@@ -471,7 +471,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mClassName;
     private CharSequence mText;
     private CharSequence mContentDescription;
-    private CharSequence mViewId;
+    private CharSequence mViewIdResourceName;
 
     private final SparseLongArray mChildNodeIds = new SparseLongArray();
     private int mActions;
@@ -1511,9 +1511,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param viewId The id resource name.
      */
-    public void setViewIdResourceName(CharSequence viewId) {
+    public void setViewIdResourceName(CharSequence viewIdResName) {
         enforceNotSealed();
-        mViewId = viewId;
+        mViewIdResourceName = viewIdResName;
     }
 
     /**
@@ -1529,7 +1529,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The id resource name.
      */
     public CharSequence getViewIdResourceName() {
-        return mViewId;
+        return mViewIdResourceName;
     }
 
     /**
@@ -1774,7 +1774,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeCharSequence(mClassName);
         parcel.writeCharSequence(mText);
         parcel.writeCharSequence(mContentDescription);
-        parcel.writeCharSequence(mViewId);
+        parcel.writeCharSequence(mViewIdResourceName);
 
         // Since instances of this class are fetched via synchronous i.e. blocking
         // calls in IPCs we always recycle as soon as the instance is marshaled.
@@ -1800,7 +1800,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mClassName = other.mClassName;
         mText = other.mText;
         mContentDescription = other.mContentDescription;
-        mViewId = other.mViewId;
+        mViewIdResourceName = other.mViewIdResourceName;
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
         mMovementGranularities = other.mMovementGranularities;
@@ -1851,7 +1851,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mClassName = parcel.readCharSequence();
         mText = parcel.readCharSequence();
         mContentDescription = parcel.readCharSequence();
-        mViewId = parcel.readCharSequence();
+        mViewIdResourceName = parcel.readCharSequence();
     }
 
     /**
@@ -1874,7 +1874,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mClassName = null;
         mText = null;
         mContentDescription = null;
-        mViewId = null;
+        mViewIdResourceName = null;
         mActions = 0;
     }
 
@@ -2027,7 +2027,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; className: ").append(mClassName);
         builder.append("; text: ").append(mText);
         builder.append("; contentDescription: ").append(mContentDescription);
-        builder.append("; viewId: ").append(mViewId);
+        builder.append("; viewIdResName: ").append(mViewIdResourceName);
 
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());
