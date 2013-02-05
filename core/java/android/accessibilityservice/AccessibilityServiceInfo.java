@@ -169,7 +169,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * This flag requests from the system to enable web accessibility enhancing
      * extensions. Such extensions aim to provide improved accessibility support
      * for content presented in a {@link android.webkit.WebView}. An example of such
-     * an extension is injecting JavaScript from Google. The system will enable
+     * an extension is injecting JavaScript from a secure source. The system will enable
      * enhanced web accessibility if there is at least one accessibility service
      * that has this flag set. Hence, clearing this flag does not guarantee that the
      * device will not have enhanced web accessibility enabled since there may be
