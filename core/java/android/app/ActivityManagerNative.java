@@ -92,7 +92,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         try {
             getDefault().broadcastIntent(
                 null, intent, null, null, Activity.RESULT_OK, null, null,
-                null /*permission*/, false, true, userId);
+                null /*permission*/, AppOpsManager.OP_NONE, false, true, userId);
         } catch (RemoteException ex) {
         }
     }
@@ -344,11 +344,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resultData = data.readString();
             Bundle resultExtras = data.readBundle();
             String perm = data.readString();
+            int appOp = data.readInt();
             boolean serialized = data.readInt() != 0;
             boolean sticky = data.readInt() != 0;
             int userId = data.readInt();
             int res = broadcastIntent(app, intent, resolvedType, resultTo,
-                    resultCode, resultData, resultExtras, perm,
+                    resultCode, resultData, resultExtras, perm, appOp,
                     serialized, sticky, userId);
             reply.writeNoException();
             reply.writeInt(res);
@@ -2174,7 +2175,7 @@ class ActivityManagerProxy implements IActivityManager
     public int broadcastIntent(IApplicationThread caller,
             Intent intent, String resolvedType,  IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle map,
-            String requiredPermission, boolean serialized,
+            String requiredPermission, int appOp, boolean serialized,
             boolean sticky, int userId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -2188,6 +2189,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resultData);
         data.writeBundle(map);
         data.writeString(requiredPermission);
+        data.writeInt(appOp);
         data.writeInt(serialized ? 1 : 0);
         data.writeInt(sticky ? 1 : 0);
         data.writeInt(userId);
