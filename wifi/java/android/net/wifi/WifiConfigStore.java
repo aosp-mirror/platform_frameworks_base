@@ -36,6 +36,7 @@ import android.os.Message;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
+import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -143,6 +144,7 @@ class WifiConfigStore {
     private static final String EOS = "eos";
 
     private WifiNative mWifiNative;
+    private final KeyStore mKeyStore = KeyStore.getInstance();
 
     WifiConfigStore(Context c, WifiNative wn) {
         mContext = c;
@@ -294,16 +296,7 @@ class WifiConfigStore {
     boolean forgetNetwork(int netId) {
         if (mWifiNative.removeNetwork(netId)) {
             mWifiNative.saveConfig();
-            WifiConfiguration target = null;
-            WifiConfiguration config = mConfiguredNetworks.get(netId);
-            if (config != null) {
-                target = mConfiguredNetworks.remove(netId);
-                mNetworkIds.remove(configKey(config));
-            }
-            if (target != null) {
-                writeIpAndProxyConfigurations();
-                sendConfiguredNetworksChangedBroadcast(target, WifiManager.CHANGE_REASON_REMOVED);
-            }
+            removeConfigAndSendBroadcastIfNeeded(netId);
             return true;
         } else {
             loge("Failed to remove network " + netId);
@@ -341,18 +334,25 @@ class WifiConfigStore {
      */
     boolean removeNetwork(int netId) {
         boolean ret = mWifiNative.removeNetwork(netId);
-        WifiConfiguration config = null;
         if (ret) {
-            config = mConfiguredNetworks.get(netId);
-            if (config != null) {
-                config = mConfiguredNetworks.remove(netId);
-                mNetworkIds.remove(configKey(config));
-            }
-        }
-        if (config != null) {
-            sendConfiguredNetworksChangedBroadcast(config, WifiManager.CHANGE_REASON_REMOVED);
+            removeConfigAndSendBroadcastIfNeeded(netId);
         }
         return ret;
+    }
+
+    private void removeConfigAndSendBroadcastIfNeeded(int netId) {
+        WifiConfiguration config = mConfiguredNetworks.get(netId);
+        if (config != null) {
+            // Remove any associated keys
+            if (config.enterpriseConfig != null) {
+                config.enterpriseConfig.removeKeys(mKeyStore);
+            }
+            mConfiguredNetworks.remove(netId);
+            mNetworkIds.remove(configKey(config));
+
+            writeIpAndProxyConfigurations();
+            sendConfiguredNetworksChangedBroadcast(config, WifiManager.CHANGE_REASON_REMOVED);
+        }
     }
 
     /**
@@ -1122,13 +1122,48 @@ class WifiConfigStore {
             }
 
             if (config.enterpriseConfig != null) {
-                HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
+
+                WifiEnterpriseConfig enterpriseConfig = config.enterpriseConfig;
+
+                if (enterpriseConfig.needsKeyStore()) {
+                    /**
+                     * Keyguard settings may eventually be controlled by device policy.
+                     * We check here if keystore is unlocked before installing
+                     * credentials.
+                     * TODO: Figure a way to store these credentials for wifi alone
+                     * TODO: Do we need a dialog here ?
+                     */
+                    if (mKeyStore.state() != KeyStore.State.UNLOCKED) {
+                        loge(config.SSID + ": key store is locked");
+                        break setVariables;
+                    }
+
+                    try {
+                        /* config passed may include only fields being updated.
+                         * In order to generate the key id, fetch uninitialized
+                         * fields from the currently tracked configuration
+                         */
+                        WifiConfiguration currentConfig = mConfiguredNetworks.get(netId);
+                        String keyId = config.getKeyIdForCredentials(currentConfig);
+
+                        if (!enterpriseConfig.installKeys(mKeyStore, keyId)) {
+                            loge(config.SSID + ": failed to install keys");
+                            break setVariables;
+                        }
+                    } catch (IllegalStateException e) {
+                        loge(config.SSID + " invalid config for key installation");
+                        break setVariables;
+                    }
+                }
+
+                HashMap<String, String> enterpriseFields = enterpriseConfig.getFields();
                 for (String key : enterpriseFields.keySet()) {
                         String value = enterpriseFields.get(key);
                         if (!mWifiNative.setNetworkVariable(
                                     netId,
                                     key,
                                     value)) {
+                            enterpriseConfig.removeKeys(mKeyStore);
                             loge(config.SSID + ": failed to set " + key +
                                     ": " + value);
                             break setVariables;
@@ -1136,7 +1171,7 @@ class WifiConfigStore {
                 }
             }
             updateFailed = false;
-        }
+        } //end of setVariables
 
         if (updateFailed) {
             if (newNetwork) {
