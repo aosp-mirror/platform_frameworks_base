@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Доступ к USB-накопителю."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Доступ к SD-карте."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Специальные возможности"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Специальные возможности, которые можно запрашивать"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"отключать или изменять строку состояния"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"строка состояния"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Приложение сможет подключаться к базовому интерфейсу системы ввода. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"подключаться к службе спецвозможностей"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Приложение сможет подключаться к базовому интерфейсу службы специальных возможностей. Это разрешение не используется обычными приложениями."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"запрашивать функцию \"Изучение касанием\""</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Владелец устройства сможет запрашивать включение режима \"Изучение касанием\", чтобы названия элементов управления озвучивались."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"запрашивать установку веб-скриптов"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"привязка к службе текстовых сообщений"</string>
@@ -768,7 +763,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Неверный PIN-код."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Экстренная служба"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Сеть не найдена"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Нет сигнала"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Экран заблокирован."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Для разблокировки нажмите \"Меню\"."</string>

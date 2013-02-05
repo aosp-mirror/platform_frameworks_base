@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Prostor za pohranu"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Pristupi memoriji USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Pristup SD kartici."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Značajke dostupnosti"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Značajke koje tehnologija za pristupačnost može zahtijevati."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogućavanje ili izmjena trake statusa"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikaciji omogućuje onemogućavanje trake statusa ili dodavanje i uklanjanje sistemskih ikona."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"traka statusa"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Nositelju omogućuje povezivanje sučelja najviše razine načina unosa. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"vezivanje uz uslugu dostupnosti"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge dostupnosti. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"zahtijevaj istraživanje dodirom"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Omogućuje korisniku zahtijevanje načina interakcije u kojem se dodirnute stavke izgovaraju naglas, a korisničko sučelje može se istraživati pokretima."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"zahtijevaj poboljšanu web-dostupnost"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vezanje na tekstualnu uslugu"</string>

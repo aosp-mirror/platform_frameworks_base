@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Tallennustila"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Käytä USB-tallennustilaa."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Käytä SD-korttia."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Esteettömyysominaisuudet"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Ominaisuudet, joiden käyttöönottoa avustava tekniikka voi pyytää."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"poista tilapalkki käytöstä tai muokkaa tilapalkkia"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Antaa sovelluksen poistaa tilapalkin käytöstä ja lisätä tai poistaa järjestelmäkuvakkeita."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"tilapalkki"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Antaa sovelluksen sitoutua syötetavan ylätason käyttöliittymään. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"sitoudu esteettömyyspalveluun"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Antaa sovelluksen sitoutua esteettömyyspalvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"pyydä kosketuksella tutkimisen käyttöönottoa"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Antaa luvan haltijan pyytää käyttöön vuorovaikutustilaa, jossa kosketettujen kohteiden nimet sanotaan ääneen ja käyttöliittymää voi tutkia eleiden avulla."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"pyydä parannettua verkon esteettömyyttä"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tekstipalveluun sitoutuminen"</string>

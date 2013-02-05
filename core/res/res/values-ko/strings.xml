@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB 저장소에 액세스합니다."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"접근성 기능"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"장애인 보조 기술이 요청할 수 있는 기능입니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"상태 표시줄"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"접근성 서비스와 연결"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"권한을 가진 프로그램이 접근성 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"\'터치하여 탐색\' 요청"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"권한을 가진 프로그램이 터치한 항목을 소리내어 말하고 제스처로 UI를 탐색할 수 있는 상호작용 모드를 요청할 수 있도록 허용합니다."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"웹 접근성 개선 요청"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>

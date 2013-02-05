@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Dostęp do nośnika USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Dostęp do karty SD."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcje ułatwień dostępu"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcje, których może zażądać technologia ułatwień dostępu."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"pasek stanu"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Pozwala na powiązanie wybranego sposobu wprowadzania tekstu z interfejsem najwyższego poziomu. To uprawnienie nie powinno być nigdy wymagane przez zwykłe aplikacje."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"tworzenie powiązania z usługą ułatwień dostępu"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi ułatwień dostępu. Nieprzeznaczone dla zwykłych aplikacji."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"żądanie dotyczące czytania dotykiem"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Pozwala właścicielowi zażądać włączenia trybu interaktywnego, w którym nazwy klikniętych elementów są wypowiadane na głos, a po interfejsie można poruszać się gestami."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"żądanie dotyczące dodatkowych ułatwień dostępu w internecie"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tworzenie powiązania z usługą tekstową"</string>

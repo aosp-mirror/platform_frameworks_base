@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"存取 USB 儲存裝置。"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"存取 SD 卡。"</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"協助工具功能"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"輔助技術可要求的功能。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"狀態列"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允許應用程式繫結至輸入法的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"繫結至協助工具服務"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允許應用程式繫結至協助工具服務的頂層介面 (一般應用程式不需使用)。"</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"要求輕觸探索"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"允許應用程式要求啟用互動模式，讓裝置讀出使用者輕觸的項目，並且讓使用者透過手勢探索使用者介面。"</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"要求增強式網頁協助工具"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"繫結至文字服務"</string>

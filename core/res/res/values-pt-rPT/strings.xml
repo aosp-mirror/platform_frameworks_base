@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Aceder ao armazenamento USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Aceder ao cartão SD."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funcionalidades de acessibilidade"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funcionalidades que a tecnologia de apoio pode solicitar."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite à aplicação desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barra de estado"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permite ao titular vincular-se à interface de nível superior de um método de entrada. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"vincular a um serviço de acessibilidade"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite que o titular vincule a interface de nível superior de um serviço de acessibilidade. Nunca deverá ser necessário para aplicações normais."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"solicitar exploração por toque"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permite ao Hoder solicitar um modo de interação em que os itens tocados são falados em voz alta e a IU pode ser explorada através de gestos."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"solicitar acessibilidade Web melhorada"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincular a um serviço de texto"</string>

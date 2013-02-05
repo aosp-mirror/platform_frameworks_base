@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Сховішча"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Атрымаць доступ да USB-назапашвальнiка."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Доступ да SD-карты."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Спецыяльныя магчымасці"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Функцыі, якія могуць запытаць дадатковыя тэхналогii."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"адключаць ці змяняць радок стану"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дазваляе прыкладанням адключаць радок стану або дадаваць і выдаляць сістэмныя значкі."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"радок стану"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню метада ўводу. Не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"прывязацца да службы доступу"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню службы доступу. Не патрабуецца для звычайных прыкладанняў."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"запытаць даследаванне навобмацак"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Дазваляе ўладальнiку запытваць працу ў рэжыме ўзаемадзеяння, у якiм элементы, да якiх дакранулiся, прагаворваюцца ўслых, а карыстальнiцкi iнтэрфейс можна даследаваць рукамi."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"прасіць пашырэння даступнасці вэб-даступнасцi"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"звязаць з тэкставай службай"</string>
