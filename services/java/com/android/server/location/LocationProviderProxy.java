@@ -54,9 +54,9 @@ public class LocationProviderProxy implements LocationProviderInterface {
     private WorkSource mWorksource = new WorkSource();
 
     public static LocationProviderProxy createAndBind(Context context, String name, String action,
-            List<String> initialPackageNames, Handler handler, int userId) {
+            List<String> initialPackageNames, Handler handler) {
         LocationProviderProxy proxy = new LocationProviderProxy(context, name, action,
-                initialPackageNames, handler, userId);
+                initialPackageNames, handler);
         if (proxy.bind()) {
             return proxy;
         } else {
@@ -65,11 +65,11 @@ public class LocationProviderProxy implements LocationProviderInterface {
     }
 
     private LocationProviderProxy(Context context, String name, String action,
-            List<String> initialPackageNames, Handler handler, int userId) {
+            List<String> initialPackageNames, Handler handler) {
         mContext = context;
         mName = name;
         mServiceWatcher = new ServiceWatcher(mContext, TAG, action, initialPackageNames,
-                mNewServiceWork, handler, userId);
+                mNewServiceWork, handler);
     }
 
     private boolean bind () {
@@ -208,11 +208,6 @@ public class LocationProviderProxy implements LocationProviderInterface {
             // never let remote service crash system server
             Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
         }
-    }
-
-    @Override
-    public void switchUser(int userId) {
-        mServiceWatcher.switchUser(userId);
     }
 
     @Override

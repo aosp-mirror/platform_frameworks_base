@@ -40,8 +40,8 @@ public class GeocoderProxy {
     private final ServiceWatcher mServiceWatcher;
 
     public static GeocoderProxy createAndBind(Context context,
-            List<String> initialPackageNames, Handler handler, int userId) {
-        GeocoderProxy proxy = new GeocoderProxy(context, initialPackageNames, handler, userId);
+            List<String> initialPackageNames, Handler handler) {
+        GeocoderProxy proxy = new GeocoderProxy(context, initialPackageNames, handler);
         if (proxy.bind()) {
             return proxy;
         } else {
@@ -49,12 +49,11 @@ public class GeocoderProxy {
         }
     }
 
-    public GeocoderProxy(Context context, List<String> initialPackageNames, Handler handler,
-            int userId) {
+    public GeocoderProxy(Context context, List<String> initialPackageNames, Handler handler) {
         mContext = context;
 
         mServiceWatcher = new ServiceWatcher(mContext, TAG, SERVICE_ACTION, initialPackageNames,
-                null, handler, userId);
+                null, handler);
     }
 
     private boolean bind () {
