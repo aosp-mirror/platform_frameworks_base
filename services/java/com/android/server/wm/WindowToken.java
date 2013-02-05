@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.os.IBinder;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Container of a set of related windows in the window manager.  Often this

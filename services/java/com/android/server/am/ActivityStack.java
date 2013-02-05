@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
+import com.android.server.am.ActivityRecord.Token;
 import com.android.server.wm.AppTransition;
 
 import android.app.Activity;
@@ -157,7 +158,7 @@ final class ActivityStack {
     /**
      * Used for validating app tokens with window manager.
      */
-    final ArrayList<IBinder> mValidateAppTokens = new ArrayList<IBinder>();
+    final ArrayList<TaskGroup> mValidateAppTokens = new ArrayList<TaskGroup>();
 
     /**
      * List of running activities, sorted by recent usage.
@@ -1959,8 +1960,17 @@ final class ActivityStack {
     final void validateAppTokensLocked() {
         mValidateAppTokens.clear();
         mValidateAppTokens.ensureCapacity(mHistory.size());
+        int taskId = Integer.MIN_VALUE;
+        TaskGroup task = null;
         for (int i=0; i<mHistory.size(); i++) {
-            mValidateAppTokens.add(mHistory.get(i).appToken);
+            final ActivityRecord r = mHistory.get(i);
+            if (taskId != r.task.taskId) {
+                taskId = r.task.taskId;
+                task = new TaskGroup();
+                task.taskId = taskId;
+                mValidateAppTokens.add(task);
+            }
+            task.tokens.add(r.appToken);
         }
         mService.mWindowManager.validateAppTokens(mValidateAppTokens);
     }
