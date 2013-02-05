@@ -667,20 +667,15 @@ public class LocationManagerService extends ILocationManager.Stub {
         mProvidersByName.remove(provider.getName());
     }
 
-
     /**
-     * Returns "true" if access to the specified location provider is allowed by the current user's
-     * settings. Access to all location providers is forbidden to non-location-provider processes
-     * belonging to background users.
+     * Returns "true" if access to the specified location provider is allowed by the current
+     * user's settings. Access to all location providers is forbidden to non-location-provider
+     * processes belonging to background users.
      *
      * @param provider the name of the location provider
-     * @param uid the requestor's UID
      * @return
      */
-    private boolean isAllowedBySettingsLocked(String provider, int uid) {
-        if (UserHandle.getUserId(uid) != mCurrentUserId && !isUidALocationProvider(uid)) {
-            return false;
-        }
+    private boolean isAllowedByCurrentUserSettingsLocked(String provider) {
         if (mEnabledProviders.contains(provider)) {
             return true;
         }
@@ -691,6 +686,22 @@ public class LocationManagerService extends ILocationManager.Stub {
         ContentResolver resolver = mContext.getContentResolver();
 
         return Settings.Secure.isLocationProviderEnabledForUser(resolver, provider, mCurrentUserId);
+    }
+
+    /**
+     * Returns "true" if access to the specified location provider is allowed by the specified
+     * user's settings. Access to all location providers is forbidden to non-location-provider
+     * processes belonging to background users.
+     *
+     * @param provider the name of the location provider
+     * @param uid the requestor's UID
+     * @return
+     */
+    private boolean isAllowedByUserSettingsLocked(String provider, int uid) {
+        if (UserHandle.getUserId(uid) != mCurrentUserId && !isUidALocationProvider(uid)) {
+            return false;
+        }
+        return isAllowedByCurrentUserSettingsLocked(provider);
     }
 
     /**
@@ -882,7 +893,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         continue;
                     }
                     if (allowedResolutionLevel >= getMinimumResolutionLevelForProviderUse(name)) {
-                        if (enabledOnly && !isAllowedBySettingsLocked(name, uid)) {
+                        if (enabledOnly && !isAllowedByUserSettingsLocked(name, uid)) {
                             continue;
                         }
                         if (criteria != null && !LocationProvider.propertiesMeetCriteria(
@@ -958,8 +969,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             LocationProviderInterface p = mProviders.get(i);
             boolean isEnabled = p.isEnabled();
             String name = p.getName();
-            boolean shouldBeEnabled = isAllowedBySettingsLocked(name,
-                    UserHandle.getUid(mCurrentUserId, 0));
+            boolean shouldBeEnabled = isAllowedByCurrentUserSettingsLocked(name);
             if (isEnabled && !shouldBeEnabled) {
                 updateProviderListenersLocked(name, false, mCurrentUserId);
                 changesMade = true;
@@ -1270,7 +1280,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             oldRecord.disposeLocked(false);
         }
 
-        boolean isProviderEnabled = isAllowedBySettingsLocked(name, uid);
+        boolean isProviderEnabled = isAllowedByUserSettingsLocked(name, uid);
         if (isProviderEnabled) {
             applyRequirementsLocked(name);
         } else {
@@ -1327,7 +1337,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // update provider
         for (String provider : providers) {
             // If provider is already disabled, don't need to do anything
-            if (!isAllowedBySettingsLocked(provider, UserHandle.getUid(mCurrentUserId, 0))) {
+            if (!isAllowedByCurrentUserSettingsLocked(provider)) {
                 continue;
             }
 
@@ -1368,7 +1378,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 LocationProviderInterface provider = mProvidersByName.get(name);
                 if (provider == null) return null;
 
-                if (!isAllowedBySettingsLocked(name, uid)) return null;
+                if (!isAllowedByUserSettingsLocked(name, uid)) return null;
 
                 Location location = mLastLocation.get(name);
                 if (location == null) {
@@ -1542,13 +1552,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                 provider);
         if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
 
+        int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 LocationProviderInterface p = mProvidersByName.get(provider);
                 if (p == null) return false;
 
-                return isAllowedBySettingsLocked(provider, UserHandle.getUid(mCurrentUserId, 0));
+                return isAllowedByUserSettingsLocked(provider, uid);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -1836,13 +1847,12 @@ public class LocationManagerService extends ILocationManager.Stub {
             myLocation.setIsFromMockProvider(true);
         }
 
-        if (!passive) {
-            // notify passive provider of the new location
-            mPassiveProvider.updateLocation(myLocation);
-        }
-
         synchronized (mLock) {
-            if (isAllowedBySettingsLocked(provider, UserHandle.getUid(mCurrentUserId, 0))) {
+            if (isAllowedByCurrentUserSettingsLocked(provider)) {
+                if (!passive) {
+                    // notify passive provider of the new location
+                    mPassiveProvider.updateLocation(myLocation);
+                }
                 handleLocationChangedLocked(myLocation, passive);
             }
         }
