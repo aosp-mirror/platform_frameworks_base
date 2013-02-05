@@ -41,8 +41,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private static final boolean DEBUG = false;
 
-    private static final int UNDEFINED_DEVICE_ID = -1;
-
     /**
      * Flag for enabling the screen magnification feature.
      *
@@ -89,10 +87,16 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private int mEnabledFeatures;
 
     private TouchExplorer mTouchExplorer;
+
     private ScreenMagnifier mScreenMagnifier;
+
     private EventStreamTransformation mEventHandler;
 
     private MotionEventHolder mEventQueue;
+
+    private boolean mMotionEventSequenceStarted;
+
+    private boolean mHoverEventSequenceStarted;
 
     AccessibilityInputFilter(Context context, AccessibilityManagerService service) {
         super(context.getMainLooper());
@@ -138,16 +142,45 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             return;
         }
         if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
+            mMotionEventSequenceStarted = false;
+            mHoverEventSequenceStarted = false;
             mEventHandler.clear();
             super.onInputEvent(event, policyFlags);
             return;
         }
         final int deviceId = event.getDeviceId();
         if (mCurrentDeviceId != deviceId) {
-            if (mCurrentDeviceId != UNDEFINED_DEVICE_ID) {
-                mEventHandler.clear();
-            }
+            mMotionEventSequenceStarted = false;
+            mHoverEventSequenceStarted = false;
+            mEventHandler.clear();
             mCurrentDeviceId = deviceId;
+        }
+        if (mCurrentDeviceId < 0) {
+            super.onInputEvent(event, policyFlags);
+            return;
+        }
+        // We do not handle scroll events.
+        MotionEvent motionEvent = (MotionEvent) event;
+        if (motionEvent.getActionMasked() == MotionEvent.ACTION_SCROLL) {
+            super.onInputEvent(event, policyFlags);
+            return;
+        }
+        // Wait for a down touch event to start processing.
+        if (motionEvent.isTouchEvent()) {
+            if (!mMotionEventSequenceStarted) {
+                if (motionEvent.getActionMasked() != MotionEvent.ACTION_DOWN) {
+                    return;
+                }
+                mMotionEventSequenceStarted = true;
+            }
+        } else {
+        // Wait for an enter hover event to start processing.
+            if (!mHoverEventSequenceStarted) {
+                if (motionEvent.getActionMasked() != MotionEvent.ACTION_HOVER_ENTER) {
+                    return;
+                }
+                mHoverEventSequenceStarted = true;
+            }
         }
         batchMotionEvent((MotionEvent) event, policyFlags);
     }
@@ -250,6 +283,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void enableFeatures() {
+        mMotionEventSequenceStarted = false;
+        mHoverEventSequenceStarted = false;
         if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
             mEventHandler = mScreenMagnifier = new ScreenMagnifier(mContext,
                     Display.DEFAULT_DISPLAY, mAms);
