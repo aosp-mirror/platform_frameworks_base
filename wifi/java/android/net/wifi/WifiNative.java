@@ -42,7 +42,7 @@ public class WifiNative {
 
     private static final boolean DBG = false;
     private final String mTAG;
-    private static final int DEFAULT_GROUP_OWNER_INTENT = 7;
+    private static final int DEFAULT_GROUP_OWNER_INTENT = 6;
 
     static final int BLUETOOTH_COEXISTENCE_MODE_ENABLED = 0;
     static final int BLUETOOTH_COEXISTENCE_MODE_DISABLED = 1;
