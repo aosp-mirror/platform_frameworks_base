@@ -1042,7 +1042,7 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, null, false, false,
+                Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, false, false,
                 getUserId());
         } catch (RemoteException e) {
         }
@@ -1056,7 +1056,21 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, receiverPermission, false, false,
+                Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE,
+                false, false, getUserId());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void sendBroadcast(Intent intent, String receiverPermission, int appOp) {
+        warnIfCallingFromSystemProcess();
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().broadcastIntent(
+                mMainThread.getApplicationThread(), intent, resolvedType, null,
+                Activity.RESULT_OK, null, null, receiverPermission, appOp, false, false,
                 getUserId());
         } catch (RemoteException e) {
         }
@@ -1071,7 +1085,7 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, receiverPermission, true, false,
+                Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE, true, false,
                 getUserId());
         } catch (RemoteException e) {
         }
@@ -1080,6 +1094,15 @@ class ContextImpl extends Context {
     @Override
     public void sendOrderedBroadcast(Intent intent,
             String receiverPermission, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
+        sendOrderedBroadcast(intent, receiverPermission, AppOpsManager.OP_NONE,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
+    public void sendOrderedBroadcast(Intent intent,
+            String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
             Bundle initialExtras) {
         warnIfCallingFromSystemProcess();
@@ -1105,8 +1128,8 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
-                initialCode, initialData, initialExtras, receiverPermission,
-                true, false, getUserId());
+                initialCode, initialData, initialExtras, receiverPermission, appOp,
+                    true, false, getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1117,8 +1140,8 @@ class ContextImpl extends Context {
         try {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(mMainThread.getApplicationThread(),
-                    intent, resolvedType, null, Activity.RESULT_OK, null, null, null, false, false,
-                    user.getIdentifier());
+                    intent, resolvedType, null, Activity.RESULT_OK, null, null, null,
+                    AppOpsManager.OP_NONE, false, false, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }
@@ -1131,7 +1154,7 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, receiverPermission, false, false,
+                Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE, false, false,
                 user.getIdentifier());
         } catch (RemoteException e) {
         }
@@ -1164,7 +1187,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermission,
-                true, false, user.getIdentifier());
+                    AppOpsManager.OP_NONE, true, false, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }
@@ -1177,7 +1200,7 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, null, false, true,
+                Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, false, true,
                 getUserId());
         } catch (RemoteException e) {
         }
@@ -1212,7 +1235,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
-                true, true, getUserId());
+                    AppOpsManager.OP_NONE, true, true, getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1239,7 +1262,7 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, null, false, true, user.getIdentifier());
+                Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, false, true, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }
@@ -1272,7 +1295,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
-                true, true, user.getIdentifier());
+                    AppOpsManager.OP_NONE, true, true, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }

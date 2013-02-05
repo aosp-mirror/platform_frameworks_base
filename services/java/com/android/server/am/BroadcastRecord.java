@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.AppOpsManager;
 import android.content.IIntentReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -46,6 +47,7 @@ class BroadcastRecord extends Binder {
     final boolean initialSticky; // initial broadcast from register to sticky?
     final int userId;       // user id this broadcast was for
     final String requiredPermission; // a permission the caller has required
+    final int appOp;        // an app op that is associated with this broadcast
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     IIntentReceiver resultTo; // who receives final result if non-null
     long dispatchTime;      // when dispatch started on this set of receivers
@@ -90,8 +92,9 @@ class BroadcastRecord extends Binder {
                 pw.print(callerApp != null ? callerApp.toShortString() : "null");
                 pw.print(" pid="); pw.print(callingPid);
                 pw.print(" uid="); pw.println(callingUid);
-        if (requiredPermission != null) {
-            pw.print(prefix); pw.print("requiredPermission="); pw.println(requiredPermission);
+        if (requiredPermission != null || appOp != AppOpsManager.OP_NONE) {
+            pw.print(prefix); pw.print("requiredPermission="); pw.print(requiredPermission);
+                    pw.print("  appOp="); pw.println(appOp);
         }
         pw.print(prefix); pw.print("dispatchClockTime=");
                 pw.println(new Date(dispatchClockTime));
@@ -164,7 +167,7 @@ class BroadcastRecord extends Binder {
 
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
-            int _callingPid, int _callingUid, String _requiredPermission,
+            int _callingPid, int _callingUid, String _requiredPermission, int _appOp,
             List _receivers, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized,
             boolean _sticky, boolean _initialSticky,
@@ -176,6 +179,7 @@ class BroadcastRecord extends Binder {
         callingPid = _callingPid;
         callingUid = _callingUid;
         requiredPermission = _requiredPermission;
+        appOp = _appOp;
         receivers = _receivers;
         resultTo = _resultTo;
         resultCode = _resultCode;

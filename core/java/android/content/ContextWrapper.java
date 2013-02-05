@@ -349,6 +349,12 @@ public class ContextWrapper extends Context {
         mBase.sendBroadcast(intent, receiverPermission);
     }
 
+    /** @hide */
+    @Override
+    public void sendBroadcast(Intent intent, String receiverPermission, int appOp) {
+        mBase.sendBroadcast(intent, receiverPermission, appOp);
+    }
+
     @Override
     public void sendOrderedBroadcast(Intent intent,
             String receiverPermission) {
@@ -361,6 +367,17 @@ public class ContextWrapper extends Context {
         Handler scheduler, int initialCode, String initialData,
         Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
+                resultReceiver, scheduler, initialCode,
+                initialData, initialExtras);
+    }
+
+    /** @hide */
+    @Override
+    public void sendOrderedBroadcast(
+        Intent intent, String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
+        Handler scheduler, int initialCode, String initialData,
+        Bundle initialExtras) {
+        mBase.sendOrderedBroadcast(intent, receiverPermission, appOp,
                 resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
     }

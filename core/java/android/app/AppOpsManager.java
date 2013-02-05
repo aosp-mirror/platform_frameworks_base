@@ -37,6 +37,7 @@ public class AppOpsManager {
     public static final int MODE_IGNORED = 1;
     public static final int MODE_ERRORED = 2;
 
+    public static final int OP_NONE = -1;
     public static final int OP_COARSE_LOCATION = 0;
     public static final int OP_FINE_LOCATION = 1;
     public static final int OP_GPS = 2;
@@ -51,8 +52,17 @@ public class AppOpsManager {
     public static final int OP_POST_NOTIFICATION = 11;
     public static final int OP_NEIGHBORING_CELLS = 12;
     public static final int OP_CALL_PHONE = 13;
+    public static final int OP_READ_SMS = 14;
+    public static final int OP_WRITE_SMS = 15;
+    public static final int OP_RECEIVE_SMS = 16;
+    public static final int OP_RECEIVE_EMERGECY_SMS = 17;
+    public static final int OP_RECEIVE_MMS = 18;
+    public static final int OP_RECEIVE_WAP_PUSH = 19;
+    public static final int OP_SEND_SMS = 20;
+    public static final int OP_READ_ICC_SMS = 21;
+    public static final int OP_WRITE_ICC_SMS = 22;
     /** @hide */
-    public static final int _NUM_OP = 14;
+    public static final int _NUM_OP = 23;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -77,6 +87,15 @@ public class AppOpsManager {
             OP_POST_NOTIFICATION,
             OP_COARSE_LOCATION,
             OP_CALL_PHONE,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
+            OP_READ_SMS,
+            OP_READ_SMS,
+            OP_READ_SMS,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
     };
 
     /**
@@ -98,6 +117,15 @@ public class AppOpsManager {
             "POST_NOTIFICATION",
             "NEIGHBORING_CELLS",
             "CALL_PHONE",
+            "READ_SMS",
+            "WRITE_SMS",
+            "RECEIVE_SMS",
+            "RECEIVE_EMERGECY_SMS",
+            "RECEIVE_MMS",
+            "RECEIVE_WAP_PUSH",
+            "SEND_SMS",
+            "READ_ICC_SMS",
+            "WRITE_ICC_SMS",
     };
 
     /**
@@ -119,6 +147,15 @@ public class AppOpsManager {
             android.Manifest.permission.ACCESS_WIFI_STATE,
             null, // neighboring cells shares the coarse location perm
             android.Manifest.permission.CALL_PHONE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.WRITE_SMS,
+            android.Manifest.permission.RECEIVE_SMS,
+            android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST,
+            android.Manifest.permission.RECEIVE_MMS,
+            android.Manifest.permission.RECEIVE_WAP_PUSH,
+            android.Manifest.permission.SEND_SMS,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.WRITE_SMS,
     };
 
     public static int opToSwitch(int op) {

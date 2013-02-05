@@ -1138,6 +1138,14 @@ public abstract class Context {
             String receiverPermission);
 
     /**
+     * Like {@link #sendBroadcast(Intent, String)}, but also allows specification
+     * of an assocated app op as per {@link android.app.AppOpsManager}.
+     * @hide
+     */
+    public abstract void sendBroadcast(Intent intent,
+            String receiverPermission, int appOp);
+
+    /**
      * Broadcast the given intent to all interested BroadcastReceivers, delivering
      * them one at a time to allow more preferred receivers to consume the
      * broadcast before it is delivered to less preferred receivers.  This
@@ -1204,6 +1212,17 @@ public abstract class Context {
      */
     public abstract void sendOrderedBroadcast(Intent intent,
             String receiverPermission, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras);
+
+    /**
+     * Like {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler,
+     * int, String, android.os.Bundle)}, but also allows specification
+     * of an assocated app op as per {@link android.app.AppOpsManager}.
+     * @hide
+     */
+    public abstract void sendOrderedBroadcast(Intent intent,
+            String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
             Bundle initialExtras);
 

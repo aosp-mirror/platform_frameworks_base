@@ -25,7 +25,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
-import static libcore.io.OsConstants.S_ISLNK;
 import static libcore.io.OsConstants.S_IRWXU;
 import static libcore.io.OsConstants.S_IRGRP;
 import static libcore.io.OsConstants.S_IXGRP;
@@ -112,7 +111,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Environment.UserEnvironment;
-import android.provider.Settings.Secure;
 import android.security.SystemKeyStore;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -149,13 +147,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
-import libcore.io.OsConstants;
 import libcore.io.StructStat;
 
 /**
@@ -5441,7 +5437,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 + " " + intent.getExtras(), here);
                     }
                     am.broadcastIntent(null, intent, null, finishedReceiver,
-                            0, null, null, null, finishedReceiver != null, false, id);
+                            0, null, null, null, android.app.AppOpsManager.OP_NONE,
+                            finishedReceiver != null, false, id);
                 }
             } catch (RemoteException ex) {
             }

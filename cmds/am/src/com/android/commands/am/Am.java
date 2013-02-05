@@ -614,8 +614,8 @@ public class Am {
         Intent intent = makeIntent(UserHandle.USER_ALL);
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
-        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null, true, false,
-                mUserId);
+        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null,
+                android.app.AppOpsManager.OP_NONE, true, false, mUserId);
         receiver.waitForFinish();
     }
 

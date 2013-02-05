@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -409,6 +410,16 @@ public class BroadcastQueue {
                 skip = true;
             }
         }
+        if (r.appOp != AppOpsManager.OP_NONE) {
+            int mode = mService.mAppOpsService.checkOperation(r.appOp,
+                    filter.receiverList.uid, filter.packageName);
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                if (DEBUG_BROADCAST)  Slog.v(TAG,
+                        "App op " + r.appOp + " not allowed for broadcast to uid "
+                        + filter.receiverList.uid + " pkg " + filter.packageName);
+                skip = true;
+            }
+        }
 
         if (!skip) {
             // If this is not being sent as an ordered broadcast, then we
@@ -703,6 +714,17 @@ public class BroadcastQueue {
                             + " requires " + r.requiredPermission
                             + " due to sender " + r.callerPackage
                             + " (uid " + r.callingUid + ")");
+                    skip = true;
+                }
+            }
+            if (r.appOp != AppOpsManager.OP_NONE) {
+                int mode = mService.mAppOpsService.checkOperation(r.appOp,
+                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName);
+                if (mode != AppOpsManager.MODE_ALLOWED) {
+                    if (DEBUG_BROADCAST)  Slog.v(TAG,
+                            "App op " + r.appOp + " not allowed for broadcast to uid "
+                            + info.activityInfo.applicationInfo.uid + " pkg "
+                            + info.activityInfo.packageName);
                     skip = true;
                 }
             }
