@@ -218,12 +218,14 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
         cacheTexture->allocateTexture();
     }
 
-    uint8_t* cacheBuffer = cacheTexture->getTexture();
-    uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
-    unsigned int stride = glyph.rowBytes();
+    // Tells us whether the glyphs is B&W (1 bit per pixel)
+    // or anti-aliased (8 bits per pixel)
+    SkMask::Format format = static_cast<SkMask::Format>(glyph.fMaskFormat);
 
+    uint8_t* cacheBuffer = cacheTexture->getTexture();
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
 
+    // Zero out the borders
     for (cacheX = startX - TEXTURE_BORDER_SIZE; cacheX < endX + TEXTURE_BORDER_SIZE; cacheX++) {
         cacheBuffer[(startY - TEXTURE_BORDER_SIZE) * cacheWidth + cacheX] = 0;
         cacheBuffer[(endY + TEXTURE_BORDER_SIZE - 1) * cacheWidth + cacheX] = 0;
@@ -235,20 +237,49 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
         cacheBuffer[cacheY * cacheWidth + endX + TEXTURE_BORDER_SIZE - 1] = 0;
     }
 
-    if (mGammaTable) {
-        for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
-            for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
-                uint8_t tempCol = bitmapBuffer[bY * stride + bX];
-                cacheBuffer[cacheY * cacheWidth + cacheX] = mGammaTable[tempCol];
+    // Copy the glyph image, taking the mask format into account
+    uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
+    int stride = glyph.rowBytes();
+
+    switch (format) {
+        case SkMask::kA8_Format: {
+            if (mGammaTable) {
+                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += stride) {
+                    for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
+                        uint8_t tempCol = bitmapBuffer[bY + bX];
+                        cacheBuffer[cacheY * cacheWidth + cacheX] = mGammaTable[tempCol];
+                    }
+                }
+            } else {
+                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += stride) {
+                    memcpy(&cacheBuffer[cacheY * cacheWidth + startX], &bitmapBuffer[bY],
+                            glyph.fWidth);
+                }
             }
+            break;
         }
-    } else {
-        for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
-            for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
-                uint8_t tempCol = bitmapBuffer[bY * stride + bX];
-                cacheBuffer[cacheY * cacheWidth + cacheX] = tempCol;
+        case SkMask::kBW_Format: {
+            static const uint8_t COLORS[2] = { 0, 255 };
+
+            for (cacheY = startY; cacheY < endY; cacheY++) {
+                cacheX = startX;
+                int rowBytes = stride;
+                uint8_t* buffer = bitmapBuffer;
+
+                while (--rowBytes >= 0) {
+                    uint8_t b = *buffer++;
+                    for (int8_t mask = 7; mask >= 0 && cacheX < endX; mask--) {
+                        cacheBuffer[cacheY * cacheWidth + cacheX++] = COLORS[(b >> mask) & 0x1];
+                    }
+                }
+
+                bitmapBuffer += stride;
             }
+            break;
         }
+        default:
+            ALOGW("Unkown glyph format: 0x%x", format);
+            break;
     }
 
     cachedGlyph->mIsValid = true;

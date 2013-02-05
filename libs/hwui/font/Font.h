@@ -68,6 +68,7 @@ public:
         float mScaleX;
         uint8_t mStyle;
         float mStrokeWidth;
+        bool mAntiAliasing;
     };
 
     ~Font();
