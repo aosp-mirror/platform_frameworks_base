@@ -27,8 +27,9 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.webkit.WebViewCore.EventHub;
 
+import com.android.internal.os.SomeArgs;
+
 import java.util.ArrayList;
-import java.util.Stack;
 
 /**
  * This class injects accessibility into WebViews with disabled JavaScript or
@@ -48,8 +49,7 @@ import java.util.Stack;
  * </p>
  * The possible actions are invocations to
  * {@link #setCurrentAxis(int, boolean, String)}, or
- * {@link #traverseCurrentAxis(int, boolean, String)}
- * {@link #traverseGivenAxis(int, int, boolean, String)}
+ * {@link #traverseGivenAxis(int, int, boolean, String, boolean)}
  * {@link #performAxisTransition(int, int, boolean, String)}
  * referred via the values of:
  * {@link #ACTION_SET_CURRENT_AXIS},
@@ -74,6 +74,9 @@ class AccessibilityInjectorFallback {
     private static final int ACTION_PERFORM_AXIS_TRANSITION = 3;
     private static final int ACTION_TRAVERSE_DEFAULT_WEB_VIEW_BEHAVIOR_AXIS = 4;
 
+    /** Timeout after which asynchronous granular movement is aborted. */
+    private static final int MODIFY_SELECTION_TIMEOUT = 500;
+
     // WebView navigation axes from WebViewCore.h, plus an additional axis for
     // the default behavior.
     private static final int NAVIGATION_AXIS_CHARACTER = 0;
@@ -81,7 +84,8 @@ class AccessibilityInjectorFallback {
     private static final int NAVIGATION_AXIS_SENTENCE = 2;
     @SuppressWarnings("unused")
     private static final int NAVIGATION_AXIS_HEADING = 3;
-    private static final int NAVIGATION_AXIS_SIBLING = 5;
+    @SuppressWarnings("unused")
+    private static final int NAVIGATION_AXIS_SIBLING = 4;
     @SuppressWarnings("unused")
     private static final int NAVIGATION_AXIS_PARENT_FIRST_CHILD = 5;
     private static final int NAVIGATION_AXIS_DOCUMENT = 6;
@@ -99,8 +103,11 @@ class AccessibilityInjectorFallback {
     private final WebViewClassic mWebView;
     private final WebView mWebViewInternal;
 
-    // events scheduled for sending as soon as we receive the selected text
-    private final Stack<AccessibilityEvent> mScheduledEventStack = new Stack<AccessibilityEvent>();
+    // Event scheduled for sending as soon as we receive the selected text.
+    private AccessibilityEvent mScheduledEvent;
+
+    // Token required to send the scheduled event.
+    private int mScheduledToken = 0;
 
     // the current traversal axis
     private int mCurrentAxis = 2; // sentence
@@ -113,6 +120,15 @@ class AccessibilityInjectorFallback {
 
     // keep track of last direction
     private int mLastDirection;
+
+    // Lock used for asynchronous selection callback.
+    private final Object mCallbackLock = new Object();
+
+    // Whether the asynchronous selection callback was received.
+    private boolean mCallbackReceived;
+
+    // Whether the asynchronous selection callback succeeded.
+    private boolean mCallbackResult;
 
     /**
      * Creates a new injector associated with a given {@link WebViewClassic}.
@@ -174,8 +190,8 @@ class AccessibilityInjectorFallback {
                     }
                     mLastDirection = direction;
                     sendEvent = (binding.getSecondArgument(i) == 1);
-                    mLastDownEventHandled = traverseCurrentAxis(direction, sendEvent,
-                            contentDescription);
+                    mLastDownEventHandled = traverseGivenAxis(
+                            direction, mCurrentAxis, sendEvent, contentDescription, false);
                     break;
                 case ACTION_TRAVERSE_GIVEN_AXIS:
                     direction = binding.getFirstArgument(i);
@@ -187,7 +203,7 @@ class AccessibilityInjectorFallback {
                     mLastDirection = direction;
                     axis =  binding.getSecondArgument(i);
                     sendEvent = (binding.getThirdArgument(i) == 1);
-                    traverseGivenAxis(direction, axis, sendEvent, contentDescription);
+                    traverseGivenAxis(direction, axis, sendEvent, contentDescription, false);
                     mLastDownEventHandled = true;
                     break;
                 case ACTION_PERFORM_AXIS_TRANSITION:
@@ -207,7 +223,7 @@ class AccessibilityInjectorFallback {
                         mLastDirection = binding.getFirstArgument(i);
                         sendEvent = (binding.getSecondArgument(i) == 1);
                         traverseGivenAxis(mLastDirection, NAVIGATION_AXIS_DEFAULT_WEB_VIEW_BEHAVIOR,
-                            sendEvent, contentDescription);
+                            sendEvent, contentDescription, false);
                         mLastDownEventHandled = false;
                     } else {
                         mLastDownEventHandled = true;
@@ -222,8 +238,7 @@ class AccessibilityInjectorFallback {
     }
 
     /**
-     * Set the current navigation axis which will be used while
-     * calling {@link #traverseCurrentAxis(int, boolean, String)}.
+     * Set the current navigation axis.
      *
      * @param axis The axis to set.
      * @param sendEvent Whether to send an accessibility event to
@@ -255,20 +270,6 @@ class AccessibilityInjectorFallback {
         }
     }
 
-    /**
-     * Traverse the document along the current navigation axis.
-     *
-     * @param direction The direction of traversal.
-     * @param sendEvent Whether to send an accessibility event to
-     *        announce the change.
-     * @param contentDescription A description of the performed action.
-     * @see #setCurrentAxis(int, boolean, String)
-     */
-    private boolean traverseCurrentAxis(int direction, boolean sendEvent,
-            String contentDescription) {
-        return traverseGivenAxis(direction, mCurrentAxis, sendEvent, contentDescription);
-    }
-    
     boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
@@ -276,14 +277,14 @@ class AccessibilityInjectorFallback {
                 final int direction = getDirectionForAction(action);
                 final int axis = getAxisForGranularity(arguments.getInt(
                         AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT));
-                return traverseGivenAxis(direction, axis, true, null);
+                return traverseGivenAxis(direction, axis, true, null, true);
             }
             case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
             case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT: {
                 final int direction = getDirectionForAction(action);
                 // TODO: Add support for moving by object.
                 final int axis = NAVIGATION_AXIS_SENTENCE;
-                return traverseGivenAxis(direction, axis, true, null);
+                return traverseGivenAxis(direction, axis, true, null, true);
             }
             default:
                 return false;
@@ -293,7 +294,7 @@ class AccessibilityInjectorFallback {
     /**
      * Returns the {@link WebView}-defined direction for the given
      * {@link AccessibilityNodeInfo}-defined action.
-     * 
+     *
      * @param action An accessibility action identifier.
      * @return A web view navigation direction.
      */
@@ -313,7 +314,7 @@ class AccessibilityInjectorFallback {
     /**
      * Returns the {@link WebView}-defined axis for the given
      * {@link AccessibilityNodeInfo}-defined granularity.
-     * 
+     *
      * @param granularity An accessibility granularity identifier.
      * @return A web view navigation axis.
      */
@@ -345,20 +346,20 @@ class AccessibilityInjectorFallback {
      * @param contentDescription A description of the performed action.
      */
     private boolean traverseGivenAxis(int direction, int axis, boolean sendEvent,
-            String contentDescription) {
-        WebViewCore webViewCore = mWebView.getWebViewCore();
+            String contentDescription, boolean sychronous) {
+        final WebViewCore webViewCore = mWebView.getWebViewCore();
         if (webViewCore == null) {
             return false;
         }
 
-        AccessibilityEvent event = null;
         if (sendEvent) {
-            event = getPartialyPopulatedAccessibilityEvent(
+            final AccessibilityEvent event = getPartialyPopulatedAccessibilityEvent(
                     AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY);
-            // the text will be set upon receiving the selection string
+            // The text will be set upon receiving the selection string.
             event.setContentDescription(contentDescription);
+            mScheduledEvent = event;
+            mScheduledToken++;
         }
-        mScheduledEventStack.push(event);
 
         // if the axis is the default let WebView handle the event which will
         // result in cursor ring movement and selection of its content
@@ -366,27 +367,78 @@ class AccessibilityInjectorFallback {
             return false;
         }
 
-        webViewCore.sendMessage(EventHub.MODIFY_SELECTION, direction, axis);
-        return true;
+        final SomeArgs args = SomeArgs.obtain();
+        args.argi1 = direction;
+        args.argi2 = axis;
+        args.argi3 = mScheduledToken;
+
+        // If we don't need synchronous results, just return true.
+        if (!sychronous) {
+            webViewCore.sendMessage(EventHub.MODIFY_SELECTION, args);
+            return true;
+        }
+
+        final boolean callbackResult;
+
+        synchronized (mCallbackLock) {
+            mCallbackReceived = false;
+
+            // Asynchronously changes the selection in WebView, which responds by
+            // calling onSelectionStringChanged().
+            webViewCore.sendMessage(EventHub.MODIFY_SELECTION, args);
+
+            try {
+                mCallbackLock.wait(MODIFY_SELECTION_TIMEOUT);
+            } catch (InterruptedException e) {
+                // Do nothing.
+            }
+
+            callbackResult = mCallbackResult;
+        }
+
+        return (mCallbackReceived && callbackResult);
     }
 
-    /**
-     * Called when the <code>selectionString</code> has changed.
-     */
-    public void onSelectionStringChange(String selectionString) {
-        if (DEBUG) {
-            Log.d(LOG_TAG, "Selection string: " + selectionString);
+    /* package */ void onSelectionStringChangedWebCoreThread(
+            final String selection, final int token) {
+        synchronized (mCallbackLock) {
+            mCallbackReceived = true;
+            mCallbackResult = (selection != null);
+            mCallbackLock.notifyAll();
         }
-        mIsLastSelectionStringNull = (selectionString == null);
-        if (mScheduledEventStack.isEmpty()) {
+
+        // Managing state and sending events must take place on the UI thread.
+        mWebViewInternal.post(new Runnable() {
+            @Override
+            public void run() {
+                onSelectionStringChangedMainThread(selection, token);
+            }
+        });
+    }
+
+    private void onSelectionStringChangedMainThread(String selection, int token) {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "Selection string: " + selection);
+        }
+
+        if (token != mScheduledToken) {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Selection string has incorrect token: " + token);
+            }
             return;
         }
-        AccessibilityEvent event = mScheduledEventStack.pop();
-        if ((event != null) && (selectionString != null)) {
-            event.getText().add(selectionString);
+
+        mIsLastSelectionStringNull = (selection == null);
+
+        final AccessibilityEvent event = mScheduledEvent;
+        mScheduledEvent = null;
+
+        if ((event != null) && (selection != null)) {
+            event.getText().add(selection);
             event.setFromIndex(0);
-            event.setToIndex(selectionString.length());
+            event.setToIndex(selection.length());
             sendAccessibilityEvent(event);
+            event.recycle();
         }
     }
 
