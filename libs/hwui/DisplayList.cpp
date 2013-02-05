@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Debug.h"
 #include "DisplayList.h"
 #include "DisplayListOp.h"
 #include "DisplayListLogBuffer.h"
@@ -386,7 +387,8 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t level) {
     }
 }
 
-status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level) {
+status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level,
+        DeferredDisplayList* deferredList) {
     status_t drawGlStatus = DrawGlInfo::kStatusDone;
 
 #if DEBUG_DISPLAY_LIST
@@ -401,6 +403,12 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
     int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     DISPLAY_LIST_LOGD("%*sSave %d %d", level * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
+
+    if (mAlpha < 1 && !mCaching && CC_LIKELY(deferredList)) {
+        // flush before a saveLayerAlpha/setAlpha
+        // TODO: make this cleaner
+        drawGlStatus |= deferredList->flush(renderer, dirty, flags, level);
+    }
     setViewProperties(renderer, level);
 
     if (renderer.quickRejectNoScissor(0, 0, mWidth, mHeight)) {
@@ -418,8 +426,13 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
         Caches::getInstance().eventMark(strlen(op->name()), op->name());
 #endif
 
-        drawGlStatus |= op->replay(renderer, dirty, flags,
-                saveCount, level, mCaching, mMultipliedAlpha);
+        if (deferredList) {
+            drawGlStatus |= op->replay(renderer, dirty, flags,
+                    saveCount, level, mCaching, mMultipliedAlpha, *deferredList);
+        } else {
+            drawGlStatus |= op->replay(renderer, dirty, flags,
+                    saveCount, level, mCaching, mMultipliedAlpha);
+        }
         logBuffer.writeCommand(level, op->name());
     }
 
@@ -429,6 +442,11 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
 
     DISPLAY_LIST_LOGD("%*sDone (%p, %s), returning %d", (level + 1) * 2, "", this, mName.string(),
             drawGlStatus);
+
+    if (!level && CC_LIKELY(deferredList)) {
+        drawGlStatus |= deferredList->flush(renderer, dirty, flags, level);
+    }
+
     return drawGlStatus;
 }
 

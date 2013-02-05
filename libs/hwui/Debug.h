@@ -74,6 +74,9 @@
 // Turn on to enable additional debugging in the font renderers
 #define DEBUG_FONT_RENDERER 0
 
+// Turn on to log draw operation batching and deferral information
+#define DEBUG_DEFER 0
+
 // Turn on to dump display list state
 #define DEBUG_DISPLAY_LIST 0
 
