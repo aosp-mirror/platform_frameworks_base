@@ -5024,7 +5024,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         /* ignore */
                     }
                 }
-                info.setViewId(viewId);
+                info.setViewIdResourceName(viewId);
             }
         }
 
