@@ -96,14 +96,21 @@ public class PanelBar extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // Allow subclasses to implement enable/disable semantics
-        if (!panelsEnabled()) return false;
+        if (!panelsEnabled()) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                Slog.v(TAG, String.format("onTouch: all panels disabled, ignoring touch at (%d,%d)",
+                        (int) event.getX(), (int) event.getY()));
+            }
+            return false;
+        }
 
         // figure out which panel needs to be talked to here
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             final PanelView panel = selectPanelForTouch(event);
             if (panel == null) {
                 // panel is not there, so we'll eat the gesture
-                if (DEBUG) LOG("PanelBar.onTouch: no panel for x=%d, bailing", event.getX());
+                Slog.v(TAG, String.format("onTouch: no panel for touch at (%d,%d)",
+                        (int) event.getX(), (int) event.getY()));
                 mTouchingPanel = null;
                 return true;
             }
@@ -112,6 +119,9 @@ public class PanelBar extends FrameLayout {
                     (enabled ? "" : " (disabled)"));
             if (!enabled) {
                 // panel is disabled, so we'll eat the gesture
+                Slog.v(TAG, String.format(
+                        "onTouch: panel (%s) is disabled, ignoring touch at (%d,%d)",
+                        panel, (int) event.getX(), (int) event.getY()));
                 mTouchingPanel = null;
                 return true;
             }
