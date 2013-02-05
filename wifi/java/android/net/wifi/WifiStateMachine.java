@@ -1767,9 +1767,6 @@ public class WifiStateMachine extends StateMachine {
     private void handleSuccessfulIpConfiguration(DhcpResults dhcpResults) {
         mLastSignalLevel = -1; // force update of signal strength
         mReconnectCount = 0; //Reset IP failure tracking
-        if (dhcpResults.serverAddress == null) {
-            dhcpResults = null;
-        }
         synchronized (mDhcpResultsLock) {
             mDhcpResults = dhcpResults;
         }
