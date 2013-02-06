@@ -89,6 +89,9 @@ void Caches::init() {
 
     mFunctorsCount = 0;
 
+    debugLayersUpdates = false;
+    debugOverdraw = false;
+
     mInitialized = true;
 }
 
