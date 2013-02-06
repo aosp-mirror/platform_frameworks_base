@@ -432,6 +432,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPowerKeyTriggered;
     private long mPowerKeyTime;
 
+    /* The number of steps between min and max brightness */
+    private static final int BRIGHTNESS_STEPS = 10;
+
     SettingsObserver mSettingsObserver;
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
@@ -1975,6 +1978,43 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
             if (down && repeatCount == 0) {
                 mHandler.post(mScreenshotRunnable);
+            }
+            return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP
+                || keyCode == KeyEvent.KEYCODE_BRIGHTNESS_DOWN) {
+            if (down) {
+                int direction = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP ? 1 : -1;
+
+                // Disable autobrightness if it's on
+                int auto = Settings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_MODE,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                        UserHandle.USER_CURRENT_OR_SELF);
+                if (auto != 0) {
+                    Settings.System.putIntForUser(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS_MODE,
+                            Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                            UserHandle.USER_CURRENT_OR_SELF);
+                }
+
+                int min = mPowerManager.getMinimumScreenBrightnessSetting();
+                int max = mPowerManager.getMaximumScreenBrightnessSetting();
+                int step = (max - min + BRIGHTNESS_STEPS - 1) / BRIGHTNESS_STEPS * direction;
+                int brightness = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS,
+                        mPowerManager.getDefaultScreenBrightnessSetting(),
+                        UserHandle.USER_CURRENT_OR_SELF);
+                brightness += step;
+                // Make sure we don't go beyond the limits.
+                brightness = Math.min(max, brightness);
+                brightness = Math.max(min, brightness);
+
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS, brightness,
+                        UserHandle.USER_CURRENT_OR_SELF);
+                Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
+                mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT_OR_SELF);
             }
             return -1;
         }
