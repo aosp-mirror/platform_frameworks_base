@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
@@ -323,6 +324,7 @@ public class SettingsProvider extends ContentProvider {
         mBackupManager = new BackupManager(getContext());
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
 
+        setAppOps(AppOpsManager.OP_NONE, AppOpsManager.OP_WRITE_SETTINGS);
         establishDbTracking(UserHandle.USER_OWNER);
 
         IntentFilter userFilter = new IntentFilter();
@@ -544,7 +546,8 @@ public class SettingsProvider extends ContentProvider {
      * Fast path that avoids the use of chatty remoted Cursors.
      */
     @Override
-    public Bundle call(String method, String request, Bundle args) {
+    public Bundle callFromPackage(String callingPackage, String method, String request,
+            Bundle args) {
         int callingUser = UserHandle.getCallingUserId();
         if (args != null) {
             int reqUser = args.getInt(Settings.CALL_METHOD_USER_KEY, callingUser);
@@ -586,7 +589,22 @@ public class SettingsProvider extends ContentProvider {
         // Put methods - new value is in the args bundle under the key named by
         // the Settings.NameValueTable.VALUE static.
         final String newValue = (args == null)
-        ? null : args.getString(Settings.NameValueTable.VALUE);
+                ? null : args.getString(Settings.NameValueTable.VALUE);
+
+        // Framework can't do automatic permission checking for calls, so we need
+        // to do it here.
+        if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    String.format("Permission denial: writing to settings requires %1$s",
+                                  android.Manifest.permission.WRITE_SETTINGS));
+        }
+
+        // Also need to take care of app op.
+        if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SETTINGS, Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return null;
+        }
 
         final ContentValues values = new ContentValues();
         values.put(Settings.NameValueTable.NAME, request);
