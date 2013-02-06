@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"السماح للتطبيق بقراءة رسائل بث الخلية التي يتلقاها هذا الجهاز. يتم تسليم تنبيهات بث الخلية في بعض المواقع لتحذيرك من حالات طارئة. يمكن أن تتداخل التطبيقات الضارة مع أداء أو تشغيل الجهاز عندما يتم تلقي بث خلية طارئ."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"إرسال رسائل قصيرة SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"للسماح للتطبيق بإرسال رسائل قصيرة SMS. وقد يؤدي هذا إلى تحمل رسوم غير متوقعة. وقد تكلفك التطبيقات الضارة أموالاً من خلال إرسال رسائل بدون موافقة منك."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"إرسال رسائل قصيرة SMS بدون تأكيد"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"للسماح للتطبيق بإرسال رسائل قصيرة SMS. وقد يؤدي هذا إلى تحمل رسوم غير متوقعة. وقد تكلفك التطبيقات الضارة أموالاً من خلال إرسال رسائل بدون موافقة منك."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"إرسال أحداث يتم الرد عليها عبر رسالة"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"السماح للتطبيق بإرسال طلبات إلى تطبيقات المراسلة الأخرى للتعامل مع الأحداث التي يتم الرد عليها عبر الرسائل في المكالمات الواردة."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"قراءة الرسائل النصية (الرسائل القصيرة SMS أو رسائل الوسائط المتعددة)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"للسماح للتطبيق بقراءة الرسائل القصيرة SMS المخزنة على الجهاز اللوحي أو على بطاقة SIM. ويتيح هذا للتطبيق قراءة جميع الرسائل القصيرة SMS، بغض النظر عن المحتوى أو مدى السرية."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"للسماح للتطبيق بقراءة الرسائل القصيرة SMS المخزنة على هاتفك أو على بطاقة SIM. ويتيح هذا للتطبيق قراءة جميع الرسائل القصيرة SMS، بغض النظر عن المحتوى أو مدى السرية."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"طلب الاستكشاف باللمس"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"للسماح للمالك بطلب وضع التفاعل الذي يتم فيه النطق بالعناصر الملموسة بصوت عالٍ واستكشاف واجهة المستخدم بالإيماءات."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"طلب إمكانية وصول محسنة"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"للسماح للمالك بطلب تمكين تحسينات إمكانية الوصول إلى الويب، مثل تثبيت البرامج النصية لمزيد من تسهيل الدخول إلى محتوى التطبيق."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"الالتزام بخدمة إدخال النصوص"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إدخال النصوص (على سبيل المثال، SpellCheckerService). لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"الالتزام بخدمة VPN"</string>

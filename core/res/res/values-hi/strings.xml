@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"एप्‍लिकेशन को आपके उपकरण द्वारा प्राप्त सेल प्रसारण संदेशों को पढ़ने देता है. कुछ स्‍थानों पर आपको आपातकालीन स्‍थितियों की चेतावनी देने के लिए सेल प्रसारण अलर्ट वितरित किए जाते हैं. आपातकालीन सेल प्रसारण प्राप्त होने पर दुर्भावनापूर्ण एप्‍लिकेशन आपके उपकरण के निष्‍पादन या संचालन में हस्‍तक्षेप कर सकते हैं."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS संदेश भेजें"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"एप्लिकेशन को SMS संदेशों को भेजने देता है. इसके परिणामस्वरूप अप्रत्‍याशित शुल्‍क लागू हो सकते हैं. दुर्भावनापूर्ण एप्लिकेशन आपकी पुष्टि के बिना संदेश भेजकर आपका धन व्‍यय कर सकते हैं."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"बिना कि‍सी पुष्टि के SMS संदेश भेजें"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"एप्लिकेशन को SMS संदेशों को भेजने देता है. इसके परिणामस्वरूप अप्रत्‍याशित शुल्‍क लागू हो सकते हैं. दुर्भावनापूर्ण एप्लिकेशन आपकी पुष्टि के बिना संदेश भेजकर आपका धन व्‍यय कर सकते हैं."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"संदेश-द्वारा-जवाब भेजें ईवेंट"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"इनकमिंग कॉल के संदेश-द्वारा-जवाब देने के ईवेंट प्रबंधित करने के लिए, एप्लिकेशन को अन्य संदेश सेवा एप्लिकेशन को अनुरोध भेजने देती है."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"अपने पाठ संदेश (SMS या MMS) पढ़ें"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"एप्लिकेशन को आपके टेबलेट या SIM कार्ड में संग्रहीत SMS संदेश पढ़ने देता है. इससे सामग्री या गोपनीयता पर ध्यान दिए बिना, एप्लिकेशन सभी SMS संदेश पढ़ सकता है."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"एप्लिकेशन को आपके फ़ोन या SIM कार्ड में संग्रहीत SMS संदेश पढ़ने देता है. इससे सामग्री या गोपनीयता पर ध्यान दिए बिना, एप्लिकेशन सभी SMS संदेश पढ़ सकता है."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"स्पर्श द्वारा एक्सप्लोर करें का अनुरोध करें"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"धारक को ऐसे सहभागी मोड का अनुरोध करने देती है जिसमें स्पर्श किए गए आइटम ज़ोर से बोले जाते हैं और UI को जेस्चर के द्वारा एक्सप्लोर किया जा सकता है."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"उन्नत वेब पहुंच-योग्यता का अनुरोध करें"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"धारक को वेब पहुंच-योग्यता एन्हांसमेंट सक्षम करने का अनुरोध करने देती है. उदाहरण के लिए, एप्लिकेशन सामग्री को अधिक पहुंच-योग्य बनाने के लिए स्क्रिप्ट इंस्टॉल करना."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"किसी पाठ सेवा पर बने रहें"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"धारक को किसी पाठ सेवा (उदा. SpellCheckerService) के शीर्ष-स्‍तर इंटरफ़ेस पर आबद्ध होने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"किसी VPN सेवा से आबद्ध करें"</string>

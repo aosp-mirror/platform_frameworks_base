@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permet que l\'aplicació llegeixi missatges de difusió mòbil rebuts pel dispositiu. Les alertes de difusió mòbil s\'entreguen en algunes ubicacions per alertar de situacions d\'emergència. És possible que les aplicacions malicioses interfereixin en el rendiment o en el funcionament del dispositiu quan es rep una difusió mòbil d\'emergència."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar missatges SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permet que l\'aplicació enviï missatges SMS. Aquesta acció pot provocar càrrecs inesperats. Les aplicacions malicioses poden enviar missatges sense la teva confirmació, cosa que et pot fer gastar diners."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"enviament de missatges SMS sense confirmació"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Permet que l\'aplicació enviï missatges SMS. Aquesta acció pot provocar càrrecs inesperats. Les aplicacions malicioses poden enviar missatges sense la teva confirmació, cosa que et pot fer gastar diners."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"envia els esdeveniments amb \"resposta per missatge\""</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Permet que l\'aplicació enviï sol·licituds a altres aplicacions de missatgeria per gestionar els esdeveniments amb \"resposta per missatge\" de les trucades entrants."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lectura dels missatges de text (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permet que l\'aplicació llegeixi missatges SMS emmagatzemats a la tauleta o a la targeta SIM. Això permet que l\'aplicació llegeixi tots els missatges SMS, independentment del contingut o de la confidencialitat."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Permet que l\'aplicació llegeixi missatges SMS emmagatzemats al telèfon o a la targeta SIM. Això permet que l\'aplicació llegeixi tots els missatges SMS, independentment del contingut o de la confidencialitat."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"sol·licitud d\'exploració tàctil"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permet que el titular sol·liciti un mode d\'interacció en què els elements que es toquin es llegeixin en veu alta i la interfície d\'usuari es pugui explorar mitjançant gestos."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"sol·licitud d\'accessibilitat web millorada"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Permet que el titular sol·liciti l\'activació de les millores per a l\'accessibilitat web. Per exemple, la instal·lació de scripts de Google per fer més accessible el contingut de l\'aplicació."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincula a un servei de text"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet al titular vincular amb la interfície de nivell superior d\'un servei de text (per exemple, SpellCheckerService). Les aplicacions normals mai no ho haurien de necessitar."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincula a un servei de VPN"</string>

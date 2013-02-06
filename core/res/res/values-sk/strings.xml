@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikácii čítať správy Cell Broadcast prijaté vaším zariadením. Upozornenia Cell Broadcast sú doručované na určitých miestach a upozorňujú na núdzové situácie. Škodlivé aplikácie môžu pri prijatí núdzovej správy Cell Broadcast narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"odosielať správy SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikácii odosielať správy SMS. Môže to mať za následok účtovanie neočakávaných poplatkov. Škodlivé aplikácie vám môžu spôsobiť výdavky odosielaním správ bez vášho potvrdenia."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"posielať správy SMS bez potvrdenia"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Umožňuje aplikácii odosielať správy SMS. Môže to mať za následok účtovanie neočakávaných poplatkov. Škodlivé aplikácie vám môžu spôsobiť výdavky odosielaním správ bez vášho potvrdenia."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"odosielanie udalostí typu „odpovedzte správou“"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Umožňuje aplikácii odosielať žiadosti ostatným aplikáciám na posielanie správ s cieľom spracovania udalostí typu „odpovedzte správou“ pre prichádzajúce hovory."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čítať textové správy (SMS alebo MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Umožňuje aplikácii čítať správy SMS uložené v tablete alebo na karte SIM. Toto povolenie umožňuje aplikácii čítať správy SMS bez ohľadu na ich obsah alebo dôvernosť."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Umožňuje aplikácii čítať správy SMS uložené v telefóne alebo na karte SIM. Toto povolenie umožňuje aplikácii čítať správy SMS bez ohľadu na ich obsah alebo dôvernosť."</string>
@@ -347,10 +347,9 @@
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"viazať na službu zjednodušeného ovládania"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby zjednodušeného ovládania. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"vyžiadať preskúmanie dotykom"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Držiteľovi umožňuje, aby požiadal o interaktívny režim, v ktorom aplikácia reaguje na dotyky položiek vyslovením ich názvu a v ktorom môže používateľ preskúmať používateľské rozhranie pomocou gest."</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Držiteľovi umožňuje požiadať o interaktívny režim, v ktorom aplikácia reaguje na dotyky položiek vyslovením ich názvu a v ktorom môže používateľ preskúmať používateľské rozhranie pomocou gest."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"vyžiadať zlepšenie dostupnosti webu"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Držiteľovi umožňuje, aby vyžiadal povolenie vylepšení prístupu k webu, napríklad inštaláciu skriptov, ktoré uľahčujú prístup k obsahu aplikácie."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"väzba na textovú službu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania textovej služby (napr. SpellCheckerService). Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"Zaviazať k službe VPN"</string>

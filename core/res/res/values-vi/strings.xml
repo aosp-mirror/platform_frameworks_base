@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Cho phép ứng dụng đọc tin nhắn quảng bá mà thiết bị của bạn nhận được. Tin nhắn quảng bá cảnh báo được gửi ở một số địa điểm nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể gây ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị của bạn khi nhận được tin nhắn quảng bá khẩn cấp."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"gửi tin nhắn SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Cho phép ứng dụng gửi tin nhắn SMS. Việc này có thể dẫn đến các khoản phí không mong muốn. Các ứng dụng độc hai có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần sự xác nhận của bạn."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"gửi tin nhắn SMS mà không cần xác nhận"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Cho phép ứng dụng gửi tin nhắn SMS. Việc này có thể dẫn đến các khoản phí không mong muốn. Các ứng dụng độc hai có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần sự xác nhận của bạn."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"gửi sự kiện trả lời qua tin nhắn"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Cho phép ứng dụng gửi yêu cầu đến ứng dụng nhắn tin khác để xử lý các sự kiện trả lời qua tin nhắn cho các cuộc gọi đến."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"đọc tin nhắn văn bản của bạn (SMS hoặc MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên máy tính bảng hoặc thẻ SIM của bạn. Việc này cho phép ứng dụng đọc tất cả tin nhắn SMS, bất kể nội dung hay tính bí mật là gì."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên điện thoại hoặc thẻ SIM của bạn. Việc này cho phép ứng dụng đọc tất cả tin nhắn SMS, bất kể nội dung hay tính bí mật là gì."</string>
@@ -347,10 +347,9 @@
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"liên kết với dịch vụ truy cập"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ truy cập. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"yêu cầu khám phá bằng cách chạm"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Cho phép chủ sở hữu yêu cầu chế độ tương tác mà các mục đã chạm được đọc to và có thể khám phá giao diện  người dùng qua các thao tác."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"yêu cầu cải thiện hỗ trợ truy cập web"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Cho phép chủ sở hữu yêu cầu chế độ tương tác mà các mục đã chạm được đọc to và có thể khám phá giao diện người dùng qua các thao tác."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"yêu cầu khả năng hỗ trợ truy cập web nâng cao"</string>
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Cho phép chủ sở hữu yêu cầu bật tính năng cải thiện hỗ trợ truy cập web. Ví dụ: cài đặt tập lệnh để nội dung ứng dụng dễ truy cập hơn."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"liên kết với dịch vụ văn bản"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ văn bản (ví dụ: SpellCheckerService). Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"liên kết với dịch vụ VPN"</string>

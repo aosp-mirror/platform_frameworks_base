@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Võimaldab rakendusel lugeda seadme vastu võetud mobiilsidesõnumeid. Mobiilsidemärguandeid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad segada seadme toimivust või tööd eriolukorra sõnumi vastuvõtmisel."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"saada SMS-sõnumeid"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Võimaldab rakendusel saata SMS-sõnumeid. See võib kaasa tuua ootamatuid tasusid. Pahatahtlikud rakendused võivad teile tekitada kulusid, saates sõnumeid teie kinnituseta."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"lühisõnumite saatmine ilma kinnituseta"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Võimaldab rakendusel saata SMS-sõnumeid. See võib kaasa tuua ootamatuid tasusid. Pahatahtlikud rakendused võivad teile tekitada kulusid, saates sõnumeid teie kinnituseta."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"sõnumiga vastamise sündmuste saatmine"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Lubab rakendusel saata taotlusi teistele sõnumiside rakendustele, et käsitleda sissetulevate kõnedele sõnumiga vastamise sündmusi."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lugege oma tekstisõnumeid (SMS või MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Võimaldab rakendusel lugeda tahvelarvutisse või SIM-kaardile salvestatud SMS-sõnumeid. See võimaldab rakendusel lugeda kõiki SMS-sõnumeid sisust või konfidentsiaalsusest hoolimata."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Võimaldab rakendusel lugeda telefoni või SIM-kaardile salvestatud SMS-sõnumeid. See võimaldab rakendusel lugeda kõiki SMS-sõnumeid sisust või konfidentsiaalsusest hoolimata."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"puudutusega uurimise taotlus"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Võimaldab taotleda suhtlusrežiimi, milles puudutatud üksused valjusti välja öeldakse ja kus kasutajaliidest saab kasutada liigutuste abil."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"täiustatud veebijuurdepääsu taotlus"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Võimaldab taotleda veebijuurdepääsu täiustuste lubamist. Näiteks installida skripte, mis hõlbustavad juurdepääsu rakenduse sisule."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tekstiteenusega sidumine"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Võimaldab omanikul siduda tekstiteenuse (nt SpellCheckerService) ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"seo VPN-teenusega"</string>

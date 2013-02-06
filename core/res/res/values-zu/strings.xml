@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ivumela uhlelo lokusebenza ukufunda imilayezo yokusakaza yeselula etholwe idivayisi yakho. Izaziso zokusakaza zeselula zilethwa kwezinye izindawo ukukuxwayisa ngezimo ezisheshayo. Izinhlelo zokusebenza ezingalungile zingaphazamisana nokusebenza noma umsebenzi wedivayisi yakho uma ukusakaza kweselula kwesimo esisheshayo kutholwa."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"thumela imiyalezo ye-SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ivumela uhlelo lokusebenza ukuthumela imilayezo ye-SMS. Lokhu kungaholela emashajini angallindelekile. Izinhlelo zokusebenza ezingalungile zingakubiza imali ngokuthumela imilayezo ngaphandle kokuqinisekisa kwakho."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"thumela i-SMS engenakuqinisekiswa"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Ivumela uhlelo lokusebenza ukuthumela imilayezo ye-SMS. Lokhu kungaholela emashajini angallindelekile. Izinhlelo zokusebenza ezingalungile zingakubiza imali ngokuthumela imilayezo ngaphandle kokuqinisekisa kwakho."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"thumela imicimbi yokuphendula ngemilayezo"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Ivumela uhlelo lokusebenza ukuthumela izicelo kwezinye izinhlelo zokusebenza zemilayezo ukuphatha imicimbi yokuphendula ngemilayezo amakholi angenayo."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"funda imilayezo yakho ebhaliwe (i-SMS noma i-MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ivumela uhlelo lokusebenza ukufunda imilayezo ye-SMS elondolozwe kuthebulethi noma ekhadini lakho le-SIM. Lokhu kuvumela uhlelo lokusebenza ukufunda yonke imilayezo ye-SMS, ngaphandle kokuqukethwe noma ukugcinwa kuyimfihlo."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Ivumela uhlelo lokusebenza ukufunda imilayezo ye-SMS elondolozwe efonini noma ekhadini lakho le-SIM. Lokhu kuvumela uhlelo lokusebenza ukufunda yonke imilayezo ye-SMS, ngaphandle kokuqukethwe noma ukugcinwa kuyimfihlo."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"cela ukuhlola ngokuthinta"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Ivumela i-hoder ukuthi icele imodi yokusebenzisana lapho izinto ezithintiwe zikhulunywa ngokumemezwa ne-UI ingahlolwa ngezimpawu."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"cela ukufinyelela kuwebhu okuthuthukisiwe"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Ivumela i-hoder ukucela ukunika amandla ukuthuthukiswa kokufinyelela iwebhu. isibonelo, ukufaka izikripthi kusuka ku-Google ukwenza okuqukethwe kohlelo lokusebenza ukuthi kufinyeleleke."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bophezela kunsizakalo yombhalo"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwesixhumi esibonakalayo sensizakalo yombhalo(isb. InsizakaloYokuhlolaUkubhala). Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"hlanganisa kwinsizakalo ye-VPN"</string>

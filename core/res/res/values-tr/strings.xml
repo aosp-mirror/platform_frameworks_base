@@ -226,7 +226,7 @@
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB belleğe erişin."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD karta erişin."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Erişilebilirlik özellikleri"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Engelli kullanıcılara yardımcı olan teknolojinin istekte bulunabileceği özellikler"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Engelli kullanıcılara yardımcı olan teknolojinin istekte bulunabileceği özellikler."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"durum çubuğunu devre dışı bırak veya değiştir"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Uygulamaya, durum çubuğunu devre dışı bırakma ve sistem simgelerini ekleyip kaldırma izni verir."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"durum çubuğu"</string>
@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Uygulamaya, cihazınız tarafından alınan hücre yayını mesajlarını okuma izni verir. Hücre yayını uyarıları bazı yerlerde acil durumlar konusunda sizi uyarmak için gönderilir. Kötü amaçlı uygulamalar acil hücre yayını alındığında cihazınızın performansına ya da çalışmasına engel olabilir."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS mesajları gönder"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Uygulamaya SMS mesajları gönderme izni verir. Bu durum beklenmeyen ödemelere neden olabilir. Kötü amaçlı uygulamalar onayınız olmadan mesajlar göndererek sizi zarara uğratabilir."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"SMS mesajlarını onaysız gönder"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Uygulamaya SMS mesajları gönderme izni verir. Bu durum beklenmeyen ödemelere neden olabilir. Kötü amaçlı uygulamalar onayınız olmadan mesajlar göndererek sizi zarara uğratabilir."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"mesajla yanıtla etkinlikleri gönder"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Uygulamaya, gelen çağrıları mesajla yanıtlama etkinliklerini işlemek üzere diğer mesajlaşma uygulamalarına istek gönderme izni verir."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"kısa mesajlarımı (SMS veya MMS) oku"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Uygulamaya tabletinizde veya SIM kartta saklanan SMS mesajlarını okuma izni verir. Bu izin, uygulamanın tüm SMS mesajlarını içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Uygulamaya telefonunuzda veya SIM kartta saklanan SMS mesajlarını okuma izni verir. Bu izin, uygulamanın tüm SMS mesajlarını içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
@@ -346,11 +346,10 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Cihazın sahibine, bir giriş yönteminin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"erişilebilirlik hizmetine bağlan"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"İzin sahibine bir erişilebilirlik hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"dokunarak keşfetme isteğinde bulun"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"İzin sahibine, dokunulan öğelerin sesli okunduğu ve kullanıcı arayüzünün hareketlerle keşfedilebildiği etkileşimli mod bir isteğinde bulunma olanağı sağlar."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"genişletilmiş Web erişilebilirliği isteğinde bulun"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"dokunarak keşfetme isteğinde bulunur"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"İzin sahibine, dokunulan öğelerin sesli okunduğu ve kullanıcı arayüzünün hareketlerle keşfedilebildiği etkileşimli bir mod isteğinde bulunma olanağı sağlar."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"genişletilmiş Web erişilebilirliği isteğinde bulunur"</string>
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"İzin sahibine Web erişim geliştirmelerini etkinleştirme isteğinde bulunma olanağı sağlar. Örneğin, uygulama içeriğinin daha fazla erişilebilir olması için Google\'dan komut dosyası yüklemek gibi."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"kısa mesaj hizmetine bağla"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Cihazın sahibine, bir metin hizmetinin (ör. SpellCheckerService) en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerekmez."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN hizmetine bağlan"</string>

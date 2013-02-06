@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‎های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ارسال پیامک ها"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"به برنامه اجازه می‌دهد پیامک‌ها را ارسال کند. این باعث ایجاد هزینه‌های پیش‌بینی نشده می‌شود. برنامه‌های مخرب ممکن است با ارسال پیام بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"ارسال پیامک بدون تأیید"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"به برنامه اجازه می‌دهد پیامک‌ها را ارسال کند. این باعث ایجاد هزینه‌های پیش‌بینی نشده می‌شود. برنامه‌های مخرب ممکن است با ارسال پیام بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"ارسال رویدادهای «پاسخ‌ از طریق پیام»"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"به برنامه اجازه می‌دهد درخواست‌ها را برای دیگر برنامه‌های پیام‌رسانی بفرستد تا به رویدادهای «پاسخ‌ از طریق پیام» برای تماس‌های دریافتی رسیدگی کند."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"خواندن پیام‌های نوشتاری شما (پیامک یا MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"به برنامه اجازه می‌دهد پیامک‌های ذخیره شده در رایانهٔ لوحی یا سیم کارت شما را بخواند. این ویژگی به برنامه امکان می‌دهد همه پیامک‌ها را صرفنظر از محتوا یا محرمانه بودن آن‌ها بخواند."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"به برنامه اجازه می‌دهد پیامک‌های ذخیره شده در تلفن یا سیم کارت شما را بخواند. این ویژگی به برنامه امکان می‌دهد همه پیامک‌ها را صرفنظر از محتوا یا محرمانه بودن آن‌ها بخواند."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"درخواست کاوش با لمس"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"به دارنده اجازه می‌دهد یک حالت تعاملی را درخواست کند که در این حالت موارد لمس شده به صدای بلند بیان می‌شوند و رابط کاربری از طریق حرکات اشاره قابل کاوش است."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"درخواست افزایش دسترسی به وب"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"به دارنده اجازه می‌دهد فعال کردن افزایش دسترسی به وب را درخواست کند، برای مثال، نصب اسکریپت‌ها، تا محتوای برنامه بیشتر در دسترس باشد."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"اتصال به یک سرویس متنی"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"به دارنده اجازه می‌دهد خود را به یک رابط سطح بالای خدمات متنی مرتبط کند (برای مثال SpellCheckerService). هرگز برای برنامه‌های عادی لازم نیست."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"اتصال به یک سرویس VPN"</string>

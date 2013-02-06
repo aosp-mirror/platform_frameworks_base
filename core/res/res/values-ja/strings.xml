@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信したエリアメールSMSの読み取りをアプリに許可します。エリアメール警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急エリアメールの受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"確認せずにSMSメッセージを送信する"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"メッセージ応答イベントの送信"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"着信時にメッセージ応答イベントを処理するよう他のSMSアプリにリクエストを送信することをアプリに許可します。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"テキストメッセージ（SMSまたはMMS）の読み取り"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"タブレットまたはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージをコンテンツや機密性に関係なくアプリから読み取ることができるようになります。"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"携帯端末またはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージをコンテンツや機密性に関係なくアプリから読み取ることができるようになります。"</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"タッチガイドのリクエスト"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"触れたアイテムが読み上げられ、ジェスチャーでユーザーインターフェースのガイドを利用できる操作モードをリクエストすることを所有者に許可します。"</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"ウェブアクセシビリティ拡張のリクエスト"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"ウェブアクセシビリティの拡張の有効化をリクエストすることを所有者に許可します。たとえば、アプリコンテンツのアクセシビリティをもっと向上させるためにスクリプトをインストールできます。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"テキストサービスにバインド"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"テキストサービス（SpellCheckerServiceなど）のトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPNサービスにバインド"</string>
