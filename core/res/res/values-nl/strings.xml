@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Toestaan dat de app infodienstberichten leest die worden ontvangen op uw apparaat. Infodienstberichten worden verzonden naar bepaalde locaties om u te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van uw apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-berichten verzenden"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Hiermee kan de app sms-berichten verzenden. Dit kan tot onverwachte kosten leiden. Schadelijke apps kunnen u geld kosten doordat ze zonder uw bevestiging berichten kunnen verzenden."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"zonder toestemming sms\'jes verzenden"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Hiermee kan de app sms-berichten verzenden. Dit kan tot onverwachte kosten leiden. Schadelijke apps kunnen u geld kosten doordat ze zonder uw bevestiging berichten kunnen verzenden."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"gebeurtenissen voor reageren-via-berichten verzenden"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Hiermee kan de app verzoeken verzenden aan andere bericht-apps om gebeurtenissen voor reageren-via-berichten voor inkomende oproepen te verwerken."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"uw tekstberichten (SMS of MMS) lezen"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op uw tablet of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op uw telefoon of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"verkennen via aanraking aanvragen"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Hiermee kan de houder een interactiemodus aanvragen waarin aangeraakte items worden uitgesproken en de gebruikersinterface kan worden bediend met gebaren."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"verbeterde internettoegankelijkheid aanvragen"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Hiermee kan de houder het inschakelen van verbeteringen voor internettoegankelijkheid aanvragen. Bijvoorbeeld scripts installeren om app-inhoud toegankelijker te maken."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"koppelen aan een sms-service"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Hiermee kan de gebruiker koppelen met de hoofdinterface van een tekstservice (zoals SpellCheckerService). Dit is niet nodig voor normale apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"koppelen aan een VPN-service"</string>

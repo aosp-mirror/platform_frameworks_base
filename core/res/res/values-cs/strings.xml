@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informační služby přijaté ve vašem zařízení. Upozornění informační služby jsou v některých oblastech odesílána za účelem varování před mimořádnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informační služby."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"posílat zprávy SMS bez potvrzení"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"odesílání událostí typu „odpovězte zprávou“"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Umožňuje aplikaci odesílat ostatním aplikacím požadavky na zpracování událostí typu „odpovězte zprávou“ pro příchozí volání."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čtení textových zpráv (SMS nebo MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Umožňuje aplikaci číst zprávy SMS uložené v tabletu nebo na SIM kartě.Toto oprávnění umožňuje aplikaci číst zprávy SMS bez ohledu na jejich obsah nebo důvěrnost."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Umožňuje aplikaci číst zprávy SMS uložené v telefonu nebo na SIM kartě. Toto oprávnění umožňuje aplikaci číst zprávy SMS bez ohledu na jejich obsah nebo důvěrnost."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"požádat o prozkoumání dotykem"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Umožňuje držiteli požádat o interaktivní režim, ve kterém jsou po dotyku vysloveny názvy položek a uživatelské rozhraní lze poznávat pomocí gest."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"požádat o usnadnění přístupu k webu"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Umožňuje držiteli požádat o aktivaci usnadnění přístupu k webu, například o instalaci skriptů, které usnadňují přístup k obsahu aplikace."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"navázat se na textovou službu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Umožňuje držiteli připojit se k nejvyšší úrovni rozhraní textové služby (např. SpellCheckerService). Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"navázat se na službu VPN"</string>

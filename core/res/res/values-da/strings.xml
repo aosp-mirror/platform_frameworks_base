@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser mobiltransmissionsbeskeder, der modtages af din enhed. I nogle områder sendes mobiltransmissionsbeskeder for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når en mobiltransmission om en nødsituation modtages."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"send sms-beskeder"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillader, at appen kan sende sms-beskeder. Dette kan resultere i uventede opkrævninger. Skadelige apps kan koste dig penge ved at sende beskeder uden din bekræftelse."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"sende sms-meddelelser uden bekræftelse"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Tillader, at appen kan sende sms-beskeder. Dette kan resultere i uventede opkrævninger. Skadelige apps kan koste dig penge ved at sende beskeder uden din bekræftelse."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"send hændelser, hvor der skal svares pr. besked"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Tillader, at appen kan sende anmodninger til andre apps til beskeder for at håndtere hændelser, hvor der skal svares pr. besked."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillader, at appen kan læse de sms-beskeder, der er gemt på din tablet eller dit SIM-kort. Med denne tilladelse kan appen læse alle sms-beskeder, uanset indhold eller fortrolighed."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Tillader, at appen kan læse de sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Med denne tilladelse kan appen læse alle sms-beskeder, uanset indhold eller fortrolighed."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"anmod om udforsk ved berøring"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Tillader brugeren at anmode om en interaktionstilstand, hvor elementer, der berøres, læses op, og brugergrænsefladen kan udforskes via berøringer."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"anmod om bedre webtilgængelighed"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Tillader, at brugeren kan anmode om aktivering af webtilgængelighedsforbedringer. Disse omfatter bl.a. at installering af scripts, der gør appindhold mere tilgængeligt."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"forpligte sig til en sms-tjeneste"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Tillader, at ejeren kan binde en teksttjenestes grænseflade (f. eks. SpellCheckerService) på øverste niveau. Dette bør aldrig være nødvendigt til normale apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind til en VPN-tjeneste"</string>

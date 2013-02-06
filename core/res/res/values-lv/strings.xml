@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ļauj lietotnei lasīt ierīcē saņemtos šūnu apraides ziņojumus. Šūnu apraides brīdinājumi tiek piegādāti dažās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sūtīt īsziņas"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ļauj lietotnei sūtīt īsziņas. Tas var radīt neparedzētas izmaksas. Ļaunprātīgas lietotnes var radīt jums izmaksas, sūtot ziņojumus bez jūsu apstiprinājuma."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"īsziņu sūtīšana bez apstiprinājuma"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Ļauj lietotnei sūtīt īsziņas. Tas var radīt neparedzētas izmaksas. Ļaunprātīgas lietotnes var radīt jums izmaksas, sūtot ziņojumus bez jūsu apstiprinājuma."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"nosūtīt “atbildēt ziņojumā” notikumus"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Ļauj lietotnei nosūtīt pieprasījumus citām ziņojumapmaiņas lietotnēm par “atbildēt ziņojumā” notikumu apstrādi ienākošajiem zvaniem."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lasīt ziņojumus (SMS vai MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ļauj lietotnei lasīt planšetdatorā vai SIM kartē saglabātās īsziņas. Tas ļauj lietotnei lasīt visas īsziņas, neraugoties uz to saturu vai konfidencialitāti."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Ļauj lietotnei lasīt tālrunī vai SIM kartē saglabātās īsziņas. Tas ļauj lietotnei lasīt visas īsziņas, neraugoties uz to saturu vai konfidencialitāti."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"pieprasīt funkciju “Pārlūkot pieskaroties”"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Ļauj pieprasīt mijiedarbības režīmu. Izmantojot šo režīmu, vienumi, kuriem pieskaraties, tiek izrunāti skaļi, un lietotāja saskarni var pārlūkot ar žestiem."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"pieprasīt uzlabotu tīmekļa pieejamību"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Ļauj pieprasīt tīmekļa pieejamības uzlabojumu iespējošanu, piemēram, ļauj instalēt skriptus, lai padarītu lietotnes saturu pieejamāku."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"saistīt ar īsziņu pakalpojumu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ļauj īpašniekam veikt saistīšanu ar īsziņu pakalpojuma augstākā līmeņa saskarni (piem., SpellCheckerService). Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"saistīt ar VPN pakalpojumu"</string>

@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogoča aplikaciji branje sporočil oddaje v celici, ki jih prejme naprava. Opozorila oddaje v celici so dostavljena na nekaterih lokacijah, da vas opozorijo na izredne razmere. Zlonamerne aplikacije lahko vplivajo na delovanje naprave, ko dobi sporočilo oddaje v celici."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"pošiljanje sporočil SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Aplikaciji omogoča pošiljanje SMS-ov. Zaradi tega lahko pride do nepričakovanih stroškov. Zlonamerne aplikacije lahko pošiljajo sporočila brez vaše potrditve, kar vas lahko drago stane."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"pošiljanje SMS-ov brez potrditve"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Aplikaciji omogoča pošiljanje SMS-ov. Zaradi tega lahko pride do nepričakovanih stroškov. Zlonamerne aplikacije lahko pošiljajo sporočila brez vaše potrditve, kar vas lahko drago stane."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"pošiljanje dogodkov z odgovori prek sporočil"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Aplikaciji dovoli, da pošilja zahteve drugim aplikacijam za sporočila za obravnavanje dogodkov z odgovori prek sporočil za dohodne klice."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"branje sporočil (SMS ali MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Aplikaciji omogoča branje SMS-ov, shranjenih v tabličnem računalniku ali na kartici SIM. S tem lahko aplikacija bere vse SMS-e, ne glede na njihovo vsebino ali zaupnost."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Aplikaciji omogoča branje SMS-ov, shranjenih v telefonu ali na kartici SIM. S tem lahko aplikacija bere vse SMS-e, ne glede na njihovo vsebino ali zaupnost."</string>
@@ -347,10 +347,9 @@
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"povezovanje s storitvijo za ljudi s posebnimi potrebami"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lastniku omogoča povezovanje z vmesnikom najvišje ravni storitve za ljudi s posebnimi potrebami. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"zahteva za raziskovanje z dotikom"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Imetniku dovoli zahtevanje načina interaktivnosti, v katerem se dotaknjene možnosti izgovorijo na glas in je mogoče uporabniški vmesnik raziskati s potezami."</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Imetniku dovoli, da zahteva interaktivni način delovanja, v katerem se dotaknjene možnosti izgovorijo na glas in je mogoče uporabniški vmesnik raziskati s potezami."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"zahteva za izboljšano spletno dostopnost"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Imetniku dovoli, da zahteva omogočanje izboljšav spletne dostopnosti, na primer namestitev skriptov, ki naredijo vsebino aplikacije dostopnejšo."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"poveži z besedilno storitvijo"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Dovoljuje, da se lastnik poveže z vmesnikom besedilne storitve najvišje ravni (npr. SpellCheckerService). Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"povezava s storitvijo navideznega zasebnega omrežja"</string>

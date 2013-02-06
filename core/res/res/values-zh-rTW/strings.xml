@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允許應用程式讀取您裝置收到的區域廣播訊息。某些地點會發出區域廣播警示，警告您有緊急狀況發生。請注意，惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的效能或運作。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"傳送 SMS 簡訊"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允許應用程式傳送簡訊，但可能產生非預期的費用。惡意應用程式可能利用此功能擅自傳送簡訊，增加您不必要的額外支出。"</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"不需經過確認即傳送 SMS 簡訊"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"允許應用程式傳送簡訊，但可能產生非預期的費用。惡意應用程式可能利用此功能擅自傳送簡訊，增加您不必要的額外支出。"</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"傳送透過訊息回應事件"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"允許應用程式傳送要求給其他簡訊應用程式，以處理來電的透過訊息回應事件。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"讀取您的簡訊 (SMS 或 MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允許應用程式讀取平板電腦或 SIM 卡上儲存的簡訊。這項權限可讓應用程式讀取所有簡訊，包括各種內容及機密簡訊。"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"允許應用程式讀取手機或 SIM 卡上儲存的簡訊。這項權限可讓應用程式讀取所有簡訊，包括各種內容及機密簡訊。"</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"要求輕觸探索"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"允許應用程式要求啟用互動模式，讓裝置讀出使用者輕觸的項目，並且讓使用者透過手勢探索使用者介面。"</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"要求增強式網頁協助工具"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"允許應用程式要求啟用網頁協助工具增強功能。例如安裝指令碼，讓使用者更容易存取應用程式的內容。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"繫結至文字服務"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"允許應用程式繫結至文字服務 (例如 SpellCheckerService) 的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"繫結至 VPN 服務"</string>

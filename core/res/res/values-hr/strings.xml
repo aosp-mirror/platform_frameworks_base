@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućuje aplikaciji čitanje poruka emitiranih unutar mobilne mreže koje prima vaš uređaj. Upozorenja koja se emitiraju na području mobilne mreže dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno upozorenje koje se emitira unutar mobilne mreže."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"slanje SMS poruka"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Aplikaciji omogućuje slanje SMS poruka. To može dovesti do neočekivanih troškova. Zlonamjerne aplikacije mogu vam uzrokovati dodatne troškove slanjem poruka bez vašeg odobrenja."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"slanje SMS poruka bez potvrde"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Aplikaciji omogućuje slanje SMS poruka. To može dovesti do neočekivanih troškova. Zlonamjerne aplikacije mogu vam uzrokovati dodatne troškove slanjem poruka bez vašeg odobrenja."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"slanje događaja \"odgovaranja porukom\""</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Omogućuje aplikaciji slanje zahtijeva drugim aplikacijama za primanje i slanje poruka radi obrade događaja \"odgovaranja porukom\" za dolazne pozive."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čitanje tekstnih poruka (SMS ili MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Aplikaciji omogućuje čitanje SMS poruka pohranjenih na tabletnom računalu ili SIM kartici. To aplikaciji omogućuje čitanje svih SMS poruka, neovisno o sadržaju ili povjerljivosti."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Aplikaciji omogućuje čitanje SMS poruka pohranjenih na telefonu ili SIM kartici. To aplikaciji omogućuje čitanje svih SMS poruka, neovisno o sadržaju ili povjerljivosti."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"zahtijevaj istraživanje dodirom"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Omogućuje korisniku zahtijevanje načina interakcije u kojem se dodirnute stavke izgovaraju naglas, a korisničko sučelje može se istraživati pokretima."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"zahtijevaj poboljšanu web-dostupnost"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Omogućuje korisniku zahtijevanje omogućivanja poboljšanja za dostupnost na webu. Na primjer, instaliranje skripti kako bi sadržaj aplikacije bio pristupačniji."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vezanje na tekstualnu uslugu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Omogućuje korisniku povezivanje s najvišom razinom sučelja tekstualne usluge (npr. SpellCheckerService). Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vezanje na VPN uslugu"</string>

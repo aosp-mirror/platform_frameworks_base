@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Antaa sovelluksen lukea laitteesi vastaanottamia tiedotteita. Tiedotteiden avulla ilmoitetaan hätätilanteista joissakin paikoissa. Haitalliset sovellukset voivat häiritä laitteen toimintaa laitteen vastaanottaessa hätätiedotteen."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"lähetä tekstiviestejä"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Antaa sovelluksen lähettää tekstiviestejä. Tästä voi aiheutua odottamattomia kuluja. Haitalliset sovellukset voivat aiheuttaa kuluja lähettämällä viestejä ilman lupaasi."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"lähettää tekstiviestejä ilman vahvistusta"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Antaa sovelluksen lähettää tekstiviestejä. Tästä voi aiheutua odottamattomia kuluja. Haitalliset sovellukset voivat aiheuttaa kuluja lähettämällä viestejä ilman lupaasi."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"lähetä vastaa viestillä -tapahtumia"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Antaa sovelluksen lähettää muille viestisovelluksille pyyntöjä käsitellä saapuvien puheluiden vastaa viestillä -tapahtumia."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lue tekstiviestejä (teksti tai multimedia)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Antaa sovelluksen lukea tablet-laitteeseen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Antaa sovelluksen lukea puhelimeen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"pyydä kosketuksella tutkimisen käyttöönottoa"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Antaa luvan haltijan pyytää käyttöön vuorovaikutustilaa, jossa kosketettujen kohteiden nimet sanotaan ääneen ja käyttöliittymää voi tutkia eleiden avulla."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"pyydä parannettua verkon esteettömyyttä"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Antaa luvan haltijan pyytää verkon esteettömyysparannuksien käyttöönottoa. Sovellus voi esimerkiksi pyytää Googlen koodikatkelmien asentamista sovelluksen sisällön esteettömyyden parantamiseksi."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tekstipalveluun sitoutuminen"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Antaa sovelluksen sitoutua tekstipalvelun (kuten SpellCheckerServicen) ylätason liittymään. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"sitoudu VPN-palveluun"</string>
