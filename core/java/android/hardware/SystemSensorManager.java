@@ -16,17 +16,18 @@
 
 package android.hardware;
 
-import android.os.Looper;
-import android.os.Process;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+
+import dalvik.system.CloseGuard;
+
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
+import android.os.Looper;
+import android.os.MessageQueue;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Sensor manager implementation that communicates with the built-in
@@ -35,236 +36,43 @@ import java.util.List;
  * @hide
  */
 public class SystemSensorManager extends SensorManager {
-    private static final int SENSOR_DISABLE = -1;
-    private static boolean sSensorModuleInitialized = false;
-    private static ArrayList<Sensor> sFullSensorsList = new ArrayList<Sensor>();
-    /* The thread and the sensor list are global to the process
-     * but the actual thread is spawned on demand */
-    private static SensorThread sSensorThread;
-    private static int sQueue;
+    private static native void nativeClassInit();
+    private static native int nativeGetNextSensor(Sensor sensor, int next);
 
-    // Used within this module from outside SensorManager, don't make private
-    static SparseArray<Sensor> sHandleToSensor = new SparseArray<Sensor>();
-    static final ArrayList<ListenerDelegate> sListeners =
-        new ArrayList<ListenerDelegate>();
+    private static boolean sSensorModuleInitialized = false;
+    private static final Object sSensorModuleLock = new Object();
+    private static final ArrayList<Sensor> sFullSensorsList = new ArrayList<Sensor>();
+    private static final SparseArray<Sensor> sHandleToSensor = new SparseArray<Sensor>();
+
+    // Listener list
+    private final ArrayList<SensorEventListenerSensorPair> mListenerDelegates = new ArrayList<SensorEventListenerSensorPair>();
 
     // Common pool of sensor events.
-    static SensorEventPool sPool;
+    private static SensorEventPool sPool;
 
     // Looper associated with the context in which this instance was created.
-    final Looper mMainLooper;
+    private final Looper mMainLooper;
 
-    /*-----------------------------------------------------------------------*/
+    // maps a SensorEventListener to a SensorEventQueue
+    private final Hashtable<SensorEventListener, SensorEventQueue> mSensorEventQueueMap;
 
-    static private class SensorThread {
-
-        Thread mThread;
-        boolean mSensorsReady;
-
-        SensorThread() {
-        }
-
-        @Override
-        protected void finalize() {
-        }
-
-        // must be called with sListeners lock
-        boolean startLocked() {
-            try {
-                if (mThread == null) {
-                    mSensorsReady = false;
-                    SensorThreadRunnable runnable = new SensorThreadRunnable();
-                    Thread thread = new Thread(runnable, SensorThread.class.getName());
-                    thread.start();
-                    synchronized (runnable) {
-                        while (mSensorsReady == false) {
-                            runnable.wait();
-                        }
-                    }
-                    mThread = thread;
-                }
-            } catch (InterruptedException e) {
-            }
-            return mThread == null ? false : true;
-        }
-
-        private class SensorThreadRunnable implements Runnable {
-            SensorThreadRunnable() {
-            }
-
-            private boolean open() {
-                // NOTE: this cannot synchronize on sListeners, since
-                // it's held in the main thread at least until we
-                // return from here.
-                sQueue = sensors_create_queue();
-                return true;
-            }
-
-            public void run() {
-                //Log.d(TAG, "entering main sensor thread");
-                final float[] values = new float[3];
-                final int[] status = new int[1];
-                final long timestamp[] = new long[1];
-                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
-
-                if (!open()) {
-                    return;
-                }
-
-                synchronized (this) {
-                    // we've open the driver, we're ready to open the sensors
-                    mSensorsReady = true;
-                    this.notify();
-                }
-
-                while (true) {
-                    // wait for an event
-                    final int sensor = sensors_data_poll(sQueue, values, status, timestamp);
-
-                    int accuracy = status[0];
-                    synchronized (sListeners) {
-                        if (sensor == -1 || sListeners.isEmpty()) {
-                            // we lost the connection to the event stream. this happens
-                            // when the last listener is removed or if there is an error
-                            if (sensor == -1 && !sListeners.isEmpty()) {
-                                // log a warning in case of abnormal termination
-                                Log.e(TAG, "_sensors_data_poll() failed, we bail out: sensors=" + sensor);
-                            }
-                            // we have no more listeners or polling failed, terminate the thread
-                            sensors_destroy_queue(sQueue);
-                            sQueue = 0;
-                            mThread = null;
-                            break;
-                        }
-                        final Sensor sensorObject = sHandleToSensor.get(sensor);
-                        if (sensorObject != null) {
-                            // report the sensor event to all listeners that
-                            // care about it.
-                            final int size = sListeners.size();
-                            for (int i=0 ; i<size ; i++) {
-                                ListenerDelegate listener = sListeners.get(i);
-                                if (listener.hasSensor(sensorObject)) {
-                                    // this is asynchronous (okay to call
-                                    // with sListeners lock held).
-                                    listener.onSensorChangedLocked(sensorObject,
-                                            values, timestamp, accuracy);
-                                }
-                            }
-                        }
-                    }
-                }
-                //Log.d(TAG, "exiting main sensor thread");
-            }
-        }
-    }
-
-    /*-----------------------------------------------------------------------*/
-
-    private class ListenerDelegate {
-        private final SensorEventListener mSensorEventListener;
-        private final ArrayList<Sensor> mSensorList = new ArrayList<Sensor>();
-        private final Handler mHandler;
-        public SparseBooleanArray mSensors = new SparseBooleanArray();
-        public SparseBooleanArray mFirstEvent = new SparseBooleanArray();
-        public SparseIntArray mSensorAccuracies = new SparseIntArray();
-
-        ListenerDelegate(SensorEventListener listener, Sensor sensor, Handler handler) {
-            mSensorEventListener = listener;
-            Looper looper = (handler != null) ? handler.getLooper() : mMainLooper;
-            // currently we create one Handler instance per listener, but we could
-            // have one per looper (we'd need to pass the ListenerDelegate
-            // instance to handleMessage and keep track of them separately).
-            mHandler = new Handler(looper) {
-                @Override
-                public void handleMessage(Message msg) {
-                    final SensorEvent t = (SensorEvent)msg.obj;
-                    final int handle = t.sensor.getHandle();
-
-                    switch (t.sensor.getType()) {
-                        // Only report accuracy for sensors that support it.
-                        case Sensor.TYPE_MAGNETIC_FIELD:
-                        case Sensor.TYPE_ORIENTATION:
-                            // call onAccuracyChanged() only if the value changes
-                            final int accuracy = mSensorAccuracies.get(handle);
-                            if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
-                                mSensorAccuracies.put(handle, t.accuracy);
-                                mSensorEventListener.onAccuracyChanged(t.sensor, t.accuracy);
-                            }
-                            break;
-                        default:
-                            // For other sensors, just report the accuracy once
-                            if (mFirstEvent.get(handle) == false) {
-                                mFirstEvent.put(handle, true);
-                                mSensorEventListener.onAccuracyChanged(
-                                        t.sensor, SENSOR_STATUS_ACCURACY_HIGH);
-                            }
-                            break;
-                    }
-
-                    mSensorEventListener.onSensorChanged(t);
-                    sPool.returnToPool(t);
-                }
-            };
-            addSensor(sensor);
-        }
-
-        Object getListener() {
-            return mSensorEventListener;
-        }
-
-        void addSensor(Sensor sensor) {
-            mSensors.put(sensor.getHandle(), true);
-            mSensorList.add(sensor);
-        }
-        int removeSensor(Sensor sensor) {
-            mSensors.delete(sensor.getHandle());
-            mSensorList.remove(sensor);
-            return mSensors.size();
-        }
-        boolean hasSensor(Sensor sensor) {
-            return mSensors.get(sensor.getHandle());
-        }
-        List<Sensor> getSensors() {
-            return mSensorList;
-        }
-
-        void onSensorChangedLocked(Sensor sensor, float[] values, long[] timestamp, int accuracy) {
-            SensorEvent t = sPool.getFromPool();
-            final float[] v = t.values;
-            v[0] = values[0];
-            v[1] = values[1];
-            v[2] = values[2];
-            t.timestamp = timestamp[0];
-            t.accuracy = accuracy;
-            t.sensor = sensor;
-            Message msg = Message.obtain();
-            msg.what = 0;
-            msg.obj = t;
-            msg.setAsynchronous(true);
-            mHandler.sendMessage(msg);
-        }
-    }
-
-    /**
-     * {@hide}
-     */
+    /** {@hide} */
     public SystemSensorManager(Looper mainLooper) {
         mMainLooper = mainLooper;
+        mSensorEventQueueMap = new Hashtable<SensorEventListener, SensorEventQueue>();
 
-        synchronized(sListeners) {
+        synchronized(sSensorModuleLock) {
             if (!sSensorModuleInitialized) {
                 sSensorModuleInitialized = true;
 
                 nativeClassInit();
 
                 // initialize the sensor list
-                sensors_module_init();
                 final ArrayList<Sensor> fullList = sFullSensorsList;
                 int i = 0;
                 do {
                     Sensor sensor = new Sensor();
-                    i = sensors_module_get_next_sensor(sensor, i);
-
+                    i = nativeGetNextSensor(sensor, i);
                     if (i>=0) {
                         //Log.d(TAG, "found sensor: " + sensor.getName() +
                         //        ", handle=" + sensor.getHandle());
@@ -274,10 +82,10 @@ public class SystemSensorManager extends SensorManager {
                 } while (i>0);
 
                 sPool = new SensorEventPool( sFullSensorsList.size()*2 );
-                sSensorThread = new SensorThread();
             }
         }
     }
+
 
     /** @hide */
     @Override
@@ -285,115 +93,293 @@ public class SystemSensorManager extends SensorManager {
         return sFullSensorsList;
     }
 
-    private boolean enableSensorLocked(Sensor sensor, int delay) {
-        boolean result = false;
-        for (ListenerDelegate i : sListeners) {
-            if (i.hasSensor(sensor)) {
-                String name = sensor.getName();
-                int handle = sensor.getHandle();
-                result = sensors_enable_sensor(sQueue, name, handle, delay);
-                break;
-            }
-        }
-        return result;
-    }
-
-    private boolean disableSensorLocked(Sensor sensor) {
-        for (ListenerDelegate i : sListeners) {
-            if (i.hasSensor(sensor)) {
-                // not an error, it's just that this sensor is still in use
-                return true;
-            }
-        }
-        String name = sensor.getName();
-        int handle = sensor.getHandle();
-        return sensors_enable_sensor(sQueue, name, handle, SENSOR_DISABLE);
-    }
 
     /** @hide */
     @Override
     protected boolean registerListenerImpl(SensorEventListener listener, Sensor sensor,
-            int delay, Handler handler) {
-        boolean result = true;
-        synchronized (sListeners) {
-            // look for this listener in our list
-            ListenerDelegate l = null;
-            for (ListenerDelegate i : sListeners) {
-                if (i.getListener() == listener) {
-                    l = i;
-                    break;
+            int delay, Handler handler)
+    {
+        // Invariants to preserve:
+        // - one Looper per SensorEventListener
+        // - one Looper per SensorEventQueue
+        // We map SensorEventListeners to a SensorEventQueue, which holds the looper
+
+        if (sensor == null) throw new NullPointerException("sensor cannot be null");
+
+        boolean result;
+        synchronized (mSensorEventQueueMap) {
+            // check if we already have this SensorEventListener, Sensor pair
+            // registered -- if so, we ignore the register. This is not ideal
+            // but this is what the implementation has always been doing.
+            for (SensorEventListenerSensorPair l : mListenerDelegates) {
+                if (l.isSameListenerSensorPair(listener, sensor)) {
+                    // already added, just return silently.
+                    return true;
                 }
             }
 
-            // if we don't find it, add it to the list
-            if (l == null) {
-                l = new ListenerDelegate(listener, sensor, handler);
-                sListeners.add(l);
-                // if the list is not empty, start our main thread
-                if (!sListeners.isEmpty()) {
-                    if (sSensorThread.startLocked()) {
-                        if (!enableSensorLocked(sensor, delay)) {
-                            // oops. there was an error
-                            sListeners.remove(l);
-                            result = false;
-                        }
-                    } else {
-                        // there was an error, remove the listener
-                        sListeners.remove(l);
-                        result = false;
-                    }
-                } else {
-                    // weird, we couldn't add the listener
-                    result = false;
+            // now find the SensorEventQueue associated to this listener
+            SensorEventQueue queue = mSensorEventQueueMap.get(listener);
+            if (queue != null) {
+                result = queue.addSensor(sensor, delay);
+                if (result) {
+                    // create a new ListenerDelegate for this pair
+                    mListenerDelegates.add(new SensorEventListenerSensorPair(listener, sensor));
                 }
-            } else if (!l.hasSensor(sensor)) {
-                l.addSensor(sensor);
-                if (!enableSensorLocked(sensor, delay)) {
-                    // oops. there was an error
-                    l.removeSensor(sensor);
-                    result = false;
+            } else {
+                Looper looper = (handler != null) ? handler.getLooper() : mMainLooper;
+                queue = new SensorEventQueue(listener, looper.getQueue());
+                result = queue.addSensor(sensor, delay);
+                if (result) {
+                    // create a new ListenerDelegate for this pair
+                    mListenerDelegates.add(new SensorEventListenerSensorPair(listener, sensor));
+                    mSensorEventQueueMap.put(listener, queue);
+                } else {
+                    queue.dispose();
                 }
             }
         }
-
         return result;
     }
 
     /** @hide */
     @Override
     protected void unregisterListenerImpl(SensorEventListener listener, Sensor sensor) {
-        synchronized (sListeners) {
-            final int size = sListeners.size();
-            for (int i=0 ; i<size ; i++) {
-                ListenerDelegate l = sListeners.get(i);
-                if (l.getListener() == listener) {
-                    if (sensor == null) {
-                        sListeners.remove(i);
-                        // disable all sensors for this listener
-                        for (Sensor s : l.getSensors()) {
-                            disableSensorLocked(s);
-                        }
-                    // Check if the ListenerDelegate has the sensor it is trying to unregister.
-                    } else if (l.hasSensor(sensor) && l.removeSensor(sensor) == 0) {
-                        // if we have no more sensors enabled on this listener,
-                        // take it off the list.
-                        sListeners.remove(i);
-                        disableSensorLocked(sensor);
-                    }
-                    break;
+        synchronized (mSensorEventQueueMap) {
+
+            // remove this listener/sensor from our list
+            final ArrayList<SensorEventListenerSensorPair> copy =
+                    new ArrayList<SensorEventListenerSensorPair>(mListenerDelegates);
+            int lastIndex = copy.size()-1;
+            for (int i=lastIndex ; i>= 0 ; i--) {
+                if (copy.get(i).isSameListenerSensorPair(listener, sensor)) {
+                    mListenerDelegates.remove(i);
+                }
+            }
+
+            // find the SensorEventQueue associated to this SensorEventListener
+            SensorEventQueue queue = mSensorEventQueueMap.get(listener);
+            if (queue != null) {
+                if (sensor != null) {
+                    queue.removeSensor(sensor);
+                } else {
+                    queue.removeAllSensors();
+                }
+                if (!queue.hasSensors()) {
+                    mSensorEventQueueMap.remove(listener);
+                    queue.dispose();
                 }
             }
         }
     }
 
-    private static native void nativeClassInit();
 
-    private static native int sensors_module_init();
-    private static native int sensors_module_get_next_sensor(Sensor sensor, int next);
+    /*
+     * ListenerDelegate is essentially a SensorEventListener, Sensor pair
+     * and is associated with a single SensorEventQueue.
+     */
+    private static final class SensorEventListenerSensorPair {
+        private final SensorEventListener mSensorEventListener;
+        private final Sensor mSensor;
+        public SensorEventListenerSensorPair(SensorEventListener listener, Sensor sensor) {
+            mSensorEventListener = listener;
+            mSensor = sensor;
+        }
+        public boolean isSameListenerSensorPair(SensorEventListener listener, Sensor sensor) {
+            // if sensor is null, we match only on the listener
+            if (sensor != null) {
+                return (listener == mSensorEventListener) &&
+                        (sensor.getHandle() == mSensor.getHandle());
+            } else {
+                return (listener == mSensorEventListener);
+            }
+        }
+    }
 
-    // Used within this module from outside SensorManager, don't make private
-    static native int sensors_create_queue();
-    static native void sensors_destroy_queue(int queue);
-    static native boolean sensors_enable_sensor(int queue, String name, int sensor, int enable);
-    static native int sensors_data_poll(int queue, float[] values, int[] status, long[] timestamp);
+    /*
+     * SensorEventQueue is the communication channel with the sensor service,
+     * there is a one-to-one mapping between SensorEventQueue and
+     * SensorEventListener.
+     */
+    private static final class SensorEventQueue {
+        private static native int nativeInitSensorEventQueue(SensorEventQueue eventQ, MessageQueue msgQ, float[] scratch);
+        private static native int nativeEnableSensor(int eventQ, int handle, int us);
+        private static native int nativeDisableSensor(int eventQ, int handle);
+        private static native void nativeDestroySensorEventQueue(int eventQ);
+        private int nSensorEventQueue;
+        private final SensorEventListener mListener;
+        private final SparseBooleanArray mActiveSensors = new SparseBooleanArray();
+        private final SparseIntArray mSensorAccuracies = new SparseIntArray();
+        private final SparseBooleanArray mFirstEvent = new SparseBooleanArray();
+        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private final float[] mScratch = new float[16];
+
+        public SensorEventQueue(SensorEventListener listener, MessageQueue msgQ) {
+            nSensorEventQueue = nativeInitSensorEventQueue(this, msgQ, mScratch);
+            mListener = listener;
+            mCloseGuard.open("dispose");
+        }
+        public void dispose() {
+            dispose(false);
+        }
+
+        public boolean addSensor(Sensor sensor, int delay) {
+            if (enableSensor(sensor, delay) == 0) {
+                mActiveSensors.put(sensor.getHandle(), true);
+                return true;
+            }
+            return false;
+        }
+
+        public void removeAllSensors() {
+            for (int i=0 ; i<mActiveSensors.size(); i++) {
+                if (mActiveSensors.valueAt(i) == true) {
+                    int handle = mActiveSensors.keyAt(i);
+                    Sensor sensor = sHandleToSensor.get(handle);
+                    if (sensor != null) {
+                        disableSensor(sensor);
+                        mActiveSensors.put(handle, false);
+                    } else {
+                        // it should never happen -- just ignore.
+                    }
+                }
+            }
+        }
+
+        public void removeSensor(Sensor sensor) {
+            final int handle = sensor.getHandle();
+            if (mActiveSensors.get(handle)) {
+                disableSensor(sensor);
+                mActiveSensors.put(sensor.getHandle(), false);
+            }
+        }
+
+        public boolean hasSensors() {
+            // no more sensors are set
+            return mActiveSensors.indexOfValue(true) >= 0;
+        }
+        
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                dispose(true);
+            } finally {
+                super.finalize();
+            }
+        }
+
+        private void dispose(boolean finalized) {
+            if (mCloseGuard != null) {
+                if (finalized) {
+                    mCloseGuard.warnIfOpen();
+                }
+                mCloseGuard.close();
+            }
+            if (nSensorEventQueue != 0) {
+                nativeDestroySensorEventQueue(nSensorEventQueue);
+                nSensorEventQueue = 0;
+            }
+        }
+
+        private int enableSensor(Sensor sensor, int us) {
+            if (nSensorEventQueue == 0) throw new NullPointerException();
+            if (sensor == null) throw new NullPointerException();
+            return nativeEnableSensor(nSensorEventQueue, sensor.getHandle(), us);
+        }
+        private int disableSensor(Sensor sensor) {
+            if (nSensorEventQueue == 0) throw new NullPointerException();
+            if (sensor == null) throw new NullPointerException();
+            return nativeDisableSensor(nSensorEventQueue, sensor.getHandle());
+        }
+
+        // Called from native code.
+        @SuppressWarnings("unused")
+        private void dispatchSensorEvent(int handle, float[] values, int inAccuracy, long timestamp) {
+            // this is always called on the same thread.
+            final SensorEvent t = sPool.getFromPool();
+            try {
+                final Sensor sensor = sHandleToSensor.get(handle);
+                final SensorEventListener listener = mListener;
+                // FIXME: handle more than 3 values
+                System.arraycopy(values, 0, t.values, 0, 3);
+                t.timestamp = timestamp;
+                t.accuracy = inAccuracy;
+                t.sensor = sensor;
+                switch (t.sensor.getType()) {
+                    // Only report accuracy for sensors that support it.
+                    case Sensor.TYPE_MAGNETIC_FIELD:
+                    case Sensor.TYPE_ORIENTATION:
+                        // call onAccuracyChanged() only if the value changes
+                        final int accuracy = mSensorAccuracies.get(handle);
+                        if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
+                            mSensorAccuracies.put(handle, t.accuracy);
+                            listener.onAccuracyChanged(t.sensor, t.accuracy);
+                        }
+                        break;
+                    default:
+                        // For other sensors, just report the accuracy once
+                        if (mFirstEvent.get(handle) == false) {
+                            mFirstEvent.put(handle, true);
+                            listener.onAccuracyChanged(
+                                    t.sensor, SENSOR_STATUS_ACCURACY_HIGH);
+                        }
+                        break;
+                }
+                listener.onSensorChanged(t);
+            } finally {
+                sPool.returnToPool(t);
+            }
+        }
+    }
+
+    /*
+     * A dumb pool of SensorEvent
+     */
+    private static final class SensorEventPool {
+        private final int mPoolSize;
+        private final SensorEvent mPool[];
+        private int mNumItemsInPool;
+
+        private SensorEvent createSensorEvent() {
+            // maximal size for all legacy events is 3
+            return new SensorEvent(3);
+        }
+
+        SensorEventPool(int poolSize) {
+            mPoolSize = poolSize;
+            mNumItemsInPool = poolSize;
+            mPool = new SensorEvent[poolSize];
+        }
+
+        SensorEvent getFromPool() {
+            SensorEvent t = null;
+            synchronized (this) {
+                if (mNumItemsInPool > 0) {
+                    // remove the "top" item from the pool
+                    final int index = mPoolSize - mNumItemsInPool;
+                    t = mPool[index];
+                    mPool[index] = null;
+                    mNumItemsInPool--;
+                }
+            }
+            if (t == null) {
+                // the pool was empty or this item was removed from the pool for
+                // the first time. In any case, we need to create a new item.
+                t = createSensorEvent();
+            }
+            return t;
+        }
+
+        void returnToPool(SensorEvent t) {
+            synchronized (this) {
+                // is there space left in the pool?
+                if (mNumItemsInPool < mPoolSize) {
+                    // if so, return the item to the pool
+                    mNumItemsInPool++;
+                    final int index = mPoolSize - mNumItemsInPool;
+                    mPool[index] = t;
+                }
+            }
+        }
+    }
 }
