@@ -559,6 +559,21 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setHomeButtonEnabled(boolean enable) {
+        setHomeButtonEnabled(enable, true);
+    }
+
+    private void setHomeButtonEnabled(boolean enable, boolean recordState) {
+        if (recordState) {
+            mWasHomeEnabled = enable;
+        }
+
+        if (mExpandedActionView != null) {
+            // There's an action view currently showing and we want to keep the state
+            // configured for the action view at the moment. If we needed to record the
+            // new state for later we will have done so above.
+            return;
+        }
+
         mUpGoerFive.setEnabled(enable);
         mUpGoerFive.setFocusable(enable);
         // Make sure the home button has an accurate content description for accessibility.
@@ -1540,8 +1555,7 @@ public class ActionBarView extends AbsActionBarView {
             if (mTabScrollView != null) mTabScrollView.setVisibility(GONE);
             if (mSpinner != null) mSpinner.setVisibility(GONE);
             if (mCustomNavView != null) mCustomNavView.setVisibility(GONE);
-            mWasHomeEnabled = mUpGoerFive.isEnabled();
-            setHomeButtonEnabled(false);
+            setHomeButtonEnabled(false, false);
             requestLayout();
             item.setActionViewExpanded(true);
 
