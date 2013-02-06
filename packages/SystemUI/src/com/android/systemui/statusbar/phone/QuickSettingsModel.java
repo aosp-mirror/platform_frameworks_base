@@ -42,9 +42,9 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
+import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
-import com.android.systemui.statusbar.policy.BrightnessController.BrightnessStateChangeCallback;
-import com.android.systemui.statusbar.policy.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
@@ -239,10 +239,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mContext = context;
         mHandler = new Handler();
         mUserTracker = new CurrentUserTracker(mContext) {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                super.onReceive(context, intent);
-                onUserSwitched();
+            public void onUserSwitched(int newUserId) {
+                mBrightnessObserver.startObserving();
+                onRotationLockChanged();
+                onBrightnessLevelChanged();
+                onNextAlarmChanged();
+                onBugreportChanged();
             }
         };
 
@@ -704,14 +706,5 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     void refreshBrightnessTile() {
         onBrightnessLevelChanged();
-    }
-
-    // User switch: need to update visuals of all tiles known to have per-user state
-    void onUserSwitched() {
-        mBrightnessObserver.startObserving();
-        onRotationLockChanged();
-        onBrightnessLevelChanged();
-        onNextAlarmChanged();
-        onBugreportChanged();
     }
 }
