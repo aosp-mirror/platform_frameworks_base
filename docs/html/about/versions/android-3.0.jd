@@ -571,7 +571,7 @@ as a special, platform-independent shader language for maximum performance. Usin
 can accelerate graphics operations and data processing. Renderscript is an ideal way to create
 high-performance 3D effects for applications, wallpapers, carousels, and more.</p>
 <p>For more information, see the <a
-href="{@docRoot}guide/topics/graphics/renderscript.html">3D Rendering and Computation with
+href="{@docRoot}guide/topics/renderscript/index.html">3D Rendering and Computation with
 Renderscript</a> documentation.</p></li>
 </ul>
 
