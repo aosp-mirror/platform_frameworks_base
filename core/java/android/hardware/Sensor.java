@@ -194,7 +194,8 @@ public final class Sensor {
         return mMinDelay;
     }
 
-    int getHandle() {
+    /** @hide */
+    public int getHandle() {
         return mHandle;
     }
 
