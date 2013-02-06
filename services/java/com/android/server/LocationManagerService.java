@@ -1449,7 +1449,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (checkLocationAccess(uid, packageName, allowedResolutionLevel)) {
+            if (!checkLocationAccess(uid, packageName, allowedResolutionLevel)) {
                 return false;
             }
         } finally {
