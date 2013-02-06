@@ -145,6 +145,10 @@ class SimulatedDpad {
         if (!synthesizeNewKeys) {
             mHandler.removeMessages(MSG_FLICK);
         }
+        InputDevice device = event.getDevice();
+        if (device == null) {
+            return;
+        }
         // Store what time the touchpad event occurred
         final long time = SystemClock.uptimeMillis();
         switch (event.getAction()) {
@@ -157,7 +161,7 @@ class SimulatedDpad {
                 mAccumulatedY = 0;
                 mLastMoveX = 0;
                 mLastMoveY = 0;
-                if (event.getDevice().getMotionRange(MotionEvent.AXIS_Y).getMax()
+                if (device.getMotionRange(MotionEvent.AXIS_Y).getMax()
                         * EDGE_SWIPE_THRESHOLD < event.getY()) {
                     // Did the swipe begin in a valid region
                     mEdgeSwipePossible = true;
@@ -176,7 +180,7 @@ class SimulatedDpad {
                 }
                 // Checks if the swipe has crossed the midpoint
                 // and if our swipe gesture is complete
-                if (event.getY() < (event.getDevice().getMotionRange(MotionEvent.AXIS_Y).getMax()
+                if (event.getY() < (device.getMotionRange(MotionEvent.AXIS_Y).getMax()
                         * .5) && mEdgeSwipePossible) {
                     mEdgeSwipePossible = false;
 
