@@ -947,6 +947,7 @@ public class RenderScript {
                         mRS.mErrorCallback.mErrorNum = subID;
                         mRS.mErrorCallback.run();
                     } else {
+                        android.util.Log.e(LOG_TAG, "non fatal RS error, " + e);
                         // Do not throw here. In these cases, we do not have
                         // a fatal error.
                     }
