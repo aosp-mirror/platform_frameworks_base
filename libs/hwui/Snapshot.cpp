@@ -184,6 +184,7 @@ const Rect& Snapshot::getLocalClip() {
 
 void Snapshot::resetClip(float left, float top, float right, float bottom) {
     clipRect = &mClipRectRoot;
+    clipRegion = &mClipRegionRoot;
     setClip(left, top, right, bottom);
 }
 

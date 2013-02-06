@@ -168,6 +168,15 @@
         </activity>
 
         <activity
+                android:name="ClipRegion3Activity"
+                android:label="_ClipRegion3">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="DisplayListLayersActivity"
                 android:label="__DisplayListLayers">
             <intent-filter>
