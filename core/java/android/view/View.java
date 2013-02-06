@@ -4859,13 +4859,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         event.setEnabled(isEnabled());
         event.setContentDescription(mContentDescription);
 
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && mAttachInfo != null) {
-            ArrayList<View> focusablesTempList = mAttachInfo.mTempArrayList;
-            getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD,
-                    FOCUSABLES_ALL);
-            event.setItemCount(focusablesTempList.size());
-            event.setCurrentItemIndex(focusablesTempList.indexOf(this));
-            focusablesTempList.clear();
+        switch (event.getEventType()) {
+            case AccessibilityEvent.TYPE_VIEW_FOCUSED: {
+                ArrayList<View> focusablesTempList = (mAttachInfo != null)
+                        ? mAttachInfo.mTempArrayList : new ArrayList<View>();
+                getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD, FOCUSABLES_ALL);
+                event.setItemCount(focusablesTempList.size());
+                event.setCurrentItemIndex(focusablesTempList.indexOf(this));
+                if (mAttachInfo != null) {
+                    focusablesTempList.clear();
+                }
+            } break;
+            case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
+                CharSequence text = getIterableTextForAccessibility();
+                if (text != null && text.length() > 0) {
+                    event.setFromIndex(getAccessibilitySelectionStart());
+                    event.setToIndex(getAccessibilitySelectionEnd());
+                    event.setItemCount(text.length());
+                }
+            } break;
         }
     }
 
@@ -5081,7 +5093,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
         }
 
-        if (mContentDescription != null && mContentDescription.length() > 0) {
+        CharSequence text = getIterableTextForAccessibility();
+        if (text != null && text.length() > 0) {
+            info.setTextSelection(getAccessibilitySelectionStart(), getAccessibilitySelectionEnd());
+
             info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
             info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
             info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
@@ -7153,11 +7168,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void setAccessibilitySelection(int start, int end) {
+        if (start ==  end && end == mAccessibilityCursorPosition) {
+            return;
+        }
         if (start >= 0 && start == end && end <= getIterableTextForAccessibility().length()) {
             mAccessibilityCursorPosition = start;
         } else {
             mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
         }
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
     }
 
     private void sendViewTextTraversedAtGranularityEvent(int action, int granularity,

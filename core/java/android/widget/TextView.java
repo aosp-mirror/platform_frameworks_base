@@ -7165,6 +7165,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
+        notifyAccessibilityStateChanged();
     }
 
     /**
@@ -7974,6 +7975,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (!isPassword) {
             info.setText(getTextForAccessibility());
+        }
+
+        if (mBufferType == BufferType.EDITABLE) {
+            info.setEditable(true);
         }
 
         if (TextUtils.isEmpty(getContentDescription()) && !TextUtils.isEmpty(mText)) {
