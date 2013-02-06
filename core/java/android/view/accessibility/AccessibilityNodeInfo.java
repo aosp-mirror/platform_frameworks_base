@@ -372,29 +372,31 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     // Boolean attributes.
 
-    private static final int PROPERTY_CHECKABLE = 0x00000001;
+    private static final int BOOLEAN_PROPERTY_CHECKABLE = 0x00000001;
 
-    private static final int PROPERTY_CHECKED = 0x00000002;
+    private static final int BOOLEAN_PROPERTY_CHECKED = 0x00000002;
 
-    private static final int PROPERTY_FOCUSABLE = 0x00000004;
+    private static final int BOOLEAN_PROPERTY_FOCUSABLE = 0x00000004;
 
-    private static final int PROPERTY_FOCUSED = 0x00000008;
+    private static final int BOOLEAN_PROPERTY_FOCUSED = 0x00000008;
 
-    private static final int PROPERTY_SELECTED = 0x00000010;
+    private static final int BOOLEAN_PROPERTY_SELECTED = 0x00000010;
 
-    private static final int PROPERTY_CLICKABLE = 0x00000020;
+    private static final int BOOLEAN_PROPERTY_CLICKABLE = 0x00000020;
 
-    private static final int PROPERTY_LONG_CLICKABLE = 0x00000040;
+    private static final int BOOLEAN_PROPERTY_LONG_CLICKABLE = 0x00000040;
 
-    private static final int PROPERTY_ENABLED = 0x00000080;
+    private static final int BOOLEAN_PROPERTY_ENABLED = 0x00000080;
 
-    private static final int PROPERTY_PASSWORD = 0x00000100;
+    private static final int BOOLEAN_PROPERTY_PASSWORD = 0x00000100;
 
-    private static final int PROPERTY_SCROLLABLE = 0x00000200;
+    private static final int BOOLEAN_PROPERTY_SCROLLABLE = 0x00000200;
 
-    private static final int PROPERTY_ACCESSIBILITY_FOCUSED = 0x00000400;
+    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED = 0x00000400;
 
-    private static final int PROPERTY_VISIBLE_TO_USER = 0x00000800;
+    private static final int BOOLEAN_PROPERTY_VISIBLE_TO_USER = 0x00000800;
+
+    private static final int BOOLEAN_PROPERTY_EDITABLE = 0x00001000;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -477,6 +479,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     private int mActions;
 
     private int mMovementGranularities;
+
+    private int mTextSelectionStart = UNDEFINED;
+    private int mTextSelectionEnd = UNDEFINED;
 
     private int mConnectionId = UNDEFINED;
 
@@ -987,7 +992,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is checkable.
      */
     public boolean isCheckable() {
-        return getBooleanProperty(PROPERTY_CHECKABLE);
+        return getBooleanProperty(BOOLEAN_PROPERTY_CHECKABLE);
     }
 
     /**
@@ -1003,7 +1008,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setCheckable(boolean checkable) {
-        setBooleanProperty(PROPERTY_CHECKABLE, checkable);
+        setBooleanProperty(BOOLEAN_PROPERTY_CHECKABLE, checkable);
     }
 
     /**
@@ -1012,7 +1017,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is checked.
      */
     public boolean isChecked() {
-        return getBooleanProperty(PROPERTY_CHECKED);
+        return getBooleanProperty(BOOLEAN_PROPERTY_CHECKED);
     }
 
     /**
@@ -1028,7 +1033,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setChecked(boolean checked) {
-        setBooleanProperty(PROPERTY_CHECKED, checked);
+        setBooleanProperty(BOOLEAN_PROPERTY_CHECKED, checked);
     }
 
     /**
@@ -1037,7 +1042,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is focusable.
      */
     public boolean isFocusable() {
-        return getBooleanProperty(PROPERTY_FOCUSABLE);
+        return getBooleanProperty(BOOLEAN_PROPERTY_FOCUSABLE);
     }
 
     /**
@@ -1053,7 +1058,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setFocusable(boolean focusable) {
-        setBooleanProperty(PROPERTY_FOCUSABLE, focusable);
+        setBooleanProperty(BOOLEAN_PROPERTY_FOCUSABLE, focusable);
     }
 
     /**
@@ -1062,7 +1067,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is focused.
      */
     public boolean isFocused() {
-        return getBooleanProperty(PROPERTY_FOCUSED);
+        return getBooleanProperty(BOOLEAN_PROPERTY_FOCUSED);
     }
 
     /**
@@ -1078,7 +1083,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setFocused(boolean focused) {
-        setBooleanProperty(PROPERTY_FOCUSED, focused);
+        setBooleanProperty(BOOLEAN_PROPERTY_FOCUSED, focused);
     }
 
     /**
@@ -1087,7 +1092,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return Whether the node is visible to the user.
      */
     public boolean isVisibleToUser() {
-        return getBooleanProperty(PROPERTY_VISIBLE_TO_USER);
+        return getBooleanProperty(BOOLEAN_PROPERTY_VISIBLE_TO_USER);
     }
 
     /**
@@ -1103,7 +1108,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setVisibleToUser(boolean visibleToUser) {
-        setBooleanProperty(PROPERTY_VISIBLE_TO_USER, visibleToUser);
+        setBooleanProperty(BOOLEAN_PROPERTY_VISIBLE_TO_USER, visibleToUser);
     }
 
     /**
@@ -1112,7 +1117,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is accessibility focused.
      */
     public boolean isAccessibilityFocused() {
-        return getBooleanProperty(PROPERTY_ACCESSIBILITY_FOCUSED);
+        return getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED);
     }
 
     /**
@@ -1128,7 +1133,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setAccessibilityFocused(boolean focused) {
-        setBooleanProperty(PROPERTY_ACCESSIBILITY_FOCUSED, focused);
+        setBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED, focused);
     }
 
     /**
@@ -1137,7 +1142,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is selected.
      */
     public boolean isSelected() {
-        return getBooleanProperty(PROPERTY_SELECTED);
+        return getBooleanProperty(BOOLEAN_PROPERTY_SELECTED);
     }
 
     /**
@@ -1153,7 +1158,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setSelected(boolean selected) {
-        setBooleanProperty(PROPERTY_SELECTED, selected);
+        setBooleanProperty(BOOLEAN_PROPERTY_SELECTED, selected);
     }
 
     /**
@@ -1162,7 +1167,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is clickable.
      */
     public boolean isClickable() {
-        return getBooleanProperty(PROPERTY_CLICKABLE);
+        return getBooleanProperty(BOOLEAN_PROPERTY_CLICKABLE);
     }
 
     /**
@@ -1178,7 +1183,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setClickable(boolean clickable) {
-        setBooleanProperty(PROPERTY_CLICKABLE, clickable);
+        setBooleanProperty(BOOLEAN_PROPERTY_CLICKABLE, clickable);
     }
 
     /**
@@ -1187,7 +1192,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is long clickable.
      */
     public boolean isLongClickable() {
-        return getBooleanProperty(PROPERTY_LONG_CLICKABLE);
+        return getBooleanProperty(BOOLEAN_PROPERTY_LONG_CLICKABLE);
     }
 
     /**
@@ -1203,7 +1208,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setLongClickable(boolean longClickable) {
-        setBooleanProperty(PROPERTY_LONG_CLICKABLE, longClickable);
+        setBooleanProperty(BOOLEAN_PROPERTY_LONG_CLICKABLE, longClickable);
     }
 
     /**
@@ -1212,7 +1217,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is enabled.
      */
     public boolean isEnabled() {
-        return getBooleanProperty(PROPERTY_ENABLED);
+        return getBooleanProperty(BOOLEAN_PROPERTY_ENABLED);
     }
 
     /**
@@ -1228,7 +1233,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setEnabled(boolean enabled) {
-        setBooleanProperty(PROPERTY_ENABLED, enabled);
+        setBooleanProperty(BOOLEAN_PROPERTY_ENABLED, enabled);
     }
 
     /**
@@ -1237,7 +1242,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is a password.
      */
     public boolean isPassword() {
-        return getBooleanProperty(PROPERTY_PASSWORD);
+        return getBooleanProperty(BOOLEAN_PROPERTY_PASSWORD);
     }
 
     /**
@@ -1253,7 +1258,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setPassword(boolean password) {
-        setBooleanProperty(PROPERTY_PASSWORD, password);
+        setBooleanProperty(BOOLEAN_PROPERTY_PASSWORD, password);
     }
 
     /**
@@ -1262,7 +1267,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is scrollable, false otherwise.
      */
     public boolean isScrollable() {
-        return getBooleanProperty(PROPERTY_SCROLLABLE);
+        return getBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE);
     }
 
     /**
@@ -1279,7 +1284,32 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setScrollable(boolean scrollable) {
         enforceNotSealed();
-        setBooleanProperty(PROPERTY_SCROLLABLE, scrollable);
+        setBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE, scrollable);
+    }
+
+    /**
+     * Gets if the node is editable.
+     *
+     * @return True if the node is editable, false otherwise.
+     */
+    public boolean isEditable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_EDITABLE);
+    }
+
+    /**
+     * Sets whether this node is editable.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param editable True if the node is editable.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setEditable(boolean editable) {
+        setBooleanProperty(BOOLEAN_PROPERTY_EDITABLE, editable);
     }
 
     /**
@@ -1533,6 +1563,43 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Gets the text selection start.
+     *
+     * @return The text selection start if there is selection or -1.
+     */
+    public int getTextSelectionStart() {
+        return mTextSelectionStart;
+    }
+
+    /**
+     * Gets the text selection end.
+     *
+     * @return The text selection end if there is selection or -1.
+     */
+    public int getTextSelectionEnd() {
+        return mTextSelectionEnd;
+    }
+
+    /**
+     * Sets the text selection start and end.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param start The text selection start.
+     * @param end The text selection end.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setTextSelection(int start, int end) {
+        enforceNotSealed();
+        mTextSelectionStart = start;
+        mTextSelectionEnd = end;
+    }
+
+    /**
      * Gets the value of a boolean property.
      *
      * @param property The property.
@@ -1776,6 +1843,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeCharSequence(mContentDescription);
         parcel.writeCharSequence(mViewIdResourceName);
 
+        parcel.writeInt(mTextSelectionStart);
+        parcel.writeInt(mTextSelectionEnd);
+
         // Since instances of this class are fetched via synchronous i.e. blocking
         // calls in IPCs we always recycle as soon as the instance is marshaled.
         recycle();
@@ -1808,6 +1878,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         for (int i = 0; i < otherChildIdCount; i++) {
             mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));    
         }
+        mTextSelectionStart = other.mTextSelectionStart;
+        mTextSelectionEnd = other.mTextSelectionEnd;
     }
 
     /**
@@ -1852,6 +1924,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         mText = parcel.readCharSequence();
         mContentDescription = parcel.readCharSequence();
         mViewIdResourceName = parcel.readCharSequence();
+
+        mTextSelectionStart = parcel.readInt();
+        mTextSelectionEnd = parcel.readInt();
     }
 
     /**
@@ -1876,6 +1951,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = null;
         mViewIdResourceName = null;
         mActions = 0;
+        mTextSelectionStart = UNDEFINED;
+        mTextSelectionEnd = UNDEFINED;
     }
 
     /**
