@@ -189,7 +189,7 @@
     <string name="quick_settings_location_label" msgid="3292451598267467545">"الموقع المستخدم"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"جهاز الوسائط"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"مكالمات طوارئ فقط"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"مكالمات الطوارئ فقط"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"الإعدادات"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"الوقت"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"أنا"</string>

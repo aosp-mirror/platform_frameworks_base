@@ -18,7 +18,8 @@
 #define ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 
 #include <SkChunkAlloc.h>
-#include <SkFlattenable.h>
+#include <SkReader32.h>
+#include <SkWriter32.h>
 #include <SkMatrix.h>
 #include <SkCamera.h>
 #include <SkPaint.h>

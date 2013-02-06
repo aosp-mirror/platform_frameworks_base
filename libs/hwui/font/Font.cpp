@@ -20,6 +20,7 @@
 
 #include <utils/JenkinsHash.h>
 
+#include <SkGlyph.h>
 #include <SkUtils.h>
 
 #include "Debug.h"
