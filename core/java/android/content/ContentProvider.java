@@ -174,8 +174,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      */
     class Transport extends ContentProviderNative {
         AppOpsManager mAppOpsManager = null;
-        int mReadOp = -1;
-        int mWriteOp = -1;
+        int mReadOp = AppOpsManager.OP_NONE;
+        int mWriteOp = AppOpsManager.OP_NONE;
 
         ContentProvider getContentProvider() {
             return ContentProvider.this;
@@ -274,7 +274,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public Bundle call(String callingPkg, String method, String arg, Bundle extras) {
-            return ContentProvider.this.call(method, arg, extras);
+            return ContentProvider.this.callFromPackage(callingPkg, method, arg, extras);
         }
 
         @Override
@@ -309,7 +309,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         private int enforceReadPermission(String callingPkg, Uri uri) throws SecurityException {
             enforceReadPermissionInner(uri);
-            if (mAppOpsManager != null) {
+            if (mReadOp != AppOpsManager.OP_NONE) {
                 return mAppOpsManager.noteOp(mReadOp, Binder.getCallingUid(), callingPkg);
             }
             return AppOpsManager.MODE_ALLOWED;
@@ -378,7 +378,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         private int enforceWritePermission(String callingPkg, Uri uri) throws SecurityException {
             enforceWritePermissionInner(uri);
-            if (mAppOpsManager != null) {
+            if (mWriteOp != AppOpsManager.OP_NONE) {
                 return mAppOpsManager.noteOp(mWriteOp, Binder.getCallingUid(), callingPkg);
             }
             return AppOpsManager.MODE_ALLOWED;
@@ -527,6 +527,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 Context.APP_OPS_SERVICE);
         mTransport.mReadOp = readOp;
         mTransport.mWriteOp = writeOp;
+    }
+
+    /** @hide */
+    public AppOpsManager getAppOpsManager() {
+        return mTransport.mAppOpsManager;
     }
 
     /**
@@ -1186,6 +1191,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             results[i] = operations.get(i).apply(this, results, i);
         }
         return results;
+    }
+
+    /**
+     * @hide
+     * Front-end to {@link #call(String, String, android.os.Bundle)} that provides the name
+     * of the calling package.
+     */
+    public Bundle callFromPackage(String callingPackag, String method, String arg, Bundle extras) {
+        return call(method, arg, extras);
     }
 
     /**

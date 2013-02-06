@@ -204,6 +204,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
         verifyIncomingUid(uid);
+        verifyIncomingOp(code);
         synchronized (this) {
             Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, true);
             if (op != null) {
@@ -218,6 +219,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int checkOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
+        verifyIncomingOp(code);
         synchronized (this) {
             Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, false);
             if (op == null) {
@@ -230,6 +232,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int noteOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
+        verifyIncomingOp(code);
         synchronized (this) {
             Ops ops = getOpsLocked(uid, packageName, true);
             if (ops == null) {
@@ -261,6 +264,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int startOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
+        verifyIncomingOp(code);
         synchronized (this) {
             Ops ops = getOpsLocked(uid, packageName, true);
             if (ops == null) {
@@ -291,6 +295,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void finishOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
+        verifyIncomingOp(code);
         synchronized (this) {
             Op op = getOpLocked(code, uid, packageName, true);
             if (op == null) {
@@ -320,6 +325,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
+    }
+
+    private void verifyIncomingOp(int op) {
+        if (op >= 0 && op < AppOpsManager._NUM_OP) {
+            return;
+        }
+        throw new IllegalArgumentException("Bad operation #" + op);
     }
 
     private Ops getOpsLocked(int uid, String packageName, boolean edit) {

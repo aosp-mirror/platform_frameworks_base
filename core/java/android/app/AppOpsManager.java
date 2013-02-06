@@ -61,8 +61,9 @@ public class AppOpsManager {
     public static final int OP_SEND_SMS = 20;
     public static final int OP_READ_ICC_SMS = 21;
     public static final int OP_WRITE_ICC_SMS = 22;
+    public static final int OP_WRITE_SETTINGS = 23;
     /** @hide */
-    public static final int _NUM_OP = 23;
+    public static final int _NUM_OP = 24;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -96,6 +97,7 @@ public class AppOpsManager {
             OP_WRITE_SMS,
             OP_READ_SMS,
             OP_WRITE_SMS,
+            OP_WRITE_SETTINGS,
     };
 
     /**
@@ -126,6 +128,7 @@ public class AppOpsManager {
             "SEND_SMS",
             "READ_ICC_SMS",
             "WRITE_ICC_SMS",
+            "WRITE_SETTINGS",
     };
 
     /**
@@ -156,6 +159,7 @@ public class AppOpsManager {
             android.Manifest.permission.SEND_SMS,
             android.Manifest.permission.READ_SMS,
             android.Manifest.permission.WRITE_SMS,
+            android.Manifest.permission.WRITE_SETTINGS,
     };
 
     public static int opToSwitch(int op) {
