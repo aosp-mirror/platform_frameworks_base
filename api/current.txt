@@ -26305,12 +26305,15 @@ package android.view.accessibility {
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
     method public java.lang.CharSequence getText();
+    method public int getTextSelectionEnd();
+    method public int getTextSelectionStart();
     method public java.lang.CharSequence getViewIdResourceName();
     method public int getWindowId();
     method public boolean isAccessibilityFocused();
     method public boolean isCheckable();
     method public boolean isChecked();
     method public boolean isClickable();
+    method public boolean isEditable();
     method public boolean isEnabled();
     method public boolean isFocusable();
     method public boolean isFocused();
@@ -26335,6 +26338,7 @@ package android.view.accessibility {
     method public void setClassName(java.lang.CharSequence);
     method public void setClickable(boolean);
     method public void setContentDescription(java.lang.CharSequence);
+    method public void setEditable(boolean);
     method public void setEnabled(boolean);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
@@ -26353,6 +26357,7 @@ package android.view.accessibility {
     method public void setSource(android.view.View);
     method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
+    method public void setTextSelection(int, int);
     method public void setViewIdResourceName(java.lang.CharSequence);
     method public void setVisibleToUser(boolean);
     method public void writeToParcel(android.os.Parcel, int);
