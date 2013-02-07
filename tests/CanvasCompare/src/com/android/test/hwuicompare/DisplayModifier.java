@@ -122,6 +122,12 @@ public abstract class DisplayModifier {
                             paint.setStrokeWidth(5);
                         }
                     });
+                    put("30", new DisplayModifier() {
+                        @Override
+                        public void modifyDrawing(Paint paint, Canvas canvas) {
+                            paint.setStrokeWidth(30);
+                        }
+                    });
                 }
             });
             put("strokeCap", new LinkedHashMap<String, DisplayModifier>() {
