@@ -221,6 +221,16 @@ public class LocationManagerService extends ILocationManager.Stub {
             mBlacklist.init();
             mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
 
+            // Monitor for app ops mode changes.
+            AppOpsManager.Callback callback = new AppOpsManager.Callback() {
+                public void opChanged(int op, String packageName) {
+                    synchronized (mLock) {
+                        applyAllProviderRequirementsLocked();
+                    }
+                }
+            };
+            mAppOps.startWatchingMode(AppOpsManager.OP_COARSE_LOCATION, null, callback);
+
             // prepare providers
             loadProvidersLocked();
             updateProvidersLocked();
@@ -1342,6 +1352,17 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             applyRequirementsLocked(provider);
+        }
+    }
+
+    private void applyAllProviderRequirementsLocked() {
+        for (LocationProviderInterface p : mProviders) {
+            // If provider is already disabled, don't need to do anything
+            if (!isAllowedBySettingsLocked(p.getName(), UserHandle.getUid(mCurrentUserId, 0))) {
+                continue;
+            }
+
+            applyRequirementsLocked(p.getName());
         }
     }
 

@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import android.app.AppOpsManager;
 import com.android.server.input.InputWindowHandle;
 
 import android.content.Context;
@@ -69,6 +70,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final Context mContext;
     final Session mSession;
     final IWindow mClient;
+    final int mAppOp;
+    // UserId and appId of the owner. Don't display windows of non-current user.
+    final int mOwnerUid;
     WindowToken mToken;
     WindowToken mRootToken;
     AppWindowToken mAppToken;
@@ -270,18 +274,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     DisplayContent  mDisplayContent;
 
-    // UserId and appId of the owner. Don't display windows of non-current user.
-    int mOwnerUid;
-
     /** When true this window can be displayed on screens owther than mOwnerUid's */
     private boolean mShowToOwnerOnly;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
-           WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
+           WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
         mService = service;
         mSession = s;
         mClient = c;
+        mAppOp = appOp;
         mToken = token;
         mOwnerUid = s.mUid;
         mAttrs.copyFrom(a);
@@ -383,7 +385,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public int getOwningUid() {
-        return mSession.mUid;
+        return mOwnerUid;
     }
 
     @Override
@@ -1129,7 +1131,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 pw.print(" mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
         pw.print(prefix); pw.print("mOwnerUid="); pw.print(mOwnerUid);
-                pw.print(" mShowToOwnerOnly="); pw.println(mShowToOwnerOnly);
+                pw.print(" mShowToOwnerOnly="); pw.print(mShowToOwnerOnly);
+                pw.print(" package="); pw.print(mAttrs.packageName);
+                pw.print(" appop="); pw.println(AppOpsManager.opToName(mAppOp));
         pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
         pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
                 pw.print(" h="); pw.print(mRequestedHeight);
@@ -1273,9 +1277,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public String toString() {
-        if (mStringNameCache == null || mLastTitle != mAttrs.getTitle()
-                || mWasExiting != mExiting) {
-            mLastTitle = mAttrs.getTitle();
+        CharSequence title = mAttrs.getTitle();
+        if (title == null || title.length() <= 0) {
+            title = mAttrs.packageName;
+        }
+        if (mStringNameCache == null || mLastTitle != title || mWasExiting != mExiting) {
+            mLastTitle = title;
             mWasExiting = mExiting;
             mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
                     + " u" + UserHandle.getUserId(mSession.mUid)
