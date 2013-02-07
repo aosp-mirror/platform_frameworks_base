@@ -7415,9 +7415,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     }
 
     public void requestBugReport() {
-        // No permission check because this can't do anything harmful --
-        // it will just eventually cause the user to be presented with
-        // a UI to select where the bug report goes.
+        enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
         SystemProperties.set("ctl.start", "bugreport");
     }
 
