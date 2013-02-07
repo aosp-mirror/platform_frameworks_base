@@ -21,6 +21,8 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+#include <GLES2/gl2.h>
+
 #include <cutils/compiler.h>
 
 namespace android {
@@ -39,6 +41,11 @@ public:
      * is 0, then no stencil buffer is required.
      */
     ANDROID_API static uint32_t getStencilSize();
+
+    /**
+     * Returns the smallest stencil format accepted by render buffers.
+     */
+    static GLenum getSmallestStencilFormat();
 
     /**
      * Clears the stencil buffer.

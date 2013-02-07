@@ -567,9 +567,11 @@ private:
      * @param mode The Skia xfermode to use
      * @param ignoreTransform True if the current transform should be ignored
      * @param dirty True if calling this method should dirty the current layer
+     * @param clip True if the rects should be clipped, false otherwise
      */
     status_t drawColorRects(const float* rects, int count, int color,
-            SkXfermode::Mode mode, bool ignoreTransform = false, bool dirty = true);
+            SkXfermode::Mode mode, bool ignoreTransform = false,
+            bool dirty = true, bool clip = true);
 
     /**
      * Draws the shape represented by the specified path texture.
@@ -888,6 +890,7 @@ private:
 
     // Various caches
     Caches& mCaches;
+    Extensions& mExtensions;
 
     // List of rectangles to clear after saveLayer() is invoked
     Vector<Rect*> mLayers;

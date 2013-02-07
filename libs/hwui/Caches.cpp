@@ -47,7 +47,7 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
+Caches::Caches(): Singleton<Caches>(), mExtensions(Extensions::getInstance()), mInitialized(false) {
     init();
     initFont();
     initExtensions();
@@ -100,7 +100,7 @@ void Caches::initFont() {
 }
 
 void Caches::initExtensions() {
-    if (extensions.hasDebugMarker()) {
+    if (mExtensions.hasDebugMarker()) {
         eventMark = glInsertEventMarkerEXT;
         startMark = glPushGroupMarkerEXT;
         endMark = glPopGroupMarkerEXT;
@@ -110,7 +110,7 @@ void Caches::initExtensions() {
         endMark = endMarkNull;
     }
 
-    if (extensions.hasDebugLabel()) {
+    if (mExtensions.hasDebugLabel()) {
         setLabel = glLabelObjectEXT;
         getLabel = glGetObjectLabelEXT;
     } else {
@@ -470,13 +470,13 @@ void Caches::resetScissor() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard) {
-    if (extensions.hasTiledRendering() && !debugOverdraw) {
+    if (mExtensions.hasTiledRendering() && !debugOverdraw) {
         glStartTilingQCOM(x, y, width, height, (discard ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM));
     }
 }
 
 void Caches::endTiling() {
-    if (extensions.hasTiledRendering() && !debugOverdraw) {
+    if (mExtensions.hasTiledRendering() && !debugOverdraw) {
         glEndTilingQCOM(GL_COLOR_BUFFER_BIT0_QCOM);
     }
 }
