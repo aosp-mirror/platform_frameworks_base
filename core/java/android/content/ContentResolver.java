@@ -193,6 +193,23 @@ public abstract class ContentResolver {
         return SYNC_ERROR_NAMES[error - 1];
     }
 
+    /** @hide */
+    public static int syncErrorStringToInt(String error) {
+        for (int i = 0, n = SYNC_ERROR_NAMES.length; i < n; i++) {
+            if (SYNC_ERROR_NAMES[i].equals(error)) {
+                return i + 1;
+            }
+        }
+        if (error != null) {
+            try {
+                return Integer.parseInt(error);
+            } catch (NumberFormatException e) {
+                Log.d(TAG, "error parsing sync error: " + error);
+            }
+        }
+        return 0;
+    }
+
     public static final int SYNC_OBSERVER_TYPE_SETTINGS = 1<<0;
     public static final int SYNC_OBSERVER_TYPE_PENDING = 1<<1;
     public static final int SYNC_OBSERVER_TYPE_ACTIVE = 1<<2;
