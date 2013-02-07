@@ -12685,12 +12685,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final HardwareCanvas canvas = displayList.start();
             int width = mRight - mLeft;
             int height = mBottom - mTop;
+            int layerType = getLayerType();
 
             try {
                 canvas.setViewport(width, height);
                 // The dirty rect should always be null for a display list
                 canvas.onPreDraw(null);
-                int layerType = getLayerType();
                 if (!isLayer && layerType != LAYER_TYPE_NONE) {
                     if (layerType == LAYER_TYPE_HARDWARE) {
                         final HardwareLayer layer = getHardwareLayer();
@@ -13425,8 +13425,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             transformToApply = parent.mChildTransformation;
         } else {
-            if ((mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_TRANSFORM) == PFLAG3_VIEW_IS_ANIMATING_TRANSFORM &&
-                    mDisplayList != null) {
+            if ((mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_TRANSFORM) ==
+                    PFLAG3_VIEW_IS_ANIMATING_TRANSFORM && mDisplayList != null) {
                 // No longer animating: clear out old animation matrix
                 mDisplayList.setAnimationMatrix(null);
                 mPrivateFlags3 &= ~PFLAG3_VIEW_IS_ANIMATING_TRANSFORM;
@@ -13623,7 +13623,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) == ViewGroup.FLAG_CLIP_CHILDREN &&
-                !useDisplayListProperties) {
+                !useDisplayListProperties && layerType == LAYER_TYPE_NONE) {
             if (offsetForScroll) {
                 canvas.clipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop));
             } else {

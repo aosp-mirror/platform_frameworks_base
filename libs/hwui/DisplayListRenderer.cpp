@@ -350,7 +350,7 @@ void DisplayList::outputViewProperties(uint32_t level) {
                     mMultipliedAlpha, flags);
         }
     }
-    if (mClipChildren) {
+    if (mClipChildren && !mCaching) {
         ALOGD("%*sClipRect %.2f, %.2f, %.2f, %.2f", level * 2, "", 0.0f, 0.0f,
                 (float) mRight - mLeft, (float) mBottom - mTop);
     }
@@ -391,7 +391,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t level) {
                     mMultipliedAlpha, flags);
         }
     }
-    if (mClipChildren) {
+    if (mClipChildren && !mCaching) {
         renderer.clipRect(0, 0, mRight - mLeft, mBottom - mTop,
                 SkRegion::kIntersect_Op);
     }
