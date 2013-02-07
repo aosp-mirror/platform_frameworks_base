@@ -2103,20 +2103,25 @@ public final class ViewRootImpl implements ViewParent,
     private void profileRendering(boolean enabled) {
         if (mProfileRendering) {
             mRenderProfilingEnabled = enabled;
-            if (mRenderProfiler == null) {
-                mRenderProfiler = new Choreographer.FrameCallback() {
-                    @Override
-                    public void doFrame(long frameTimeNanos) {
-                        mDirty.set(0, 0, mWidth, mHeight);
-                        scheduleTraversals();
-                        if (mRenderProfilingEnabled) {
-                            mChoreographer.postFrameCallback(mRenderProfiler);
+
+            if (mRenderProfiler != null) {
+                mChoreographer.removeFrameCallback(mRenderProfiler);
+            }
+            if (mRenderProfilingEnabled) {
+                if (mRenderProfiler == null) {
+                    mRenderProfiler = new Choreographer.FrameCallback() {
+                        @Override
+                        public void doFrame(long frameTimeNanos) {
+                            mDirty.set(0, 0, mWidth, mHeight);
+                            scheduleTraversals();
+                            if (mRenderProfilingEnabled) {
+                                mChoreographer.postFrameCallback(mRenderProfiler);
+                            }
                         }
-                    }
-                };
+                    };
+                }
                 mChoreographer.postFrameCallback(mRenderProfiler);
             } else {
-                mChoreographer.removeFrameCallback(mRenderProfiler);
                 mRenderProfiler = null;
             }
         }
