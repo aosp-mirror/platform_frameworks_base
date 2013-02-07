@@ -80,7 +80,7 @@ static int parseIfaceStats(const char* iface, struct Stats* stats) {
         return -1;
     }
 
-    char buffer[256];
+    char buffer[384];
     char cur_iface[32];
     bool foundTcp = false;
     uint64_t rxBytes, rxPackets, txBytes, txPackets, tcpRxPackets, tcpTxPackets;
@@ -124,12 +124,12 @@ static int parseUidStats(const uint32_t uid, struct Stats* stats) {
         return -1;
     }
 
-    char buffer[256];
+    char buffer[384];
     char iface[32];
     uint32_t idx, cur_uid, set;
     uint64_t tag, rxBytes, rxPackets, txBytes, txPackets;
 
-    while (fgets(buffer, 256, fp) != NULL) {
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
         if (sscanf(buffer, "%d %31s 0x%llx %u %u %llu %llu %llu %llu", &idx,
                 iface, &tag, &cur_uid, &set, &rxBytes, &rxPackets, &txBytes,
                 &txPackets) == 9) {
