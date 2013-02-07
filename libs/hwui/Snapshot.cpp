@@ -183,6 +183,9 @@ const Rect& Snapshot::getLocalClip() {
 }
 
 void Snapshot::resetClip(float left, float top, float right, float bottom) {
+    // TODO: This is incorrect, when we start rendering into a new layer,
+    // we may have to modify the previous snapshot's clip rect and clip
+    // region if the previous restore() call did not restore the clip
     clipRect = &mClipRectRoot;
     clipRegion = &mClipRegionRoot;
     setClip(left, top, right, bottom);

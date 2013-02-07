@@ -219,7 +219,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
 
     // We could also enable mipmapping if both bitmap dimensions are powers
     // of 2 but we'd have to deal with size changes. Let's keep this simple
-    const bool canMipMap = Caches::getInstance().extensions.hasNPot();
+    const bool canMipMap = Extensions::getInstance().hasNPot();
 
     // If the texture had mipmap enabled but not anymore,
     // force a glTexImage2D to discard the mipmap levels

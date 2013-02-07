@@ -44,6 +44,9 @@
 // Turn on to display info about layers
 #define DEBUG_LAYERS 0
 
+// Turn on to make stencil operations easier to debug
+#define DEBUG_STENCIL 0
+
 // Turn on to display debug info about 9patch objects
 #define DEBUG_PATCHES 0
 // Turn on to "explode" 9patch objects
