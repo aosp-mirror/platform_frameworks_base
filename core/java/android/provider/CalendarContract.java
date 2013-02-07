@@ -550,6 +550,8 @@ public final class CalendarContract {
                         Calendars.CALENDAR_DISPLAY_NAME);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
                         Calendars.CALENDAR_COLOR);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Calendars.CALENDAR_COLOR_KEY);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, CALENDAR_ACCESS_LEVEL);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, VISIBLE);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SYNC_EVENTS);
