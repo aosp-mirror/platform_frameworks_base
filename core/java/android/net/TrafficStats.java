@@ -424,161 +424,156 @@ public class TrafficStats {
     }
 
     /**
-     * Get the number of bytes sent through the network for this UID.
-     * The statistics are across all interfaces.
+     * Return number of bytes transmitted by the given UID since device boot.
+     * Counts packets across all network interfaces, and always increases
+     * monotonically since device boot. Statistics are measured at the network
+     * layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @see android.os.Process#myUid()
+     * @see android.content.pm.ApplicationInfo#uid
      */
-    public static native long getUidTxBytes(int uid);
+    public static long getUidTxBytes(int uid) {
+        return nativeGetUidStat(uid, TYPE_TX_BYTES);
+    }
 
     /**
-     * Get the number of bytes received through the network for this UID.
-     * The statistics are across all interfaces.
+     * Return number of bytes received by the given UID since device boot.
+     * Counts packets across all network interfaces, and always increases
+     * monotonically since device boot. Statistics are measured at the network
+     * layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of bytes
+     * @see android.os.Process#myUid()
+     * @see android.content.pm.ApplicationInfo#uid
      */
-    public static native long getUidRxBytes(int uid);
+    public static long getUidRxBytes(int uid) {
+        return nativeGetUidStat(uid, TYPE_RX_BYTES);
+    }
 
     /**
-     * Get the number of packets (TCP segments + UDP) sent through
-     * the network for this UID.
-     * The statistics are across all interfaces.
+     * Return number of packets transmitted by the given UID since device boot.
+     * Counts packets across all network interfaces, and always increases
+     * monotonically since device boot. Statistics are measured at the network
+     * layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of packets.
-     * If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @see android.os.Process#myUid()
+     * @see android.content.pm.ApplicationInfo#uid
      */
-    public static native long getUidTxPackets(int uid);
+    public static long getUidTxPackets(int uid) {
+        return nativeGetUidStat(uid, TYPE_TX_PACKETS);
+    }
 
     /**
-     * Get the number of packets (TCP segments + UDP) received through
-     * the network for this UID.
-     * The statistics are across all interfaces.
+     * Return number of packets received by the given UID since device boot.
+     * Counts packets across all network interfaces, and always increases
+     * monotonically since device boot. Statistics are measured at the network
+     * layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of packets
+     * @see android.os.Process#myUid()
+     * @see android.content.pm.ApplicationInfo#uid
      */
-    public static native long getUidRxPackets(int uid);
+    public static long getUidRxPackets(int uid) {
+        return nativeGetUidStat(uid, TYPE_RX_PACKETS);
+    }
 
     /**
-     * Get the number of TCP payload bytes sent for this UID.
-     * This total does not include protocol and control overheads at
-     * the transport and the lower layers of the networking stack.
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidTxBytes(int)
      */
-    public static native long getUidTcpTxBytes(int uid);
+    @Deprecated
+    public static long getUidTcpTxBytes(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
-     * Get the number of TCP payload bytes received for this UID.
-     * This total does not include protocol and control overheads at
-     * the transport and the lower layers of the networking stack.
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidRxBytes(int)
      */
-    public static native long getUidTcpRxBytes(int uid);
+    @Deprecated
+    public static long getUidTcpRxBytes(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
-     * Get the number of UDP payload bytes sent for this UID.
-     * This total does not include protocol and control overheads at
-     * the transport and the lower layers of the networking stack.
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidTxBytes(int)
      */
-    public static native long getUidUdpTxBytes(int uid);
+    @Deprecated
+    public static long getUidUdpTxBytes(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
-     * Get the number of UDP payload bytes received for this UID.
-     * This total does not include protocol and control overheads at
-     * the transport and the lower layers of the networking stack.
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidRxBytes(int)
      */
-    public static native long getUidUdpRxBytes(int uid);
+    @Deprecated
+    public static long getUidUdpRxBytes(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
-     * Get the number of TCP segments sent for this UID.
-     * Does not include TCP control packets (SYN/ACKs/FIN/..).
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of TCP segments.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidTxPackets(int)
      */
-    public static native long getUidTcpTxSegments(int uid);
+    @Deprecated
+    public static long getUidTcpTxSegments(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
-     * Get the number of TCP segments received for this UID.
-     * Does not include TCP control packets (SYN/ACKs/FIN/..).
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of TCP segments.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidRxPackets(int)
      */
-    public static native long getUidTcpRxSegments(int uid);
+    @Deprecated
+    public static long getUidTcpRxSegments(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
-     * Get the number of UDP packets sent for this UID.
-     * Includes DNS requests.
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of packets.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidTxPackets(int)
      */
-    public static native long getUidUdpTxPackets(int uid);
+    @Deprecated
+    public static long getUidUdpTxPackets(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
-     * Get the number of UDP packets received for this UID.
-     * Includes DNS responses.
-     * The statistics are across all interfaces.
-     *
-     * {@see android.os.Process#myUid()}.
-     *
-     * @param uid The UID of the process to examine.
-     * @return number of packets.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     *             transport layer statistics are no longer available, and will
+     *             always return {@link #UNSUPPORTED}.
+     * @see #getUidRxPackets(int)
      */
-    public static native long getUidUdpRxPackets(int uid);
+    @Deprecated
+    public static long getUidUdpRxPackets(int uid) {
+        return UNSUPPORTED;
+    }
 
     /**
      * Return detailed {@link NetworkStats} for the current UID. Requires no
@@ -616,4 +611,5 @@ public class TrafficStats {
 
     private static native long nativeGetTotalStat(int type);
     private static native long nativeGetIfaceStat(String iface, int type);
+    private static native long nativeGetUidStat(int uid, int type);
 }
