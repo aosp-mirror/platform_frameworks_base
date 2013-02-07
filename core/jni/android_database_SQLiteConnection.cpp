@@ -706,7 +706,7 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
             }
 
             CopyRowResult cpr = copyRow(env, window, statement, numColumns, startPos, addedRows);
-            if (cpr == CPR_FULL && addedRows && startPos + addedRows < requiredPos) {
+            if (cpr == CPR_FULL && addedRows && startPos + addedRows <= requiredPos) {
                 // We filled the window before we got to the one row that we really wanted.
                 // Clear the window and start filling it again from here.
                 // TODO: Would be nicer if we could progressively replace earlier rows.
