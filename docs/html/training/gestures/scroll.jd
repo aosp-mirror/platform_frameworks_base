@@ -45,13 +45,7 @@ a scrolling effect in response to touch gestures using <em>scrollers</em>.
 
 <p>You can use scrollers ({@link android.widget.Scroller} or {@link
 android.widget.OverScroller}) to collect the data you need to produce a
-scrolling animation in response to a touch event. {@link
-android.widget.Scroller} and {@link android.widget.OverScroller} are largely
-interchangeable&mdash;the difference is that {@link android.widget.OverScroller}
-allows temporarily scrolling beyond the minimum/maximum boundaries and springing
-back to the bounds. This is normally rendered using a "glow" effect, provided by
-the {@link android.widget.EdgeEffect} or {@link
-android.support.v4.widget.EdgeEffectCompat} classes. </p>
+scrolling animation in response to a touch event.</p>
 
 <p>A scroller is used  to animate scrolling over time, using platform-standard
 scrolling physics (friction, velocity, etc.). The scroller itself doesn't
@@ -157,5 +151,4 @@ public void computeScroll() {
 }</pre>
 
 <p>For another example of scroller usage, see the <a href="http://github.com/android/platform_frameworks_support/blob/master/v4/java/android/support/v4/view/ViewPager.java">source code</a> for the 
-{@link android.support.v4.view.ViewPager} class. It scrolls in response to flings, 
-and uses scrolling to implement the "snapping to page" animation.</p>
+{@link android.support.v4.view.ViewPager} class.</p>
