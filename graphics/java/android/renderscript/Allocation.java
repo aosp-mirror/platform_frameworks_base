@@ -1466,6 +1466,10 @@ public class Allocation extends BaseObj {
      * Creates a non-mipmapped renderscript allocation to use as a
      * graphics texture from the bitmap referenced by resource id
      *
+     * With target API version 18 or greater, this allocation will be
+     * created with USAGE_SHARED. With target API version 17 or lower,
+     * this allocation will be created with USAGE_GRAPHICS_TEXTURE.
+     *
      * @param rs Context to which the allocation will belong.
      * @param res application resources
      * @param id resource id to load the data from
@@ -1476,6 +1480,11 @@ public class Allocation extends BaseObj {
     static public Allocation createFromBitmapResource(RenderScript rs,
                                                       Resources res,
                                                       int id) {
+        if (rs.getApplicationContext().getApplicationInfo().targetSdkVersion >= 18) {
+            return createFromBitmapResource(rs, res, id,
+                                            MipmapControl.MIPMAP_NONE,
+                                            USAGE_SHARED | USAGE_SCRIPT);
+        }
         return createFromBitmapResource(rs, res, id,
                                         MipmapControl.MIPMAP_NONE,
                                         USAGE_GRAPHICS_TEXTURE);

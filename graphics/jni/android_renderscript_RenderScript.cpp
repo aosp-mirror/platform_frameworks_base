@@ -346,6 +346,23 @@ static void nContextDeinitToClient(JNIEnv *_env, jobject _this, RsContext con)
     rsContextDeinitToClient(con);
 }
 
+static void
+nContextSendMessage(JNIEnv *_env, jobject _this, RsContext con, jint id, jintArray data)
+{
+    jint *ptr = NULL;
+    jint len = 0;
+    if (data) {
+        len = _env->GetArrayLength(data);
+        jint *ptr = _env->GetIntArrayElements(data, NULL);
+    }
+    LOG_API("nContextSendMessage, con(%p), id(%i), len(%i)", con, id, len);
+    rsContextSendMessage(con, id, (const uint8_t *)ptr, len * sizeof(int));
+    if (data) {
+        _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
+    }
+}
+
+
 
 static jint
 nElementCreate(JNIEnv *_env, jobject _this, RsContext con, jint type, jint kind, jboolean norm, jint size)
@@ -1434,6 +1451,7 @@ static JNINativeMethod methods[] = {
 {"rsnContextDump",                   "(II)V",                                 (void*)nContextDump },
 {"rsnContextPause",                  "(I)V",                                  (void*)nContextPause },
 {"rsnContextResume",                 "(I)V",                                  (void*)nContextResume },
+{"rsnContextSendMessage",            "(II[I)V",                               (void*)nContextSendMessage },
 {"rsnAssignName",                    "(II[B)V",                               (void*)nAssignName },
 {"rsnGetName",                       "(II)Ljava/lang/String;",                (void*)nGetName },
 {"rsnObjDestroy",                    "(II)V",                                 (void*)nObjDestroy },

@@ -45,7 +45,6 @@ public class TestBase  {
     protected Allocation mInPixelsAllocation;
     protected Allocation mInPixelsAllocation2;
     protected Allocation mOutPixelsAllocation;
-    protected ScriptC_msg mMessageScript;
 
     protected ImageProcessingActivity act;
 
@@ -110,7 +109,6 @@ public class TestBase  {
         act = ipact;
         mRS = RenderScript.create(act);
         mRS.setMessageHandler(new MessageProcessor(act));
-        mMessageScript = new ScriptC_msg(mRS);
 
         mInPixelsAllocation = Allocation.createFromBitmap(mRS, b);
         mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2);
@@ -129,7 +127,7 @@ public class TestBase  {
 
     final public void runTestSendMessage() {
         runTest();
-        mMessageScript.invoke_sendMsg();
+        mRS.sendMessage(0, null);
     }
 
     public void finish() {
