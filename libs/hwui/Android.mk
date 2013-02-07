@@ -14,6 +14,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		DisplayListLogBuffer.cpp \
 		DisplayListRenderer.cpp \
 		Dither.cpp \
+		Extensions.cpp \
 		FboCache.cpp \
 		GradientCache.cpp \
 		Layer.cpp \
