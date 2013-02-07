@@ -1258,6 +1258,40 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         mAutoFillData = new WebViewCore.AutoFillData();
         mEditTextScroller = new Scroller(context);
+
+        // Calculate channel distance
+        calculateChannelDistance(context);
+    }
+
+    /**
+     * Calculate sChannelDistance based on the screen information.
+     * @param context A Context object used to access application assets.
+     */
+    private void calculateChannelDistance(Context context) {
+        // The channel distance is adjusted for density and screen size
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final double screenSize = Math.hypot((double)(metrics.widthPixels/metrics.densityDpi),
+                (double)(metrics.heightPixels/metrics.densityDpi));
+        if (screenSize < 3.0) {
+            sChannelDistance = 16;
+        } else if (screenSize < 5.0) {
+            sChannelDistance = 22;
+        } else if (screenSize < 7.0) {
+            sChannelDistance = 28;
+        } else {
+            sChannelDistance = 34;
+        }
+        sChannelDistance = (int)(sChannelDistance * metrics.density);
+        if (sChannelDistance < 16) sChannelDistance = 16;
+
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "sChannelDistance : " + sChannelDistance
+                    + ", density : " + metrics.density
+                    + ", screenSize : " + screenSize
+                    + ", metrics.heightPixels : " + metrics.heightPixels
+                    + ", metrics.widthPixels : " + metrics.widthPixels
+                    + ", metrics.densityDpi : " + metrics.densityDpi);
+        }
     }
 
     // WebViewProvider bindings
@@ -5715,32 +5749,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
         return mWebViewPrivate.super_dispatchKeyEvent(event);
     }
-
-    /*
-     * Here is the snap align logic:
-     * 1. If it starts nearly horizontally or vertically, snap align;
-     * 2. If there is a dramitic direction change, let it go;
-     *
-     * Adjustable parameters. Angle is the radians on a unit circle, limited
-     * to quadrant 1. Values range from 0f (horizontal) to PI/2 (vertical)
-     */
-    private static final float HSLOPE_TO_START_SNAP = .25f;
-    private static final float HSLOPE_TO_BREAK_SNAP = .4f;
-    private static final float VSLOPE_TO_START_SNAP = 1.25f;
-    private static final float VSLOPE_TO_BREAK_SNAP = .95f;
-    /*
-     *  These values are used to influence the average angle when entering
-     *  snap mode. If is is the first movement entering snap, we set the average
-     *  to the appropriate ideal. If the user is entering into snap after the
-     *  first movement, then we average the average angle with these values.
-     */
-    private static final float ANGLE_VERT = 2f;
-    private static final float ANGLE_HORIZ = 0f;
-    /*
-     *  The modified moving average weight.
-     *  Formula: MAV[t]=MAV[t-1] + (P[t]-MAV[t-1])/n
-     */
-    private static final float MMA_WEIGHT_N = 5;
+    
+    private static final int SNAP_BOUND = 16;
+    private static int sChannelDistance = 16;
+    private int mFirstTouchX = -1; // the first touched point
+    private int mFirstTouchY = -1;
+    private int mDistanceX = 0;
+    private int mDistanceY = 0;
 
     private boolean inFullScreenMode() {
         return mFullScreenHolder != null;
@@ -5830,12 +5845,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    private float calculateDragAngle(int dx, int dy) {
-        dx = Math.abs(dx);
-        dy = Math.abs(dy);
-        return (float) Math.atan2(dy, dx);
-    }
-
     /*
     * Common code for single touch and multi-touch.
     * (x, y) denotes current focus point, which is the touch point for single touch
@@ -5861,6 +5870,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 mConfirmMove = false;
+
+                // Channel Scrolling
+                mFirstTouchX = x;
+                mFirstTouchY = y;
+                mDistanceX = mDistanceY = 0;
+
                 if (!mEditTextScroller.isFinished()) {
                     mEditTextScroller.abortAnimation();
                 }
@@ -5998,20 +6013,16 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         break;
                     }
 
-                    // Only lock dragging to one axis if we don't have a scale in progress.
-                    // Scaling implies free-roaming movement. Note this is only ever a question
-                    // if mZoomManager.supportsPanDuringZoom() is true.
-                    mAverageAngle = calculateDragAngle(deltaX, deltaY);
-                    if (detector == null || !detector.isInProgress()) {
-                        // if it starts nearly horizontal or vertical, enforce it
-                        if (mAverageAngle < HSLOPE_TO_START_SNAP) {
-                            mSnapScrollMode = SNAP_X;
-                            mSnapPositive = deltaX > 0;
-                            mAverageAngle = ANGLE_HORIZ;
-                        } else if (mAverageAngle > VSLOPE_TO_START_SNAP) {
+                    if ((detector == null || !detector.isInProgress())
+                            && SNAP_NONE == mSnapScrollMode) {
+                        int ax = Math.abs(x - mFirstTouchX);
+                        int ay = Math.abs(y - mFirstTouchY);
+                        if (ax < SNAP_BOUND && ay < SNAP_BOUND) {
+                            break;
+                        } else if (ax < SNAP_BOUND) {
                             mSnapScrollMode = SNAP_Y;
-                            mSnapPositive = deltaY > 0;
-                            mAverageAngle = ANGLE_VERT;
+                        } else if (ay < SNAP_BOUND) {
+                            mSnapScrollMode = SNAP_X;
                         }
                     }
 
@@ -6030,31 +6041,21 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 if (deltaX == 0 && deltaY == 0) {
                     keepScrollBarsVisible = true;
                 } else {
-                    mAverageAngle +=
-                        (calculateDragAngle(deltaX, deltaY) - mAverageAngle)
-                        / MMA_WEIGHT_N;
-                    if (mSnapScrollMode != SNAP_NONE) {
-                        if (mSnapScrollMode == SNAP_Y) {
-                            // radical change means getting out of snap mode
-                            if (mAverageAngle < VSLOPE_TO_BREAK_SNAP) {
-                                mSnapScrollMode = SNAP_NONE;
-                            }
-                        }
+                    if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
+                        mDistanceX += Math.abs(deltaX);
+                        mDistanceY += Math.abs(deltaY);
                         if (mSnapScrollMode == SNAP_X) {
-                            // radical change means getting out of snap mode
-                            if (mAverageAngle > HSLOPE_TO_BREAK_SNAP) {
+                            if (mDistanceY > sChannelDistance) {
                                 mSnapScrollMode = SNAP_NONE;
-                            }
+                            } else if (mDistanceX > sChannelDistance) {
+                                mDistanceX = mDistanceY = 0;
                         }
                     } else {
-                        if (mAverageAngle < HSLOPE_TO_START_SNAP) {
-                            mSnapScrollMode = SNAP_X;
-                            mSnapPositive = deltaX > 0;
-                            mAverageAngle = (mAverageAngle + ANGLE_HORIZ) / 2;
-                        } else if (mAverageAngle > VSLOPE_TO_START_SNAP) {
-                            mSnapScrollMode = SNAP_Y;
-                            mSnapPositive = deltaY > 0;
-                            mAverageAngle = (mAverageAngle + ANGLE_VERT) / 2;
+                            if (mDistanceX > sChannelDistance) {
+                                mSnapScrollMode = SNAP_NONE;
+                            } else if (mDistanceY > sChannelDistance) {
+                                mDistanceX = mDistanceY = 0;
+                            }
                         }
                     }
                     if (mSnapScrollMode != SNAP_NONE) {
@@ -6089,6 +6090,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 break;
             }
             case MotionEvent.ACTION_UP: {
+                mFirstTouchX  = mFirstTouchY = -1;
                 if (mIsEditingText && mSelectionStarted) {
                     endScrollEdit();
                     mPrivateHandler.sendEmptyMessageDelayed(SCROLL_HANDLE_INTO_VIEW,
