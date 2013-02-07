@@ -191,17 +191,27 @@ public final class MediaCodecInfo {
         public static final int AACObjectHE_PS      = 29;
         public static final int AACObjectELD        = 39;
 
+        // from OMX_VIDEO_VP8LEVELTYPE
+        public static final int VP8Level_Version0 = 0x01;
+        public static final int VP8Level_Version1 = 0x02;
+        public static final int VP8Level_Version2 = 0x04;
+        public static final int VP8Level_Version3 = 0x08;
+
+        // from OMX_VIDEO_VP8PROFILETYPE
+        public static final int VP8ProfileMain = 0x01;
+
+
         /**
          * Defined in the OpenMAX IL specs, depending on the type of media
          * this can be OMX_VIDEO_AVCPROFILETYPE, OMX_VIDEO_H263PROFILETYPE,
-         * or OMX_VIDEO_MPEG4PROFILETYPE.
+         * OMX_VIDEO_MPEG4PROFILETYPE or OMX_VIDEO_VP8PROFILETYPE.
          */
         public int profile;
 
         /**
          * Defined in the OpenMAX IL specs, depending on the type of media
          * this can be OMX_VIDEO_AVCLEVELTYPE, OMX_VIDEO_H263LEVELTYPE
-         * or OMX_VIDEO_MPEG4LEVELTYPE.
+         * OMX_VIDEO_MPEG4LEVELTYPE or OMX_VIDEO_VP8LEVELTYPE.
          */
         public int level;
     };
