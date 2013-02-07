@@ -1468,6 +1468,32 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
+    public void setDnsInterfaceForPid(String iface, int pid) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            String cmd = "resolver setifaceforpid " + iface + " " + pid;
+
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating with native deamon to set interface for pid" + iface, e);
+        }
+    }
+
+    @Override
+    public void clearDnsInterfaceForPid(int pid) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            String cmd = "resolver clearifaceforpid " + pid;
+
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating with native deamon to clear interface for pid " + pid, e);
+        }
+    }
+
+    /** {@inheritDoc} */
     public void monitor() {
         if (mConnector != null) {
             mConnector.monitor();
