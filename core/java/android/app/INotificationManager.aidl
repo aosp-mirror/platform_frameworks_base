@@ -21,6 +21,8 @@ import android.app.ITransientNotification;
 import android.app.Notification;
 import android.content.Intent;
 
+import com.android.internal.statusbar.StatusBarNotification;
+
 /** {@hide} */
 interface INotificationManager
 {
@@ -34,5 +36,7 @@ interface INotificationManager
 
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
+
+    StatusBarNotification[] getActiveNotifications(String callingPkg);
 }
 
