@@ -466,7 +466,7 @@ public class VibratorService extends IVibratorService.Stub
         //synchronized (mInputDeviceVibrators) {
         //    return !mInputDeviceVibrators.isEmpty() || vibratorExists();
         //}
-        return true || vibratorExists();
+        return vibratorExists();
     }
 
     private void doVibratorOn(long millis, int uid) {
