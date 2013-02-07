@@ -22,7 +22,7 @@ import android.support.v8.renderscript.*;
 import android.util.Log;
 
 public class Convolve3x3 extends TestBase {
-    private ScriptC_convolve3x3 mScript;
+    private ScriptC_ip2_convolve3x3 mScript;
     private ScriptIntrinsicConvolve3x3 mIntrinsic;
 
     private int mWidth;
@@ -47,7 +47,7 @@ public class Convolve3x3 extends TestBase {
             mIntrinsic.setCoefficients(f);
             mIntrinsic.setInput(mInPixelsAllocation);
         } else {
-            mScript = new ScriptC_convolve3x3(mRS, res, R.raw.convolve3x3);
+            mScript = new ScriptC_ip2_convolve3x3(mRS, res, R.raw.ip2_convolve3x3);
             mScript.set_gCoeffs(f);
             mScript.set_gIn(mInPixelsAllocation);
             mScript.set_gWidth(mWidth);
