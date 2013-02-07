@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import android.app.AppOpsManager;
@@ -34,7 +35,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.AtomicFile;
@@ -45,6 +48,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -82,7 +86,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     final SparseArray<HashMap<String, Ops>> mUidOps
             = new SparseArray<HashMap<String, Ops>>();
 
-    final static class Ops extends SparseArray<Op> {
+    public final static class Ops extends SparseArray<Op> {
         public final String packageName;
         public final int uid;
 
@@ -92,7 +96,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    final static class Op {
+    public final static class Op {
         public final int op;
         public int mode;
         public int duration;
@@ -103,6 +107,34 @@ public class AppOpsService extends IAppOpsService.Stub {
         public Op(int _op) {
             op = _op;
             mode = AppOpsManager.MODE_ALLOWED;
+        }
+    }
+
+    final SparseArray<ArrayList<Callback>> mOpModeWatchers
+            = new SparseArray<ArrayList<Callback>>();
+    final HashMap<String, ArrayList<Callback>> mPackageModeWatchers
+            = new HashMap<String, ArrayList<Callback>>();
+    final HashMap<IBinder, Callback> mModeWatchers
+            = new HashMap<IBinder, Callback>();
+
+    public final class Callback implements DeathRecipient {
+        final IAppOpsCallback mCallback;
+
+        public Callback(IAppOpsCallback callback) {
+            mCallback = callback;
+            try {
+                mCallback.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void unlinkToDeath() {
+            mCallback.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            stopWatchingMode(mCallback);
         }
     }
 
@@ -205,12 +237,91 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void setMode(int code, int uid, String packageName, int mode) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        ArrayList<Callback> repCbs = null;
+        code = AppOpsManager.opToSwitch(code);
         synchronized (this) {
-            Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, true);
+            Op op = getOpLocked(code, uid, packageName, true);
             if (op != null) {
                 if (op.mode != mode) {
                     op.mode = mode;
+                    ArrayList<Callback> cbs = mOpModeWatchers.get(code);
+                    if (cbs != null) {
+                        if (repCbs == null) {
+                            repCbs = new ArrayList<Callback>();
+                        }
+                        repCbs.addAll(cbs);
+                    }
+                    cbs = mPackageModeWatchers.get(packageName);
+                    if (cbs != null) {
+                        if (repCbs == null) {
+                            repCbs = new ArrayList<Callback>();
+                        }
+                        repCbs.addAll(cbs);
+                    }
                     scheduleWriteNowLocked();
+                }
+            }
+        }
+        if (repCbs != null) {
+            for (int i=0; i<repCbs.size(); i++) {
+                try {
+                    repCbs.get(i).mCallback.opChanged(code, packageName);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public void startWatchingMode(int op, String packageName, IAppOpsCallback callback) {
+        synchronized (this) {
+            op = AppOpsManager.opToSwitch(op);
+            Callback cb = mModeWatchers.get(callback.asBinder());
+            if (cb == null) {
+                cb = new Callback(callback);
+                mModeWatchers.put(callback.asBinder(), cb);
+            }
+            if (op != AppOpsManager.OP_NONE) {
+                ArrayList<Callback> cbs = mOpModeWatchers.get(op);
+                if (cbs == null) {
+                    cbs = new ArrayList<Callback>();
+                    mOpModeWatchers.put(op, cbs);
+                }
+                cbs.add(cb);
+            }
+            if (packageName != null) {
+                ArrayList<Callback> cbs = mPackageModeWatchers.get(packageName);
+                if (cbs == null) {
+                    cbs = new ArrayList<Callback>();
+                    mPackageModeWatchers.put(packageName, cbs);
+                }
+                cbs.add(cb);
+            }
+        }
+    }
+
+    @Override
+    public void stopWatchingMode(IAppOpsCallback callback) {
+        synchronized (this) {
+            Callback cb = mModeWatchers.remove(callback.asBinder());
+            if (cb != null) {
+                cb.unlinkToDeath();
+                for (int i=0; i<mOpModeWatchers.size(); i++) {
+                    ArrayList<Callback> cbs = mOpModeWatchers.valueAt(i);
+                    cbs.remove(cb);
+                    if (cbs.size() <= 0) {
+                        mOpModeWatchers.removeAt(i);
+                    }
+                }
+                if (mPackageModeWatchers.size() > 0) {
+                    Iterator<ArrayList<Callback>> it = mPackageModeWatchers.values().iterator();
+                    while (it.hasNext()) {
+                        ArrayList<Callback> cbs = it.next();
+                        cbs.remove(cb);
+                        if (cbs.size() <= 0) {
+                            it.remove();
+                        }
+                    }
                 }
             }
         }

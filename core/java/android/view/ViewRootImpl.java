@@ -139,6 +139,7 @@ public final class ViewRootImpl implements ViewParent,
 
     final IWindowSession mWindowSession;
     final Display mDisplay;
+    final String mBasePackageName;
 
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
@@ -355,6 +356,7 @@ public final class ViewRootImpl implements ViewParent,
         // allow the spawning of threads.
         mWindowSession = WindowManagerGlobal.getWindowSession(context.getMainLooper());
         mDisplay = display;
+        mBasePackageName = context.getBasePackageName();
 
         CompatibilityInfoHolder cih = display.getCompatibilityInfo();
         mCompatibilityInfo = cih != null ? cih : new CompatibilityInfoHolder();
@@ -477,6 +479,9 @@ public final class ViewRootImpl implements ViewParent,
                 mViewLayoutDirectionInitial = mView.getRawLayoutDirection();
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
+                if (mWindowAttributes.packageName == null) {
+                    mWindowAttributes.packageName = mBasePackageName;
+                }
                 attrs = mWindowAttributes;
                 // Keep track of the actual window flags supplied by the client.
                 mClientWindowLayoutFlags = attrs.flags;
@@ -774,6 +779,9 @@ public final class ViewRootImpl implements ViewParent,
             attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
             mWindowAttributesChangesFlag = mWindowAttributes.copyFrom(attrs);
+            if (mWindowAttributes.packageName == null) {
+                mWindowAttributes.packageName = mBasePackageName;
+            }
             mWindowAttributes.flags |= compatibleWindowFlag;
 
             applyKeepScreenOnFlag(mWindowAttributes);

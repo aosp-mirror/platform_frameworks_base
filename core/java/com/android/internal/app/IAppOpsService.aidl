@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.app.AppOpsManager;
+import com.android.internal.app.IAppOpsCallback;
 
 interface IAppOpsService {
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
@@ -26,4 +27,6 @@ interface IAppOpsService {
     int noteOperation(int code, int uid, String packageName);
     int startOperation(int code, int uid, String packageName);
     void finishOperation(int code, int uid, String packageName);
+    void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
+    void stopWatchingMode(IAppOpsCallback callback);
 }

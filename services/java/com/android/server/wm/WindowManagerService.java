@@ -42,6 +42,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
+import android.app.AppOpsManager;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
@@ -310,6 +311,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final IActivityManager mActivityManager;
 
     final IBatteryStats mBatteryStats;
+
+    final AppOpsManager mAppOps;
 
     /**
      * All currently active sessions with clients.
@@ -765,6 +768,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mActivityManager = ActivityManagerNative.getDefault();
         mBatteryStats = BatteryStatsService.getService();
+        mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
 
         // Get persisted window scale setting
         mWindowAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
@@ -2024,7 +2028,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public int addWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int viewVisibility, int displayId,
             Rect outContentInsets, InputChannel outInputChannel) {
-        int res = mPolicy.checkAddPermission(attrs);
+        int[] appOp = new int[1];
+        int res = mPolicy.checkAddPermission(attrs, appOp);
         if (res != WindowManagerGlobal.ADD_OKAY) {
             return res;
         }
@@ -2128,7 +2133,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             win = new WindowState(this, session, client, token,
-                    attachedWindow, seq, attrs, viewVisibility, displayContent);
+                    attachedWindow, appOp[0], seq, attrs, viewVisibility, displayContent);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -2166,6 +2171,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.attach();
             mWindowMap.put(client.asBinder(), win);
+            if (win.mAppOp != AppOpsManager.OP_NONE) {
+                mAppOps.startOpNoThrow(win.mAppOp, win.getOwningUid(), win.getOwningPackage());
+            }
 
             if (type == TYPE_APPLICATION_STARTING && token.appWindowToken != null) {
                 token.appWindowToken.startingWindow = win;
@@ -2376,6 +2384,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (DEBUG_ADD_REMOVE) Slog.v(TAG, "removeWindowInnerLocked: " + win);
         mWindowMap.remove(win.mClient.asBinder());
+        if (win.mAppOp != AppOpsManager.OP_NONE) {
+            mAppOps.finishOp(win.mAppOp, win.getOwningUid(), win.getOwningPackage());
+        }
 
         final WindowList windows = win.getWindowList();
         windows.remove(win);

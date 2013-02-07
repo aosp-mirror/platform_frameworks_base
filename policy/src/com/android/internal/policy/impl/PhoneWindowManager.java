@@ -17,6 +17,7 @@ package com.android.internal.policy.impl;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AppOpsManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.UiModeManager;
@@ -1185,9 +1186,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int checkAddPermission(WindowManager.LayoutParams attrs) {
+    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp) {
         int type = attrs.type;
-        
+
+        outAppOp[0] = AppOpsManager.OP_NONE;
+
         if (type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
                 || type > WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
             return WindowManagerGlobal.ADD_OKAY;
@@ -1210,6 +1213,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_SYSTEM_ERROR:
             case TYPE_SYSTEM_OVERLAY:
                 permission = android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+                outAppOp[0] = AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
                 break;
             default:
                 permission = android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;

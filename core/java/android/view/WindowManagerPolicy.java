@@ -460,13 +460,15 @@ public interface WindowManagerPolicy {
     /**
      * Check permissions when adding a window.
      * 
-     * @param attrs The window's LayoutParams. 
+     * @param attrs The window's LayoutParams.
+     * @param outAppOp First element will be filled with the app op corresponding to
+     *                 this window, or OP_NONE.
      *  
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
      *      {@link WindowManagerGlobal#ADD_PERMISSION_DENIED}, to abort the add.
      */
-    public int checkAddPermission(WindowManager.LayoutParams attrs);
+    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp);
 
     /**
      * Check permissions when adding a window.

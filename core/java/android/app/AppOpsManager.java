@@ -16,10 +16,11 @@
 
 package android.app;
 
-import android.Manifest;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IAppOpsCallback;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -32,6 +33,8 @@ import android.os.RemoteException;
 public class AppOpsManager {
     final Context mContext;
     final IAppOpsService mService;
+    final HashMap<Callback, IAppOpsCallback> mModeWatchers
+            = new HashMap<Callback, IAppOpsCallback>();
 
     public static final int MODE_ALLOWED = 0;
     public static final int MODE_IGNORED = 1;
@@ -62,8 +65,9 @@ public class AppOpsManager {
     public static final int OP_READ_ICC_SMS = 21;
     public static final int OP_WRITE_ICC_SMS = 22;
     public static final int OP_WRITE_SETTINGS = 23;
+    public static final int OP_SYSTEM_ALERT_WINDOW = 24;
     /** @hide */
-    public static final int _NUM_OP = 24;
+    public static final int _NUM_OP = 25;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -98,6 +102,7 @@ public class AppOpsManager {
             OP_READ_SMS,
             OP_WRITE_SMS,
             OP_WRITE_SETTINGS,
+            OP_SYSTEM_ALERT_WINDOW,
     };
 
     /**
@@ -129,6 +134,7 @@ public class AppOpsManager {
             "READ_ICC_SMS",
             "WRITE_ICC_SMS",
             "WRITE_SETTINGS",
+            "SYSTEM_ALERT_WINDOW",
     };
 
     /**
@@ -160,6 +166,7 @@ public class AppOpsManager {
             android.Manifest.permission.READ_SMS,
             android.Manifest.permission.WRITE_SMS,
             android.Manifest.permission.WRITE_SETTINGS,
+            android.Manifest.permission.SYSTEM_ALERT_WINDOW,
     };
 
     public static int opToSwitch(int op) {
@@ -167,6 +174,7 @@ public class AppOpsManager {
     }
 
     public static String opToName(int op) {
+        if (op == OP_NONE) return "NONE";
         return op < sOpNames.length ? sOpNames[op] : ("Unknown(" + op + ")");
     }
 
@@ -305,6 +313,10 @@ public class AppOpsManager {
         };
     }
 
+    public interface Callback {
+        public void opChanged(int op, String packageName);
+    }
+
     public AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
@@ -330,6 +342,36 @@ public class AppOpsManager {
         try {
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
+        }
+    }
+
+    public void startWatchingMode(int op, String packageName, final Callback callback) {
+        synchronized (mModeWatchers) {
+            IAppOpsCallback cb = mModeWatchers.get(callback);
+            if (cb == null) {
+                cb = new IAppOpsCallback.Stub() {
+                    public void opChanged(int op, String packageName) {
+                        callback.opChanged(op, packageName);
+                    }
+                };
+                mModeWatchers.put(callback, cb);
+            }
+            try {
+                mService.startWatchingMode(op, packageName, cb);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    public void stopWatchingMode(Callback callback) {
+        synchronized (mModeWatchers) {
+            IAppOpsCallback cb = mModeWatchers.get(callback);
+            if (cb != null) {
+                try {
+                    mService.stopWatchingMode(cb);
+                } catch (RemoteException e) {
+                }
+            }
         }
     }
 
