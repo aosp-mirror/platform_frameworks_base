@@ -1358,7 +1358,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private void applyAllProviderRequirementsLocked() {
         for (LocationProviderInterface p : mProviders) {
             // If provider is already disabled, don't need to do anything
-            if (!isAllowedBySettingsLocked(p.getName(), UserHandle.getUid(mCurrentUserId, 0))) {
+            if (!isAllowedByCurrentUserSettingsLocked(p.getName())) {
                 continue;
             }
 
