@@ -1039,7 +1039,7 @@ nScriptForEach(JNIEnv *_env, jobject _this, RsContext con,
                jint script, jint slot, jint ain, jint aout)
 {
     LOG_API("nScriptForEach, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
-    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, NULL, 0);
+    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, NULL, 0, NULL, 0);
 }
 static void
 nScriptForEachV(JNIEnv *_env, jobject _this, RsContext con,
@@ -1048,10 +1048,32 @@ nScriptForEachV(JNIEnv *_env, jobject _this, RsContext con,
     LOG_API("nScriptForEach, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
     jint len = _env->GetArrayLength(params);
     jbyte *ptr = _env->GetByteArrayElements(params, NULL);
-    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, ptr, len);
+    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, ptr, len, NULL, 0);
     _env->ReleaseByteArrayElements(params, ptr, JNI_ABORT);
 }
 
+static void
+nScriptForEachClipped(JNIEnv *_env, jobject _this, RsContext con,
+                      jint script, jint slot, jint ain, jint aout,
+                      jbyteArray params, jint xstart, jint xend,
+                      jint ystart, jint yend, jint zstart, jint zend)
+{
+    LOG_API("nScriptForEachClipped, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jint len = _env->GetArrayLength(params);
+    jbyte *ptr = _env->GetByteArrayElements(params, NULL);
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, ptr, len, &sc, sizeof(sc));
+    _env->ReleaseByteArrayElements(params, ptr, JNI_ABORT);
+}
 
 // -----------------------------------
 
@@ -1514,6 +1536,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptInvokeV",                 "(III[B)V",                              (void*)nScriptInvokeV },
 {"rsnScriptForEach",                 "(IIIII)V",                              (void*)nScriptForEach },
 {"rsnScriptForEach",                 "(IIIII[B)V",                            (void*)nScriptForEachV },
+{"rsnScriptForEachClipped",          "(IIIII[BIIIIII)V",                      (void*)nScriptForEachClipped },
 {"rsnScriptSetVarI",                 "(IIII)V",                               (void*)nScriptSetVarI },
 {"rsnScriptSetVarJ",                 "(IIIJ)V",                               (void*)nScriptSetVarJ },
 {"rsnScriptSetVarF",                 "(IIIF)V",                               (void*)nScriptSetVarF },

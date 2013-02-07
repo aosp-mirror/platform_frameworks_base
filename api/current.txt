@@ -20098,6 +20098,7 @@ package android.renderscript {
     method protected android.renderscript.Script.FieldID createFieldID(int, android.renderscript.Element);
     method protected android.renderscript.Script.KernelID createKernelID(int, int, android.renderscript.Element, android.renderscript.Element);
     method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker);
+    method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
     method protected void invoke(int);
     method protected void invoke(int, android.renderscript.FieldPacker);
     method public void setTimeZone(java.lang.String);
@@ -20138,13 +20139,18 @@ package android.renderscript {
     method public int getXStart();
     method public int getYEnd();
     method public int getYStart();
-    method public void setX(int, int);
-    method public void setY(int, int);
+    method public int getZEnd();
+    method public int getZStart();
+    method public android.renderscript.Script.LaunchOptions setX(int, int);
+    method public android.renderscript.Script.LaunchOptions setY(int, int);
+    method public android.renderscript.Script.LaunchOptions setZ(int, int);
     field protected int strategy;
     field protected int xend;
     field protected int xstart;
     field protected int yend;
     field protected int ystart;
+    field protected int zend;
+    field protected int zstart;
   }
 
   public class ScriptC extends android.renderscript.Script {

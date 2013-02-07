@@ -166,6 +166,25 @@ public class Script extends BaseObj {
         mRS.nScriptForEach(getID(mRS), slot, in_id, out_id, params);
     }
 
+    protected void forEach(int slot, Allocation ain, Allocation aout, FieldPacker v, LaunchOptions sc) {
+        if (ain == null && aout == null) {
+            throw new RSIllegalArgumentException(
+                "At least one of ain or aout is required to be non-null.");
+        }
+        int in_id = 0;
+        if (ain != null) {
+            in_id = ain.getID(mRS);
+        }
+        int out_id = 0;
+        if (aout != null) {
+            out_id = aout.getID(mRS);
+        }
+        byte[] params = null;
+        if (v != null) {
+            params = v.getData();
+        }
+        mRS.nScriptForEachClipped(getID(mRS), slot, in_id, out_id, params, sc.xstart, sc.xend, sc.ystart, sc.yend, sc.zstart, sc.zend);
+    }
 
     Script(int id, RenderScript rs) {
         super(id, rs);
@@ -320,28 +339,42 @@ public class Script extends BaseObj {
     }
 
     public static final class LaunchOptions {
-        protected int xstart = -1;
-        protected int ystart = -1;
-        protected int xend = -1 ;
-        protected int yend = -1;
+        protected int xstart = 0;
+        protected int ystart = 0;
+        protected int xend = 0;
+        protected int yend = 0;
+        protected int zstart = 0;
+        protected int zend = 0;
 
         protected int strategy;
 
-        public void setX(int xstartArg, int xendArg) {
+        public LaunchOptions setX(int xstartArg, int xendArg) {
             if (xstartArg < 0 || xendArg <= xstartArg) {
                 throw new RSIllegalArgumentException("Invalid dimensions");
             }
             xstart = xstartArg;
             xend = xendArg;
+            return this;
         }
 
-        public void setY(int ystartArg, int yendArg) {
+        public LaunchOptions setY(int ystartArg, int yendArg) {
             if (ystartArg < 0 || yendArg <= ystartArg) {
                 throw new RSIllegalArgumentException("Invalid dimensions");
             }
             ystart = ystartArg;
             yend = yendArg;
+            return this;
         }
+
+        public LaunchOptions setZ(int zstartArg, int zendArg) {
+            if (zstartArg < 0 || zendArg <= zstartArg) {
+                throw new RSIllegalArgumentException("Invalid dimensions");
+            }
+            zstart = zstartArg;
+            zend = zendArg;
+            return this;
+        }
+
 
         public int getXStart() {
             return xstart;
@@ -354,6 +387,12 @@ public class Script extends BaseObj {
         }
         public int getYEnd() {
             return yend;
+        }
+        public int getZStart() {
+            return zstart;
+        }
+        public int getZEnd() {
+            return zend;
         }
 
     }
