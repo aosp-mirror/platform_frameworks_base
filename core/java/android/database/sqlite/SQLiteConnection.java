@@ -974,7 +974,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         if (count != statement.mNumParameters) {
             throw new SQLiteBindOrColumnIndexOutOfRangeException(
                     "Expected " + statement.mNumParameters + " bind arguments but "
-                    + bindArgs.length + " were provided.");
+                    + count + " were provided.");
         }
         if (count == 0) {
             return;
