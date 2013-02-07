@@ -351,7 +351,7 @@ void LayerRenderer::flushLayer(Layer* layer) {
     if (layer && fbo) {
         // If possible, discard any enqueud operations on deferred
         // rendering architectures
-        if (Caches::getInstance().extensions.hasDiscardFramebuffer()) {
+        if (Extensions::getInstance().hasDiscardFramebuffer()) {
             GLuint previousFbo;
             glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
             if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, fbo);

@@ -109,7 +109,8 @@ static const Blender gBlendsSwap[] = {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
+OpenGLRenderer::OpenGLRenderer():
+        mCaches(Caches::getInstance()), mExtensions(Extensions::getInstance()) {
     mShader = NULL;
     mColorFilter = NULL;
     mHasShadow = false;
@@ -216,7 +217,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
     // If we know that we are going to redraw the entire framebuffer,
     // perform a discard to let the driver know we don't need to preserve
     // the back buffer for this frame.
-    if (mCaches.extensions.hasDiscardFramebuffer() &&
+    if (mExtensions.hasDiscardFramebuffer() &&
             left <= 0.0f && top <= 0.0f && right >= mWidth && bottom >= mHeight) {
         const bool isFbo = getTargetFbo() == 0;
         const GLenum attachments[] = {
@@ -1119,7 +1120,7 @@ void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
         it.next();
     }
 
-    drawColorRects(rects.array(), count, color, mode, true, dirty);
+    drawColorRects(rects.array(), count, color, mode, true, dirty, false);
 }
 
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
@@ -1269,15 +1270,12 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
         // attach the new render buffer then turn tiling back on
         endTiling();
 
-        // TODO: See Layer::removeFbo(). The stencil renderbuffer should be cached
-        GLuint buffer;
-        glGenRenderbuffers(1, &buffer);
+        RenderBuffer* buffer = new RenderBuffer(
+                Stencil::getSmallestStencilFormat(), layer->getWidth(), layer->getHeight());
+        buffer->bind();
+        buffer->allocate();
 
         layer->setStencilRenderBuffer(buffer);
-        layer->bindStencilRenderBuffer();
-        layer->allocateStencilRenderBuffer();
-
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, buffer);
 
         startTiling(layer->clipRect, layer->layer.getHeight());
     }
@@ -1525,13 +1523,13 @@ void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
 
 void OpenGLRenderer::setupDrawShader() {
     if (mShader) {
-        mShader->describe(mDescription, mCaches.extensions);
+        mShader->describe(mDescription, mExtensions);
     }
 }
 
 void OpenGLRenderer::setupDrawColorFilter() {
     if (mColorFilter) {
-        mColorFilter->describe(mDescription, mCaches.extensions);
+        mColorFilter->describe(mDescription, mExtensions);
     }
 }
 
@@ -3207,7 +3205,7 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
 }
 
 status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,
-        SkXfermode::Mode mode, bool ignoreTransform, bool dirty) {
+        SkXfermode::Mode mode, bool ignoreTransform, bool dirty, bool clip) {
 
     float left = FLT_MAX;
     float top = FLT_MAX;
@@ -3241,7 +3239,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
         }
     }
 
-    if (count == 0 || quickReject(left, top, right, bottom)) {
+    if (count == 0 || (clip && quickReject(left, top, right, bottom))) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -3386,7 +3384,7 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         // If the blend mode cannot be implemented using shaders, fall
         // back to the default SrcOver blend mode instead
         if (CC_UNLIKELY(mode > SkXfermode::kScreen_Mode)) {
-            if (CC_UNLIKELY(mCaches.extensions.hasFramebufferFetch())) {
+            if (CC_UNLIKELY(mExtensions.hasFramebufferFetch())) {
                 description.framebufferMode = mode;
                 description.swapSrcDst = swapSrcDst;
 

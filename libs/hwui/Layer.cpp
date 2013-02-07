@@ -41,7 +41,7 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
     renderer = NULL;
     displayList = NULL;
     fbo = 0;
-    stencil = 0;
+    stencil = NULL;
     debugDrawUpdate = false;
     Caches::getInstance().resourceCache.incrementRefcount(this);
 }
@@ -87,8 +87,8 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
     }
 
     if (stencil) {
-        bindStencilRenderBuffer();
-        allocateStencilRenderBuffer();
+        stencil->bind();
+        stencil->resize(desiredWidth, desiredHeight);
 
         if (glGetError() != GL_NO_ERROR) {
             setSize(oldWidth, oldHeight);
@@ -108,8 +108,8 @@ void Layer::removeFbo(bool flush) {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
         if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
 
-        glDeleteRenderbuffers(1, &stencil);
-        stencil = 0;
+        delete stencil;
+        stencil = NULL;
     }
 
     if (fbo) {

@@ -26,6 +26,7 @@
 #include <SkXfermode.h>
 
 #include "Rect.h"
+#include "RenderBuffer.h"
 #include "SkiaColorFilter.h"
 #include "Texture.h"
 #include "Vertex.h"
@@ -86,11 +87,11 @@ struct Layer {
         deferredUpdateScheduled = true;
     }
 
-    inline uint32_t getWidth() {
+    inline uint32_t getWidth() const {
         return texture.width;
     }
 
-    inline uint32_t getHeight() {
+    inline uint32_t getHeight() const {
         return texture.height;
     }
 
@@ -116,7 +117,7 @@ struct Layer {
         texture.blend = blend;
     }
 
-    inline bool isBlend() {
+    inline bool isBlend() const {
         return texture.blend;
     }
 
@@ -129,11 +130,11 @@ struct Layer {
         this->mode = mode;
     }
 
-    inline int getAlpha() {
+    inline int getAlpha() const {
         return alpha;
     }
 
-    inline SkXfermode::Mode getMode() {
+    inline SkXfermode::Mode getMode() const {
         return mode;
     }
 
@@ -141,7 +142,7 @@ struct Layer {
         this->empty = empty;
     }
 
-    inline bool isEmpty() {
+    inline bool isEmpty() const {
         return empty;
     }
 
@@ -149,23 +150,29 @@ struct Layer {
         this->fbo = fbo;
     }
 
-    inline GLuint getFbo() {
+    inline GLuint getFbo() const {
         return fbo;
     }
 
-    inline void setStencilRenderBuffer(GLuint renderBuffer) {
-        this->stencil = renderBuffer;
+    inline void setStencilRenderBuffer(RenderBuffer* renderBuffer) {
+        if (RenderBuffer::isStencilBuffer(renderBuffer->getFormat())) {
+            this->stencil = renderBuffer;
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                    GL_RENDERBUFFER, stencil->getName());
+        } else {
+            ALOGE("The specified render buffer is not a stencil buffer");
+        }
     }
 
-    inline GLuint getStencilRenderBuffer() {
+    inline RenderBuffer* getStencilRenderBuffer() const {
         return stencil;
     }
 
-    inline GLuint getTexture() {
+    inline GLuint getTexture() const {
         return texture.id;
     }
 
-    inline GLenum getRenderTarget() {
+    inline GLenum getRenderTarget() const {
         return renderTarget;
     }
 
@@ -181,7 +188,7 @@ struct Layer {
         texture.setFilter(filter, bindTexture, force, renderTarget);
     }
 
-    inline bool isCacheable() {
+    inline bool isCacheable() const {
         return cacheable;
     }
 
@@ -189,7 +196,7 @@ struct Layer {
         this->cacheable = cacheable;
     }
 
-    inline bool isDirty() {
+    inline bool isDirty() const {
         return dirty;
     }
 
@@ -197,7 +204,7 @@ struct Layer {
         this->dirty = dirty;
     }
 
-    inline bool isTextureLayer() {
+    inline bool isTextureLayer() const {
         return textureLayer;
     }
 
@@ -205,21 +212,21 @@ struct Layer {
         this->textureLayer = textureLayer;
     }
 
-    inline SkiaColorFilter* getColorFilter() {
+    inline SkiaColorFilter* getColorFilter() const {
         return colorFilter;
     }
 
     ANDROID_API void setColorFilter(SkiaColorFilter* filter);
 
-    inline void bindTexture() {
+    inline void bindTexture() const {
         if (texture.id) {
             glBindTexture(renderTarget, texture.id);
         }
     }
 
-    inline void bindStencilRenderBuffer() {
+    inline void bindStencilRenderBuffer() const {
         if (stencil) {
-            glBindRenderbuffer(GL_RENDERBUFFER, stencil);
+            stencil->bind();
         }
     }
 
@@ -252,12 +259,6 @@ struct Layer {
         if (texture.id) {
             glTexImage2D(renderTarget, 0, format, getWidth(), getHeight(), 0,
                     format, storage, NULL);
-        }
-    }
-
-    inline void allocateStencilRenderBuffer() {
-        if (stencil) {
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, getWidth(), getHeight());
         }
     }
 
@@ -317,10 +318,9 @@ private:
     GLuint fbo;
 
     /**
-     * Name of the render buffer used as the stencil buffer. If the
-     * name is 0, this layer does not have a stencil buffer.
+     * The render buffer used as the stencil buffer.
      */
-    GLuint stencil;
+    RenderBuffer* stencil;
 
     /**
      * Indicates whether this layer has been used already.

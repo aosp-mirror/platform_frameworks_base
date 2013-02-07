@@ -25,7 +25,6 @@
 
 #include <cutils/compiler.h>
 
-#include "Extensions.h"
 #include "FontRenderer.h"
 #include "GammaFontRenderer.h"
 #include "TextureCache.h"
@@ -244,9 +243,6 @@ public:
     // VBO to draw with
     GLuint meshBuffer;
 
-    // GL extensions
-    Extensions extensions;
-
     // Misc
     GLint maxTextureSize;
     bool debugLayersUpdates;
@@ -311,6 +307,8 @@ private:
     GLint mScissorY;
     GLint mScissorWidth;
     GLint mScissorHeight;
+
+    Extensions& mExtensions;
 
     // Used to render layers
     TextureVertex* mRegionMesh;
