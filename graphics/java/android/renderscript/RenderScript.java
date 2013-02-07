@@ -157,6 +157,12 @@ public class RenderScript {
         rsnContextFinish(mContext);
     }
 
+    native void rsnContextSendMessage(int con, int id, int[] data);
+    synchronized void nContextSendMessage(int id, int[] data) {
+        validate();
+        rsnContextSendMessage(mContext, id, data);
+    }
+
     native void rsnContextBindRootScript(int con, int script);
     synchronized void nContextBindRootScript(int script) {
         validate();
@@ -821,6 +827,16 @@ public class RenderScript {
     }
     public RSMessageHandler getMessageHandler() {
         return mMessageCallback;
+    }
+
+    /**
+     * @hide
+     *
+     * @param id
+     * @param data
+     */
+    public void sendMessage(int id, int[] data) {
+        nContextSendMessage(id, data);
     }
 
     /**
