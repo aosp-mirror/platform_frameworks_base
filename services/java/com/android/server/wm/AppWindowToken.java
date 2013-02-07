@@ -30,6 +30,10 @@ import android.view.View;
 import android.view.WindowManager;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+
+class AppTokenList extends ArrayList<AppWindowToken> {
+}
 
 /**
  * Version of WindowToken that is specifically for a particular application (or

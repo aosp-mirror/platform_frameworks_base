@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -33,6 +34,7 @@ class DisplayContentList extends ArrayList<DisplayContent> {
  * WindowManagerService.mWindowMap.
  */
 class DisplayContent {
+//    private final static String TAG = "DisplayContent";
 
     /** Unique identifier of this stack. */
     private final int mDisplayId;
@@ -67,6 +69,38 @@ class DisplayContent {
     final boolean isDefaultDisplay;
 
     /**
+     * List controlling the ordering of windows in different applications which must
+     * be kept in sync with ActivityManager.
+     */
+    final AppTokenList mAppTokens = new AppTokenList();
+
+    /**
+     * AppWindowTokens in the Z order they were in at the start of an animation. Between
+     * animations this list is maintained in the exact order of mAppTokens. If tokens
+     * are added to mAppTokens during an animation an attempt is made to insert them at the same
+     * logical location in this list. Note that this list is always in sync with mWindows.
+     */
+    AppTokenList mAnimatingAppTokens = new AppTokenList();
+
+    /**
+     * Window tokens that are in the process of exiting, but still
+     * on screen for animations.
+     */
+    final ArrayList<WindowToken> mExitingTokens = new ArrayList<WindowToken>();
+
+    /**
+     * Application tokens that are in the process of exiting, but still
+     * on screen for animations.
+     */
+    final AppTokenList mExitingAppTokens = new AppTokenList();
+
+    /**
+     * Sorted most recent at top, oldest at [0].
+     */
+//    ArrayList<TaskList> mTaskLists = new ArrayList<TaskList>();
+    SparseArray<TaskList> mTaskIdToTaskList = new SparseArray<TaskList>();
+
+    /**
      * @param display May not be null.
      */
     DisplayContent(Display display) {
@@ -96,6 +130,71 @@ class DisplayContent {
         mDisplay.getDisplayInfo(mDisplayInfo);
     }
 
+    /**
+     *  Find the location to insert a new AppWindowToken into the window-ordered app token list.
+     * @param addPos The location the token was inserted into in mAppTokens.
+     * @param atoken The token to insert.
+     */
+    void addAppToken(final int addPos, final AppWindowToken atoken) {
+        mAppTokens.add(addPos, atoken);
+
+        if (addPos == 0 || addPos == mAnimatingAppTokens.size()) {
+            // It was inserted into the beginning or end of mAppTokens. Honor that.
+            mAnimatingAppTokens.add(addPos, atoken);
+        } else {
+            // Find the item immediately above the mAppTokens insertion point and put the token
+            // immediately below that one in mAnimatingAppTokens.
+            final AppWindowToken aboveAnchor = mAppTokens.get(addPos + 1);
+            mAnimatingAppTokens.add(mAnimatingAppTokens.indexOf(aboveAnchor), atoken);
+        }
+
+        TaskList task = mTaskIdToTaskList.get(atoken.groupId);
+        if (task == null) {
+            mTaskIdToTaskList.put(atoken.groupId, new TaskList(atoken));
+        }
+    }
+
+    void removeAppToken(final AppWindowToken wtoken) {
+        mAppTokens.remove(wtoken);
+        mAnimatingAppTokens.remove(wtoken);
+        final int taskId = wtoken.groupId;
+        final TaskList task = mTaskIdToTaskList.get(taskId);
+        if (task != null) {
+            AppTokenList appTokens = task.mAppTokens;
+            appTokens.remove(wtoken);
+            if (appTokens.size() == 0) {
+                mTaskIdToTaskList.delete(taskId);
+            }
+        }
+    }
+
+    void refillAnimatingAppTokens() {
+        mAnimatingAppTokens.clear();
+        mAnimatingAppTokens.addAll(mAppTokens);
+    }
+
+    void setAppTaskId(AppWindowToken wtoken, int newTaskId) {
+        final int taskId = wtoken.groupId;
+        TaskList task = mTaskIdToTaskList.get(taskId);
+        if (task != null) {
+            AppTokenList appTokens = task.mAppTokens;
+            appTokens.remove(wtoken);
+            if (appTokens.size() == 0) {
+                mTaskIdToTaskList.delete(taskId);
+            }
+        }
+
+        task = mTaskIdToTaskList.get(newTaskId);
+        if (task == null) {
+            task = new TaskList(wtoken);
+            mTaskIdToTaskList.put(newTaskId, task);
+        } else {
+            task.mAppTokens.add(wtoken);
+        }
+
+        wtoken.groupId = newTaskId;
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
@@ -119,7 +218,48 @@ class DisplayContent {
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-        pw.print(subPrefix); pw.print("layoutNeeded="); pw.print(layoutNeeded);
+            if (mAppTokens.size() > 0) {
+                pw.println();
+                pw.println("  Application tokens in Z order:");
+                for (int i=mAppTokens.size()-1; i>=0; i--) {
+                    pw.print("  App #"); pw.print(i);
+                            pw.print(' '); pw.print(mAppTokens.get(i)); pw.println(":");
+                    mAppTokens.get(i).dump(pw, "    ");
+                }
+            }
+            if (mExitingTokens.size() > 0) {
+                pw.println();
+                pw.println("  Exiting tokens:");
+                for (int i=mExitingTokens.size()-1; i>=0; i--) {
+                    WindowToken token = mExitingTokens.get(i);
+                    pw.print("  Exiting #"); pw.print(i);
+                    pw.print(' '); pw.print(token);
+                    pw.println(':');
+                    token.dump(pw, "    ");
+                }
+            }
+            if (mExitingAppTokens.size() > 0) {
+                pw.println();
+                pw.println("  Exiting application tokens:");
+                for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
+                    WindowToken token = mExitingAppTokens.get(i);
+                    pw.print("  Exiting App #"); pw.print(i);
+                      pw.print(' '); pw.print(token);
+                      pw.println(':');
+                      token.dump(pw, "    ");
+                }
+            }
+            if (mTaskIdToTaskList.size() > 0) {
+                pw.println();
+                for (int i = 0; i < mTaskIdToTaskList.size(); ++i) {
+                    pw.print("  TaskList #"); pw.print(i);
+                      pw.print(" taskId="); pw.println(mTaskIdToTaskList.keyAt(i));
+                    pw.print("    mAppTokens=");
+                      pw.println(mTaskIdToTaskList.valueAt(i).mAppTokens);
+                    pw.println();
+                }
+            }
+        pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
         pw.println();
     }
 }
