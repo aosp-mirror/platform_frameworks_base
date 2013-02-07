@@ -42,7 +42,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Enterprise configuration details for Wi-Fi @hide */
+/** 
+ * Enterprise configuration details for Wi-Fi. Stores details about the EAP method
+ * and any associated credentials.
+ */
 public class WifiEnterpriseConfig implements Parcelable {
     private static final String TAG = "WifiEnterpriseConfig";
     /**
@@ -211,22 +214,32 @@ public class WifiEnterpriseConfig implements Parcelable {
                 }
             };
 
+    /** The Extensible Authentication Protocol method used */
     public static final class Eap {
-        /* NONE represents an empty enterprise config */
+        /** No EAP method used. Represents an empty config */
         public static final int NONE    = -1;
+        /** Protected EAP */
         public static final int PEAP    = 0;
+        /** EAP-Transport Layer Security */
         public static final int TLS     = 1;
+        /** EAP-Tunneled Transport Layer Security */
         public static final int TTLS    = 2;
+        /** EAP-Password */
         public static final int PWD     = 3;
         /** @hide */
         public static final String[] strings = { "PEAP", "TLS", "TTLS", "PWD" };
     }
 
+    /** The inner authentication method used */
     public static final class Phase2 {
         public static final int NONE        = 0;
+        /** Password Authentication Protocol */
         public static final int PAP         = 1;
+        /** Microsoft Challenge Handshake Authentication Protocol */
         public static final int MSCHAP      = 2;
+        /** Microsoft Challenge Handshake Authentication Protocol v2 */
         public static final int MSCHAPV2    = 3;
+        /** Generic Token Card */
         public static final int GTC         = 4;
         private static final String PREFIX = "auth=";
         /** @hide */
@@ -249,6 +262,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * Set the EAP authentication method.
      * @param  eapMethod is one {@link Eap#PEAP}, {@link Eap#TLS}, {@link Eap#TTLS} or
      *                   {@link Eap#PWD}
+     * @throws IllegalArgumentException on an invalid eap method
      */
     public void setEapMethod(int eapMethod) {
         switch (eapMethod) {
@@ -279,6 +293,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param phase2Method is the inner authentication method and can be one of {@link Phase2#NONE},
      *                     {@link Phase2#PAP}, {@link Phase2#MSCHAP}, {@link Phase2#MSCHAPV2},
      *                     {@link Phase2#GTC}
+     * @throws IllegalArgumentException on an invalid phase2 method
      *
      */
     public void setPhase2Method(int phase2Method) {
@@ -378,7 +393,10 @@ public class WifiEnterpriseConfig implements Parcelable {
      * Specify a X.509 certificate that identifies the server.
      *
      * <p>A default name is automatically assigned to the certificate and used
-     * with this configuration.
+     * with this configuration. The framework takes care of installing the
+     * certificate when the config is saved and removing the certificate when
+     * the config is removed.
+     *
      * @param cert X.509 CA certificate
      * @throws IllegalArgumentException if not a CA certificate
      */
@@ -425,9 +443,13 @@ public class WifiEnterpriseConfig implements Parcelable {
      * Specify a private key and client certificate for client authorization.
      *
      * <p>A default name is automatically assigned to the key entry and used
-     * with this configuration.
+     * with this configuration.  The framework takes care of installing the
+     * key entry when the config is saved and removing the key entry when
+     * the config is removed.
+
      * @param privateKey
      * @param clientCertificate
+     * @throws IllegalArgumentException for an invalid key or certificate.
      */
     public void setClientKeyEntry(PrivateKey privateKey, X509Certificate clientCertificate) {
         if (clientCertificate != null) {
