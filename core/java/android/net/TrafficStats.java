@@ -315,6 +315,30 @@ public class TrafficStats {
         return total;
     }
 
+    /** {@hide} */
+    public static long getMobileTcpRxPackets() {
+        long total = 0;
+        for (String iface : getMobileIfaces()) {
+            final long stat = nativeGetIfaceStat(iface, TYPE_TCP_RX_PACKETS);
+            if (stat != UNSUPPORTED) {
+                total += stat;
+            }
+        }
+        return total;
+    }
+
+    /** {@hide} */
+    public static long getMobileTcpTxPackets() {
+        long total = 0;
+        for (String iface : getMobileIfaces()) {
+            final long stat = nativeGetIfaceStat(iface, TYPE_TCP_TX_PACKETS);
+            if (stat != UNSUPPORTED) {
+                total += stat;
+            }
+        }
+        return total;
+    }
+
     /**
      * Get the total number of packets transmitted through the specified interface.
      *
@@ -587,6 +611,8 @@ public class TrafficStats {
     private static final int TYPE_RX_PACKETS = 1;
     private static final int TYPE_TX_BYTES = 2;
     private static final int TYPE_TX_PACKETS = 3;
+    private static final int TYPE_TCP_RX_PACKETS = 4;
+    private static final int TYPE_TCP_TX_PACKETS = 5;
 
     private static native long nativeGetTotalStat(int type);
     private static native long nativeGetIfaceStat(String iface, int type);

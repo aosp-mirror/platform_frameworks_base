@@ -31,8 +31,7 @@
 
 namespace android {
 
-static const uint64_t VALUE_UNKNOWN = -1;
-static const char* IFACE_STAT_ALL = "/proc/net/xt_qtaguid/iface_stat_all";
+static const char* QTAGUID_IFACE_STATS = "/proc/net/xt_qtaguid/iface_stat_fmt";
 
 enum Tx_Rx {
     TX,
@@ -46,19 +45,44 @@ enum Tcp_Udp {
 };
 
 // NOTE: keep these in sync with TrafficStats.java
-enum IfaceStatType {
+static const uint64_t UNKNOWN = -1;
+
+enum StatsType {
     RX_BYTES = 0,
     RX_PACKETS = 1,
     TX_BYTES = 2,
-    TX_PACKETS = 3
+    TX_PACKETS = 3,
+    TCP_RX_PACKETS = 4,
+    TCP_TX_PACKETS = 5
 };
 
-struct IfaceStat {
+struct Stats {
     uint64_t rxBytes;
     uint64_t rxPackets;
     uint64_t txBytes;
     uint64_t txPackets;
+    uint64_t tcpRxPackets;
+    uint64_t tcpTxPackets;
 };
+
+static uint64_t getStatsType(struct Stats* stats, StatsType type) {
+    switch (type) {
+        case RX_BYTES:
+            return stats->rxBytes;
+        case RX_PACKETS:
+            return stats->rxPackets;
+        case TX_BYTES:
+            return stats->txBytes;
+        case TX_PACKETS:
+            return stats->txPackets;
+        case TCP_RX_PACKETS:
+            return stats->tcpRxPackets;
+        case TCP_TX_PACKETS:
+            return stats->tcpTxPackets;
+        default:
+            return UNKNOWN;
+    }
+}
 
 // Returns an ASCII decimal number read from the specified file, -1 on error.
 static jlong readNumber(char const* filename) {
@@ -81,79 +105,72 @@ static jlong readNumber(char const* filename) {
     return atoll(buf);
 }
 
-static int parseIfaceStat(const char* iface, struct IfaceStat* stat) {
-    FILE *fp = fopen(IFACE_STAT_ALL, "r");
-    if (!fp) {
-        return errno;
+static int parseIfaceStats(const char* iface, struct Stats* stats) {
+    FILE *fp = fopen(QTAGUID_IFACE_STATS, "r");
+    if (fp == NULL) {
+        return -1;
     }
 
     char buffer[256];
     char cur_iface[32];
-    int active;
-    uint64_t rxBytes, rxPackets, txBytes, txPackets, devRxBytes, devRxPackets, devTxBytes,
-            devTxPackets;
+    bool foundTcp = false;
+    uint64_t rxBytes, rxPackets, txBytes, txPackets, tcpRxPackets, tcpTxPackets;
 
-    while (fgets(buffer, 256, fp) != NULL) {
-        if (sscanf(buffer, "%31s %d %llu %llu %llu %llu %llu %llu %llu %llu", cur_iface, &active,
-                   &rxBytes, &rxPackets, &txBytes, &txPackets, &devRxBytes, &devRxPackets,
-                   &devTxBytes, &devTxPackets) != 10) {
-            continue;
-        }
-
-        if (!iface || !strcmp(iface, cur_iface)) {
-            stat->rxBytes += rxBytes;
-            stat->rxPackets += rxPackets;
-            stat->txBytes += txBytes;
-            stat->txPackets += txPackets;
-
-            if (active) {
-                stat->rxBytes += devRxBytes;
-                stat->rxPackets += devRxPackets;
-                stat->txBytes += devTxBytes;
-                stat->txPackets += devTxPackets;
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        int matched = sscanf(buffer, "%31s %llu %llu %llu %llu "
+                "%*llu %llu %*llu %*llu %*llu %*llu "
+                "%*llu %llu %*llu %*llu %*llu %*llu", cur_iface, &rxBytes,
+                &rxPackets, &txBytes, &txPackets, &tcpRxPackets, &tcpTxPackets);
+        if (matched >= 5) {
+            if (matched == 7) {
+                foundTcp = true;
+            }
+            if (!iface || !strcmp(iface, cur_iface)) {
+                stats->rxBytes += rxBytes;
+                stats->rxPackets += rxPackets;
+                stats->txBytes += txBytes;
+                stats->txPackets += txPackets;
+                if (matched == 7) {
+                    stats->tcpRxPackets += tcpRxPackets;
+                    stats->tcpTxPackets += tcpTxPackets;
+                }
             }
         }
     }
 
-    fclose(fp);
+    if (!foundTcp) {
+        stats->tcpRxPackets = UNKNOWN;
+        stats->tcpTxPackets = UNKNOWN;
+    }
+
+    if (fclose(fp) != 0) {
+        return -1;
+    }
     return 0;
 }
 
-static uint64_t getIfaceStatType(const char* iface, IfaceStatType type) {
-    struct IfaceStat stat;
-    memset(&stat, 0, sizeof(IfaceStat));
-
-    if (parseIfaceStat(iface, &stat)) {
-        return VALUE_UNKNOWN;
-    }
-
-    switch (type) {
-        case RX_BYTES:
-            return stat.rxBytes;
-        case RX_PACKETS:
-            return stat.rxPackets;
-        case TX_BYTES:
-            return stat.txBytes;
-        case TX_PACKETS:
-            return stat.txPackets;
-        default:
-            return VALUE_UNKNOWN;
-    }
-}
-
 static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type) {
-    return getIfaceStatType(NULL, (IfaceStatType) type);
+    struct Stats stats;
+    memset(&stats, 0, sizeof(Stats));
+    if (parseIfaceStats(NULL, &stats) == 0) {
+        return getStatsType(&stats, (StatsType) type);
+    } else {
+        return UNKNOWN;
+    }
 }
 
 static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type) {
-    struct IfaceStat stat;
-    const char* ifaceChars = env->GetStringUTFChars(iface, NULL);
-    if (ifaceChars) {
-        uint64_t stat = getIfaceStatType(ifaceChars, (IfaceStatType) type);
-        env->ReleaseStringUTFChars(iface, ifaceChars);
-        return stat;
+    ScopedUtfChars iface8(env, iface);
+    if (iface8.c_str() == NULL) {
+        return UNKNOWN;
+    }
+
+    struct Stats stats;
+    memset(&stats, 0, sizeof(Stats));
+    if (parseIfaceStats(NULL, &stats) == 0) {
+        return getStatsType(&stats, (StatsType) type);
     } else {
-        return VALUE_UNKNOWN;
+        return UNKNOWN;
     }
 }
 
