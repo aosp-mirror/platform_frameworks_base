@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Ermöglicht der App, Netzwerkrichtlinien zu verwalten und anwendungsspezifische Regeln festzulegen"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"Zuordnung für Netzwerknutzung ändern"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Ermöglicht der App, die Art und Weise zu ändern, wie der Netzwerkverbrauch im Hinblick auf Apps berechnet wird. Nicht für normale Apps vorgesehen."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Zulässige Länge und Zeichen für Passwörter zum Entsperren des Bildschirms festlegen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>

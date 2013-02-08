@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Programu omogoča upravljanje pravilnikov o omrežju in določanje pravil za program."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"spremeni obračunavanje uporabe omrežja"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Programu omogoča, da spremeni uporabo omrežja na podlagi programov. Ni za uporabo z navadnimi programi."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>

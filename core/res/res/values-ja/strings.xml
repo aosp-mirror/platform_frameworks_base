@@ -241,8 +241,8 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"緊急放送の受信"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"緊急ブロードキャストメッセージの受信と処理をアプリに許可します。これはシステムアプリのみが利用できる権限です。"</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"エリアメールSMSの読み取り"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信したエリアメールSMSの読み取りをアプリに許可します。エリアメール警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急エリアメールの受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"緊急警報SMSの読み取り"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信した緊急警報SMSの読み取りをアプリに許可します。緊急警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急警報の受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"メッセージ応答イベントの送信"</string>
@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ネットワークポリシーを管理しアプリ固有のルールを定義することをアプリに許可します。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ネットワークの課金の変更"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"アプリに対するネットワーク利用の計算方法を変更することをアプリに許可します。通常のアプリでは使用しません。"</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"画面ロック解除パスワードの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>

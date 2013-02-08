@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Sallii sovelluksen hallinnoida verkkokäytäntöjä ja määritellä sovelluskohtaisia sääntöjä."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"verkon käytön seurannan muokkaaminen"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Antaa sovelluksen muokata, miten sovellusten verkonkäyttöä lasketaan. Ei tavallisten sovellusten käyttöön."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>

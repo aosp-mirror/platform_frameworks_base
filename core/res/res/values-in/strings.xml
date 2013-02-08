@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Mengizinkan apl mengelola kebijakan jaringan dan menentukan peraturan khusus apl."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"mengubah penghitungan penggunaan jaringan"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Mengizinkan apl memodifikasi cara penggunaan jaringan diperhitungkan terhadap apl. Tidak untuk digunakan oleh apl normal."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrol panjang dan karakter yang diizinkan dalam sandi pembuka layar."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Upaya pembukaan kunci layar monitor"</string>

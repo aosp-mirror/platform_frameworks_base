@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Lehetővé teszi az alkalmazás számára, hogy kezelje a hálózati irányelveket és meghatározza az alkalmazásspecifikus szabályokat."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"hálózathasználat elszámolásának módosítása"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Lehetővé teszi az alkalmazás számára annak módosítását, hogy a hálózathasználatot hogyan számolják el az alkalmazások esetében. Normál alkalmazások nem használhatják."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"A képernyőzár-feloldási jelszavakban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>

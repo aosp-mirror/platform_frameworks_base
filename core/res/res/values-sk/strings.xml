@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Umožňuje aplikácii spravovať pravidlá siete a definovať pravidlá pre konkrétnu aplikáciu."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"zmeniť kontrolu používania siete"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Umožňuje aplikácii upraviť používanie siete jednotlivými aplikáciami. Bežné aplikácie toto nastavenie nepoužívajú."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ovládanie dĺžky hesiel na odomknutie obrazovky a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>
@@ -1105,11 +1109,11 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Hlasitosť hovoru"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Hlasitosť médií"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Hlasitosť upozornení"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Predvolený vyzváňací tón"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Predvolený vyzváňací tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Predvolený tón zvonenia"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Predvolený tón zvonenia (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Žiadny"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváňacie tóny"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámy vyzváňací tón"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámy tón zvonenia"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"K dispozícii je sieť Wi-Fi"</item>
     <item quantity="other" msgid="4192424489168397386">"K dispozícii sú siete Wi-Fi."</item>

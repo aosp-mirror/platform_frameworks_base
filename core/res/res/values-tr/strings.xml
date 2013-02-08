@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Uygulamaya, ağ politikalarını yönetme ve uygulamaya özgü kuralları tanımlama izni verir."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ağ kullanım hesaplamasını değiştir"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Uygulamaya, ağın uygulamalara göre nasıl kullanılacağını değiştirme izni verir. Normal uygulamalar tarafından kullanılmak için değildir."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
