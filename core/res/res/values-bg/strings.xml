@@ -245,10 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Разрешава на приложението да чете съобщения с клетъчно излъчване, получени от устройството ви. Сигналите с клетъчно излъчване се получават на някои местоположения, за да ви предупредят за спешни ситуации. Злонамерените приложения могат да възпрепятстват изпълнението или работата на устройството ви при получаване на такова спешно излъчване."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"изпращане на SMS съобщения"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Разрешава на приложението да изпраща SMS съобщения. Това може да доведе до неочаквано таксуване. Злонамерените приложения могат да ви въвлекат в разходи, като изпращат съобщения без потвърждение от ваша страна."</string>
-    <!-- no translation found for permlab_sendRespondViaMessageRequest (8713889105305943200) -->
-    <skip />
-    <!-- no translation found for permdesc_sendRespondViaMessageRequest (7107648548468778734) -->
-    <skip />
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"изпращане на покани за отговор чрез съобщение"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Разрешава на приложението да изпраща заявки до други приложения за съобщения, за да обработва покани за отговор чрез SMS за входящите обаждания."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"четене на текстовите ви съобщения (SMS или MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Разрешава на приложението да чете SMS съобщенията, съхранени на таблета или SIM картата ви. Това разрешение му позволява да чете всички съобщения независимо от съдържанието или поверителността."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Разрешава на приложението да чете SMS съобщенията, съхранени на телефона или SIM картата ви. Това разрешение му позволява да чете всички съобщения независимо от съдържанието или поверителността."</string>
@@ -351,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"заявяване на изследване чрез докосване"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Разрешава на собственика да заяви режим на взаимодействие, при който докоснатите елементи се изговарят на глас и потребителският интерфейс може да бъде изследван чрез жестове."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"заявяване на подобрена достъпност в мрежата"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Разрешава на собственика да заяви активирането на подобрения на достъпността в мрежата – например инсталирането на скриптове, за да стане съдържанието от приложенията по-достъпно."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"обвързване с текстова услуга"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на текстова услуга (напр. SpellCheckerService). Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"обвързване с услуга за VPN"</string>
@@ -620,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Разрешава на приложението да управлява правилата на мрежата и да определя такива за конкретно приложение."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"промяна на отчетността на употребата на мрежа"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Разрешава на приложението да променя това как употребата на мрежа се отчита спрямо приложенията. Не е предназначено за нормални приложения."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролирайте дължината и разрешените знаци за паролите за отключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>
