@@ -3793,6 +3793,13 @@ public final class ViewRootImpl implements ViewParent,
                         finishInputEvent(q, true);
                         return;
                     }
+                } else {
+                    // find the best view to give focus to in this non-touch-mode with no-focus
+                    View v = focusSearch(null, direction);
+                    if (v != null && v.requestFocus(direction)) {
+                        finishInputEvent(q, true);
+                        return;
+                    }
                 }
             }
         }
