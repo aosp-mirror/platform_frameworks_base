@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -33,12 +34,23 @@ import android.widget.TextView;
 
 import libcore.util.MutableInt;
 
+import java.lang.ref.WeakReference;
+
 import com.android.internal.R;
 
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
 class KeyguardMessageArea extends TextView {
+    /** Handler token posted with accessibility announcement runnables. */
+    private static final Object ANNOUNCE_TOKEN = new Object();
+
+    /**
+     * Delay before speaking an accessibility announcement. Used to prevent
+     * lift-to-type from interrupting itself.
+     */
+    private static final long ANNOUNCEMENT_DELAY = 250;
+
     static final int CHARGING_ICON = 0; //R.drawable.ic_lock_idle_charging;
     static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
 
@@ -174,7 +186,9 @@ class KeyguardMessageArea extends TextView {
         if (mTimeout > 0) {
             mHandler.postDelayed(mClearMessageRunnable, mTimeout);
         }
-        announceForAccessibility(getText());
+        mHandler.removeCallbacksAndMessages(ANNOUNCE_TOKEN);
+        mHandler.postAtTime(new AnnounceRunnable(this, getText()), ANNOUNCE_TOKEN,
+                (SystemClock.uptimeMillis() + ANNOUNCEMENT_DELAY));
     }
 
     /**
@@ -269,6 +283,27 @@ class KeyguardMessageArea extends TextView {
             anim.start();
         } else {
             setAlpha(1f);
+        }
+    }
+
+    /**
+     * Runnable used to delay accessibility announcements.
+     */
+    private static class AnnounceRunnable implements Runnable {
+        private final WeakReference<View> mHost;
+        private final CharSequence mTextToAnnounce;
+
+        public AnnounceRunnable(View host, CharSequence textToAnnounce) {
+            mHost = new WeakReference<View>(host);
+            mTextToAnnounce = textToAnnounce;
+        }
+
+        @Override
+        public void run() {
+            final View host = mHost.get();
+            if (host != null) {
+                host.announceForAccessibility(mTextToAnnounce);
+            }
         }
     }
 }
