@@ -19485,6 +19485,7 @@ package android.renderscript {
 
   public class FieldPacker {
     ctor public FieldPacker(int);
+    ctor public FieldPacker(byte[]);
     method public void addBoolean(boolean);
     method public void addF32(float);
     method public void addF32(android.renderscript.Float2);
