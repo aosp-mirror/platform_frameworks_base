@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -33,7 +34,8 @@ import android.speech.tts.TextToSpeech.Engine;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
@@ -654,19 +656,19 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    private class SynthesisToFileSpeechItem extends SynthesisSpeechItem {
-        private final File mFile;
+    private class SynthesisToFileSpeechDescriptorItem extends SynthesisSpeechItem {
+        private final FileDescriptor mFileDescriptor;
 
-        public SynthesisToFileSpeechItem(Object callerIdentity, int callerUid, int callerPid,
-                Bundle params, String text,
-                File file) {
+        public SynthesisToFileSpeechDescriptorItem(Object callerIdentity, int callerUid,
+                int callerPid, Bundle params, String text, FileDescriptor fileDescriptor) {
             super(callerIdentity, callerUid, callerPid, params, text);
-            mFile = file;
+            mFileDescriptor = fileDescriptor;
         }
 
         @Override
         protected AbstractSynthesisCallback createSynthesisCallback() {
-            return new FileSynthesisCallback(mFile);
+            FileOutputStream fileOutputStream = new FileOutputStream(mFileDescriptor);
+            return new FileSynthesisCallback(fileOutputStream.getChannel());
         }
 
         @Override
@@ -797,15 +799,15 @@ public abstract class TextToSpeechService extends Service {
         }
 
         @Override
-        public int synthesizeToFile(IBinder caller, String text, String filename,
-                Bundle params) {
-            if (!checkNonNull(caller, text, filename, params)) {
+        public int synthesizeToFileDescriptor(IBinder caller, String text, ParcelFileDescriptor
+                fileDescriptor, Bundle params) {
+            if (!checkNonNull(caller, text, fileDescriptor, params)) {
                 return TextToSpeech.ERROR;
             }
 
-            File file = new File(filename);
-            SpeechItem item = new SynthesisToFileSpeechItem(caller, Binder.getCallingUid(),
-                    Binder.getCallingPid(), params, text, file);
+            SpeechItem item = new SynthesisToFileSpeechDescriptorItem(caller, Binder.getCallingUid(),
+                    Binder.getCallingPid(), params, text,
+                    fileDescriptor.getFileDescriptor());
             return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
         }
 
