@@ -9376,7 +9376,7 @@ package android.graphics.drawable {
 
   public class BitmapDrawable extends android.graphics.drawable.Drawable {
     ctor public deprecated BitmapDrawable();
-    ctor public BitmapDrawable(android.content.res.Resources);
+    ctor public deprecated BitmapDrawable(android.content.res.Resources);
     ctor public deprecated BitmapDrawable(android.graphics.Bitmap);
     ctor public BitmapDrawable(android.content.res.Resources, android.graphics.Bitmap);
     ctor public deprecated BitmapDrawable(java.lang.String);

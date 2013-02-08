@@ -74,8 +74,8 @@ public class BitmapDrawable extends Drawable {
     
     /**
      * Create an empty drawable, not dealing with density.
-     * @deprecated Use {@link #BitmapDrawable(Resources)} to ensure
-     * that the drawable has correctly set its target density.
+     * @deprecated Use {@link #BitmapDrawable(android.content.res.Resources, android.graphics.Bitmap)}
+     * instead to specify a bitmap to draw with and ensure the correct density is set.
      */
     @Deprecated
     public BitmapDrawable() {
@@ -85,7 +85,10 @@ public class BitmapDrawable extends Drawable {
     /**
      * Create an empty drawable, setting initial target density based on
      * the display metrics of the resources.
+     * @deprecated Use {@link #BitmapDrawable(android.content.res.Resources, android.graphics.Bitmap)}
+     * instead to specify a bitmap to draw with.
      */
+    @Deprecated
     @SuppressWarnings({"UnusedParameters"})
     public BitmapDrawable(Resources res) {
         mBitmapState = new BitmapState((Bitmap) null);
