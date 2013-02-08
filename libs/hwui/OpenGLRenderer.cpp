@@ -2145,6 +2145,11 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     VertexBuffer buffer;
     SkRect bounds;
     PathTessellator::tessellateLines(points, count, paint, mSnapshot->transform, bounds, buffer);
+
+    if (quickReject(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
+        return DrawGlInfo::kStatusDone;
+    }
+
     dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
 
     bool useOffset = !paint->isAntiAlias();
@@ -2166,6 +2171,7 @@ status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
         strokeWidth = 1.0f;
     }
     const float halfWidth = strokeWidth / 2;
+
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
