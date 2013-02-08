@@ -772,6 +772,7 @@ final class DisplayPowerController {
                 mNotifier.onScreenOn();
             } else {
                 mLights.getLight(LightsService.LIGHT_ID_BUTTONS).setBrightness(0);
+                mLights.getLight(LightsService.LIGHT_ID_KEYBOARD).setBrightness(0);
                 mNotifier.onScreenOff();
             }
         }

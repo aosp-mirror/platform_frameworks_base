@@ -187,6 +187,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private DreamManagerService mDreamManager;
     private LightsService.Light mAttentionLight;
     private LightsService.Light mButtonsLight;
+    private LightsService.Light mKeyboardLight;
 
     private final Object mLock = new Object();
 
@@ -386,6 +387,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeCpuBoost(int duration);
+    private boolean mKeyboardVisible = false;
 
     public PowerManagerService() {
         synchronized (mLock) {
@@ -469,6 +471,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             mSettingsObserver = new SettingsObserver(mHandler);
             mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
             mButtonsLight = mLightsService.getLight(LightsService.LIGHT_ID_BUTTONS);
+            mKeyboardLight = mLightsService.getLight(LightsService.LIGHT_ID_KEYBOARD);
 
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
@@ -939,6 +942,18 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     @Override // Binder call
+    public void setKeyboardVisibility(boolean visible) {
+        synchronized (mLock) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "setKeyboardVisibility: " + visible);
+            }
+            if (mKeyboardVisible != visible) {
+                mKeyboardVisible = visible;
+            }
+        }
+    }
+
+    @Override // Binder call
     public void wakeUp(long eventTime) {
         if (eventTime > SystemClock.uptimeMillis()) {
             throw new IllegalArgumentException("event time must not be in the future");
@@ -1364,11 +1379,13 @@ public final class PowerManagerService extends IPowerManager.Stub
                     if (now < nextTimeout) {
                         if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
                             mButtonsLight.setBrightness(0);
+                            mKeyboardLight.setBrightness(0);
                         } else {
                             int brightness = mButtonBrightnessOverrideFromWindowManager >= 0
                                     ? mButtonBrightnessOverrideFromWindowManager
                                     : mDisplayPowerRequest.screenBrightness;
                             mButtonsLight.setBrightness(brightness);
+                            mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
                             if (brightness != 0) {
                                 nextTimeout = now + BUTTON_ON_DURATION;
                             }
