@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Laat die program toe om seluitsending-boodskappe te lees wat deur jou toestel ontvang word. Seluitsending-waarskuwings word in sommige plekke afgelewer om jou van noodsituasies te waarsku. Kwaadwillige programme mag inmeng met die prestasie of die werking van jou toestel wanneer \'n noodgeval se seluitsending ontvang word."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"stuur SMS-boodskappe"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Laat die program toe om SMS-boodskappe te stuur. Dit kan tot onverwagse heffings lei. Kwaadwillige programme kan jou geld kos deur boodskappe sonder jou bevestiging te stuur."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"stuur sms-boodskappe met geen bestiging"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Laat die program toe om SMS-boodskappe te stuur. Dit kan tot onverwagse heffings lei. Kwaadwillige programme kan jou geld kos deur boodskappe sonder jou bevestiging te stuur."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"stuur antwoord-via-boodskap-geleenthede"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Laat die program toe om versoeke te stuur na ander boodskapprogramme om antwoord-via-boodskap-geleenthede vir inkomende oproepe te hanteer."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lees jou teksboodskappe (SMS of MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Laat die program toe om SMS-boodskappe wat op jou tablet of SIM-kaart gestoor is, te lees. Dit laat die program toe om alle SMS-boodskappe te lees, ongeag van die inhoud of vertroulikheid daarvan."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Laat die program toe om SMS-boodskappe wat op jou foon of SIM-kaart gestoor is, te lees. Dit laat die program toe om alle SMS-boodskappe te lees, ongeag van die inhoud of vertroulikheid daarvan."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"versoek verken-met-aanraking"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Laat die houer toe om \'n interaksiemodus te versoek waarin geraakte items hardop uitgespreek word en die UI via handgebare verken kan word."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"versoek verbeterde webtoeganklikheid"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Laat die houer toe om te versoek dat webtoeganklikheidsverbeterings geaktiveer word. Byvoorbeeld, om skripte te installeer om programinhoud meer toeganklik te maak."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bind aan \'n teksdiens"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n teksdiens (bv SpellCheckerService) te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind aan \'n VPN-diens"</string>

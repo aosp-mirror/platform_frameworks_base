@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lehetővé teszi az alkalmazás számára az eszközre érkező cellán belüli üzenetek olvasását. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások befolyásolhatják az eszköz  teljesítményét vagy működését vészhelyzeti cellaüzenet érkezésekor."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-ek küldése"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lehetővé teszi az alkalmazás számára, hogy SMS-eket küldjön. Ennek eredményeként váratlan terhelésekkel találkozhat. A rosszindulatú alkalmazások az Ön jóváhagyása nélkül küldhetnek üzeneteket, így költségek merülhetnek fel."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"SMS üzenetek küldése megerősítés nélkül"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Lehetővé teszi az alkalmazás számára, hogy SMS-eket küldjön. Ennek eredményeként váratlan terhelésekkel találkozhat. A rosszindulatú alkalmazások az Ön jóváhagyása nélkül küldhetnek üzeneteket, így költségek merülhetnek fel."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"válaszküldés üzenetben"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Lehetővé teszi az alkalmazás számára, hogy kérelmeket küldjön más üzenetküldő alkalmazásoknak, azért hogy kezelje az üzenetben történő válaszküldést a bejövő hívások esetében."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"szöveges üzenetek (SMS vagy MMS) olvasása"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen a táblagépen vagy SIM kártyán tárolt SMS-ekhez. Így az alkalmazás hozzáférhet az összes SMS-hez, azok tartalmától és titkos jellegétől függetlenül."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen a telefonon vagy SIM kártyán tárolt SMS-ekhez. Így az alkalmazás hozzáférhet az összes SMS-hez, azok tartalmától és titkos jellegétől függetlenül."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"felfedezés érintéssel kérése"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Lehetővé teszi a felhasználó számára egy olyan használati mód engedélyezését, amelyben az eszköz kimondja, hogy milyen elemek lettek megérintve, a felhasználói felület pedig felfedezhető kézmozdulatok révén."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"bővített internetes kisegítő lehetőségek kérése"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Lehetővé teszi a felhasználó számára az internetes kisegítő lehetőségek bővítését. Telepíthet például szkripteket, hogy még inkább elérhetővé tegye az alkalmazás tartalmát."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"csatlakozás szövegszolgáltatáshoz"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Lehetővé teszi, hogy a tulajdonos egy szöveges szolgáltatás felső szintjéhez kapcsolódjon (pl. SpellCheckerService). A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"csatlakozás egy VPN-szolgáltatáshoz"</string>

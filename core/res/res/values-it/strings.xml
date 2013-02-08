@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le applicazioni dannose potrebbero interferire con il rendimento o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"invio SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Consente all\'applicazione di inviare messaggi SMS. Ciò potrebbe comportare costi imprevisti. Applicazioni dannose potrebbero generare dei costi inviando messaggi senza la tua conferma."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"invio di messaggi SMS senza conferma"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Consente all\'applicazione di inviare messaggi SMS. Ciò potrebbe comportare costi imprevisti. Applicazioni dannose potrebbero generare dei costi inviando messaggi senza la tua conferma."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"invio di eventi di risposta tramite messaggio"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Consente all\'app di inviare richieste ad altre app di messaggi per gestire eventi di risposta tramite messaggio per le chiamate in arrivo."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lettura messaggi di testo personali (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Consente all\'applicazione di leggere i messaggi SMS memorizzati sul tablet o sulla scheda SIM. Ciò consente all\'applicazione di leggere tutti i messaggi SMS, indipendentemente dai contenuti o dal livello di riservatezza."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Consente all\'applicazione di leggere i messaggi SMS memorizzati sul telefono o sulla scheda SIM. Ciò consente all\'applicazione di leggere tutti i messaggi SMS, indipendentemente dai contenuti o dal livello di riservatezza."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"richiesta di esplorazione al tocco"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Consente al titolare di richiedere una modalità di interazione con cui gli elementi toccati vengono descritti tramite output vocale e l\'interfaccia utente può essere esplorata tramite gesti."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"richiesta di accessibilità web migliorata"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Consente al titolare di richiedere l\'attivazione dei miglioramenti dell\'accessibilità web, ad esempio l\'installazione di script per rendere più accessibili i contenuti dell\'app."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"associazione a un servizio di testo"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Consente al titolare di collegarsi all\'interfaccia di primo livello di un servizio di testo (ad esempio SpellCheckerService). Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"associazione a un servizio VPN"</string>
@@ -1279,7 +1278,7 @@
     <string name="tethered_notification_message" msgid="6857031760103062982">"Tocca per configurare."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Indietro"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Avanti"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"Salta"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Ignora"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Utilizzo dati cell. elevato"</string>
     <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Tocca per ulteriori informazioni sull\'utilizzo dei dati del cellulare."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Limite dati cell. superato"</string>

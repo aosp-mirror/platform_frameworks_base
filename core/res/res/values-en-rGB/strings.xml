@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Allows the app to read mobile broadcast messages received by your device. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency mobile broadcast is received."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"send SMS messages"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Allows the app to send SMS messages. This may result in unexpected charges. Malicious apps may cost you money by sending messages without your confirmation."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"send SMS messages with no confirmation"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Allows the app to send SMS messages. This may result in unexpected charges. Malicious apps may cost you money by sending messages without your confirmation."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"send respond-via-message events"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Allows the app to send requests to other messaging apps to handle respond-via-message events for incoming calls."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"read your text messages (SMS or MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Allows the app to read SMS messages stored on your tablet or SIM card. This allows the app to read all SMS messages, regardless of content or confidentiality."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Allows the app to read SMS messages stored on your phone or SIM card. This allows the app to read all SMS messages, regardless of content or confidentiality."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"request explore by touch"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Allows the hoder to request an interaction mode in which touched items are spoken aloud and the UI can be explored via gestures."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"request enhanced web accessibility"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Allows the hoder to request enabling of web accessibility enhancements. For example, installing scripts to make app content more accessible."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bind to a text service"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Allows the holder to bind to the top-level interface of a text service (e.g. SpellCheckerService). Should never be needed for normal applications."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind to a VPN service"</string>

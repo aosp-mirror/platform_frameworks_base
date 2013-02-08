@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"መሣሪያህ የህዋስ ስርጭት መልዕክቶች ሲቀበል መተግበሪያው እንዲያነበው ይፈቅድለታል። የህዋስ ስርጭት ማንቂያዎች አስቸኳይ ሁኔታዎች ሲያጋጥሙ አንዳንድ አካባቢዎች ላይ የሚላኩ ናቸው። የህዋስ ስርጭት ሲደርስ ተንኮል አዘል መተግበሪያዎች በመሣሪያህ አፈጻጸም ወይም አሰራር ላይ ጣልቃ ሊገቡ ይችላሉ።"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"የSMS መልዕክቶች ላክ"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"መተግበሪያው የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲልክ ይፈቅድለታል። ይህ ያልተጠበቁ ወጪዎችን ሊያስከትል ይችላል። ተንኮል አዘል መተግበሪያዎች ያላንተ ማረጋገጫ መልዕክቶችን በመላክ ገንዘብ ሊያስወጡህ ይችላሉ።"</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"ያለ ምንም ማረጋገጫ የSMS መልዕክቶች ላክ"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"መተግበሪያው የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲልክ ይፈቅድለታል። ይህ ያልተጠበቁ ወጪዎችን ሊያስከትል ይችላል። ተንኮል አዘል መተግበሪያዎች ያላንተ ማረጋገጫ መልዕክቶችን በመላክ ገንዘብ ሊያስወጡህ ይችላሉ።"</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"የበመልዕክት-በኩል-ምላሽ-ስጥ ክስተቶችን ይላኩ"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"መተግበሪያው ሌሎች የመልዕክት መላኪያ መተግበሪያዎች ለመጪ ጥሪዎች በመልዕክት-በኩል-ምላሽ-መስጠት ስራን እንዲይዙ ጥያቄዎች እንዲልክላቸው ያስችለዋል።"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"የጽሑፍ መልዕክቶችህን አንብብ (ኤስ.ኤም.ኤስ. ወይም ኤም.ኤም.ኤስ.)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"መገለጫው በጡባዊ ቱኮህ ወይም በSIM ካርድህ የተከማቹ የኤስ.ኤም.ኤስ. መልእክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስ.ኤም.ኤስ. መልእክቶች እንዲያነብ ይፈቅድለታል።"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"መገለጫው በስልክህ ወይም በSIM ካርድህ የተከማቹ የኤስ.ኤም.ኤስ. መልእክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስ.ኤም.ኤስ. መልእክቶች እንዲያነብ ይፈቅድለታል።"</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"በንክኪ ማሰስን ይጠይቁ"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"ያዢው የተነኩ ንጥሎች ጮክ ተብለው የሚነገሩበት እና በይነገጹ በምልክቶች በኩል ሊታሰስ በሚችሉበት የበይነግንኙነት ሁኒታ እንዲጠይቅ ያስችለዋል።"</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"የተሻሻለ የድር ተደራሽነት ይጠይቁ"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"ያዢው የድር ተደራሽነት ማሻሻያዎች እንዲነቁለት እንዲጠይቅ ያስችለዋል። ለምሳሌ፣ የመተግበሪያ ይዘት ይበልጥ ተደራሽ እንዲሆን የGoogle ስክሪፕቶችን እንዲጫኑ መጠየቅ።"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"ለፅሁፍ አገልግሎት አሰረ"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"ያዡ ግቤት ለከፍተኛ-ደረጃ የፅሁፍ አገልግሎት ገፅታ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"ለVPN አገልግሎት ተገዛ"</string>

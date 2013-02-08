@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite aplicaţiei să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locaţii pentru a vă avertiza cu privire la situaţiile de urgenţă. Aplicaţiile rău intenţionate pot afecta performanţa sau funcţionarea dispozitivului dvs. când este primită o transmisie celulară de urgenţă."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"trimitere mesaje SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite aplicaţiei să trimită mesaje SMS, ceea ce ar putea determina apariţia unor taxe neaşteptate. Aplicaţiile rău intenţionate pot acumula costuri prin trimiterea mesajelor fără confirmarea dvs."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"trimitere mesaje SMS fără confirmare"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Permite aplicaţiei să trimită mesaje SMS, ceea ce ar putea determina apariţia unor taxe neaşteptate. Aplicaţiile rău intenţionate pot acumula costuri prin trimiterea mesajelor fără confirmarea dvs."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"trimitere de evenimente de tipul „răspuns prin mesaj”"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Permite aplicației să trimită solicitări altor aplicații de mesagerie pentru a gestiona evenimentele de tipul „răspuns prin mesaj” pentru apelurile primite."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"citeşte mesajele text (SMS sau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite aplicaţiei să citească mesajele SMS stocate pe tabletă sau pe cardul SIM. În acest fel, aplicaţia poate citi toate mesajele SMS, indiferent de conţinutul sau de gradul de confidenţialitate al acestora."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Permite aplicaţiei să citească mesajele SMS stocate pe telefon sau pe cardul SIM. În acest fel, aplicaţia poate citi toate mesajele SMS, indiferent de conţinutul sau de gradul de confidenţialitate al acestora."</string>
@@ -346,11 +346,10 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei metode de introducere. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"conectare la un serviciu de accesibilitate"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu de accesibilitate. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"solicitare explorare prin atingere"</string>
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"solicitare de explorare prin atingere"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permite proprietarului să solicite un mod de interacțiune în care elementele atinse sunt rostite cu voce tare, iar interfața de utilizare poate fi explorată prin gesturi."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"solicitare accesibilitate web îmbunătățită"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"solicitare de accesibilitate mai bună la internet"</string>
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Permite proprietarului să solicite activarea îmbunătățirilor accesibilității web. De exemplu, instalarea unor scripturi pentru a mări accesibilitatea conținutului aplicațiilor."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"conectare la un serviciu text"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite proprietarului să se conecteze la o interfaţă de nivel superior a unui serviciu text (de ex., SpellCheckerService). Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"conectare la un serviciu VPN"</string>

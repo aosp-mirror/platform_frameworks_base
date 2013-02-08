@@ -346,9 +346,9 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"trametter messadis SMS"</string>
     <!-- no translation found for permdesc_sendSms (7094729298204937667) -->
     <skip />
-    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <!-- no translation found for permlab_sendRespondViaMessageRequest (8713889105305943200) -->
     <skip />
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (402569800862935907) -->
+    <!-- no translation found for permdesc_sendRespondViaMessageRequest (7107648548468778734) -->
     <skip />
     <!-- no translation found for permlab_readSms (8745086572213270480) -->
     <skip />
