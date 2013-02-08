@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Zezwala aplikacji na odczyt wiadomości z sieci komórkowej odebranych na urządzeniu. Alerty sieci komórkowej są dostarczane w niektórych lokalizacjach w celu ostrzeżenia Cię o sytuacjach alarmowych. Złośliwe aplikacje mogą wpływać na wydajność lub zakłócać działanie urządzenia po odebraniu wiadomości alarmowej z sieci komórkowej."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"wysyłanie wiadomości SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Pozwala aplikacji na wysyłanie SMS-ów. Może to skutkować nieoczekiwanymi opłatami. Złośliwe aplikacje mogą generować koszty, wysyłając wiadomości bez Twojego potwierdzenia."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"wysyłanie wiadomości SMS bez potwierdzenia"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Pozwala aplikacji na wysyłanie SMS-ów. Może to skutkować nieoczekiwanymi opłatami. Złośliwe aplikacje mogą generować koszty, wysyłając wiadomości bez Twojego potwierdzenia."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"wysyłanie zdarzeń odpowiedzi przez SMS"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Zezwala aplikacjom na wysyłanie żądań do innych aplikacji komunikacyjnych w celu obsługi zdarzeń odpowiedzi przez SMS dla połączeń przychodzących."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"odczytywanie wiadomości tekstowych (SMS i MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Pozwala aplikacji na odczyt SMS-ów zapisanych na tablecie lub na karcie SIM. Aplikacja z tym uprawnieniem może czytać wszystkie SMS-y niezależnie od ich treści lub poufności."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Pozwala aplikacji na odczyt SMS-ów zapisanych na telefonie lub na karcie SIM. Aplikacja z tym uprawnieniem może czytać wszystkie SMS-y niezależnie od ich treści lub poufności."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"żądanie dotyczące czytania dotykiem"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Pozwala właścicielowi zażądać włączenia trybu interaktywnego, w którym nazwy klikniętych elementów są wypowiadane na głos, a po interfejsie można poruszać się gestami."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"żądanie dotyczące dodatkowych ułatwień dostępu w internecie"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Pozwala właścicielowi zażądać włączenia internetowych funkcji ułatwień dostępu. Może to być np. zainstalowanie skryptów, które sprawią, że treść aplikacji będzie łatwiej dostępna."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tworzenie powiązania z usługą tekstową"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Pozwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi tekstowej (np. SpellCheckerService). Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"tworzenie powiązania z usługą VPN"</string>

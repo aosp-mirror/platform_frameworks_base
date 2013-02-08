@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"מאפשר ליישום לקרוא הודעות שידור סלולרי שהתקבלו במכשיר שלך. התראות שידור סלולרי נשלחות במקומות מסוימים על מנת להזהיר אותך מפני מצבי חירום. יישומים זדוניים עשויים להפריע לביצועים או לפעולה של המכשיר שלך כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"שלוח הודעות SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"מאפשר ליישום לשלוח הודעות SMS. הדבר עשוי לגרום לחיובים בלתי צפויים. יישומים זדוניים עלולים לגרום לעלויות על ידי שליחת הודעות ללא אישורך."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"שלח הודעות SMS ללא אישור"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"מאפשר ליישום לשלוח הודעות SMS. הדבר עשוי לגרום לחיובים בלתי צפויים. יישומים זדוניים עלולים לגרום לעלויות על ידי שליחת הודעות ללא אישורך."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"שליחת אירועי \'תגובה באמצעות הודעה\'"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"מאפשר ליישום לשלוח בקשות ליישומים אחרים של העברת הודעות כדי לטפל באירועי \'תגובה באמצעות הודעה\' עבור שיחות נכנסות."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"קריאת הודעות הטקסט שלך (SMS או MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"מאפשר ליישום לקרוא הודעות SMS המאוחסנות בטאבלט או בכרטיס ה-SIM. דבר זה מתיר ליישום לקרוא את כל הודעות ה-SMS, ללא התחשבות בתוכן או בסודיות."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"מאפשר ליישום לקרוא הודעות SMS המאוחסנות בטלפון או בכרטיס ה-SIM. דבר זה מתיר ליישום לקרוא את כל הודעות ה-SMS, ללא התחשבות בתוכן או בסודיות."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"בקשת גילוי באמצעות מגע"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"מאפשר לבעלים לבקש מצב אינטראקציה שבו נגיעה בפריטים מלווה בהשמעת התיאור שלהם ושניתן לחקור בו את ה-UI באמצעות מחוות."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"בקשת נגישות משופרת לאינטרנט"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"מאפשר לבעלים לבקש הפעלה של שיפורי נגישות לאינטרנט. לדוגמה, התקנת סקריפטים כדי להגביר את הנגישות של תוכן יישומים."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"הכפפה לשירות טקסט"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"מאפשר למשתמש ליצור איגוד לממשק הרמה העליונה של שירות טקסט (למשל, SpellCheckerService). הרשאה זו לעולם אינה נחוצה ליישומים רגילים."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"אגד לשירות VPN"</string>

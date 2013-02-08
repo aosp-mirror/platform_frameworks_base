@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que o aplicativo leia mensagens de difusão celular recebidas por seu dispositivo. Alertas de difusão celular são recebidos em alguns locais para avisar você de situações de emergência. Aplicativos maliciosos podem interferir no desempenho ou funcionamento de seu dispositivo quando uma difusão celular de emergência é recebida."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensagens SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite que o aplicativo envie mensagens SMS. Isso pode resultar em cobranças inesperadas. Aplicativos maliciosos podem gerar custos através do envio de mensagens sem sua confirmação."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"enviar mensagens SMS sem confirmação"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Permite que o aplicativo envie mensagens SMS. Isso pode resultar em cobranças inesperadas. Aplicativos maliciosos podem gerar custos através do envio de mensagens sem sua confirmação."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"enviar eventos de resposta por mensagem"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Permite que o aplicativo envie solicitações a outros aplicativos de mensagens para processar eventos de resposta por mensagem para chamadas recebidas."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ler suas mensagens de texto (SMS ou MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite que o aplicativo leia mensagens SMS armazenadas no tablet ou cartão SIM. Isso permite que o aplicativo leia todas as mensagens SMS, independentemente de seu conteúdo ou confidencialidade."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Permite que o aplicativo leia mensagens SMS armazenadas no telefone ou cartão SIM. Isso permite que o aplicativo leia todas as mensagens SMS, independentemente de seu conteúdo ou confidencialidade."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"solicitar explorar por toque"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permite ao proprietário solicitar um modo de interação em que os itens tocados são falados em voz alta e a interface do usuário pode ser explorada com gestos."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"solicitar acessibilidade melhorada da Web"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Permite ao proprietário solicitar melhorias na acessibilidade da Web. Por exemplo, a instalação de scripts para tornar o conteúdo de aplicativos mais acessível."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sujeitar-se a um serviço de texto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite que o proprietário utilize interface de nível superior de um serviço de texto (por exemplo, SpellCheckerService). Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"se ligam a um serviço de VPN"</string>

@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"앱이 기기가 수신한 셀 브로드캐스트 메시지를 읽을 수 있도록 합니다. 비상 상황임을 알리기 위해 일부 지역에서 셀 브로드캐스트 경고가 전달됩니다. 비상 셀 브로드캐스트를 수신할 때 악성 앱이 기기의 성능이나 작동을 방해할 수 있습니다."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"앱이 SMS 메시지를 보낼 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 이 경우 악성 앱이 사용자의 확인 없이 메시지를 전송해 요금이 부과될 수 있습니다."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"확인 없이 SMS 메시지 보내기"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"앱이 SMS 메시지를 보낼 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 이 경우 악성 앱이 사용자의 확인 없이 메시지를 전송해 요금이 부과될 수 있습니다."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"메시지를 통한 응답 이벤트 보내기"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"앱에서 다른 메시징 앱에 요청을 보내어 수신 전화에 대해 메시지를 통한 응답 이벤트를 처리하도록 허용합니다."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"내 문자 메시지 읽기(SMS 또는 MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"앱이 태블릿 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이렇게 하면 앱이 콘텐츠 또는 비밀유지와 관계 없이 모든 SMS 메시지를 읽을 수 있습니다."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"앱이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이렇게 하면 앱이 콘텐츠 또는 비밀유지와 관계 없이 모든 SMS 메시지를 읽을 수 있습니다."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"\'터치하여 탐색\' 요청"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"권한을 가진 프로그램이 터치한 항목을 소리내어 말하고 제스처로 UI를 탐색할 수 있는 상호작용 모드를 요청할 수 있도록 허용합니다."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"웹 접근성 개선 요청"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"권한을 가진 프로그램이 웹 접근성 개선을 요청할 수 있도록 허용합니다. 예를 들어 스크립트를 설치하여 앱 콘텐츠에 더 간편하게 액세스할 수 있습니다."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"권한을 가진 프로그램이 텍스트 서비스(예: SpellCheckerService)에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN 서비스와 연결"</string>

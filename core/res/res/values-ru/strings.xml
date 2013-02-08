@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Приложение получит доступ к сообщениям широковещательных SMS-служб, которые в некоторых странах используются для информирования населения об экстренных ситуациях. Вредоносные программы могут помешать работе устройства, на которое поступают такие сообщения."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Отправка SMS-сообщений"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Приложение сможет отправлять SMS. Учтите, что вредоносные программы смогут отправлять сообщения без уведомления, что может привести к непредвиденным расходам."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"отправка SMS без подтверждения"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Приложение сможет отправлять SMS. Учтите, что вредоносные программы смогут отправлять сообщения без уведомления, что может привести к непредвиденным расходам."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"отвечать на звонки текстовыми сообщениями"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Приложение сможет отправлять запросы другим программам обмена сообщениями, чтобы на звонки можно было отвечать текстовыми сообщениями."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"Просмотр SMS и MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Приложение сможет просматривать SMS-сообщения, сохраненные на устройстве или SIM-карте, независимо от содержания или настроек конфиденциальности."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Приложение сможет просматривать SMS-сообщения, сохраненные на устройстве или SIM-карте, независимо от содержания или настроек конфиденциальности."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"запрашивать функцию \"Изучение касанием\""</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Владелец устройства сможет запрашивать включение режима \"Изучение касанием\", чтобы названия элементов управления озвучивались."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"запрашивать установку веб-скриптов"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Владелец устройства сможет запрашивать установку скриптов для повышения доступности веб-контента."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"привязка к службе текстовых сообщений"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Позволяет подключаться к базовому интерфейсу службы текстовых сообщений (например, SpellCheckerService). Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"подключаться к VPN-службе"</string>

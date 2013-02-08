@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Appen tillåts läsa SMS som skickas till din enhet. På vissa platser skickas SMS för att varna för nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktionalitet när du får ett meddelande om en nödsituation via SMS."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"skicka SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"skicka SMS utan bekräftelse"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"skicka svar via meddelanden"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Tillåter att appen skickar förfrågningar till andra meddelandeappar för att kunna skicka meddelanden som svar på inkommande samtal."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillåter att appen läser SMS som sparats på surfplattan eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Tillåter att appen läser SMS som sparats på mobilen eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"begära beröringsstyrda gränssnittsfunktioner"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Innehavaren tillåts begära ett interaktionsläge där objekt som användaren trycker på läses upp och där gränssnittet kan användas med gester."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"begära tillgänglighetsfunktioner"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Innehavaren tillåts begära aktivering av tillgänglighetsfunktioner. Det kan t.ex. vara att installera skript från Google som gör appens innehåll mer tillgängligt."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bind till en texttjänst"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Tillåter innehavaren att binda mot den högsta gränssnittsnivån i en texttjänst (t.ex. SpellCheckerService). Bör aldrig behövas för normala appar."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind till en VPN-tjänst"</string>

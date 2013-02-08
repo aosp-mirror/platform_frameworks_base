@@ -226,7 +226,7 @@
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Fikia hifadhi ya USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Fikia kadi ya SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Vipengele vya ufikiaji"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Vipengele ambavyo teknolojia saidizi inaweza kuomba."</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Vipengee ambavyo teknolojia saidizi inaweza kuomba."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa ikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"mwamba hali"</string>
@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Huruhusu programu kusoma jumbe za matangazo ya simu zilizopokewa na kifaa chako. Taarifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu hasidi zikatatiza utendajikazi au shughuli ya kifaa chako wakati matangazo ya simu ya dharura yamepokewa."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"tuma ujumbe wa SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Inaruhusu programu kutuma ujumbe wa SMS. Hii inaweza ikasababisha malipo yasiyotarajiwa. Programu hasidi zinaweza kukugharimu pesa kwa kutuma ujumbe bila uthibitisho wako."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"Tuma ujumbe wa SMS bila ya thibitisho"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Inaruhusu programu kutuma ujumbe wa SMS. Hii inaweza ikasababisha malipo yasiyotarajiwa. Programu hasidi zinaweza kukugharimu pesa kwa kutuma ujumbe bila uthibitisho wako."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"tuma matukio ya kujibu-kupitia-ujumbe"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Inaruhusu programu kutuma maombi kwa programu nyingine za ujumbe ili kushughulikia matukio ya kujibu-kupitia-ujumbe kwa simu zinazoingia."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"soma jumbe zako za maandishi (SMS au MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Inaruhusu programu kusoma ujumbe wa SMS uliohifadhiwa kwenye kompyuta kibao yako au SIM kadi. Hii inaruhusu programu kusoma ujumbe wote wa SMS, bila kujali maudhui au usiri."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Inaruhusu programu kusoma ujumbe wa SMS uliohifadhiwa kwenye simu yako au SIM kadi. Hii inaruhusu programu kusoma ujumbe wote wa SMS, bila kujali maudhui au usiri."</string>
@@ -347,10 +347,9 @@
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"funga kwa huduma ya ufikiaji"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Inamuruhusu mmiliki kufunga kipengee kinachojitokeza katika nyanja mbalimbali za kiwango cha juu cha huduma ya afikiaji. Hapaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"omba uchunguzi kwa kugusa"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Huruhusu programu kuomba hali ya mwingiliano ambapo vipengee vilivyoguswa husemwa kwa sauti na UI inaweza kuchunguzwa kupitia ishara."</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Huruhusu programu kuomba hali ya mwingiliano ambapo vipengee vilivyoguswa hutamkwa kwa sauti na Kiolesura kinaweza kuchunguzwa kupitia ishara."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"omba ufikiaji wa wavuti ulioimarishwa"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Huruhusu programu kuomba uwezeshaji wa uimarishaji wa ufikiaji wa wavuti. Kwa mfano, kusakinisha hati ili kufanya maudhui ya programu kufikiwa zaidi."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Imefungwa kwa huduma ya maandishi"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Inaruhusu kishikiliaji kushurutisha kusano ya kiwango cha juu ya huduma ya matini(k.m.SpellCheckerService). Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"funga kwa huduma ya VPN"</string>

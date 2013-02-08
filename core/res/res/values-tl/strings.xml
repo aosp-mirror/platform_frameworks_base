@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Binibigyang-daan ang app na magbasa ng mga mensahe ng cell broadcast na natanggap ng iyong device. Inihahatid ang mga alerto ng cell broadcast sa ilang lokasyon upang balaan ka tungkol sa mga emergency na sitwasyon. Maaaring makaabala ang nakakahamak na apps sa pagganap o pagpapatakbo ng iyong device kapag nakatanggap ng emergency na cell broadcast."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"magpadala ng mga SMS na mensahe"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"magpadala ng mga SMS na mensahe nang walang pagkumpirma"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"magpadala ng mga kaganapan ng tumugon sa pamamagitan ng mensahe"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Binibigyang-daan ang app na magpadala ng mga kahilingan sa iba pang apps ng pagmemensahe upang pangasiwaan ang mga kaganapan ng tumugon sa pamamagitan ng mensahe para sa mga papasok na tawag."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"basahin ang iyong mga text message (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong tablet o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong telepono o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"humiling ng explore by touch"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Binibigyang-daan ang may-ari na humiling ng mode ng pakikipag-ugnayan kung saan sinasabi nang malakas ang mga napindot na item at nagagalugad ang UI sa pamamagitan ng mga galaw."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"humiling ng pinahusay na accessibility sa web"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Binibigyang-daan ang may-ari na hilingin ang pagpapagana ng mga pagpapahusay sa accessibility sa web. Halimbawa, ang pag-install ng mga script mula sa Google upang gawing mas naa-access ang nilalaman ng app."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sumailalim sa serbisyo ng teksto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Pinapayagan ang may-hawak na sumailalim sa nangungunang antas na interface (hal. SpellCheckerService). Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"sumailalim sa isang serbisyo ng VPN"</string>

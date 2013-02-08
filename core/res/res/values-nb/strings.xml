@@ -226,7 +226,7 @@
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Tilgang til USB-lagring."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Tilgang til minnekortet."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Tilgjengelighetsfunksjoner"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funksjoner hjelpeteknologi kan be om."</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funksjoner støttende teknologi kan be om."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
@@ -245,8 +245,8 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillater at appen kan lese kringkastede meldinger enheten din mottar. Kringkastede varsler leveres noen steder for å advare deg om nødsituasjoner. Skadelige apper kan forstyrre ytelsen eller funksjonen til enheten din når en kringkastet nødmelding mottas."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sende SMS-meldinger"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lar appen sende tekstmeldinger. Dette kan resultere i uventede kostnader. Merk at skadelige apper kan påføre deg kostnader ved å sende meldinger uten bekreftelse fra deg."</string>
-    <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"send tekstmeldinger uten godkjenning"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Lar appen sende tekstmeldinger. Dette kan resultere i uventede kostnader. Merk at skadelige apper kan påføre deg kostnader ved å sende meldinger uten bekreftelse fra deg."</string>
+    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"send svar via melding-hendelser"</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Lar appen sende forespørsler om håndtering av svar via melding-hendelser for innkommende anrop til andre meldingsapper."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"leser tekstmeldinger (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lar appen lese tekstmeldinger lagret på nettbrettet eller SIM-kortet ditt. Dette lar appen lese alle tekstmeldingene dine, uavhengig av innhold og konfidensialitet."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Lar appen lese tekstmeldinger lagret på telefonen eller SIM-kortet ditt. Dette lar appen lese alle tekstmeldingene dine, uavhengig av innhold og konfidensialitet."</string>
@@ -349,8 +349,7 @@
     <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"be om utforsking ved berøring"</string>
     <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Tillater brukeren å be om en interaksjonsmodus der berørte elementer sies høyt, og brukergrensesnittet kan utforskes med bevegelser."</string>
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"be om forbedret nettilgjengelighet"</string>
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
-    <skip />
+    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Tillater brukeren å be om aktivering av forbedret nettilgjengelighet. Dette kan for eksempel være installasjon av skript for å gjøre appinnhold mer tilgjengelig."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"binde til en teksttjeneste"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Lar innehaveren binde seg til øverste grensesnittnivå for en teksttjeneste (f.eks. SpellCheckerService). Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"binde deg til en VPN-tjeneste"</string>
