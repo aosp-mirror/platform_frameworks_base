@@ -456,7 +456,7 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Povoluje aplikaci připojit a konfigurovat displeje přes Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"ovládat displeje přes Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Povoluje aplikaci ovládat základní funkce displejů přes Wi-Fi."</string>
-    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"změna vašeho nastavení zvuku"</string>
+    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"změna nastavení zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávání zvuku"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikaci zaznamenat zvuk pomocí mikrofonu. Toto oprávnění umožňuje aplikaci kdykoliv zaznamenat zvuk bez vašeho svolení."</string>
@@ -617,6 +617,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Umožňuje aplikaci spravovat zásady sítě a definovat pravidla pro konkrétní aplikace."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"upravit kontrolu používání sítě"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Umožňuje aplikaci upravit způsob výpočtu využití sítě aplikacemi. Toto oprávnění není určeno pro běžné aplikace."</string>
+    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Řídit délku hesel pro odemčení obrazovky a povolené znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
