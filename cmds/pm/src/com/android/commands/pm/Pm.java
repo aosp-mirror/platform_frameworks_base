@@ -1522,8 +1522,9 @@ public final class Pm {
         System.err.println("");
         System.err.println("pm clear: deletes all data associated with a package.");
         System.err.println("");
-        System.err.println("pm enable, disable, disable-user: these commands change the enabled state");
-        System.err.println("  of a given package or component (written as \"package/class\").");
+        System.err.println("pm enable, disable, disable-user, disable-until-used: these commands");
+        System.err.println("  change the enabled state of a given package or component (written");
+        System.err.println("  as \"package/class\").");
         System.err.println("");
         System.err.println("pm grant, revoke: these commands either grant or revoke permissions");
         System.err.println("  to applications.  Only optional permissions the application has");

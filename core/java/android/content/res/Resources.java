@@ -77,7 +77,7 @@ public class Resources {
 
     private static final int ID_OTHER = 0x01000004;
 
-    private static final Object mSync = new Object();
+    private static final Object sSync = new Object();
     /*package*/ static Resources mSystem = null;
     
     // Information about preloaded resources.  Note that they are not
@@ -92,17 +92,18 @@ public class Resources {
     private static boolean sPreloaded;
     private static int sPreloadedDensity;
 
-    /*package*/ final TypedValue mTmpValue = new TypedValue();
-    /*package*/ final Configuration mTmpConfig = new Configuration();
+    // These are protected by mAccessLock.
 
-    // These are protected by the mTmpValue lock.
-    private final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
+    /*package*/ final Object mAccessLock = new Object();
+    /*package*/ final Configuration mTmpConfig = new Configuration();
+    /*package*/ TypedValue mTmpValue = new TypedValue();
+    /*package*/ final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
             = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
-    private final LongSparseArray<WeakReference<ColorStateList> > mColorStateListCache
+    /*package*/ final LongSparseArray<WeakReference<ColorStateList> > mColorStateListCache
             = new LongSparseArray<WeakReference<ColorStateList> >();
-    private final LongSparseArray<WeakReference<Drawable.ConstantState> > mColorDrawableCache
+    /*package*/ final LongSparseArray<WeakReference<Drawable.ConstantState> > mColorDrawableCache
             = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
-    private boolean mPreloading;
+    /*package*/ boolean mPreloading;
 
     /*package*/ TypedArray mCachedStyledAttributes = null;
     RuntimeException mLastRetrievedAttrs = null;
@@ -196,7 +197,7 @@ public class Resources {
      * on orientation, etc). 
      */
     public static Resources getSystem() {
-        synchronized (mSync) {
+        synchronized (sSync) {
             Resources ret = mSystem;
             if (ret == null) {
                 ret = new Resources();
@@ -266,7 +267,7 @@ public class Resources {
     }
 
     private NativePluralRules getPluralRule() {
-        synchronized (mSync) {
+        synchronized (sSync) {
             if (mPluralRule == null) {
                 mPluralRule = NativePluralRules.forLocale(mConfiguration.locale);
             }
@@ -517,8 +518,11 @@ public class Resources {
      * @see #getDimensionPixelSize
      */
     public float getDimension(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
+            if (value == null) {
+                mTmpValue = value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type == TypedValue.TYPE_DIMENSION) {
                 return TypedValue.complexToDimension(value.data, mMetrics);
@@ -549,8 +553,11 @@ public class Resources {
      * @see #getDimensionPixelSize
      */
     public int getDimensionPixelOffset(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
+            if (value == null) {
+                mTmpValue = value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type == TypedValue.TYPE_DIMENSION) {
                 return TypedValue.complexToDimensionPixelOffset(
@@ -583,8 +590,11 @@ public class Resources {
      * @see #getDimensionPixelOffset
      */
     public int getDimensionPixelSize(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
+            if (value == null) {
+                mTmpValue = value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type == TypedValue.TYPE_DIMENSION) {
                 return TypedValue.complexToDimensionPixelSize(
@@ -614,8 +624,11 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
     public float getFraction(int id, int base, int pbase) {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
+            if (value == null) {
+                mTmpValue = value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type == TypedValue.TYPE_FRACTION) {
                 return TypedValue.complexToFraction(value.data, base, pbase);
@@ -654,11 +667,23 @@ public class Resources {
      * @return Drawable An object that can be used to draw this resource.
      */
     public Drawable getDrawable(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
-            TypedValue value = mTmpValue;
+        TypedValue value;
+        synchronized (mAccessLock) {
+            value = mTmpValue;
+            if (value == null) {
+                value = new TypedValue();
+            } else {
+                mTmpValue = null;
+            }
             getValue(id, value, true);
-            return loadDrawable(value, id);
         }
+        Drawable res = loadDrawable(value, id);
+        synchronized (mAccessLock) {
+            if (mTmpValue == null) {
+                mTmpValue = value;
+            }
+        }
+        return res;
     }
 
     /**
@@ -681,8 +706,14 @@ public class Resources {
      * @return Drawable An object that can be used to draw this resource.
      */
     public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
-        synchronized (mTmpValue) {
-            TypedValue value = mTmpValue;
+        TypedValue value;
+        synchronized (mAccessLock) {
+            value = mTmpValue;
+            if (value == null) {
+                value = new TypedValue();
+            } else {
+                mTmpValue = null;
+            }
             getValueForDensity(id, density, value, true);
 
             /*
@@ -699,9 +730,15 @@ public class Resources {
                     value.density = (value.density * mMetrics.densityDpi) / density;
                 }
             }
-
-            return loadDrawable(value, id);
         }
+
+        Drawable res = loadDrawable(value, id);
+        synchronized (mAccessLock) {
+            if (mTmpValue == null) {
+                mTmpValue = value;
+            }
+        }
+        return res;
     }
 
     /**
@@ -739,20 +776,30 @@ public class Resources {
      * @return Returns a single color value in the form 0xAARRGGBB.
      */
     public int getColor(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
-            TypedValue value = mTmpValue;
+        TypedValue value;
+        synchronized (mAccessLock) {
+            value = mTmpValue;
+            if (value == null) {
+                value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type >= TypedValue.TYPE_FIRST_INT
                 && value.type <= TypedValue.TYPE_LAST_INT) {
+                mTmpValue = value;
                 return value.data;
-            } else if (value.type == TypedValue.TYPE_STRING) {
-                ColorStateList csl = loadColorStateList(mTmpValue, id);
-                return csl.getDefaultColor();
+            } else if (value.type != TypedValue.TYPE_STRING) {
+                throw new NotFoundException(
+                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                    + Integer.toHexString(value.type) + " is not valid");
             }
-            throw new NotFoundException(
-                "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                + Integer.toHexString(value.type) + " is not valid");
         }
+        ColorStateList csl = loadColorStateList(value, id);
+        synchronized (mAccessLock) {
+            if (mTmpValue == null) {
+                mTmpValue = value;
+            }
+        }
+        return csl.getDefaultColor();
     }
 
     /**
@@ -770,11 +817,23 @@ public class Resources {
      * solid color or multiple colors that can be selected based on a state.
      */
     public ColorStateList getColorStateList(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
-            TypedValue value = mTmpValue;
+        TypedValue value;
+        synchronized (mAccessLock) {
+            value = mTmpValue;
+            if (value == null) {
+                value = new TypedValue();
+            } else {
+                mTmpValue = null;
+            }
             getValue(id, value, true);
-            return loadColorStateList(value, id);
         }
+        ColorStateList res = loadColorStateList(value, id);
+        synchronized (mAccessLock) {
+            if (mTmpValue == null) {
+                mTmpValue = value;
+            }
+        }
+        return res;
     }
 
     /**
@@ -791,8 +850,11 @@ public class Resources {
      * @return Returns the boolean value contained in the resource.
      */
     public boolean getBoolean(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
+            if (value == null) {
+                mTmpValue = value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type >= TypedValue.TYPE_FIRST_INT
                 && value.type <= TypedValue.TYPE_LAST_INT) {
@@ -816,8 +878,11 @@ public class Resources {
      * @return Returns the integer value contained in the resource.
      */
     public int getInteger(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
+            if (value == null) {
+                mTmpValue = value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type >= TypedValue.TYPE_FIRST_INT
                 && value.type <= TypedValue.TYPE_LAST_INT) {
@@ -917,9 +982,22 @@ public class Resources {
      * 
      */
     public InputStream openRawResource(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
-            return openRawResource(id, mTmpValue);
+        TypedValue value;
+        synchronized (mAccessLock) {
+            value = mTmpValue;
+            if (value == null) {
+                value = new TypedValue();
+            } else {
+                mTmpValue = null;
+            }
         }
+        InputStream res = openRawResource(id, value);
+        synchronized (mAccessLock) {
+            if (mTmpValue == null) {
+                mTmpValue = value;
+            }
+        }
+        return res;
     }
 
     /**
@@ -971,22 +1049,32 @@ public class Resources {
      * 
      */
     public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
-        synchronized (mTmpValue) {
-            TypedValue value = mTmpValue;
-            getValue(id, value, true);
-
-            try {
-                return mAssets.openNonAssetFd(
-                    value.assetCookie, value.string.toString());
-            } catch (Exception e) {
-                NotFoundException rnf = new NotFoundException(
-                    "File " + value.string.toString()
-                    + " from drawable resource ID #0x"
-                    + Integer.toHexString(id));
-                rnf.initCause(e);
-                throw rnf;
+        TypedValue value;
+        synchronized (mAccessLock) {
+            value = mTmpValue;
+            if (value == null) {
+                value = new TypedValue();
+            } else {
+                mTmpValue = null;
             }
-
+            getValue(id, value, true);
+        }
+        try {
+            return mAssets.openNonAssetFd(
+                value.assetCookie, value.string.toString());
+        } catch (Exception e) {
+            NotFoundException rnf = new NotFoundException(
+                "File " + value.string.toString()
+                + " from drawable resource ID #0x"
+                + Integer.toHexString(id));
+            rnf.initCause(e);
+            throw rnf;
+        } finally {
+            synchronized (mAccessLock) {
+                if (mTmpValue == null) {
+                    mTmpValue = value;
+                }
+            }
         }
     }
 
@@ -1407,7 +1495,7 @@ public class Resources {
      */
     public void updateConfiguration(Configuration config,
             DisplayMetrics metrics, CompatibilityInfo compat) {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             if (false) {
                 Slog.i(TAG, "**** Updating config of " + this + ": old config is "
                         + mConfiguration + " old compat is " + mCompatibilityInfo);
@@ -1497,21 +1585,21 @@ public class Resources {
                         + " final compat is " + mCompatibilityInfo);
             }
 
-            clearDrawableCache(mDrawableCache, configChanges);
-            clearDrawableCache(mColorDrawableCache, configChanges);
+            clearDrawableCacheLocked(mDrawableCache, configChanges);
+            clearDrawableCacheLocked(mColorDrawableCache, configChanges);
 
             mColorStateListCache.clear();
 
             flushLayoutCache();
         }
-        synchronized (mSync) {
+        synchronized (sSync) {
             if (mPluralRule != null) {
                 mPluralRule = NativePluralRules.forLocale(config.locale);
             }
         }
     }
 
-    private void clearDrawableCache(
+    private void clearDrawableCacheLocked(
             LongSparseArray<WeakReference<ConstantState>> cache,
             int configChanges) {
         int N = cache.size();
@@ -1631,6 +1719,9 @@ public class Resources {
      *         resource was found.  (0 is not a valid resource ID.)
      */
     public int getIdentifier(String name, String defType, String defPackage) {
+        if (name == null) {
+            throw new NullPointerException("name is null");
+        }
         try {
             return Integer.parseInt(name);
         } catch (Exception e) {
@@ -1846,7 +1937,7 @@ public class Resources {
      * {@hide}
      */
     public final void startPreloading() {
-        synchronized (mSync) {
+        synchronized (sSync) {
             if (sPreloaded) {
                 throw new IllegalStateException("Resources already preloaded");
             }
@@ -1990,7 +2081,7 @@ public class Resources {
                         }
                     }
                 } else {
-                    synchronized (mTmpValue) {
+                    synchronized (mAccessLock) {
                         //Log.i(TAG, "Saving cached drawable @ #" +
                         //        Integer.toHexString(key.intValue())
                         //        + " in " + this + ": " + cs);
@@ -2010,7 +2101,7 @@ public class Resources {
     private Drawable getCachedDrawable(
             LongSparseArray<WeakReference<ConstantState>> drawableCache,
             long key) {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             WeakReference<Drawable.ConstantState> wr = drawableCache.get(key);
             if (wr != null) {   // we have the key
                 Drawable.ConstantState entry = wr.get();
@@ -2102,7 +2193,7 @@ public class Resources {
                     sPreloadedColorStateLists.put(key, csl);
                 }
             } else {
-                synchronized (mTmpValue) {
+                synchronized (mAccessLock) {
                     //Log.i(TAG, "Saving cached color state list @ #" +
                     //        Integer.toHexString(key.intValue())
                     //        + " in " + this + ": " + csl);
@@ -2115,7 +2206,7 @@ public class Resources {
     }
 
     private ColorStateList getCachedColorStateList(long key) {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             WeakReference<ColorStateList> wr = mColorStateListCache.get(key);
             if (wr != null) {   // we have the key
                 ColorStateList entry = wr.get();
@@ -2134,7 +2225,7 @@ public class Resources {
 
     /*package*/ XmlResourceParser loadXmlResourceParser(int id, String type)
             throws NotFoundException {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             getValue(id, value, true);
             if (value.type == TypedValue.TYPE_STRING) {
@@ -2197,7 +2288,7 @@ public class Resources {
     }
 
     private TypedArray getCachedStyledAttributes(int len) {
-        synchronized (mTmpValue) {
+        synchronized (mAccessLock) {
             TypedArray attrs = mCachedStyledAttributes;
             if (attrs != null) {
                 mCachedStyledAttributes = null;
