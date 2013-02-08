@@ -1324,6 +1324,18 @@ public final class MediaStore {
         }
 
         public static final class Media implements AudioColumns {
+
+            private static final String[] EXTERNAL_PATHS;
+
+            static {
+                String secondary_storage = System.getenv("SECONDARY_STORAGE");
+                if (secondary_storage != null) {
+                    EXTERNAL_PATHS = secondary_storage.split(":");
+                } else {
+                    EXTERNAL_PATHS = new String[0];
+                }
+            }
+
             /**
              * Get the content:// style URI for the audio media table on the
              * given volume.
@@ -1337,6 +1349,12 @@ public final class MediaStore {
             }
 
             public static Uri getContentUriForPath(String path) {
+                for (String ep : EXTERNAL_PATHS) {
+                    if (path.startsWith(ep)) {
+                        return EXTERNAL_CONTENT_URI;
+                    }
+                }
+
                 return (path.startsWith(Environment.getExternalStorageDirectory().getPath()) ?
                         EXTERNAL_CONTENT_URI : INTERNAL_CONTENT_URI);
             }
