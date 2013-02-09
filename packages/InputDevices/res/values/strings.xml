@@ -6,6 +6,9 @@
     <!-- Keyboard layouts label, used to describe the set of all built-in layouts in the UI. [CHAR LIMIT=35] -->
     <string name="keyboard_layouts_label">Android keyboard</string>
 
+    <!-- UK English keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_english_uk_label">English (UK)</string>
+
     <!-- US English keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_english_us_label">English (US)</string>
 
