@@ -84,6 +84,10 @@ public class ActionBarContainer extends FrameLayout {
         mBackground = bg;
         if (bg != null) {
             bg.setCallback(this);
+            if (mActionBarView != null) {
+                mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
+                        mActionBarView.getRight(), mActionBarView.getBottom());
+            }
         }
         setWillNotDraw(mIsSplit ? mSplitBackground == null :
                 mBackground == null && mStackedBackground == null);
@@ -98,6 +102,10 @@ public class ActionBarContainer extends FrameLayout {
         mStackedBackground = bg;
         if (bg != null) {
             bg.setCallback(this);
+            if ((mIsStacked && mStackedBackground != null)) {
+                mStackedBackground.setBounds(mTabContainer.getLeft(), mTabContainer.getTop(),
+                        mTabContainer.getRight(), mTabContainer.getBottom());
+            }
         }
         setWillNotDraw(mIsSplit ? mSplitBackground == null :
                 mBackground == null && mStackedBackground == null);
@@ -112,6 +120,9 @@ public class ActionBarContainer extends FrameLayout {
         mSplitBackground = bg;
         if (bg != null) {
             bg.setCallback(this);
+            if (mIsSplit && mSplitBackground != null) {
+                mSplitBackground.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
+            }
         }
         setWillNotDraw(mIsSplit ? mSplitBackground == null :
                 mBackground == null && mStackedBackground == null);
