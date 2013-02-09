@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <keyboard-layouts xmlns:android="http://schemas.android.com/apk/res/android">
+    <keyboard-layout android:name="keyboard_layout_english_uk"
+            android:label="@string/keyboard_layout_english_uk_label"
+            android:keyboardLayout="@raw/keyboard_layout_english_uk" />
+
     <keyboard-layout android:name="keyboard_layout_english_us"
             android:label="@string/keyboard_layout_english_us_label"
             android:keyboardLayout="@raw/keyboard_layout_english_us" />
