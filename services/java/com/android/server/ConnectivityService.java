@@ -200,6 +200,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private int mDefaultConnectionSequence = 0;
 
     private Object mDnsLock = new Object();
+    private int mNumDnsEntries;
     private boolean mDnsOverridden = false;
 
     private boolean mTestMode;
@@ -2479,6 +2480,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         try {
             mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses), domains);
             mNetd.setDefaultInterfaceForDns(iface);
+            for (InetAddress dns : dnses) {
+                ++last;
+                String key = "net.dns" + last;
+                String value = dns.getHostAddress();
+                SystemProperties.set(key, value);
+            }
+            for (int i = last + 1; i <= mNumDnsEntries; ++i) {
+                String key = "net.dns" + i;
+                SystemProperties.set(key, "");
+            }
+            mNumDnsEntries = last;
         } catch (Exception e) {
             if (DBG) loge("exception setting default dns interface: " + e);
         }
