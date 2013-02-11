@@ -84,7 +84,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
-import android.view.WindowOrientationListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -555,8 +554,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     class MyOrientationListener extends WindowOrientationListener {
-        MyOrientationListener(Context context) {
-            super(context);
+        MyOrientationListener(Context context, Handler handler) {
+            super(context, handler);
         }
         
         @Override
@@ -854,7 +853,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardMediator = new KeyguardViewMediator(context, null);
         }
         mHandler = new PolicyHandler();
-        mOrientationListener = new MyOrientationListener(mContext);
+        mOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
             mOrientationListener.setCurrentRotation(windowManager.getRotation());
         } catch (RemoteException ex) { }
@@ -3760,13 +3759,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_DOCK_EVENT.equals(intent.getAction())) {
                 mDockMode = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                         Intent.EXTRA_DOCK_STATE_UNDOCKED);
             }
             updateRotation(true);
-            updateOrientationListenerLp();
+            synchronized (mLock) {
+                updateOrientationListenerLp();
+            }
         }
     };
 
