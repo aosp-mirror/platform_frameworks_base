@@ -2838,11 +2838,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
             for (int i=0; i<activities.size(); i++) {
                 ActivityRecord r = activities.get(i);
                 if (!r.finishing) {
-                    int index = mMainStack.indexOfTokenLocked(r.appToken);
-                    if (index >= 0) {
-                        mMainStack.finishActivityLocked(r, index, Activity.RESULT_CANCELED,
-                                null, "finish-heavy", true);
-                    }
+                    mMainStack.finishActivityLocked(r, Activity.RESULT_CANCELED,
+                            null, "finish-heavy", true);
                 }
             }
             
@@ -8001,33 +7998,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
             mMainStack.resumeTopActivityLocked(null);
         } else {
-            ActivityRecord r = mMainStack.topRunningActivityLocked(null);
-            if (r != null && r.app == app) {
-                // If the top running activity is from this crashing
-                // process, then terminate it to avoid getting in a loop.
-                Slog.w(TAG, "  Force finishing activity "
-                        + r.intent.getComponent().flattenToShortString());
-                int index = mMainStack.indexOfActivityLocked(r);
-                r.stack.finishActivityLocked(r, index,
-                        Activity.RESULT_CANCELED, null, "crashed", false);
-                // Also terminate any activities below it that aren't yet
-                // stopped, to avoid a situation where one will get
-                // re-start our crashing activity once it gets resumed again.
-                index--;
-                if (index >= 0) {
-                    r = mMainStack.getActivityAtIndex(index);
-                    if (r.state == ActivityState.RESUMED
-                            || r.state == ActivityState.PAUSING
-                            || r.state == ActivityState.PAUSED) {
-                        if (!r.isHomeActivity || mHomeProcess != r.app) {
-                            Slog.w(TAG, "  Force finishing activity "
-                                    + r.intent.getComponent().flattenToShortString());
-                            r.stack.finishActivityLocked(r, index,
-                                    Activity.RESULT_CANCELED, null, "crashed", false);
-                        }
-                    }
-                }
-            }
+            mMainStack.finishTopRunningActivityLocked(app);
         }
 
         // Bump up the crash count of any services currently running in the proc.
@@ -12364,7 +12335,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     public boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
             Intent resultData) {
-        ComponentName dest = destIntent.getComponent();
 
         synchronized (this) {
             ActivityRecord srec = ActivityRecord.forToken(token);
@@ -12372,87 +12342,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 return false;
             }
             ActivityStack stack = srec.stack;
-            final int start = stack.indexOfActivityLocked(srec);
-            if (start < 0) {
-                // Current activity is not in history stack; do nothing.
-                return false;
-            }
-            int finishTo = start - 1;
-            ActivityRecord parent = null;
-            boolean foundParentInTask = false;
-            if (dest != null) {
-                TaskRecord tr = srec.task;
-                for (int i = start - 1; i >= 0; i--) {
-                    ActivityRecord r = stack.getActivityAtIndex(i);
-                    if (tr != r.task) {
-                        // Couldn't find parent in the same task; stop at the one above this.
-                        // (Root of current task; in-app "home" behavior)
-                        // Always at least finish the current activity.
-                        finishTo = Math.min(start - 1, i + 1);
-                        parent = stack.getActivityAtIndex(finishTo);
-                        break;
-                    } else if (r.info.packageName.equals(dest.getPackageName()) &&
-                            r.info.name.equals(dest.getClassName())) {
-                        finishTo = i;
-                        parent = r;
-                        foundParentInTask = true;
-                        break;
-                    }
-                }
-            }
-
-            if (mController != null) {
-                ActivityRecord next = mMainStack.topRunningActivityLocked(token, 0);
-                if (next != null) {
-                    // ask watcher if this is allowed
-                    boolean resumeOK = true;
-                    try {
-                        resumeOK = mController.activityResuming(next.packageName);
-                    } catch (RemoteException e) {
-                        mController = null;
-                    }
-
-                    if (!resumeOK) {
-                        return false;
-                    }
-                }
-            }
-            final long origId = Binder.clearCallingIdentity();
-            for (int i = start; i > finishTo; i--) {
-                ActivityRecord r = stack.getActivityAtIndex(i);
-                mMainStack.requestFinishActivityLocked(r.appToken, resultCode, resultData,
-                        "navigate-up", true);
-                // Only return the supplied result for the first activity finished
-                resultCode = Activity.RESULT_CANCELED;
-                resultData = null;
-            }
-
-            if (parent != null && foundParentInTask) {
-                final int parentLaunchMode = parent.info.launchMode;
-                final int destIntentFlags = destIntent.getFlags();
-                if (parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
-                        parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
-                        parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
-                        (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                    parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent);
-                } else {
-                    try {
-                        ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                                destIntent.getComponent(), 0, srec.userId);
-                        int res = mMainStack.startActivityLocked(srec.app.thread, destIntent,
-                                null, aInfo, parent.appToken, null,
-                                0, -1, parent.launchedFromUid, parent.launchedFromPackage,
-                                0, null, true, null);
-                        foundParentInTask = res == ActivityManager.START_SUCCESS;
-                    } catch (RemoteException e) {
-                        foundParentInTask = false;
-                    }
-                    mMainStack.requestFinishActivityLocked(parent.appToken, resultCode,
-                            resultData, "navigate-up", true);
-                }
-            }
-            Binder.restoreCallingIdentity(origId);
-            return foundParentInTask;
+            return stack.navigateUpToLocked(srec, destIntent, resultCode, resultData);
         }
     }
 
