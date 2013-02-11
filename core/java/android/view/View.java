@@ -5022,21 +5022,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if ((mAttachInfo.mAccessibilityFetchFlags
                     & AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS) != 0) {
-                String viewId = null;
                 try {
-                    viewId = getResources().getResourceName(mID);
+                    String viewId = getResources().getResourceName(mID);
+                    info.setViewIdResourceName(viewId);
                 } catch (Resources.NotFoundException nfe) {
                     /* ignore */
                 }
-                if (viewId == null) {
-                    try {
-                        viewId = ((Context) ActivityThread.currentActivityThread()
-                                .getSystemContext()).getResources().getResourceName(mID);
-                    } catch (Resources.NotFoundException nfe) {
-                        /* ignore */
-                    }
-                }
-                info.setViewIdResourceName(viewId);
             }
         }
 
