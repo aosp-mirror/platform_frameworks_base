@@ -574,6 +574,9 @@ final class ActivityRecord {
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent) {
         boolean sent = false;
+        // The activity now gets access to the data associated with this Intent.
+        service.grantUriPermissionFromIntentLocked(callingUid, packageName,
+                intent, getUriPermissionsLocked());
         // We want to immediately deliver the intent to the activity if
         // it is currently the top resumed activity...  however, if the
         // device is sleeping, then all activities are stopped, so in that
@@ -586,8 +589,6 @@ final class ActivityRecord {
                 ArrayList<Intent> ar = new ArrayList<Intent>();
                 intent = new Intent(intent);
                 ar.add(intent);
-                service.grantUriPermissionFromIntentLocked(callingUid, packageName,
-                        intent, getUriPermissionsLocked());
                 app.thread.scheduleNewIntent(ar, appToken);
                 sent = true;
             } catch (RemoteException e) {

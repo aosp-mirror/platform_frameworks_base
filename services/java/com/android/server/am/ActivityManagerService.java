@@ -7925,7 +7925,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 }
                 mDidUpdate = true;
             }
-            
+
+            mAppOpsService.systemReady();
             mSystemReady = true;
             if (!mStartRunning) {
                 return;
@@ -11779,6 +11780,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                         synchronized (bs) {
                             bs.removeUidStatsLocked(uid);
                         }
+                        mAppOpsService.uidRemoved(uid);
                     }
                 } else {
                     // If resources are unavailable just force stop all
@@ -11804,6 +11806,10 @@ public final class ActivityManagerService  extends ActivityManagerNative
                             if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                                 sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
                                         new String[] {ssp}, userId);
+                                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                                    mAppOpsService.packageRemoved(
+                                            intent.getIntExtra(Intent.EXTRA_UID, -1), ssp);
+                                }
                             }
                         }
                     }
