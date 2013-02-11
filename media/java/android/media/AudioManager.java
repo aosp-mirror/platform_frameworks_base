@@ -1526,6 +1526,16 @@ public class AudioManager {
 
     /**
      * @hide
+     * Checks whether any music or media is actively playing on a remote device (e.g. wireless
+     *   display). Note that BT audio sinks are not considered remote devices.
+     * @return true if {@link AudioManager#STREAM_MUSIC} is active on a remote device
+     */
+    public boolean isMusicActiveRemotely() {
+        return AudioSystem.isStreamActiveRemotely(STREAM_MUSIC, 0);
+    }
+
+    /**
+     * @hide
      * Checks whether speech recognition is active
      * @return true if a recording with source {@link MediaRecorder.AudioSource#VOICE_RECOGNITION}
      *    is underway.

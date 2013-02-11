@@ -111,6 +111,14 @@ public class AudioSystem
     public static native boolean isStreamActive(int stream, int inPastMs);
 
     /*
+     * Checks whether the specified stream type is active on a remotely connected device. The notion
+     * of what constitutes a remote device is enforced by the audio policy manager of the platform.
+     *
+     * return true if any track playing on this stream is active on a remote device.
+     */
+    public static native boolean isStreamActiveRemotely(int stream, int inPastMs);
+
+    /*
      * Checks whether the specified audio source is active.
      *
      * return true if any recorder using this source is currently recording
