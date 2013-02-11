@@ -86,8 +86,8 @@ final class DisplayMagnifier {
         mContext = windowManagerService.mContext;
         mWindowManagerService = windowManagerService;
         mCallbacks = callbacks;
-        mMagnifedViewport = new MagnifiedViewport();
         mHandler = new MyHandler(mWindowManagerService.mH.getLooper());
+        mMagnifedViewport = new MagnifiedViewport();
         mLongAnimationDuration = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longAnimTime);
     }
@@ -273,6 +273,7 @@ final class DisplayMagnifier {
                             mContext.getResources().getDisplayMetrics());
             mHalfBorderWidth = (int) (mBorderWidth + 0.5) / 2;
             mWindow = new ViewportWindow(mContext);
+            recomputeBoundsLocked();
         }
 
         public void updateMagnificationSpecLocked(MagnificationSpec spec) {
