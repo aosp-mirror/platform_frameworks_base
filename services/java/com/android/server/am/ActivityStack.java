@@ -21,8 +21,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
-import com.android.server.am.ActivityRecord.Token;
 import com.android.server.wm.AppTransition;
 
 import android.app.Activity;
@@ -30,10 +30,12 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.IThumbnailReceiver;
 import android.app.IThumbnailRetriever;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
 import android.content.ComponentName;
 import android.content.Context;
@@ -64,7 +66,9 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -151,9 +155,9 @@ final class ActivityStack {
     
     /**
      * The back history of all previous (and possibly still
-     * running) activities.  It contains HistoryRecord objects.
+     * running) activities.  It contains #ActivityRecord objects.
      */
-    final ArrayList<ActivityRecord> mHistory = new ArrayList<ActivityRecord>();
+    private final ArrayList<ActivityRecord> mHistory = new ArrayList<ActivityRecord>();
 
     /**
      * Used for validating app tokens with window manager.
@@ -289,6 +293,12 @@ final class ActivityStack {
      */
     private ActivityRecord mLastScreenshotActivity = null;
     private Bitmap mLastScreenshotBitmap = null;
+
+    /**
+     * List of ActivityRecord objects that have been finished and must
+     * still report back to a pending thumbnail receiver.
+     */
+    private final ArrayList<ActivityRecord> mCancelledThumbnails = new ArrayList<ActivityRecord>();
 
     int mThumbnailWidth = -1;
     int mThumbnailHeight = -1;
@@ -505,6 +515,31 @@ final class ActivityStack {
             return r;
         }
         return null;
+    }
+
+    // TODO: This exposes mHistory too much, replace usage with ActivityStack methods. 
+    final ActivityRecord getActivityAtIndex(int index) {
+        if (index >= 0 && index < mHistory.size()) {
+            return mHistory.get(index);
+        }
+        return null;
+    }
+
+    int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
+        TaskRecord lastTask = null;
+        final int N = mHistory.size();
+        for (int i = 0; i < N; i++) {
+            ActivityRecord r = mHistory.get(i);
+            if (r.appToken == token) {
+                if (!onlyRoot || lastTask != r.task) {
+                    return r.task.taskId;
+                }
+                return -1;
+            }
+            lastTask = r.task;
+        }
+
+        return -1;
     }
 
     private final boolean updateLRUListLocked(ActivityRecord r) {
@@ -3589,9 +3624,9 @@ final class ActivityStack {
                 finishes = new ArrayList<ActivityRecord>(mFinishingActivities);
                 mFinishingActivities.clear();
             }
-            if ((NT=mService.mCancelledThumbnails.size()) > 0) {
-                thumbnails = new ArrayList<ActivityRecord>(mService.mCancelledThumbnails);
-                mService.mCancelledThumbnails.clear();
+            if ((NT=mCancelledThumbnails.size()) > 0) {
+                thumbnails = new ArrayList<ActivityRecord>(mCancelledThumbnails);
+                mCancelledThumbnails.clear();
             }
 
             if (mMainStack) {
@@ -3814,7 +3849,7 @@ final class ActivityStack {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
-            mService.mCancelledThumbnails.add(r);
+            mCancelledThumbnails.add(r);
         }
 
         if (immediate) {
@@ -3974,7 +4009,7 @@ final class ActivityStack {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
-            mService.mCancelledThumbnails.add(r);
+            mCancelledThumbnails.add(r);
         }
 
         // Get rid of any pending idle timeouts.
@@ -4320,6 +4355,25 @@ final class ActivityStack {
             }
         }
         mService.mWindowManager.prepareAppTransition(transit, false);
+    }
+
+    final boolean findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
+        for (int i = mHistory.size() - 1; i >= 0; i--) {
+            ActivityRecord hr = mHistory.get(i);
+            if (hr.task.taskId == taskId) {
+                if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+                    mUserLeaving = true;
+                }
+                if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
+                    // Caller wants the home activity moved with it.  To accomplish this,
+                    // we'll just move the home task to the top first.
+                    moveHomeToFrontLocked();
+                }
+                moveTaskToFrontLocked(hr.task, null, options);
+                return true;
+            }
+        }
+        return false;
     }
 
     final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason, Bundle options) {
@@ -4786,5 +4840,205 @@ final class ActivityStack {
     
     public void dismissKeyguardOnNextActivityLocked() {
         mDismissKeyguardOnNextActivity = true;
+    }
+
+    boolean willActivityBeVisibleLocked(IBinder token) {
+        int i;
+        for (i = mHistory.size() - 1; i >= 0; i--) {
+            ActivityRecord r = mHistory.get(i);
+            if (r.appToken == token) {
+                    return true;
+            }
+            if (r.fullscreen && !r.finishing) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void closeSystemDialogsLocked() {
+        for (int i = mHistory.size() - 1; i >= 0; i--) {
+            ActivityRecord r = mHistory.get(i);
+            if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
+                r.stack.finishActivityLocked(r, i,
+                        Activity.RESULT_CANCELED, null, "close-sys", true);
+            }
+        }
+    }
+
+    boolean forceStopPackageLocked(String name, boolean doit, boolean evenPersistent, int userId) {
+        boolean didSomething = false;
+        TaskRecord lastTask = null;
+        final int N = mHistory.size();
+        for (int i = 0; i < N; i++) {
+            ActivityRecord r = mHistory.get(i);
+            final boolean samePackage = r.packageName.equals(name)
+                    || (name == null && r.userId == userId);
+            if ((userId == UserHandle.USER_ALL || r.userId == userId)
+                    && (samePackage || r.task == lastTask)
+                    && (r.app == null || evenPersistent || !r.app.persistent)) {
+                if (!doit) {
+                    if (r.finishing) {
+                        // If this activity is just finishing, then it is not
+                        // interesting as far as something to stop.
+                        continue;
+                    }
+                    return true;
+                }
+                didSomething = true;
+                Slog.i(TAG, "  Force finishing activity " + r);
+                if (samePackage) {
+                    if (r.app != null) {
+                        r.app.removed = true;
+                    }
+                    r.app = null;
+                }
+                lastTask = r.task;
+                if (r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
+                        null, "force-stop", true)) {
+                    i--;
+                }
+            }
+        }
+        return didSomething;
+    }
+
+    ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
+        PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
+        ActivityRecord topRecord = null;
+        int pos = mHistory.size() - 1;
+        ActivityRecord next = pos >= 0 ? mHistory.get(pos) : null;
+        ActivityRecord top = null;
+        TaskRecord curTask = null;
+        int numActivities = 0;
+        int numRunning = 0;
+        while (pos >= 0 && maxNum > 0) {
+            final ActivityRecord r = next;
+            pos--;
+            next = pos >= 0 ? mHistory.get(pos) : null;
+
+            // Initialize state for next task if needed.
+            if (top == null || (top.state == ActivityState.INITIALIZING && top.task == r.task)) {
+                top = r;
+                curTask = r.task;
+                numActivities = numRunning = 0;
+            }
+
+            // Add 'r' into the current task.
+            numActivities++;
+            if (r.app != null && r.app.thread != null) {
+                numRunning++;
+            }
+
+            if (localLOGV) Slog.v(
+                TAG, r.intent.getComponent().flattenToShortString()
+                + ": task=" + r.task);
+
+            // If the next one is a different task, generate a new
+            // TaskInfo entry for what we have.
+            if (next == null || next.task != curTask) {
+                RunningTaskInfo ci = new RunningTaskInfo();
+                ci.id = curTask.taskId;
+                ci.baseActivity = r.intent.getComponent();
+                ci.topActivity = top.intent.getComponent();
+                if (top.thumbHolder != null) {
+                    ci.description = top.thumbHolder.lastDescription;
+                }
+                ci.numActivities = numActivities;
+                ci.numRunning = numRunning;
+                //System.out.println(
+                //    "#" + maxNum + ": " + " descr=" + ci.description);
+                if (receiver != null) {
+                    if (localLOGV) Slog.v(
+                        TAG, "State=" + top.state + "Idle=" + top.idle
+                        + " app=" + top.app
+                        + " thr=" + (top.app != null ? top.app.thread : null));
+                    if (top.state == ActivityState.RESUMED || top.state == ActivityState.PAUSING) {
+                        if (top.idle && top.app != null && top.app.thread != null) {
+                            topRecord = top;
+                        } else {
+                            top.thumbnailNeeded = true;
+                        }
+                    }
+                    pending.pendingRecords.add(top);
+                }
+                list.add(ci);
+                maxNum--;
+                top = null;
+            }
+        }
+        return topRecord;
+    }
+
+    public void unhandledBackLocked() {
+        int top = mHistory.size() - 1;
+        if (DEBUG_SWITCH) Slog.d(
+            TAG, "Performing unhandledBack(): top activity at " + top);
+        if (top > 0) {
+            finishActivityLocked(mHistory.get(top),
+                        top, Activity.RESULT_CANCELED, null, "unhandled-back", true);
+        }
+    }
+
+    void handleAppCrashLocked(ProcessRecord app) {
+        for (int i = mHistory.size() - 1; i >= 0; i--) {
+            ActivityRecord r = mHistory.get(i);
+            if (r.app == app) {
+                Slog.w(TAG, "  Force finishing activity "
+                    + r.intent.getComponent().flattenToShortString());
+                r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
+                        null, "crashed", false);
+            }
+        }
+    }
+
+    void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
+            boolean dumpClient, String dumpPackage) {
+        ActivityManagerService.dumpHistoryList(fd, pw, mHistory, "  ", "Hist", true, !dumpAll,
+            dumpClient, dumpPackage);
+    }
+
+    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
+        ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
+
+        if ("all".equals(name)) {
+            for (ActivityRecord r1 : mHistory) {
+                activities.add(r1);
+            }
+        } else if ("top".equals(name)) {
+            final int N = mHistory.size();
+            if (N > 0) {
+                activities.add(mHistory.get(N-1));
+            }
+        } else {
+            ItemMatcher matcher = new ItemMatcher();
+            matcher.build(name);
+
+            for (ActivityRecord r1 : mHistory) {
+                if (matcher.match(r1, r1.intent.getComponent())) {
+                    activities.add(r1);
+                }
+            }
+        }
+
+        return activities;
+    }
+
+    ActivityRecord restartPackage(String packageName) {
+        ActivityRecord starting = topRunningActivityLocked(null);
+
+        // All activities that came from the package must be
+        // restarted as if there was a config change.
+        for (int i = mHistory.size() - 1; i >= 0; i--) {
+            ActivityRecord a = mHistory.get(i);
+            if (a.info.packageName.equals(packageName)) {
+                a.forceNewConfig = true;
+                if (starting != null && a == starting && a.visible) {
+                    a.startFreezingScreenLocked(starting.app, ActivityInfo.CONFIG_SCREEN_LAYOUT);
+                }
+            }
+        }
+
+        return starting;
     }
 }
