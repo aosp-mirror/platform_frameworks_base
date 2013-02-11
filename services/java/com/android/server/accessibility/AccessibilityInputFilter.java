@@ -174,7 +174,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 mMotionEventSequenceStarted = true;
             }
         } else {
-        // Wait for an enter hover event to start processing.
+            // Wait for an enter hover event to start processing.
             if (!mHoverEventSequenceStarted) {
                 if (motionEvent.getActionMasked() != MotionEvent.ACTION_HOVER_ENTER) {
                     return;
@@ -234,10 +234,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         if (DEBUG) {
             Slog.i(TAG, "Handling batched event: " + event + ", policyFlags: " + policyFlags);
         }
-        mPm.userActivity(event.getEventTime(), false);
-        MotionEvent transformedEvent = MotionEvent.obtain(event);
-        mEventHandler.onMotionEvent(transformedEvent, event, policyFlags);
-        transformedEvent.recycle();
+        // Since we do batch processing it is possible that by the time the
+        // next batch is processed the event handle had been set to null.
+        if (mEventHandler != null) {
+            mPm.userActivity(event.getEventTime(), false);
+            MotionEvent transformedEvent = MotionEvent.obtain(event);
+            mEventHandler.onMotionEvent(transformedEvent, event, policyFlags);
+            transformedEvent.recycle();
+        }
     }
 
     @Override
