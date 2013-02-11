@@ -30,6 +30,7 @@ import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -81,6 +82,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_USER_VERSION = "version";
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
+    private static final String TAG_RESTRICTIONS = "restrictions";
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
@@ -104,6 +106,7 @@ public class UserManagerService extends IUserManager.Stub {
     private final File mBaseUserPath;
 
     private final SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
+    private final SparseArray<Bundle> mUserRestrictions = new SparseArray<Bundle>();
 
     /**
      * Set of user IDs being actively removed. Removed IDs linger in this set
@@ -343,6 +346,26 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @Override
+    public Bundle getUserRestrictions(int userId) {
+        // checkManageUsersPermission("getUserRestrictions");
+
+        synchronized (mPackagesLock) {
+            Bundle restrictions = mUserRestrictions.get(userId);
+            return restrictions != null ? restrictions : Bundle.EMPTY;
+        }
+    }
+
+    @Override
+    public void setUserRestrictions(Bundle restrictions, int userId) {
+        checkManageUsersPermission("setUserRestrictions");
+
+        synchronized (mPackagesLock) {
+            mUserRestrictions.get(userId).putAll(restrictions);
+            writeUserLocked(mUsers.get(userId));
+        }
+    }
+
     /**
      * Check if we've hit the limit of how many users can be created.
      */
@@ -454,7 +477,7 @@ public class UserManagerService extends IUserManager.Stub {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
                     String id = parser.getAttributeValue(null, ATTR_ID);
-                    UserInfo user = readUser(Integer.parseInt(id));
+                    UserInfo user = readUserLocked(Integer.parseInt(id));
 
                     if (user != null) {
                         mUsers.put(user.id, user);
@@ -568,6 +591,15 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.text(userInfo.name);
             serializer.endTag(null, TAG_NAME);
 
+            Bundle restrictions = mUserRestrictions.get(userInfo.id);
+            if (restrictions != null) {
+                serializer.startTag(null, TAG_RESTRICTIONS);
+                writeBoolean(serializer, restrictions, UserManager.ALLOW_CONFIG_WIFI);
+                writeBoolean(serializer, restrictions, UserManager.ALLOW_MODIFY_ACCOUNTS);
+                writeBoolean(serializer, restrictions, UserManager.ALLOW_INSTALL_APPS);
+                writeBoolean(serializer, restrictions, UserManager.ALLOW_UNINSTALL_APPS);
+                serializer.endTag(null, TAG_RESTRICTIONS);
+            }
             serializer.endTag(null, TAG_USER);
 
             serializer.endDocument();
@@ -620,7 +652,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private UserInfo readUser(int id) {
+    private UserInfo readUserLocked(int id) {
         int flags = 0;
         int serialNumber = id;
         String name = null;
@@ -628,6 +660,8 @@ public class UserManagerService extends IUserManager.Stub {
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
         boolean partial = false;
+        Bundle restrictions = new Bundle();
+        initRestrictionsToDefaults(restrictions);
 
         FileInputStream fis = null;
         try {
@@ -663,13 +697,23 @@ public class UserManagerService extends IUserManager.Stub {
                     partial = true;
                 }
 
-                while ((type = parser.next()) != XmlPullParser.START_TAG
-                        && type != XmlPullParser.END_DOCUMENT) {
-                }
-                if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_NAME)) {
-                    type = parser.next();
-                    if (type == XmlPullParser.TEXT) {
-                        name = parser.getText();
+                int outerDepth = parser.getDepth();
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                       && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                    if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                        continue;
+                    }
+                    String tag = parser.getName();
+                    if (TAG_NAME.equals(tag)) {
+                        type = parser.next();
+                        if (type == XmlPullParser.TEXT) {
+                            name = parser.getText();
+                        }
+                    } else if (TAG_RESTRICTIONS.equals(tag)) {
+                        readBoolean(parser, restrictions, UserManager.ALLOW_CONFIG_WIFI);
+                        readBoolean(parser, restrictions, UserManager.ALLOW_MODIFY_ACCOUNTS);
+                        readBoolean(parser, restrictions, UserManager.ALLOW_INSTALL_APPS);
+                        readBoolean(parser, restrictions, UserManager.ALLOW_UNINSTALL_APPS);
                     }
                 }
             }
@@ -679,6 +723,7 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.creationTime = creationTime;
             userInfo.lastLoggedInTime = lastLoggedInTime;
             userInfo.partial = partial;
+            mUserRestrictions.append(id, restrictions);
             return userInfo;
 
         } catch (IOException ioe) {
@@ -692,6 +737,27 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return null;
+    }
+
+    private void readBoolean(XmlPullParser parser, Bundle restrictions,
+            String restrictionKey) {
+        String value = parser.getAttributeValue(null, restrictionKey);
+        restrictions.putBoolean(restrictionKey, value == null ? true : Boolean.parseBoolean(value));
+    }
+
+    private void writeBoolean(XmlSerializer xml, Bundle restrictions, String restrictionKey)
+            throws IOException {
+        if (restrictions.containsKey(restrictionKey)) {
+            xml.attribute(null, restrictionKey,
+                    Boolean.toString(restrictions.getBoolean(restrictionKey)));
+        }
+    }
+
+    private void initRestrictionsToDefaults(Bundle restrictions) {
+        restrictions.putBoolean(UserManager.ALLOW_CONFIG_WIFI, true);
+        restrictions.putBoolean(UserManager.ALLOW_MODIFY_ACCOUNTS, true);
+        restrictions.putBoolean(UserManager.ALLOW_INSTALL_APPS, true);
+        restrictions.putBoolean(UserManager.ALLOW_UNINSTALL_APPS, true);
     }
 
     private int readIntAttribute(XmlPullParser parser, String attr, int defaultValue) {

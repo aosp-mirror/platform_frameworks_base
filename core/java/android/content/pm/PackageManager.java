@@ -666,6 +666,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INTERNAL_ERROR = -110;
 
     /**
+     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+     * if the system failed to install the package because the user is restricted from installing
+     * apps.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_USER_RESTRICTED = -111;
+
+    /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
      * package's data directory.
      *
@@ -708,6 +717,15 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int DELETE_FAILED_DEVICE_POLICY_MANAGER = -2;
+
+    /**
+     * Deletion failed return code: this is passed to the
+     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
+     * failed to delete the package since the user is restricted.
+     *
+     * @hide
+     */
+    public static final int DELETE_FAILED_USER_RESTRICTED = -3;
 
     /**
      * Return code that is passed to the {@link IPackageMoveObserver} by

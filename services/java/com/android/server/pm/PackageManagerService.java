@@ -110,6 +110,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Environment.UserEnvironment;
 import android.security.SystemKeyStore;
 import android.util.DisplayMetrics;
@@ -5649,6 +5650,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 null);
 
         final int uid = Binder.getCallingUid();
+        if (!isUserAllowed(uid, UserManager.ALLOW_INSTALL_APPS)) {
+            try {
+                observer.packageInstalled("", PackageManager.INSTALL_FAILED_USER_RESTRICTED);
+            } catch (RemoteException re) {
+            }
+            return;
+        }
+
         UserHandle user;
         if ((flags&PackageManager.INSTALL_ALL_USERS) != 0) {
             user = UserHandle.ALL;
@@ -5685,6 +5694,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(uid);
+        if (!isUserAllowed(uid, UserManager.ALLOW_INSTALL_APPS)) {
+            return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
+        }
 
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -5715,7 +5727,19 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         return PackageManager.INSTALL_SUCCEEDED;
     }
-    
+
+    private boolean isUserAllowed(int callingUid, String restrictionKey) {
+        if (callingUid != android.os.Process.myUid()) {
+            Bundle restrictions = sUserManager.getUserRestrictions(
+                    UserHandle.getUserId(callingUid));
+            if (!restrictions.getBoolean(UserManager.ALLOW_INSTALL_APPS)) {
+                Log.w(TAG, "User does not have permission to: " + restrictionKey);
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public void verifyPendingInstall(int id, int verificationCode) throws RemoteException {
         mContext.enforceCallingOrSelfPermission(
@@ -8071,6 +8095,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 android.Manifest.permission.DELETE_PACKAGES, null);
         // Queue up an async operation since the package deletion may take a little while.
         final int uid = Binder.getCallingUid();
+        if (!isUserAllowed(uid, UserManager.ALLOW_UNINSTALL_APPS)) {
+            try {
+                observer.packageDeleted(packageName, PackageManager.DELETE_FAILED_USER_RESTRICTED);
+            } catch (RemoteException re) {
+            }
+            return;
+        }
+
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);

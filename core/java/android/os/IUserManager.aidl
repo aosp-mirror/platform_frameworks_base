@@ -17,6 +17,7 @@
 
 package android.os;
 
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
@@ -37,4 +38,6 @@ interface IUserManager {
     void wipeUser(int userHandle);
     int getUserSerialNumber(int userHandle);
     int getUserHandle(int userSerialNumber);
+    Bundle getUserRestrictions(int userHandle);
+    void setUserRestrictions(in Bundle restrictions, int userHandle);
 }

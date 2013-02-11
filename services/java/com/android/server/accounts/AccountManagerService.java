@@ -21,6 +21,7 @@ import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerResponse;
 import android.accounts.AuthenticatorDescription;
 import android.accounts.GrantCredentialsPermissionActivity;
 import android.accounts.IAccountAuthenticator;
@@ -526,6 +527,9 @@ public class AccountManagerService
         }
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
+        if (!canUserModifyAccounts(Binder.getCallingUid())) {
+            return false;
+        }
 
         UserAccounts accounts = getUserAccountsForCaller();
         // fails if the account already exists
@@ -679,6 +683,14 @@ public class AccountManagerService
         checkManageAccountsPermission();
         UserHandle user = Binder.getCallingUserHandle();
         UserAccounts accounts = getUserAccountsForCaller();
+        if (!canUserModifyAccounts(Binder.getCallingUid())) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "User cannot modify accounts");
+            } catch (RemoteException re) {
+            }
+        }
+
         long identityToken = clearCallingIdentity();
 
         cancelNotification(getSigninRequiredNotificationId(accounts, account), user);
@@ -2310,6 +2322,17 @@ public class AccountManagerService
     private void checkManageAccountsOrUseCredentialsPermissions() {
         checkBinderPermission(Manifest.permission.MANAGE_ACCOUNTS,
                 Manifest.permission.USE_CREDENTIALS);
+    }
+
+    private boolean canUserModifyAccounts(int callingUid) {
+        if (callingUid != android.os.Process.myUid()) {
+            Bundle restrictions = getUserManager().getUserRestrictions(
+                    new UserHandle(UserHandle.getUserId(callingUid)));
+            if (!restrictions.getBoolean(UserManager.ALLOW_MODIFY_ACCOUNTS)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void updateAppPermission(Account account, String authTokenType, int uid, boolean value)
