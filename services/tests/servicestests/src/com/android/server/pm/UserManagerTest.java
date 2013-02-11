@@ -24,6 +24,7 @@ import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
 
@@ -147,8 +148,8 @@ public class UserManagerTest extends AndroidTestCase {
             Bundle restrictions = new Bundle();
             restrictions.putBoolean(UserManager.ALLOW_INSTALL_APPS, false);
             restrictions.putBoolean(UserManager.ALLOW_CONFIG_WIFI, true);
-            mUserManager.setUserRestrictions(restrictions, users.get(1).id);
-            Bundle stored = mUserManager.getUserRestrictions(users.get(1).id);
+            mUserManager.setUserRestrictions(restrictions, new UserHandle(users.get(1).id));
+            Bundle stored = mUserManager.getUserRestrictions(new UserHandle(users.get(1).id));
             assertEquals(stored.getBoolean(UserManager.ALLOW_CONFIG_WIFI), true);
             assertEquals(stored.getBoolean(UserManager.ALLOW_UNINSTALL_APPS), true);
             assertEquals(stored.getBoolean(UserManager.ALLOW_INSTALL_APPS), false);
