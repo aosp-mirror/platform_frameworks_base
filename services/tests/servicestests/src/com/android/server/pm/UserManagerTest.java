@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.UserManager;
@@ -140,6 +141,20 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
+    public void testRestrictions() {
+        List<UserInfo> users = mUserManager.getUsers();
+        if (users.size() > 1) {
+            Bundle restrictions = new Bundle();
+            restrictions.putBoolean(UserManager.ALLOW_INSTALL_APPS, false);
+            restrictions.putBoolean(UserManager.ALLOW_CONFIG_WIFI, true);
+            mUserManager.setUserRestrictions(restrictions, users.get(1).id);
+            Bundle stored = mUserManager.getUserRestrictions(users.get(1).id);
+            assertEquals(stored.getBoolean(UserManager.ALLOW_CONFIG_WIFI), true);
+            assertEquals(stored.getBoolean(UserManager.ALLOW_UNINSTALL_APPS), true);
+            assertEquals(stored.getBoolean(UserManager.ALLOW_INSTALL_APPS), false);
+        }
+    }
+
     private void removeUser(int userId) {
         synchronized (mUserLock) {
             mUserManager.removeUser(userId);
@@ -151,4 +166,5 @@ public class UserManagerTest extends AndroidTestCase {
             }
         }
     }
+
 }

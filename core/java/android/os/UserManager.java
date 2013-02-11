@@ -35,6 +35,42 @@ public class UserManager {
     private final IUserManager mService;
     private final Context mContext;
 
+    /**
+     * @hide
+     * Key for user restrictions. Specifies if a user is allowed to add or remove accounts.
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String ALLOW_MODIFY_ACCOUNTS = "modify_accounts";
+
+    /**
+     * @hide
+     * Key for user restrictions. Specifies if a user is allowed to change Wi-Fi access points.
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String ALLOW_CONFIG_WIFI = "config_wifi";
+
+    /**
+     * @hide
+     * Key for user restrictions. Specifies if a user is allowed to install applications.
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String ALLOW_INSTALL_APPS = "install_apps";
+
+    /**
+     * @hide
+     * Key for user restrictions. Specifies if a user is allowed to uninstall applications.
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String ALLOW_UNINSTALL_APPS = "uninstall_apps";
+
     /** @hide */
     public UserManager(Context context, IUserManager service) {
         mService = service;
@@ -129,6 +165,35 @@ public class UserManager {
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user info", re);
             return null;
+        }
+    }
+
+    /** @hide */
+    public Bundle getUserRestrictions() {
+        return getUserRestrictions(Process.myUserHandle());
+    }
+
+    /** @hide */
+    public Bundle getUserRestrictions(UserHandle userHandle) {
+        try {
+            return mService.getUserRestrictions(userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get user restrictions", re);
+            return Bundle.EMPTY;
+        }
+    }
+
+    /** @hide */
+    public void setUserRestrictions(Bundle restrictions) {
+        setUserRestrictions(restrictions, Process.myUserHandle());
+    }
+
+    /** @hide */
+    public void setUserRestrictions(Bundle restrictions, UserHandle userHandle) {
+        try {
+            mService.setUserRestrictions(restrictions, userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set user restrictions", re);
         }
     }
 
