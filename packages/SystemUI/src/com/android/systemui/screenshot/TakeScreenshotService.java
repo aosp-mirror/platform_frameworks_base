@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 
 public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";
@@ -37,12 +38,15 @@ public class TakeScreenshotService extends Service {
                     final Messenger callback = msg.replyTo;
                     if (mScreenshot == null) {
                         mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);
+                        Log.d(TAG, "Global screenshot initialized");
                     }
+                    Log.d(TAG, "Global screenshot captured");
                     mScreenshot.takeScreenshot(new Runnable() {
                         @Override public void run() {
                             Message reply = Message.obtain(null, 1);
                             try {
                                 callback.send(reply);
+                                Log.d(TAG, "Global screenshot completed");
                             } catch (RemoteException e) {
                             }
                         }
