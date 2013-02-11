@@ -4829,6 +4829,51 @@ public final class ViewRootImpl implements ViewParent,
         postSendWindowContentChangedCallback(child);
     }
 
+    @Override
+    public boolean canResolveLayoutDirection() {
+        return true;
+    }
+
+    @Override
+    public boolean isLayoutDirectionResolved() {
+        return true;
+    }
+
+    @Override
+    public int getLayoutDirection() {
+        return View.LAYOUT_DIRECTION_RESOLVED_DEFAULT;
+    }
+
+    @Override
+    public boolean canResolveTextDirection() {
+        return true;
+    }
+
+    @Override
+    public boolean isTextDirectionResolved() {
+        return true;
+    }
+
+    @Override
+    public int getTextDirection() {
+        return View.TEXT_DIRECTION_RESOLVED_DEFAULT;
+    }
+
+    @Override
+    public boolean canResolveTextAlignment() {
+        return true;
+    }
+
+    @Override
+    public boolean isTextAlignmentResolved() {
+        return true;
+    }
+
+    @Override
+    public int getTextAlignment() {
+        return View.TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+    }
+
     private View getCommonPredecessor(View first, View second) {
         if (mAttachInfo != null) {
             if (mTempHashSet == null) {
