@@ -617,10 +617,8 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"የአውታረመረብ ቋሚ መመሪያዎችን እና ትግበራ ተኮር ደንቦችን ለማደራጀት ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"የአውታረ መረብ አጠቃቀም"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ከመተግበሪያዎች በተለየ መልኩ እንዴት የአውታረ መረብ አጠቃቀም እንደተመዘገበ ለመቀየር ለመተግበሪያው ይፈቅዳሉ።ለመደበኛ መተግበሪያዎች አገልግሎት አይውልም።"</string>
-    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
-    <skip />
-    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
-    <skip />
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"ማሳወቂያዎችን ይድረሱ"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"መተግበሪያው ማሳወቂያዎችን እንዲያስመጣ፣ እንዲመረምር እና እንዲያጸዳ ያስችለዋል፣ በሌሎች መተግበሪያዎች የተለጠፉትንም ጨምሮ።"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ድንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"በማያ-መክፈት የተፈቀዱ የይለፍ ቃል ርዝመት እና ቁምፊዎች ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"የማሳያ-ክፈት ሙከራዎችን አሳይ"</string>
