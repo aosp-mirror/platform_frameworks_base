@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+// This interface is also used by native code, so must
+// be kept in sync with frameworks/native/include/binder/IAppOpsCallback.h
 oneway interface IAppOpsCallback {
     void opChanged(int op, String packageName);
 }
