@@ -149,6 +149,61 @@ public class AppOpsService extends IAppOpsService.Stub {
         ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
     }
 
+    public void systemReady() {
+        synchronized (this) {
+            boolean changed = false;
+            for (int i=0; i<mUidOps.size(); i++) {
+                HashMap<String, Ops> pkgs = mUidOps.valueAt(i);
+                Iterator<Ops> it = pkgs.values().iterator();
+                while (it.hasNext()) {
+                    Ops ops = it.next();
+                    int curUid;
+                    try {
+                        curUid = mContext.getPackageManager().getPackageUid(ops.packageName,
+                                UserHandle.getUserId(ops.uid));
+                    } catch (NameNotFoundException e) {
+                        curUid = -1;
+                    }
+                    if (curUid != ops.uid) {
+                        Slog.i(TAG, "Pruning old package " + ops.packageName
+                                + "/" + ops.uid + ": new uid=" + curUid);
+                        it.remove();
+                        changed = true;
+                    }
+                }
+                if (pkgs.size() <= 0) {
+                    mUidOps.removeAt(i);
+                }
+            }
+            if (changed) {
+                scheduleWriteLocked();
+            }
+        }
+    }
+
+    public void packageRemoved(int uid, String packageName) {
+        synchronized (this) {
+            HashMap<String, Ops> pkgs = mUidOps.get(uid);
+            if (pkgs != null) {
+                if (pkgs.remove(packageName) != null) {
+                    if (pkgs.size() <= 0) {
+                        mUidOps.remove(uid);
+                    }
+                    scheduleWriteLocked();
+                }
+            }
+        }
+    }
+
+    public void uidRemoved(int uid) {
+        synchronized (this) {
+            if (mUidOps.indexOfKey(uid) >= 0) {
+                mUidOps.remove(uid);
+                scheduleWriteLocked();
+            }
+        }
+    }
+
     public void shutdown() {
         Slog.w(TAG, "Writing app ops before shutdown...");
         boolean doWrite = false;
@@ -257,6 +312,25 @@ public class AppOpsService extends IAppOpsService.Stub {
                             repCbs = new ArrayList<Callback>();
                         }
                         repCbs.addAll(cbs);
+                    }
+                    if (mode == AppOpsManager.MODE_ALLOWED) {
+                        // If going into the default mode, prune this op
+                        // if there is nothing else interesting in it.
+                        if (op.time == 0 && op.rejectTime == 0) {
+                            Ops ops = getOpsLocked(uid, packageName, false);
+                            if (ops != null) {
+                                ops.remove(op.op);
+                                if (ops.size() <= 0) {
+                                    HashMap<String, Ops> pkgOps = mUidOps.get(uid);
+                                    if (pkgOps != null) {
+                                        pkgOps.remove(ops.packageName);
+                                        if (pkgOps.size() <= 0) {
+                                            mUidOps.remove(uid);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     scheduleWriteNowLocked();
                 }
@@ -368,6 +442,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (DEBUG) Log.d(TAG, "noteOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName);
             op.time = System.currentTimeMillis();
+            op.rejectTime = 0;
             return AppOpsManager.MODE_ALLOWED;
         }
     }
@@ -396,6 +471,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     + " package " + packageName);
             if (op.nesting == 0) {
                 op.time = System.currentTimeMillis();
+                op.rejectTime = 0;
                 op.duration = -1;
             }
             op.nesting++;
@@ -415,6 +491,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (op.nesting <= 1) {
                 if (op.nesting == 1) {
                     op.duration = (int)(System.currentTimeMillis() - op.time);
+                    op.time += op.duration;
                 } else {
                     Slog.w(TAG, "Finishing op nesting under-run: uid " + uid + " pkg " + packageName
                         + " code " + code + " time=" + op.time + " duration=" + op.duration
@@ -454,6 +531,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             pkgOps = new HashMap<String, Ops>();
             mUidOps.put(uid, pkgOps);
         }
+        if (uid == 0) {
+            packageName = "root";
+        } else if (uid == Process.SHELL_UID) {
+            packageName = "com.android.shell";
+        }
         Ops ops = pkgOps.get(packageName);
         if (ops == null) {
             if (!edit) {
@@ -461,23 +543,25 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             // This is the first time we have seen this package name under this uid,
             // so let's make sure it is valid.
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                int pkgUid = -1;
+            if (uid != 0) {
+                final long ident = Binder.clearCallingIdentity();
                 try {
-                    pkgUid = mContext.getPackageManager().getPackageUid(packageName,
-                            UserHandle.getUserId(uid));
-                } catch (NameNotFoundException e) {
+                    int pkgUid = -1;
+                    try {
+                        pkgUid = mContext.getPackageManager().getPackageUid(packageName,
+                                UserHandle.getUserId(uid));
+                    } catch (NameNotFoundException e) {
+                    }
+                    if (pkgUid != uid) {
+                        // Oops!  The package name is not valid for the uid they are calling
+                        // under.  Abort.
+                        Slog.w(TAG, "Bad call: specified package " + packageName
+                                + " under uid " + uid + " but it is really " + pkgUid);
+                        return null;
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
                 }
-                if (pkgUid != uid) {
-                    // Oops!  The package name is not valid for the uid they are calling
-                    // under.  Abort.
-                    Slog.w(TAG, "Bad call: specified package " + packageName
-                            + " under uid " + uid + " but it is really " + pkgUid);
-                    return null;
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
             ops = new Ops(packageName, uid);
             pkgOps.put(packageName, ops);
