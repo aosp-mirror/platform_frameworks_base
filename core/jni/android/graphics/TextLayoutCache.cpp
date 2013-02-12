@@ -785,10 +785,6 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* conte
 /**
  * Return the first typeface in the logical change, starting with this typeface,
  * that contains the specified unichar, or NULL if none is found.
- * 
- * Note that this function does _not_ increment the reference count on the typeface, as the
- * assumption is that its lifetime is managed elsewhere - in particular, the fallback typefaces
- * for the default font live in a global cache.
  */
 SkTypeface* TextLayoutShaper::typefaceForScript(const SkPaint* paint, SkTypeface* typeface,
         hb_script_t script) {
@@ -798,7 +794,7 @@ SkTypeface* TextLayoutShaper::typefaceForScript(const SkPaint* paint, SkTypeface
     }
     typeface = SkCreateTypefaceForScriptNG(script, currentStyle);
 #if DEBUG_GLYPHS
-    ALOGD("Using Harfbuzz Script %d, Style %d", script, currentStyle);
+    ALOGD("Using Harfbuzz Script %c%c%c%c, Style %d", HB_UNTAG(script), currentStyle);
 #endif
     return typeface;
 }
@@ -845,6 +841,7 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint) {
     if (baseGlyphCount != 0) {
         typeface = typefaceForScript(paint, typeface, hb_buffer_get_script(mBuffer));
         if (!typeface) {
+            baseGlyphCount = 0;
             typeface = mDefaultTypeface;
             SkSafeRef(typeface);
 #if DEBUG_GLYPHS
