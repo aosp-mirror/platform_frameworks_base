@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.Manifest;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 
@@ -29,7 +30,25 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 
-/** @hide */
+/**
+ * API for interacting with "application operation" tracking.  Allows you to:
+ *
+ * - Note when operations are happening, and find out if they are allowed for the current caller.
+ * - Disallow specific apps from doing specific operations.
+ * - Collect all of the current information about operations that have been executed or are not
+ * being allowed.
+ * - Monitor for changes in whether an operation is allowed.
+ *
+ * Each operation is identified by a single integer; these integers are a fixed set of
+ * operations, enumerated by the OP_* constants.
+ *
+ * When checking operations, the result is a "mode" integer indicating the current setting
+ * for the operation under that caller: MODE_ALLOWED, MODE_IGNORED (don't execute the operation but
+ * fake its behavior enough so that the caller doesn't crash), MODE_ERRORED (through a
+ * SecurityException back to the caller; the normal operation calls will do this for you).
+ *
+ * @hide
+ */
 public class AppOpsManager {
     final Context mContext;
     final IAppOpsService mService;
@@ -71,8 +90,11 @@ public class AppOpsManager {
     public static final int OP_WRITE_SETTINGS = 23;
     public static final int OP_SYSTEM_ALERT_WINDOW = 24;
     public static final int OP_ACCESS_NOTIFICATIONS = 25;
+    public static final int OP_CAMERA = 26;
+    public static final int OP_RECORD_AUDIO = 27;
+    public static final int OP_PLAY_AUDIO = 28;
     /** @hide */
-    public static final int _NUM_OP = 26;
+    public static final int _NUM_OP = 29;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -109,6 +131,9 @@ public class AppOpsManager {
             OP_WRITE_SETTINGS,
             OP_SYSTEM_ALERT_WINDOW,
             OP_ACCESS_NOTIFICATIONS,
+            OP_CAMERA,
+            OP_RECORD_AUDIO,
+            OP_PLAY_AUDIO,
     };
 
     /**
@@ -142,6 +167,9 @@ public class AppOpsManager {
             "WRITE_SETTINGS",
             "SYSTEM_ALERT_WINDOW",
             "ACCESS_NOTIFICATIONS",
+            "CAMERA",
+            "RECORD_AUDIO",
+            "PLAY_AUDIO",
     };
 
     /**
@@ -175,21 +203,36 @@ public class AppOpsManager {
             android.Manifest.permission.WRITE_SETTINGS,
             android.Manifest.permission.SYSTEM_ALERT_WINDOW,
             android.Manifest.permission.ACCESS_NOTIFICATIONS,
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO,
+            null, // no permission for playing audio
     };
 
+    /**
+     * Retrieve the op switch that controls the given operation.
+     */
     public static int opToSwitch(int op) {
         return sOpToSwitch[op];
     }
 
+    /**
+     * Retrieve a non-localized name for the operation, for debugging output.
+     */
     public static String opToName(int op) {
         if (op == OP_NONE) return "NONE";
         return op < sOpNames.length ? sOpNames[op] : ("Unknown(" + op + ")");
     }
 
+    /**
+     * Retrieve the permission associated with an operation, or null if there is not one.
+     */
     public static String opToPermission(int op) {
         return sOpPerms[op];
     }
 
+    /**
+     * Class holding all of the operation information associated with an app.
+     */
     public static class PackageOps implements Parcelable {
         private final String mPackageName;
         private final int mUid;
@@ -249,6 +292,9 @@ public class AppOpsManager {
         };
     }
 
+    /**
+     * Class holding the information about one unique operation of an application.
+     */
     public static class OpEntry implements Parcelable {
         private final int mOp;
         private final int mMode;
@@ -321,6 +367,9 @@ public class AppOpsManager {
         };
     }
 
+    /**
+     * Callback for notification of changes to operation state.
+     */
     public interface Callback {
         public void opChanged(int op, String packageName);
     }
@@ -330,6 +379,11 @@ public class AppOpsManager {
         mService = service;
     }
 
+    /**
+     * Retrieve current operation state for all applications.
+     *
+     * @param ops The set of operations you are interested in, or null if you want all of them.
+     */
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         try {
             return mService.getPackagesForOps(ops);
@@ -338,6 +392,13 @@ public class AppOpsManager {
         return null;
     }
 
+    /**
+     * Retrieve current operation state for one application.
+     *
+     * @param uid The uid of the application of interest.
+     * @param packageName The name of the application of interest.
+     * @param ops The set of operations you are interested in, or null if you want all of them.
+     */
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, int[] ops) {
         try {
             return mService.getOpsForPackage(uid, packageName, ops);
