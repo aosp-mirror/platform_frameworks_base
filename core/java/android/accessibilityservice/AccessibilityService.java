@@ -457,7 +457,7 @@ public abstract class AccessibilityService extends Service {
      *
      * @return The accessibility service info.
      *
-     * @see AccessibilityNodeInfo
+     * @see AccessibilityServiceInfo
      */
     public final AccessibilityServiceInfo getServiceInfo() {
         IAccessibilityServiceConnection connection =
