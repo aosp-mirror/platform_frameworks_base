@@ -704,27 +704,27 @@ include $(BUILD_DROIDDOC)
 $(full_target): framework-res-package-target
 
 # ==== docs for the s.a.c site (on the google app engine server) =======================
-include $(CLEAR_VARS)
+# include $(CLEAR_VARS)
 
-LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
-LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
-LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
-LOCAL_DROIDDOC_HTML_DIR:=../../docs/source.android.com/src
-LOCAL_ADDITIONAL_HTML_DIR:=
-LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
-LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
-LOCAL_MODULE := online-sac
-
-LOCAL_DROIDDOC_OPTIONS:= \
-		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		-toroot / \
-		-hdf android.whichdoc online \
-		-hdf sac true
-
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
-
-include $(BUILD_DROIDDOC)
+# LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
+# LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+# LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+# LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+# LOCAL_DROIDDOC_HTML_DIR:=../../docs/source.android.com/src
+# LOCAL_ADDITIONAL_HTML_DIR:=
+# LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+# LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+# LOCAL_MODULE := online-sac
+#
+# LOCAL_DROIDDOC_OPTIONS:= \
+#		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+#		-toroot / \
+#		-hdf android.whichdoc online \
+#		-hdf sac true
+#
+# LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+#
+# include $(BUILD_DROIDDOC)
 
 # ==== docs for the web (on the devsite app engine server) =======================
 include $(CLEAR_VARS)
