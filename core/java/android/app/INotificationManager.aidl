@@ -38,5 +38,6 @@ interface INotificationManager
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
 
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
 }
 
