@@ -234,7 +234,6 @@ public class Surface implements Parcelable {
     private native void nativeDestroy();
 
     private native boolean nativeIsValid();
-    private native int nativeGetIdentity();
     private native boolean nativeIsConsumerRunningBehind();
 
     private native Canvas nativeLockCanvas(Rect dirty);
@@ -726,7 +725,7 @@ public class Surface implements Parcelable {
 
     @Override
     public String toString() {
-        return "Surface(name=" + mName + ", identity=" + nativeGetIdentity() + ")";
+        return "Surface(name=" + mName + ")";
     }
 
     private static void checkHeadless() {
