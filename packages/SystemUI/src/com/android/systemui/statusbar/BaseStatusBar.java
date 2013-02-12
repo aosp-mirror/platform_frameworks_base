@@ -597,6 +597,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     y = (int) ((dm.heightPixels - statusBarHeight - height) / 2f + thumbTopMargin
                             + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
                 }
+                if (mLayoutDirection == View.LAYOUT_DIRECTION_RTL) {
+                    x = dm.widthPixels - x - res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
+                }
 
                 ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(
                         getStatusBarView(),

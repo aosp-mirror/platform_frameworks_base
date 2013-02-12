@@ -45,6 +45,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
@@ -162,7 +164,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             if (convertView == null) {
                 convertView = createView(parent);
             }
-            ViewHolder holder = (ViewHolder) convertView.getTag();
+            final ViewHolder holder = (ViewHolder) convertView.getTag();
 
             // index is reverse since most recent appears at the bottom...
             final int index = mRecentTaskDescriptions.size() - position - 1;
@@ -191,24 +193,49 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                             holder.calloutLine.setTranslationY(0f);
                         }
                     }
-                    mItemToAnimateInWhenWindowAnimationIsFinished = holder;
-                    final int translation = -getResources().getDimensionPixelSize(
-                            R.dimen.status_bar_recents_app_icon_translate_distance);
-                    final Configuration config = getResources().getConfiguration();
-                    if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        holder.iconView.setAlpha(0f);
-                        holder.iconView.setTranslationX(translation);
-                        holder.labelView.setAlpha(0f);
-                        holder.labelView.setTranslationX(translation);
-                        holder.calloutLine.setAlpha(0f);
-                        holder.calloutLine.setTranslationX(translation);
-                    } else {
-                        holder.iconView.setAlpha(0f);
-                        holder.iconView.setTranslationY(translation);
-                    }
-                    if (!mWaitingForWindowAnimation) {
-                        animateInIconOfFirstTask();
-                    }
+                    mItemToAnimateInWhenWindowAnimationIsFinished = null;
+
+                    final ViewTreeObserver observer = getViewTreeObserver();
+                    final OnGlobalLayoutListener animateFirstIcon = new OnGlobalLayoutListener() {
+                        public void onGlobalLayout() {
+                            if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
+                                holder.iconView.setAlpha(1f);
+                                holder.iconView.setTranslationX(0f);
+                                holder.iconView.setTranslationY(0f);
+                                holder.labelView.setAlpha(1f);
+                                holder.labelView.setTranslationX(0f);
+                                holder.labelView.setTranslationY(0f);
+                                if (holder.calloutLine != null) {
+                                    holder.calloutLine.setAlpha(1f);
+                                    holder.calloutLine.setTranslationX(0f);
+                                    holder.calloutLine.setTranslationY(0f);
+                                }
+                            }
+                            mItemToAnimateInWhenWindowAnimationIsFinished = holder;
+                            int translation = -getResources().getDimensionPixelSize(
+                                    R.dimen.status_bar_recents_app_icon_translate_distance);
+                            final Configuration config = getResources().getConfiguration();
+                            if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                if (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+                                    translation = -translation;
+                                }
+                                holder.iconView.setAlpha(0f);
+                                holder.iconView.setTranslationX(translation);
+                                holder.labelView.setAlpha(0f);
+                                holder.labelView.setTranslationX(translation);
+                                holder.calloutLine.setAlpha(0f);
+                                holder.calloutLine.setTranslationX(translation);
+                            } else {
+                                holder.iconView.setAlpha(0f);
+                                holder.iconView.setTranslationY(translation);
+                            }
+                            if (!mWaitingForWindowAnimation) {
+                                animateInIconOfFirstTask();
+                            }
+                            getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                    };
+                    observer.addOnGlobalLayoutListener(animateFirstIcon);
                 }
             }
 
