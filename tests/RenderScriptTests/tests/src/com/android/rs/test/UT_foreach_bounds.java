@@ -37,7 +37,7 @@ public class UT_foreach_bounds extends UnitTest {
         s.set_dimY(Y);
         typeBuilder.setX(X).setY(Y);
         A = Allocation.createTyped(RS, typeBuilder.create());
-        s.bind_a(A);
+        s.set_aRaw(A);
         s.set_s(s);
         s.set_ain(A);
         s.set_aout(A);
