@@ -235,6 +235,31 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
             };
         }
+
+        public StatusBarNotification[] getArray(int count) {
+            if (count == 0) count = Archive.BUFFER_SIZE;
+            final StatusBarNotification[] a
+                    = new StatusBarNotification[Math.min(count, mBuffer.size())];
+            Iterator<StatusBarNotification> iter = descendingIterator();
+            int i=0;
+            while (iter.hasNext() && i < count) {
+                a[i++] = iter.next();
+            }
+            return a;
+        }
+
+        public StatusBarNotification[] getArray(int count, String pkg, int userId) {
+            if (count == 0) count = Archive.BUFFER_SIZE;
+            final StatusBarNotification[] a
+                    = new StatusBarNotification[Math.min(count, mBuffer.size())];
+            Iterator<StatusBarNotification> iter = filter(descendingIterator(), pkg, userId);
+            int i=0;
+            while (iter.hasNext() && i < count) {
+                a[i++] = iter.next();
+            }
+            return a;
+        }
+
     }
 
     Archive mArchive = new Archive();
@@ -347,10 +372,9 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     public StatusBarNotification[] getActiveNotifications(String callingPkg) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS,
-                "NotificationManagerService");
+                "NotificationManagerService.getActiveNotifications");
 
         StatusBarNotification[] tmp = null;
-        int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
 
         if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
@@ -361,6 +385,22 @@ public class NotificationManagerService extends INotificationManager.Stub
                 for (int i=0; i<N; i++) {
                     tmp[i] = mNotificationList.get(i).sbn;
                 }
+            }
+        }
+        return tmp;
+    }
+
+    public StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS,
+                "NotificationManagerService.getHistoricalNotifications");
+
+        StatusBarNotification[] tmp = null;
+        int uid = Binder.getCallingUid();
+
+        if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
+                == AppOpsManager.MODE_ALLOWED) {
+            synchronized (mArchive) {
+                tmp = mArchive.getArray(count);
             }
         }
         return tmp;
