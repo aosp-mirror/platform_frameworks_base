@@ -16,8 +16,6 @@
 
 package android.view;
 
-import android.app.ActivityThread;
-import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -218,13 +216,8 @@ final class AccessibilityInteractionController {
                 root = mViewRootImpl.mView;
             }
             if (root != null) {
-                int resolvedViewId = root.getContext().getResources().getIdentifier(
-                        viewId, "id", root.getContext().getPackageName());
-                if (resolvedViewId <= 0) {
-                    resolvedViewId = ((Context) ActivityThread.currentActivityThread()
-                            .getSystemContext()).getResources()
-                            .getIdentifier(viewId, "id", "android");
-                }
+                final int resolvedViewId = root.getContext().getResources()
+                        .getIdentifier(viewId, null, null);
                 if (resolvedViewId <= 0) {
                     return;
                 }
