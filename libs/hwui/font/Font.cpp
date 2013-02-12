@@ -189,7 +189,10 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
     vOffset += glyph->mBitmapTop + height;
 
     SkPoint destination[4];
-    measure.getPosTan(x + hOffset + glyph->mBitmapLeft + halfWidth, position, tangent);
+    bool ok = measure.getPosTan(x + hOffset + glyph->mBitmapLeft + halfWidth, position, tangent);
+    if (!ok) {
+        ALOGW("The path for drawTextOnPath is empty or null");
+    }
 
     // Move along the tangent and offset by the normal
     destination[0].set(-tangent->fX * halfWidth - tangent->fY * vOffset,
