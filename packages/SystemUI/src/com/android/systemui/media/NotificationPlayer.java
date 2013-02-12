@@ -91,15 +91,28 @@ public class NotificationPlayer implements OnCompletionListener {
                     if ((mCmd.uri != null) && (mCmd.uri.getEncodedPath() != null)
                             && (mCmd.uri.getEncodedPath().length() > 0)) {
                         if (!audioManager.isMusicActiveRemotely()) {
-                            if (mCmd.looping) {
-                                audioManager.requestAudioFocus(null, mCmd.stream,
-                                        AudioManager.AUDIOFOCUS_GAIN);
-                            } else {
-                                audioManager.requestAudioFocus(null, mCmd.stream,
-                                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+                            synchronized(mQueueAudioFocusLock) {
+                                if (mAudioManagerWithAudioFocus == null) {
+                                    if (mDebug) Log.d(mTag, "requesting AudioFocus");
+                                    if (mCmd.looping) {
+                                        audioManager.requestAudioFocus(null, mCmd.stream,
+                                                AudioManager.AUDIOFOCUS_GAIN);
+                                    } else {
+                                        audioManager.requestAudioFocus(null, mCmd.stream,
+                                                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+                                    }
+                                    mAudioManagerWithAudioFocus = audioManager;
+                                } else {
+                                    if (mDebug) Log.d(mTag, "AudioFocus was previously requested");
+                                }
                             }
                         }
                     }
+                    // FIXME Having to start a new thread so we can receive completion callbacks
+                    //  is wrong, as we kill this thread whenever a new sound is to be played. This
+                    //  can lead to AudioFocus being released too early, before the second sound is
+                    //  done playing. This class should be modified to use a single thread, on which
+                    //  command are issued, and on which it receives the completion callbacks.
                     player.setOnCompletionListener(NotificationPlayer.this);
                     player.start();
                     if (mPlayer != null) {
@@ -110,7 +123,6 @@ public class NotificationPlayer implements OnCompletionListener {
                 catch (Exception e) {
                     Log.w(mTag, "error loading sound for " + mCmd.uri, e);
                 }
-                mAudioManager = audioManager;
                 this.notify();
             }
             Looper.loop();
@@ -181,8 +193,12 @@ public class NotificationPlayer implements OnCompletionListener {
                         mPlayer.stop();
                         mPlayer.release();
                         mPlayer = null;
-                        mAudioManager.abandonAudioFocus(null);
-                        mAudioManager = null;
+                        synchronized(mQueueAudioFocusLock) {
+                            if (mAudioManagerWithAudioFocus != null) {
+                                mAudioManagerWithAudioFocus.abandonAudioFocus(null);
+                                mAudioManagerWithAudioFocus = null;
+                            }
+                        }
                         if((mLooper != null)
                                 && (mLooper.getThread().getState() != Thread.State.TERMINATED)) {
                             mLooper.quit();
@@ -209,8 +225,14 @@ public class NotificationPlayer implements OnCompletionListener {
     }
 
     public void onCompletion(MediaPlayer mp) {
-        if (mAudioManager != null) {
-            mAudioManager.abandonAudioFocus(null);
+        synchronized(mQueueAudioFocusLock) {
+            if (mAudioManagerWithAudioFocus != null) {
+                if (mDebug) Log.d(mTag, "onCompletion() abandonning AudioFocus");
+                mAudioManagerWithAudioFocus.abandonAudioFocus(null);
+                mAudioManagerWithAudioFocus = null;
+            } else {
+                if (mDebug) Log.d(mTag, "onCompletion() no need to abandon AudioFocus");
+            }
         }
         // if there are no more sounds to play, end the Looper to listen for media completion
         synchronized (mCmdQueue) {
@@ -231,7 +253,8 @@ public class NotificationPlayer implements OnCompletionListener {
     private final Object mCompletionHandlingLock = new Object();
     private MediaPlayer mPlayer;
     private PowerManager.WakeLock mWakeLock;
-    private AudioManager mAudioManager;
+    private final Object mQueueAudioFocusLock = new Object();
+    private AudioManager mAudioManagerWithAudioFocus; // synchronized on mQueueAudioFocusLock
 
     // The current state according to the caller.  Reality lags behind
     // because of the asynchronous nature of this class.
