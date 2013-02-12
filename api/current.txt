@@ -4155,9 +4155,12 @@ package android.app {
   public final class UiAutomation {
     method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, com.android.internal.util.Predicate<android.view.accessibility.AccessibilityEvent>, long) throws java.util.concurrent.TimeoutException;
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
+    method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method public boolean injectInputEvent(android.view.InputEvent, boolean);
+    method public final boolean performGlobalAction(int);
     method public void setOnAccessibilityEventListener(android.app.UiAutomation.OnAccessibilityEventListener);
     method public boolean setRotation(int);
+    method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
     method public android.graphics.Bitmap takeScreenshot();
     method public void waitForIdle(long, long) throws java.util.concurrent.TimeoutException;
     field public static final int ROTATION_FREEZE_0 = 0; // 0x0

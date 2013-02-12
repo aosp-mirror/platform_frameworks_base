@@ -18,7 +18,9 @@ package android.app;
 
 import android.accessibilityservice.AccessibilityService.Callbacks;
 import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -45,7 +47,10 @@ import java.util.concurrent.TimeoutException;
  * introspection of the screen content. It relies on the platform accessibility
  * APIs to introspect the screen and to perform some actions on the remote view
  * tree. It also allows injecting of arbitrary raw input events simulating user
- * interaction with keyboards and touch devices.
+ * interaction with keyboards and touch devices. One can think of a UiAutomation
+ * as a special type of {@link android.accessibilityservice.AccessibilityService}
+ * which does not provide hooks for the service life cycle and exposes other
+ * APIs that are useful for UI test automation.
  * <p>
  * The APIs exposed by this class are low-level to maximize flexibility when
  * developing UI test automation tools and libraries. Generally, a UiAutomation
@@ -239,6 +244,90 @@ public final class UiAutomation {
     public void setOnAccessibilityEventListener(OnAccessibilityEventListener listener) {
         synchronized (mLock) {
             mOnAccessibilityEventListener = listener;
+        }
+    }
+
+    /**
+     * Performs a global action. Such an action can be performed at any moment
+     * regardless of the current application or user location in that application.
+     * For example going back, going home, opening recents, etc.
+     *
+     * @param action The action to perform.
+     * @return Whether the action was successfully performed.
+     *
+     * @see AccessibilityService#GLOBAL_ACTION_BACK
+     * @see AccessibilityService#GLOBAL_ACTION_HOME
+     * @see AccessibilityService#GLOBAL_ACTION_NOTIFICATIONS
+     * @see AccessibilityService#GLOBAL_ACTION_RECENTS
+     */
+    public final boolean performGlobalAction(int action) {
+        final IAccessibilityServiceConnection connection;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connection = AccessibilityInteractionClient.getInstance()
+                    .getConnection(mConnectionId);
+        }
+        // Calling out without a lock held.
+        if (connection != null) {
+            try {
+                return connection.performGlobalAction(action);
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while calling performGlobalAction", re);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the an {@link AccessibilityServiceInfo} describing this UiAutomation.
+     * This method is useful if one wants to change some of the dynamically
+     * configurable properties at runtime.
+     *
+     * @return The accessibility service info.
+     *
+     * @see AccessibilityServiceInfo
+     */
+    public final AccessibilityServiceInfo getServiceInfo() {
+        final IAccessibilityServiceConnection connection;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connection = AccessibilityInteractionClient.getInstance()
+                    .getConnection(mConnectionId);
+        }
+        // Calling out without a lock held.
+        if (connection != null) {
+            try {
+                return connection.getServiceInfo();
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while getting AccessibilityServiceInfo", re);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sets the {@link AccessibilityServiceInfo} that describes how this
+     * UiAutomation will be handled by the platform accessibility layer.
+     *
+     * @param info The info.
+     *
+     * @see AccessibilityServiceInfo
+     */
+    public final void setServiceInfo(AccessibilityServiceInfo info) {
+        final IAccessibilityServiceConnection connection;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            AccessibilityInteractionClient.getInstance().clearCache();
+            connection = AccessibilityInteractionClient.getInstance()
+                    .getConnection(mConnectionId);
+        }
+        // Calling out without a lock held.
+        if (connection != null) {
+            try {
+                connection.setServiceInfo(info);
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfo", re);
+            }
         }
     }
 
