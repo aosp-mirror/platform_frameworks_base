@@ -820,7 +820,7 @@ public class StateMachine {
              * and we won't log special messages SM_INIT_CMD or SM_QUIT_CMD which
              * always set msg.obj to the handler.
              */
-            boolean recordLogMsg = mSm.recordLogRec(mMsg) && (msg.obj == mSmHandlerObj);
+            boolean recordLogMsg = mSm.recordLogRec(mMsg) && (msg.obj != mSmHandlerObj);
 
             if (mLogRecords.logOnlyTransitions()) {
                 /** Record only if there is a transition */
