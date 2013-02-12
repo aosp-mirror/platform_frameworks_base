@@ -1,6 +1,6 @@
 #include "shared.rsh"
 
-int *a;
+rs_allocation aRaw;
 int dimX;
 int dimY;
 static bool failed = false;
@@ -15,7 +15,8 @@ static bool test_foo_output() {
 
     for (j = 0; j < dimY; j++) {
         for (i = 0; i < dimX; i++) {
-            _RS_ASSERT(a[i + j * dimX] == (99 + i + j * dimX));
+            int v = rsGetElementAt_int(aRaw, i, j);
+            _RS_ASSERT(v == (99 + i + j * dimX));
         }
     }
 
