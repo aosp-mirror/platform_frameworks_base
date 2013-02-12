@@ -746,6 +746,14 @@ public class WindowManagerService extends IWindowManager.Stub
         mActivityManager = ActivityManagerNative.getDefault();
         mBatteryStats = BatteryStatsService.getService();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
+        mAppOps.startWatchingMode(AppOpsManager.OP_SYSTEM_ALERT_WINDOW, null,
+                new AppOpsManager.Callback() {
+                    @Override
+                    public void opChanged(int op, String packageName) {
+                        updateAppOpsState();
+                    }
+                }
+        );
 
         // Get persisted window scale setting
         mWindowAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
@@ -2150,7 +2158,10 @@ public class WindowManagerService extends IWindowManager.Stub
             win.attach();
             mWindowMap.put(client.asBinder(), win);
             if (win.mAppOp != AppOpsManager.OP_NONE) {
-                mAppOps.startOpNoThrow(win.mAppOp, win.getOwningUid(), win.getOwningPackage());
+                if (mAppOps.startOpNoThrow(win.mAppOp, win.getOwningUid(), win.getOwningPackage())
+                        != AppOpsManager.MODE_ALLOWED) {
+                    win.setAppOpVisibilityLw(false);
+                }
             }
 
             if (type == TYPE_APPLICATION_STARTING && token.appWindowToken != null) {
@@ -2437,6 +2448,27 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mInputMonitor.updateInputWindowsLw(true /*force*/);
+    }
+
+    public void updateAppOpsState() {
+        synchronized(mWindowMap) {
+            boolean changed = false;
+            for (int i=0; i<mDisplayContents.size(); i++) {
+                DisplayContent display = mDisplayContents.valueAt(i);
+                WindowList windows = display.getWindowList();
+                for (int j=0; j<windows.size(); j++) {
+                    final WindowState win = windows.get(j);
+                    if (win.mAppOp != AppOpsManager.OP_NONE) {
+                        changed |= win.setAppOpVisibilityLw(mAppOps.checkOpNoThrow(win.mAppOp,
+                                win.getOwningUid(),
+                                win.getOwningPackage()) == AppOpsManager.MODE_ALLOWED);
+                    }
+                }
+            }
+            if (changed) {
+                scheduleAnimationLocked();
+            }
+        }
     }
 
     static void logSurface(WindowState w, String msg, RuntimeException where) {

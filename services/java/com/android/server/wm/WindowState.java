@@ -96,6 +96,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mSystemUiVisibility;
     boolean mPolicyVisibility = true;
     boolean mPolicyVisibilityAfterAnim = true;
+    boolean mAppOpVisibility = true;
     boolean mAppFreezing;
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
@@ -982,6 +983,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     + this + ", type " + mAttrs.type + ", belonging to " + mOwnerUid);
             return false;
         }
+        if (!mAppOpVisibility) {
+            // Being hidden due to app op request.
+            return false;
+        }
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -1051,6 +1056,25 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mService.scheduleAnimationLocked();
         }
         return true;
+    }
+
+    public boolean setAppOpVisibilityLw(boolean state) {
+        if (mAppOpVisibility != state) {
+            mAppOpVisibility = state;
+            if (state) {
+                // If the policy visibility had last been to hide, then this
+                // will incorrectly show at this point since we lost that
+                // information.  Not a big deal -- for the windows that have app
+                // ops modifies they should only be hidden by policy due to the
+                // lock screen, and the user won't be changing this if locked.
+                // Plus it will quickly be fixed the next time we do a layout.
+                showLw(true, false);
+            } else {
+                hideLw(true, false);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -1179,11 +1203,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(" mSystemUiVisibility=0x");
             pw.println(Integer.toHexString(mSystemUiVisibility));
         }
-        if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || mAttachedHidden) {
+        if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || !mAppOpVisibility
+                || mAttachedHidden) {
             pw.print(prefix); pw.print("mPolicyVisibility=");
                     pw.print(mPolicyVisibility);
                     pw.print(" mPolicyVisibilityAfterAnim=");
                     pw.print(mPolicyVisibilityAfterAnim);
+                    pw.print(" mAppOpVisibility=");
+                    pw.print(mAppOpVisibility);
                     pw.print(" mAttachedHidden="); pw.println(mAttachedHidden);
         }
         if (!mRelayoutCalled || mLayoutNeeded) {
