@@ -2120,6 +2120,7 @@ final class ActivityStack {
                         int dstPos = 0;
                         ThumbnailHolder curThumbHolder = target.thumbHolder;
                         boolean gotOptions = !canMoveOptions;
+                        final int taskId = target.task.taskId;
                         for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
                             p = mHistory.get(srcPos);
                             if (p.finishing) {
@@ -2145,14 +2146,14 @@ final class ActivityStack {
                             mHistory.remove(srcPos);
                             mHistory.add(dstPos, p);
                             mService.mWindowManager.moveAppToken(dstPos, p.appToken);
-                            mService.mWindowManager.setAppGroupId(p.appToken, p.task.taskId);
+                            mService.mWindowManager.setAppGroupId(p.appToken, taskId);
                             dstPos++;
-                            if (VALIDATE_TOKENS) {
-                                validateAppTokensLocked();
-                            }
                             i++;
                         }
-                        mService.mWindowManager.moveTaskToBottom(target.task.taskId);
+                        mService.mWindowManager.moveTaskToBottom(taskId);
+                        if (VALIDATE_TOKENS) {
+                            validateAppTokensLocked();
+                        }
                         if (taskTop == p) {
                             taskTop = below;
                         }
@@ -2270,6 +2271,7 @@ final class ActivityStack {
                     if (replyChainEnd < 0) {
                         replyChainEnd = targetI;
                     }
+                    final int taskId = task.taskId;
                     if (DEBUG_TASKS) Slog.v(TAG, "Reparenting task at index "
                             + targetI + " to " + replyChainEnd);
                     for (int srcPos=replyChainEnd; srcPos>=targetI; srcPos--) {
@@ -2296,13 +2298,13 @@ final class ActivityStack {
                                 + " from " + srcPos + " to " + lastReparentPos
                                 + " in to resetting task " + task);
                         mService.mWindowManager.moveAppToken(lastReparentPos, p.appToken);
-                        mService.mWindowManager.setAppGroupId(p.appToken, p.task.taskId);
-                        if (VALIDATE_TOKENS) {
-                            validateAppTokensLocked();
-                        }
+                        mService.mWindowManager.setAppGroupId(p.appToken, taskId);
                     }
                     // TODO: This is wrong because it doesn't take lastReparentPos into account.
-                    mService.mWindowManager.moveTaskToTop(task.taskId);
+                    mService.mWindowManager.moveTaskToTop(taskId);
+                    if (VALIDATE_TOKENS) {
+                        validateAppTokensLocked();
+                    }
                     replyChainEnd = -1;
                     
                     // Now we've moved it in to place...  but what if this is
@@ -4563,12 +4565,12 @@ final class ActivityStack {
         } else {
             updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
         }
-        
+
         mService.mWindowManager.moveAppTokensToTop(moved);
+        mService.mWindowManager.moveTaskToTop(task);
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
-        mService.mWindowManager.moveTaskToTop(task);
 
         finishTaskMoveLocked(task);
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, task);
@@ -4658,10 +4660,10 @@ final class ActivityStack {
                     AppTransition.TRANSIT_TASK_TO_BACK, false);
         }
         mService.mWindowManager.moveAppTokensToBottom(moved);
+        mService.mWindowManager.moveTaskToBottom(task);
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
-        mService.mWindowManager.moveTaskToBottom(task);
 
         finishTaskMoveLocked(task);
         return true;
