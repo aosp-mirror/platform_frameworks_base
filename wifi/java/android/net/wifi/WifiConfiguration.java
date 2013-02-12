@@ -19,6 +19,7 @@ package android.net.wifi;
 import android.net.LinkProperties;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.text.TextUtils;
 
 import java.util.BitSet;
 
@@ -274,7 +275,8 @@ public class WifiConfiguration implements Parcelable {
      */
     public BitSet allowedGroupCiphers;
     /**
-     * The enterprise configuration details
+     * The enterprise configuration details specifying the EAP method,
+     * certificates and other settings associated with the EAP.
      * @hide
      */
     public WifiEnterpriseConfig enterpriseConfig;
@@ -462,6 +464,47 @@ public class WifiConfiguration implements Parcelable {
         return SSID;
     }
 
+    /**
+     * Get an identifier for associating credentials with this config
+     * @param current configuration contains values for additional fields
+     *                that are not part of this configuration. Used
+     *                when a config with some fields is passed by an application.
+     * @throws IllegalStateException if config is invalid for key id generation
+     * @hide
+     */
+    String getKeyIdForCredentials(WifiConfiguration current) {
+        String keyMgmt = null;
+
+        try {
+            // Get current config details for fields that are not initialized
+            if (TextUtils.isEmpty(SSID)) SSID = current.SSID;
+            if (allowedKeyManagement.cardinality() == 0) {
+                allowedKeyManagement = current.allowedKeyManagement;
+            }
+            if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
+                keyMgmt = KeyMgmt.strings[KeyMgmt.WPA_EAP];
+            }
+            if (allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+                keyMgmt += KeyMgmt.strings[KeyMgmt.IEEE8021X];
+            }
+
+            if (TextUtils.isEmpty(keyMgmt)) {
+                throw new IllegalStateException("Not an EAP network");
+            }
+
+            return trimStringForKeyId(SSID) + "_" + keyMgmt + "_" +
+                    trimStringForKeyId(enterpriseConfig.getKeyId(current != null ?
+                            current.enterpriseConfig : null));
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Invalid config details");
+        }
+    }
+
+    private String trimStringForKeyId(String string) {
+        // Remove quotes and spaces
+        return string.replace("\"", "").replace(" ", "");
+    }
+
     private static BitSet readBitSet(Parcel src) {
         int cardinality = src.readInt();
 
@@ -485,6 +528,9 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public int getAuthType() {
+        if (allowedKeyManagement.cardinality() > 1) {
+            throw new IllegalStateException("More than one auth type set");
+        }
         if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             return KeyMgmt.WPA_PSK;
         } else if (allowedKeyManagement.get(KeyMgmt.WPA2_PSK)) {
