@@ -2452,21 +2452,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void updateAppOpsState() {
         synchronized(mWindowMap) {
-            boolean changed = false;
-            for (int i=0; i<mDisplayContents.size(); i++) {
-                DisplayContent display = mDisplayContents.valueAt(i);
-                WindowList windows = display.getWindowList();
-                for (int j=0; j<windows.size(); j++) {
-                    final WindowState win = windows.get(j);
-                    if (win.mAppOp != AppOpsManager.OP_NONE) {
-                        changed |= win.setAppOpVisibilityLw(mAppOps.checkOpNoThrow(win.mAppOp,
-                                win.getOwningUid(),
-                                win.getOwningPackage()) == AppOpsManager.MODE_ALLOWED);
-                    }
+            AllWindowsIterator iterator = new AllWindowsIterator();
+            while (iterator.hasNext()) {
+                final WindowState win = iterator.next();
+                if (win.mAppOp != AppOpsManager.OP_NONE) {
+                    final int mode = mAppOps.checkOpNoThrow(win.mAppOp, win.getOwningUid(),
+                            win.getOwningPackage());
+                    win.setAppOpVisibilityLw(mode == AppOpsManager.MODE_ALLOWED);
                 }
-            }
-            if (changed) {
-                scheduleAnimationLocked();
             }
         }
     }
