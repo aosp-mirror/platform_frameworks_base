@@ -792,6 +792,7 @@ public class Resources {
                     "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
                     + Integer.toHexString(value.type) + " is not valid");
             }
+            mTmpValue = null;
         }
         ColorStateList csl = loadColorStateList(value, id);
         synchronized (mAccessLock) {
@@ -2227,6 +2228,9 @@ public class Resources {
             throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
+            if (value == null) {
+                mTmpValue = value = new TypedValue();
+            }
             getValue(id, value, true);
             if (value.type == TypedValue.TYPE_STRING) {
                 return loadXmlResourceParser(value.string.toString(), id,
