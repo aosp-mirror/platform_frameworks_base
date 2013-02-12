@@ -1332,10 +1332,19 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 P2pStateMachine.this, mGroup.getInterface());
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
                         WifiP2pDevice groupOwner = mGroup.getOwner();
-                        /* update group owner details with the ones found at discovery */
-                        groupOwner.updateSupplicantDetails(mPeers.get(groupOwner.deviceAddress));
-                        mPeers.updateStatus(groupOwner.deviceAddress, WifiP2pDevice.CONNECTED);
-                        sendPeersChangedBroadcast();
+                        WifiP2pDevice peer = mPeers.get(groupOwner.deviceAddress);
+                        if (peer != null) {
+                            // update group owner details with peer details found at discovery
+                            groupOwner.updateSupplicantDetails(peer);
+                            mPeers.updateStatus(groupOwner.deviceAddress, WifiP2pDevice.CONNECTED);
+                            sendPeersChangedBroadcast();
+                        } else {
+                            // A supplicant bug can lead to reporting an invalid
+                            // group owner address (all zeroes) at times. Avoid a
+                            // crash, but continue group creation since it is not
+                            // essential.
+                            logw("Unknown group owner " + groupOwner);
+                        }
                     }
                     transitionTo(mGroupCreatedState);
                     break;
