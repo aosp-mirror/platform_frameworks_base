@@ -22,6 +22,7 @@ import com.android.server.am.ActivityStack.ActivityState;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -95,9 +96,9 @@ final class ActivityRecord {
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
-    ArrayList results;      // pending ActivityResult objs we have received
+    ArrayList<ResultInfo> results; // pending ActivityResult objs we have received
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
-    ArrayList newIntents;   // any pending new intents for single-top mode
+    ArrayList<Intent> newIntents; // any pending new intents for single-top mode
     ActivityOptions pendingOptions; // most recently given options
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
     UriPermissionOwner uriPermissions; // current special URI access perms.

@@ -16,15 +16,15 @@
 
 package com.android.server.wm;
 
-import com.android.server.am.TaskGroup;
-
-class TaskList extends TaskGroup {
+class TaskList {
 //    private final String TAG = "TaskGroup";
-    AppTokenList mAppTokens = new AppTokenList();
+    DisplayContent mDisplayContent;
+    final AppTokenList mAppTokens = new AppTokenList();
+    final int taskId;
 
-    TaskList(AppWindowToken wtoken) {
+    TaskList(AppWindowToken wtoken, DisplayContent displayContent) {
         taskId = wtoken.groupId;
-        tokens.add(wtoken.appToken);
         mAppTokens.add(wtoken);
+        mDisplayContent = displayContent;
     }
 }
