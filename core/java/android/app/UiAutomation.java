@@ -37,8 +37,6 @@ import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 
-import com.android.internal.util.Predicate;
-
 import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
 
@@ -132,6 +130,21 @@ public final class UiAutomation {
          * @param event The received event.
          */
         public void onAccessibilityEvent(AccessibilityEvent event);
+    }
+
+    /**
+     * Listener for filtering accessibility events.
+     */
+    public static interface AccessibilityEventFilter {
+
+        /**
+         * Callback for determining whether an event is accepted or
+         * it is filtered out.
+         *
+         * @param event The event to process.
+         * @return True if the event is accepted, false to filter it out.
+         */
+        public boolean accept(AccessibilityEvent event);
     }
 
     /**
@@ -428,7 +441,7 @@ public final class UiAutomation {
      * @throws TimeoutException If the expected event is not received within the timeout.
      */
     public AccessibilityEvent executeAndWaitForEvent(Runnable command,
-            Predicate<AccessibilityEvent> filter, long timeoutMillis) throws TimeoutException {
+            AccessibilityEventFilter filter, long timeoutMillis) throws TimeoutException {
         synchronized (mLock) {
             throwIfNotConnectedLocked();
 
@@ -452,7 +465,7 @@ public final class UiAutomation {
                         if (event.getEventTime() <= executionStartTimeMillis) {
                             continue;
                         }
-                        if (filter.apply(event)) {
+                        if (filter.accept(event)) {
                             return event;
                         }
                         event.recycle();

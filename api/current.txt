@@ -4153,7 +4153,7 @@ package android.app {
   }
 
   public final class UiAutomation {
-    method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, com.android.internal.util.Predicate<android.view.accessibility.AccessibilityEvent>, long) throws java.util.concurrent.TimeoutException;
+    method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, android.app.UiAutomation.AccessibilityEventFilter, long) throws java.util.concurrent.TimeoutException;
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method public boolean injectInputEvent(android.view.InputEvent, boolean);
@@ -4169,6 +4169,10 @@ package android.app {
     field public static final int ROTATION_FREEZE_90 = 1; // 0x1
     field public static final int ROTATION_FREEZE_CURRENT = -1; // 0xffffffff
     field public static final int ROTATION_UNFREEZE = -2; // 0xfffffffe
+  }
+
+  public static abstract interface UiAutomation.AccessibilityEventFilter {
+    method public abstract boolean accept(android.view.accessibility.AccessibilityEvent);
   }
 
   public static abstract interface UiAutomation.OnAccessibilityEventListener {
