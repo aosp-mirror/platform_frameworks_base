@@ -899,38 +899,22 @@ public class Allocation extends BaseObj {
      * @param data to be placed into the allocation
      */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, byte[] data) {
-        // We can only validate the type on API 18+, since this check was not present in
-        // earlier releases.
-        if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 18) {
-            validateIsInt8();
-        }
+        validateIsInt8();
         copy2DRangeFromUnchecked(xoff, yoff, w, h, data);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] data) {
-        // We can only validate the type on API 18+, since this check was not present in
-        // earlier releases.
-        if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 18) {
-            validateIsInt16();
-        }
+        validateIsInt16();
         copy2DRangeFromUnchecked(xoff, yoff, w, h, data);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, int[] data) {
-        // We can only validate the type on API 18+, since this check was not present in
-        // earlier releases.
-        if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 18) {
-            validateIsInt32();
-        }
+        validateIsInt32();
         copy2DRangeFromUnchecked(xoff, yoff, w, h, data);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, float[] data) {
-        // We can only validate the type on API 18+, since this check was not present in
-        // earlier releases.
-        if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 18) {
-            validateIsFloat32();
-        }
+        validateIsFloat32();
         copy2DRangeFromUnchecked(xoff, yoff, w, h, data);
     }
 
