@@ -40,6 +40,7 @@ import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 
@@ -313,10 +314,10 @@ final class Session extends IWindowSession.Stub
             mService.mDragState.mThumbOffsetY = thumbCenterY;
 
             // Make the surface visible at the proper location
-            final Surface surface = mService.mDragState.mSurface;
+            final SurfaceControl surface = mService.mDragState.mSurface;
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     WindowManagerService.TAG, ">>> OPEN TRANSACTION performDrag");
-            Surface.openTransaction();
+            SurfaceControl.openTransaction();
             try {
                 surface.setPosition(touchX - thumbCenterX,
                         touchY - thumbCenterY);
@@ -325,7 +326,7 @@ final class Session extends IWindowSession.Stub
                 surface.setLayerStack(display.getLayerStack());
                 surface.show();
             } finally {
-                Surface.closeTransaction();
+                SurfaceControl.closeTransaction();
                 if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
                         WindowManagerService.TAG, "<<< CLOSE TRANSACTION performDrag");
             }

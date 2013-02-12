@@ -27,7 +27,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.view.IWindowManager;
 import android.view.InputEvent;
-import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 
@@ -135,7 +135,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return Surface.screenshot(width, height);
+            return SurfaceControl.screenshot(width, height);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

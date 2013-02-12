@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 import java.io.PrintWriter;
@@ -80,7 +81,8 @@ final class ElectronBeam {
     private int mDisplayWidth;      // real width, not rotated
     private int mDisplayHeight;     // real height, not rotated
     private SurfaceSession mSurfaceSession;
-    private Surface mSurface;
+    private SurfaceControl mSurfaceControl;
+    private final Surface mSurface = new Surface();
     private NaturalSurfaceLayout mSurfaceLayout;
     private EGLDisplay mEglDisplay;
     private EGLConfig mEglConfig;
@@ -370,7 +372,7 @@ final class ElectronBeam {
 
     private boolean captureScreenshotTextureAndSetViewport() {
         // TODO: Use a SurfaceTexture to avoid the extra texture upload.
-        Bitmap bitmap = Surface.screenshot(mDisplayWidth, mDisplayHeight,
+        Bitmap bitmap = SurfaceControl.screenshot(mDisplayWidth, mDisplayHeight,
                 0, ELECTRON_BEAM_LAYER - 1);
         if (bitmap == null) {
             Slog.e(TAG, "Could not take a screenshot!");
@@ -525,32 +527,33 @@ final class ElectronBeam {
             mSurfaceSession = new SurfaceSession();
         }
 
-        Surface.openTransaction();
+        SurfaceControl.openTransaction();
         try {
-            if (mSurface == null) {
+            if (mSurfaceControl == null) {
                 try {
                     int flags;
                     if (mMode == MODE_FADE) {
-                        flags = Surface.FX_SURFACE_DIM | Surface.HIDDEN;
+                        flags = SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN;
                     } else {
-                        flags = Surface.OPAQUE | Surface.HIDDEN;
+                        flags = SurfaceControl.OPAQUE | SurfaceControl.HIDDEN;
                     }
-                    mSurface = new Surface(mSurfaceSession,
+                    mSurfaceControl = new SurfaceControl(mSurfaceSession,
                             "ElectronBeam", mDisplayWidth, mDisplayHeight,
                             PixelFormat.OPAQUE, flags);
-                } catch (Surface.OutOfResourcesException ex) {
+                } catch (SurfaceControl.OutOfResourcesException ex) {
                     Slog.e(TAG, "Unable to create surface.", ex);
                     return false;
                 }
             }
 
-            mSurface.setLayerStack(mDisplayLayerStack);
-            mSurface.setSize(mDisplayWidth, mDisplayHeight);
-
-            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManager, mSurface);
+            mSurfaceControl.setLayerStack(mDisplayLayerStack);
+            mSurfaceControl.setSize(mDisplayWidth, mDisplayHeight);
+            mSurface.copyFrom(mSurfaceControl);
+            
+            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManager, mSurfaceControl);
             mSurfaceLayout.onDisplayTransaction();
         } finally {
-            Surface.closeTransaction();
+            SurfaceControl.closeTransaction();
         }
         return true;
     }
@@ -560,6 +563,7 @@ final class ElectronBeam {
             int[] eglSurfaceAttribList = new int[] {
                     EGL14.EGL_NONE
             };
+            // turn our SurfaceControl into a Surface
             mEglSurface = EGL14.eglCreateWindowSurface(mEglDisplay, mEglConfig, mSurface,
                     eglSurfaceAttribList, 0);
             if (mEglSurface == null) {
@@ -580,16 +584,17 @@ final class ElectronBeam {
     }
 
     private void destroySurface() {
-        if (mSurface != null) {
+        if (mSurfaceControl != null) {
             mSurfaceLayout.dispose();
             mSurfaceLayout = null;
-            Surface.openTransaction();
+            SurfaceControl.openTransaction();
             try {
-                mSurface.destroy();
+                mSurfaceControl.destroy();
+                mSurface.release();
             } finally {
-                Surface.closeTransaction();
+                SurfaceControl.closeTransaction();
             }
-            mSurface = null;
+            mSurfaceControl = null;
             mSurfaceVisible = false;
             mSurfaceAlpha = 0f;
         }
@@ -597,13 +602,13 @@ final class ElectronBeam {
 
     private boolean showSurface(float alpha) {
         if (!mSurfaceVisible || mSurfaceAlpha != alpha) {
-            Surface.openTransaction();
+            SurfaceControl.openTransaction();
             try {
-                mSurface.setLayer(ELECTRON_BEAM_LAYER);
-                mSurface.setAlpha(alpha);
-                mSurface.show();
+                mSurfaceControl.setLayer(ELECTRON_BEAM_LAYER);
+                mSurfaceControl.setAlpha(alpha);
+                mSurfaceControl.show();
             } finally {
-                Surface.closeTransaction();
+                SurfaceControl.closeTransaction();
             }
             mSurfaceVisible = true;
             mSurfaceAlpha = alpha;
@@ -708,9 +713,9 @@ final class ElectronBeam {
      */
     private static final class NaturalSurfaceLayout implements DisplayTransactionListener {
         private final DisplayManagerService mDisplayManager;
-        private Surface mSurface;
+        private SurfaceControl mSurface;
 
-        public NaturalSurfaceLayout(DisplayManagerService displayManager, Surface surface) {
+        public NaturalSurfaceLayout(DisplayManagerService displayManager, SurfaceControl surface) {
             mDisplayManager = displayManager;
             mSurface = surface;
             mDisplayManager.registerDisplayTransactionListener(this);

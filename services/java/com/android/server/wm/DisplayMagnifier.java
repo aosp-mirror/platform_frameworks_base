@@ -43,6 +43,7 @@ import android.view.IMagnificationCallbacks;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.animation.DecelerateInterpolator;
@@ -481,7 +482,8 @@ final class DisplayMagnifier {
             private final Paint mPaint = new Paint();
 
             private final ValueAnimator mShowHideFrameAnimator;
-            private final Surface mSurface;
+            private final SurfaceControl mSurfaceControl;
+            private final Surface mSurface = new Surface();
 
             private boolean mShown;
             private int mAlpha;
@@ -489,20 +491,21 @@ final class DisplayMagnifier {
             private boolean mInvalidated;
 
             public ViewportWindow(Context context) {
-                Surface surface = null;
+                SurfaceControl surface = null;
                 try {
                     mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                    surface = new Surface(mWindowManagerService.mFxSession, SURFACE_TITLE,
-                            mTempPoint.x, mTempPoint.y, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
-                } catch (OutOfResourcesException oore) {
+                    surface = new SurfaceControl(mWindowManagerService.mFxSession, SURFACE_TITLE,
+                            mTempPoint.x, mTempPoint.y, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+                } catch (SurfaceControl.OutOfResourcesException oore) {
                     /* ignore */
                 }
-                mSurface = surface;
-                mSurface.setLayerStack(mWindowManager.getDefaultDisplay().getLayerStack());
-                mSurface.setLayer(mWindowManagerService.mPolicy.windowTypeToLayerLw(
+                mSurfaceControl = surface;
+                mSurfaceControl.setLayerStack(mWindowManager.getDefaultDisplay().getLayerStack());
+                mSurfaceControl.setLayer(mWindowManagerService.mPolicy.windowTypeToLayerLw(
                         WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY)
                         * WindowManagerService.TYPE_LAYER_MULTIPLIER);
-                mSurface.setPosition(0, 0);
+                mSurfaceControl.setPosition(0, 0);
+                mSurface.copyFrom(mSurfaceControl);
 
                 TypedValue typedValue = new TypedValue();
                 context.getTheme().resolveAttribute(R.attr.colorActivatedHighlight,
@@ -591,7 +594,7 @@ final class DisplayMagnifier {
             public void updateSize() {
                 synchronized (mWindowManagerService.mWindowMap) {
                     mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                    mSurface.setSize(mTempPoint.x, mTempPoint.y);
+                    mSurfaceControl.setSize(mTempPoint.x, mTempPoint.y);
                     invalidate(mDirtyRect);
                 }
             }
@@ -641,16 +644,17 @@ final class DisplayMagnifier {
                     canvas.drawPath(path, mPaint);
 
                     mSurface.unlockCanvasAndPost(canvas);
-
+                    
                     if (mAlpha > 0) {
-                        mSurface.show();
+                        mSurfaceControl.show();
                     } else {
-                        mSurface.hide();
+                        mSurfaceControl.hide();
                     }
                 }
             }
 
             public void releaseSurface() {
+                mSurfaceControl.release();
                 mSurface.release();
             }
         }

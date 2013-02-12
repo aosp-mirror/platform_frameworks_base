@@ -47,8 +47,6 @@
 
 using namespace android;
 
-extern void register_BindTest();
-
 extern int register_android_os_Binder(JNIEnv* env);
 extern int register_android_os_Process(JNIEnv* env);
 extern int register_android_graphics_Bitmap(JNIEnv*);
@@ -121,6 +119,7 @@ extern int register_android_view_GLES20DisplayList(JNIEnv* env);
 extern int register_android_view_GLES20Canvas(JNIEnv* env);
 extern int register_android_view_HardwareRenderer(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
+extern int register_android_view_SurfaceControl(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_TextureView(JNIEnv* env);
 extern int register_android_database_CursorWindow(JNIEnv* env);
@@ -1112,6 +1111,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_GLES20Canvas),
     REG_JNI(register_android_view_HardwareRenderer),
     REG_JNI(register_android_view_Surface),
+    REG_JNI(register_android_view_SurfaceControl),
     REG_JNI(register_android_view_SurfaceSession),
     REG_JNI(register_android_view_TextureView),
     REG_JNI(register_com_google_android_gles_jni_EGLImpl),

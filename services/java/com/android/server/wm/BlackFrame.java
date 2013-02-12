@@ -23,6 +23,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 /**
@@ -33,7 +34,7 @@ public class BlackFrame {
         final int left;
         final int top;
         final int layer;
-        final Surface surface;
+        final SurfaceControl surface;
 
         BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b, int layerStack)
                 throws Surface.OutOfResourcesException {
@@ -42,13 +43,17 @@ public class BlackFrame {
             this.layer = layer;
             int w = r-l;
             int h = b-t;
-            if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                surface = new WindowStateAnimator.SurfaceTrace(session, "BlackSurface("
-                        + l + ", " + t + ")",
-                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM | Surface.HIDDEN);
-            } else {
-                surface = new Surface(session, "BlackSurface",
-                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM | Surface.HIDDEN);
+            try {
+                if (WindowManagerService.DEBUG_SURFACE_TRACE) {
+                    surface = new WindowStateAnimator.SurfaceTrace(session, "BlackSurface("
+                            + l + ", " + t + ")",
+                            w, h, PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
+                } else {
+                    surface = new SurfaceControl(session, "BlackSurface",
+                            w, h, PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
+                }
+            } catch (SurfaceControl.OutOfResourcesException e) {
+                throw new Surface.OutOfResourcesException(e.getMessage());
             }
             surface.setAlpha(1);
             surface.setLayerStack(layerStack);
