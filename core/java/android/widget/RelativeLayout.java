@@ -701,10 +701,15 @@ public class RelativeLayout extends ViewGroup {
                 myWidth);
         int childHeightMeasureSpec;
         if (myHeight < 0 && !mAllowBrokenMeasureSpecs) {
-            // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
-            // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
-            // Carry it forward.
-            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            if (params.height >= 0) {
+                childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        params.height, MeasureSpec.EXACTLY);
+            } else {
+                // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
+                // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
+                // Carry it forward.
+                childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            }
         } else if (params.width == LayoutParams.MATCH_PARENT) {
             childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.EXACTLY);
         } else {
@@ -733,6 +738,9 @@ public class RelativeLayout extends ViewGroup {
             int childSize, int startMargin, int endMargin, int startPadding,
             int endPadding, int mySize) {
         if (mySize < 0 && !mAllowBrokenMeasureSpecs) {
+            if (childSize >= 0) {
+                return MeasureSpec.makeMeasureSpec(childSize, MeasureSpec.EXACTLY);
+            }
             // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
             // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
             // Carry it forward.
@@ -1028,7 +1036,7 @@ public class RelativeLayout extends ViewGroup {
         return -1;
     }
 
-    private void centerHorizontal(View child, LayoutParams params, int myWidth) {
+    private static void centerHorizontal(View child, LayoutParams params, int myWidth) {
         int childWidth = child.getMeasuredWidth();
         int left = (myWidth - childWidth) / 2;
 
@@ -1036,7 +1044,7 @@ public class RelativeLayout extends ViewGroup {
         params.mRight = left + childWidth;
     }
 
-    private void centerVertical(View child, LayoutParams params, int myHeight) {
+    private static void centerVertical(View child, LayoutParams params, int myHeight) {
         int childHeight = child.getMeasuredHeight();
         int top = (myHeight - childHeight) / 2;
 
@@ -1230,6 +1238,7 @@ public class RelativeLayout extends ViewGroup {
                     com.android.internal.R.styleable.RelativeLayout_Layout);
 
             final int[] rules = mRules;
+            //noinspection MismatchedReadAndWriteOfArray
             final int[] initialRules = mInitialRules;
 
             final int N = a.getIndexCount();
@@ -1308,9 +1317,7 @@ public class RelativeLayout extends ViewGroup {
                 }
             }
 
-            for (int n = LEFT_OF; n < VERB_COUNT; n++) {
-                initialRules[n] = rules[n];
-            }
+            System.arraycopy(rules, LEFT_OF, initialRules, LEFT_OF, VERB_COUNT);
 
             a.recycle();
         }
@@ -1401,9 +1408,7 @@ public class RelativeLayout extends ViewGroup {
         private void resolveRules(int layoutDirection) {
             final boolean isLayoutRtl = (layoutDirection == View.LAYOUT_DIRECTION_RTL);
             // Reset to initial state
-            for (int n = LEFT_OF; n < VERB_COUNT; n++) {
-                mRules[n] = mInitialRules[n];
-            }
+            System.arraycopy(mInitialRules, LEFT_OF, mRules, LEFT_OF, VERB_COUNT);
             // Apply rules depending on direction
             if (mRules[ALIGN_START] != 0) {
                 mRules[isLayoutRtl ? ALIGN_RIGHT : ALIGN_LEFT] = mRules[ALIGN_START];
