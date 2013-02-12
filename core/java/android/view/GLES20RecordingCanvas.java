@@ -267,15 +267,15 @@ class GLES20RecordingCanvas extends GLES20Canvas {
 
     @Override
     public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,
-            float x, float y, int dir, Paint paint) {
-        super.drawTextRun(text, index, count, contextIndex, contextCount, x, y, dir, paint);
+            float x, float y, Paint paint) {
+        super.drawTextRun(text, index, count, contextIndex, contextCount, x, y, paint);
         recordShaderBitmap(paint);
     }
 
     @Override
     public void drawTextRun(CharSequence text, int start, int end, int contextStart,
-            int contextEnd, float x, float y, int dir, Paint paint) {
-        super.drawTextRun(text, start, end, contextStart, contextEnd, x, y, dir, paint);
+            int contextEnd, float x, float y, Paint paint) {
+        super.drawTextRun(text, start, end, contextStart, contextEnd, x, y, paint);
         recordShaderBitmap(paint);
     }
 

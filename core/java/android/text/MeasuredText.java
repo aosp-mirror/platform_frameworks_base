@@ -159,18 +159,15 @@ class MeasuredText {
         mPos = p + len;
 
         if (mEasy) {
-            int flags = mDir == Layout.DIR_LEFT_TO_RIGHT
-                ? Canvas.DIRECTION_LTR : Canvas.DIRECTION_RTL;
-            return paint.getTextRunAdvances(mChars, p, len, p, len, flags, mWidths, p);
+            return paint.getTextRunAdvances(mChars, p, len, p, len, mWidths, p);
         }
 
         float totalAdvance = 0;
         int level = mLevels[p];
         for (int q = p, i = p + 1, e = p + len;; ++i) {
             if (i == e || mLevels[i] != level) {
-                int flags = (level & 0x1) == 0 ? Canvas.DIRECTION_LTR : Canvas.DIRECTION_RTL;
                 totalAdvance +=
-                        paint.getTextRunAdvances(mChars, q, i - q, q, i - q, flags, mWidths, q);
+                        paint.getTextRunAdvances(mChars, q, i - q, q, i - q, mWidths, q);
                 if (i == e) {
                     break;
                 }
