@@ -1,6 +1,5 @@
 #include "shared.rsh"
 
-int *a;
 int dimX;
 int dimY;
 int xStart = 0;
@@ -9,6 +8,7 @@ int yStart = 0;
 int yEnd = 0;
 
 rs_script s;
+rs_allocation aRaw;
 rs_allocation ain;
 rs_allocation aout;
 
@@ -26,13 +26,14 @@ static bool test_root_output() {
 
     for (j = 0; j < dimY; j++) {
         for (i = 0; i < dimX; i++) {
+            int v = rsGetElementAt_int(aRaw, i, j);
             rsDebug("i: ", i);
             rsDebug("j: ", j);
-            rsDebug("a[j][i]: ", a[i + j * dimX]);
+            rsDebug("a[j][i]: ", v);
             if (i < xStart || i >= xEnd || j < yStart || j >= yEnd) {
-                _RS_ASSERT(a[i + j * dimX] == 0);
+                _RS_ASSERT(v == 0);
             } else {
-                _RS_ASSERT(a[i + j * dimX] == (i + j * dimX));
+                _RS_ASSERT(v == (i + j * dimX));
             }
         }
     }
