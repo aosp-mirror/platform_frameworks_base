@@ -19,43 +19,45 @@ package android.text;
 
 import android.view.View;
 
+import java.nio.CharBuffer;
+
 /**
  * Some objects that implement TextDirectionHeuristic.
  *
- * @hide
  */
 public class TextDirectionHeuristics {
 
-    /** Always decides that the direction is left to right. */
+    /**
+     * Always decides that the direction is left to right.
+     */
     public static final TextDirectionHeuristic LTR =
         new TextDirectionHeuristicInternal(null /* no algorithm */, false);
 
-    /** Always decides that the direction is right to left. */
+    /**
+     * Always decides that the direction is right to left.
+     */
     public static final TextDirectionHeuristic RTL =
         new TextDirectionHeuristicInternal(null /* no algorithm */, true);
 
     /**
-     * Determines the direction based on the first strong directional character,
-     * including bidi format chars, falling back to left to right if it
-     * finds none.  This is the default behavior of the Unicode Bidirectional
-     * Algorithm.
+     * Determines the direction based on the first strong directional character, including bidi
+     * format chars, falling back to left to right if it finds none. This is the default behavior
+     * of the Unicode Bidirectional Algorithm.
      */
     public static final TextDirectionHeuristic FIRSTSTRONG_LTR =
         new TextDirectionHeuristicInternal(FirstStrong.INSTANCE, false);
 
     /**
-     * Determines the direction based on the first strong directional character,
-     * including bidi format chars, falling back to right to left if it
-     * finds none.  This is similar to the default behavior of the Unicode
-     * Bidirectional Algorithm, just with different fallback behavior.
+     * Determines the direction based on the first strong directional character, including bidi
+     * format chars, falling back to right to left if it finds none. This is similar to the default
+     * behavior of the Unicode Bidirectional Algorithm, just with different fallback behavior.
      */
     public static final TextDirectionHeuristic FIRSTSTRONG_RTL =
         new TextDirectionHeuristicInternal(FirstStrong.INSTANCE, true);
 
     /**
-     * If the text contains any strong right to left non-format character, determines
-     * that the direction is right to left, falling back to left to right if it
-     * finds none.
+     * If the text contains any strong right to left non-format character, determines that the
+     * direction is right to left, falling back to left to right if it finds none.
      */
     public static final TextDirectionHeuristic ANYRTL_LTR =
         new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_RTL, false);
@@ -65,8 +67,39 @@ public class TextDirectionHeuristics {
      */
     public static final TextDirectionHeuristic LOCALE = TextDirectionHeuristicLocale.INSTANCE;
 
-    private static enum TriState {
-        TRUE, FALSE, UNKNOWN;
+    /**
+     * State constants for taking care about true / false / unknown
+     */
+    private static final int STATE_TRUE = 0;
+    private static final int STATE_FALSE = 1;
+    private static final int STATE_UNKNOWN = 2;
+
+    private static int isRtlText(int directionality) {
+        switch (directionality) {
+            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
+                return STATE_FALSE;
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
+                return STATE_TRUE;
+            default:
+                return STATE_UNKNOWN;
+        }
+    }
+
+    private static int isRtlTextOrFormat(int directionality) {
+        switch (directionality) {
+            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
+            case Character.DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING:
+            case Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE:
+                return STATE_FALSE;
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING:
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE:
+                return STATE_TRUE;
+            default:
+                return STATE_UNKNOWN;
+        }
     }
 
     /**
@@ -87,21 +120,26 @@ public class TextDirectionHeuristics {
         abstract protected boolean defaultIsRtl();
 
         @Override
-        public boolean isRtl(char[] chars, int start, int count) {
-            if (chars == null || start < 0 || count < 0 || chars.length - count < start) {
+        public boolean isRtl(char[] array, int start, int count) {
+            return isRtl(CharBuffer.wrap(array), start, count);
+        }
+
+        @Override
+        public boolean isRtl(CharSequence cs, int start, int count) {
+            if (cs == null || start < 0 || count < 0 || cs.length() - count < start) {
                 throw new IllegalArgumentException();
             }
             if (mAlgorithm == null) {
                 return defaultIsRtl();
             }
-            return doCheck(chars, start, count);
+            return doCheck(cs, start, count);
         }
 
-        private boolean doCheck(char[] chars, int start, int count) {
-            switch(mAlgorithm.checkRtl(chars, start, count)) {
-                case TRUE:
+        private boolean doCheck(CharSequence cs, int start, int count) {
+            switch(mAlgorithm.checkRtl(cs, start, count)) {
+                case STATE_TRUE:
                     return true;
-                case FALSE:
+                case STATE_FALSE:
                     return false;
                 default:
                     return defaultIsRtl();
@@ -124,58 +162,26 @@ public class TextDirectionHeuristics {
         }
     }
 
-    private static TriState isRtlText(int directionality) {
-        switch (directionality) {
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-                return TriState.FALSE;
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
-                return TriState.TRUE;
-            default:
-                return TriState.UNKNOWN;
-        }
-    }
-
-    private static TriState isRtlTextOrFormat(int directionality) {
-        switch (directionality) {
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING:
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE:
-                return TriState.FALSE;
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE:
-                return TriState.TRUE;
-            default:
-                return TriState.UNKNOWN;
-        }
-    }
-
     /**
      * Interface for an algorithm to guess the direction of a paragraph of text.
-     *
      */
     private static interface TextDirectionAlgorithm {
         /**
          * Returns whether the range of text is RTL according to the algorithm.
-         *
          */
-        TriState checkRtl(char[] text, int start, int count);
+        int checkRtl(CharSequence cs, int start, int count);
     }
 
     /**
-     * Algorithm that uses the first strong directional character to determine
-     * the paragraph direction.  This is the standard Unicode Bidirectional
-     * algorithm.
-     *
+     * Algorithm that uses the first strong directional character to determine the paragraph
+     * direction. This is the standard Unicode Bidirectional algorithm.
      */
     private static class FirstStrong implements TextDirectionAlgorithm {
         @Override
-        public TriState checkRtl(char[] text, int start, int count) {
-            TriState result = TriState.UNKNOWN;
-            for (int i = start, e = start + count; i < e && result == TriState.UNKNOWN; ++i) {
-                result = isRtlTextOrFormat(Character.getDirectionality(text[i]));
+        public int checkRtl(CharSequence cs, int start, int count) {
+            int result = STATE_UNKNOWN;
+            for (int i = start, e = start + count; i < e && result == STATE_UNKNOWN; ++i) {
+                result = isRtlTextOrFormat(Character.getDirectionality(cs.charAt(i)));
             }
             return result;
         }
@@ -190,25 +196,24 @@ public class TextDirectionHeuristics {
      * Algorithm that uses the presence of any strong directional non-format
      * character (e.g. excludes LRE, LRO, RLE, RLO) to determine the
      * direction of text.
-     *
      */
     private static class AnyStrong implements TextDirectionAlgorithm {
         private final boolean mLookForRtl;
 
         @Override
-        public TriState checkRtl(char[] text, int start, int count) {
+        public int checkRtl(CharSequence cs, int start, int count) {
             boolean haveUnlookedFor = false;
             for (int i = start, e = start + count; i < e; ++i) {
-                switch (isRtlText(Character.getDirectionality(text[i]))) {
-                    case TRUE:
+                switch (isRtlText(Character.getDirectionality(cs.charAt(i)))) {
+                    case STATE_TRUE:
                         if (mLookForRtl) {
-                            return TriState.TRUE;
+                            return STATE_TRUE;
                         }
                         haveUnlookedFor = true;
                         break;
-                    case FALSE:
+                    case STATE_FALSE:
                         if (!mLookForRtl) {
-                            return TriState.FALSE;
+                            return STATE_FALSE;
                         }
                         haveUnlookedFor = true;
                         break;
@@ -217,9 +222,9 @@ public class TextDirectionHeuristics {
                 }
             }
             if (haveUnlookedFor) {
-                return mLookForRtl ? TriState.FALSE : TriState.TRUE;
+                return mLookForRtl ? STATE_FALSE : STATE_TRUE;
             }
-            return TriState.UNKNOWN;
+            return STATE_UNKNOWN;
         }
 
         private AnyStrong(boolean lookForRtl) {

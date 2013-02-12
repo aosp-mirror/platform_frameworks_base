@@ -17,10 +17,30 @@
 package android.text;
 
 /**
- * Interface for objects that guess at the paragraph direction by examining text.
- *
- * @hide
+ * Interface for objects that use a heuristic for guessing at the paragraph direction by examining text.
  */
 public interface TextDirectionHeuristic {
-    boolean isRtl(char[] text, int start, int count);
+    /**
+     * Guess if a chars array is in the RTL direction or not.
+     *
+     * @param array the char array.
+     * @param start start index, inclusive.
+     * @param count the length to check, must not be negative and not greater than
+     *          {@code array.length - start}.
+     * @return true if all chars in the range are to be considered in a RTL direction,
+     *          false otherwise.
+     */
+    boolean isRtl(char[] array, int start, int count);
+
+    /**
+     * Guess if a {@code CharSequence} is in the RTL direction or not.
+     *
+     * @param cs the CharSequence.
+     * @param start start index, inclusive.
+     * @param count the length to check, must not be negative and not greater than
+     *            {@code CharSequence.length() - start}.
+     * @return true if all chars in the range are to be considered in a RTL direction,
+     *          false otherwise.
+     */
+    boolean isRtl(CharSequence cs, int start, int count);
 }
