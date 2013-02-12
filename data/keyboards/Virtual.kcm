@@ -477,7 +477,7 @@ key ESCAPE {
 ### Gamepad buttons ###
 
 key BUTTON_A {
-    base:                               fallback BACK
+    base:                               fallback DPAD_CENTER
 }
 
 key BUTTON_B {
@@ -485,7 +485,7 @@ key BUTTON_B {
 }
 
 key BUTTON_C {
-    base:                               fallback BACK
+    base:                               fallback DPAD_CENTER
 }
 
 key BUTTON_X {
@@ -493,7 +493,7 @@ key BUTTON_X {
 }
 
 key BUTTON_Y {
-    base:                               fallback DPAD_CENTER
+    base:                               fallback BACK
 }
 
 key BUTTON_Z {
@@ -525,7 +525,7 @@ key BUTTON_THUMBR {
 }
 
 key BUTTON_START {
-    base:                               fallback HOME
+    base:                               fallback DPAD_CENTER
 }
 
 key BUTTON_SELECT {
