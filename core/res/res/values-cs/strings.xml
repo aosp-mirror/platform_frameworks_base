@@ -617,10 +617,8 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Umožňuje aplikaci spravovat zásady sítě a definovat pravidla pro konkrétní aplikace."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"upravit kontrolu používání sítě"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Umožňuje aplikaci upravit způsob výpočtu využití sítě aplikacemi. Toto oprávnění není určeno pro běžné aplikace."</string>
-    <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
-    <skip />
-    <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
-    <skip />
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"přístup k oznámením"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Umožňuje aplikacím načítat, zobrazovat a mazat oznámení včetně těch přidaných jinými aplikacemi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Řídit délku hesel pro odemčení obrazovky a povolené znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
