@@ -685,9 +685,9 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
                                                            jobject outValue,
                                                            jboolean resolve)
 {
-    if (outValue == null) {
+    if (outValue == NULL) {
          jniThrowNullPointerException(env, "outValue");
-         return null;
+         return NULL;
     }
     AssetManager* am = assetManagerForJavaObject(env, clazz);
     if (am == NULL) {
