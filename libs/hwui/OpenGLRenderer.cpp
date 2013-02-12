@@ -1179,6 +1179,10 @@ void OpenGLRenderer::clearLayerRegions() {
 
             delete bounds;
         }
+        // We must clear the list of dirty rects before we
+        // call setupDraw() to prevent stencil setup to do
+        // the same thing again
+        mLayers.clear();
 
         setupDraw(false);
         setupDrawColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1195,9 +1199,8 @@ void OpenGLRenderer::clearLayerRegions() {
         for (uint32_t i = 0; i < count; i++) {
             delete mLayers.itemAt(i);
         }
+        mLayers.clear();
     }
-
-    mLayers.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
