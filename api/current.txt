@@ -11584,6 +11584,20 @@ package android.media {
     field public static final int OPTION_PREVIOUS_SYNC = 0; // 0x0
   }
 
+  public final class MediaMuxer {
+    ctor public MediaMuxer(java.lang.String, int) throws java.io.IOException;
+    method public int addTrack(android.media.MediaFormat);
+    method public void release();
+    method public void start();
+    method public void stop();
+    method public void writeSampleData(int, java.nio.ByteBuffer, android.media.MediaCodec.BufferInfo);
+    field public static final int SAMPLE_FLAG_SYNC = 1; // 0x1
+  }
+
+  public static final class MediaMuxer.OutputFormat {
+    field public static final int MUXER_OUTPUT_MPEG_4 = 0; // 0x0
+  }
+
   public class MediaPlayer {
     ctor public MediaPlayer();
     method public void addTimedTextSource(java.lang.String, java.lang.String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
