@@ -111,7 +111,17 @@ rules</a>.</p>
   </li>
 </ol>
 
-<p>When plugged in over USB, can verify that your device is connected by executing <code>adb
+
+<p class="note"><strong>Note:</strong> When you connect a device running Android 4.2.2 or higher
+to your computer, the system shows a dialog asking whether to accept an RSA key that allows
+debugging through this computer. This security mechanism protects user devices because it ensures
+that USB debugging and other adb commands cannot be executed unless you're able to unlock the
+device and acknowledge the dialog. This requires that you have adb version 1.0.31 (available with
+SDK Platform-tools r16.0.1 and higher) in order to debug on a device running Android 4.2.2 or
+higher.</p>
+
+
+<p>When plugged in over USB, you can verify that your device is connected by executing <code>adb
 devices</code> from your SDK {@code platform-tools/} directory. If connected,
 you'll see the device name listed as a "device."</p>
 
