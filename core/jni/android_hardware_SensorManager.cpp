@@ -31,7 +31,7 @@
 static struct {
     jclass clazz;
     jmethodID dispatchSensorEvent;
-} gSensorEventQueueClassInfo;
+} gBaseEventQueueClassInfo;
 
 namespace android {
 
@@ -145,7 +145,7 @@ private:
                 env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
 
                 env->CallVoidMethod(mReceiverObject,
-                        gSensorEventQueueClassInfo.dispatchSensorEvent,
+                        gBaseEventQueueClassInfo.dispatchSensorEvent,
                         buffer[i].sensor,
                         mScratch,
                         buffer[i].vector.status,
@@ -209,9 +209,9 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
             (void*)nativeGetNextSensor },
 };
 
-static JNINativeMethod gSensorEventQueueMethods[] = {
-    {"nativeInitSensorEventQueue",
-            "(Landroid/hardware/SystemSensorManager$SensorEventQueue;Landroid/os/MessageQueue;[F)I",
+static JNINativeMethod gBaseEventQueueMethods[] = {
+    {"nativeInitBaseEventQueue",
+            "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[F)I",
             (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
@@ -245,13 +245,13 @@ int register_android_hardware_SensorManager(JNIEnv *env)
     jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager",
             gSystemSensorManagerMethods, NELEM(gSystemSensorManagerMethods));
 
-    jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager$SensorEventQueue",
-            gSensorEventQueueMethods, NELEM(gSensorEventQueueMethods));
+    jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager$BaseEventQueue",
+            gBaseEventQueueMethods, NELEM(gBaseEventQueueMethods));
 
-    FIND_CLASS(gSensorEventQueueClassInfo.clazz, "android/hardware/SystemSensorManager$SensorEventQueue");
+    FIND_CLASS(gBaseEventQueueClassInfo.clazz, "android/hardware/SystemSensorManager$BaseEventQueue");
 
-    GET_METHOD_ID(gSensorEventQueueClassInfo.dispatchSensorEvent,
-            gSensorEventQueueClassInfo.clazz,
+    GET_METHOD_ID(gBaseEventQueueClassInfo.dispatchSensorEvent,
+            gBaseEventQueueClassInfo.clazz,
             "dispatchSensorEvent", "(I[FIJ)V");
 
     return 0;
