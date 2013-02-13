@@ -213,8 +213,8 @@ public class AccessPointParserHelper {
                         config.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
                         // Initialize other fields.
                         config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
-                        config.enterpriseConfig.setCaCertificate("");
-                        config.enterpriseConfig.setClientCertificate("");
+                        config.enterpriseConfig.setCaCertificateAlias("");
+                        config.enterpriseConfig.setClientCertificateAlias("");
                         config.enterpriseConfig.setIdentity("");
                         config.enterpriseConfig.setAnonymousIdentity("");
                         break;
@@ -288,12 +288,12 @@ public class AccessPointParserHelper {
             }
             if (cacert) {
                 String cacertValue = new String(ch, start, length);
-                config.enterpriseConfig.setCaCertificate(cacertValue);
+                config.enterpriseConfig.setCaCertificateAlias(cacertValue);
                 cacert = false;
             }
             if (usercert) {
                 String usercertValue = new String(ch, start, length);
-                config.enterpriseConfig.setClientCertificate(usercertValue);
+                config.enterpriseConfig.setClientCertificateAlias(usercertValue);
                 usercert = false;
             }
             if (ip) {
