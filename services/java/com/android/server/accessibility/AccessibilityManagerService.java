@@ -2105,6 +2105,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (mIsAutomation) {
                     // We no longer have an automation service, so restore
                     // the state based on values in the settings database.
+                    userState.mInstalledServices.remove(mAccessibilityServiceInfo);
+                    userState.mEnabledServices.remove(mComponentName);
                     userState.mUiAutomationService = null;
                     userState.mUiAutomationServiceClient = null;
                 }
