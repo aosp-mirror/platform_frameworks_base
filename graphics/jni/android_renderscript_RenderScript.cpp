@@ -1055,8 +1055,28 @@ nScriptForEachV(JNIEnv *_env, jobject _this, RsContext con,
 static void
 nScriptForEachClipped(JNIEnv *_env, jobject _this, RsContext con,
                       jint script, jint slot, jint ain, jint aout,
-                      jbyteArray params, jint xstart, jint xend,
+                      jint xstart, jint xend,
                       jint ystart, jint yend, jint zstart, jint zend)
+{
+    LOG_API("nScriptForEachClipped, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, NULL, 0, &sc, sizeof(sc));
+}
+
+static void
+nScriptForEachClippedV(JNIEnv *_env, jobject _this, RsContext con,
+                       jint script, jint slot, jint ain, jint aout,
+                       jbyteArray params, jint xstart, jint xend,
+                       jint ystart, jint yend, jint zstart, jint zend)
 {
     LOG_API("nScriptForEachClipped, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
     jint len = _env->GetArrayLength(params);
@@ -1536,7 +1556,8 @@ static JNINativeMethod methods[] = {
 {"rsnScriptInvokeV",                 "(III[B)V",                              (void*)nScriptInvokeV },
 {"rsnScriptForEach",                 "(IIIII)V",                              (void*)nScriptForEach },
 {"rsnScriptForEach",                 "(IIIII[B)V",                            (void*)nScriptForEachV },
-{"rsnScriptForEachClipped",          "(IIIII[BIIIIII)V",                      (void*)nScriptForEachClipped },
+{"rsnScriptForEachClipped",          "(IIIIIIIIIII)V",                        (void*)nScriptForEachClipped },
+{"rsnScriptForEachClipped",          "(IIIII[BIIIIII)V",                      (void*)nScriptForEachClippedV },
 {"rsnScriptSetVarI",                 "(IIII)V",                               (void*)nScriptSetVarI },
 {"rsnScriptSetVarJ",                 "(IIIJ)V",                               (void*)nScriptSetVarJ },
 {"rsnScriptSetVarF",                 "(IIIF)V",                               (void*)nScriptSetVarF },
