@@ -45,7 +45,6 @@ public class TestBase  {
     protected Allocation mInPixelsAllocation;
     protected Allocation mInPixelsAllocation2;
     protected Allocation mOutPixelsAllocation;
-
     protected ImageProcessingActivity act;
 
     private class MessageProcessor extends RenderScript.RSMessageHandler {
@@ -107,12 +106,12 @@ public class TestBase  {
 
     public final void createBaseTest(ImageProcessingActivity ipact, Bitmap b, Bitmap b2, Bitmap outb) {
         act = ipact;
-        mRS = RenderScript.create(act);
+        mRS = ipact.mRS;
         mRS.setMessageHandler(new MessageProcessor(act));
 
-        mInPixelsAllocation = Allocation.createFromBitmap(mRS, b);
-        mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2);
-        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, outb);
+        mInPixelsAllocation = ipact.mInPixelsAllocation;
+        mInPixelsAllocation2 = ipact.mInPixelsAllocation2;
+        mOutPixelsAllocation = ipact.mOutPixelsAllocation;
 
         createTest(act.getResources());
     }
@@ -135,8 +134,7 @@ public class TestBase  {
     }
 
     public void destroy() {
-        mRS.destroy();
-        mRS = null;
+        mRS.setMessageHandler(null);
     }
 
     public void updateBitmap(Bitmap b) {
