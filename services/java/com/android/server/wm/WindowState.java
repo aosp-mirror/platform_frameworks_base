@@ -52,6 +52,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class WindowList extends ArrayList<WindowState> {
+    WindowList() {
+        super();
+    }
+    WindowList(WindowList windows) {
+        super(windows);
+    }
 }
 
 /**
