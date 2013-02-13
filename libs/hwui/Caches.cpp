@@ -186,6 +186,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
             textureCache.getSize(), textureCache.getMaxSize());
     log.appendFormat("  LayerCache           %8d / %8d\n",
             layerCache.getSize(), layerCache.getMaxSize());
+    log.appendFormat("  RenderBufferCache    %8d / %8d\n",
+            renderBufferCache.getSize(), renderBufferCache.getMaxSize());
     log.appendFormat("  GradientCache        %8d / %8d\n",
             gradientCache.getSize(), gradientCache.getMaxSize());
     log.appendFormat("  PathCache            %8d / %8d\n",
@@ -215,6 +217,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
     uint32_t total = 0;
     total += textureCache.getSize();
     total += layerCache.getSize();
+    total += renderBufferCache.getSize();
     total += gradientCache.getSize();
     total += pathCache.getSize();
     total += dropShadowCache.getSize();
@@ -298,6 +301,7 @@ void Caches::flush(FlushMode mode) {
             // fall through
         case kFlushMode_Layers:
             layerCache.clear();
+            renderBufferCache.clear();
             break;
     }
 

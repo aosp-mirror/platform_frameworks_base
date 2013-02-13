@@ -1273,11 +1273,8 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
         // attach the new render buffer then turn tiling back on
         endTiling();
 
-        RenderBuffer* buffer = new RenderBuffer(
+        RenderBuffer* buffer = mCaches.renderBufferCache.get(
                 Stencil::getSmallestStencilFormat(), layer->getWidth(), layer->getHeight());
-        buffer->bind();
-        buffer->allocate();
-
         layer->setStencilRenderBuffer(buffer);
 
         startTiling(layer->clipRect, layer->layer.getHeight());

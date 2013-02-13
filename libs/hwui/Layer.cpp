@@ -101,14 +101,13 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
 
 void Layer::removeFbo(bool flush) {
     if (stencil) {
-        // TODO: recycle & cache instead of simply deleting
         GLuint previousFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
         if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
         if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
 
-        delete stencil;
+        Caches::getInstance().renderBufferCache.put(stencil);
         stencil = NULL;
     }
 

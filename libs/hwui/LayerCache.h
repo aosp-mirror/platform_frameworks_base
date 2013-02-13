@@ -19,7 +19,6 @@
 
 #include "Debug.h"
 #include "Layer.h"
-#include "Properties.h"
 #include "utils/SortedList.h"
 
 namespace android {
@@ -54,7 +53,7 @@ public:
      * size of the cache goes down.
      *
      * @param width The desired width of the layer
-     * @param width The desired height of the layer
+     * @param height The desired height of the layer
      */
     Layer* get(const uint32_t width, const uint32_t height);
 
@@ -91,6 +90,7 @@ public:
      */
     void dump();
 
+private:
     struct LayerEntry {
         LayerEntry():
             mLayer(NULL), mWidth(0), mHeight(0) {
@@ -115,12 +115,19 @@ public:
             return compare(*this, other) != 0;
         }
 
+        friend inline int strictly_order_type(const LayerEntry& lhs, const LayerEntry& rhs) {
+            return LayerEntry::compare(lhs, rhs) < 0;
+        }
+
+        friend inline int compare_type(const LayerEntry& lhs, const LayerEntry& rhs) {
+            return LayerEntry::compare(lhs, rhs);
+        }
+
         Layer* mLayer;
         uint32_t mWidth;
         uint32_t mHeight;
     }; // struct LayerEntry
 
-private:
     void deleteLayer(Layer* layer);
 
     SortedList<LayerEntry> mCache;
@@ -128,15 +135,6 @@ private:
     uint32_t mSize;
     uint32_t mMaxSize;
 }; // class LayerCache
-
-inline int strictly_order_type(const LayerCache::LayerEntry& lhs,
-        const LayerCache::LayerEntry& rhs) {
-    return LayerCache::LayerEntry::compare(lhs, rhs) < 0;
-}
-
-inline int compare_type(const LayerCache::LayerEntry& lhs, const LayerCache::LayerEntry& rhs) {
-    return LayerCache::LayerEntry::compare(lhs, rhs);
-}
 
 }; // namespace uirenderer
 }; // namespace android

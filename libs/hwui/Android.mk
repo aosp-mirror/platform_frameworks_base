@@ -28,6 +28,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		PathTessellator.cpp \
 		Program.cpp \
 		ProgramCache.cpp \
+		RenderBufferCache.cpp \
 		ResourceCache.cpp \
 		ShapeCache.cpp \
 		SkiaColorFilter.cpp \
