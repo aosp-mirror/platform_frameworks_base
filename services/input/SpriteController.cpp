@@ -208,7 +208,8 @@ void SpriteController::doUpdateSprites() {
                         surfaceInfo.w, surfaceInfo.h, bpr);
                 surfaceBitmap.setPixels(surfaceInfo.bits);
 
-                SkCanvas surfaceCanvas(surfaceBitmap);
+                SkCanvas surfaceCanvas;
+                surfaceCanvas.setBitmapDevice(surfaceBitmap);
 
                 SkPaint paint;
                 paint.setXfermodeMode(SkXfermode::kSrc_Mode);

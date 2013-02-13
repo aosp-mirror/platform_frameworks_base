@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <SkGlyph.h>
 #include <utils/Log.h>
 
 #include "Debug.h"

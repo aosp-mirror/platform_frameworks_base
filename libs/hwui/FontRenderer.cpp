@@ -16,7 +16,6 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <SkGlyph.h>
 #include <SkUtils.h>
 
 #include <cutils/properties.h>

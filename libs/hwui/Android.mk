@@ -43,7 +43,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		external/skia/include/core \
 		external/skia/include/effects \
 		external/skia/include/images \
-		external/skia/src/core \
 		external/skia/src/ports \
 		external/skia/include/utils
 
