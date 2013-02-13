@@ -169,6 +169,9 @@
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
     <protected-broadcast android:name="android.intent.action.ADVANCED_SETTINGS" />
 
+    <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
+    <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_END" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
