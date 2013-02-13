@@ -46,10 +46,33 @@ by the directory name, such as {@code v4/} and {@code v13/}.</p>
 <p>The sections below provide notes about successive releases of
 the Support Package, as denoted by revision number.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Support Package, revision 12</a> <em>(February 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Improved interaction behavior for {@link android.support.v4.view.ViewPager}.</li>
+          <li>Fixed a bug that could cause {@link android.support.v4.view.ViewPager} to select the
+            wrong page.</li>
+          <li>Fixed use of {@link android.support.v4.view.ViewPager#removeView removeView()} method
+            during layout for {@link android.support.v4.view.ViewPager}.</li>
+          <li>Fixed issue with {@link android.support.v4.widget.SearchViewCompat} where using the
+            back button to dismiss does not clear the search text. This fix only applies to
+            host API levels 14 and higher.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 11</a> <em>(November 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -119,7 +142,7 @@ the Support Package, as denoted by revision number.</p>
       <dt>Changes for v4 support library:</dt>
       <dd>
         <ul>
-          <li>Added support for notification features introduced in Android 4.1 (API Level 16) with
+          <li>Added support for notification features introduced in Android 4.1 (API level 16) with
           additions to {@link android.support.v4.app.NotificationCompat}.</li>
         </ul>
       </dd>
@@ -210,7 +233,7 @@ isActiveNetworkMetered()} method.</li>
           <li>Fixed intent flags for {@link android.app.PendingIntent} objects generated
             by {@link android.support.v4.app.TaskStackBuilder}.</li>
           <li>Removed unused attributes from the gridlayout library projects to make sure
-            the library can be built with API Level 7 and higher.</li>
+            the library can be built with API level 7 and higher.</li>
           <li>Added {@code .classpath} and {@code .project} files for the gridlayout
             library project.</li>
         </ul>
