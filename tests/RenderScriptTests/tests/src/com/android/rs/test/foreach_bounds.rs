@@ -7,6 +7,8 @@ int xEnd = 0;
 int yStart = 0;
 int yEnd = 0;
 
+static bool failed = false;
+
 rs_script s;
 rs_allocation aRaw;
 rs_allocation ain;
@@ -27,9 +29,6 @@ static bool test_root_output() {
     for (j = 0; j < dimY; j++) {
         for (i = 0; i < dimX; i++) {
             int v = rsGetElementAt_int(aRaw, i, j);
-            rsDebug("i: ", i);
-            rsDebug("j: ", j);
-            rsDebug("a[j][i]: ", v);
             if (i < xStart || i >= xEnd || j < yStart || j >= yEnd) {
                 _RS_ASSERT(v == 0);
             } else {
@@ -48,20 +47,11 @@ static bool test_root_output() {
     return failed;
 }
 
-void foreach_bounds_test() {
-    static bool failed = false;
-
-    rs_script_call_t rssc = {0};
-    rssc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
-    rssc.xStart = xStart;
-    rssc.xEnd = xEnd;
-    rssc.yStart = yStart;
-    rssc.yEnd = yEnd;
-
-    rsForEach(s, ain, aout, NULL, 0, &rssc);
-
+void verify_root() {
     failed |= test_root_output();
+}
 
+void foreach_bounds_test() {
     if (failed) {
         rsSendToClientBlocking(RS_MSG_TEST_FAILED);
     }
