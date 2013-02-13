@@ -190,8 +190,8 @@
     <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Soma maneno katika kamusi ya mtumiaji."</string>
     <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Andika Kamusi ya Mtumiaji"</string>
     <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Ongeza maneno katika kamusi mtumiaji."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Vialamisho na Historia"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Kufikia moja kwa moja vialamisho na historia ya kivinjari"</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Alamisho na Historia"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Kufikia, moja kwa moja, alamisho na historia ya kivinjari."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Kengele"</string>
     <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Weka saa ya kengele."</string>
     <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Barua ya sauti"</string>
@@ -863,8 +863,8 @@
     <string name="js_dialog_before_unload" msgid="730366588032430474">"Toka kwa ukurasa huu?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Gusa Sawa ili kuendelea, au Ghairi ili kubaki kwenye ukurasa wa sasa."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Thibitisha"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kidokezo: Gonga mara mbili ili kukuza ndani na nje."</string>
-    <string name="autofill_this_form" msgid="4616758841157816676">"Mjazo-otomatiki"</string>
-    <string name="setup_autofill" msgid="7103495070180590814">"Sanidi Mjazo-otomati"</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"Kujaza kiotomatiki"</string>
+    <string name="setup_autofill" msgid="7103495070180590814">"Weka uwezo wa kujaza kiotomatiki"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -885,7 +885,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Inaruhusu programu kusoma historia ya URL zote ambazo zimetembelewa na Kivinjari, na alamisho zote za Kivinjari. Kumbuka: idhini hii haiwezi kutekelezwa vivinjari vya vingine au programu zingine zenye uwezo wa kuvinjari."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"andika alamisho na historia ya wavuti"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Inaruhusu programu kurekebisha historia ya Kivinjari au alamisho zilizohifadhiwa kwenye kompyuta kibao yako. Hii inaruhusu programu kufuta au kurekebisha data ya Kivinjari. Kumbuka: huenda idhini hii isitekelezwe na kivinjari kingine au programu nyingine zenye uwezo wa kuvinjari wavuti."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Inaruhusu programu kurekebisha historia ya Kivinjari au vialamisho vilivyohifadhiwa kwenye simu yako. Hii huenda ikaruhusu programu kufuta au kurekebisha data ya Kivinjari. Kumbuka: huenda idhini hii isitekelezwe na vivinjari vingine au programu nyingine zenye uwezo wa kuvinjari wavuti."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Inaruhusu programu kurekebisha historia ya Kivinjari au alamisho zilizohifadhiwa kwenye simu yako. Hii huenda ikaruhusu programu kufuta au kurekebisha data ya Kivinjari. Kumbuka: huenda idhini hii isitekelezwe na vivinjari vingine au programu nyingine zenye uwezo wa kuvinjari wavuti."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"weka kengele"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Inaruhusu programu kuweka kengele katika programu iliyosakinishwa ya kengele. Programu zingine za kengele zinawezakosa kutekeleza kipengee hiki."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ongeza barua ya sauti"</string>
