@@ -26,19 +26,19 @@ sdk.win64_bundle_checksum=c51679f4517e1c3ddefa1e662bbf17f6
 
 
 
-sdk.linux_download=android-sdk_r21.1.0-linux.tgz
+sdk.linux_download=android-sdk_r21.1-linux.tgz
 sdk.linux_bytes=91617112
 sdk.linux_checksum=3369a439240cf3dbe165d6b4173900a8
 
-sdk.mac_download=android-sdk_r21.1.0-macosx.zip
+sdk.mac_download=android-sdk_r21.1-macosx.zip
 sdk.mac_bytes=66077080
 sdk.mac_checksum=49903cf79e1f8e3fde54a95bd3666385
 
-sdk.win_download=android-sdk_r21.1.0-windows.zip
+sdk.win_download=android-sdk_r21.1-windows.zip
 sdk.win_bytes=99360755
 sdk.win_checksum=dbece8859da9b66a1e8e7cd47b1e647e
 
-sdk.win_installer=installer_r21.1.0-windows.exe
+sdk.win_installer=installer_r21.1-windows.exe
 sdk.win_installer_bytes=77767013
 sdk.win_installer_checksum=594d8ff8e349db9e783a5f2229561353
 
