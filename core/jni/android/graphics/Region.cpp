@@ -177,7 +177,7 @@ static SkRegion* Region_createFromParcel(JNIEnv* env, jobject clazz, jobject par
 
     SkRegion* region = new SkRegion;
     size_t size = p->readInt32();
-    region->readFromMemory(p->readInplace(size));
+    region->unflatten(p->readInplace(size));
 
     return region;
 }
@@ -190,9 +190,9 @@ static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, const SkRegion*
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
-    size_t size = region->writeToMemory(NULL);
+    size_t size = region->flatten(NULL);
     p->writeInt32(size);
-    region->writeToMemory(p->writeInplace(size));
+    region->flatten(p->writeInplace(size));
 
     return true;
 }

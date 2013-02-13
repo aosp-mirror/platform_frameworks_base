@@ -269,7 +269,8 @@ static jint android_view_GLES20Canvas_saveLayerAlphaClip(JNIEnv* env, jobject cl
 // ----------------------------------------------------------------------------
 
 static bool android_view_GLES20Canvas_quickReject(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom) {
+        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom,
+        SkCanvas::EdgeType edge) {
     return renderer->quickReject(left, top, right, bottom);
 }
 
@@ -980,7 +981,7 @@ static JNINativeMethod gMethods[] = {
     { "nSaveLayerAlpha",    "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayerAlpha },
     { "nSaveLayerAlpha",    "(III)I",          (void*) android_view_GLES20Canvas_saveLayerAlphaClip },
 
-    { "nQuickReject",       "(IFFFF)Z",        (void*) android_view_GLES20Canvas_quickReject },
+    { "nQuickReject",       "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_quickReject },
     { "nClipRect",          "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_clipRectF },
     { "nClipRect",          "(IIIIII)Z",       (void*) android_view_GLES20Canvas_clipRect },
     { "nClipPath",          "(III)Z",          (void*) android_view_GLES20Canvas_clipPath },
