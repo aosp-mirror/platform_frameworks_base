@@ -179,7 +179,10 @@ class DisplayContent {
 
     void refillAnimatingAppTokens() {
         mAnimatingAppTokens.clear();
-        mAnimatingAppTokens.addAll(mAppTokens);
+        AppTokenIterator iterator = new AppTokenIterator();
+        while (iterator.hasNext()) {
+            mAnimatingAppTokens.add(iterator.next());
+        }
     }
 
     void setAppTaskId(AppWindowToken wtoken, int newTaskId) {
@@ -352,13 +355,16 @@ class DisplayContent {
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-            if (mAppTokens.size() > 0) {
+            AppTokenIterator iterator = new AppTokenIterator(true);
+            int ndx = iterator.size() - 1;
+            if (ndx >= 0) {
                 pw.println();
                 pw.println("  Application tokens in Z order:");
-                for (int i=mAppTokens.size()-1; i>=0; i--) {
-                    pw.print("  App #"); pw.print(i);
-                            pw.print(' '); pw.print(mAppTokens.get(i)); pw.println(":");
-                    mAppTokens.get(i).dump(pw, "    ");
+                while (iterator.hasNext()) {
+                    AppWindowToken wtoken = iterator.next();
+                    pw.print("  App #"); pw.print(ndx--);
+                            pw.print(' '); pw.print(wtoken); pw.println(":");
+                    wtoken.dump(pw, "    ");
                 }
             }
             if (mExitingTokens.size() > 0) {
