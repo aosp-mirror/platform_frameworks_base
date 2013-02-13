@@ -28,6 +28,15 @@ public class NfcExecutionEnvironment {
     private final NfcAdapterExtras mExtras;
     private final Binder mToken;
 
+    // Exception types that can be thrown by NfcService
+    // 1:1 mapped to EE_ERROR_ types in NfcService
+    private static final int EE_ERROR_IO = -1;
+    private static final int EE_ERROR_ALREADY_OPEN = -2;
+    private static final int EE_ERROR_INIT = -3;
+    private static final int EE_ERROR_LISTEN_MODE = -4;
+    private static final int EE_ERROR_EXT_FIELD = -5;
+    private static final int EE_ERROR_NFC_DISABLED = -6;
+
     /**
      * Broadcast Action: An ISO-DEP AID was selected.
      *
@@ -118,24 +127,49 @@ public class NfcExecutionEnvironment {
     /**
      * Open the NFC Execution Environment on its contact interface.
      *
-     * <p>Only one process may open the secure element at a time. If it is
-     * already open, an {@link IOException} is thrown.
+     * <p>Opening a channel to the the secure element may fail
+     * for a number of reasons:
+     * <ul>
+     * <li>NFC must be enabled for the connection to the SE to be opened.
+     * If it is disabled at the time of this call, an {@link EeNfcDisabledException}
+     * is thrown.
      *
+     * <li>Only one process may open the secure element at a time. Additionally,
+     * this method is not reentrant. If the secure element is already opened,
+     * either by this process or by a different process, an {@link EeAlreadyOpenException}
+     * is thrown.
+     *
+     * <li>If the connection to the secure element could not be initialized,
+     * an {@link EeInitializationException} is thrown.
+     *
+     * <li>If the secure element or the NFC controller is activated in listen
+     * mode - that is, it is talking over the contactless interface - an
+     * {@link EeListenModeException} is thrown.
+     *
+     * <li>If the NFC controller is in a field powered by a remote device,
+     * such as a payment terminal, an {@link EeExternalFieldException} is
+     * thrown.
+     * </ul>
      * <p>All other NFC functionality is disabled while the NFC-EE is open
      * on its contact interface, so make sure to call {@link #close} once complete.
      *
      * <p class="note">
      * Requires the {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} permission.
      *
-     * @throws IOException if the NFC-EE is already open, or some other error occurs
+     * @throws EeAlreadyOpenException if the NFC-EE is already open
+     * @throws EeNfcDisabledException if NFC is disabled
+     * @throws EeInitializationException if the Secure Element could not be initialized
+     * @throws EeListenModeException if the NFCC or Secure Element is activated in listen mode
+     * @throws EeExternalFieldException if the NFCC is in the presence of a remote-powered field
+     * @throws EeIoException if an unknown error occurs
      */
-    public void open() throws IOException {
+    public void open() throws EeIOException {
         try {
             Bundle b = mExtras.getService().open(mExtras.mPackageName, mToken);
             throwBundle(b);
         } catch (RemoteException e) {
             mExtras.attemptDeadServiceRecovery(e);
-            throw new IOException("NFC Service was dead, try again");
+            throw new EeIOException("NFC Service was dead, try again");
         }
     }
 
@@ -176,9 +210,20 @@ public class NfcExecutionEnvironment {
         return b.getByteArray("out");
     }
 
-    private static void throwBundle(Bundle b) throws IOException {
-        if (b.getInt("e") == -1) {
-            throw new IOException(b.getString("m"));
+    private static void throwBundle(Bundle b) throws EeIOException {
+        switch (b.getInt("e")) {
+            case EE_ERROR_NFC_DISABLED:
+                throw new EeNfcDisabledException(b.getString("m"));
+            case EE_ERROR_IO:
+                throw new EeIOException(b.getString("m"));
+            case EE_ERROR_INIT:
+                throw new EeInitializationException(b.getString("m"));
+            case EE_ERROR_EXT_FIELD:
+                throw new EeExternalFieldException(b.getString("m"));
+            case EE_ERROR_LISTEN_MODE:
+                throw new EeListenModeException(b.getString("m"));
+            case EE_ERROR_ALREADY_OPEN:
+                throw new EeAlreadyOpenException(b.getString("m"));
         }
     }
 }
