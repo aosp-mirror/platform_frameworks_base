@@ -32,6 +32,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.View;
 import android.util.Log;
+import android.renderscript.ScriptC;
+import android.renderscript.RenderScript;
+import android.renderscript.Type;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.Script;
 
 import android.os.Environment;
 import java.io.BufferedWriter;
@@ -43,6 +49,11 @@ public class ImageProcessingActivity extends Activity
                                        implements SeekBar.OnSeekBarChangeListener {
     private final String TAG = "Img";
     public final String RESULT_FILE = "image_processing_result.csv";
+
+    RenderScript mRS;
+    Allocation mInPixelsAllocation;
+    Allocation mInPixelsAllocation2;
+    Allocation mOutPixelsAllocation;
 
     /**
      * Define enum type for test names
@@ -407,6 +418,13 @@ public class ImageProcessingActivity extends Activity
 
         mBenchmarkResult = (TextView) findViewById(R.id.benchmarkText);
         mBenchmarkResult.setText("Result: not run");
+
+
+        mRS = RenderScript.create(this);
+        mInPixelsAllocation = Allocation.createFromBitmap(mRS, mBitmapIn);
+        mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, mBitmapIn2);
+        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, mBitmapOut);
+
 
         setupTests();
         changeTest(TestName.LEVELS_VEC3_RELAXED);
