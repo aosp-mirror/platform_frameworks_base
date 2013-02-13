@@ -171,6 +171,11 @@ public class Script extends BaseObj {
             throw new RSIllegalArgumentException(
                 "At least one of ain or aout is required to be non-null.");
         }
+
+        if (sc == null) {
+            forEach(slot, ain, aout, v);
+            return;
+        }
         int in_id = 0;
         if (ain != null) {
             in_id = ain.getID(mRS);
