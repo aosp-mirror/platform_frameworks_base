@@ -23,9 +23,6 @@
 
 #include <utils/Log.h>
 
-#include "RenderScript.h"
-
-#include "utils/Timing.h"
 #include "Caches.h"
 #include "Debug.h"
 #include "FontRenderer.h"
@@ -33,9 +30,6 @@
 
 namespace android {
 namespace uirenderer {
-
-// blur inputs smaller than this constant will bypass renderscript
-#define RS_MIN_INPUT_CUTOFF 10000
 
 ///////////////////////////////////////////////////////////////////////////////
 // FontRenderer
@@ -550,22 +544,18 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
 
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
     uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
+    uint8_t* dataBuffer = new uint8_t[paddedWidth * paddedHeight];
 
-    // Align buffers for renderscript usage
-    if (paddedWidth & (RS_CPU_ALLOCATION_ALIGNMENT - 1)) {
-        paddedWidth += RS_CPU_ALLOCATION_ALIGNMENT - paddedWidth % RS_CPU_ALLOCATION_ALIGNMENT;
+    for (uint32_t i = 0; i < paddedWidth * paddedHeight; i++) {
+        dataBuffer[i] = 0;
     }
-
-    int size = paddedWidth * paddedHeight;
-    uint8_t* dataBuffer = (uint8_t*)memalign(RS_CPU_ALLOCATION_ALIGNMENT, size);
-    memset(dataBuffer, 0, size);
 
     int penX = radius - bounds.left;
     int penY = radius - bounds.bottom;
 
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
             Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, NULL, positions);
-    blurImage(&dataBuffer, paddedWidth, paddedHeight, radius);
+    blurImage(dataBuffer, paddedWidth, paddedHeight, radius);
 
     DropShadow image;
     image.width = paddedWidth;
@@ -762,44 +752,18 @@ void FontRenderer::verticalBlur(float* weights, int32_t radius,
     }
 }
 
-void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int32_t radius) {
-    if (width * height * radius < RS_MIN_INPUT_CUTOFF) {
-        float *gaussian = new float[2 * radius + 1];
-        computeGaussianWeights(gaussian, radius);
 
-        uint8_t* scratch = new uint8_t[width * height];
+void FontRenderer::blurImage(uint8_t *image, int32_t width, int32_t height, int32_t radius) {
+    float *gaussian = new float[2 * radius + 1];
+    computeGaussianWeights(gaussian, radius);
 
-        horizontalBlur(gaussian, radius, *image, scratch, width, height);
-        verticalBlur(gaussian, radius, scratch, *image, width, height);
+    uint8_t* scratch = new uint8_t[width * height];
 
-        delete[] gaussian;
-        delete[] scratch;
-    }
+    horizontalBlur(gaussian, radius, image, scratch, width, height);
+    verticalBlur(gaussian, radius, scratch, image, width, height);
 
-    uint8_t* outImage = (uint8_t*)memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
-
-    if (mRs.get() == 0) {
-        mRs = new RSC::RS();
-        if (!mRs->init(true, true)) {
-            ALOGE("blur RS failed to init");
-        }
-
-        mRsElement = RSC::Element::A_8(mRs);
-        mRsScript = new RSC::ScriptIntrinsicBlur(mRs, mRsElement);
-    }
-
-    sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
-    sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
-            RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, *image);
-    sp<RSC::Allocation> aout = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
-            RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, outImage);
-
-    mRsScript->setRadius(radius);
-    mRsScript->blur(ain, aout);
-
-    // replace the original image's pointer, avoiding a copy back to the original buffer
-    delete *image;
-    *image = outImage;
+    delete[] gaussian;
+    delete[] scratch;
 }
 
 }; // namespace uirenderer

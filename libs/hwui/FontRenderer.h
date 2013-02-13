@@ -31,12 +31,6 @@
 #include "Matrix.h"
 #include "Properties.h"
 
-namespace RSC {
-    class Element;
-    class RS;
-    class ScriptIntrinsicBlur;
-}
-
 namespace android {
 namespace uirenderer {
 
@@ -184,19 +178,13 @@ private:
     Vector<uint32_t> mDrawCounts;
     Vector<CacheTexture*> mDrawCacheTextures;
 
-    // RS constructs
-    sp<RSC::RS> mRs;
-    sp<const RSC::Element> mRsElement;
-    sp<RSC::ScriptIntrinsicBlur> mRsScript;
-
+    /** We should consider multi-threading this code or using Renderscript **/
     static void computeGaussianWeights(float* weights, int32_t radius);
     static void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
             int32_t width, int32_t height);
     static void verticalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
             int32_t width, int32_t height);
-
-    // the input image handle may have its pointer replaced (to avoid copies)
-    void blurImage(uint8_t** image, int32_t width, int32_t height, int32_t radius);
+    static void blurImage(uint8_t* image, int32_t width, int32_t height, int32_t radius);
 };
 
 }; // namespace uirenderer
