@@ -565,8 +565,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             UserState userState = getCurrentUserStateLocked();
             // Automation service is not bound, so pretend it died to perform clean up.
             if (userState.mUiAutomationService != null
-                    && userState.mUiAutomationService.mServiceInterface != null
                     && serviceClient != null
+                    && userState.mUiAutomationService != null
+                    && userState.mUiAutomationService.mServiceInterface != null
                     && userState.mUiAutomationService.mServiceInterface.asBinder()
                     == serviceClient.asBinder()) {
                 userState.mUiAutomationService.binderDied();
