@@ -277,7 +277,6 @@ public class WifiConfiguration implements Parcelable {
     /**
      * The enterprise configuration details specifying the EAP method,
      * certificates and other settings associated with the EAP.
-     * @hide
      */
     public WifiEnterpriseConfig enterpriseConfig;
 
