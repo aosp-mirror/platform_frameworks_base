@@ -48,7 +48,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static javax.microedition.khronos.egl.EGL10.*;
 
 /**
- * Interface for rendering a ViewAncestor using hardware acceleration.
+ * Interface for rendering a view hierarchy using hardware acceleration.
  * 
  * @hide
  */

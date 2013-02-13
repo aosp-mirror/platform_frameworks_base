@@ -21,7 +21,6 @@
 #include <utils/Log.h>
 
 #include "Caches.h"
-#include "Debug.h"
 #include "LayerCache.h"
 #include "Properties.h"
 

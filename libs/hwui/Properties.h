@@ -34,9 +34,9 @@
 // Textures used by layers must have dimensions multiples of this number
 #define LAYER_SIZE 64
 
-// Defines the size in bits of the stencil buffer
+// Defines the size in bits of the stencil buffer for the framebuffer
 // Note: Only 1 bit is required for clipping but more bits are required
-// to properly implement the winding fill rule when rasterizing paths
+// to properly implement overdraw debugging
 #define STENCIL_BUFFER_SIZE 8
 
 /**
@@ -85,6 +85,7 @@ enum DebugLevel {
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
 #define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
+#define PROPERTY_RENDER_BUFFER_CACHE_SIZE "ro.hwui.r_buffer_cache_size"
 #define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 #define PROPERTY_PATH_CACHE_SIZE "ro.hwui.path_cache_size"
 #define PROPERTY_SHAPE_CACHE_SIZE "ro.hwui.shape_cache_size"
@@ -130,6 +131,7 @@ enum DebugLevel {
 
 #define DEFAULT_TEXTURE_CACHE_SIZE 24.0f
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
+#define DEFAULT_RENDER_BUFFER_CACHE_SIZE 2.0f
 #define DEFAULT_PATH_CACHE_SIZE 4.0f
 #define DEFAULT_SHAPE_CACHE_SIZE 1.0f
 #define DEFAULT_PATCH_CACHE_SIZE 512
