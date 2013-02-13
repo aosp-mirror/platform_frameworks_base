@@ -26,14 +26,14 @@ parent.link=manifest-intro.html
 </div>
 </div>
 
-<div class="sidebox-wrapper"> 
+<div class="sidebox-wrapper">
 <div class="sidebox">
-    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;">
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p>
     <p style="padding-top:1em;">Google Play uses the <code>&lt;uses-sdk&gt;</code>
-    attributes declared in your app manifest to filter your app from devices 
+    attributes declared in your app manifest to filter your app from devices
     that do not meet it's platform version requirements. Before setting these
-    attributes, make sure that you understand 
+    attributes, make sure that you understand
     <a href="{@docRoot}google/play/filters.html">Google Play filters</a>. </p>
   </div>
 </div>
@@ -41,7 +41,7 @@ parent.link=manifest-intro.html
 <dl class="xml">
 <dt>syntax:</dt>
 <dd><pre>
-&lt;uses-sdk android:<a href="#min">minSdkVersion</a>="<i>integer</i>" 
+&lt;uses-sdk android:<a href="#min">minSdkVersion</a>="<i>integer</i>"
           android:<a href="#target">targetSdkVersion</a>="<i>integer</i>"
           android:<a href="#max">maxSdkVersion</a>="<i>integer</i>" /&gt;</pre></dd>
 
@@ -55,14 +55,14 @@ API Level of a given Android system, which may vary among different Android devi
 </p>
 
 <p>Despite its name, this element is used to specify the API Level, <em>not</em>
-the version number of the SDK (software development kit) or Android platform. 
+the version number of the SDK (software development kit) or Android platform.
 The API Level is always a single integer. You cannot derive the API Level from
 its associated Android version number (for example, it is not the same as the
 major version or the sum of the major and minor versions).</p>
 
 <p>Also read the document about
 <a href="{@docRoot}tools/publishing/versioning.html">Versioning Your Applications</a>.
-</p></dd> 
+</p></dd>
 
 <dt>attributes:</dt>
 
@@ -117,8 +117,8 @@ the corresponding platform version.</p>
   </dd>
 
   <dt><a name="max"></a>{@code android:maxSdkVersion}</dt>
-  <dd>An integer designating the maximum API Level on which the application is 
-  designed to run. 
+  <dd>An integer designating the maximum API Level on which the application is
+  designed to run.
 
   <p>In Android 1.5, 1.6, 2.0, and 2.0.1, the system checks the value of this
   attribute when installing an application and when re-validating the application
@@ -165,7 +165,7 @@ installation or re-validation. Google Play will continue to use the attribute
 as a filter, however, when presenting users with applications available for
 download. </div>
   </dd>
-  
+
 
 </dl></dd>
 
@@ -217,7 +217,7 @@ modification.</p>
 <p>The framework API that an Android platform delivers is specified using an
 integer identifier called "API Level". Each Android platform version supports
 exactly one API Level, although support is implicit for all earlier API Levels
-(down to API Level 1). The initial release of the Android platform provided 
+(down to API Level 1). The initial release of the Android platform provided
 API Level 1 and subsequent releases have incremented the API Level.</p>
 
 <p>The table below specifies the API Level supported by each version of the
@@ -227,8 +227,8 @@ Versions dashboards page</a>.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
- 
-    <tr><td><a href="{@docRoot}about/versions/android-4.2.html">Android 4.2</a></td>
+
+    <tr><td><a href="{@docRoot}about/versions/android-4.2.html">Android 4.2, 4.2.2</a></td>
     <td><a href="{@docRoot}sdk/api_diff/17/changes.html" title="Diff Report">17</a></td>
     <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}</td>
     <td><a href="{@docRoot}about/versions/jelly-bean.html">Platform
@@ -250,70 +250,70 @@ Highlights</a></td></tr>
     <td><a href="{@docRoot}sdk/api_diff/14/changes.html" title="Diff Report">14</a></td>
     <td>{@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}</td>
     </tr>
-  
+
     <tr><td><a href="{@docRoot}about/versions/android-3.2.html">Android 3.2</a></td>
     <td><a href="{@docRoot}sdk/api_diff/13/changes.html" title="Diff Report">13</a></td>
     <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}</td>
     <td><!-- <a href="{@docRoot}about/versions/android-3.2-highlights.html">Platform
 Highlights</a>--></td></tr>
-  
+
   <tr><td><a href="{@docRoot}about/versions/android-3.1.html">Android 3.1.x</a></td>
     <td><a href="{@docRoot}sdk/api_diff/12/changes.html" title="Diff Report">12</a></td>
     <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB_MR1}</td>
     <td><a href="{@docRoot}about/versions/android-3.1-highlights.html">Platform Highlights</a></td></tr>
-    
+
   <tr><td><a href="{@docRoot}about/versions/android-3.0.html">Android 3.0.x</td>
     <td><a href="{@docRoot}sdk/api_diff/11/changes.html" title="Diff Report">11</a></td>
     <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB}</td>
     <td><a href="{@docRoot}about/versions/android-3.0-highlights.html">Platform Highlights</a></td></tr>
-    
+
   <tr><td><a href="{@docRoot}about/versions/android-2.3.3.html">Android 2.3.4<br>Android 2.3.3</td>
     <td><a href="{@docRoot}sdk/api_diff/10/changes.html" title="Diff Report">10</a></td>
     <td>{@link android.os.Build.VERSION_CODES#GINGERBREAD_MR1}</td>
     <td rowspan="2"><a href="{@docRoot}about/versions/android-2.3-highlights.html">Platform
 Highlights</a></td></tr>
-  
+
   <tr><td><a href="{@docRoot}about/versions/android-2.3.html">Android 2.3.2<br>Android 2.3.1<br>Android
 2.3</td>
     <td><a href="{@docRoot}sdk/api_diff/9/changes.html" title="Diff Report">9</a></td>
     <td>{@link android.os.Build.VERSION_CODES#GINGERBREAD}</td>
     </tr>
-  
+
   <tr><td><a href="{@docRoot}about/versions/android-2.2.html">Android 2.2.x</td>
     <td ><a href="{@docRoot}sdk/api_diff/8/changes.html" title="Diff Report">8</a></td>
     <td>{@link android.os.Build.VERSION_CODES#FROYO}</td>
     <td><a href="{@docRoot}about/versions/android-2.2-highlights.html">Platform Highlights</a></td></tr>
-  
+
   <tr><td><a href="{@docRoot}about/versions/android-2.1.html">Android 2.1.x</td>
     <td><a href="{@docRoot}sdk/api_diff/7/changes.html" title="Diff Report">7</a></td>
     <td>{@link android.os.Build.VERSION_CODES#ECLAIR_MR1}</td>
     <td rowspan="3" ><a href="{@docRoot}about/versions/android-2.0-highlights.html">Platform
 Highlights</a></td></tr>
-    
+
   <tr><td><a href="{@docRoot}about/versions/android-2.0.1.html">Android 2.0.1</td>
     <td><a href="{@docRoot}sdk/api_diff/6/changes.html" title="Diff Report">6</a></td>
     <td>{@link android.os.Build.VERSION_CODES#ECLAIR_0_1}</td>
     </tr>
-    
+
   <tr><td><a href="{@docRoot}about/versions/android-2.0.html">Android 2.0</td>
     <td><a href="{@docRoot}sdk/api_diff/5/changes.html" title="Diff Report">5</a></td>
     <td>{@link android.os.Build.VERSION_CODES#ECLAIR}</td>
     </tr>
-    
+
   <tr><td><a href="{@docRoot}about/versions/android-1.6.html">Android 1.6</td>
     <td><a href="{@docRoot}sdk/api_diff/4/changes.html" title="Diff Report">4</a></td>
     <td>{@link android.os.Build.VERSION_CODES#DONUT}</td>
     <td><a href="{@docRoot}about/versions/android-1.6-highlights.html">Platform Highlights</a></td></tr>
-    
+
   <tr><td><a href="{@docRoot}about/versions/android-1.5.html">Android 1.5</td>
     <td><a href="{@docRoot}sdk/api_diff/3/changes.html" title="Diff Report">3</a></td>
     <td>{@link android.os.Build.VERSION_CODES#CUPCAKE}</td>
     <td><a href="{@docRoot}about/versions/android-1.5-highlights.html">Platform Highlights</a></td></tr>
-    
+
   <tr><td><a href="{@docRoot}about/versions/android-1.1.html">Android 1.1</td>
     <td>2</td>
     <td>{@link android.os.Build.VERSION_CODES#BASE_1_1}</td><td></td></tr>
-    
+
   <tr><td>Android 1.0</td>
     <td>1</td>
     <td>{@link android.os.Build.VERSION_CODES#BASE}</td>
@@ -324,10 +324,10 @@ Highlights</a></td></tr>
 <h2 id="uses">Uses of API Level in Android</h2>
 
 <p>The API Level identifier serves a key role in ensuring the best possible
-experience for users and application developers: 
+experience for users and application developers:
 
 <ul>
-<li>It lets the Android platform describe the maximum framework API revision 
+<li>It lets the Android platform describe the maximum framework API revision
 that it supports</li>
 <li>It lets applications describe the framework API revision that they
 require</li>
@@ -349,7 +349,7 @@ on which the application is able to run. The default value is "1".</li>
 <li><code>android:targetSdkVersion</code> &mdash; Specifies the API Level
 on which the application is designed to run. In some cases, this allows the
 application to use manifest elements or behaviors defined in the target
-API Level, rather than being restricted to using only those defined 
+API Level, rather than being restricted to using only those defined
 for the minimum API Level.</li>
 <li><code>android:maxSdkVersion</code> &mdash; Specifies the maximum API Level
 on which the application is able to run. <strong>Important:</strong> Please read the <a
@@ -375,7 +375,7 @@ installation to begin only if these conditions are met:</p>
 must be less than or equal to the system's API Level integer. If not declared,
 the system assumes that the application requires API Level 1. </li>
 <li>If a <code>android:maxSdkVersion</code> attribute is declared, its value
-must be equal to or greater than the system's API Level integer. 
+must be equal to or greater than the system's API Level integer.
 If not declared, the system assumes that the application
 has no maximum API Level. Please read the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
@@ -470,7 +470,7 @@ might not receive an update for a significant amount of time. </p>
 <p>When you are developing your application, you will need to choose
 the platform version against which you will compile the application. In
 general, you should compile your application against the lowest possible
-version of the platform that your application can support. 
+version of the platform that your application can support.
 
 <p>You can determine the lowest possible platform version by compiling the
 application against successively lower build targets. After you determine the
@@ -513,7 +513,7 @@ download other platform versions as necessary. </p>
 located in the &lt;sdk&gt;/tools directory. You can launch the SDK updater by
 executing <code>android sdk</code>. You can
 also simply double-click the android.bat (Windows) or android (OS X/Linux) file.
-In ADT, you can also access the updater by selecting 
+In ADT, you can also access the updater by selecting
 <strong>Window</strong>&nbsp;>&nbsp;<strong>Android SDK
 Manager</strong>.</p>
 
@@ -552,9 +552,9 @@ Level integer.</p>
 <h2 id="filtering">Filtering the Reference Documentation by API Level</h2>
 
 <p>Reference documentation pages on the Android Developers site offer a "Filter
-by API Level" control in the top-right area of each page. You can use the 
-control to show documentation only for parts of the API that are actually 
-accessible to your application, based on the API Level that it specifies in 
+by API Level" control in the top-right area of each page. You can use the
+control to show documentation only for parts of the API that are actually
+accessible to your application, based on the API Level that it specifies in
 the <code>android:minSdkVersion</code> attribute of its manifest file. </p>
 
 <p>To use filtering, select the checkbox to enable filtering, just below the
@@ -574,10 +574,10 @@ disabled, so that you can view the full framework API, regardless of API Level.
 </p>
 
 <p>Also note that the reference documentation for individual API elements
-specifies the API Level at which each element was introduced. The API Level 
-for packages and classes is specified as "Since &lt;api level&gt;" at the 
-top-right corner of the content area on each documentation page. The API Level 
-for class members is specified in their detailed description headers, 
+specifies the API Level at which each element was introduced. The API Level
+for packages and classes is specified as "Since &lt;api level&gt;" at the
+top-right corner of the content area on each documentation page. The API Level
+for class members is specified in their detailed description headers,
 at the right margin. </p>
 
 
