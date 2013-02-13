@@ -28,6 +28,41 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 21.1.0</a> <em>(February 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 16 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r21.1.0 is
+          designed for use with ADT 21.1.0 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 21.1.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Improved error reporting in {@code dx} when dex merging fails in the build
+          system.</li>
+        <li>Added more than 15 new Lint checks, including checks for overriding older APIs, XML
+          resource problems, graphic asset issues and manifest tags.</li>
+        <li>Added new aapt feature to compile resources.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 21.0.1</a> <em>(December 2012)</em>
   </p>
 
@@ -40,7 +75,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
         <li>Android SDK Platform-tools revision 16 or later.</li>
         <li>If you are developing in Eclipse with ADT, note that the SDK Tools r21.0.1 is
           designed for use with ADT 21.0.1 and later. If you haven't already, update your
-        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 21.0.0.</li>
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 21.0.1.</li>
         <li>If you are developing outside Eclipse, you must have
           <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
     </ul>
