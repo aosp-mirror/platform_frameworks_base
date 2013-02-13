@@ -2145,7 +2145,6 @@ final class ActivityStack {
                             }
                             mHistory.remove(srcPos);
                             mHistory.add(dstPos, p);
-//                            mService.mWindowManager.moveAppToken(dstPos, p.appToken);
                             mService.mWindowManager.setAppGroupId(p.appToken, taskId);
                             dstPos++;
                             i++;
@@ -2297,7 +2296,6 @@ final class ActivityStack {
                         if (DEBUG_TASKS) Slog.v(TAG, "Pulling activity " + p
                                 + " from " + srcPos + " to " + lastReparentPos
                                 + " in to resetting task " + task);
-//                        mService.mWindowManager.moveAppToken(lastReparentPos, p.appToken);
                         mService.mWindowManager.setAppGroupId(p.appToken, taskId);
                     }
                     // TODO: This is wrong because it doesn't take lastReparentPos into account.
@@ -4566,7 +4564,6 @@ final class ActivityStack {
             updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
         }
 
-//        mService.mWindowManager.moveAppTokensToTop(moved);
         mService.mWindowManager.moveTaskToTop(task);
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
@@ -4659,7 +4656,6 @@ final class ActivityStack {
             mService.mWindowManager.prepareAppTransition(
                     AppTransition.TRANSIT_TASK_TO_BACK, false);
         }
-//        mService.mWindowManager.moveAppTokensToBottom(moved);
         mService.mWindowManager.moveTaskToBottom(task);
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
