@@ -39,7 +39,7 @@ struct RenderBuffer {
     }
 
     ~RenderBuffer() {
-        if (mName && mAllocated) {
+        if (mName) {
             glDeleteRenderbuffers(1, &mName);
         }
     }
@@ -152,6 +152,29 @@ struct RenderBuffer {
                 return true;
         }
         return false;
+    }
+
+    /**
+     * Returns the name of the specified render buffer format.
+     */
+    static const char* formatName(GLenum format) {
+        switch (format) {
+            case GL_STENCIL_INDEX8:
+                return "STENCIL_8";
+            case GL_STENCIL_INDEX1_OES:
+                return "STENCIL_1";
+            case GL_STENCIL_INDEX4_OES:
+                return "STENCIL_4";
+            case GL_DEPTH_COMPONENT16:
+                return "DEPTH_16";
+            case GL_RGBA4:
+                return "RGBA_444";
+            case GL_RGB565:
+                return "RGB_565";
+            case GL_RGB5_A1:
+                return "RGBA_5551";
+        }
+        return "Unknown";
     }
 
 private:

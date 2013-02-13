@@ -44,6 +44,9 @@
 // Turn on to display info about layers
 #define DEBUG_LAYERS 0
 
+// Turn on to display info about render buffers
+#define DEBUG_RENDER_BUFFERS 0
+
 // Turn on to make stencil operations easier to debug
 #define DEBUG_STENCIL 0
 

@@ -29,6 +29,7 @@
 #include "GammaFontRenderer.h"
 #include "TextureCache.h"
 #include "LayerCache.h"
+#include "RenderBufferCache.h"
 #include "GradientCache.h"
 #include "PatchCache.h"
 #include "ProgramCache.h"
@@ -249,6 +250,7 @@ public:
 
     TextureCache textureCache;
     LayerCache layerCache;
+    RenderBufferCache renderBufferCache;
     GradientCache gradientCache;
     ProgramCache programCache;
     PathCache pathCache;
