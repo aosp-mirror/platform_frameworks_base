@@ -293,6 +293,15 @@ class DisplayContent {
         public void remove() {
             throw new IllegalArgumentException();
         }
+
+        int size() {
+            int size = 0;
+            final TaskListsIterator iterator = new TaskListsIterator();
+            while (iterator.hasNext()) {
+                size += iterator.next().mAppTokens.size();
+            }
+            return size;
+        }
     }
 
     void verifyAppTokens() {
