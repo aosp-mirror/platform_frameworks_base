@@ -9929,8 +9929,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             outRect.set(mLeft, mTop, mRight, mBottom);
         } else {
             final RectF tmpRect = mAttachInfo.mTmpTransformRect;
-            tmpRect.set(-info.mPivotX, -info.mPivotY,
-                    getWidth() - info.mPivotX, getHeight() - info.mPivotY);
+            tmpRect.set(0, 0, getWidth(), getHeight());
             info.mMatrix.mapRect(tmpRect);
             outRect.set((int) tmpRect.left + mLeft, (int) tmpRect.top + mTop,
                     (int) tmpRect.right + mLeft, (int) tmpRect.bottom + mTop);
