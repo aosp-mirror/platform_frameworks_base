@@ -96,8 +96,7 @@ you compile.</p>
 you don't have a private key, you can use the Keytool utility to create one for you. When you
 compile your application in release mode, the build tools use your private key along with the
 Jarsigner utility to sign your application's <code>.apk</code> file. Because the certificate and
-private key you use are your own, you will have to provide the password for the keystore and key
-alias.</p>
+private key you use are your own, you must provide the password for the keystore and key alias.</p>
 
 <p>The debug signing process happens automatically when you run or debug your application using
 Eclipse with the ADT plugin. Debug signing also happens automatically when you use the Ant build
@@ -117,13 +116,13 @@ lifespan of your applications. There are several reasons why you should do so: <
 
 <ul>
 <li>Application upgrade &ndash; As you release updates to your application, you
-will want to continue to sign the updates with the same certificate or set of
-certificates, if you want users to upgrade seamlessly to the new version. When
+must continue to sign the updates with the same certificate or set of certificates,
+if you want users to be able to upgrade seamlessly to the new version. When
 the system is installing an update to an application, it compares the
 certificate(s) in the new version with those in the existing version. If the
 certificates match exactly, including both the certificate data and order, then
 the system allows the update. If you sign the new version without using matching
-certificates, you will also need to assign a different package name to the
+certificates, you must also assign a different package name to the
 application &mdash; in this case, the user installs the new version as a
 completely new application. </li>
 
@@ -313,6 +312,13 @@ Before you run Keytool, make sure to read
 your key secure and why doing so is critically important to you and to users. In
 particular, when you are generating your key, you should select strong passwords
 for both the keystore and key.</p>
+
+<p class="warning"><strong>Warning:</strong> Keep the keystore file you generate with Keytool
+in a safe, secure place. You must use the same key to sign future versions of your application. If
+you republish your app with a new key, Google Play will consider it a new app. For more information
+on settings that must remain constant over the life of your app, see the Android Developer Blog post
+<a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
+That Cannot Change</a>.</p>
 
 <table>
 <tr>
@@ -597,6 +603,10 @@ replace your authentic applications or corrupt them. Such a person could also
 sign and distribute applications under your identity that attack other
 applications or the system itself, or corrupt or steal user data. </p>
 
+<p>Your private key is required for signing all future versions of your application. If you lose or
+misplace your key, you will not be able to publish updates to your existing application. You cannot
+regenerate a previously generated key.</p>
+
 <p>Your reputation as a developer entity depends on your securing your private
 key properly, at all times, until the key is expired. Here are some tips for
 keeping your key secure: </p>
@@ -612,6 +622,8 @@ which any user on your computer could access.</li>
 options at the command line. </li>
 <li>Do not give or lend anyone your private key, and do not let unauthorized
 persons know your keystore and key passwords.</li>
+<li>Keep the keystore file containing your private key that you <a href="#cert">generate with the
+Keytool</a> in a safe, secure place.</li>
 </ul>
 
 <p>In general, if you follow common-sense precautions when generating, using,
