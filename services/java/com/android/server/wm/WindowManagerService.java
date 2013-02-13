@@ -197,6 +197,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_LAYOUT_REPEATS = true;
     static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean DEBUG_WINDOW_TRACE = false;
+    static final boolean DEBUG_TASK_MOVEMENT = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -3313,7 +3314,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mTaskIdToDisplayContents.put(taskId, displayContent);
             }
             displayContent.addAppToken(addPos, atoken);
-            displayContent.verifyAppTokens();
             mTokenMap.put(token.asBinder(), atoken);
             mTaskIdToDisplayContents.put(taskId, displayContent);
 
@@ -4313,7 +4313,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                         "removeAppToken: " + wtoken);
                 displayContent.removeAppToken(wtoken);
-                displayContent.verifyAppTokens();
                 wtoken.removed = true;
                 if (wtoken.startingData != null) {
                     startingToken = wtoken;
@@ -4453,6 +4452,58 @@ public class WindowManagerService extends IWindowManager.Stub
         return 0;
     }
 
+    private int findAppWindowInsertionPointLocked(AppWindowToken target) {
+        final int taskId = target.groupId;
+        DisplayContent displayContent = mTaskIdToDisplayContents.get(taskId);
+        if (displayContent == null) {
+            Slog.w(TAG, "findTopAppWindowLocked: no DisplayContent for " + target);
+            return 0;
+        }
+        final WindowList windows = displayContent.getWindowList();
+        final int NW = windows.size();
+
+        AppTokenIterator iterator = displayContent.new AppTokenIterator(true);
+        while (iterator.hasNext()) {
+            if (iterator.next() == target) {
+                break;
+            }
+        }
+
+        while (iterator.hasNext()) {
+            // Find the first app token below the new position that has
+            // a window displayed.
+            final AppWindowToken wtoken = iterator.next();
+            if (DEBUG_REORDER) Slog.v(TAG, "Looking for lower windows in " + wtoken.token);
+            if (wtoken.sendingToBottom) {
+                if (DEBUG_REORDER) Slog.v(TAG, "Skipping token -- currently sending to bottom");
+                continue;
+            }
+            for (int i = wtoken.windows.size() - 1; i >= 0; --i) {
+                WindowState win = wtoken.windows.get(i);
+                for (int j = win.mChildWindows.size() - 1; j >= 0; --j) {
+                    WindowState cwin = win.mChildWindows.get(j);
+                    if (cwin.mSubLayer >= 0) {
+                        for (int pos = NW - 1; pos >= 0; pos--) {
+                            if (windows.get(pos) == cwin) {
+                                if (DEBUG_REORDER) Slog.v(TAG,
+                                        "Found child win @" + (pos + 1));
+                                return pos + 1;
+                            }
+                        }
+                    }
+                }
+                for (int pos = NW - 1; pos >= 0; pos--) {
+                    if (windows.get(pos) == win) {
+                        if (DEBUG_REORDER) Slog.v(TAG, "Found win @" + (pos + 1));
+                        return pos + 1;
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }
+
     private final int reAddWindowLocked(int index, WindowState win) {
         final WindowList windows = win.getWindowList();
         final int NCW = win.mChildWindows.size();
@@ -4509,7 +4560,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken wtoken = findAppWindowToken(token);
             DisplayContent displayContent = mTaskIdToDisplayContents.get(wtoken.groupId);
             final AppTokenList appTokens = displayContent.mAppTokens;
-            final AppTokenList animatingAppTokens = displayContent.mAnimatingAppTokens;
             final int oldIndex = appTokens.indexOf(wtoken);
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_REORDER) Slog.v(TAG,
                     "Start moving token " + wtoken + " initially at "
@@ -4571,7 +4621,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (wtoken != null) {
                 final DisplayContent displayContent = mTaskIdToDisplayContents.get(wtoken.groupId);
                 if (DEBUG_REORDER || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG, "Temporarily removing "
-                        + wtoken + " from " + displayContent.mAppTokens.indexOf(wtoken));
+                        + wtoken);
                 if (!displayContent.mAppTokens.remove(wtoken)) {
                     Slog.w(TAG, "Attempting to reorder token that doesn't exist: "
                             + token + " (" + wtoken + ")");
@@ -4582,8 +4632,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    WindowList mSavedWindows;
     private void moveAppWindowsLocked(List<IBinder> tokens, DisplayContent displayContent,
             int tokenPos) {
+        if (DEBUG_TASK_MOVEMENT) {
+            mSavedWindows = new WindowList(displayContent.getWindowList());
+        }
         // First remove all of the windows from the list.
         final int N = tokens.size();
         int i;
@@ -4702,42 +4756,130 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
-    public void moveTaskToTop(int taskId) {
+    private void moveTaskWindowsLocked(int taskId) {
         DisplayContent displayContent = mTaskIdToDisplayContents.get(taskId);
         if (displayContent == null) {
-            Slog.e(TAG, "moveTaskToTop: taskId=" + taskId
-                    + " not found in mTaskIdToDisplayContents");
+            Slog.w(TAG, "moveTaskWindowsLocked: can't find DisplayContent for taskId=" + taskId);
             return;
         }
+
+        WindowList windows;
+        WindowList windowsAtStart;
+        if (DEBUG_TASK_MOVEMENT) {
+            windows = displayContent.getWindowList();
+            windowsAtStart = new WindowList(windows);
+            windows.clear();
+            windows.addAll(mSavedWindows);
+        }
+
         TaskList taskList = displayContent.mTaskIdToTaskList.get(taskId);
         if (taskList == null) {
-            Slog.e(TAG, "moveTaskToTop: taskId=" + taskId + " not found in mTaskIdToTaskLists");
+            Slog.w(TAG, "moveTaskWindowsLocked: can't find TaskList for taskId=" + taskId);
             return;
         }
-        if (!displayContent.mTaskLists.remove(taskList)) {
-            Slog.e(TAG, "moveTaskToTop: taskId=" + taskId + " not found in mTaskLists");
+
+        // First remove all of the windows from the list.
+        for (AppWindowToken wtoken : taskList.mAppTokens) {
+            tmpRemoveAppWindowsLocked(wtoken);
         }
-        displayContent.mTaskLists.add(taskList);
-        displayContent.verifyAppTokens();
+
+        // And now add them back at the correct place.
+        // Where to start adding?
+        int pos = findAppWindowInsertionPointLocked(taskList.mAppTokens.get(0));
+        for (AppWindowToken wtoken : taskList.mAppTokens) {
+            if (wtoken != null) {
+                final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
+                if (newPos != pos) {
+                    displayContent.layoutNeeded = true;
+                }
+                pos = newPos;
+            }
+        }
+        if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+            false /*updateInputWindows*/)) {
+            assignLayersLocked(displayContent.getWindowList());
+        }
+
+        if (DEBUG_TASK_MOVEMENT) {
+            // Compare windowsAtStart with current windows.
+            if (windowsAtStart.size() != windows.size()) {
+                Slog.e(TAG, "moveTaskWindowsLocked: Mismatch in size!");
+            }
+            for (int i = 0; i < windowsAtStart.size(); i++) {
+                if (windowsAtStart.get(i) != windows.get(i)) {
+                    Slog.e(TAG, "moveTaskWindowsLocked: Mismatch at " + i
+                            + " app=" + windowsAtStart.get(i) + " task=" + windows.get(i));
+                }
+            }
+        }
+
+        updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                false /*updateInputWindows*/);
+        mInputMonitor.setUpdateInputWindowsNeededLw();
+        performLayoutAndPlaceSurfacesLocked();
+        mInputMonitor.updateInputWindowsLw(false /*force*/);
+
+        //dump();
+    }
+
+    public void moveTaskToTop(int taskId) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                DisplayContent displayContent = mTaskIdToDisplayContents.get(taskId);
+                if (displayContent == null) {
+                    Slog.e(TAG, "moveTaskToTop: taskId=" + taskId
+                            + " not found in mTaskIdToDisplayContents");
+                    return;
+                }
+                TaskList taskList = displayContent.mTaskIdToTaskList.get(taskId);
+                if (taskList == null) {
+                    Slog.e(TAG, "moveTaskToTop: taskId=" + taskId
+                            + " not found in mTaskIdToTaskLists");
+                    return;
+                }
+                if (!displayContent.mTaskLists.remove(taskList)) {
+                    Slog.e(TAG, "moveTaskToTop: taskId=" + taskId + " not found in mTaskLists");
+                }
+                displayContent.mTaskLists.add(taskList);
+                displayContent.verifyAppTokens();
+
+                displayContent.refillAnimatingAppTokens();
+                moveTaskWindowsLocked(taskId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     public void moveTaskToBottom(int taskId) {
-        DisplayContent displayContent = mTaskIdToDisplayContents.get(taskId);
-        if (displayContent == null) {
-            Slog.e(TAG, "moveTaskToBottom: taskId=" + taskId
-                    + " not found in mTaskIdToDisplayContents");
-            return;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                DisplayContent displayContent = mTaskIdToDisplayContents.get(taskId);
+                if (displayContent == null) {
+                    Slog.e(TAG, "moveTaskToBottom: taskId=" + taskId
+                            + " not found in mTaskIdToDisplayContents");
+                    return;
+                }
+                TaskList taskList = displayContent.mTaskIdToTaskList.get(taskId);
+                if (taskList == null) {
+                    Slog.e(TAG, "moveTaskToTopBottom: taskId=" + taskId
+                            + " not found in mTaskIdToTaskLists");
+                    return;
+                }
+                if (!displayContent.mTaskLists.remove(taskList)) {
+                    Slog.e(TAG, "moveTaskToBottom: taskId=" + taskId + " not found in mTaskLists");
+                }
+                displayContent.mTaskLists.add(0, taskList);
+                displayContent.verifyAppTokens();
+
+                displayContent.refillAnimatingAppTokens();
+                moveTaskWindowsLocked(taskId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-        TaskList taskList = displayContent.mTaskIdToTaskList.get(taskId);
-        if (taskList == null) {
-            Slog.e(TAG, "moveTaskToTopBottomtaskId=" + taskId + " not found in mTaskIdToTaskLists");
-            return;
-        }
-        if (!displayContent.mTaskLists.remove(taskList)) {
-            Slog.e(TAG, "moveTaskToBottom: taskId=" + taskId + " not found in mTaskLists");
-        }
-        displayContent.mTaskLists.add(0, taskList);
-        displayContent.verifyAppTokens();
     }
 
     // -------------------------------------------------------------
@@ -7028,11 +7170,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         Slog.w(TAG, "App freeze timeout expired.");
                         DisplayContent displayContent = getDefaultDisplayContentLocked();
-                        AppTokenList appTokens = displayContent.mAppTokens;
-                        int i = appTokens.size();
-                        while (i > 0) {
-                            i--;
-                            AppWindowToken tok = appTokens.get(i);
+                        AppTokenIterator iterator = displayContent.new AppTokenIterator(true);
+                        while (iterator.hasNext()) {
+                            AppWindowToken tok = iterator.next();
                             if (tok.mAppAnimator.freezingScreen) {
                                 Slog.w(TAG, "Force clearing freeze: " + tok);
                                 unsetAppFreezingScreenLocked(tok, true, true);
