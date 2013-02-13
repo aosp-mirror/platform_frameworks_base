@@ -254,13 +254,19 @@ public final class BidiFormatter {
         }
     }
 
+    //
     private static final int FLAG_STEREO_RESET = 2;
     private static final int DEFAULT_FLAGS = FLAG_STEREO_RESET;
 
-    private static final BidiFormatter DEFAULT_LTR_INSTANCE =
-            new BidiFormatter(false /* LTR context */, DEFAULT_FLAGS, DEFAULT_TEXT_DIRECTION_HEURISTIC);
-    private static final BidiFormatter DEFAULT_RTL_INSTANCE =
-            new BidiFormatter(true /* RTL context */, DEFAULT_FLAGS, DEFAULT_TEXT_DIRECTION_HEURISTIC);
+    private static final BidiFormatter DEFAULT_LTR_INSTANCE = new BidiFormatter(
+            false /* LTR context */,
+            DEFAULT_FLAGS,
+            DEFAULT_TEXT_DIRECTION_HEURISTIC);
+
+    private static final BidiFormatter DEFAULT_RTL_INSTANCE = new BidiFormatter(
+            true /* RTL context */,
+            DEFAULT_FLAGS,
+            DEFAULT_TEXT_DIRECTION_HEURISTIC);
 
     private final boolean isRtlContext;
     private final int flags;
@@ -411,10 +417,10 @@ public final class BidiFormatter {
     public String markAfter(String str, TextDirectionHeuristic heuristic) {
         final boolean isRtl = heuristic.isRtl(str, 0, str.length());
         // getExitDir() is called only if needed (short-circuit).
-        if (!isRtlContext && (isRtl || getExitDir(str) == Dir.RTL)) {
+        if (!isRtlContext && (isRtl || getExitDir(str) == DIR_RTL)) {
             return LRM_STRING;
         }
-        if (isRtlContext && (!isRtl || getExitDir(str) == Dir.LTR)) {
+        if (isRtlContext && (!isRtl || getExitDir(str) == DIR_LTR)) {
             return RLM_STRING;
         }
         return EMPTY_STRING;
@@ -450,10 +456,10 @@ public final class BidiFormatter {
     public String markBefore(String str, TextDirectionHeuristic heuristic) {
         final boolean isRtl = heuristic.isRtl(str, 0, str.length());
         // getEntryDir() is called only if needed (short-circuit).
-        if (!isRtlContext && (isRtl || getEntryDir(str) == Dir.RTL)) {
+        if (!isRtlContext && (isRtl || getEntryDir(str) == DIR_RTL)) {
             return LRM_STRING;
         }
-        if (isRtlContext && (!isRtl || getEntryDir(str) == Dir.LTR)) {
+        if (isRtlContext && (!isRtl || getEntryDir(str) == DIR_LTR)) {
             return RLM_STRING;
         }
         return EMPTY_STRING;
@@ -677,43 +683,13 @@ public final class BidiFormatter {
     /**
      * Enum for directionality type.
      */
-    private enum Dir {
-        LTR     (1),
-        UNKNOWN (0),
-        RTL     (-1);
-
-        public final int ord;
-
-        Dir(int ord) {this.ord = ord; }
-
-        /**
-         * Interprets numeric representation of directionality: positive values are
-         * interpreted as RTL, negative values as LTR, and zero as UNKNOWN.
-         */
-        public static Dir valueOf(int dir) {
-            return dir > 0 ? LTR : dir < 0 ? RTL : UNKNOWN;
-        }
-
-        /**
-         * Interprets boolean representation of directionality: false is interpreted
-         * as LTR and true as RTL.
-         */
-        public static Dir valueOf(boolean dir) {
-            return dir ? RTL : LTR;
-        }
-
-        /**
-         * Returns whether this directionality is opposite to the given
-         * directionality.
-         */
-        public boolean isOppositeTo(Dir dir) {
-            return this.ord * dir.ord < 0;
-        }
-    }
+    private static final int DIR_LTR = -1;
+    private static final int DIR_UNKNOWN = 0;
+    private static final int DIR_RTL = +1;
 
     /**
      * Returns the directionality of the last character with strong directionality in the string, or
-     * Dir.UNKNOWN if none was encountered. For efficiency, actually scans backwards from the end of
+     * DIR_UNKNOWN if none was encountered. For efficiency, actually scans backwards from the end of
      * the string. Treats a non-BN character between an LRE/RLE/LRO/RLO and its matching PDF as a
      * strong character, LTR after LRE/LRO, and RTL after RLE/RLO. The results are undefined for a
      * string containing unbalanced LRE/RLE/LRO/RLO/PDF characters. The intended use is to check
@@ -725,13 +701,13 @@ public final class BidiFormatter {
      *
      * @param str the string to check.
      */
-    private static Dir getExitDir(String str) {
+    private static int getExitDir(String str) {
         return new DirectionalityEstimator(str, false /* isHtml */).getExitDir();
     }
 
     /**
      * Returns the directionality of the first character with strong directionality in the string,
-     * or Dir.UNKNOWN if none was encountered. Treats a non-BN character between an
+     * or DIR_UNKNOWN if none was encountered. Treats a non-BN character between an
      * LRE/RLE/LRO/RLO and its matching PDF as a strong character, LTR after LRE/LRO, and RTL after
      * RLE/RLO. The results are undefined for a string containing unbalanced LRE/RLE/LRO/RLO/PDF
      * characters. The intended use is to check whether a logically separate item that ends with a
@@ -742,7 +718,7 @@ public final class BidiFormatter {
      *
      * @param str the string to check.
      */
-    private static Dir getEntryDir(String str) {
+    private static int getEntryDir(String str) {
         return new DirectionalityEstimator(str, false /* isHtml */).getEntryDir();
     }
 
@@ -821,51 +797,51 @@ public final class BidiFormatter {
 
         /**
          * Returns the directionality of the first character with strong directionality in the
-         * string, or Dir.UNKNOWN if none was encountered. Treats a non-BN character between an
+         * string, or DIR_UNKNOWN if none was encountered. Treats a non-BN character between an
          * LRE/RLE/LRO/RLO and its matching PDF as a strong character, LTR after LRE/LRO, and RTL
          * after RLE/RLO. The results are undefined for a string containing unbalanced
          * LRE/RLE/LRO/RLO/PDF characters.
          */
-        Dir getEntryDir() {
+        int getEntryDir() {
             // The reason for this method name, as opposed to getFirstStrongDir(), is that
             // "first strong" is a commonly used description of Unicode's estimation algorithm,
             // but the two must treat formatting characters quite differently. Thus, we are staying
             // away from both "first" and "last" in these method names to avoid confusion.
             charIndex = 0;
             int embeddingLevel = 0;
-            Dir embeddingLevelDir = Dir.UNKNOWN;
+            int embeddingLevelDir = DIR_UNKNOWN;
             int firstNonEmptyEmbeddingLevel = 0;
             while (charIndex < length && firstNonEmptyEmbeddingLevel == 0) {
                 switch (dirTypeForward()) {
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING:
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE:
                         ++embeddingLevel;
-                        embeddingLevelDir = Dir.LTR;
+                        embeddingLevelDir = DIR_LTR;
                         break;
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING:
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE:
                         ++embeddingLevel;
-                        embeddingLevelDir = Dir.RTL;
+                        embeddingLevelDir = DIR_RTL;
                         break;
                     case Character.DIRECTIONALITY_POP_DIRECTIONAL_FORMAT:
                         --embeddingLevel;
                         // To restore embeddingLevelDir to its previous value, we would need a
                         // stack, which we want to avoid. Thus, at this point we do not know the
                         // current embedding's directionality.
-                        embeddingLevelDir = Dir.UNKNOWN;
+                        embeddingLevelDir = DIR_UNKNOWN;
                         break;
                     case Character.DIRECTIONALITY_BOUNDARY_NEUTRAL:
                         break;
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
                         if (embeddingLevel == 0) {
-                            return Dir.LTR;
+                            return DIR_LTR;
                         }
                         firstNonEmptyEmbeddingLevel = embeddingLevel;
                         break;
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
                         if (embeddingLevel == 0) {
-                            return Dir.RTL;
+                            return DIR_RTL;
                         }
                         firstNonEmptyEmbeddingLevel = embeddingLevel;
                         break;
@@ -880,11 +856,11 @@ public final class BidiFormatter {
             if (firstNonEmptyEmbeddingLevel == 0) {
                 // We have not found a non-empty embedding. Thus, the string contains neither a
                 // non-empty embedding nor a strong character outside of an embedding.
-                return Dir.UNKNOWN;
+                return DIR_UNKNOWN;
             }
 
             // We have found a non-empty embedding.
-            if (embeddingLevelDir != Dir.UNKNOWN) {
+            if (embeddingLevelDir != DIR_UNKNOWN) {
                 // We know the directionality of the non-empty embedding.
                 return embeddingLevelDir;
             }
@@ -896,14 +872,14 @@ public final class BidiFormatter {
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING:
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE:
                         if (firstNonEmptyEmbeddingLevel == embeddingLevel) {
-                            return Dir.LTR;
+                            return DIR_LTR;
                         }
                         --embeddingLevel;
                         break;
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING:
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE:
                         if (firstNonEmptyEmbeddingLevel == embeddingLevel) {
-                            return Dir.RTL;
+                            return DIR_RTL;
                         }
                         --embeddingLevel;
                         break;
@@ -913,17 +889,17 @@ public final class BidiFormatter {
                 }
             }
             // We should never get here.
-            return Dir.UNKNOWN;
+            return DIR_UNKNOWN;
         }
 
         /**
          * Returns the directionality of the last character with strong directionality in the
-         * string, or Dir.UNKNOWN if none was encountered. For efficiency, actually scans backwards
+         * string, or DIR_UNKNOWN if none was encountered. For efficiency, actually scans backwards
          * from the end of the string. Treats a non-BN character between an LRE/RLE/LRO/RLO and its
          * matching PDF as a strong character, LTR after LRE/LRO, and RTL after RLE/RLO. The results
          * are undefined for a string containing unbalanced LRE/RLE/LRO/RLO/PDF characters.
          */
-        Dir getExitDir() {
+        int getExitDir() {
             // The reason for this method name, as opposed to getLastStrongDir(), is that "last
             // strong" sounds like the exact opposite of "first strong", which is a commonly used
             // description of Unicode's estimation algorithm (getUnicodeDir() above), but the two
@@ -936,7 +912,7 @@ public final class BidiFormatter {
                 switch (dirTypeBackward()) {
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
                         if (embeddingLevel == 0) {
-                            return Dir.LTR;
+                            return DIR_LTR;
                         }
                         if (lastNonEmptyEmbeddingLevel == 0) {
                             lastNonEmptyEmbeddingLevel = embeddingLevel;
@@ -945,14 +921,14 @@ public final class BidiFormatter {
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING:
                     case Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE:
                         if (lastNonEmptyEmbeddingLevel == embeddingLevel) {
-                            return Dir.LTR;
+                            return DIR_LTR;
                         }
                         --embeddingLevel;
                         break;
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
                         if (embeddingLevel == 0) {
-                            return Dir.RTL;
+                            return DIR_RTL;
                         }
                         if (lastNonEmptyEmbeddingLevel == 0) {
                             lastNonEmptyEmbeddingLevel = embeddingLevel;
@@ -961,7 +937,7 @@ public final class BidiFormatter {
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING:
                     case Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE:
                         if (lastNonEmptyEmbeddingLevel == embeddingLevel) {
-                            return Dir.RTL;
+                            return DIR_RTL;
                         }
                         --embeddingLevel;
                         break;
@@ -977,7 +953,7 @@ public final class BidiFormatter {
                         break;
                 }
             }
-            return Dir.UNKNOWN;
+            return DIR_UNKNOWN;
         }
 
         // Internal methods
