@@ -1235,6 +1235,7 @@ public class GridLayout extends ViewGroup {
             Assoc<Spec, Bounds> assoc = Assoc.of(Spec.class, Bounds.class);
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
+                if (c.getVisibility() == View.GONE) continue;
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 Bounds bounds = getAlignment(spec.alignment, horizontal).getBounds();
@@ -1250,6 +1251,7 @@ public class GridLayout extends ViewGroup {
             }
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
+                if (c.getVisibility() == View.GONE) continue;
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 groupBounds.getValue(i).include(GridLayout.this, c, spec, this);
