@@ -168,7 +168,7 @@ struct RenderBuffer {
             case GL_DEPTH_COMPONENT16:
                 return "DEPTH_16";
             case GL_RGBA4:
-                return "RGBA_444";
+                return "RGBA_4444";
             case GL_RGB565:
                 return "RGB_565";
             case GL_RGB5_A1:
