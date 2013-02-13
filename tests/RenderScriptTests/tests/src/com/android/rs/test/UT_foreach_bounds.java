@@ -33,6 +33,10 @@ public class UT_foreach_bounds extends UnitTest {
         Type.Builder typeBuilder = new Type.Builder(RS, Element.I32(RS));
         int X = 5;
         int Y = 7;
+        final int xStart = 2;
+        final int xEnd = 5;
+        final int yStart = 3;
+        final int yEnd = 6;
         s.set_dimX(X);
         s.set_dimY(Y);
         typeBuilder.setX(X).setY(Y);
@@ -41,11 +45,15 @@ public class UT_foreach_bounds extends UnitTest {
         s.set_s(s);
         s.set_ain(A);
         s.set_aout(A);
-        s.set_xStart(2);
-        s.set_xEnd(5);
-        s.set_yStart(3);
-        s.set_yEnd(6);
+        s.set_xStart(xStart);
+        s.set_xEnd(xEnd);
+        s.set_yStart(yStart);
+        s.set_yEnd(yEnd);
         s.forEach_zero(A);
+
+        Script.LaunchOptions sc = new Script.LaunchOptions();
+        sc.setX(xStart, xEnd).setY(yStart, yEnd);
+        s.forEach_root(A, sc);
 
         return;
     }
@@ -55,6 +63,7 @@ public class UT_foreach_bounds extends UnitTest {
         ScriptC_foreach_bounds s = new ScriptC_foreach_bounds(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
+        s.invoke_verify_root();
         s.invoke_foreach_bounds_test();
         pRS.finish();
         waitForMessage();
