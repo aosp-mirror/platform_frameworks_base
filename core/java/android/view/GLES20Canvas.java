@@ -515,22 +515,22 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean quickReject(float left, float top, float right, float bottom, EdgeType type) {
-        return nQuickReject(mRenderer, left, top, right, bottom);
+        return nQuickReject(mRenderer, left, top, right, bottom, type.nativeInt);
     }
     
     private static native boolean nQuickReject(int renderer, float left, float top,
-            float right, float bottom);
+            float right, float bottom, int edge);
 
     @Override
     public boolean quickReject(Path path, EdgeType type) {
         path.computeBounds(mPathBounds, true);
         return nQuickReject(mRenderer, mPathBounds.left, mPathBounds.top,
-                mPathBounds.right, mPathBounds.bottom);
+                mPathBounds.right, mPathBounds.bottom, type.nativeInt);
     }
 
     @Override
     public boolean quickReject(RectF rect, EdgeType type) {
-        return nQuickReject(mRenderer, rect.left, rect.top, rect.right, rect.bottom);
+        return nQuickReject(mRenderer, rect.left, rect.top, rect.right, rect.bottom, type.nativeInt);
     }
 
     ///////////////////////////////////////////////////////////////////////////
