@@ -69,6 +69,13 @@ instances and handles commands from multiple adb clients, you can control any em
 instance from any client (or from a script).</p>
 
 
+<p class="note"><strong>Note:</strong> When you connect a device running Android 4.2.2 or higher
+to your computer, the system shows a dialog asking whether to accept an RSA key that allows
+debugging through this computer. This security mechanism protects user devices because it ensures
+that USB debugging and other adb commands cannot be executed unless you're able to unlock the
+device and acknowledge the dialog. This requires that you have adb version 1.0.31 (available with
+SDK Platform-tools r16.0.1 and higher) in order to debug on a device running Android 4.2.2 or
+higher.</p>
 
 
 <h2 id="issuingcommands">Syntax</h2>
@@ -871,8 +878,14 @@ list permission-groups
 <td><code>
 list permissions [options] &lt;GROUP>
 </code></td>
-<td>Prints all known permissions, optionally only  those in {@code &lt;GROUP>}.  <p>Options:
-<ul>    <li>{@code -g}: Organize by group.    <li>{@code -f}: Print all information.    <li>{@code -s}: Short summary.    <li>{@code -d}: Only list dangerous permissions.    <li>{@code -u}: List only the permissions users will see.
+<td>Prints all known permissions, optionally only
+  those in {@code &lt;GROUP>}.  <p>Options:
+<ul>
+    <li>{@code -g}: Organize by group.
+    <li>{@code -f}: Print all information.
+    <li>{@code -s}: Short summary.
+    <li>{@code -d}: Only list dangerous permissions.
+    <li>{@code -u}: List only the permissions users will see.
 </ul>
 </td>
 </tr>
@@ -882,7 +895,8 @@ list permissions [options] &lt;GROUP>
 list instrumentation
 </code></td>
 <td>List all test packages.  <p>Options:
-  <ul>    <li>{@code -f}: List the APK file for the test package.
+  <ul>
+    <li>{@code -f}: List the APK file for the test package.
     <li>{@code &lt;TARGET_PACKAGE>}: List test packages for only this app.
   </ul>
 </td>
@@ -925,7 +939,14 @@ path &lt;PACKAGE>
 install [options]  &lt;PATH>
 </code></td>
 <td>Installs a package (specified by {@code &lt;PATH>}) to the system.  <p>Options:
-  <ul>    <li>{@code -l}: Install the package with forward lock.    <li>{@code -r}: Reinstall an exisiting app, keeping its data.    <li>{@code -t}: Allow test APKs to be installed.    <li>{@code -i &lt;INSTALLER_PACKAGE_NAME>}: Specify the installer package name.    <li>{@code -s}: Install package on the shared mass storage (such as sdcard).    <li>{@code -f}: Install package on the internal system memory.    <li>{@code -d}: Allow version code downgrade.
+  <ul>
+    <li>{@code -l}: Install the package with forward lock.
+    <li>{@code -r}: Reinstall an exisiting app, keeping its data.
+    <li>{@code -t}: Allow test APKs to be installed.
+    <li>{@code -i &lt;INSTALLER_PACKAGE_NAME>}: Specify the installer package name.
+    <li>{@code -s}: Install package on the shared mass storage (such as sdcard).
+    <li>{@code -f}: Install package on the internal system memory.
+    <li>{@code -d}: Allow version code downgrade.
   </ul>
 </td>
 </tr>
@@ -935,7 +956,8 @@ install [options]  &lt;PATH>
 uninstall [options] &lt;PACKAGE>
 </code></td>
 <td>Removes a package from the system. <p>Options:
-  <ul>    <li>{@code -k}: Keep the data and cache directories around after package removal.
+  <ul>
+    <li>{@code -k}: Keep the data and cache directories around after package removal.
   </ul>
 </td>
 </tr>
