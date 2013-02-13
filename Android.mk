@@ -700,9 +700,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
 include $(BUILD_DROIDDOC)
 
-# explicitly specify that online-sdk depends on framework-res and any generated docs
-$(full_target): framework-res-package-target
-
 # ==== docs for the web (on the devsite app engine server) =======================
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
@@ -730,9 +727,6 @@ LOCAL_DROIDDOC_OPTIONS:= \
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
 include $(BUILD_DROIDDOC)
-
-# explicitly specify that ds depends on framework-res and any generated docs
-$(full_target): framework-res-package-target
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)

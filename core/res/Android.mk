@@ -42,7 +42,3 @@ include $(BUILD_PACKAGE)
 
 # Make sure the system .rs files get compiled before building the package-export.apk.
 # $(resource_export_package): $(framework_RenderScript_STAMP_FILE)
-
-# define a global intermediate target that other module may depend on.
-.PHONY: framework-res-package-target
-framework-res-package-target: $(LOCAL_BUILT_MODULE)
