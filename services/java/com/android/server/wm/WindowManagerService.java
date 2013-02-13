@@ -54,7 +54,6 @@ import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.am.TaskGroup;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.power.PowerManagerService;
@@ -330,8 +329,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Mapping from a token IBinder to a WindowToken object.
      */
-    final HashMap<IBinder, WindowToken> mTokenMap =
-            new HashMap<IBinder, WindowToken>();
+    final HashMap<IBinder, WindowToken> mTokenMap = new HashMap<IBinder, WindowToken>();
 
     /**
      * List of window tokens that have finished starting their application,
@@ -3318,6 +3316,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mTaskIdToDisplayContents.put(taskId, displayContent);
             }
             displayContent.addAppToken(addPos, atoken);
+            displayContent.verifyAppTokens();
             mTokenMap.put(token.asBinder(), atoken);
             mTaskIdToDisplayContents.put(taskId, displayContent);
 
@@ -4301,11 +4300,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         TAG, "Removing app " + wtoken + " delayed=" + delayed
                         + " animation=" + wtoken.mAppAnimator.animation
                         + " animating=" + wtoken.mAppAnimator.animating);
+                DisplayContent displayContent = mTaskIdToDisplayContents.get(wtoken.groupId);
                 if (delayed) {
                     // set the token aside because it has an active animation to be finished
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                             "removeAppToken make exiting: " + wtoken);
-                    mTaskIdToDisplayContents.get(wtoken.groupId).mExitingAppTokens.add(wtoken);
+                    displayContent.mExitingAppTokens.add(wtoken);
                 } else {
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
@@ -4315,7 +4315,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                         "removeAppToken: " + wtoken);
-                mTaskIdToDisplayContents.get(wtoken.groupId).removeAppToken(wtoken);
+                displayContent.removeAppToken(wtoken);
+                displayContent.verifyAppTokens();
                 wtoken.removed = true;
                 if (wtoken.startingData != null) {
                     startingToken = wtoken;
@@ -4705,6 +4706,44 @@ public class WindowManagerService extends IWindowManager.Stub
             moveAppWindowsLocked(tokens, displayContent, 0);
         }
         Binder.restoreCallingIdentity(origId);
+    }
+
+    public void moveTaskToTop(int taskId) {
+        DisplayContent displayContent = mTaskIdToDisplayContents.get(taskId);
+        if (displayContent == null) {
+            Slog.e(TAG, "moveTaskToTop: taskId=" + taskId
+                    + " not found in mTaskIdToDisplayContents");
+            return;
+        }
+        TaskList taskList = displayContent.mTaskIdToTaskList.get(taskId);
+        if (taskList == null) {
+            Slog.e(TAG, "moveTaskToTop: taskId=" + taskId + " not found in mTaskIdToTaskLists");
+            return;
+        }
+        if (!displayContent.mTaskLists.remove(taskList)) {
+            Slog.e(TAG, "moveTaskToTop: taskId=" + taskId + " not found in mTaskLists");
+        }
+        displayContent.mTaskLists.add(taskList);
+        displayContent.verifyAppTokens();
+    }
+
+    public void moveTaskToBottom(int taskId) {
+        DisplayContent displayContent = mTaskIdToDisplayContents.get(taskId);
+        if (displayContent == null) {
+            Slog.e(TAG, "moveTaskToBottom: taskId=" + taskId
+                    + " not found in mTaskIdToDisplayContents");
+            return;
+        }
+        TaskList taskList = displayContent.mTaskIdToTaskList.get(taskId);
+        if (taskList == null) {
+            Slog.e(TAG, "moveTaskToTopBottomtaskId=" + taskId + " not found in mTaskIdToTaskLists");
+            return;
+        }
+        if (!displayContent.mTaskLists.remove(taskList)) {
+            Slog.e(TAG, "moveTaskToBottom: taskId=" + taskId + " not found in mTaskLists");
+        }
+        displayContent.mTaskLists.add(0, taskList);
+        displayContent.verifyAppTokens();
     }
 
     // -------------------------------------------------------------

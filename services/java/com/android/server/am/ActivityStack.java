@@ -24,11 +24,13 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.wm.AppTransition;
+import com.android.server.wm.TaskGroup;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IThumbnailReceiver;
 import android.app.IThumbnailRetriever;
@@ -501,26 +503,14 @@ final class ActivityStack {
         return null;
     }
 
-    final int indexOfTokenLocked(IBinder token) {
+    private final int indexOfTokenLocked(IBinder token) {
         return mHistory.indexOf(ActivityRecord.forToken(token));
-    }
-
-    final int indexOfActivityLocked(ActivityRecord r) {
-        return mHistory.indexOf(r);
     }
 
     final ActivityRecord isInStackLocked(IBinder token) {
         ActivityRecord r = ActivityRecord.forToken(token);
         if (mHistory.contains(r)) {
             return r;
-        }
-        return null;
-    }
-
-    // TODO: This exposes mHistory too much, replace usage with ActivityStack methods. 
-    final ActivityRecord getActivityAtIndex(int index) {
-        if (index >= 0 && index < mHistory.size()) {
-            return mHistory.get(index);
         }
         return null;
     }
@@ -745,7 +735,13 @@ final class ActivityStack {
                 try {
                     profileFd = profileFd.dup();
                 } catch (IOException e) {
-                    profileFd = null;
+                    if (profileFd != null) {
+                        try {
+                            profileFd.close();
+                        } catch (IOException o) {
+                        }
+                        profileFd = null;
+                    }
                 }
             }
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
@@ -1758,7 +1754,7 @@ final class ActivityStack {
             
             try {
                 // Deliver all pending results.
-                ArrayList a = next.results;
+                ArrayList<ResultInfo> a = next.results;
                 if (a != null) {
                     final int N = a.size();
                     if (!next.finishing && N > 0) {
@@ -2156,6 +2152,7 @@ final class ActivityStack {
                             }
                             i++;
                         }
+                        mService.mWindowManager.moveTaskToBottom(target.task.taskId);
                         if (taskTop == p) {
                             taskTop = below;
                         }
@@ -2304,6 +2301,8 @@ final class ActivityStack {
                             validateAppTokensLocked();
                         }
                     }
+                    // TODO: This is wrong because it doesn't take lastReparentPos into account.
+                    mService.mWindowManager.moveTaskToTop(task.taskId);
                     replyChainEnd = -1;
                     
                     // Now we've moved it in to place...  but what if this is
@@ -2413,7 +2412,7 @@ final class ActivityStack {
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
                         && (launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
                     if (!ret.finishing) {
-                        int index = indexOfTokenLocked(ret.appToken);
+                        int index = mHistory.indexOf(ret);
                         if (index >= 0) {
                             finishActivityLocked(ret, index, Activity.RESULT_CANCELED,
                                     null, "clear", false);
@@ -3568,7 +3567,7 @@ final class ActivityStack {
             }
 
             // Get the activity record.
-            int index = indexOfActivityLocked(r);
+            int index = mHistory.indexOf(r);
             if (index >= 0) {
                 res = r;
 
@@ -3654,7 +3653,7 @@ final class ActivityStack {
         // Stop any activities that are scheduled to do so but have been
         // waiting for the next one to start.
         for (i=0; i<NS; i++) {
-            ActivityRecord r = (ActivityRecord)stops.get(i);
+            ActivityRecord r = stops.get(i);
             synchronized (mService) {
                 if (r.finishing) {
                     finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
@@ -3667,7 +3666,7 @@ final class ActivityStack {
         // Finish any activities that are scheduled to do so but have been
         // waiting for the next one to start.
         for (i=0; i<NF; i++) {
-            ActivityRecord r = (ActivityRecord)finishes.get(i);
+            ActivityRecord r = finishes.get(i);
             synchronized (mService) {
                 activityRemoved = destroyActivityLocked(r, true, false, "finish-idle");
             }
@@ -3675,7 +3674,7 @@ final class ActivityStack {
 
         // Report back to any thumbnail receivers.
         for (i=0; i<NT; i++) {
-            ActivityRecord r = (ActivityRecord)thumbnails.get(i);
+            ActivityRecord r = thumbnails.get(i);
             mService.sendPendingThumbnail(r, null, null, null, true);
         }
 
@@ -3730,7 +3729,7 @@ final class ActivityStack {
 
         int i;
         for (i=mHistory.size()-1; i>=0; i--) {
-            ActivityRecord r = (ActivityRecord)mHistory.get(i);
+            ActivityRecord r = mHistory.get(i);
             if (r.resultTo == self && r.requestCode == requestCode) {
                 if ((r.resultWho == null && resultWho == null) ||
                     (r.resultWho != null && r.resultWho.equals(resultWho))) {
@@ -3740,6 +3739,36 @@ final class ActivityStack {
             }
         }
         mService.updateOomAdjLocked();
+    }
+
+    final void finishTopRunningActivityLocked(ProcessRecord app) {
+        ActivityRecord r = topRunningActivityLocked(null);
+        if (r != null && r.app == app) {
+            // If the top running activity is from this crashing
+            // process, then terminate it to avoid getting in a loop.
+            Slog.w(TAG, "  Force finishing activity "
+                    + r.intent.getComponent().flattenToShortString());
+            int index = mHistory.indexOf(r);
+            r.stack.finishActivityLocked(r, index,
+                    Activity.RESULT_CANCELED, null, "crashed", false);
+            // Also terminate any activities below it that aren't yet
+            // stopped, to avoid a situation where one will get
+            // re-start our crashing activity once it gets resumed again.
+            index--;
+            if (index >= 0) {
+                r = mHistory.get(index);
+                if (r.state == ActivityState.RESUMED
+                        || r.state == ActivityState.PAUSING
+                        || r.state == ActivityState.PAUSED) {
+                    if (!r.isHomeActivity || mService.mHomeProcess != r.app) {
+                        Slog.w(TAG, "  Force finishing activity "
+                                + r.intent.getComponent().flattenToShortString());
+                        r.stack.finishActivityLocked(r, index,
+                                Activity.RESULT_CANCELED, null, "crashed", false);
+                    }
+                }
+            }
+        }
     }
 
     final boolean finishActivityAffinityLocked(IBinder token) {
@@ -3794,6 +3823,19 @@ final class ActivityStack {
         r.pendingResults = null;
         r.newIntents = null;
         r.icicle = null;
+    }
+
+    /**
+     * @return Returns true if this activity has been removed from the history
+     * list, or false if it is still in the list and will be removed later.
+     */
+    final boolean finishActivityLocked(ActivityRecord r,
+            int resultCode, Intent resultData, String reason, boolean oomAdj) {
+        int index = mHistory.indexOf(r);
+        if (index >= 0) {
+            return finishActivityLocked(r, index, resultCode, resultData, reason, false, oomAdj);
+        }
+        return false;
     }
 
     /**
@@ -3892,7 +3934,7 @@ final class ActivityStack {
 
     private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
             int mode, boolean oomAdj) {
-        final int index = indexOfActivityLocked(r);
+        final int index = mHistory.indexOf(r);
         if (index < 0) {
             return null;
         }
@@ -3948,16 +3990,102 @@ final class ActivityStack {
                 resumeTopActivityLocked(null);
             }
             return activityRemoved ? null : r;
-        } else {
-            // Need to go through the full pause cycle to get this
-            // activity into the stopped state and then finish it.
-            if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
-            mFinishingActivities.add(r);
-            resumeTopActivityLocked(null);
         }
+
+        // Need to go through the full pause cycle to get this
+        // activity into the stopped state and then finish it.
+        if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
+        mFinishingActivities.add(r);
+        resumeTopActivityLocked(null);
         return r;
     }
 
+    final boolean navigateUpToLocked(ActivityRecord srec, Intent destIntent, int resultCode,
+            Intent resultData) {
+        final int start = mHistory.indexOf(srec);
+        if (start < 0) {
+            // Current activity is not in history stack; do nothing.
+            return false;
+        }
+        int finishTo = start - 1;
+        ActivityRecord parent = null;
+        boolean foundParentInTask = false;
+        ComponentName dest = destIntent.getComponent();
+        if (dest != null) {
+            TaskRecord tr = srec.task;
+            for (int i = start - 1; i >= 0; i--) {
+                ActivityRecord r = mHistory.get(i);
+                if (tr != r.task) {
+                    // Couldn't find parent in the same task; stop at the one above this.
+                    // (Root of current task; in-app "home" behavior)
+                    // Always at least finish the current activity.
+                    finishTo = Math.min(start - 1, i + 1);
+                    parent = mHistory.get(finishTo);
+                    break;
+                } else if (r.info.packageName.equals(dest.getPackageName()) &&
+                        r.info.name.equals(dest.getClassName())) {
+                    finishTo = i;
+                    parent = r;
+                    foundParentInTask = true;
+                    break;
+                }
+            }
+        }
+
+        IActivityController controller = mService.mController;
+        if (controller != null) {
+            ActivityRecord next = topRunningActivityLocked(srec.appToken, 0);
+            if (next != null) {
+                // ask watcher if this is allowed
+                boolean resumeOK = true;
+                try {
+                    resumeOK = controller.activityResuming(next.packageName);
+                } catch (RemoteException e) {
+                    mService.mController = null;
+                }
+
+                if (!resumeOK) {
+                    return false;
+                }
+            }
+        }
+        final long origId = Binder.clearCallingIdentity();
+        for (int i = start; i > finishTo; i--) {
+            ActivityRecord r = mHistory.get(i);
+            requestFinishActivityLocked(r.appToken, resultCode, resultData,
+                    "navigate-up", true);
+            // Only return the supplied result for the first activity finished
+            resultCode = Activity.RESULT_CANCELED;
+            resultData = null;
+        }
+
+        if (parent != null && foundParentInTask) {
+            final int parentLaunchMode = parent.info.launchMode;
+            final int destIntentFlags = destIntent.getFlags();
+            if (parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
+                    parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
+                    parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
+                    (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
+                parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent);
+            } else {
+                try {
+                    ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
+                            destIntent.getComponent(), 0, srec.userId);
+                    int res = startActivityLocked(srec.app.thread, destIntent,
+                            null, aInfo, parent.appToken, null,
+                            0, -1, parent.launchedFromUid, parent.launchedFromPackage,
+                            0, null, true, null);
+                    foundParentInTask = res == ActivityManager.START_SUCCESS;
+                } catch (RemoteException e) {
+                    foundParentInTask = false;
+                }
+                requestFinishActivityLocked(parent.appToken, resultCode,
+                        resultData, "navigate-up", true);
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
+        return foundParentInTask;
+    }
     /**
      * Perform the common clean-up of an activity record.  This is called both
      * as part of destroyActivityLocked() (when destroying the client-side
@@ -4216,7 +4344,7 @@ final class ActivityStack {
                     mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
                 }
 
-                int index = indexOfActivityLocked(r);
+                int index = mHistory.indexOf(r);
                 if (index >= 0) {
                     if (r.state == ActivityState.DESTROYING) {
                         cleanUpActivityLocked(r, true, false);
@@ -4230,15 +4358,15 @@ final class ActivityStack {
         }
     }
     
-    private void removeHistoryRecordsForAppLocked(ArrayList list, ProcessRecord app,
-            String listName) {
+    private void removeHistoryRecordsForAppLocked(ArrayList<ActivityRecord> list,
+            ProcessRecord app, String listName) {
         int i = list.size();
         if (DEBUG_CLEANUP) Slog.v(
             TAG, "Removing app " + app + " from list " + listName
             + " with " + i + " entries");
         while (i > 0) {
             i--;
-            ActivityRecord r = (ActivityRecord)list.get(i);
+            ActivityRecord r = list.get(i);
             if (DEBUG_CLEANUP) Slog.v(TAG, "Record #" + i + " " + r);
             if (r.app == app) {
                 if (DEBUG_CLEANUP) Slog.v(TAG, "---> REMOVING this entry!");
@@ -4264,7 +4392,7 @@ final class ActivityStack {
             TAG, "Removing app " + app + " from history with " + i + " entries");
         while (i > 0) {
             i--;
-            ActivityRecord r = (ActivityRecord)mHistory.get(i);
+            ActivityRecord r = mHistory.get(i);
             if (DEBUG_CLEANUP) Slog.v(
                 TAG, "Record #" + i + " " + r + ": app=" + r.app);
             if (r.app == app) {
@@ -4440,6 +4568,7 @@ final class ActivityStack {
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
+        mService.mWindowManager.moveTaskToTop(task);
 
         finishTaskMoveLocked(task);
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, task);
@@ -4532,6 +4661,7 @@ final class ActivityStack {
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
+        mService.mWindowManager.moveTaskToBottom(task);
 
         finishTaskMoveLocked(task);
         return true;
@@ -4561,9 +4691,8 @@ final class ActivityStack {
         TaskAccessInfo info = getTaskAccessInfoLocked(tr.taskId, true);
         if (info.numSubThumbbails <= 0) {
             return info.mainThumbnail != null ? info.mainThumbnail : tr.lastThumbnail;
-        } else {
-            return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
         }
+        return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
     }
 
     public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex,
@@ -4643,6 +4772,7 @@ final class ActivityStack {
         }
         if (thumbs.numSubThumbbails > 0) {
             thumbs.retriever = new IThumbnailRetriever.Stub() {
+                @Override
                 public Bitmap getThumbnail(int index) {
                     if (index < 0 || index >= thumbs.subtasks.size()) {
                         return null;

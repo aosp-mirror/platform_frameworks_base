@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.am;
+package com.android.server.wm;
 
 import android.view.IApplicationToken;
 

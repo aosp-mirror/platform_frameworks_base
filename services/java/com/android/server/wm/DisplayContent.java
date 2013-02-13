@@ -16,12 +16,16 @@
 
 package com.android.server.wm;
 
+import android.os.Debug;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 class DisplayContentList extends ArrayList<DisplayContent> {
 }
@@ -34,7 +38,7 @@ class DisplayContentList extends ArrayList<DisplayContent> {
  * WindowManagerService.mWindowMap.
  */
 class DisplayContent {
-//    private final static String TAG = "DisplayContent";
+    private final static String TAG = "DisplayContent";
 
     /** Unique identifier of this stack. */
     private final int mDisplayId;
@@ -97,7 +101,7 @@ class DisplayContent {
     /**
      * Sorted most recent at top, oldest at [0].
      */
-//    ArrayList<TaskList> mTaskLists = new ArrayList<TaskList>();
+    ArrayList<TaskList> mTaskLists = new ArrayList<TaskList>();
     SparseArray<TaskList> mTaskIdToTaskList = new SparseArray<TaskList>();
 
     /**
@@ -133,24 +137,28 @@ class DisplayContent {
     /**
      *  Find the location to insert a new AppWindowToken into the window-ordered app token list.
      * @param addPos The location the token was inserted into in mAppTokens.
-     * @param atoken The token to insert.
+     * @param wtoken The token to insert.
      */
-    void addAppToken(final int addPos, final AppWindowToken atoken) {
-        mAppTokens.add(addPos, atoken);
+    void addAppToken(final int addPos, final AppWindowToken wtoken) {
+        mAppTokens.add(addPos, wtoken);
 
         if (addPos == 0 || addPos == mAnimatingAppTokens.size()) {
             // It was inserted into the beginning or end of mAppTokens. Honor that.
-            mAnimatingAppTokens.add(addPos, atoken);
+            mAnimatingAppTokens.add(addPos, wtoken);
         } else {
             // Find the item immediately above the mAppTokens insertion point and put the token
             // immediately below that one in mAnimatingAppTokens.
             final AppWindowToken aboveAnchor = mAppTokens.get(addPos + 1);
-            mAnimatingAppTokens.add(mAnimatingAppTokens.indexOf(aboveAnchor), atoken);
+            mAnimatingAppTokens.add(mAnimatingAppTokens.indexOf(aboveAnchor), wtoken);
         }
 
-        TaskList task = mTaskIdToTaskList.get(atoken.groupId);
+        TaskList task = mTaskIdToTaskList.get(wtoken.groupId);
         if (task == null) {
-            mTaskIdToTaskList.put(atoken.groupId, new TaskList(atoken));
+            task = new TaskList(wtoken, this);
+            mTaskIdToTaskList.put(wtoken.groupId, task);
+            mTaskLists.add(task);
+        } else {
+            task.mAppTokens.add(wtoken);
         }
     }
 
@@ -163,6 +171,7 @@ class DisplayContent {
             AppTokenList appTokens = task.mAppTokens;
             appTokens.remove(wtoken);
             if (appTokens.size() == 0) {
+                mTaskLists.remove(task);
                 mTaskIdToTaskList.delete(taskId);
             }
         }
@@ -186,13 +195,129 @@ class DisplayContent {
 
         task = mTaskIdToTaskList.get(newTaskId);
         if (task == null) {
-            task = new TaskList(wtoken);
+            task = new TaskList(wtoken, this);
             mTaskIdToTaskList.put(newTaskId, task);
         } else {
             task.mAppTokens.add(wtoken);
         }
 
         wtoken.groupId = newTaskId;
+    }
+
+    class TaskListsIterator implements Iterator<TaskList> {
+        private int mCur;
+        private boolean mReverse;
+
+        TaskListsIterator() {
+            this(false);
+        }
+
+        TaskListsIterator(boolean reverse) {
+            mReverse = reverse;
+            int numTaskLists = mTaskLists.size();
+            mCur = reverse ? numTaskLists - 1 : 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (mReverse) {
+                return mCur >= 0;
+            }
+            return mCur < mTaskLists.size();
+        }
+
+        @Override
+        public TaskList next() {
+            if (hasNext()) {
+                TaskList taskList = mTaskLists.get(mCur);
+                mCur += (mReverse ? -1 : 1);
+                return taskList;
+            }
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove() {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    class AppTokenIterator implements Iterator<AppWindowToken> {
+        final TaskListsIterator mIterator;
+        final boolean mReverse;
+        int mCur;
+        TaskList mTaskList;
+
+        public AppTokenIterator() {
+            this(false);
+        }
+
+        public AppTokenIterator(boolean reverse) {
+            mReverse = reverse;
+            mIterator = new TaskListsIterator(reverse);
+            getNextTaskList();
+        }
+
+        private void getNextTaskList() {
+            if (mIterator.hasNext()) {
+                mTaskList = mIterator.next();
+                mCur = mReverse ? mTaskList.mAppTokens.size() - 1 : 0;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (mTaskList == null) {
+                return false;
+            }
+            if (mReverse) {
+                return mCur >= 0;
+            }
+            return mCur < mTaskList.mAppTokens.size();
+        }
+
+        @Override
+        public AppWindowToken next() {
+            if (hasNext()) {
+                AppWindowToken wtoken = mTaskList.mAppTokens.get(mCur);
+                mCur += mReverse ? -1 : 1;
+                if (!hasNext()) {
+                    getNextTaskList();
+                }
+                return wtoken;
+            }
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove() {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    void verifyAppTokens() {
+        AppTokenIterator iterator = new AppTokenIterator();
+        for (int i = 0; i < mAppTokens.size(); ++i) {
+            if (!iterator.hasNext()) {
+                Slog.e(TAG, "compareAppTokens: More mAppTokens than TaskList tokens. Callers="
+                        + Debug.getCallers(4));
+                while (i < mAppTokens.size()) {
+                    Slog.e(TAG, "compareAppTokens: mAppTokens[" + i + "]=" + mAppTokens.get(i));
+                    i++;
+                }
+                return;
+            }
+            AppWindowToken appToken = mAppTokens.get(i);
+            AppWindowToken taskListToken = iterator.next();
+            if (appToken != taskListToken) {
+                Slog.e(TAG, "compareAppTokens: Mismatch at " + i + " appToken=" + appToken
+                        + " taskListToken=" + taskListToken + ". Callers=" + Debug.getCallers(4));
+            }
+        }
+        if (iterator.hasNext()) {
+            Slog.e(TAG, "compareAppTokens: More TaskList tokens than mAppTokens Callers="
+                    + Debug.getCallers(4));
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
