@@ -97,9 +97,6 @@ interface IWindowManager
     void startAppFreezingScreen(IBinder token, int configChanges);
     void stopAppFreezingScreen(IBinder token, boolean force);
     void removeAppToken(IBinder token);
-    void moveAppToken(int index, IBinder token);
-    void moveAppTokensToTop(in List<IBinder> tokens);
-    void moveAppTokensToBottom(in List<IBinder> tokens);
 
     // Re-evaluate the current orientation from the caller's state.
     // If there is a change, the new Configuration is returned and the
