@@ -85,7 +85,7 @@ public class KeyStore {
 
     public boolean put(String key, byte[] value) {
         try {
-            return mBinder.insert(key, value) == NO_ERROR;
+            return mBinder.insert(key, value, -1) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
@@ -94,7 +94,7 @@ public class KeyStore {
 
     public boolean delete(String key) {
         try {
-            return mBinder.del(key) == NO_ERROR;
+            return mBinder.del(key, -1) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
@@ -103,7 +103,7 @@ public class KeyStore {
 
     public boolean contains(String key) {
         try {
-            return mBinder.exist(key) == NO_ERROR;
+            return mBinder.exist(key, -1) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
@@ -112,7 +112,7 @@ public class KeyStore {
 
     public String[] saw(String prefix) {
         try {
-            return mBinder.saw(prefix);
+            return mBinder.saw(prefix, -1);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;
@@ -167,7 +167,7 @@ public class KeyStore {
 
     public boolean generate(String key) {
         try {
-            return mBinder.generate(key) == NO_ERROR;
+            return mBinder.generate(key, -1) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
@@ -176,7 +176,7 @@ public class KeyStore {
 
     public boolean importKey(String keyName, byte[] key) {
         try {
-            return mBinder.import_key(keyName, key) == NO_ERROR;
+            return mBinder.import_key(keyName, key, -1) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
@@ -194,7 +194,7 @@ public class KeyStore {
 
     public boolean delKey(String key) {
         try {
-            return mBinder.del_key(key) == NO_ERROR;
+            return mBinder.del_key(key, -1) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
