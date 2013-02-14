@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import android.renderscript.*;
 
 import android.graphics.Bitmap;
 
-public class RsYuv
+public class RsYuv implements TextureView.SurfaceTextureListener
 {
     private int mHeight;
     private int mWidth;
@@ -43,36 +43,104 @@ public class RsYuv
     private Allocation mAllocationIn;
     private ScriptC_yuv mScript;
     private ScriptIntrinsicYuvToRGB mYuv;
+    private boolean mHaveSurface;
+    private SurfaceTexture mSurface;
+    private ScriptGroup mGroup;
 
-    RsYuv(RenderScript rs, Resources res, int width, int height) {
+    RsYuv(RenderScript rs) {
+        mRS = rs;
+        mScript = new ScriptC_yuv(mRS);
+        mYuv = ScriptIntrinsicYuvToRGB.create(rs, Element.RGBA_8888(mRS));
+    }
+
+    void setupSurface() {
+        if (mAllocationOut != null) {
+            mAllocationOut.setSurfaceTexture(mSurface);
+        }
+        if (mSurface != null) {
+            mHaveSurface = true;
+        } else {
+            mHaveSurface = false;
+        }
+    }
+
+    void reset(int width, int height) {
+        if (mAllocationOut != null) {
+            mAllocationOut.destroy();
+        }
+
+        android.util.Log.v("cpa", "reset " + width + ", " + height);
         mHeight = height;
         mWidth = width;
-        mRS = rs;
-        mScript = new ScriptC_yuv(mRS, res, R.raw.yuv);
         mScript.invoke_setSize(mWidth, mHeight);
-
-        mYuv = ScriptIntrinsicYuvToRGB.create(rs, Element.RGBA_8888(mRS));
 
         Type.Builder tb = new Type.Builder(mRS, Element.RGBA_8888(mRS));
         tb.setX(mWidth);
         tb.setY(mHeight);
-
-        mAllocationOut = Allocation.createTyped(rs, tb.create());
-        mAllocationIn = Allocation.createSized(rs, Element.U8(mRS), (mHeight * mWidth) +
+        Type t = tb.create();
+        mAllocationOut = Allocation.createTyped(mRS, t, Allocation.USAGE_SCRIPT |
+                                                        Allocation.USAGE_IO_OUTPUT);
+        mAllocationIn = Allocation.createSized(mRS, Element.U8(mRS), (mHeight * mWidth) +
                                                ((mHeight / 2) * (mWidth / 2) * 2));
-
         mYuv.setInput(mAllocationIn);
+        setupSurface();
+
+
+        ScriptGroup.Builder b = new ScriptGroup.Builder(mRS);
+        b.addKernel(mScript.getKernelID_root());
+        b.addKernel(mYuv.getKernelID());
+        b.addConnection(t, mYuv.getKernelID(), mScript.getKernelID_root());
+        mGroup = b.create();
+    }
+
+    public int getWidth() {
+        return mWidth;
+    }
+    public int getHeight() {
+        return mHeight;
     }
 
     private long mTiming[] = new long[50];
     private int mTimingSlot = 0;
 
-    void execute(byte[] yuv, Bitmap b) {
+    void execute(byte[] yuv) {
         mAllocationIn.copyFrom(yuv);
-        mYuv.forEach(mAllocationOut);
-        mScript.forEach_root(mAllocationOut, mAllocationOut);
-        mAllocationOut.copyTo(b);
+        if (mHaveSurface) {
+            mGroup.setOutput(mScript.getKernelID_root(), mAllocationOut);
+            mGroup.execute();
+
+            //mYuv.forEach(mAllocationOut);
+            //mScript.forEach_root(mAllocationOut, mAllocationOut);
+            mAllocationOut.ioSendOutput();
+        }
     }
 
+
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        android.util.Log.v("cpa", "onSurfaceTextureAvailable " + surface);
+        mSurface = surface;
+        setupSurface();
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        android.util.Log.v("cpa", "onSurfaceTextureSizeChanged " + surface);
+        mSurface = surface;
+        setupSurface();
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        android.util.Log.v("cpa", "onSurfaceTextureDestroyed " + surface);
+        mSurface = surface;
+        setupSurface();
+        return true;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+    }
 }
 
