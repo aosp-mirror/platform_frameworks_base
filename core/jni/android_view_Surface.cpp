@@ -336,20 +336,6 @@ static jboolean nativeIsValid(JNIEnv* env, jobject surfaceObj) {
     return Surface::isValid(surface) ? JNI_TRUE : JNI_FALSE;
 }
 
-static jint nativeGetIdentity(JNIEnv* env, jobject surfaceObj) {
-    sp<SurfaceControl> control(getSurfaceControl(env, surfaceObj));
-    if (control != NULL) {
-        return jint(control->getIdentity());
-    }
-
-    sp<Surface> surface(getSurface(env, surfaceObj));
-    if (surface != NULL) {
-        return jint(surface->getIdentity());
-    }
-
-    return -1;
-}
-
 static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jobject surfaceObj) {
     sp<Surface> surface(getSurface(env, surfaceObj));
     if (!Surface::isValid(surface)) {
@@ -820,8 +806,6 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeDestroy },
     {"nativeIsValid", "()Z",
             (void*)nativeIsValid },
-    {"nativeGetIdentity", "()I",
-            (void*)nativeGetIdentity },
     {"nativeIsConsumerRunningBehind", "()Z",
             (void*)nativeIsConsumerRunningBehind },
     {"nativeLockCanvas", "(Landroid/graphics/Rect;)Landroid/graphics/Canvas;",
