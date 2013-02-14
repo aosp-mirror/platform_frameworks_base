@@ -39,15 +39,6 @@ Version 2, rather than Version 3. </p>
 <p>If you do not need to sell subscriptions, you
 should implement In-app Billing Version 3 instead.</p>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-  <h2>New in In-app Billing V2</h2>
-  <p><strong>Free trials</strong>—You can now offer users a configurable free trial period for
-  your in-app subscriptions. You can set up trials with a simple change in the Developer
-  Console—no change to your app code is needed.</p>
-</div>
-</div>
-
 <h2 id="billing-types">Product Types</h2>
 
 <p>In-app Billing Version supports three different product types
