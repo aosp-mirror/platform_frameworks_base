@@ -16,6 +16,7 @@ parent.link=index.html
        <li><a href="#Purchase">Purchasing an Item</a></li>
        <li><a href="#QueryPurchases">Querying Purchased Items</a></li>
        <li><a href="#Consume">Consuming a Purchase</a><li>
+       <li><a href="#Subs">Implementing Subscriptions</a><li>
        </ol>
     </li>
   </ol>
@@ -176,7 +177,7 @@ if (response == 0) {
 </pre>
 
 <h3 id="Purchase">Purchasing an Item</h3>
-<p>To start a purchase request from your app, call the {@code getBuyIntent} method on the In-app Billing service. Pass in to the method the In-app Billing API version (“3”), the package name of your calling app, the product ID for the item to purchase, the purchase type (“inapp”), and a {@code developerPayload} String. The {@code developerPayload} String is used to  specify any additional arguments that you want Google Play to send back along with the purchase information.</p>
+<p>To start a purchase request from your app, call the {@code getBuyIntent} method on the In-app Billing service. Pass in to the method the In-app Billing API version (“3”), the package name of your calling app, the product ID for the item to purchase, the purchase type (“inapp” or "subs"), and a {@code developerPayload} String. The {@code developerPayload} String is used to  specify any additional arguments that you want Google Play to send back along with the purchase information.</p>
 
 <pre>
 Bundle buyIntentBundle = mService.getBuyIntent(3, getPackageName(),
@@ -238,7 +239,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 <p class="note"><strong>Security Recommendation:</strong> When you send a purchase request, create a String token that uniquely identifies this purchase request and include this token in the {@code developerPayload}.You can use a randomly generated string as the token. When you receive the purchase response from Google Play, make sure to check the returned data signature, the {@code orderId}, and the {@code developerPayload} String. For added security, you should perform the checking on your own secure server. Make sure to verify that the {@code orderId} is a unique value that you have not previously processed, and the {@code developerPayload} String matches the token that you sent previously with the purchase request.</p>
 
 <h3 id="QueryPurchases">Querying for Purchased Items</h3>
-<p>To retrieve information about purchases made by a user from your app, call the {@code getPurchases} method on the In-app Billing Version 3 service. Pass in to the method the In-app Billing API version (“3”), the package name of your calling app, and the purchase type (“inapp”).</p>
+<p>To retrieve information about purchases made by a user from your app, call the {@code getPurchases} method on the In-app Billing Version 3 service. Pass in to the method the In-app Billing API version (“3”), the package name of your calling app, and the purchase type (“inapp” or "subs").</p>
 <pre>
 Bundle ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
 </pre>
@@ -273,8 +274,26 @@ if (response == 0) {
 </pre>
 
 <h3 id="Consume">Consuming a Purchase</h3>
-<p>You can use the In-app Billing Version 3 API to track the ownership of purchased items in Google Play. Once an item is purchased, it is considered to be "owned" and cannot be purchased from Google Play. You must send a consumption request for the item before Google Play makes it available for purchase again. All managed in-app products are consumable.  How you use the consumption mechanism in your app is up to you. Typically, you would implement consumption for products with temporary benefits that users may want to purchase multiple times (for example, in-game currency or equipment). You would typically not want to implement consumption for products that are purchased once and provide a permanent effect (for example, a premium upgrade).</p>
-<p>To record a purchase consumption, send the {@code consumePurchase} method to the In-app Billing service and pass in the {@code purchaseToken} String value that identifies the purchase to be removed. The {@code purchaseToken} is part of the data returned in the {@code INAPP_PURCHASE_DATA} String by the Google Play service following a successful purchase request. In this example, you are recording the consumption of a product that is identified with the {@code purchaseToken} in the {@code token} variable.</p>
+<p>You can use the In-app Billing Version 3 API to track the ownership of 
+purchased in-app products in Google Play. Once an in-app product is purchased, 
+it is considered to be "owned" and cannot be purchased from Google Play. You 
+must send a consumption request for the in-app product before Google Play makes 
+it available for purchase again.</p>
+<p class="caution"><strong>Important</strong>: Managed in-app products are 
+consumable, but subscriptions are not.</p>
+<p>How you use the consumption mechanism in your app is up to you. Typically, 
+you would implement consumption for in-app products with temporary benefits that 
+users may want to purchase multiple times (for example, in-game currency or 
+equipment). You would typically not want to implement consumption for in-app 
+products that are purchased once and provide a permanent effect (for example, 
+a premium upgrade).</p>
+<p>To record a purchase consumption, send the {@code consumePurchase} method to 
+the In-app Billing service and pass in the {@code purchaseToken} String value 
+that identifies the purchase to be removed. The {@code purchaseToken} is part 
+of the data returned in the {@code INAPP_PURCHASE_DATA} String by the Google 
+Play service following a successful purchase request. In this example, you are 
+recording the consumption of a product that is identified with the 
+{@code purchaseToken} in the {@code token} variable.</p>
 <pre>
 int response = mService.consumePurchase(3, getPackageName(), token);
 </pre>
@@ -282,6 +301,33 @@ int response = mService.consumePurchase(3, getPackageName(), token);
 <p>It's your responsibility to control and track how the in-app product is provisioned to the user. For example, if the user purchased in-game currency, you should update the player's inventory with the amount of currency purchased.</p>
 <p class="note"><strong>Security Recommendation:</strong> You must send a consumption request before provisioning the benefit of the consumable in-app purchase to the user. Make sure that you have received a successful consumption response from Google Play before you provision the item.</p>
 
+<h3 id="Subs">Implementing Subscriptions</h3>
+<p>Launching a purchase flow for a subscription is similar to launching the 
+purchase flow for a product, with the exception that the product type must be set 
+to "subs". The purchase result is delivered to your Activity's 
+{@link android.app.Activity#onActivityResult onActivityResult} method, exactly 
+as in the case of in-app products.</p>
+<pre>
+Bundle bundle = mService.getBuyIntent(3, "com.example.myapp",
+   MY_SKU, "subs", developerPayload);
+
+PendingIntent pendingIntent = bundle.getParcelable(RESPONSE_BUY_INTENT);
+if (bundle.getInt(RESPONSE_CODE) == BILLING_RESPONSE_RESULT_OK) {
+   // Start purchase flow (this brings up the Google Play UI).
+   // Result will be delivered through onActivityResult().
+   startIntentSenderForResult(pendingIntent, RC_BUY, new Intent(),
+       Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0));
+}
+</pre>
+<p>To query for active subscriptions, use the {@code getPurchases} method, again 
+with the product type parameter set to "subs".</p>
+<pre>
+Bundle activeSubs = mService.getPurchases(3, "com.example.myapp",
+                   "subs", continueToken);
+</pre>
+<p>The call returns a {@code Bundle} with all the active subscriptions owned by 
+the user. Once a subscription expires without renewal, it will no longer appear 
+in the returned {@code Bundle}.</p>
 
 
 

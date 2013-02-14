@@ -80,6 +80,9 @@
               <span class="en">Reference</span></a></li>
               </ul>
       </li>
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
+      </li>
       <li><a href="<?cs var:toroot?>google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
