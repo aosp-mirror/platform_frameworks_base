@@ -69,7 +69,8 @@ ownership of in-app products). The user cannot own multiple copies of an in-app
 item; only one copy can be owned at any point in time</li>
 <li>Purchased items can be consumed. When consumed, the item reverts to the 
 "unowned" state and can be purchased again from Google Play</li>
-<li>Provides support for subscriptions</li>
+<li>Provides support for <a
+  href="{@docRoot}google/play/billing/billing_subscriptions.html">subscriptions</a></li>
 </ul>
 <p>For details about other versions of In-app Billing, see the 
 <a href="{@docRoot}google/play/billing/versions.html">Version Notes</a>.</p>
