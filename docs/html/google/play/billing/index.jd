@@ -10,8 +10,8 @@ and features, and more. You can use In-app Billing to sell products as</p>
 <div class="sidebox">
   <h2><strong>New in In-App Billing</strong></h2>
   <ul>
-  <li><strong>In-app Billing Version 3</strong>&mdash;The <a href="{@docRoot}google/play/billing/api.html">latest version</a> of In-app Billing features a synchronous API that is easier to implement and lets you manage products and purchases more effectively.</li>
-  <li><strong>New order number format</strong>&mdash;Starting 5 December, orders are reported in Merchant Order Number format. See <a href="/google/play/billing/billing_admin.html#orderId">Working with Order Numbers</a> for an example.</li>
+  <li><strong>In-app Billing Version 3</strong>&mdash;The <a href="{@docRoot}google/play/billing/api.html">latest version</a> of In-app Billing features a synchronous API that is easier to implement and lets you manage in-app products and subscriptions more effectively.</li>
+  <li><strong>Subscriptions now supported in Version 3</strong>&mdash;You can query and launch purchase flows for subscription items using the V3 API.</li>
   <li><strong>Free trials</strong>&mdash;You can now offer users a configurable <a href="/google/play/billing/v2/billing_subscriptions.html#trials">free trial period</a> for your in-app subscriptions. You can set up trials with a simple change in the Developer Console&mdash;no change to your app code is needed.</li>
  </ul>
 </div>
@@ -30,7 +30,7 @@ is used for application purchases, so your users experience a consistent and
 familiar purchase flow.</p>
 
 <p>Any application that you publish through Google Play can implement In-app Billing. No special
-account or registration is required other than an Android Market publisher account and a Google
+account or registration is required other than a Google Play Developer Console account and a Google
 Checkout merchant account.</p>
 
 <p>To help you integrate in-app billing into your application, the Android SDK
