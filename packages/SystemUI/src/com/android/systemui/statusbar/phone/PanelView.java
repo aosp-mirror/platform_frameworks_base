@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -593,5 +595,21 @@ public class PanelView extends FrameLayout {
         } else if (DEBUG) {
             if (DEBUG) LOG("skipping expansion: is expanded");
         }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(String.format("[PanelView(%s): expandedHeight=%f fullHeight=%f closing=%s"
+                + " tracking=%s rubberbanding=%s justPeeked=%s peekAnim=%s%s timeAnim=%s%s"
+                + "]",
+                this.getClass().getSimpleName(),
+                getExpandedHeight(),
+                getFullHeight(),
+                mClosing?"T":"f",
+                mTracking?"T":"f",
+                mRubberbanding?"T":"f",
+                mJustPeeked?"T":"f",
+                mPeekAnimator, ((mPeekAnimator!=null && mPeekAnimator.isStarted())?" (started)":""),
+                mTimeAnimator, ((mTimeAnimator!=null && mTimeAnimator.isStarted())?" (started)":"")
+        ));
     }
 }
