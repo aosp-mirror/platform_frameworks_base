@@ -65,11 +65,27 @@ public class StatFs {
     }
 
     /**
+     * The size, in bytes, of a block on the file system. This corresponds to
+     * the Unix {@code statfs.f_bsize} field.
+     */
+    public long getBlockSizeLong() {
+        return mStat.f_bsize;
+    }
+
+    /**
      * The total number of blocks on the file system. This corresponds to the
      * Unix {@code statfs.f_blocks} field.
      */
     public int getBlockCount() {
         return (int) mStat.f_blocks;
+    }
+
+    /**
+     * The size, in bytes, of a block on the file system. This corresponds to
+     * the Unix {@code statfs.f_bsize} field.
+     */
+    public long getBlockCountLong() {
+        return mStat.f_blocks;
     }
 
     /**
@@ -83,10 +99,44 @@ public class StatFs {
     }
 
     /**
+     * The total number of blocks that are free on the file system, including
+     * reserved blocks (that are not available to normal applications). This
+     * corresponds to the Unix {@code statfs.f_bfree} field. Most applications
+     * will want to use {@link #getAvailableBlocks()} instead.
+     */
+    public long getFreeBlocksLong() {
+        return mStat.f_bfree;
+    }
+
+    /**
+     * The number of bytes that are free on the file system, including
+     * reserved blocks (that are not available to normal applications).
+     */
+    public long getFreeBytes() {
+        return mStat.f_bfree * mStat.f_bsize;
+    }
+
+    /**
      * The number of blocks that are free on the file system and available to
      * applications. This corresponds to the Unix {@code statfs.f_bavail} field.
      */
     public int getAvailableBlocks() {
         return (int) mStat.f_bavail;
+    }
+
+    /**
+     * The number of blocks that are free on the file system and available to
+     * applications. This corresponds to the Unix {@code statfs.f_bavail} field.
+     */
+    public long getAvailableBlocksLong() {
+        return mStat.f_bavail;
+    }
+
+    /**
+     * The number of bytes that are free on the file system and available to
+     * applications.
+     */
+    public long getAvailableBytes() {
+        return mStat.f_bavail * mStat.f_bsize;
     }
 }
