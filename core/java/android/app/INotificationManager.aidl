@@ -17,6 +17,7 @@
 
 package android.app;
 
+import android.app.INotificationListener;
 import android.app.ITransientNotification;
 import android.app.Notification;
 import android.content.Intent;
@@ -39,5 +40,8 @@ interface INotificationManager
 
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
+
+    void registerListener(in INotificationListener listener, int userid);
+    void unregisterListener(in INotificationListener listener, int userid);
 }
 
