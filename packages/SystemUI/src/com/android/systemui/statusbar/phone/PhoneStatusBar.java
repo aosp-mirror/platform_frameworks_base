@@ -246,16 +246,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     private ViewGroup mCling;
     private boolean mSuppressStatusBarDrags; // while a cling is up, briefly deaden the bar to give things time to settle
 
-    boolean mAnimating;
-    boolean mClosing; // only valid when mAnimating; indicates the initial acceleration
-    float mAnimY;
-    float mAnimVel;
-    float mAnimAccel;
-    long mAnimLastTimeNanos;
-    boolean mAnimatingReveal = false;
-    int mViewDelta;
-    float mFlingVelocity;
-    int mFlingY;
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
 
@@ -352,7 +342,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (mExpandedVisible && !mAnimating) {
+                    if (mExpandedVisible) {
                         animateCollapsePanels();
                     }
                 }
@@ -963,7 +953,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
             }
 
-            if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0 && !mAnimating) {
+            if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0) {
                 animateCollapsePanels();
             }
         }
@@ -1411,10 +1401,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse():"
                     + " mExpandedVisible=" + mExpandedVisible
-                    + " mAnimating=" + mAnimating
-                    + " mAnimatingReveal=" + mAnimatingReveal
-                    + " mAnimY=" + mAnimY
-                    + " mAnimVel=" + mAnimVel
                     + " flags=" + flags);
         }
 
@@ -2051,16 +2037,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     + ", mTrackingPosition=" + mTrackingPosition);
             pw.println("  mTicking=" + mTicking);
             pw.println("  mTracking=" + mTracking);
-            pw.println("  mNotificationPanel=" + 
-                    ((mNotificationPanel == null) 
-                            ? "null" 
-                            : (mNotificationPanel + " params=" + mNotificationPanel.getLayoutParams().debug(""))));
-            pw.println("  mAnimating=" + mAnimating
-                    + ", mAnimY=" + mAnimY + ", mAnimVel=" + mAnimVel
-                    + ", mAnimAccel=" + mAnimAccel);
-            pw.println("  mAnimLastTimeNanos=" + mAnimLastTimeNanos);
-            pw.println("  mAnimatingReveal=" + mAnimatingReveal
-                    + " mViewDelta=" + mViewDelta);
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
             pw.println("  mPile: " + viewInfo(mPile));
             pw.println("  mTickerView: " + viewInfo(mTickerView));
@@ -2073,6 +2049,20 @@ public class PhoneStatusBar extends BaseStatusBar {
             pw.println("null");
         } else {
             mNavigationBarView.dump(fd, pw, args);
+        }
+
+        pw.println("  Panels: ");
+        if (mNotificationPanel != null) {
+            pw.println("    mNotificationPanel=" +
+                mNotificationPanel + " params=" + mNotificationPanel.getLayoutParams().debug(""));
+            pw.print  ("      ");
+            mNotificationPanel.dump(fd, pw, args);
+        }
+        if (mSettingsPanel != null) {
+            pw.println("    mSettingsPanel=" +
+                mSettingsPanel + " params=" + mSettingsPanel.getLayoutParams().debug(""));
+            pw.print  ("      ");
+            mSettingsPanel.dump(fd, pw, args);
         }
 
         if (DUMPTRUCK) {
