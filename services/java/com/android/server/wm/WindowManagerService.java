@@ -888,7 +888,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowList windows = win.getWindowList();
         final int N = windows.size();
         final WindowState attached = win.mAttachedWindow;
-        int i;
         WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
         if (attached == null) {
             int tokenWindowsPos = 0;
@@ -938,13 +937,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         + client.asBinder() + " (token=" + token + ")");
                     // Figure out where the window should go, based on the
                     // order of applications.
-                    AppTokenList animatingAppTokens = displayContent.mAnimatingAppTokens;
-                    final int NA = animatingAppTokens.size();
                     WindowState pos = null;
-                    for (i=NA-1; i>=0; i--) {
-                        AppWindowToken t = animatingAppTokens.get(i);
+                    AppTokenIterator iterator =
+                            displayContent.new AppTokenIterator(true /*reverse*/);
+                    while (iterator.hasNext()) {
+                        AppWindowToken t = iterator.next();
                         if (t == token) {
-                            i--;
                             break;
                         }
 
@@ -977,15 +975,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else {
                         // Continue looking down until we find the first
                         // token that has windows on this display.
-                        while (i >= 0) {
-                            AppWindowToken t = animatingAppTokens.get(i);
+                        while (iterator.hasNext()) {
+                            AppWindowToken t = iterator.next();
                             tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
                             final int NW = tokenWindowList.size();
                             if (NW > 0) {
                                 pos = tokenWindowList.get(NW-1);
                                 break;
                             }
-                            i--;
                         }
                         if (pos != null) {
                             // Move in front of any windows attached to this
@@ -1004,7 +1001,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         } else {
                             // Just search for the start of this layer.
                             final int myLayer = win.mBaseLayer;
-                            for (i=0; i<N; i++) {
+                            int i;
+                            for (i = 0; i < N; i++) {
                                 WindowState w = windows.get(i);
                                 if (w.mBaseLayer > myLayer) {
                                     break;
@@ -1022,7 +1020,8 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 // Figure out where window should go, based on layer.
                 final int myLayer = win.mBaseLayer;
-                for (i=N-1; i>=0; i--) {
+                int i;
+                for (i = N - 1; i >= 0; i--) {
                     if (windows.get(i).mBaseLayer <= myLayer) {
                         break;
                     }
@@ -1047,7 +1046,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final int sublayer = win.mSubLayer;
             int largestSublayer = Integer.MIN_VALUE;
             WindowState windowWithLargestSublayer = null;
-            for (i=0; i<NA; i++) {
+            int i;
+            for (i = 0; i < NA; i++) {
                 WindowState w = tokenWindowList.get(i);
                 final int wSublayer = w.mSubLayer;
                 if (wSublayer >= largestSublayer) {
@@ -4369,18 +4369,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void dumpAnimatingAppTokensLocked() {
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            DisplayContent displayContent = iterator.next();
-            Slog.v(TAG, "  Display " + displayContent.getDisplayId());
-            AppTokenList appTokens = displayContent.mAnimatingAppTokens;
-            for (int i=appTokens.size()-1; i>=0; i--) {
-                Slog.v(TAG, "  #" + i + ": " + appTokens.get(i).token);
-            }
-        }
-    }
-
     void dumpWindowsLocked() {
         int i = 0;
         final AllWindowsIterator iterator = new AllWindowsIterator(REVERSE_ITERATOR);
@@ -4550,7 +4538,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 displayContent.mTaskLists.add(taskList);
 
-                displayContent.refillAnimatingAppTokens();
                 moveTaskWindowsLocked(taskId);
             }
         } finally {
@@ -4579,7 +4566,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 displayContent.mTaskLists.add(0, taskList);
 
-                displayContent.refillAnimatingAppTokens();
                 moveTaskWindowsLocked(taskId);
             }
         } finally {
@@ -6829,7 +6815,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mAppTransition.isTransitionSet()) {
                             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** APP TRANSITION TIMEOUT");
                             mAppTransition.setTimeout();
-                            getDefaultDisplayContentLocked().refillAnimatingAppTokens();
                             performLayoutAndPlaceSurfacesLocked();
                         }
                     }
@@ -7338,10 +7323,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // And add in the still active app tokens in Z order.
-        AppTokenList animatingAppTokens = displayContent.mAnimatingAppTokens;
-        NT = animatingAppTokens.size();
-        for (int j=0; j<NT; j++) {
-            i = reAddAppWindowsLocked(displayContent, i, animatingAppTokens.get(j));
+        AppTokenIterator iterator = displayContent.new AppTokenIterator();
+        while (iterator.hasNext()) {
+            i = reAddAppWindowsLocked(displayContent, i, iterator.next());
         }
 
         i -= lastBelow;
@@ -7361,7 +7345,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             Slog.w(TAG, "Current app token list:");
-            dumpAnimatingAppTokensLocked();
+            dumpAppTokensLocked();
             Slog.w(TAG, "Final window list:");
             dumpWindowsLocked();
         }
@@ -8008,11 +7992,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.setIdle();
         // Restore window app tokens to the ActivityManager views
         final DisplayContent displayContent = getDefaultDisplayContentLocked();
-        final AppTokenList animatingAppTokens = displayContent.mAnimatingAppTokens;
-        for (int i = animatingAppTokens.size() - 1; i >= 0; i--) {
-            animatingAppTokens.get(i).sendingToBottom = false;
+        AppTokenIterator iterator = displayContent.new AppTokenIterator();
+        while (iterator.hasNext()) {
+            iterator.next().sendingToBottom = false;
         }
-        displayContent.refillAnimatingAppTokens();
         rebuildAppWindowListLocked();
 
         changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
@@ -8169,10 +8152,9 @@ public class WindowManagerService extends IWindowManager.Stub
     private void updateAllDrawnLocked(DisplayContent displayContent) {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        final AppTokenList appTokens = displayContent.mAnimatingAppTokens;
-        final int NT = appTokens.size();
-        for (int i=0; i<NT; i++) {
-            AppWindowToken wtoken = appTokens.get(i);
+        AppTokenIterator iterator = displayContent.new AppTokenIterator();
+        while (iterator.hasNext()) {
+            AppWindowToken wtoken = iterator.next();
             if (!wtoken.allDrawn) {
                 int numInteresting = wtoken.numInterestingWindows;
                 if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
@@ -9524,23 +9506,6 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int i=mFinishedStarting.size()-1; i>=0; i--) {
                 WindowToken token = mFinishedStarting.get(i);
                 pw.print("  Finished Starting #"); pw.print(i);
-                        pw.print(' '); pw.print(token);
-                if (dumpAll) {
-                    pw.println(':');
-                    token.dump(pw, "    ");
-                } else {
-                    pw.println();
-                }
-            }
-        }
-        final AppTokenList animatingAppTokens =
-                getDefaultDisplayContentLocked().mAnimatingAppTokens;
-        if (mAppTransition.isRunning() && animatingAppTokens.size() > 0) {
-            pw.println();
-            pw.println("  Application tokens during animation:");
-            for (int i=animatingAppTokens.size()-1; i>=0; i--) {
-                WindowToken token = animatingAppTokens.get(i);
-                pw.print("  App moving to bottom #"); pw.print(i);
                         pw.print(' '); pw.print(token);
                 if (dumpAll) {
                     pw.println(':');

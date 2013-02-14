@@ -25,6 +25,7 @@ import android.view.Surface;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
+import com.android.server.wm.DisplayContent.AppTokenIterator;
 import com.android.server.wm.WindowManagerService.DisplayContentsIterator;
 import com.android.server.wm.WindowManagerService.LayoutFields;
 
@@ -174,10 +175,9 @@ public class WindowAnimator {
     private void updateAppWindowsLocked(int displayId) {
         int i;
         final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
-        final AppTokenList appTokens = displayContent.mAnimatingAppTokens;
-        final int NAT = appTokens.size();
-        for (i=0; i<NAT; i++) {
-            final AppWindowAnimator appAnimator = appTokens.get(i).mAppAnimator;
+        AppTokenIterator iterator = displayContent.new AppTokenIterator();
+        while (iterator.hasNext()) {
+            final AppWindowAnimator appAnimator = iterator.next().mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime)) {
@@ -458,11 +458,10 @@ public class WindowAnimator {
     private void testTokenMayBeDrawnLocked(int displayId) {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        final AppTokenList appTokens =
-                mService.getDisplayContentLocked(displayId).mAnimatingAppTokens;
-        final int NT = appTokens.size();
-        for (int i=0; i<NT; i++) {
-            AppWindowToken wtoken = appTokens.get(i);
+        AppTokenIterator iterator = mService.getDisplayContentLocked(displayId).new
+                AppTokenIterator();
+        while (iterator.hasNext()) {
+            AppWindowToken wtoken = iterator.next();
             AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             final boolean allDrawn = wtoken.allDrawn;
             if (allDrawn != appAnimator.allDrawn) {
