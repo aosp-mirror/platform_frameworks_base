@@ -228,6 +228,21 @@ public class ConnectivityManager {
     public static final String EXTRA_ERRORED_TETHER = "erroredArray";
 
     /**
+     * Broadcast Action: The captive portal tracker has finished its test.
+     * Sent only while running Setup Wizard, in lieu of showing a user
+     * notification.
+     * @hide
+     */
+    public static final String ACTION_CAPTIVE_PORTAL_TEST_COMPLETED =
+            "android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED";
+    /**
+     * The lookup key for a boolean that indicates whether a captive portal was detected.
+     * Retrieve it with {@link android.content.Intent#getBooleanExtra(String,boolean)}.
+     * @hide
+     */
+    public static final String EXTRA_IS_CAPTIVE_PORTAL = "captivePortal";
+
+    /**
      * The absence of APN..
      * @hide
      */

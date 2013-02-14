@@ -25,14 +25,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -81,15 +82,21 @@ public class CaptivePortalTracker extends StateMachine {
     private State mActiveNetworkState = new ActiveNetworkState();
     private State mDelayedCaptiveCheckState = new DelayedCaptiveCheckState();
 
+    private static final String SETUP_WIZARD_PACKAGE = "com.google.android.setupwizard";
+    private boolean mDeviceProvisioned = false;
+    private ProvisioningObserver mProvisioningObserver;
+
     private CaptivePortalTracker(Context context, IConnectivityManager cs) {
         super(TAG);
 
         mContext = context;
         mConnService = cs;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mProvisioningObserver = new ProvisioningObserver();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
         mContext.registerReceiver(mReceiver, filter);
 
         mServer = Settings.Global.getString(mContext.getContentResolver(),
@@ -106,11 +113,31 @@ public class CaptivePortalTracker extends StateMachine {
         setInitialState(mNoActiveNetworkState);
     }
 
+    private class ProvisioningObserver extends ContentObserver {
+        ProvisioningObserver() {
+            super(new Handler());
+            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.DEVICE_PROVISIONED), false, this);
+            onChange(false); // load initial value
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            mDeviceProvisioned = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        }
+    }
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+            // Normally, we respond to CONNECTIVITY_ACTION, allowing time for the change in
+            // connectivity to stabilize, but if the device is not yet provisioned, respond
+            // immediately to speed up transit through the setup wizard.
+            if ((mDeviceProvisioned && action.equals(ConnectivityManager.CONNECTIVITY_ACTION))
+                    || (!mDeviceProvisioned
+                            && action.equals(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE))) {
                 NetworkInfo info = intent.getParcelableExtra(
                         ConnectivityManager.EXTRA_NETWORK_INFO);
                 sendMessage(obtainMessage(CMD_CONNECTIVITY_CHANGE, info));
@@ -222,8 +249,12 @@ public class CaptivePortalTracker extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            sendMessageDelayed(obtainMessage(CMD_DELAYED_CAPTIVE_CHECK,
-                        ++mDelayedCheckToken, 0), DELAYED_CHECK_INTERVAL_MS);
+            Message message = obtainMessage(CMD_DELAYED_CAPTIVE_CHECK, ++mDelayedCheckToken, 0);
+            if (mDeviceProvisioned) {
+                sendMessageDelayed(message, DELAYED_CHECK_INTERVAL_MS);
+            } else {
+                sendMessage(message);
+            }
         }
 
         @Override
@@ -233,13 +264,26 @@ public class CaptivePortalTracker extends StateMachine {
                 case CMD_DELAYED_CAPTIVE_CHECK:
                     if (message.arg1 == mDelayedCheckToken) {
                         InetAddress server = lookupHost(mServer);
-                        if (server != null) {
-                            if (isCaptivePortal(server)) {
-                                if (DBG) log("Captive network " + mNetworkInfo);
+                        boolean captive = server != null && isCaptivePortal(server);
+                        if (captive) {
+                            if (DBG) log("Captive network " + mNetworkInfo);
+                        } else {
+                            if (DBG) log("Not captive network " + mNetworkInfo);
+                        }
+                        if (mDeviceProvisioned) {
+                            if (captive) {
+                                // Setup Wizard will assist the user in connecting to a captive
+                                // portal, so make the notification visible unless during setup
                                 setNotificationVisible(true);
                             }
+                        } else {
+                            Intent intent = new Intent(
+                                    ConnectivityManager.ACTION_CAPTIVE_PORTAL_TEST_COMPLETED);
+                            intent.putExtra(ConnectivityManager.EXTRA_IS_CAPTIVE_PORTAL, captive);
+                            intent.setPackage(SETUP_WIZARD_PACKAGE);
+                            mContext.sendBroadcast(intent);
                         }
-                        if (DBG) log("Not captive network " + mNetworkInfo);
+
                         transitionTo(mActiveNetworkState);
                     }
                     break;

@@ -129,6 +129,7 @@
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
     <protected-broadcast android:name="android.net.conn.DATA_ACTIVITY_CHANGE" />
+    <protected-broadcast android:name="android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
@@ -641,7 +642,7 @@
         android:protectionLevel="normal"
         android:description="@string/permdesc_accessWifiState"
         android:label="@string/permlab_accessWifiState" />
-        
+
     <!-- Allows applications to change Wi-Fi connectivity state -->
     <permission android:name="android.permission.CHANGE_WIFI_STATE"
         android:permissionGroup="android.permission-group.NETWORK"
@@ -681,14 +682,14 @@
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_bluetooth"
         android:label="@string/permlab_bluetooth" />
-        
+
     <!-- Allows applications to discover and pair bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
-   
+
     <!-- Allows bluetooth stack to access files
          @hide This should only be used by Bluetooth apk.
     -->
@@ -719,7 +720,7 @@
     <permission android:name="android.permission.LOOP_RADIO"
 	android:permissionGroup="android.permission-group.NETWORK"
 	android:protectionLevel="signature|system" />
-    
+
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
@@ -1129,7 +1130,7 @@
         android:protectionLevel="signature|system"
         android:label="@string/permlab_manageUsers"
         android:description="@string/permdesc_manageUsers" />
-    
+
     <!-- Allows an application to get full detailed information about
          recently running tasks, with full fidelity to the real state.
          @hide -->
@@ -1671,7 +1672,7 @@
         android:label="@string/permlab_freezeScreen"
         android:description="@string/permdesc_freezeScreen"
         android:protectionLevel="signature" />
-    
+
     <!-- Allows an application to inject user events (keys, touch, trackball)
          into the event stream and deliver them to ANY window.  Without this
          permission, you can only deliver events to windows in your own process.
