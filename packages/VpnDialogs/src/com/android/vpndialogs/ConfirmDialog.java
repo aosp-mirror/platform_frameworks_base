@@ -78,6 +78,7 @@ public class ConfirmDialog extends AlertActivity implements
             getWindow().setCloseOnTouchOutside(false);
             mButton = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
             mButton.setEnabled(false);
+            mButton.setFilterTouchesWhenObscured(true);
         } catch (Exception e) {
             Log.e(TAG, "onResume", e);
             finish();

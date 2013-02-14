@@ -52,6 +52,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/accept"
                 android:textSize="20sp"
+                android:filterTouchesWhenObscured="true"
                 android:checked="false"/>
     </LinearLayout>
 </ScrollView>
