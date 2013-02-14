@@ -467,12 +467,10 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mAndroidKeyStore = android.security.KeyStore.getInstance();
 
         assertTrue(mAndroidKeyStore.reset());
-
-        assertEquals(android.security.KeyStore.State.UNINITIALIZED, mAndroidKeyStore.state());
+        assertFalse(mAndroidKeyStore.isUnlocked());
 
         assertTrue(mAndroidKeyStore.password("1111"));
-
-        assertEquals(android.security.KeyStore.State.UNLOCKED, mAndroidKeyStore.state());
+        assertTrue(mAndroidKeyStore.isUnlocked());
 
         assertEquals(0, mAndroidKeyStore.saw("").length);
 
