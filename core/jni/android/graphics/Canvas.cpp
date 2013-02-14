@@ -725,7 +725,7 @@ public:
     }
 
 
-    static void drawText___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
+    static void drawText___CIIFFPaint(JNIEnv* env, jobject, SkCanvas* canvas,
                                       jcharArray text, int index, int count,
                                       jfloat x, jfloat y, SkPaint* paint) {
         jchar* textArray = env->GetCharArrayElements(text, NULL);
@@ -733,7 +733,7 @@ public:
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     }
 
-    static void drawText__StringIIFFIPaint(JNIEnv* env, jobject,
+    static void drawText__StringIIFFPaint(JNIEnv* env, jobject,
                                           SkCanvas* canvas, jstring text,
                                           int start, int end,
                                           jfloat x, jfloat y, SkPaint* paint) {
@@ -819,10 +819,10 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
         delete[] posPtr;
     }
 
-    static void drawTextRun___CIIIIFFIPaint(
+    static void drawTextRun___CIIIIFFPaint(
         JNIEnv* env, jobject, SkCanvas* canvas, jcharArray text, int index,
         int count, int contextIndex, int contextCount,
-        jfloat x, jfloat y, int dirFlags, SkPaint* paint) {
+        jfloat x, jfloat y, SkPaint* paint) {
 
         jchar* chars = env->GetCharArrayElements(text, NULL);
         drawTextWithGlyphs(canvas, chars + contextIndex, index - contextIndex,
@@ -830,10 +830,10 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
         env->ReleaseCharArrayElements(text, chars, JNI_ABORT);
     }
 
-    static void drawTextRun__StringIIIIFFIPaint(
+    static void drawTextRun__StringIIIIFFPaint(
         JNIEnv* env, jobject obj, SkCanvas* canvas, jstring text, jint start,
         jint end, jint contextStart, jint contextEnd,
-        jfloat x, jfloat y, jint dirFlags, SkPaint* paint) {
+        jfloat x, jfloat y, SkPaint* paint) {
 
         jint count = end - start;
         jint contextCount = contextEnd - contextStart;
@@ -1024,13 +1024,13 @@ static JNINativeMethod gCanvasMethods[] = {
     {"nativeDrawVertices", "(III[FI[FI[II[SIII)V",
         (void*)SkCanvasGlue::drawVertices},
     {"native_drawText","(I[CIIFFI)V",
-        (void*) SkCanvasGlue::drawText___CIIFFIPaint},
+        (void*) SkCanvasGlue::drawText___CIIFFPaint},
     {"native_drawText","(ILjava/lang/String;IIFFI)V",
-        (void*) SkCanvasGlue::drawText__StringIIFFIPaint},
+        (void*) SkCanvasGlue::drawText__StringIIFFPaint},
     {"native_drawTextRun","(I[CIIIIFFI)V",
-        (void*) SkCanvasGlue::drawTextRun___CIIIIFFIPaint},
+        (void*) SkCanvasGlue::drawTextRun___CIIIIFFPaint},
     {"native_drawTextRun","(ILjava/lang/String;IIIIFFI)V",
-        (void*) SkCanvasGlue::drawTextRun__StringIIIIFFIPaint},
+        (void*) SkCanvasGlue::drawTextRun__StringIIIIFFPaint},
     {"native_drawPosText","(I[CII[FI)V",
         (void*) SkCanvasGlue::drawPosText___CII_FPaint},
     {"native_drawPosText","(ILjava/lang/String;[FI)V",
