@@ -33,7 +33,7 @@ struct Vertex {
 }; // struct Vertex
 
 /**
- * Simple structure to describe a vertex with a position and a texture.
+ * Simple structure to describe a vertex with a position and texture UV.
  */
 struct TextureVertex {
     float position[2];
@@ -51,6 +51,24 @@ struct TextureVertex {
         vertex[0].texture[1] = v;
     }
 }; // struct TextureVertex
+
+/**
+ * Simple structure to describe a vertex with a position, texture UV and ARGB color.
+ */
+struct ColorTextureVertex : TextureVertex {
+    float color[4];
+
+    static inline void set(ColorTextureVertex* vertex, float x, float y,
+            float u, float v, int color) {
+        TextureVertex::set(vertex, x, y, u, v);
+
+        const float a = ((color >> 24) & 0xff) / 255.0f;
+        vertex[0].color[0] = a * ((color >> 16) & 0xff) / 255.0f;
+        vertex[0].color[1] = a * ((color >>  8) & 0xff) / 255.0f;
+        vertex[0].color[2] = a * ((color      ) & 0xff) / 255.0f;
+        vertex[0].color[3] = a;
+    }
+}; // struct ColorTextureVertex
 
 /**
  * Simple structure to describe a vertex with a position and an alpha value.

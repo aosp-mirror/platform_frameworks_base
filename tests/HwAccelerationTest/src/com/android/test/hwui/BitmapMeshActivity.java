@@ -54,7 +54,7 @@ public class BitmapMeshActivity extends Activity {
                 0.0f, height * 2, width, height * 2, width * 2, height * 2, width * 3, height * 2,
                 0.0f, height * 4, width, height * 4, width * 2, height * 4, width * 4, height * 4,
             };
-            
+
             mColors = new int[] {
                 0xffff0000, 0xff00ff00, 0xff0000ff, 0xffff0000,
                 0xff0000ff, 0xffff0000, 0xff00ff00, 0xff00ff00,

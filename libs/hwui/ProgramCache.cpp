@@ -40,6 +40,8 @@ const char* gVS_Header_Attributes =
         "attribute vec4 position;\n";
 const char* gVS_Header_Attributes_TexCoords =
         "attribute vec2 texCoords;\n";
+const char* gVS_Header_Attributes_Colors =
+        "attribute vec4 colors;\n";
 const char* gVS_Header_Attributes_AAVertexShapeParameters =
         "attribute float vtxAlpha;\n";
 const char* gVS_Header_Uniforms_TextureTransform =
@@ -65,6 +67,8 @@ const char* gVS_Header_Uniforms_HasBitmap =
         "uniform mediump vec2 textureDimension;\n";
 const char* gVS_Header_Varyings_HasTexture =
         "varying vec2 outTexCoords;\n";
+const char* gVS_Header_Varyings_HasColors =
+        "varying vec4 outColors;\n";
 const char* gVS_Header_Varyings_IsAAVertexShape =
         "varying float alpha;\n";
 const char* gVS_Header_Varyings_HasBitmap =
@@ -94,6 +98,8 @@ const char* gVS_Main =
         "\nvoid main(void) {\n";
 const char* gVS_Main_OutTexCoords =
         "    outTexCoords = texCoords;\n";
+const char* gVS_Main_OutColors =
+        "    outColors = colors;\n";
 const char* gVS_Main_OutTransformedTexCoords =
         "    outTexCoords = (mainTextureTransform * vec4(texCoords, 0.0, 1.0)).xy;\n";
 const char* gVS_Main_OutGradient[6] = {
@@ -325,6 +331,8 @@ const char* gFS_Main_BitmapShader_Modulate[6] = {
     };
 const char* gFS_Main_FragColor =
         "    gl_FragColor = fragColor;\n";
+const char* gFS_Main_FragColor_HasColors =
+        "    gl_FragColor *= outColors;\n";
 const char* gFS_Main_FragColor_Blend =
         "    gl_FragColor = blendFramebuffer(fragColor, gl_LastFragColor);\n";
 const char* gFS_Main_FragColor_Blend_Swap =
@@ -459,6 +467,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     if (description.isAA) {
         shader.append(gVS_Header_Attributes_AAVertexShapeParameters);
     }
+    if (description.hasColors) {
+        shader.append(gVS_Header_Attributes_Colors);
+    }
     // Uniforms
     shader.append(gVS_Header_Uniforms);
     if (description.hasTextureTransform) {
@@ -480,6 +491,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     if (description.isAA) {
         shader.append(gVS_Header_Varyings_IsAAVertexShape);
     }
+    if (description.hasColors) {
+        shader.append(gVS_Header_Varyings_HasColors);
+    }
     if (description.hasGradient) {
         shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description)]);
     }
@@ -498,6 +512,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         }
         if (description.isAA) {
             shader.append(gVS_Main_AAVertexShape);
+        }
+        if (description.hasColors) {
+            shader.append(gVS_Main_OutColors);
         }
         if (description.hasBitmap) {
             shader.append(description.isPoint ?
@@ -549,6 +566,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.isAA) {
         shader.append(gVS_Header_Varyings_IsAAVertexShape);
     }
+    if (description.hasColors) {
+        shader.append(gVS_Header_Varyings_HasColors);
+    }
     if (description.hasGradient) {
         shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description)]);
     }
@@ -583,7 +603,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
 
     // Optimization for common cases
-    if (!description.isAA && !blendFramebuffer &&
+    if (!description.isAA && !blendFramebuffer && !description.hasColors &&
             description.colorOp == ProgramDescription::kColorNone && !description.isPoint) {
         bool fast = false;
 
@@ -728,6 +748,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         } else {
             shader.append(!description.swapSrcDst ?
                     gFS_Main_FragColor_Blend : gFS_Main_FragColor_Blend_Swap);
+        }
+        if (description.hasColors) {
+            shader.append(gFS_Main_FragColor_HasColors);
         }
     }
     // End the shader
