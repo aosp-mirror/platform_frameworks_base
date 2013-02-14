@@ -145,7 +145,8 @@ LOCAL_SRC_FILES:= \
 	android_app_backup_FullBackup.cpp \
 	android_content_res_ObbScanner.cpp \
 	android_content_res_Configuration.cpp \
-    android_animation_PropertyValuesHolder.cpp
+	android_animation_PropertyValuesHolder.cpp \
+	com_android_internal_net_NetworkStatsFactory.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
@@ -155,7 +156,7 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
- $(TOP)/frameworks/av/include \
+	$(TOP)/frameworks/av/include \
 	external/skia/include/core \
 	external/skia/include/effects \
 	external/skia/include/images \
