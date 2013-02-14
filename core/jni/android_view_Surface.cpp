@@ -85,7 +85,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
             env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeObject));
 }
 
-jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
+jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         const sp<IGraphicBufferProducer>& bufferProducer) {
     if (bufferProducer == NULL) {
         return NULL;
@@ -131,22 +131,22 @@ static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jobject surfaceObj,
     return int(surface.get());
 }
 
-static void nativeRelease(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    sur->decStrong(surfaceObj);
+    sur->decStrong(clazz);
 }
 
-static void nativeDestroy(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    sur->decStrong(surfaceObj);
+    sur->decStrong(clazz);
 }
 
-static jboolean nativeIsValid(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     return Surface::isValid(sur) ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     if (!Surface::isValid(sur)) {
         doThrowIAE(env);
@@ -284,7 +284,7 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jobject surfaceObj, jint nati
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCopyFrom(JNIEnv* env, jobject surfaceObj,
+static jint nativeCopyFrom(JNIEnv* env, jclass clazz,
         jint nativeObject, jint surfaceControlNativeObj) {
     /*
      * This is used by the WindowManagerService just after constructing
@@ -295,18 +295,18 @@ static jint nativeCopyFrom(JNIEnv* env, jobject surfaceObj,
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
     sp<Surface> other(ctrl->getSurface());
     if (other != NULL) {
-        other->incStrong(surfaceObj);
+        other->incStrong(clazz);
     }
 
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     if (sur != NULL) {
-        sur->decStrong(surfaceObj);
+        sur->decStrong(clazz);
     }
 
     return int(other.get());
 }
 
-static jint nativeReadFromParcel(JNIEnv* env, jobject surfaceObj,
+static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
         jint nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
@@ -315,16 +315,16 @@ static jint nativeReadFromParcel(JNIEnv* env, jobject surfaceObj,
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
     if (self != NULL) {
-        self->decStrong(surfaceObj);
+        self->decStrong(clazz);
     }
     sp<Surface> sur(Surface::readFromParcel(*parcel));
     if (sur != NULL) {
-        sur->incStrong(surfaceObj);
+        sur->incStrong(clazz);
     }
     return int(sur.get());
 }
 
-static void nativeWriteToParcel(JNIEnv* env, jobject surfaceObj,
+static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         jint nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {

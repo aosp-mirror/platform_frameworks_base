@@ -37,24 +37,22 @@ public class BlackFrame {
         final SurfaceControl surface;
 
         BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b, int layerStack)
-                throws Surface.OutOfResourcesException {
+                throws SurfaceControl.OutOfResourcesException {
             left = l;
             top = t;
             this.layer = layer;
             int w = r-l;
             int h = b-t;
-            try {
-                if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                    surface = new WindowStateAnimator.SurfaceTrace(session, "BlackSurface("
-                            + l + ", " + t + ")",
-                            w, h, PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
-                } else {
-                    surface = new SurfaceControl(session, "BlackSurface",
-                            w, h, PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
-                }
-            } catch (SurfaceControl.OutOfResourcesException e) {
-                throw new Surface.OutOfResourcesException(e.getMessage());
+
+            if (WindowManagerService.DEBUG_SURFACE_TRACE) {
+                surface = new WindowStateAnimator.SurfaceTrace(session, "BlackSurface("
+                        + l + ", " + t + ")",
+                        w, h, PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
+            } else {
+                surface = new SurfaceControl(session, "BlackSurface",
+                        w, h, PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
             }
+
             surface.setAlpha(1);
             surface.setLayerStack(layerStack);
             surface.setLayer(layer);
@@ -109,7 +107,7 @@ public class BlackFrame {
     }
 
     public BlackFrame(SurfaceSession session, Rect outer, Rect inner,
-            int layer, final int layerStack) throws Surface.OutOfResourcesException {
+            int layer, final int layerStack) throws SurfaceControl.OutOfResourcesException {
         boolean success = false;
 
         mOuterRect = new Rect(outer);

@@ -314,17 +314,17 @@ final class Session extends IWindowSession.Stub
             mService.mDragState.mThumbOffsetY = thumbCenterY;
 
             // Make the surface visible at the proper location
-            final SurfaceControl surface = mService.mDragState.mSurface;
+            final SurfaceControl surfaceControl = mService.mDragState.mSurfaceControl;
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     WindowManagerService.TAG, ">>> OPEN TRANSACTION performDrag");
             SurfaceControl.openTransaction();
             try {
-                surface.setPosition(touchX - thumbCenterX,
+                surfaceControl.setPosition(touchX - thumbCenterX,
                         touchY - thumbCenterY);
-                surface.setAlpha(.7071f);
-                surface.setLayer(mService.mDragState.getDragLayerLw());
-                surface.setLayerStack(display.getLayerStack());
-                surface.show();
+                surfaceControl.setAlpha(.7071f);
+                surfaceControl.setLayer(mService.mDragState.getDragLayerLw());
+                surfaceControl.setLayerStack(display.getLayerStack());
+                surfaceControl.show();
             } finally {
                 SurfaceControl.closeTransaction();
                 if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(

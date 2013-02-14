@@ -37,7 +37,7 @@ extern bool android_view_Surface_isInstanceOf(JNIEnv* env, jobject obj);
 extern sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj);
 
 /* Creates a Surface from an IGraphicBufferProducer. */
-extern jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
+extern jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         const sp<IGraphicBufferProducer>& bufferProducer);
 
 } // namespace android
