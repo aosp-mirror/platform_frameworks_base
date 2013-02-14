@@ -222,37 +222,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
-        try {
-            mWm.moveAppToken(0, null);
-            fail("IWindowManager.moveAppToken did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-        
-        try {
-            mWm.moveAppTokensToTop(null);
-            fail("IWindowManager.moveAppTokensToTop did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-        
-        try {
-            mWm.moveAppTokensToBottom(null);
-            fail("IWindowManager.moveAppTokensToBottom did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-	}    
+    }
 
     @SmallTest
     public void testDISABLE_KEYGUARD() {
