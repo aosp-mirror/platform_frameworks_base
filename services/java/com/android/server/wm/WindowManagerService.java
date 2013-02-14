@@ -7631,6 +7631,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowState windowForClientLocked(Session session, IBinder client,
             boolean throwOnError) {
+        if (client == null)
+            return null; //this is intentional, so STFU
         WindowState win = mWindowMap.get(client);
         if (localLOGV) Slog.v(
             TAG, "Looking up client " + client + ": " + win);
