@@ -462,7 +462,7 @@ public class Vpn extends BaseNetworkStateTracker {
      * secondary thread to perform connection work, returning quickly.
      */
     public void startLegacyVpn(VpnProfile profile, KeyStore keyStore, LinkProperties egress) {
-        if (keyStore.state() != KeyStore.State.UNLOCKED) {
+        if (!keyStore.isUnlocked()) {
             throw new IllegalStateException("KeyStore isn't unlocked");
         }
 

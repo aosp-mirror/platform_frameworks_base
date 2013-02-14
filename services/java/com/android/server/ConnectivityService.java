@@ -3341,7 +3341,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // Tear down existing lockdown if profile was removed
         mLockdownEnabled = LockdownVpnTracker.isEnabled();
         if (mLockdownEnabled) {
-            if (mKeyStore.state() != KeyStore.State.UNLOCKED) {
+            if (!mKeyStore.isUnlocked()) {
                 Slog.w(TAG, "KeyStore locked; unable to create LockdownTracker");
                 return false;
             }
