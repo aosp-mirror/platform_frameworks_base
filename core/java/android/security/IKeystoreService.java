@@ -148,6 +148,10 @@ public interface IKeystoreService extends IInterface {
                     for (int i = 0; i < size; i++) {
                         _result[i] = _reply.readString();
                     }
+                    int _ret = _reply.readInt();
+                    if (_ret != 1) {
+                        return null;
+                    }
                 } finally {
                     _reply.recycle();
                     _data.recycle();
