@@ -23,6 +23,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include <android_runtime/android_graphics_SurfaceTexture.h>
+#include <android_runtime/android_view_Surface.h>
 
 #include <cutils/properties.h>
 #include <utils/Vector.h>
@@ -36,7 +37,6 @@ using namespace android;
 
 struct fields_t {
     jfieldID    context;
-    jfieldID    surface;
     jfieldID    facing;
     jfieldID    orientation;
     jfieldID    canDisableShutterSound;
@@ -537,10 +537,8 @@ static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    sp<Surface> surface = NULL;
-    if (jSurface != NULL) {
-        surface = reinterpret_cast<Surface*>(env->GetIntField(jSurface, fields.surface));
-    }
+    sp<Surface> surface = android_view_Surface_getSurface(env, jSurface);
+
     if (camera->setPreviewDisplay(surface) != NO_ERROR) {
         jniThrowException(env, "java/io/IOException", "setPreviewDisplay failed");
     }
@@ -965,7 +963,6 @@ int register_android_hardware_Camera(JNIEnv *env)
 {
     field fields_to_find[] = {
         { "android/hardware/Camera", "mNativeContext",   "I", &fields.context },
-        { "android/view/Surface",    ANDROID_VIEW_SURFACE_JNI_ID, "I", &fields.surface },
         { "android/hardware/Camera$CameraInfo", "facing",   "I", &fields.facing },
         { "android/hardware/Camera$CameraInfo", "orientation",   "I", &fields.orientation },
         { "android/hardware/Camera$CameraInfo", "canDisableShutterSound",   "Z",

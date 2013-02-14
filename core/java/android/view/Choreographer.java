@@ -693,7 +693,7 @@ public final class Choreographer {
             // At this time Surface Flinger won't send us vsyncs for secondary displays
             // but that could change in the future so let's log a message to help us remember
             // that we need to fix this.
-            if (builtInDisplayId != Surface.BUILT_IN_DISPLAY_ID_MAIN) {
+            if (builtInDisplayId != SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
                 Log.d(TAG, "Received vsync from secondary display, but we don't support "
                         + "this case yet.  Choreographer needs a way to explicitly request "
                         + "vsync for a specific display to ensure it doesn't lose track "

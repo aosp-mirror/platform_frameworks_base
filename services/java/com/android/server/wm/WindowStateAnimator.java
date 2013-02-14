@@ -20,6 +20,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
@@ -87,8 +88,8 @@ class WindowStateAnimator {
     int mAnimLayer;
     int mLastLayer;
 
-    Surface mSurface;
-    Surface mPendingDestroySurface;
+    SurfaceControl mSurface;
+    SurfaceControl mPendingDestroySurface;
 
     /**
      * Set when we have changed the size of the surface, to know that
@@ -477,7 +478,7 @@ class WindowStateAnimator {
         return true;
     }
 
-    static class SurfaceTrace extends Surface {
+    static class SurfaceTrace extends SurfaceControl {
         private final static String SURFACE_TAG = "SurfaceTrace";
         final static ArrayList<SurfaceTrace> sSurfaces = new ArrayList<SurfaceTrace>();
 
@@ -623,7 +624,7 @@ class WindowStateAnimator {
         }
     }
 
-    Surface createSurfaceLocked() {
+    SurfaceControl createSurfaceLocked() {
         if (mSurface == null) {
             if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
                     "createSurface " + this + ": mDrawState=DRAW_PENDING");
@@ -641,11 +642,11 @@ class WindowStateAnimator {
 
             mService.makeWindowFreezingScreenIfNeededLocked(mWin);
 
-            int flags = Surface.HIDDEN;
+            int flags = SurfaceControl.HIDDEN;
             final WindowManager.LayoutParams attrs = mWin.mAttrs;
 
             if ((attrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
-                flags |= Surface.SECURE;
+                flags |= SurfaceControl.SECURE;
             }
             if (WindowState.DEBUG_VISIBILITY) Slog.v(
                 TAG, "Creating surface in session "
@@ -681,7 +682,7 @@ class WindowStateAnimator {
                         WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
                 final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
                 if (!PixelFormat.formatHasAlpha(attrs.format)) {
-                    flags |= Surface.OPAQUE;
+                    flags |= SurfaceControl.OPAQUE;
                 }
                 if (DEBUG_SURFACE_TRACE) {
                     mSurface = new SurfaceTrace(
@@ -689,7 +690,7 @@ class WindowStateAnimator {
                             attrs.getTitle().toString(),
                             w, h, format, flags);
                 } else {
-                    mSurface = new Surface(
+                    mSurface = new SurfaceControl(
                         mSession.mSurfaceSession,
                         attrs.getTitle().toString(),
                         w, h, format, flags);
@@ -703,7 +704,7 @@ class WindowStateAnimator {
                         + attrs.format + " flags=0x"
                         + Integer.toHexString(flags)
                         + " / " + this);
-            } catch (Surface.OutOfResourcesException e) {
+            } catch (SurfaceControl.OutOfResourcesException e) {
                 mWin.mHasSurface = false;
                 Slog.w(TAG, "OutOfResourcesException creating surface");
                 mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
@@ -727,7 +728,7 @@ class WindowStateAnimator {
                         + mWin.mCompatFrame.width() + "x" + mWin.mCompatFrame.height()
                         + "), layer=" + mAnimLayer + " HIDE", null);
             }
-            Surface.openTransaction();
+            SurfaceControl.openTransaction();
             try {
                 try {
                     mSurfaceX = mWin.mFrame.left + mWin.mXOffset;
@@ -744,7 +745,7 @@ class WindowStateAnimator {
                 }
                 mLastHidden = true;
             } finally {
-                Surface.closeTransaction();
+                SurfaceControl.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION createSurfaceLocked");
             }
@@ -1324,13 +1325,13 @@ class WindowStateAnimator {
         }
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
             ">>> OPEN TRANSACTION setTransparentRegion");
-        Surface.openTransaction();
+        SurfaceControl.openTransaction();
         try {
             if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
                     "transparentRegionHint=" + region, null);
             mSurface.setTransparentRegionHint(region);
         } finally {
-            Surface.closeTransaction();
+            SurfaceControl.closeTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setTransparentRegion");
         }
@@ -1351,7 +1352,7 @@ class WindowStateAnimator {
             }
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION setWallpaperOffset");
-            Surface.openTransaction();
+            SurfaceControl.openTransaction();
             try {
                 if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
                         "POS " + left + ", " + top, null);
@@ -1361,7 +1362,7 @@ class WindowStateAnimator {
                 Slog.w(TAG, "Error positioning surface of " + mWin
                         + " pos=(" + left + "," + top + ")", e);
             } finally {
-                Surface.closeTransaction();
+                SurfaceControl.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION setWallpaperOffset");
             }

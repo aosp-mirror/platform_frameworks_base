@@ -34,6 +34,7 @@
 #include "android_runtime/AndroidRuntime.h"
 
 #include <system/audio.h>
+#include <android_runtime/android_view_Surface.h>
 
 // ----------------------------------------------------------------------------
 
@@ -47,8 +48,6 @@ extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, struct JNICameraC
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
-    /* actually in android.view.Surface XXX */
-    jfieldID    surface_native;
 
     jmethodID   post_event;
 };
@@ -109,8 +108,7 @@ void JNIMediaRecorderListener::notify(int msg, int ext1, int ext2)
 static sp<Surface> get_surface(JNIEnv* env, jobject clazz)
 {
     ALOGV("get_surface");
-    Surface* const p = (Surface*)env->GetIntField(clazz, fields.surface_native);
-    return sp<Surface>(p);
+    return android_view_Surface_getSurface(env, clazz);
 }
 
 // Returns true if it throws an exception.
@@ -406,11 +404,6 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
 
     jclass surface = env->FindClass("android/view/Surface");
     if (surface == NULL) {
-        return;
-    }
-
-    fields.surface_native = env->GetFieldID(surface, ANDROID_VIEW_SURFACE_JNI_ID, "I");
-    if (fields.surface_native == NULL) {
         return;
     }
 

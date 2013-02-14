@@ -30,6 +30,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -284,7 +285,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         @Override
         public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate) {
             synchronized (getSyncRoot()) {
-                IBinder displayToken = Surface.createDisplay(mName, false);
+                IBinder displayToken = SurfaceControl.createDisplay(mName, false);
                 mDevice = new OverlayDisplayDevice(displayToken, mName,
                         mWidth, mHeight, refreshRate, mDensityDpi, surfaceTexture);
 

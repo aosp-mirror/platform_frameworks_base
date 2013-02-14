@@ -34,6 +34,7 @@ import android.view.Display;
 import android.view.DragEvent;
 import android.view.InputChannel;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -45,7 +46,7 @@ import java.util.ArrayList;
 class DragState {
     final WindowManagerService mService;
     IBinder mToken;
-    Surface mSurface;
+    SurfaceControl mSurface;
     int mFlags;
     IBinder mLocalWin;
     ClipData mData;
@@ -64,7 +65,7 @@ class DragState {
 
     private final Region mTmpRegion = new Region();
 
-    DragState(WindowManagerService service, IBinder token, Surface surface,
+    DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
             int flags, IBinder localWin) {
         mService = service;
         mToken = token;
@@ -293,14 +294,14 @@ class DragState {
         // Move the surface to the given touch
         if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
                 WindowManagerService.TAG, ">>> OPEN TRANSACTION notifyMoveLw");
-        Surface.openTransaction();
+        SurfaceControl.openTransaction();
         try {
             mSurface.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DRAG "
                     + mSurface + ": pos=(" +
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
         } finally {
-            Surface.closeTransaction();
+            SurfaceControl.closeTransaction();
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     WindowManagerService.TAG, "<<< CLOSE TRANSACTION notifyMoveLw");
         }
