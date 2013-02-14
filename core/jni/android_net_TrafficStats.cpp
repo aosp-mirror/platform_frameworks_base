@@ -87,8 +87,8 @@ static int parseIfaceStats(const char* iface, struct Stats* stats) {
 
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {
         int matched = sscanf(buffer, "%31s %llu %llu %llu %llu "
-                "%*llu %llu %*llu %*llu %*llu %*llu "
-                "%*llu %llu %*llu %*llu %*llu %*llu", cur_iface, &rxBytes,
+                "%*u %llu %*u %*u %*u %*u "
+                "%*u %llu %*u %*u %*u %*u", cur_iface, &rxBytes,
                 &rxPackets, &txBytes, &txPackets, &tcpRxPackets, &tcpTxPackets);
         if (matched >= 5) {
             if (matched == 7) {
