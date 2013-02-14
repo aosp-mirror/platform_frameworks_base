@@ -74,6 +74,10 @@ public class KeyStore {
         }
     }
 
+    public boolean isUnlocked() {
+        return state() == State.UNLOCKED;
+    }
+
     public byte[] get(String key) {
         try {
             return mBinder.get(key);
