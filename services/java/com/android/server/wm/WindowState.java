@@ -1064,7 +1064,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return true;
     }
 
-    public boolean setAppOpVisibilityLw(boolean state) {
+    public void setAppOpVisibilityLw(boolean state) {
         if (mAppOpVisibility != state) {
             mAppOpVisibility = state;
             if (state) {
@@ -1074,13 +1074,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 // ops modifies they should only be hidden by policy due to the
                 // lock screen, and the user won't be changing this if locked.
                 // Plus it will quickly be fixed the next time we do a layout.
-                showLw(true, false);
+                showLw(true, true);
             } else {
-                hideLw(true, false);
+                hideLw(true, true);
             }
-            return true;
         }
-        return false;
     }
 
     @Override
