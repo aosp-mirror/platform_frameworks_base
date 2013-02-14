@@ -135,6 +135,18 @@ public class NetworkStats implements Parcelable {
             builder.append(" operations=").append(operations);
             return builder.toString();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Entry) {
+                final Entry e = (Entry) o;
+                return uid == e.uid && set == e.set && tag == e.tag && rxBytes == e.rxBytes
+                        && rxPackets == e.rxPackets && txBytes == e.txBytes
+                        && txPackets == e.txPackets && operations == e.operations
+                        && iface.equals(e.iface);
+            }
+            return false;
+        }
     }
 
     public NetworkStats(long elapsedRealtime, int initialSize) {

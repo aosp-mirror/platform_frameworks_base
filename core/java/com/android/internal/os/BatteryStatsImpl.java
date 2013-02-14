@@ -5956,7 +5956,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
                     try {
                         mNetworkSummaryCache = mNetworkStatsFactory.readNetworkStatsSummaryDev();
-                    } catch (IllegalStateException e) {
+                    } catch (IOException e) {
                         Log.wtf(TAG, "problem reading network stats", e);
                     }
                 }
@@ -5980,7 +5980,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     try {
                         mNetworkDetailCache = mNetworkStatsFactory
                                 .readNetworkStatsDetail().groupedByUid();
-                    } catch (IllegalStateException e) {
+                    } catch (IOException e) {
                         Log.wtf(TAG, "problem reading network stats", e);
                     }
                 }
