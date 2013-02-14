@@ -307,31 +307,6 @@ class DisplayContent {
         }
     }
 
-    void verifyAppTokens() {
-        AppTokenIterator iterator = new AppTokenIterator();
-        for (int i = 0; i < mAppTokens.size(); ++i) {
-            if (!iterator.hasNext()) {
-                Slog.e(TAG, "compareAppTokens: More mAppTokens than TaskList tokens. Callers="
-                        + Debug.getCallers(4));
-                while (i < mAppTokens.size()) {
-                    Slog.e(TAG, "compareAppTokens: mAppTokens[" + i + "]=" + mAppTokens.get(i));
-                    i++;
-                }
-                return;
-            }
-            AppWindowToken appToken = mAppTokens.get(i);
-            AppWindowToken taskListToken = iterator.next();
-            if (appToken != taskListToken) {
-                Slog.e(TAG, "compareAppTokens: Mismatch at " + i + " appToken=" + appToken
-                        + " taskListToken=" + taskListToken + ". Callers=" + Debug.getCallers(4));
-            }
-        }
-        if (iterator.hasNext()) {
-            Slog.e(TAG, "compareAppTokens: More TaskList tokens than mAppTokens Callers="
-                    + Debug.getCallers(4));
-        }
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
