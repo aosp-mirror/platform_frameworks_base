@@ -317,7 +317,7 @@ void OpenGLRenderer::interrupt() {
     mCaches.unbindMeshBuffer();
     mCaches.unbindIndicesBuffer();
     mCaches.resetVertexPointers();
-    mCaches.disbaleTexCoordsVertexArray();
+    mCaches.disableTexCoordsVertexArray();
     debugOverdraw(false, false);
 }
 
@@ -1469,12 +1469,18 @@ void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
     mDescription.hasAlpha8Texture = isAlpha8;
 }
 
+void OpenGLRenderer::setupDrawWithTextureAndColor(bool isAlpha8) {
+    mDescription.hasTexture = true;
+    mDescription.hasColors = true;
+    mDescription.hasAlpha8Texture = isAlpha8;
+}
+
 void OpenGLRenderer::setupDrawWithExternalTexture() {
     mDescription.hasExternalTexture = true;
 }
 
 void OpenGLRenderer::setupDrawNoTexture() {
-    mCaches.disbaleTexCoordsVertexArray();
+    mCaches.disableTexCoordsVertexArray();
 }
 
 void OpenGLRenderer::setupDrawAA() {
@@ -1682,6 +1688,23 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint v
     mCaches.unbindIndicesBuffer();
 }
 
+void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors) {
+    bool force = mCaches.unbindMeshBuffer();
+    GLsizei stride = sizeof(ColorTextureVertex);
+
+    mCaches.bindPositionVertexPointer(force, vertices, stride);
+    if (mCaches.currentProgram->texCoords >= 0) {
+        mCaches.bindTexCoordsVertexPointer(force, texCoords, stride);
+    }
+    int slot = mCaches.currentProgram->getAttrib("colors");
+    if (slot >= 0) {
+        glEnableVertexAttribArray(slot);
+        glVertexAttribPointer(slot, 4, GL_FLOAT, GL_FALSE, stride, colors);
+    }
+
+    mCaches.unbindIndicesBuffer();
+}
+
 void OpenGLRenderer::setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords) {
     bool force = mCaches.unbindMeshBuffer();
     mCaches.bindPositionVertexPointer(force, vertices);
@@ -1833,9 +1856,16 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
 
     const uint32_t count = meshWidth * meshHeight * 6;
 
-    // TODO: Support the colors array
-    TextureVertex mesh[count];
-    TextureVertex* vertex = mesh;
+    ColorTextureVertex mesh[count];
+    ColorTextureVertex* vertex = mesh;
+
+    bool cleanupColors = false;
+    if (!colors) {
+        uint32_t colorsCount = (meshWidth + 1) * (meshHeight + 1);
+        colors = new int[colorsCount];
+        memset(colors, 0xff, colorsCount * sizeof(int));
+        cleanupColors = true;
+    }
 
     for (int32_t y = 0; y < meshHeight; y++) {
         for (int32_t x = 0; x < meshWidth; x++) {
@@ -1855,13 +1885,13 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
             int dx = i + (meshWidth + 1) * 2 + 2;
             int dy = dx + 1;
 
-            TextureVertex::set(vertex++, vertices[ax], vertices[ay], u1, v2);
-            TextureVertex::set(vertex++, vertices[bx], vertices[by], u1, v1);
-            TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
+            ColorTextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2, colors[dx / 2]);
+            ColorTextureVertex::set(vertex++, vertices[ax], vertices[ay], u1, v2, colors[ax / 2]);
+            ColorTextureVertex::set(vertex++, vertices[bx], vertices[by], u1, v1, colors[bx / 2]);
 
-            TextureVertex::set(vertex++, vertices[ax], vertices[ay], u1, v2);
-            TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
-            TextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2);
+            ColorTextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2, colors[dx / 2]);
+            ColorTextureVertex::set(vertex++, vertices[bx], vertices[by], u1, v1, colors[bx / 2]);
+            ColorTextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1, colors[cx / 2]);
 
             left = fminf(left, fminf(vertices[ax], fminf(vertices[bx], vertices[cx])));
             top = fminf(top, fminf(vertices[ay], fminf(vertices[by], vertices[cy])));
@@ -1871,12 +1901,16 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     }
 
     if (quickReject(left, top, right, bottom)) {
+        if (cleanupColors) delete[] colors;
         return DrawGlInfo::kStatusDone;
     }
 
     mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return DrawGlInfo::kStatusDone;
+    if (!texture) {
+        if (cleanupColors) delete[] colors;
+        return DrawGlInfo::kStatusDone;
+    }
     const AutoTexture autoCleanup(texture);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
@@ -1886,13 +1920,35 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
+    float a = alpha / 255.0f;
+
     if (hasLayer()) {
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     }
 
-    drawTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
-            mode, texture->blend, &mesh[0].position[0], &mesh[0].texture[0],
-            GL_TRIANGLES, count, false, false, 0, false, false);
+    setupDraw();
+    setupDrawWithTextureAndColor();
+    setupDrawColor(a, a, a, a);
+    setupDrawColorFilter();
+    setupDrawBlending(true, mode, false);
+    setupDrawProgram();
+    setupDrawDirtyRegionsDisabled();
+    setupDrawModelView(0.0f, 0.0f, 1.0f, 1.0f, false);
+    setupDrawTexture(texture->id);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0], &mesh[0].color[0]);
+
+    glDrawArrays(GL_TRIANGLES, 0, count);
+
+    finishDrawTexture();
+
+    int slot = mCaches.currentProgram->getAttrib("colors");
+    if (slot >= 0) {
+        glDisableVertexAttribArray(slot);
+    }
+
+    if (cleanupColors) delete[] colors;
 
     return DrawGlInfo::kStatusDrew;
 }

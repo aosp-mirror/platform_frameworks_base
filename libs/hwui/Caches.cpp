@@ -365,11 +365,12 @@ void Caches::bindPositionVertexPointer(bool force, GLvoid* vertices, GLsizei str
     }
 }
 
-void Caches::bindTexCoordsVertexPointer(bool force, GLvoid* vertices) {
-    if (force || vertices != mCurrentTexCoordsPointer) {
+void Caches::bindTexCoordsVertexPointer(bool force, GLvoid* vertices, GLsizei stride) {
+    if (force || vertices != mCurrentTexCoordsPointer || stride != mCurrentTexCoordsStride) {
         GLuint slot = currentProgram->texCoords;
-        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, gMeshStride, vertices);
+        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentTexCoordsPointer = vertices;
+        mCurrentTexCoordsStride = stride;
     }
 }
 
@@ -390,7 +391,7 @@ void Caches::enableTexCoordsVertexArray() {
     }
 }
 
-void Caches::disbaleTexCoordsVertexArray() {
+void Caches::disableTexCoordsVertexArray() {
     if (mTexCoordsArrayEnabled) {
         glDisableVertexAttribArray(Program::kBindingTexCoords);
         mTexCoordsArrayEnabled = false;
