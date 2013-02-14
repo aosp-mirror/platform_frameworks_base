@@ -19,6 +19,8 @@
 
 #include <SkXfermode.h>
 
+#include <private/hwui/DrawGlInfo.h>
+
 #include "OpenGLRenderer.h"
 #include "DisplayListRenderer.h"
 #include "utils/LinearAllocator.h"
