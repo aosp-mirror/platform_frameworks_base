@@ -10,6 +10,8 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPA
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_ACTION_PENDING;
+import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
+import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
 
 import android.content.Context;
 import android.os.Debug;
@@ -175,7 +177,7 @@ public class WindowAnimator {
     private void updateAppWindowsLocked(int displayId) {
         int i;
         final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
-        AppTokenIterator iterator = displayContent.new AppTokenIterator();
+        AppTokenIterator iterator = displayContent.getTmpAppIterator(FORWARD_ITERATOR);
         while (iterator.hasNext()) {
             final AppWindowAnimator appAnimator = iterator.next().mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
@@ -458,8 +460,8 @@ public class WindowAnimator {
     private void testTokenMayBeDrawnLocked(int displayId) {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        AppTokenIterator iterator = mService.getDisplayContentLocked(displayId).new
-                AppTokenIterator();
+        AppTokenIterator iterator =
+                mService.getDisplayContentLocked(displayId).getTmpAppIterator(FORWARD_ITERATOR);
         while (iterator.hasNext()) {
             AppWindowToken wtoken = iterator.next();
             AppWindowAnimator appAnimator = wtoken.mAppAnimator;

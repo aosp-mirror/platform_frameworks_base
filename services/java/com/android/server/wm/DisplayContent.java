@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
+import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
+
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -87,6 +90,8 @@ class DisplayContent {
      */
     ArrayList<TaskList> mTaskLists = new ArrayList<TaskList>();
     SparseArray<TaskList> mTaskIdToTaskList = new SparseArray<TaskList>();
+
+    private final AppTokenIterator mTmpAppIterator = new AppTokenIterator();
 
     /**
      * @param display May not be null.
@@ -169,6 +174,18 @@ class DisplayContent {
         wtoken.groupId = newTaskId;
     }
 
+    /**
+     * Return the utility iterator so we don't have to construct new iterators every time we
+     * iterate.
+     * NOTE: Do not ever nest this call or you will have a bad time!
+     * @param reverse Direction of iterator.
+     * @return The utility iterator.
+     */
+    AppTokenIterator getTmpAppIterator(boolean reverse) {
+        mTmpAppIterator.reset(reverse);
+        return mTmpAppIterator;
+    }
+
     class TaskListsIterator implements Iterator<TaskList> {
         private int mCur;
         private boolean mReverse;
@@ -178,9 +195,12 @@ class DisplayContent {
         }
 
         TaskListsIterator(boolean reverse) {
+            reset(reverse);
+        }
+
+        void reset(boolean reverse) {
             mReverse = reverse;
-            int numTaskLists = mTaskLists.size();
-            mCur = reverse ? numTaskLists - 1 : 0;
+            mCur = reverse ? mTaskLists.size() - 1 : 0;
         }
 
         @Override
@@ -208,18 +228,22 @@ class DisplayContent {
     }
 
     class AppTokenIterator implements Iterator<AppWindowToken> {
-        final TaskListsIterator mIterator;
-        final boolean mReverse;
+        final TaskListsIterator mIterator = new TaskListsIterator();
+        boolean mReverse;
         int mCur;
         TaskList mTaskList;
 
         public AppTokenIterator() {
-            this(false);
+            this(FORWARD_ITERATOR);
         }
 
         public AppTokenIterator(boolean reverse) {
+            reset(reverse);
+        }
+
+        void reset(boolean reverse) {
             mReverse = reverse;
-            mIterator = new TaskListsIterator(reverse);
+            mIterator.reset(reverse);
             getNextTaskList();
         }
 
@@ -292,7 +316,7 @@ class DisplayContent {
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-            AppTokenIterator iterator = new AppTokenIterator(true);
+            AppTokenIterator iterator = getTmpAppIterator(REVERSE_ITERATOR);
             int ndx = iterator.size() - 1;
             if (ndx >= 0) {
                 pw.println();
