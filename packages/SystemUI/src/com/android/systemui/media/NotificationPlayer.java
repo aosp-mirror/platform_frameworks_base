@@ -21,15 +21,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 
-import java.io.IOException;
-import java.lang.IllegalStateException;
 import java.lang.Thread;
 import java.util.LinkedList;
 
