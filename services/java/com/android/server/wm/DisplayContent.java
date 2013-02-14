@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import android.os.Debug;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -38,7 +36,7 @@ class DisplayContentList extends ArrayList<DisplayContent> {
  * WindowManagerService.mWindowMap.
  */
 class DisplayContent {
-    private final static String TAG = "DisplayContent";
+//    private final static String TAG = "DisplayContent";
 
     /** Unique identifier of this stack. */
     private final int mDisplayId;
@@ -71,20 +69,6 @@ class DisplayContent {
     boolean layoutNeeded;
     int pendingLayoutChanges;
     final boolean isDefaultDisplay;
-
-    /**
-     * List controlling the ordering of windows in different applications which must
-     * be kept in sync with ActivityManager.
-     */
-    final AppTokenList mAppTokens = new AppTokenList();
-
-    /**
-     * AppWindowTokens in the Z order they were in at the start of an animation. Between
-     * animations this list is maintained in the exact order of mAppTokens. If tokens
-     * are added to mAppTokens during an animation an attempt is made to insert them at the same
-     * logical location in this list. Note that this list is always in sync with mWindows.
-     */
-    AppTokenList mAnimatingAppTokens = new AppTokenList();
 
     /**
      * Window tokens that are in the process of exiting, but still
@@ -140,18 +124,6 @@ class DisplayContent {
      * @param wtoken The token to insert.
      */
     void addAppToken(final int addPos, final AppWindowToken wtoken) {
-        mAppTokens.add(addPos, wtoken);
-
-        if (addPos == 0 || addPos == mAnimatingAppTokens.size()) {
-            // It was inserted into the beginning or end of mAppTokens. Honor that.
-            mAnimatingAppTokens.add(addPos, wtoken);
-        } else {
-            // Find the item immediately above the mAppTokens insertion point and put the token
-            // immediately below that one in mAnimatingAppTokens.
-            final AppWindowToken aboveAnchor = mAppTokens.get(addPos + 1);
-            mAnimatingAppTokens.add(mAnimatingAppTokens.indexOf(aboveAnchor), wtoken);
-        }
-
         TaskList task = mTaskIdToTaskList.get(wtoken.groupId);
         if (task == null) {
             task = new TaskList(wtoken, this);
@@ -163,8 +135,6 @@ class DisplayContent {
     }
 
     void removeAppToken(final AppWindowToken wtoken) {
-        mAppTokens.remove(wtoken);
-        mAnimatingAppTokens.remove(wtoken);
         final int taskId = wtoken.groupId;
         final TaskList task = mTaskIdToTaskList.get(taskId);
         if (task != null) {
@@ -174,14 +144,6 @@ class DisplayContent {
                 mTaskLists.remove(task);
                 mTaskIdToTaskList.delete(taskId);
             }
-        }
-    }
-
-    void refillAnimatingAppTokens() {
-        mAnimatingAppTokens.clear();
-        AppTokenIterator iterator = new AppTokenIterator();
-        while (iterator.hasNext()) {
-            mAnimatingAppTokens.add(iterator.next());
         }
     }
 
