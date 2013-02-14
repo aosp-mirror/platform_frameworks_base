@@ -15,9 +15,12 @@ page.title=In-app Billing Version Notes
 </ul>
 
 <h3 id="version_3">In-app Billing version 3</h3>
-<p><em>December 2012</em></p>
+<p><em>February 2013</em></p>
 <ul>
-<li>Requires Google Play client version 3.9.16 or higher.
+<li>Purchasing and querying managed in-app items requires Google Play client 
+version 3.9.16 or higher.</li>
+<li>Purchasing and querying subscription items requires Google Play client 
+version 3.10.10 or higher.</li>
 <li>Provides a new Android Interface Definition Language (AIDL) file named {@code IInAppBillingService.aidl}. The new interface offers these features:
 <ul>
 <li>Provides a new API to get details of in-app items published for the app including price, type, title and description.</li>
@@ -27,7 +30,6 @@ page.title=In-app Billing Version Notes
 <li>An API to get current purchases of the user immediately. This list will not contain any consumed purchases.</li>
 </ul>
 </li>
-<li>Subscriptions are not yet supported in this version of the API.</li>
 </ul>
 
 <h3 id="version_2">In-app Billing version 2</h3>
