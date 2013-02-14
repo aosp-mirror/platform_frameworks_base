@@ -183,7 +183,7 @@ public:
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gMeshStride and a size of 2.
      */
-    void bindTexCoordsVertexPointer(bool force, GLvoid* vertices);
+    void bindTexCoordsVertexPointer(bool force, GLvoid* vertices, GLsizei stride = gMeshStride);
 
     /**
      * Resets the vertex pointers.
@@ -192,7 +192,7 @@ public:
     void resetTexCoordsVertexPointer();
 
     void enableTexCoordsVertexArray();
-    void disbaleTexCoordsVertexArray();
+    void disableTexCoordsVertexArray();
 
     /**
      * Activate the specified texture unit. The texture unit must
@@ -299,6 +299,7 @@ private:
     void* mCurrentPositionPointer;
     GLsizei mCurrentPositionStride;
     void* mCurrentTexCoordsPointer;
+    GLsizei mCurrentTexCoordsStride;
 
     bool mTexCoordsArrayEnabled;
 

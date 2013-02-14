@@ -777,6 +777,7 @@ private:
      * Various methods to setup OpenGL rendering.
      */
     void setupDrawWithTexture(bool isAlpha8 = false);
+    void setupDrawWithTextureAndColor(bool isAlpha8 = false);
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
     void setupDrawAA();
@@ -811,6 +812,7 @@ private:
     void setupDrawTextureTransformUniforms(mat4& transform);
     void setupDrawTextGammaUniforms();
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
+    void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors);
     void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords);
     void setupDrawVertices(GLvoid* vertices);
     void finishDrawTexture();

@@ -81,6 +81,8 @@ namespace uirenderer {
 
 #define PROGRAM_IS_SIMPLE_GRADIENT 41
 
+#define PROGRAM_HAS_COLORS 42
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,6 +121,9 @@ struct ProgramDescription {
     bool hasAlpha8Texture;
     bool hasExternalTexture;
     bool hasTextureTransform;
+
+    // Color attribute
+    bool hasColors;
 
     // Modulate, this should only be set when setColor() return true
     bool modulate;
@@ -163,6 +168,8 @@ struct ProgramDescription {
         hasAlpha8Texture = false;
         hasExternalTexture = false;
         hasTextureTransform = false;
+
+        hasColors = false;
 
         isAA = false;
 
@@ -259,6 +266,7 @@ struct ProgramDescription {
         if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
         if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
         if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
+        if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
         return key;
     }
 

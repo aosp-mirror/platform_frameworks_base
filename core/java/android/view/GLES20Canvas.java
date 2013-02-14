@@ -901,9 +901,9 @@ class GLES20Canvas extends HardwareCanvas {
         final int count = (meshWidth + 1) * (meshHeight + 1);
         checkRange(verts.length, vertOffset, count * 2);
 
-        // TODO: Colors are ignored for now
-        colors = null;
-        colorOffset = 0;
+        if (colors != null) {
+            checkRange(colors.length, colorOffset, count);
+        }
 
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
