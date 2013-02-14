@@ -1315,7 +1315,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (usedNetworkType != networkType) {
                 Integer currentPid = new Integer(pid);
                 mNetRequestersPids[usedNetworkType].remove(currentPid);
-                reassessPidDns(pid, true);
+
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    reassessPidDns(pid, true);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
                 flushVmDnsCache();
                 if (mNetRequestersPids[usedNetworkType].size() != 0) {
                     if (VDBG) {
