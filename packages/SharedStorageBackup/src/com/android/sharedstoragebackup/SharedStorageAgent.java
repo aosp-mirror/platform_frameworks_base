@@ -4,6 +4,7 @@ import android.app.backup.FullBackupAgent;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.content.Context;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
@@ -11,6 +12,7 @@ import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 
 public class SharedStorageAgent extends FullBackupAgent {
     static final String TAG = "SharedStorageAgent";
@@ -38,13 +40,20 @@ public class SharedStorageAgent extends FullBackupAgent {
         // "primary" shared storage volume is first in the list.
         if (mVolumes != null) {
             if (DEBUG) Slog.i(TAG, "Backing up " + mVolumes.length + " shared volumes");
+            // Ignore all apps' getExternalFilesDir() content; it is backed up as part of
+            // each app-specific payload.
+            HashSet<String> externalFilesDirFilter = new HashSet<String>();
+            final File externalAndroidRoot = new File(Environment.getExternalStorageDirectory(),
+                    Environment.DIRECTORY_ANDROID);
+            externalFilesDirFilter.add(externalAndroidRoot.getCanonicalPath());
+
             for (int i = 0; i < mVolumes.length; i++) {
                 StorageVolume v = mVolumes[i];
                 // Express the contents of volume N this way in the tar stream:
                 //     shared/N/path/to/file
                 // The restore will then extract to the given volume
                 String domain = FullBackup.SHARED_PREFIX + i;
-                fullBackupFileTree(null, domain, v.getPath(), null, output);
+                fullBackupFileTree(null, domain, v.getPath(), externalFilesDirFilter, output);
             }
         }
     }

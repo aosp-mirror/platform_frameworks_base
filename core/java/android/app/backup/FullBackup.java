@@ -46,6 +46,7 @@ public class FullBackup {
     public static final String DATA_TREE_TOKEN = "f";
     public static final String DATABASE_TREE_TOKEN = "db";
     public static final String SHAREDPREFS_TREE_TOKEN = "sp";
+    public static final String MANAGED_EXTERNAL_TREE_TOKEN = "ef";
     public static final String CACHE_TREE_TOKEN = "c";
     public static final String SHARED_STORAGE_TOKEN = "shared";
 
