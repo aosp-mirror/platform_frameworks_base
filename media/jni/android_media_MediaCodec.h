@@ -32,7 +32,7 @@ struct AString;
 struct ICrypto;
 struct IGraphicBufferProducer;
 struct MediaCodec;
-struct SurfaceTextureClient;
+class Surface;
 
 struct JMediaCodec : public RefBase {
     JMediaCodec(
@@ -91,7 +91,7 @@ protected:
 private:
     jclass mClass;
     jweak mObject;
-    sp<SurfaceTextureClient> mSurfaceTextureClient;
+    sp<Surface> mSurfaceTextureClient;
 
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;

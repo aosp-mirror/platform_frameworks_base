@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 #include <gui/GLConsumer.h>
-#include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -86,8 +86,8 @@ sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
         JNIEnv* env, jobject thiz)
 {
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
-    sp<SurfaceTextureClient> surfaceTextureClient(surfaceTexture != NULL ?
-            new SurfaceTextureClient(surfaceTexture->getBufferQueue()) : NULL);
+    sp<Surface> surfaceTextureClient(surfaceTexture != NULL ?
+            new Surface(surfaceTexture->getBufferQueue()) : NULL);
     return surfaceTextureClient;
 }
 

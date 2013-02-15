@@ -32,8 +32,9 @@ import dalvik.system.CloseGuard;
 public class Surface implements Parcelable {
     private static final String TAG = "Surface";
 
-    private native int nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
+    private static native int nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
             throws OutOfResourcesException;
+
     private native Canvas nativeLockCanvas(int nativeObject, Rect dirty);
     private native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
 

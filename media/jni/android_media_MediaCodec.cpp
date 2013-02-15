@@ -28,7 +28,6 @@
 #include "JNIHelp.h"
 
 #include <gui/Surface.h>
-#include <gui/SurfaceTextureClient.h>
 
 #include <media/ICrypto.h>
 #include <media/stagefright/MediaCodec.h>
@@ -114,9 +113,9 @@ status_t JMediaCodec::configure(
         const sp<IGraphicBufferProducer> &bufferProducer,
         const sp<ICrypto> &crypto,
         int flags) {
-    sp<SurfaceTextureClient> client;
+    sp<Surface> client;
     if (bufferProducer != NULL) {
-        mSurfaceTextureClient = new SurfaceTextureClient(bufferProducer);
+        mSurfaceTextureClient = new Surface(bufferProducer);
     } else {
         mSurfaceTextureClient.clear();
     }
@@ -398,7 +397,7 @@ static void android_media_MediaCodec_native_configure(
     if (jsurface != NULL) {
         sp<Surface> surface(android_view_Surface_getSurface(env, jsurface));
         if (surface != NULL) {
-            bufferProducer = surface->getSurfaceTexture();
+            bufferProducer = surface->getIGraphicBufferProducer();
         } else {
             jniThrowException(
                     env,

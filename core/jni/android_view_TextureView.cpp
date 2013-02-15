@@ -23,7 +23,7 @@
 #include <ui/Rect.h>
 
 #include <gui/GLConsumer.h>
-#include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
@@ -102,7 +102,7 @@ static void android_view_TextureView_createNativeWindow(JNIEnv* env, jobject tex
         jobject surface) {
 
     sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(env, surface));
-    sp<ANativeWindow> window = new SurfaceTextureClient(glConsumer->getBufferQueue());
+    sp<ANativeWindow> window = new Surface(glConsumer->getBufferQueue());
 
     window->incStrong(0);
     SET_INT(textureView, gTextureViewClassInfo.nativeWindow, jint(window.get()));
