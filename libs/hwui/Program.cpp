@@ -160,7 +160,7 @@ void Program::set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
         // up and to the left.
         // This offset value is based on an assumption that some hardware may use as
         // little as 12.4 precision, so we offset by slightly more than 1/16.
-        p.translate(.375, .375, 0);
+        p.translate(.065, .065, 0);
     }
 
     mat4 t(transformMatrix);
