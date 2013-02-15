@@ -19,7 +19,6 @@
 
 #include <utils/KeyedVector.h>
 
-#include "utils/Compare.h"
 #include "Debug.h"
 #include "Patch.h"
 
@@ -47,7 +46,7 @@ public:
     PatchCache(uint32_t maxCapacity);
     ~PatchCache();
 
-    Patch* get(const float bitmapWidth, const float bitmapHeight,
+    Patch* get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
             const float pixelWidth, const float pixelHeight,
             const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
             const uint32_t width, const uint32_t height, const int8_t numColors);
@@ -70,7 +69,7 @@ private:
                 xCount(0), yCount(0), emptyCount(0), colorKey(0) {
         }
 
-        PatchDescription(const float bitmapWidth, const float bitmapHeight,
+        PatchDescription(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
                 const float pixelWidth, const float pixelHeight,
                 const uint32_t xCount, const uint32_t yCount,
                 const int8_t emptyCount, const uint32_t colorKey):
@@ -80,28 +79,29 @@ private:
                 emptyCount(emptyCount), colorKey(colorKey) {
         }
 
-        bool operator<(const PatchDescription& rhs) const {
-            LTE_FLOAT(bitmapWidth) {
-                LTE_FLOAT(bitmapHeight) {
-                    LTE_FLOAT(pixelWidth) {
-                        LTE_FLOAT(pixelHeight) {
-                            LTE_INT(xCount) {
-                                LTE_INT(yCount) {
-                                    LTE_INT(emptyCount) {
-                                        LTE_INT(colorKey) return false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
+        static int compare(const PatchDescription& lhs, const PatchDescription& rhs);
+
+        bool operator==(const PatchDescription& other) const {
+            return compare(*this, other) == 0;
+        }
+
+        bool operator!=(const PatchDescription& other) const {
+            return compare(*this, other) != 0;
+        }
+
+        friend inline int strictly_order_type(const PatchDescription& lhs,
+                const PatchDescription& rhs) {
+            return PatchDescription::compare(lhs, rhs) < 0;
+        }
+
+        friend inline int compare_type(const PatchDescription& lhs,
+                const PatchDescription& rhs) {
+            return PatchDescription::compare(lhs, rhs);
         }
 
     private:
-        float bitmapWidth;
-        float bitmapHeight;
+        uint32_t bitmapWidth;
+        uint32_t bitmapHeight;
         float pixelWidth;
         float pixelHeight;
         uint32_t xCount;

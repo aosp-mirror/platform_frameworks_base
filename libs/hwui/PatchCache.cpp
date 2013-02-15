@@ -42,6 +42,35 @@ PatchCache::~PatchCache() {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
+int PatchCache::PatchDescription::compare(
+        const PatchCache::PatchDescription& lhs, const PatchCache::PatchDescription& rhs) {
+    int deltaInt = lhs.bitmapWidth - rhs.bitmapWidth;
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = lhs.bitmapHeight - rhs.bitmapHeight;
+    if (deltaInt != 0) return deltaInt;
+
+    if (lhs.pixelWidth < rhs.pixelWidth) return -1;
+    if (lhs.pixelWidth > lhs.pixelWidth) return +1;
+
+    if (lhs.pixelHeight < rhs.pixelHeight) return -1;
+    if (lhs.pixelHeight > lhs.pixelHeight) return +1;
+
+    deltaInt = lhs.xCount - rhs.xCount;
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = lhs.yCount - rhs.yCount;
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = lhs.emptyCount - rhs.emptyCount;
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = lhs.colorKey - rhs.colorKey;
+    if (deltaInt != 0) return deltaInt;
+
+    return 0;
+}
+
 void PatchCache::clear() {
     size_t count = mCache.size();
     for (size_t i = 0; i < count; i++) {
@@ -50,7 +79,7 @@ void PatchCache::clear() {
     mCache.clear();
 }
 
-Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
+Patch* PatchCache::get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
         const float pixelWidth, const float pixelHeight,
         const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
         const uint32_t width, const uint32_t height, const int8_t numColors) {
