@@ -1291,7 +1291,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 αποτέλεσμα"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> από <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
-    <string name="action_mode_done" msgid="7217581640461922289">"Ολοκληρώθηκε"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"Τέλος"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Αποσύνδεση του χώρου αποθήκευσης USB..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Αφαίρεση κάρτας SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Διαγραφή χώρου αποθήκευσης USB..."</string>
