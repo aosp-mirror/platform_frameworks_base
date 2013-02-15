@@ -121,12 +121,6 @@ public class SizeAdaptiveLayout extends ViewGroup {
         mTransitionAnimation.addListener(mAnimatorListener);
     }
 
-    @Override
-    public void setLayoutDirection(int layoutDirection) {
-        super.setLayoutDirection(layoutDirection);
-        mModestyPanel.setLayoutDirection(layoutDirection);
-    }
-
     /**
      * Visible for testing
      * @hide
@@ -246,7 +240,6 @@ public class SizeAdaptiveLayout extends ViewGroup {
                                                            View.MeasureSpec.EXACTLY);
         mActiveChild = selectActiveChild(measureSpec);
         mActiveChild.setVisibility(View.VISIBLE);
-        mActiveChild.setLayoutDirection(getLayoutDirection());
 
         if (mLastActive != mActiveChild && mLastActive != null) {
             if (DEBUG) Log.d(TAG, this + " changed children from: " + mLastActive +
