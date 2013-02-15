@@ -50,6 +50,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -455,7 +456,7 @@ class GlobalScreenshot {
         }
 
         // Take the screenshot
-        mScreenBitmap = Surface.screenshot((int) dims[0], (int) dims[1]);
+        mScreenBitmap = SurfaceControl.screenshot((int) dims[0], (int) dims[1]);
         if (mScreenBitmap == null) {
             notifyScreenshotError(mContext, mNotificationManager);
             finisher.run();

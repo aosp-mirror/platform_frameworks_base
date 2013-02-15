@@ -16,29 +16,21 @@
 
 package android.view;
 
-import dalvik.system.CloseGuard;
-
 import android.content.res.CompatibilityInfo.Translator;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.SurfaceTexture;
-import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.Parcel;
-import android.os.SystemProperties;
+import android.os.Parcelable;
 import android.util.Log;
+import dalvik.system.CloseGuard;
 
 /**
  * Handle onto a raw buffer that is being managed by the screen compositor.
  */
 public class Surface implements Parcelable {
     private static final String TAG = "Surface";
-
-    private static final boolean HEADLESS = "1".equals(
-        SystemProperties.get("ro.config.headless", "0"));
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -78,130 +70,6 @@ public class Surface implements Parcelable {
      */
     public static final int ROTATION_270 = 3;
 
-    /* built-in physical display ids (keep in sync with ISurfaceComposer.h)
-     * these are different from the logical display ids used elsewhere in the framework */
-
-    /**
-     * Built-in physical display id: Main display.
-     * Use only with {@link #getBuiltInDisplay()}.
-     * @hide
-     */
-    public static final int BUILT_IN_DISPLAY_ID_MAIN = 0;
-
-    /**
-     * Built-in physical display id: Attached HDMI display.
-     * Use only with {@link #getBuiltInDisplay()}.
-     * @hide
-     */
-    public static final int BUILT_IN_DISPLAY_ID_HDMI = 1;
-
-    /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
-
-    /**
-     * Surface creation flag: Surface is created hidden
-     * @hide */
-    public static final int HIDDEN = 0x00000004;
-
-    /**
-     * Surface creation flag: The surface contains secure content, special
-     * measures will be taken to disallow the surface's content to be copied
-     * from another process. In particular, screenshots and VNC servers will
-     * be disabled, but other measures can take place, for instance the
-     * surface might not be hardware accelerated. 
-     * @hide
-     */
-    public static final int SECURE = 0x00000080;
-
-    /**
-     * Surface creation flag: Creates a surface where color components are interpreted
-     * as "non pre-multiplied" by their alpha channel. Of course this flag is
-     * meaningless for surfaces without an alpha channel. By default
-     * surfaces are pre-multiplied, which means that each color component is
-     * already multiplied by its alpha value. In this case the blending
-     * equation used is:
-     *
-     *    DEST = SRC + DEST * (1-SRC_ALPHA)
-     *
-     * By contrast, non pre-multiplied surfaces use the following equation:
-     *
-     *    DEST = SRC * SRC_ALPHA * DEST * (1-SRC_ALPHA)
-     *
-     * pre-multiplied surfaces must always be used if transparent pixels are
-     * composited on top of each-other into the surface. A pre-multiplied
-     * surface can never lower the value of the alpha component of a given
-     * pixel.
-     *
-     * In some rare situations, a non pre-multiplied surface is preferable.
-     * @hide
-     */
-    public static final int NON_PREMULTIPLIED = 0x00000100;
-
-    /**
-     * Surface creation flag: Indicates that the surface must be considered opaque,
-     * even if its pixel format is set to translucent. This can be useful if an
-     * application needs full RGBA 8888 support for instance but will
-     * still draw every pixel opaque.
-     * @hide
-     */
-    public static final int OPAQUE = 0x00000400;
-
-    /**
-     * Surface creation flag: Application requires a hardware-protected path to an
-     * external display sink. If a hardware-protected path is not available,
-     * then this surface will not be displayed on the external sink.
-     * @hide
-     */
-    public static final int PROTECTED_APP = 0x00000800;
-
-    // 0x1000 is reserved for an independent DRM protected flag in framework
-
-    /**
-     * Surface creation flag: Creates a normal surface.
-     * This is the default.
-     * @hide
-     */
-    public static final int FX_SURFACE_NORMAL   = 0x00000000;
-
-    /**
-     * Surface creation flag: Creates a Blur surface.
-     * Everything behind this surface is blurred by some amount.
-     * The quality and refresh speed of the blur effect is not settable or guaranteed.
-     * It is an error to lock a Blur surface, since it doesn't have a backing store.
-     * @hide
-     * @deprecated
-     */
-    @Deprecated
-    public static final int FX_SURFACE_BLUR = 0x00010000;
-
-    /**
-     * Surface creation flag: Creates a Dim surface.
-     * Everything behind this surface is dimmed by the amount specified
-     * in {@link #setAlpha}.  It is an error to lock a Dim surface, since it
-     * doesn't have a backing store.
-     * @hide
-     */
-    public static final int FX_SURFACE_DIM = 0x00020000;
-
-    /**
-     * @hide
-     */
-    public static final int FX_SURFACE_SCREENSHOT = 0x00030000;
-
-    /**
-     * Mask used for FX values above.
-     * @hide
-     */
-    public static final int FX_SURFACE_MASK = 0x000F0000;
-
-    /* flags used with setFlags() (keep in sync with ISurfaceComposer.h) */
-    
-    /**
-     * Surface flag: Hide the surface.
-     * Equivalent to calling hide().
-     * @hide
-     */
-    public static final int SURFACE_HIDDEN = 0x01;
-
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -211,8 +79,8 @@ public class Surface implements Parcelable {
     // server or system processes. When this class is parceled we defer to the
     // mSurfaceControl to do the parceling. Otherwise we parcel the
     // mNativeSurface.
-    private int mNativeSurface; // Surface*
-    private int mNativeSurfaceControl; // SurfaceControl*
+    int mNativeObject; // package scope only for SurfaceControl access
+
     private int mGenerationId; // incremented each time mNativeSurface changes
     private final Canvas mCanvas = new CompatibleCanvas();
 
@@ -224,112 +92,12 @@ public class Surface implements Parcelable {
     // non compatibility mode.
     private Matrix mCompatibleMatrix;
 
-    private native void nativeCreate(SurfaceSession session, String name,
-            int w, int h, int format, int flags)
-            throws OutOfResourcesException;
-    private native void nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
-            throws OutOfResourcesException;
-    private native void nativeRelease();
-    private native void nativeDestroy();
-
-    private native boolean nativeIsValid();
-    private native boolean nativeIsConsumerRunningBehind();
-
-    private native Canvas nativeLockCanvas(Rect dirty);
-    private native void nativeUnlockCanvasAndPost(Canvas canvas);
-
-    private static native Bitmap nativeScreenshot(IBinder displayToken,
-            int width, int height, int minLayer, int maxLayer, boolean allLayers);
-
-    private static native void nativeOpenTransaction();
-    private static native void nativeCloseTransaction();
-    private static native void nativeSetAnimationTransaction();
-
-    private native void nativeSetLayer(int zorder);
-    private native void nativeSetPosition(float x, float y);
-    private native void nativeSetSize(int w, int h);
-    private native void nativeSetTransparentRegionHint(Region region);
-    private native void nativeSetAlpha(float alpha);
-    private native void nativeSetMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
-    private native void nativeSetFlags(int flags, int mask);
-    private native void nativeSetWindowCrop(Rect crop);
-    private native void nativeSetLayerStack(int layerStack);
-
-    private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
-    private static native IBinder nativeCreateDisplay(String name, boolean secure);
-    private static native void nativeSetDisplaySurface(
-            IBinder displayToken, Surface surface);
-    private static native void nativeSetDisplayLayerStack(
-            IBinder displayToken, int layerStack);
-    private static native void nativeSetDisplayProjection(
-            IBinder displayToken, int orientation, Rect layerStackRect, Rect displayRect);
-    private static native boolean nativeGetDisplayInfo(
-            IBinder displayToken, PhysicalDisplayInfo outInfo);
-    private static native void nativeBlankDisplay(IBinder displayToken);
-    private static native void nativeUnblankDisplay(IBinder displayToken);
-
-    private native void nativeCopyFrom(Surface other);
-    private native void nativeTransferFrom(Surface other);
-    private native void nativeReadFromParcel(Parcel source);
-    private native void nativeWriteToParcel(Parcel dest);
-
 
     /**
      * Create an empty surface, which will later be filled in by readFromParcel().
      * @hide
      */
     public Surface() {
-        checkHeadless();
-
-        mCloseGuard.open("release");
-    }
-
-    /**
-     * Create a surface with a name.
-     *
-     * The surface creation flags specify what kind of surface to create and
-     * certain options such as whether the surface can be assumed to be opaque
-     * and whether it should be initially hidden.  Surfaces should always be
-     * created with the {@link #HIDDEN} flag set to ensure that they are not
-     * made visible prematurely before all of the surface's properties have been
-     * configured.
-     *
-     * Good practice is to first create the surface with the {@link #HIDDEN} flag
-     * specified, open a transaction, set the surface layer, layer stack, alpha,
-     * and position, call {@link #show} if appropriate, and close the transaction.
-     *
-     * @param session The surface session, must not be null.
-     * @param name The surface name, must not be null.
-     * @param w The surface initial width.
-     * @param h The surface initial height.
-     * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
-     * in the creation flags.
-     * @hide
-     */
-    public Surface(SurfaceSession session,
-            String name, int w, int h, int format, int flags)
-            throws OutOfResourcesException {
-        if (session == null) {
-            throw new IllegalArgumentException("session must not be null");
-        }
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null");
-        }
-
-        if ((flags & HIDDEN) == 0) {
-            Log.w(TAG, "Surfaces should always be created with the HIDDEN flag set "
-                    + "to ensure that they are not made visible prematurely before "
-                    + "all of the surface's properties have been configured.  "
-                    + "Set the other properties and make the surface visible within "
-                    + "a transaction.  New surface name: " + name,
-                    new Throwable());
-        }
-
-        checkHeadless();
-
-        mName = name;
-        nativeCreate(session, name, w, h, format, flags);
-
         mCloseGuard.open("release");
     }
 
@@ -348,16 +116,19 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("surfaceTexture must not be null");
         }
 
-        checkHeadless();
-
         mName = surfaceTexture.toString();
         try {
-            nativeCreateFromSurfaceTexture(surfaceTexture);
+            mNativeObject = nativeCreateFromSurfaceTexture(surfaceTexture);
         } catch (OutOfResourcesException ex) {
             // We can't throw OutOfResourcesException because it would be an API change.
             throw new RuntimeException(ex);
         }
 
+        mCloseGuard.open("release");
+    }
+
+    private Surface(int nativeObject) {
+        mNativeObject = nativeObject;
         mCloseGuard.open("release");
     }
 
@@ -367,7 +138,9 @@ public class Surface implements Parcelable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            nativeRelease();
+            if (mNativeObject != 0) {
+                nativeRelease(mNativeObject);
+            }
         } finally {
             super.finalize();
         }
@@ -379,7 +152,10 @@ public class Surface implements Parcelable {
      * This will make the surface invalid.
      */
     public void release() {
-        nativeRelease();
+        if (mNativeObject != 0) {
+            nativeRelease(mNativeObject);
+            mNativeObject = 0;
+        }
         mCloseGuard.close();
     }
 
@@ -390,7 +166,10 @@ public class Surface implements Parcelable {
      * @hide
      */
     public void destroy() {
-        nativeDestroy();
+        if (mNativeObject != 0) {
+            nativeDestroy(mNativeObject);
+            mNativeObject = 0;
+        }
         mCloseGuard.close();
     }
 
@@ -401,7 +180,8 @@ public class Surface implements Parcelable {
      * Otherwise returns false.
      */
     public boolean isValid() {
-        return nativeIsValid();
+        if (mNativeObject == 0) return false;
+        return nativeIsValid(mNativeObject);
     }
 
     /**
@@ -422,7 +202,8 @@ public class Surface implements Parcelable {
      * @hide
      */
     public boolean isConsumerRunningBehind() {
-        return nativeIsConsumerRunningBehind();
+        checkNotReleased();
+        return nativeIsConsumerRunningBehind(mNativeObject);
     }
 
     /**
@@ -440,9 +221,10 @@ public class Surface implements Parcelable {
      * entire surface should be redrawn.
      * @return A canvas for drawing into the surface.
      */
-    public Canvas lockCanvas(Rect dirty)
+    public Canvas lockCanvas(Rect inOutDirty)
             throws OutOfResourcesException, IllegalArgumentException {
-        return nativeLockCanvas(dirty);
+        checkNotReleased();
+        return nativeLockCanvas(mNativeObject, inOutDirty);
     }
 
     /**
@@ -452,7 +234,8 @@ public class Surface implements Parcelable {
      * @param canvas The canvas previously obtained from {@link #lockCanvas}.
      */
     public void unlockCanvasAndPost(Canvas canvas) {
-        nativeUnlockCanvasAndPost(canvas);
+        checkNotReleased();
+        nativeUnlockCanvasAndPost(mNativeObject, canvas);
     }
 
     /** 
@@ -475,190 +258,6 @@ public class Surface implements Parcelable {
         }
     }
 
-    /**
-     * Like {@link #screenshot(int, int, int, int)} but includes all
-     * Surfaces in the screenshot.
-     *
-     * @hide
-     */
-    public static Bitmap screenshot(int width, int height) {
-        // TODO: should take the display as a parameter
-        IBinder displayToken = getBuiltInDisplay(BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, width, height, 0, 0, true);
-    }
-
-    /**
-     * Copy the current screen contents into a bitmap and return it.
-     *
-     * @param width The desired width of the returned bitmap; the raw
-     * screen will be scaled down to this size.
-     * @param height The desired height of the returned bitmap; the raw
-     * screen will be scaled down to this size.
-     * @param minLayer The lowest (bottom-most Z order) surface layer to
-     * include in the screenshot.
-     * @param maxLayer The highest (top-most Z order) surface layer to
-     * include in the screenshot.
-     * @return Returns a Bitmap containing the screen contents, or null
-     * if an error occurs.
-     *
-     * @hide
-     */
-    public static Bitmap screenshot(int width, int height, int minLayer, int maxLayer) {
-        // TODO: should take the display as a parameter
-        IBinder displayToken = getBuiltInDisplay(BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, width, height, minLayer, maxLayer, false);
-    }
-
-    /*
-     * set surface parameters.
-     * needs to be inside open/closeTransaction block
-     */
-
-    /** start a transaction @hide */
-    public static void openTransaction() {
-        nativeOpenTransaction();
-    }
-
-    /** end a transaction @hide */
-    public static void closeTransaction() {
-        nativeCloseTransaction();
-    }
-
-    /** flag the transaction as an animation @hide */
-    public static void setAnimationTransaction() {
-        nativeSetAnimationTransaction();
-    }
-
-    /** @hide */
-    public void setLayer(int zorder) {
-        nativeSetLayer(zorder);
-    }
-
-    /** @hide */
-    public void setPosition(int x, int y) {
-        nativeSetPosition((float)x, (float)y);
-    }
-
-    /** @hide */
-    public void setPosition(float x, float y) {
-        nativeSetPosition(x, y);
-    }
-
-    /** @hide */
-    public void setSize(int w, int h) {
-        nativeSetSize(w, h);
-    }
-
-    /** @hide */
-    public void hide() {
-        nativeSetFlags(SURFACE_HIDDEN, SURFACE_HIDDEN);
-    }
-
-    /** @hide */
-    public void show() {
-        nativeSetFlags(0, SURFACE_HIDDEN);
-    }
-
-    /** @hide */
-    public void setTransparentRegionHint(Region region) {
-        nativeSetTransparentRegionHint(region);
-    }
-
-    /** @hide */
-    public void setAlpha(float alpha) {
-        nativeSetAlpha(alpha);
-    }
-
-    /** @hide */
-    public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
-        nativeSetMatrix(dsdx, dtdx, dsdy, dtdy);
-    }
-
-    /** @hide */
-    public void setFlags(int flags, int mask) {
-        nativeSetFlags(flags, mask);
-    }
-
-    /** @hide */
-    public void setWindowCrop(Rect crop) {
-        nativeSetWindowCrop(crop);
-    }
-
-    /** @hide */
-    public void setLayerStack(int layerStack) {
-        nativeSetLayerStack(layerStack);
-    }
-
-    /** @hide */
-    public static IBinder getBuiltInDisplay(int builtInDisplayId) {
-        return nativeGetBuiltInDisplay(builtInDisplayId);
-    }
-
-    /** @hide */
-    public static IBinder createDisplay(String name, boolean secure) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null");
-        }
-        return nativeCreateDisplay(name, secure);
-    }
-
-    /** @hide */
-    public static void setDisplaySurface(IBinder displayToken, Surface surface) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        nativeSetDisplaySurface(displayToken, surface);
-    }
-
-    /** @hide */
-    public static void setDisplayLayerStack(IBinder displayToken, int layerStack) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        nativeSetDisplayLayerStack(displayToken, layerStack);
-    }
-
-    /** @hide */
-    public static void setDisplayProjection(IBinder displayToken,
-            int orientation, Rect layerStackRect, Rect displayRect) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        if (layerStackRect == null) {
-            throw new IllegalArgumentException("layerStackRect must not be null");
-        }
-        if (displayRect == null) {
-            throw new IllegalArgumentException("displayRect must not be null");
-        }
-        nativeSetDisplayProjection(displayToken, orientation, layerStackRect, displayRect);
-    }
-
-    /** @hide */
-    public static boolean getDisplayInfo(IBinder displayToken, PhysicalDisplayInfo outInfo) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        if (outInfo == null) {
-            throw new IllegalArgumentException("outInfo must not be null");
-        }
-        return nativeGetDisplayInfo(displayToken, outInfo);
-    }
-
-    /** @hide */
-    public static void blankDisplay(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        nativeBlankDisplay(displayToken);
-    }
-
-    /** @hide */
-    public static void unblankDisplay(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        nativeUnblankDisplay(displayToken);
-    }
 
     /**
      * Copy another surface to this one.  This surface now holds a reference
@@ -669,13 +268,15 @@ public class Surface implements Parcelable {
      * in to it.
      * @hide
      */
-    public void copyFrom(Surface other) {
+    public void copyFrom(SurfaceControl other) {
         if (other == null) {
             throw new IllegalArgumentException("other must not be null");
         }
-        if (other != this) {
-            nativeCopyFrom(other);
+        if (other.mNativeObject == 0) {
+            throw new NullPointerException(
+                    "SurfaceControl native object is null. Are you using a released SurfaceControl?");
         }
+        mNativeObject = nativeCopyFrom(mNativeObject, other.mNativeObject);
     }
 
     /**
@@ -691,7 +292,13 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("other must not be null");
         }
         if (other != this) {
-            nativeTransferFrom(other);
+            if (mNativeObject != 0) {
+                // release our reference to our native object
+                nativeRelease(mNativeObject);
+            }
+            // transfer the reference from other to us
+            mNativeObject = other.mNativeObject;
+            other.mNativeObject = 0;
         }
     }
 
@@ -704,9 +311,8 @@ public class Surface implements Parcelable {
         if (source == null) {
             throw new IllegalArgumentException("source must not be null");
         }
-
         mName = source.readString();
-        nativeReadFromParcel(source);
+        mNativeObject = nativeReadFromParcel(mNativeObject, source);
     }
 
     @Override
@@ -714,9 +320,8 @@ public class Surface implements Parcelable {
         if (dest == null) {
             throw new IllegalArgumentException("dest must not be null");
         }
-
         dest.writeString(mName);
-        nativeWriteToParcel(dest);
+        nativeWriteToParcel(mNativeObject, dest);
         if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
             release();
         }
@@ -727,81 +332,14 @@ public class Surface implements Parcelable {
         return "Surface(name=" + mName + ")";
     }
 
-    private static void checkHeadless() {
-        if (HEADLESS) {
-            throw new UnsupportedOperationException("Device is headless");
-        }
-    }
-
     /**
      * Exception thrown when a surface couldn't be created or resized.
      */
     public static class OutOfResourcesException extends Exception {
         public OutOfResourcesException() {
         }
-
         public OutOfResourcesException(String name) {
             super(name);
-        }
-    }
-
-    /**
-     * Describes the properties of a physical display known to surface flinger.
-     * @hide
-     */
-    public static final class PhysicalDisplayInfo {
-        public int width;
-        public int height;
-        public float refreshRate;
-        public float density;
-        public float xDpi;
-        public float yDpi;
-        public boolean secure;
-
-        public PhysicalDisplayInfo() {
-        }
-
-        public PhysicalDisplayInfo(PhysicalDisplayInfo other) {
-            copyFrom(other);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof PhysicalDisplayInfo && equals((PhysicalDisplayInfo)o);
-        }
-
-        public boolean equals(PhysicalDisplayInfo other) {
-            return other != null
-                    && width == other.width
-                    && height == other.height
-                    && refreshRate == other.refreshRate
-                    && density == other.density
-                    && xDpi == other.xDpi
-                    && yDpi == other.yDpi
-                    && secure == other.secure;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0; // don't care
-        }
-
-        public void copyFrom(PhysicalDisplayInfo other) {
-            width = other.width;
-            height = other.height;
-            refreshRate = other.refreshRate;
-            density = other.density;
-            xDpi = other.xDpi;
-            yDpi = other.yDpi;
-            secure = other.secure;
-        }
-
-        // For debugging purposes
-        @Override
-        public String toString() {
-            return "PhysicalDisplayInfo{" + width + " x " + height + ", " + refreshRate + " fps, "
-                    + "density " + density + ", " + xDpi + " x " + yDpi + " dpi, secure " + secure
-                    + "}";
         }
     }
 
@@ -892,4 +430,25 @@ public class Surface implements Parcelable {
             mOrigMatrix.set(m);
         }
     }
+
+    private void checkNotReleased() {
+        if (mNativeObject == 0) throw new NullPointerException(
+                "mNativeObject is null. Have you called release() already?");
+    }
+
+    private native int nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
+            throws OutOfResourcesException;
+
+    private native void nativeRelease(int nativeObject);
+    private native void nativeDestroy(int nativeObject);
+    private native boolean nativeIsValid(int nativeObject);
+
+    private native boolean nativeIsConsumerRunningBehind(int nativeObject);
+
+    private native Canvas nativeLockCanvas(int nativeObject, Rect dirty);
+    private native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
+    
+    private native int nativeCopyFrom(int nativeObject, int surfaceControlNativeObject);
+    private native int nativeReadFromParcel(int nativeObject, Parcel source);
+    private native void nativeWriteToParcel(int nativeObject, Parcel dest);
 }

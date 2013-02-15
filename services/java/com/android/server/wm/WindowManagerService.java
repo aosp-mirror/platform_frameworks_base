@@ -132,6 +132,7 @@ import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -781,11 +782,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
-        Surface.openTransaction();
+        SurfaceControl.openTransaction();
         try {
             createWatermarkInTransaction();
         } finally {
-            Surface.closeTransaction();
+            SurfaceControl.closeTransaction();
         }
     }
 
@@ -2473,7 +2474,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    static void logSurface(Surface s, String title, String msg, RuntimeException where) {
+    static void logSurface(SurfaceControl s, String title, String msg, RuntimeException where) {
         String str = "  SURFACE " + s + ": " + msg + " / " + title;
         if (where != null) {
             Slog.i(TAG, str, where);
@@ -2770,7 +2771,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (!win.mHasSurface) {
                         surfaceChanged = true;
                     }
-                    Surface surface = winAnimator.createSurfaceLocked();
+                    SurfaceControl surface = winAnimator.createSurfaceLocked();
                     if (surface != null) {
                         outSurface.copyFrom(surface);
                         if (SHOW_TRANSACTIONS) Slog.i(TAG,
@@ -5102,7 +5103,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION showStrictModeViolation");
-            Surface.openTransaction();
+            SurfaceControl.openTransaction();
             try {
                 // TODO(multi-display): support multiple displays
                 if (mStrictModeFlash == null) {
@@ -5111,7 +5112,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mStrictModeFlash.setVisibility(on);
             } finally {
-                Surface.closeTransaction();
+                SurfaceControl.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION showStrictModeViolation");
             }
@@ -5266,7 +5267,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " surfaceLayer=" + win.mWinAnimator.mSurfaceLayer);
                 }
             }
-            rawss = Surface.screenshot(dw, dh, 0, maxLayer);
+            rawss = SurfaceControl.screenshot(dw, dh, 0, maxLayer);
         }
 
         if (rawss == null) {
@@ -5476,7 +5477,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (SHOW_TRANSACTIONS) {
                 Slog.i(TAG, ">>> OPEN TRANSACTION setRotationUnchecked");
             }
-            Surface.openTransaction();
+            SurfaceControl.openTransaction();
         }
         try {
             // NOTE: We disable the rotation in the emulator because
@@ -5494,7 +5495,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayManagerService.performTraversalInTransactionFromWindowManager();
         } finally {
             if (!inTransaction) {
-                Surface.closeTransaction();
+                SurfaceControl.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) {
                     Slog.i(TAG, "<<< CLOSE TRANSACTION setRotationUnchecked");
                 }
@@ -6316,8 +6317,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         // TODO(multi-display): support other displays
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
                         final Display display = displayContent.getDisplay();
-                        Surface surface = new Surface(session, "drag surface",
-                                width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
+                        SurfaceControl surface = new SurfaceControl(session, "drag surface",
+                                width, height, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
                         surface.setLayerStack(display.getLayerStack());
                         if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
                                 + surface + ": CREATE");
@@ -6334,7 +6335,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else {
                         Slog.w(TAG, "Drag already in progress");
                     }
-                } catch (Surface.OutOfResourcesException e) {
+                } catch (SurfaceControl.OutOfResourcesException e) {
                     Slog.e(TAG, "Can't allocate drag surface w=" + width + " h=" + height, e);
                     if (mDragState != null) {
                         mDragState.reset();
@@ -7927,10 +7928,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     // TODO(multi-display): support other displays
                     final DisplayContent displayContent = getDefaultDisplayContentLocked();
                     final Display display = displayContent.getDisplay();
-                    Surface surface = new Surface(mFxSession,
+                    SurfaceControl surface = new SurfaceControl(mFxSession,
                             "thumbnail anim",
                             dirty.width(), dirty.height(),
-                            PixelFormat.TRANSLUCENT, Surface.HIDDEN);
+                            PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
                     surface.setLayerStack(display.getLayerStack());
                     appAnimator.thumbnail = surface;
                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL " + surface + ": CREATE");
@@ -7951,8 +7952,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAppTransition.getStartingPoint(p);
                     appAnimator.thumbnailX = p.x;
                     appAnimator.thumbnailY = p.y;
-                } catch (Surface.OutOfResourcesException e) {
+                } catch (SurfaceControl.OutOfResourcesException e) {
                     Slog.e(TAG, "Can't allocate thumbnail surface w=" + dirty.width()
+                            + " h=" + dirty.height(), e);
+                    appAnimator.clearThumbnail();
+                } catch (Surface.OutOfResourcesException e) {
+                    Slog.e(TAG, "Can't allocate Canvas surface w=" + dirty.width()
                             + " h=" + dirty.height(), e);
                     appAnimator.clearThumbnail();
                 }
@@ -8214,7 +8219,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
-        Surface.openTransaction();
+        SurfaceControl.openTransaction();
         try {
 
             if (mWatermark != null) {
@@ -8489,7 +8494,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            Surface.closeTransaction();
+            SurfaceControl.closeTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
@@ -8902,7 +8907,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean reclaimSomeSurfaceMemoryLocked(WindowStateAnimator winAnimator, String operation,
                                            boolean secure) {
-        final Surface surface = winAnimator.mSurface;
+        final SurfaceControl surface = winAnimator.mSurface;
         boolean leakedSurface = false;
         boolean killedApps = false;
 

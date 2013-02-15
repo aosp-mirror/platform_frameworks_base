@@ -24,29 +24,32 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.Display;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 class StrictModeFlash {
     private static final String TAG = "StrictModeFlash";
 
-    Surface mSurface;
-    int mLastDW;
-    int mLastDH;
-    boolean mDrawNeeded;
-    final int mThickness = 20;
+    private final SurfaceControl mSurfaceControl;
+    private final Surface mSurface = new Surface();
+    private int mLastDW;
+    private int mLastDH;
+    private boolean mDrawNeeded;
+    private final int mThickness = 20;
 
     public StrictModeFlash(Display display, SurfaceSession session) {
+        SurfaceControl ctrl = null;
         try {
-            mSurface = new Surface(session, "StrictModeFlash",
-                1, 1, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
-        } catch (Surface.OutOfResourcesException e) {
-            return;
+            ctrl = new SurfaceControl(session, "StrictModeFlash",
+                1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            ctrl.setLayerStack(display.getLayerStack());
+            ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
+            ctrl.setPosition(0, 0);
+            ctrl.show();
+            mSurface.copyFrom(ctrl);
+        } catch (SurfaceControl.OutOfResourcesException e) {
         }
-
-        mSurface.setLayerStack(display.getLayerStack());
-        mSurface.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
-        mSurface.setPosition(0, 0);
-        mSurface.show();
+        mSurfaceControl = ctrl;
         mDrawNeeded = true;
     }
 
@@ -88,14 +91,14 @@ class StrictModeFlash {
     // Note: caller responsible for being inside
     // Surface.openTransaction() / closeTransaction()
     public void setVisibility(boolean on) {
-        if (mSurface == null) {
+        if (mSurfaceControl == null) {
             return;
         }
         drawIfNeeded();
         if (on) {
-            mSurface.show();
+            mSurfaceControl.show();
         } else {
-            mSurface.hide();
+            mSurfaceControl.hide();
         }
     }
 
@@ -105,7 +108,7 @@ class StrictModeFlash {
         }
         mLastDW = dw;
         mLastDH = dh;
-        mSurface.setSize(dw, dh);
+        mSurfaceControl.setSize(dw, dh);
         mDrawNeeded = true;
     }
 

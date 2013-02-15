@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
 
@@ -122,7 +123,7 @@ abstract class DisplayDevice {
     public final void setLayerStackInTransactionLocked(int layerStack) {
         if (mCurrentLayerStack != layerStack) {
             mCurrentLayerStack = layerStack;
-            Surface.setDisplayLayerStack(mDisplayToken, layerStack);
+            SurfaceControl.setDisplayLayerStack(mDisplayToken, layerStack);
         }
     }
 
@@ -155,7 +156,7 @@ abstract class DisplayDevice {
             }
             mCurrentDisplayRect.set(displayRect);
 
-            Surface.setDisplayProjection(mDisplayToken,
+            SurfaceControl.setDisplayProjection(mDisplayToken,
                     orientation, layerStackRect, displayRect);
         }
     }
@@ -166,7 +167,7 @@ abstract class DisplayDevice {
     public final void setSurfaceInTransactionLocked(Surface surface) {
         if (mCurrentSurface != surface) {
             mCurrentSurface = surface;
-            Surface.setDisplaySurface(mDisplayToken, surface);
+            SurfaceControl.setDisplaySurface(mDisplayToken, surface);
         }
     }
 

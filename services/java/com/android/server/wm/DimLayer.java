@@ -7,6 +7,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
 
@@ -18,7 +19,7 @@ public class DimLayer {
     final DisplayContent mDisplayContent;
 
     /** Actual surface that dims */
-    Surface mDimSurface;
+    SurfaceControl mDimSurface;
 
     /** Last value passed to mDimSurface.setAlpha() */
     float mAlpha = 0;
@@ -47,17 +48,17 @@ public class DimLayer {
     DimLayer(WindowManagerService service, int displayId) {
         if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
         mDisplayContent = service.getDisplayContentLocked(displayId);
-        Surface.openTransaction();
+        SurfaceControl.openTransaction();
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
                 mDimSurface = new WindowStateAnimator.SurfaceTrace(service.mFxSession,
                     "DimSurface",
                     16, 16, PixelFormat.OPAQUE,
-                    Surface.FX_SURFACE_DIM | Surface.HIDDEN);
+                    SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
             } else {
-                mDimSurface = new Surface(service.mFxSession, TAG,
+                mDimSurface = new SurfaceControl(service.mFxSession, TAG,
                     16, 16, PixelFormat.OPAQUE,
-                    Surface.FX_SURFACE_DIM | Surface.HIDDEN);
+                    SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
             }
             if (WindowManagerService.SHOW_TRANSACTIONS ||
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(TAG,
@@ -66,7 +67,7 @@ public class DimLayer {
         } catch (Exception e) {
             Slog.e(WindowManagerService.TAG, "Exception creating Dim surface", e);
         } finally {
-            Surface.closeTransaction();
+            SurfaceControl.closeTransaction();
         }
     }
 

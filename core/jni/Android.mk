@@ -42,6 +42,7 @@ LOCAL_SRC_FILES:= \
 	android_emoji_EmojiFactory.cpp \
 	android_view_DisplayEventReceiver.cpp \
 	android_view_Surface.cpp \
+	android_view_SurfaceControl.cpp \
 	android_view_SurfaceSession.cpp \
 	android_view_TextureView.cpp \
 	android_view_InputChannel.cpp \

@@ -22,6 +22,7 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
@@ -528,8 +529,8 @@ public class WindowAnimator {
 
         if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
                 TAG, ">>> OPEN TRANSACTION animateLocked");
-        Surface.openTransaction();
-        Surface.setAnimationTransaction();
+        SurfaceControl.openTransaction();
+        SurfaceControl.setAnimationTransaction();
         try {
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
@@ -621,7 +622,7 @@ public class WindowAnimator {
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            Surface.closeTransaction();
+            SurfaceControl.closeTransaction();
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
                     TAG, "<<< CLOSE TRANSACTION animateLocked");
         }

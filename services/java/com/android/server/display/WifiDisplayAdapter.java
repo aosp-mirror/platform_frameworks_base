@@ -41,6 +41,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -332,7 +333,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         String name = display.getFriendlyDisplayName();
         String address = display.getDeviceAddress();
-        IBinder displayToken = Surface.createDisplay(name, secure);
+        IBinder displayToken = SurfaceControl.createDisplay(name, secure);
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
                 refreshRate, deviceFlags, address, surface);
         sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);

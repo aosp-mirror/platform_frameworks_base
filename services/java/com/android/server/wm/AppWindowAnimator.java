@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -38,7 +39,7 @@ public class AppWindowAnimator {
     boolean allDrawn;
 
     // Special surface for thumbnail animation.
-    Surface thumbnail;
+    SurfaceControl thumbnail;
     int thumbnailTransactionSeq;
     int thumbnailX;
     int thumbnailY;

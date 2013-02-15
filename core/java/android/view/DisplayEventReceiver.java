@@ -102,7 +102,7 @@ public abstract class DisplayEventReceiver {
      * @param timestampNanos The timestamp of the pulse, in the {@link System#nanoTime()}
      * timebase.
      * @param builtInDisplayId The surface flinger built-in display id such as
-     * {@link Surface#BUILT_IN_DISPLAY_ID_MAIN}.
+     * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_MAIN}.
      * @param frame The frame number.  Increases by one for each vertical sync interval.
      */
     public void onVsync(long timestampNanos, int builtInDisplayId, int frame) {
@@ -114,7 +114,7 @@ public abstract class DisplayEventReceiver {
      * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
      * timebase.
      * @param builtInDisplayId The surface flinger built-in display id such as
-     * {@link Surface#BUILT_IN_DISPLAY_ID_HDMI}.
+     * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_HDMI}.
      * @param connected True if the display is connected, false if it disconnected.
      */
     public void onHotplug(long timestampNanos, int builtInDisplayId, boolean connected) {
