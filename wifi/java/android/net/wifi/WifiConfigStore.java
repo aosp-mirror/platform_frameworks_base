@@ -25,7 +25,6 @@ import android.net.NetworkUtils;
 import android.net.NetworkInfo.DetailedState;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
-import android.net.wifi.WifiConfiguration.EnterpriseField;
 import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.ProxySettings;
@@ -37,6 +36,7 @@ import android.os.Message;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
+import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -144,6 +144,7 @@ class WifiConfigStore {
     private static final String EOS = "eos";
 
     private WifiNative mWifiNative;
+    private final KeyStore mKeyStore = KeyStore.getInstance();
 
     WifiConfigStore(Context c, WifiNative wn) {
         mContext = c;
@@ -295,16 +296,7 @@ class WifiConfigStore {
     boolean forgetNetwork(int netId) {
         if (mWifiNative.removeNetwork(netId)) {
             mWifiNative.saveConfig();
-            WifiConfiguration target = null;
-            WifiConfiguration config = mConfiguredNetworks.get(netId);
-            if (config != null) {
-                target = mConfiguredNetworks.remove(netId);
-                mNetworkIds.remove(configKey(config));
-            }
-            if (target != null) {
-                writeIpAndProxyConfigurations();
-                sendConfiguredNetworksChangedBroadcast(target, WifiManager.CHANGE_REASON_REMOVED);
-            }
+            removeConfigAndSendBroadcastIfNeeded(netId);
             return true;
         } else {
             loge("Failed to remove network " + netId);
@@ -342,18 +334,25 @@ class WifiConfigStore {
      */
     boolean removeNetwork(int netId) {
         boolean ret = mWifiNative.removeNetwork(netId);
-        WifiConfiguration config = null;
         if (ret) {
-            config = mConfiguredNetworks.get(netId);
-            if (config != null) {
-                config = mConfiguredNetworks.remove(netId);
-                mNetworkIds.remove(configKey(config));
-            }
-        }
-        if (config != null) {
-            sendConfiguredNetworksChangedBroadcast(config, WifiManager.CHANGE_REASON_REMOVED);
+            removeConfigAndSendBroadcastIfNeeded(netId);
         }
         return ret;
+    }
+
+    private void removeConfigAndSendBroadcastIfNeeded(int netId) {
+        WifiConfiguration config = mConfiguredNetworks.get(netId);
+        if (config != null) {
+            // Remove any associated keys
+            if (config.enterpriseConfig != null) {
+                config.enterpriseConfig.removeKeys(mKeyStore);
+            }
+            mConfiguredNetworks.remove(netId);
+            mNetworkIds.remove(configKey(config));
+
+            writeIpAndProxyConfigurations();
+            sendConfiguredNetworksChangedBroadcast(config, WifiManager.CHANGE_REASON_REMOVED);
+        }
     }
 
     /**
@@ -1122,34 +1121,57 @@ class WifiConfigStore {
                 break setVariables;
             }
 
-            for (WifiConfiguration.EnterpriseField field
-                    : config.enterpriseFields) {
-                String varName = field.varName();
-                String value = field.value();
-                if (value != null) {
-                    if (field == config.engine) {
-                        /*
-                         * If the field is declared as an integer, it must not
-                         * be null
-                         */
-                        if (value.length() == 0) {
-                            value = "0";
-                        }
-                    } else if (field != config.eap) {
-                        value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
+            if (config.enterpriseConfig != null) {
+
+                WifiEnterpriseConfig enterpriseConfig = config.enterpriseConfig;
+
+                if (enterpriseConfig.needsKeyStore()) {
+                    /**
+                     * Keyguard settings may eventually be controlled by device policy.
+                     * We check here if keystore is unlocked before installing
+                     * credentials.
+                     * TODO: Figure a way to store these credentials for wifi alone
+                     * TODO: Do we need a dialog here ?
+                     */
+                    if (mKeyStore.state() != KeyStore.State.UNLOCKED) {
+                        loge(config.SSID + ": key store is locked");
+                        break setVariables;
                     }
-                    if (!mWifiNative.setNetworkVariable(
-                                netId,
-                                varName,
-                                value)) {
-                        loge(config.SSID + ": failed to set " + varName +
-                                ": " + value);
+
+                    try {
+                        /* config passed may include only fields being updated.
+                         * In order to generate the key id, fetch uninitialized
+                         * fields from the currently tracked configuration
+                         */
+                        WifiConfiguration currentConfig = mConfiguredNetworks.get(netId);
+                        String keyId = config.getKeyIdForCredentials(currentConfig);
+
+                        if (!enterpriseConfig.installKeys(mKeyStore, keyId)) {
+                            loge(config.SSID + ": failed to install keys");
+                            break setVariables;
+                        }
+                    } catch (IllegalStateException e) {
+                        loge(config.SSID + " invalid config for key installation");
                         break setVariables;
                     }
                 }
+
+                HashMap<String, String> enterpriseFields = enterpriseConfig.getFields();
+                for (String key : enterpriseFields.keySet()) {
+                        String value = enterpriseFields.get(key);
+                        if (!mWifiNative.setNetworkVariable(
+                                    netId,
+                                    key,
+                                    value)) {
+                            enterpriseConfig.removeKeys(mKeyStore);
+                            loge(config.SSID + ": failed to set " + key +
+                                    ": " + value);
+                            break setVariables;
+                        }
+                }
             }
             updateFailed = false;
-        }
+        } //end of setVariables
 
         if (updateFailed) {
             if (newNetwork) {
@@ -1445,78 +1467,31 @@ class WifiConfigStore {
             }
         }
 
-        for (WifiConfiguration.EnterpriseField field :
-                config.enterpriseFields) {
-            value = mWifiNative.getNetworkVariable(netId,
-                    field.varName());
+        if (config.enterpriseConfig == null) {
+            config.enterpriseConfig = new WifiEnterpriseConfig();
+        }
+        HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
+        for (String key : WifiEnterpriseConfig.getSupplicantKeys()) {
+            value = mWifiNative.getNetworkVariable(netId, key);
             if (!TextUtils.isEmpty(value)) {
-                if (field != config.eap && field != config.engine) {
-                    value = removeDoubleQuotes(value);
-                }
-                field.setValue(value);
+                enterpriseFields.put(key, removeDoubleQuotes(value));
+            } else {
+                enterpriseFields.put(key, WifiEnterpriseConfig.EMPTY_VALUE);
             }
         }
 
-        migrateOldEapTlsIfNecessary(config, netId);
-    }
-
-    /**
-     * Migration code for old EAP-TLS configurations. This should only be used
-     * when restoring an old wpa_supplicant.conf or upgrading from a previous
-     * platform version.
-     *
-     * @param config the configuration to be migrated
-     * @param netId the wpa_supplicant's net ID
-     * @param value the old private_key value
-     */
-    private void migrateOldEapTlsIfNecessary(WifiConfiguration config, int netId) {
-        String value = mWifiNative.getNetworkVariable(netId,
-                WifiConfiguration.OLD_PRIVATE_KEY_NAME);
-        /*
-         * If the old configuration value is not present, then there is nothing
-         * to do.
-         */
-        if (TextUtils.isEmpty(value)) {
-            return;
-        } else {
-            // Also ignore it if it's empty quotes.
-            value = removeDoubleQuotes(value);
-            if (TextUtils.isEmpty(value)) {
-                return;
-            }
+        if (config.enterpriseConfig.migrateOldEapTlsNative(mWifiNative, netId)) {
+            saveConfig();
         }
-
-        config.engine.setValue(WifiConfiguration.ENGINE_ENABLE);
-        config.engine_id.setValue(convertToQuotedString(WifiConfiguration.KEYSTORE_ENGINE_ID));
-
-        /*
-         * The old key started with the keystore:// URI prefix, but we don't
-         * need that anymore. Trim it off if it exists.
-         */
-        final String keyName;
-        if (value.startsWith(WifiConfiguration.KEYSTORE_URI)) {
-            keyName = new String(value.substring(WifiConfiguration.KEYSTORE_URI.length()));
-        } else {
-            keyName = value;
-        }
-        config.key_id.setValue(convertToQuotedString(keyName));
-
-        // Now tell the wpa_supplicant the new configuration values.
-        final EnterpriseField needsUpdate[] = { config.engine, config.engine_id, config.key_id };
-        for (EnterpriseField field : needsUpdate) {
-            mWifiNative.setNetworkVariable(netId, field.varName(), field.value());
-        }
-
-        // Remove old private_key string so we don't run this again.
-        mWifiNative.setNetworkVariable(netId, WifiConfiguration.OLD_PRIVATE_KEY_NAME,
-                convertToQuotedString(""));
-
-        saveConfig();
     }
 
     private String removeDoubleQuotes(String string) {
-        if (string.length() <= 2) return "";
-        return string.substring(1, string.length() - 1);
+        int length = string.length();
+        if ((length > 1) && (string.charAt(0) == '"')
+                && (string.charAt(length - 1) == '"')) {
+            return string.substring(1, length - 1);
+        }
+        return string;
     }
 
     private String convertToQuotedString(String string) {
