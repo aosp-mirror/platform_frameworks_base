@@ -54,7 +54,6 @@ static struct {
     jfieldID mNativeObject;
     jfieldID mGenerationId;
     jfieldID mCanvas;
-    jfieldID mCanvasSaveCount;
     jmethodID ctor;
 } gSurfaceClassInfo;
 
@@ -380,8 +379,6 @@ int register_android_view_Surface(JNIEnv* env)
             env->GetFieldID(gSurfaceClassInfo.clazz, "mGenerationId", "I");
     gSurfaceClassInfo.mCanvas =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvas", "Landroid/graphics/Canvas;");
-    gSurfaceClassInfo.mCanvasSaveCount =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvasSaveCount", "I");
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "()V");
 
     clazz = env->FindClass("android/graphics/Canvas");
