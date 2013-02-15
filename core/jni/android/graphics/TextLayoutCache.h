@@ -24,7 +24,6 @@
 #include <utils/String16.h>
 #include <utils/LruCache.h>
 #include <utils/KeyedVector.h>
-#include <utils/Compare.h>
 #include <utils/RefBase.h>
 #include <utils/Singleton.h>
 

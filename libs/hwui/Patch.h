@@ -25,7 +25,6 @@
 
 #include "Rect.h"
 #include "Vertex.h"
-#include "utils/Compare.h"
 
 namespace android {
 namespace uirenderer {
