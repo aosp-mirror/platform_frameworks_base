@@ -29,7 +29,7 @@
 
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
-#include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 
 #include <ui/ANativeObjectBase.h>
 
@@ -631,7 +631,7 @@ not_valid_surface:
     if (surfaceTexture == NULL)
         goto not_valid_surface;
 
-    window = new android::SurfaceTextureClient(surfaceTexture->getBufferQueue());
+    window = new android::Surface(surfaceTexture->getBufferQueue());
 
     if (window == NULL)
         goto not_valid_surface;

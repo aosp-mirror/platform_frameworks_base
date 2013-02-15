@@ -22,12 +22,14 @@
 
 #include <cutils/log.h>
 #include <utils/String8.h>
+#include <gui/Surface.h>
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
 #include <SkXfermode.h>
+#include <android/native_window.h>
 
 namespace android {
 
@@ -197,16 +199,16 @@ void SpriteController::doUpdateSprites() {
         if (update.state.surfaceControl != NULL && !update.state.surfaceDrawn
                 && update.state.wantSurfaceVisible()) {
             sp<Surface> surface = update.state.surfaceControl->getSurface();
-            Surface::SurfaceInfo surfaceInfo;
-            status_t status = surface->lock(&surfaceInfo);
+            ANativeWindow_Buffer outBuffer;
+            status_t status = surface->lock(&outBuffer, NULL);
             if (status) {
                 ALOGE("Error %d locking sprite surface before drawing.", status);
             } else {
                 SkBitmap surfaceBitmap;
-                ssize_t bpr = surfaceInfo.s * bytesPerPixel(surfaceInfo.format);
+                ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
                 surfaceBitmap.setConfig(SkBitmap::kARGB_8888_Config,
-                        surfaceInfo.w, surfaceInfo.h, bpr);
-                surfaceBitmap.setPixels(surfaceInfo.bits);
+                        outBuffer.width, outBuffer.height, bpr);
+                surfaceBitmap.setPixels(outBuffer.bits);
 
                 SkCanvas surfaceCanvas(surfaceBitmap);
 
@@ -214,15 +216,15 @@ void SpriteController::doUpdateSprites() {
                 paint.setXfermodeMode(SkXfermode::kSrc_Mode);
                 surfaceCanvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
 
-                if (surfaceInfo.w > uint32_t(update.state.icon.bitmap.width())) {
+                if (outBuffer.width > uint32_t(update.state.icon.bitmap.width())) {
                     paint.setColor(0); // transparent fill color
                     surfaceCanvas.drawRectCoords(update.state.icon.bitmap.width(), 0,
-                            surfaceInfo.w, update.state.icon.bitmap.height(), paint);
+                            outBuffer.width, update.state.icon.bitmap.height(), paint);
                 }
-                if (surfaceInfo.h > uint32_t(update.state.icon.bitmap.height())) {
+                if (outBuffer.height > uint32_t(update.state.icon.bitmap.height())) {
                     paint.setColor(0); // transparent fill color
                     surfaceCanvas.drawRectCoords(0, update.state.icon.bitmap.height(),
-                            surfaceInfo.w, surfaceInfo.h, paint);
+                            outBuffer.width, outBuffer.height, paint);
                 }
 
                 status = surface->unlockAndPost();
@@ -370,8 +372,7 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
     sp<SurfaceControl> surfaceControl = mSurfaceComposerClient->createSurface(
             String8("Sprite"), width, height, PIXEL_FORMAT_RGBA_8888,
             ISurfaceComposerClient::eHidden);
-    if (surfaceControl == NULL || !surfaceControl->isValid()
-            || !surfaceControl->getSurface()->isValid()) {
+    if (surfaceControl == NULL || !surfaceControl->isValid()) {
         ALOGE("Error creating sprite surface.");
         return NULL;
     }

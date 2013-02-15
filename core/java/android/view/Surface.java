@@ -32,6 +32,20 @@ import dalvik.system.CloseGuard;
 public class Surface implements Parcelable {
     private static final String TAG = "Surface";
 
+    private static native int nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
+            throws OutOfResourcesException;
+
+    private native Canvas nativeLockCanvas(int nativeObject, Rect dirty);
+    private native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
+
+    private static native void nativeRelease(int nativeObject);
+    private static native void nativeDestroy(int nativeObject);
+    private static native boolean nativeIsValid(int nativeObject);
+    private static native boolean nativeIsConsumerRunningBehind(int nativeObject);
+    private static native int nativeCopyFrom(int nativeObject, int surfaceControlNativeObject);
+    private static native int nativeReadFromParcel(int nativeObject, Parcel source);
+    private static native void nativeWriteToParcel(int nativeObject, Parcel dest);
+
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
         public Surface createFromParcel(Parcel source) {
@@ -44,32 +58,10 @@ public class Surface implements Parcelable {
                 return null;
             }
         }
-
         public Surface[] newArray(int size) {
             return new Surface[size];
         }
     };
-
-    /**
-     * Rotation constant: 0 degree rotation (natural orientation)
-     */
-    public static final int ROTATION_0 = 0;
-
-    /**
-     * Rotation constant: 90 degree rotation.
-     */
-    public static final int ROTATION_90 = 1;
-
-    /**
-     * Rotation constant: 180 degree rotation.
-     */
-    public static final int ROTATION_180 = 2;
-
-    /**
-     * Rotation constant: 270 degree rotation.
-     */
-    public static final int ROTATION_270 = 3;
-
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -91,6 +83,28 @@ public class Surface implements Parcelable {
     // A matrix to scale the matrix set by application. This is set to null for
     // non compatibility mode.
     private Matrix mCompatibleMatrix;
+
+
+    /**
+     * Rotation constant: 0 degree rotation (natural orientation)
+     */
+    public static final int ROTATION_0 = 0;
+
+    /**
+     * Rotation constant: 90 degree rotation.
+     */
+    public static final int ROTATION_90 = 1;
+
+    /**
+     * Rotation constant: 180 degree rotation.
+     */
+    public static final int ROTATION_180 = 2;
+
+    /**
+     * Rotation constant: 270 degree rotation.
+     */
+    public static final int ROTATION_270 = 3;
+
 
 
     /**
@@ -435,20 +449,4 @@ public class Surface implements Parcelable {
         if (mNativeObject == 0) throw new NullPointerException(
                 "mNativeObject is null. Have you called release() already?");
     }
-
-    private native int nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
-            throws OutOfResourcesException;
-
-    private native void nativeRelease(int nativeObject);
-    private native void nativeDestroy(int nativeObject);
-    private native boolean nativeIsValid(int nativeObject);
-
-    private native boolean nativeIsConsumerRunningBehind(int nativeObject);
-
-    private native Canvas nativeLockCanvas(int nativeObject, Rect dirty);
-    private native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
-    
-    private native int nativeCopyFrom(int nativeObject, int surfaceControlNativeObject);
-    private native int nativeReadFromParcel(int nativeObject, Parcel source);
-    private native void nativeWriteToParcel(int nativeObject, Parcel dest);
 }

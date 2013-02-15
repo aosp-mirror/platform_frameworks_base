@@ -225,7 +225,7 @@ public class WindowAnimator {
             WindowStateAnimator winAnimator = win.mWinAnimator;
             final int flags = winAnimator.mAttrFlags;
 
-            if (winAnimator.mSurface != null) {
+            if (winAnimator.mSurfaceControl != null) {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
 
@@ -373,7 +373,7 @@ public class WindowAnimator {
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (winAnimator.mSurface == null) {
+            if (winAnimator.mSurfaceControl == null) {
                 continue;
             }
 

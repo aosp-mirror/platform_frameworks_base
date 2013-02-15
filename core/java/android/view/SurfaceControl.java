@@ -30,6 +30,46 @@ import android.util.Log;
  */
 public class SurfaceControl {
     private static final String TAG = "SurfaceControl";
+
+    private static native int nativeCreate(SurfaceSession session, String name,
+            int w, int h, int format, int flags)
+            throws OutOfResourcesException;
+    private static native void nativeRelease(int nativeObject);
+    private static native void nativeDestroy(int nativeObject);
+
+    private static native Bitmap nativeScreenshot(IBinder displayToken,
+            int width, int height, int minLayer, int maxLayer, boolean allLayers);
+
+    private static native void nativeOpenTransaction();
+    private static native void nativeCloseTransaction();
+    private static native void nativeSetAnimationTransaction();
+
+    private static native void nativeSetLayer(int nativeObject, int zorder);
+    private static native void nativeSetPosition(int nativeObject, float x, float y);
+    private static native void nativeSetSize(int nativeObject, int w, int h);
+    private static native void nativeSetTransparentRegionHint(int nativeObject, Region region);
+    private static native void nativeSetAlpha(int nativeObject, float alpha);
+    private static native void nativeSetMatrix(int nativeObject, float dsdx, float dtdx, float dsdy, float dtdy);
+    private static native void nativeSetFlags(int nativeObject, int flags, int mask);
+    private static native void nativeSetWindowCrop(int nativeObject, int l, int t, int r, int b);
+    private static native void nativeSetLayerStack(int nativeObject, int layerStack);
+
+    private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
+    private static native IBinder nativeCreateDisplay(String name, boolean secure);
+    private static native void nativeSetDisplaySurface(
+            IBinder displayToken, int nativeSurfaceObject);
+    private static native void nativeSetDisplayLayerStack(
+            IBinder displayToken, int layerStack);
+    private static native void nativeSetDisplayProjection(
+            IBinder displayToken, int orientation,
+            int l, int t, int r, int b, 
+            int L, int T, int R, int B);
+    private static native boolean nativeGetDisplayInfo(
+            IBinder displayToken, SurfaceControl.PhysicalDisplayInfo outInfo);
+    private static native void nativeBlankDisplay(IBinder displayToken);
+    private static native void nativeUnblankDisplay(IBinder displayToken);
+
+
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
     int mNativeObject; // package visibility only for Surface.java access
@@ -532,44 +572,4 @@ public class SurfaceControl {
             throw new UnsupportedOperationException("Device is headless");
         }
     }
-    
-    
-
-    private native int nativeCreate(SurfaceSession session, String name,
-            int w, int h, int format, int flags)
-            throws OutOfResourcesException;
-    private native void nativeRelease(int nativeObject);
-    private native void nativeDestroy(int nativeObject);
-    
-    private static native Bitmap nativeScreenshot(IBinder displayToken,
-            int width, int height, int minLayer, int maxLayer, boolean allLayers);
-    
-    private static native void nativeOpenTransaction();
-    private static native void nativeCloseTransaction();
-    private static native void nativeSetAnimationTransaction();
-
-    private native void nativeSetLayer(int nativeObject, int zorder);
-    private native void nativeSetPosition(int nativeObject, float x, float y);
-    private native void nativeSetSize(int nativeObject, int w, int h);
-    private native void nativeSetTransparentRegionHint(int nativeObject, Region region);
-    private native void nativeSetAlpha(int nativeObject, float alpha);
-    private native void nativeSetMatrix(int nativeObject, float dsdx, float dtdx, float dsdy, float dtdy);
-    private native void nativeSetFlags(int nativeObject, int flags, int mask);
-    private native void nativeSetWindowCrop(int nativeObject, int l, int t, int r, int b);
-    private native void nativeSetLayerStack(int nativeObject, int layerStack);
-
-    private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
-    private static native IBinder nativeCreateDisplay(String name, boolean secure);
-    private static native void nativeSetDisplaySurface(
-            IBinder displayToken, int nativeSurfaceObject);
-    private static native void nativeSetDisplayLayerStack(
-            IBinder displayToken, int layerStack);
-    private static native void nativeSetDisplayProjection(
-            IBinder displayToken, int orientation,
-            int l, int t, int r, int b, 
-            int L, int T, int R, int B);
-    private static native boolean nativeGetDisplayInfo(
-            IBinder displayToken, SurfaceControl.PhysicalDisplayInfo outInfo);
-    private static native void nativeBlankDisplay(IBinder displayToken);
-    private static native void nativeUnblankDisplay(IBinder displayToken);
 }

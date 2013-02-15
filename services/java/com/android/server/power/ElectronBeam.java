@@ -713,17 +713,17 @@ final class ElectronBeam {
      */
     private static final class NaturalSurfaceLayout implements DisplayTransactionListener {
         private final DisplayManagerService mDisplayManager;
-        private SurfaceControl mSurface;
+        private SurfaceControl mSurfaceControl;
 
-        public NaturalSurfaceLayout(DisplayManagerService displayManager, SurfaceControl surface) {
+        public NaturalSurfaceLayout(DisplayManagerService displayManager, SurfaceControl surfaceControl) {
             mDisplayManager = displayManager;
-            mSurface = surface;
+            mSurfaceControl = surfaceControl;
             mDisplayManager.registerDisplayTransactionListener(this);
         }
 
         public void dispose() {
             synchronized (this) {
-                mSurface = null;
+                mSurfaceControl = null;
             }
             mDisplayManager.unregisterDisplayTransactionListener(this);
         }
@@ -731,27 +731,27 @@ final class ElectronBeam {
         @Override
         public void onDisplayTransaction() {
             synchronized (this) {
-                if (mSurface == null) {
+                if (mSurfaceControl == null) {
                     return;
                 }
 
                 DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
                 switch (displayInfo.rotation) {
                     case Surface.ROTATION_0:
-                        mSurface.setPosition(0, 0);
-                        mSurface.setMatrix(1, 0, 0, 1);
+                        mSurfaceControl.setPosition(0, 0);
+                        mSurfaceControl.setMatrix(1, 0, 0, 1);
                         break;
                     case Surface.ROTATION_90:
-                        mSurface.setPosition(0, displayInfo.logicalHeight);
-                        mSurface.setMatrix(0, -1, 1, 0);
+                        mSurfaceControl.setPosition(0, displayInfo.logicalHeight);
+                        mSurfaceControl.setMatrix(0, -1, 1, 0);
                         break;
                     case Surface.ROTATION_180:
-                        mSurface.setPosition(displayInfo.logicalWidth, displayInfo.logicalHeight);
-                        mSurface.setMatrix(-1, 0, 0, -1);
+                        mSurfaceControl.setPosition(displayInfo.logicalWidth, displayInfo.logicalHeight);
+                        mSurfaceControl.setMatrix(-1, 0, 0, -1);
                         break;
                     case Surface.ROTATION_270:
-                        mSurface.setPosition(displayInfo.logicalWidth, 0);
-                        mSurface.setMatrix(0, 1, -1, 0);
+                        mSurfaceControl.setPosition(displayInfo.logicalWidth, 0);
+                        mSurfaceControl.setMatrix(0, 1, -1, 0);
                         break;
                 }
             }

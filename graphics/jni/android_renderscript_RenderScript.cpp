@@ -43,7 +43,7 @@
 #include <rsEnv.h>
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
-#include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
 //#define LOG_API ALOGE
@@ -247,7 +247,7 @@ nContextSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con, jint width
 
     } else {
         st = SurfaceTexture_getSurfaceTexture(_env, sur);
-        window = new SurfaceTextureClient(st->getBufferQueue());
+        window = new Surface(st->getBufferQueue());
     }
 
     rsContextSetSurface(con, width, height, window.get());

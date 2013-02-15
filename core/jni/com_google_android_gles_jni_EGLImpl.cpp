@@ -28,7 +28,7 @@
 
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
-#include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
@@ -355,7 +355,7 @@ not_valid_surface:
     
     sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(_env, native_window));
 
-    window = new SurfaceTextureClient(glConsumer->getBufferQueue());
+    window = new Surface(glConsumer->getBufferQueue());
     if (window == NULL)
         goto not_valid_surface;
 

@@ -28,6 +28,7 @@
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
 #include <gui/Surface.h>
+#include <gui/SurfaceControl.h>
 #include <gui/GLConsumer.h>
 
 #include <ui/Rect.h>
@@ -89,7 +90,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
             env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeObject));
 }
 
-jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
+jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         const sp<IGraphicBufferProducer>& bufferProducer) {
     if (bufferProducer == NULL) {
         return NULL;
@@ -115,7 +116,13 @@ jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jobject surfaceObj,
+static bool isSurfaceValid(const sp<Surface>& sur) {
+    return sur != 0 && sur->getISurfaceTexture() != 0;
+}
+
+// ----------------------------------------------------------------------------
+
+static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
     sp<GLConsumer> st(SurfaceTexture_getSurfaceTexture(env, surfaceTextureObj));
     if (st == NULL) {
@@ -131,28 +138,28 @@ static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jobject surfaceObj,
         return 0;
     }
 
-    surface->incStrong(surfaceObj);
+    surface->incStrong(clazz);
     return int(surface.get());
 }
 
-static void nativeRelease(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    sur->decStrong(surfaceObj);
+    sur->decStrong(clazz);
 }
 
-static void nativeDestroy(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    sur->decStrong(surfaceObj);
+    sur->decStrong(clazz);
 }
 
-static jboolean nativeIsValid(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    return Surface::isValid(sur) ? JNI_TRUE : JNI_FALSE;
+    return isSurfaceValid(sur) ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    if (!Surface::isValid(sur)) {
+    if (!isSurfaceValid(sur)) {
         doThrowIAE(env);
         return JNI_FALSE;
     }
@@ -189,7 +196,7 @@ static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCa
 static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObject, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
-    if (!Surface::isValid(surface)) {
+    if (!isSurfaceValid(surface)) {
         doThrowIAE(env);
         return NULL;
     }
@@ -209,9 +216,11 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
         dirtyRegion.set(Rect(0x3FFF, 0x3FFF));
     }
 
-    Surface::SurfaceInfo info;
-    status_t err = surface->lock(&info, &dirtyRegion);
+    ANativeWindow_Buffer outBuffer;
+    Rect dirtyBounds(dirtyRegion.getBounds());
+    status_t err = surface->lock(&outBuffer, &dirtyBounds);
     if (err < 0) {
+        dirtyRegion.set(dirtyBounds);
         const char* const exception = (err == NO_MEMORY) ?
                 OutOfResourcesException :
                 "java/lang/IllegalArgumentException";
@@ -221,16 +230,16 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
 
     // Associate a SkCanvas object to this surface
     jobject canvasObj = env->GetObjectField(surfaceObj, gSurfaceClassInfo.mCanvas);
-    env->SetIntField(canvasObj, gCanvasClassInfo.mSurfaceFormat, info.format);
+    env->SetIntField(canvasObj, gCanvasClassInfo.mSurfaceFormat, outBuffer.format);
 
     SkBitmap bitmap;
-    ssize_t bpr = info.s * bytesPerPixel(info.format);
-    bitmap.setConfig(convertPixelFormat(info.format), info.w, info.h, bpr);
-    if (info.format == PIXEL_FORMAT_RGBX_8888) {
+    ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
+    bitmap.setConfig(convertPixelFormat(outBuffer.format), outBuffer.width, outBuffer.height, bpr);
+    if (outBuffer.format == PIXEL_FORMAT_RGBX_8888) {
         bitmap.setIsOpaque(true);
     }
-    if (info.w > 0 && info.h > 0) {
-        bitmap.setPixels(info.bits);
+    if (outBuffer.width > 0 && outBuffer.height > 0) {
+        bitmap.setPixels(outBuffer.bits);
     } else {
         // be safe with an empty bitmap.
         bitmap.setPixels(NULL);
@@ -273,7 +282,7 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jobject surfaceObj, jint nati
     }
 
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
-    if (!Surface::isValid(surface)) {
+    if (!isSurfaceValid(surface)) {
         return;
     }
 
@@ -290,7 +299,7 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jobject surfaceObj, jint nati
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCopyFrom(JNIEnv* env, jobject surfaceObj,
+static jint nativeCopyFrom(JNIEnv* env, jclass clazz,
         jint nativeObject, jint surfaceControlNativeObj) {
     /*
      * This is used by the WindowManagerService just after constructing
@@ -301,18 +310,18 @@ static jint nativeCopyFrom(JNIEnv* env, jobject surfaceObj,
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
     sp<Surface> other(ctrl->getSurface());
     if (other != NULL) {
-        other->incStrong(surfaceObj);
+        other->incStrong(clazz);
     }
 
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     if (sur != NULL) {
-        sur->decStrong(surfaceObj);
+        sur->decStrong(clazz);
     }
 
     return int(other.get());
 }
 
-static jint nativeReadFromParcel(JNIEnv* env, jobject surfaceObj,
+static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
         jint nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
@@ -321,16 +330,16 @@ static jint nativeReadFromParcel(JNIEnv* env, jobject surfaceObj,
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
     if (self != NULL) {
-        self->decStrong(surfaceObj);
+        self->decStrong(clazz);
     }
     sp<Surface> sur(Surface::readFromParcel(*parcel));
     if (sur != NULL) {
-        sur->incStrong(surfaceObj);
+        sur->incStrong(clazz);
     }
     return int(sur.get());
 }
 
-static void nativeWriteToParcel(JNIEnv* env, jobject surfaceObj,
+static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         jint nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
