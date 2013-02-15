@@ -24,7 +24,7 @@
 #include "native/core/gl_env.h"
 
 #include <gui/IGraphicBufferProducer.h>
-#include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 #include <utils/Errors.h>
 #include <system/window.h>
 
@@ -34,7 +34,7 @@ using android::filterfw::WindowHandle;
 using android::MediaRecorder;
 using android::sp;
 using android::IGraphicBufferProducer;
-using android::SurfaceTextureClient;
+using android::Surface;
 
 
 class NativeWindowHandle : public WindowHandle {
@@ -290,7 +290,7 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
               <IGraphicBufferProducer> handle.");
       return -1;
     }
-    sp<SurfaceTextureClient> surfaceTC = new SurfaceTextureClient(surfaceMS);
+    sp<Surface> surfaceTC = new Surface(surfaceMS);
     // Get the ANativeWindow
     sp<ANativeWindow> window = surfaceTC;
 

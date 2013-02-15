@@ -120,7 +120,7 @@ private:
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCreate(JNIEnv* env, jobject surfaceObj, jobject sessionObj,
+static jint nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         jstring nameStr, jint w, jint h, jint format, jint flags) {
     ScopedUtfChars name(env, nameStr);
     sp<SurfaceComposerClient> client(android_view_SurfaceSession_getClient(env, sessionObj));
@@ -130,19 +130,19 @@ static jint nativeCreate(JNIEnv* env, jobject surfaceObj, jobject sessionObj,
         jniThrowException(env, OutOfResourcesException, NULL);
         return 0;
     }
-    surface->incStrong(surfaceObj);
+    surface->incStrong(clazz);
     return int(surface.get());
 }
 
-static void nativeRelease(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
-    ctrl->decStrong(surfaceObj);
+    ctrl->decStrong(clazz);
 }
 
-static void nativeDestroy(JNIEnv* env, jobject surfaceObj, jint nativeObject) {
+static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
     ctrl->clear();
-    ctrl->decStrong(surfaceObj);
+    ctrl->decStrong(clazz);
 }
 
 static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
@@ -210,7 +210,7 @@ static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz) {
     SurfaceComposerClient::setAnimationTransaction();
 }
 
-static void nativeSetLayer(JNIEnv* env, jobject surfaceObj, jint nativeObject, jint zorder) {
+static void nativeSetLayer(JNIEnv* env, jclass clazz, jint nativeObject, jint zorder) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setLayer(zorder);
     if (err < 0 && err != NO_INIT) {
@@ -218,7 +218,7 @@ static void nativeSetLayer(JNIEnv* env, jobject surfaceObj, jint nativeObject, j
     }
 }
 
-static void nativeSetPosition(JNIEnv* env, jobject surfaceObj, jint nativeObject, jfloat x, jfloat y) {
+static void nativeSetPosition(JNIEnv* env, jclass clazz, jint nativeObject, jfloat x, jfloat y) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setPosition(x, y);
     if (err < 0 && err != NO_INIT) {
@@ -226,7 +226,7 @@ static void nativeSetPosition(JNIEnv* env, jobject surfaceObj, jint nativeObject
     }
 }
 
-static void nativeSetSize(JNIEnv* env, jobject surfaceObj, jint nativeObject, jint w, jint h) {
+static void nativeSetSize(JNIEnv* env, jclass clazz, jint nativeObject, jint w, jint h) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setSize(w, h);
     if (err < 0 && err != NO_INIT) {
@@ -234,7 +234,7 @@ static void nativeSetSize(JNIEnv* env, jobject surfaceObj, jint nativeObject, ji
     }
 }
 
-static void nativeSetFlags(JNIEnv* env, jobject surfaceObj, jint nativeObject, jint flags, jint mask) {
+static void nativeSetFlags(JNIEnv* env, jclass clazz, jint nativeObject, jint flags, jint mask) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setFlags(flags, mask);
     if (err < 0 && err != NO_INIT) {
@@ -242,7 +242,7 @@ static void nativeSetFlags(JNIEnv* env, jobject surfaceObj, jint nativeObject, j
     }
 }
 
-static void nativeSetTransparentRegionHint(JNIEnv* env, jobject surfaceObj, jint nativeObject, jobject regionObj) {
+static void nativeSetTransparentRegionHint(JNIEnv* env, jclass clazz, jint nativeObject, jobject regionObj) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     SkRegion* region = android_graphics_Region_getSkRegion(env, regionObj);
     if (!region) {
@@ -267,7 +267,7 @@ static void nativeSetTransparentRegionHint(JNIEnv* env, jobject surfaceObj, jint
     }
 }
 
-static void nativeSetAlpha(JNIEnv* env, jobject surfaceObj, jint nativeObject, jfloat alpha) {
+static void nativeSetAlpha(JNIEnv* env, jclass clazz, jint nativeObject, jfloat alpha) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setAlpha(alpha);
     if (err < 0 && err != NO_INIT) {
@@ -275,7 +275,7 @@ static void nativeSetAlpha(JNIEnv* env, jobject surfaceObj, jint nativeObject, j
     }
 }
 
-static void nativeSetMatrix(JNIEnv* env, jobject surfaceObj, jint nativeObject,
+static void nativeSetMatrix(JNIEnv* env, jclass clazz, jint nativeObject,
         jfloat dsdx, jfloat dtdx, jfloat dsdy, jfloat dtdy) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setMatrix(dsdx, dtdx, dsdy, dtdy);
@@ -284,7 +284,7 @@ static void nativeSetMatrix(JNIEnv* env, jobject surfaceObj, jint nativeObject,
     }
 }
 
-static void nativeSetWindowCrop(JNIEnv* env, jobject surfaceObj, jint nativeObject,
+static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jint nativeObject,
         jint l, jint t, jint r, jint b) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
@@ -294,7 +294,7 @@ static void nativeSetWindowCrop(JNIEnv* env, jobject surfaceObj, jint nativeObje
     }
 }
 
-static void nativeSetLayerStack(JNIEnv* env, jobject surfaceObj, jint nativeObject, jint layerStack) {
+static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jint nativeObject, jint layerStack) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setLayerStack(layerStack);
     if (err < 0 && err != NO_INIT) {
@@ -320,7 +320,7 @@ static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeSurfaceObject));
-    sp<IGraphicBufferProducer> bufferProducer(sur->getSurfaceTexture());
+    sp<IGraphicBufferProducer> bufferProducer(sur->getIGraphicBufferProducer());
     SurfaceComposerClient::setDisplaySurface(token, bufferProducer);
 }
 

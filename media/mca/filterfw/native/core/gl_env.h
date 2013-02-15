@@ -28,7 +28,7 @@
 #include <EGL/egl.h>
 
 #include <gui/IGraphicBufferProducer.h>
-#include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 
 namespace android {
 namespace filterfw {

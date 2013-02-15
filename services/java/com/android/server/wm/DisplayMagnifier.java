@@ -491,15 +491,15 @@ final class DisplayMagnifier {
             private boolean mInvalidated;
 
             public ViewportWindow(Context context) {
-                SurfaceControl surface = null;
+                SurfaceControl surfaceControl = null;
                 try {
                     mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                    surface = new SurfaceControl(mWindowManagerService.mFxSession, SURFACE_TITLE,
+                    surfaceControl = new SurfaceControl(mWindowManagerService.mFxSession, SURFACE_TITLE,
                             mTempPoint.x, mTempPoint.y, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
                 } catch (SurfaceControl.OutOfResourcesException oore) {
                     /* ignore */
                 }
-                mSurfaceControl = surface;
+                mSurfaceControl = surfaceControl;
                 mSurfaceControl.setLayerStack(mWindowManager.getDefaultDisplay().getLayerStack());
                 mSurfaceControl.setLayer(mWindowManagerService.mPolicy.windowTypeToLayerLw(
                         WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY)

@@ -64,7 +64,7 @@ public:
             uint32_t width, uint32_t height, uint32_t flags) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-        jobject surfaceObj = android_view_Surface_createFromISurfaceTexture(env, bufferProducer);
+        jobject surfaceObj = android_view_Surface_createFromIGraphicBufferProducer(env, bufferProducer);
         if (surfaceObj == NULL) {
             ALOGE("Could not create Surface from surface texture %p provided by media server.",
                   bufferProducer.get());

@@ -46,7 +46,7 @@ import java.util.ArrayList;
 class DragState {
     final WindowManagerService mService;
     IBinder mToken;
-    SurfaceControl mSurface;
+    SurfaceControl mSurfaceControl;
     int mFlags;
     IBinder mLocalWin;
     ClipData mData;
@@ -69,17 +69,17 @@ class DragState {
             int flags, IBinder localWin) {
         mService = service;
         mToken = token;
-        mSurface = surface;
+        mSurfaceControl = surface;
         mFlags = flags;
         mLocalWin = localWin;
         mNotifiedWindows = new ArrayList<WindowState>();
     }
 
     void reset() {
-        if (mSurface != null) {
-            mSurface.destroy();
+        if (mSurfaceControl != null) {
+            mSurfaceControl.destroy();
         }
-        mSurface = null;
+        mSurfaceControl = null;
         mFlags = 0;
         mLocalWin = null;
         mToken = null;
@@ -296,9 +296,9 @@ class DragState {
                 WindowManagerService.TAG, ">>> OPEN TRANSACTION notifyMoveLw");
         SurfaceControl.openTransaction();
         try {
-            mSurface.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
+            mSurfaceControl.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DRAG "
-                    + mSurface + ": pos=(" +
+                    + mSurfaceControl + ": pos=(" +
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
         } finally {
             SurfaceControl.closeTransaction();

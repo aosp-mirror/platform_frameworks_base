@@ -44,7 +44,7 @@ class ScreenRotationAnimation {
 
     final Context mContext;
     final Display mDisplay;
-    SurfaceControl mSurface;
+    SurfaceControl mSurfaceControl;
     BlackFrame mCustomBlackFrame;
     BlackFrame mExitingBlackFrame;
     BlackFrame mEnteringBlackFrame;
@@ -128,7 +128,7 @@ class ScreenRotationAnimation {
     long mHalfwayPoint;
 
     public void printTo(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("mSurface="); pw.print(mSurface);
+        pw.print(prefix); pw.print("mSurface="); pw.print(mSurfaceControl);
                 pw.print(" mWidth="); pw.print(mWidth);
                 pw.print(" mHeight="); pw.println(mHeight);
         if (USE_CUSTOM_BLACK_FRAME) {
@@ -220,25 +220,25 @@ class ScreenRotationAnimation {
         try {
             try {
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                    mSurface = new SurfaceTrace(session, "FreezeSurface",
+                    mSurfaceControl = new SurfaceTrace(session, "FreezeSurface",
                             mWidth, mHeight,
                             PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_SCREENSHOT | SurfaceControl.HIDDEN);
                 } else {
-                    mSurface = new SurfaceControl(session, "FreezeSurface",
+                    mSurfaceControl = new SurfaceControl(session, "FreezeSurface",
                             mWidth, mHeight,
                             PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_SCREENSHOT | SurfaceControl.HIDDEN);
                 }
-                mSurface.setLayerStack(mDisplay.getLayerStack());
-                mSurface.setLayer(FREEZE_LAYER + 1);
-                mSurface.setAlpha(0);
-                mSurface.show();
+                mSurfaceControl.setLayerStack(mDisplay.getLayerStack());
+                mSurfaceControl.setLayer(FREEZE_LAYER + 1);
+                mSurfaceControl.setAlpha(0);
+                mSurfaceControl.show();
             } catch (SurfaceControl.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
             }
 
             if (WindowManagerService.SHOW_TRANSACTIONS ||
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
-                            "  FREEZE " + mSurface + ": CREATE");
+                            "  FREEZE " + mSurfaceControl + ": CREATE");
 
             setRotationInTransaction(originalRotation);
         } finally {
@@ -251,7 +251,7 @@ class ScreenRotationAnimation {
     }
 
     boolean hasScreenshot() {
-        return mSurface != null;
+        return mSurfaceControl != null;
     }
 
     static int deltaRotation(int oldRotation, int newRotation) {
@@ -261,13 +261,13 @@ class ScreenRotationAnimation {
     }
 
     private void setSnapshotTransformInTransaction(Matrix matrix, float alpha) {
-        if (mSurface != null) {
+        if (mSurfaceControl != null) {
             matrix.getValues(mTmpFloats);
-            mSurface.setPosition(mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
-            mSurface.setMatrix(
+            mSurfaceControl.setPosition(mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
+            mSurfaceControl.setMatrix(
                     mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                     mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-            mSurface.setAlpha(alpha);
+            mSurfaceControl.setAlpha(alpha);
             if (DEBUG_TRANSFORMS) {
                 float[] srcPnts = new float[] { 0, 0, mWidth, mHeight };
                 float[] dstPnts = new float[4];
@@ -333,7 +333,7 @@ class ScreenRotationAnimation {
      */
     private boolean startAnimation(SurfaceSession session, long maxAnimationDuration,
             float animationScale, int finalWidth, int finalHeight, boolean dismissing) {
-        if (mSurface == null) {
+        if (mSurfaceControl == null) {
             // Can't do animation.
             return false;
         }
@@ -509,7 +509,7 @@ class ScreenRotationAnimation {
                 mCustomBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 3,
                         layerStack);
                 mCustomBlackFrame.setMatrix(mFrameInitialMatrix);
-            } catch (Surface.OutOfResourcesException e) {
+            } catch (SurfaceControl.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -539,7 +539,7 @@ class ScreenRotationAnimation {
                 mExitingBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 2,
                         layerStack);
                 mExitingBlackFrame.setMatrix(mFrameInitialMatrix);
-            } catch (Surface.OutOfResourcesException e) {
+            } catch (SurfaceControl.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -561,7 +561,7 @@ class ScreenRotationAnimation {
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
                 mEnteringBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER,
                         layerStack);
-            } catch (Surface.OutOfResourcesException e) {
+            } catch (SurfaceControl.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -580,7 +580,7 @@ class ScreenRotationAnimation {
     public boolean dismiss(SurfaceSession session, long maxAnimationDuration,
             float animationScale, int finalWidth, int finalHeight) {
         if (DEBUG_STATE) Slog.v(TAG, "Dismiss!");
-        if (mSurface == null) {
+        if (mSurfaceControl == null) {
             // Can't do animation.
             return false;
         }
@@ -598,12 +598,12 @@ class ScreenRotationAnimation {
 
     public void kill() {
         if (DEBUG_STATE) Slog.v(TAG, "Kill!");
-        if (mSurface != null) {
+        if (mSurfaceControl != null) {
             if (WindowManagerService.SHOW_TRANSACTIONS ||
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
-                            "  FREEZE " + mSurface + ": DESTROY");
-            mSurface.destroy();
-            mSurface = null;
+                            "  FREEZE " + mSurfaceControl + ": DESTROY");
+            mSurfaceControl.destroy();
+            mSurfaceControl = null;
         }
         if (mCustomBlackFrame != null) {
             mCustomBlackFrame.kill();
@@ -861,10 +861,10 @@ class ScreenRotationAnimation {
             return;
         }
 
-        if (mSurface != null) {
+        if (mSurfaceControl != null) {
             if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
                 if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, hiding screenshot surface");
-                mSurface.hide();
+                mSurfaceControl.hide();
             }
         }
 
