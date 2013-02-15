@@ -1062,7 +1062,7 @@
     <string name="noApplications" msgid="2991814273936504689">"Egy alkalmazás sem tudja végrehajtani ezt a műveletet."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazás sajnos leállt."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Sajnos a(z) <xliff:g id="PROCESS">%1$s</xliff:g> folyamat leállt."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Sajnos a <xliff:g id="PROCESS">%1$s</xliff:g> alkalmazás leállt."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"A(z) <xliff:g id="APPLICATION">%2$s</xliff:g> nem válaszol."\n\n"Szeretné bezárni?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"A(z) <xliff:g id="ACTIVITY">%1$s</xliff:g> tevékenység nem válaszol."\n\n"Szeretné bezárni?"</string>
