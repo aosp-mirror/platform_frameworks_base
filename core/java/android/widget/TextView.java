@@ -607,6 +607,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int typefaceIndex = -1;
         int styleIndex = -1;
         boolean allCaps = false;
+        int shadowcolor = 0;
+        float dx = 0, dy = 0, r = 0;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -667,6 +669,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextAppearance_textAllCaps:
                     allCaps = appearance.getBoolean(attr, false);
                     break;
+
+                case com.android.internal.R.styleable.TextAppearance_shadowColor:
+                    shadowcolor = a.getInt(attr, 0);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_shadowDx:
+                    dx = a.getFloat(attr, 0);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_shadowDy:
+                    dy = a.getFloat(attr, 0);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_shadowRadius:
+                    r = a.getFloat(attr, 0);
+                    break;
                 }
             }
 
@@ -690,8 +708,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int maxlength = -1;
         CharSequence text = "";
         CharSequence hint = null;
-        int shadowcolor = 0;
-        float dx = 0, dy = 0, r = 0;
         boolean password = false;
         int inputType = EditorInfo.TYPE_NULL;
 
@@ -2330,6 +2346,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                        TextAppearance_textStyle, -1);
 
         setTypefaceFromAttrs(familyName, typefaceIndex, styleIndex);
+
+        final int shadowcolor = appearance.getInt(
+                com.android.internal.R.styleable.TextAppearance_shadowColor, 0);
+        if (shadowcolor != 0) {
+            final float dx = appearance.getFloat(
+                    com.android.internal.R.styleable.TextAppearance_shadowDx, 0);
+            final float dy = appearance.getFloat(
+                    com.android.internal.R.styleable.TextAppearance_shadowDy, 0);
+            final float r = appearance.getFloat(
+                    com.android.internal.R.styleable.TextAppearance_shadowRadius, 0);
+
+            setShadowLayer(r, dx, dy, shadowcolor);
+        }
 
         if (appearance.getBoolean(com.android.internal.R.styleable.TextAppearance_textAllCaps,
                 false)) {
