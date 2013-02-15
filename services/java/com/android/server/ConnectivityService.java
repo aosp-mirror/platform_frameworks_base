@@ -1823,6 +1823,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public void sendConnectedBroadcast(NetworkInfo info) {
+        enforceConnectivityInternalPermission();
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION_IMMEDIATE);
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
     }
@@ -2107,6 +2108,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     /** @hide */
     public void captivePortalCheckComplete(NetworkInfo info) {
+        enforceConnectivityInternalPermission();
         mNetTrackers[info.getType()].captivePortalCheckComplete();
     }
 
@@ -2365,7 +2367,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * net.tcp.buffersize.[default|wifi|umts|edge|gprs] and set them for system
      * wide use
      */
-   public void updateNetworkSettings(NetworkStateTracker nt) {
+   private void updateNetworkSettings(NetworkStateTracker nt) {
         String key = nt.getTcpBufferSizesPropName();
         String bufferSizes = key == null ? null : SystemProperties.get(key);
 
@@ -2844,7 +2846,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public int setUsbTethering(boolean enable) {
-        enforceTetherAccessPermission();
+        enforceTetherChangePermission();
         if (isTetheringSupported()) {
             return mTethering.setUsbTethering(enable);
         } else {
@@ -2997,6 +2999,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public ProxyProperties getProxy() {
+        enforceAccessPermission();
         synchronized (mDefaultProxyLock) {
             return mDefaultProxyDisabled ? null : mDefaultProxy;
         }
@@ -3048,6 +3051,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public ProxyProperties getGlobalProxy() {
+        enforceAccessPermission();
         synchronized (mGlobalProxyLock) {
             return mGlobalProxy;
         }
