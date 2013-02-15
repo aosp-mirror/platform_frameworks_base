@@ -27,4 +27,9 @@ class TaskList {
         mAppTokens.add(wtoken);
         mDisplayContent = displayContent;
     }
+
+    @Override
+    public String toString() {
+        return "id=" + taskId + " appTokens=" + mAppTokens;
+    }
 }
