@@ -1437,8 +1437,6 @@ public final class ViewRootImpl implements ViewParent,
                             }
                             // TODO: should handle create/resize failure
                             layerCanvas = mResizeBuffer.start(hwRendererCanvas);
-                            layerCanvas.setViewport(mWidth, mHeight);
-                            layerCanvas.onPreDraw(null);
                             final int restoreCount = layerCanvas.save();
 
                             int yoff;
@@ -1475,9 +1473,6 @@ public final class ViewRootImpl implements ViewParent,
                         } catch (OutOfMemoryError e) {
                             Log.w(TAG, "Not enough memory for content change anim buffer", e);
                         } finally {
-                            if (layerCanvas != null) {
-                                layerCanvas.onPostDraw();
-                            }
                             if (mResizeBuffer != null) {
                                 mResizeBuffer.end(hwRendererCanvas);
                                 if (!completed) {
@@ -2506,9 +2501,7 @@ public final class ViewRootImpl implements ViewParent,
         for (int i = 0; i < count; i++) {
             final DisplayList displayList = displayLists.get(i);
             if (displayList.isDirty()) {
-                displayList.invalidate();
                 displayList.clear();
-                displayList.setDirty(false);
             }
         }
 

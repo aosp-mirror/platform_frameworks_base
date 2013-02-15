@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.app.ActivityThread;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -10050,7 +10049,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTop += offset;
             mBottom += offset;
             if (mDisplayList != null) {
-                mDisplayList.offsetTopBottom(offset);
+                mDisplayList.offsetTopAndBottom(offset);
                 invalidateViewProperty(false, false);
             } else {
                 if (!matrixIsIdentity) {
@@ -10098,7 +10097,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mLeft += offset;
             mRight += offset;
             if (mDisplayList != null) {
-                mDisplayList.offsetLeftRight(offset);
+                mDisplayList.offsetLeftAndRight(offset);
                 invalidateViewProperty(false, false);
             } else {
                 if (!matrixIsIdentity) {
@@ -11687,7 +11686,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (mDisplayList != null) {
-            mDisplayList.setDirty(false);
+            mDisplayList.clearDirty();
         }
     }
 
@@ -11966,7 +11965,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (mAttachInfo != null) {
             if (mDisplayList != null) {
-                mDisplayList.setDirty(true);
+                mDisplayList.markDirty();
                 mAttachInfo.mViewRootImpl.enqueueDisplayList(mDisplayList);
             }
             mAttachInfo.mViewRootImpl.cancelInvalidate(this);
@@ -12670,8 +12669,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @return The HardwareRenderer associated with that view or null if hardware rendering
-     * is not supported or this this has not been attached to a window.
+     * @return The {@link HardwareRenderer} associated with that view or null if
+     *         hardware rendering is not supported or this view is not attached
+     *         to a window.
      *
      * @hide
      */
@@ -12726,15 +12726,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             boolean caching = false;
-            final HardwareCanvas canvas = displayList.start();
             int width = mRight - mLeft;
             int height = mBottom - mTop;
             int layerType = getLayerType();
 
+            final HardwareCanvas canvas = displayList.start(width, height);
+
             try {
-                canvas.setViewport(width, height);
-                // The dirty rect should always be null for a display list
-                canvas.onPreDraw(null);
                 if (!isLayer && layerType != LAYER_TYPE_NONE) {
                     if (layerType == LAYER_TYPE_HARDWARE) {
                         final HardwareLayer layer = getHardwareLayer();
@@ -12772,8 +12770,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
             } finally {
-                canvas.onPostDraw();
-
                 displayList.end();
                 displayList.setCaching(caching);
                 if (isLayer) {
@@ -12818,7 +12814,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void clearDisplayList() {
         if (mDisplayList != null) {
-            mDisplayList.invalidate();
             mDisplayList.clear();
         }
     }
@@ -13394,7 +13389,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             alpha = transform.getAlpha();
                         }
                         if ((transformType & Transformation.TYPE_MATRIX) != 0) {
-                            displayList.setStaticMatrix(transform.getMatrix());
+                            displayList.setMatrix(transform.getMatrix());
                         }
                     }
                 }
