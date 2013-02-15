@@ -331,14 +331,14 @@ equivalents. The system then handles the mirroring and display of your UI as
 appropriate.</p>
 
 <p>For precise control over your app UI, Android 4.2 includes new APIs that let
-you manage layout direction, text direction, text alignment, gravity, and locale
-direction in View components. You can even create custom versions of layout,
-drawables, and other resources for display when a right-to-left script is in
-use.</p>
+you manage layout direction, text direction, text alignment, gravity, and 
+locale direction in View components. You can even create custom versions of
+layout, drawables, and other resources for display when a right-to-left script
+is in use.</p>
 
 <p>To help you debug and optimize your custom right-to-left layouts, the
 HierarchyViewer tool now lets you see start/end properties, layout direction,
-text direction, and text alignment for all the Views in the hierarchy,</p>
+text direction, and text alignment for all the Views in the hierarchy.</p>
 
 
 <h2 id="42-intl">Enhancements for international languages</h2>
