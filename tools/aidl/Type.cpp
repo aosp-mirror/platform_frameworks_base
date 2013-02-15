@@ -1348,7 +1348,7 @@ Namespace::Search(const string& name)
     // would be the place to do it, but I don't think the complexity in
     // scoping rules is worth it.
     int N = m_types.size();
-    for (int i=0; i<N; i++) {
+    for (int i=N-1; i>=0; i--) {
         if (m_types[i]->Name() == name) {
             return m_types[i];
         }
