@@ -11,6 +11,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
 		Caches.cpp \
+		DisplayList.cpp \
 		DisplayListLogBuffer.cpp \
 		DisplayListRenderer.cpp \
 		Dither.cpp \
