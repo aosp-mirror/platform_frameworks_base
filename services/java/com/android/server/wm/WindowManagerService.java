@@ -3124,8 +3124,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            boolean mismatch = false;
             AppTokenIterator iterator = displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-            for ( ; t >= 0; --t) {
+            for ( ; t >= 0 && !mismatch; --t) {
                 task = tasks.get(t);
                 List<IApplicationToken> tokens = task.tokens;
                 int v = task.tokens.size() - 1;
@@ -3137,28 +3138,22 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
 
-                while (v >= 0 && iterator.hasNext()) {
+                while (v >= 0) {
                     AppWindowToken atoken = iterator.next();
                     if (atoken.removed) {
                         continue;
                     }
                     if (tokens.get(v) != atoken.token) {
-                        Slog.w(TAG, "Tokens out of sync: external is " + tokens.get(v)
-                              + " @ " + v + ", internal is " + atoken.token);
+                        mismatch = true;
+                        break;
                     }
-                    v--;
-                }
-                while (v >= 0) {
-                    Slog.w(TAG, "External token not found: " + tokens.get(v) + " @ " + v);
                     v--;
                 }
             }
 
-            while (iterator.hasNext()) {
-                AppWindowToken atoken = iterator.next();
-                if (!atoken.removed) {
-                    Slog.w(TAG, "Invalid internal atoken: " + atoken.token);
-                }
+            if (mismatch || iterator.hasNext()) {
+                Slog.w(TAG, "validateAppTokens: Mismatch! ActivityManager=" + tasks
+                        + " WindowManager=" + iterator);
             }
         }
     }
