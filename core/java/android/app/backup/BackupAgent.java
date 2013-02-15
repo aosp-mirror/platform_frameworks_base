@@ -227,6 +227,7 @@ public abstract class BackupAgent extends ContextWrapper {
         String libDir = (appInfo.nativeLibraryDir != null)
                 ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
                 : null;
+        String externalFilesDir = getExternalFilesDir(null).getCanonicalPath();
 
         // Filters, the scan queue, and the set of resulting entities
         HashSet<String> filterSet = new HashSet<String>();
@@ -254,6 +255,12 @@ public abstract class BackupAgent extends ContextWrapper {
         filterSet.add(databaseDir);
         filterSet.remove(sharedPrefsDir);
         fullBackupFileTree(packageName, FullBackup.SHAREDPREFS_TREE_TOKEN, sharedPrefsDir, filterSet, data);
+
+        // getExternalFilesDir() location associated with this app.  Technically there should
+        // not be any files here if the app does not properly have permission to access
+        // external storage, but edge cases happen. fullBackupFileTree() catches
+        // IOExceptions and similar, and treats them as non-fatal, so we rely on that here.
+        fullBackupFileTree(packageName, FullBackup.MANAGED_EXTERNAL_TREE_TOKEN, externalFilesDir, null, data);
     }
 
     /**
@@ -274,6 +281,7 @@ public abstract class BackupAgent extends ContextWrapper {
         String spDir;
         String cacheDir;
         String libDir;
+        String efDir;
         String filePath;
 
         ApplicationInfo appInfo = getApplicationInfo();
@@ -287,6 +295,7 @@ public abstract class BackupAgent extends ContextWrapper {
             libDir = (appInfo.nativeLibraryDir == null)
                     ? null
                     : new File(appInfo.nativeLibraryDir).getCanonicalPath();
+            efDir = getExternalFilesDir(null).getCanonicalPath();
 
             // Now figure out which well-defined tree the file is placed in, working from
             // most to least specific.  We also specifically exclude the lib and cache dirs.
@@ -315,6 +324,9 @@ public abstract class BackupAgent extends ContextWrapper {
         } else if (filePath.startsWith(mainDir)) {
             domain = FullBackup.ROOT_TREE_TOKEN;
             rootpath = mainDir;
+        } else if (filePath.startsWith(efDir)) {
+            domain = FullBackup.MANAGED_EXTERNAL_TREE_TOKEN;
+            rootpath = efDir;
         } else {
             Log.w(TAG, "File " + filePath + " is in an unsupported location; skipping");
             return;
@@ -438,6 +450,8 @@ public abstract class BackupAgent extends ContextWrapper {
             basePath = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
         } else if (domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
             basePath = getCacheDir().getCanonicalPath();
+        } else if (domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
+            basePath = getExternalFilesDir(null).getCanonicalPath();
         } else {
             // Not a supported location
             Log.i(TAG, "Data restored from non-app domain " + domain + ", ignoring");
