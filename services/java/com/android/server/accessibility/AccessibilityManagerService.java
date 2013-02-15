@@ -1643,14 +1643,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             if (mIsAutomation || info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion
                     >= Build.VERSION_CODES.JELLY_BEAN) {
-                mFetchFlags |= (info.flags
-                        & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0 ?
-                                AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+                if ((info.flags & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0) {
+                    mFetchFlags |= AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+                } else {
+                    mFetchFlags &= ~AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+                }
             }
 
-            mFetchFlags |= (info.flags
-                    & AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS) != 0 ?
-                            AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS : 0;
+            if ((info.flags & AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS) != 0) {
+                mFetchFlags |= AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
+            } else {
+                mFetchFlags &= ~AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
+            }
 
             if (mResolveInfo != null) {
                 mRequestTouchExplorationMode = (info.flags
