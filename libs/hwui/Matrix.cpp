@@ -24,7 +24,6 @@
 
 #include <SkMatrix.h>
 
-#include "utils/Compare.h"
 #include "Matrix.h"
 
 namespace android {
