@@ -2671,13 +2671,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.TETHER_DUN_APN);
             MOVED_TO_GLOBAL.add(Settings.Global.TETHER_DUN_REQUIRED);
             MOVED_TO_GLOBAL.add(Settings.Global.TETHER_SUPPORTED);
-            MOVED_TO_GLOBAL.add(Settings.Global.THROTTLE_HELP_URI);
-            MOVED_TO_GLOBAL.add(Settings.Global.THROTTLE_MAX_NTP_CACHE_AGE_SEC);
-            MOVED_TO_GLOBAL.add(Settings.Global.THROTTLE_NOTIFICATION_TYPE);
-            MOVED_TO_GLOBAL.add(Settings.Global.THROTTLE_POLLING_SEC);
-            MOVED_TO_GLOBAL.add(Settings.Global.THROTTLE_RESET_DAY);
-            MOVED_TO_GLOBAL.add(Settings.Global.THROTTLE_THRESHOLD_BYTES);
-            MOVED_TO_GLOBAL.add(Settings.Global.THROTTLE_VALUE_KBITSPS);
             MOVED_TO_GLOBAL.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.USE_GOOGLE_MAIL);
             MOVED_TO_GLOBAL.add(Settings.Global.WEB_AUTOFILL_QUERY_URL);
@@ -4704,50 +4697,6 @@ public final class Settings {
         * @hide
         */
        public static final String TETHER_DUN_APN = "tether_dun_apn";
-
-       /**
-        * The bandwidth throttle polling freqency in seconds
-        * @hide
-        */
-       public static final String THROTTLE_POLLING_SEC = "throttle_polling_sec";
-
-       /**
-        * The bandwidth throttle threshold (long)
-        * @hide
-        */
-       public static final String THROTTLE_THRESHOLD_BYTES = "throttle_threshold_bytes";
-
-       /**
-        * The bandwidth throttle value (kbps)
-        * @hide
-        */
-       public static final String THROTTLE_VALUE_KBITSPS = "throttle_value_kbitsps";
-
-       /**
-        * The bandwidth throttle reset calendar day (1-28)
-        * @hide
-        */
-       public static final String THROTTLE_RESET_DAY = "throttle_reset_day";
-
-       /**
-        * The throttling notifications we should send
-        * @hide
-        */
-       public static final String THROTTLE_NOTIFICATION_TYPE = "throttle_notification_type";
-
-       /**
-        * Help URI for data throttling policy
-        * @hide
-        */
-       public static final String THROTTLE_HELP_URI = "throttle_help_uri";
-
-       /**
-        * The length of time in Sec that we allow our notion of NTP time
-        * to be cached before we refresh it
-        * @hide
-        */
-       public static final String THROTTLE_MAX_NTP_CACHE_AGE_SEC =
-               "throttle_max_ntp_cache_age_sec";
 
        /**
         * USB Mass Storage Enabled
