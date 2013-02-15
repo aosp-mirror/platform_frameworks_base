@@ -110,6 +110,7 @@ protected:
     virtual void onUnlockPixels() {
     }
 
+    SK_DECLARE_UNFLATTENABLE_OBJECT()
 private:
     ScreenshotClient mScreenshot;
     SkColorTable*    fCTable;

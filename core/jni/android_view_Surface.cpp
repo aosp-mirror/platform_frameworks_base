@@ -54,6 +54,7 @@ static struct {
     jfieldID mNativeObject;
     jfieldID mGenerationId;
     jfieldID mCanvas;
+    jfieldID mCanvasSaveCount;
     jmethodID ctor;
 } gSurfaceClassInfo;
 
@@ -73,78 +74,6 @@ static struct {
 static struct {
     jfieldID mNativeCanvas;
 } gCanvasFinalizerClassInfo;
-
-static struct {
-    jfieldID width;
-    jfieldID height;
-    jfieldID refreshRate;
-    jfieldID density;
-    jfieldID xDpi;
-    jfieldID yDpi;
-    jfieldID secure;
-} gPhysicalDisplayInfoClassInfo;
-
-
-class ScreenshotPixelRef : public SkPixelRef {
-public:
-    ScreenshotPixelRef(SkColorTable* ctable) {
-        fCTable = ctable;
-        SkSafeRef(ctable);
-        setImmutable();
-    }
-
-    virtual ~ScreenshotPixelRef() {
-        SkSafeUnref(fCTable);
-    }
-
-    status_t update(const sp<IBinder>& display, int width, int height,
-            int minLayer, int maxLayer, bool allLayers) {
-        status_t res = (width > 0 && height > 0)
-                ? (allLayers
-                        ? mScreenshot.update(display, width, height)
-                        : mScreenshot.update(display, width, height, minLayer, maxLayer))
-                : mScreenshot.update(display);
-        if (res != NO_ERROR) {
-            return res;
-        }
-
-        return NO_ERROR;
-    }
-
-    uint32_t getWidth() const {
-        return mScreenshot.getWidth();
-    }
-
-    uint32_t getHeight() const {
-        return mScreenshot.getHeight();
-    }
-
-    uint32_t getStride() const {
-        return mScreenshot.getStride();
-    }
-
-    uint32_t getFormat() const {
-        return mScreenshot.getFormat();
-    }
-
-    SK_DECLARE_UNFLATTENABLE_OBJECT()
-protected:
-    // overrides from SkPixelRef
-    virtual void* onLockPixels(SkColorTable** ct) {
-        *ct = fCTable;
-        return (void*)mScreenshot.getPixels();
-    }
-
-    virtual void onUnlockPixels() {
-    }
-
-private:
-    ScreenshotClient mScreenshot;
-    SkColorTable*    fCTable;
-
-    typedef SkPixelRef INHERITED;
-};
-
 
 // ----------------------------------------------------------------------------
 
