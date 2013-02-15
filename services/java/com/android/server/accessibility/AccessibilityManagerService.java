@@ -718,7 +718,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         synchronized (mLock) {
             // Disconnect from services for the old user.
             UserState oldUserState = getUserStateLocked(mCurrentUserId);
-            unbindAllServicesLocked(oldUserState);
+            oldUserState.onSwitchToAnotherUser();
 
             // Disable the local managers for the old user.
             if (oldUserState.mClients.getRegisteredCallbackCount() > 0) {
@@ -737,10 +737,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (userState.mUiAutomationService != null) {
                 // Switching users disables the UI automation service.
                 userState.mUiAutomationService.binderDied();
-            } else if (readConfigurationForUserStateLocked(userState)) {
-                // Update the user state if needed.
-               onUserStateChangedLocked(userState);
             }
+
+            readConfigurationForUserStateLocked(userState);
+            // Even if reading did not yield change, we have to update
+            // the state since the context in which the current user
+            // state was used has changed since it was inactive.
+            onUserStateChangedLocked(userState);
 
             if (announceNewUser) {
                 // Schedule announcement of the current user if needed.
@@ -2561,10 +2564,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private class UserState {
         public final int mUserId;
 
-        public final CopyOnWriteArrayList<Service> mBoundServices = new CopyOnWriteArrayList<Service>();
+        // Non-transient state.
 
         public final RemoteCallbackList<IAccessibilityManagerClient> mClients =
             new RemoteCallbackList<IAccessibilityManagerClient>();
+
+        public final SparseArray<AccessibilityConnectionWrapper> mInteractionConnections =
+                new SparseArray<AccessibilityConnectionWrapper>();
+
+        public final SparseArray<IBinder> mWindowTokens = new SparseArray<IBinder>();
+
+        // Transient state.
+
+        public final CopyOnWriteArrayList<Service> mBoundServices =
+                new CopyOnWriteArrayList<Service>();
 
         public final Map<ComponentName, Service> mComponentNameToServiceMap =
                 new HashMap<ComponentName, Service>();
@@ -2579,15 +2592,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public final Set<ComponentName> mTouchExplorationGrantedServices =
                 new HashSet<ComponentName>();
 
-        public final SparseArray<AccessibilityConnectionWrapper>
-                mInteractionConnections =
-                new SparseArray<AccessibilityConnectionWrapper>();
-
-        public final SparseArray<IBinder> mWindowTokens = new SparseArray<IBinder>();
-
         public int mHandledFeedbackTypes = 0;
 
-        public int mLastSentClientState;
+        public int mLastSentClientState = -1;
 
         public boolean mIsAccessibilityEnabled;
         public boolean mIsTouchExplorationEnabled;
@@ -2611,6 +2618,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 clientState |= AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
             }
             return clientState;
+        }
+
+        public void onSwitchToAnotherUser() {
+            // Clear UI test automation state.
+            if (mUiAutomationService != null) {
+                mUiAutomationService.binderDied();
+                mUiAutomationService = null;
+                mUiAutomationServiceClient = null;
+            }
+
+            // Unbind all services.
+            unbindAllServicesLocked(this);
+
+            // Clear service management state.
+            mBoundServices.clear();
+            mBindingServices.clear();
+
+            // Clear event management state.
+            mHandledFeedbackTypes = 0;
+            mLastSentClientState = -1;
+
+            // Clear state persisted in settings.
+            mEnabledServices.clear();
+            mTouchExplorationGrantedServices.clear();
+            mIsAccessibilityEnabled = false;
+            mIsTouchExplorationEnabled = false;
+            mIsEnhancedWebAccessibilityEnabled = false;
+            mIsDisplayMagnificationEnabled = false;
         }
     }
 
