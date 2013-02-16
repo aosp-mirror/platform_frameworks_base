@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -906,7 +906,8 @@ public class Element extends BaseObj {
               dk == DataKind.PIXEL_LA ||
               dk == DataKind.PIXEL_RGB ||
               dk == DataKind.PIXEL_RGBA ||
-              dk == DataKind.PIXEL_DEPTH)) {
+              dk == DataKind.PIXEL_DEPTH ||
+              dk == DataKind.PIXEL_YUV)) {
             throw new RSIllegalArgumentException("Unsupported DataKind");
         }
         if (!(dt == DataType.UNSIGNED_8 ||
