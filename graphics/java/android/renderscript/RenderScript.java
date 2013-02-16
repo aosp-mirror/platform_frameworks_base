@@ -801,6 +801,9 @@ public class RenderScript {
     Sampler mSampler_WRAP_NEAREST;
     Sampler mSampler_WRAP_LINEAR;
     Sampler mSampler_WRAP_LINEAR_MIP_LINEAR;
+    Sampler mSampler_MIRRORED_REPEAT_NEAREST;
+    Sampler mSampler_MIRRORED_REPEAT_LINEAR;
+    Sampler mSampler_MIRRORED_REPEAT_LINEAR_MIP_LINEAR;
 
     ProgramStore mProgramStore_BLEND_NONE_DEPTH_TEST;
     ProgramStore mProgramStore_BLEND_NONE_DEPTH_NO_DEPTH;
