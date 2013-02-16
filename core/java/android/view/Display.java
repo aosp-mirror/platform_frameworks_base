@@ -437,6 +437,20 @@ public final class Display {
     }
 
     /**
+     * @hide
+     * Return a rectangle defining the insets of the overscan region of the display.
+     * Each field of the rectangle is the number of pixels the overscan area extends
+     * into the display on that side.
+     */
+    public void getOverscanInsets(Rect outRect) {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            outRect.set(mDisplayInfo.overscanLeft, mDisplayInfo.overscanTop,
+                    mDisplayInfo.overscanRight, mDisplayInfo.overscanBottom);
+        }
+    }
+
+    /**
      * Returns the rotation of the screen from its "natural" orientation.
      * The returned value may be {@link Surface#ROTATION_0 Surface.ROTATION_0}
      * (no rotation), {@link Surface#ROTATION_90 Surface.ROTATION_90},

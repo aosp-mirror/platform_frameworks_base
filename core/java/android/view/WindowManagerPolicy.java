@@ -458,6 +458,12 @@ public interface WindowManagerPolicy {
     public void setInitialDisplaySize(Display display, int width, int height, int density);
 
     /**
+     * Called by window manager to set the overscan region that should be used for the
+     * given display.
+     */
+    public void setDisplayOverscan(Display display, int left, int top, int right, int bottom);
+
+    /**
      * Check permissions when adding a window.
      * 
      * @param attrs The window's LayoutParams.

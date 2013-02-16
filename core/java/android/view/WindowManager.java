@@ -735,20 +735,20 @@ public interface WindowManager extends ViewManager {
         /**
          * <p>Indicates whether this window should be hardware accelerated.
          * Requesting hardware acceleration does not guarantee it will happen.</p>
-         * 
+         *
          * <p>This flag can be controlled programmatically <em>only</em> to enable
          * hardware acceleration. To enable hardware acceleration for a given
          * window programmatically, do the following:</p>
-         * 
+         *
          * <pre>
          * Window w = activity.getWindow(); // in Activity's onCreate() for instance
          * w.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
          *         WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
          * </pre>
-         * 
+         *
          * <p>It is important to remember that this flag <strong>must</strong>
          * be set before setting the content view of your activity or dialog.</p>
-         * 
+         *
          * <p>This flag cannot be used to disable hardware acceleration after it
          * was enabled in your manifest using
          * {@link android.R.attr#hardwareAccelerated}. If you need to selectively
@@ -756,12 +756,18 @@ public interface WindowManager extends ViewManager {
          * for instance), make sure it is turned off in your manifest and enable it
          * on your activity or dialog when you need it instead, using the method
          * described above.</p>
-         * 
+         *
          * <p>This flag is automatically set by the system if the
          * {@link android.R.attr#hardwareAccelerated android:hardwareAccelerated}
          * XML attribute is set to true on an activity or on the application.</p>
          */
         public static final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
+
+        /** Window flag: allow window contents to extend in to the screen's
+         * overscan area, if there is one.  The window should still correctly
+         * position its contents to take the overscan area into account.
+         */
+        public static final int FLAG_LAYOUT_IN_OVERSCAN = 0x02000000;
 
         // ----- HIDDEN FLAGS.
         // These start at the high bit and go down.

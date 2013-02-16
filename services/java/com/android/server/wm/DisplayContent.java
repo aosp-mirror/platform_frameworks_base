@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
 import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
 
+import android.graphics.Rect;
+import android.os.Debug;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -316,6 +319,7 @@ class DisplayContent {
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
+            pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
             AppTokenIterator iterator = getTmpAppIterator(REVERSE_ITERATOR);
             int ndx = iterator.size() - 1;
             if (ndx >= 0) {
@@ -360,7 +364,6 @@ class DisplayContent {
                     pw.println();
                 }
             }
-        pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
         pw.println();
     }
 }

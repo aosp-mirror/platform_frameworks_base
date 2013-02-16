@@ -109,6 +109,30 @@ public final class DisplayInfo implements Parcelable {
     public int logicalHeight;
 
     /**
+     * @hide
+     * Number of overscan pixels on the left side of the display.
+     */
+    public int overscanLeft;
+
+    /**
+     * @hide
+     * Number of overscan pixels on the top side of the display.
+     */
+    public int overscanTop;
+
+    /**
+     * @hide
+     * Number of overscan pixels on the right side of the display.
+     */
+    public int overscanRight;
+
+    /**
+     * @hide
+     * Number of overscan pixels on the bottom side of the display.
+     */
+    public int overscanBottom;
+
+    /**
      * The rotation of the display relative to its natural orientation.
      * May be one of {@link android.view.Surface#ROTATION_0},
      * {@link android.view.Surface#ROTATION_90}, {@link android.view.Surface#ROTATION_180},
@@ -196,6 +220,10 @@ public final class DisplayInfo implements Parcelable {
                 && largestNominalAppHeight == other.largestNominalAppHeight
                 && logicalWidth == other.logicalWidth
                 && logicalHeight == other.logicalHeight
+                && overscanLeft == other.overscanLeft
+                && overscanTop == other.overscanTop
+                && overscanRight == other.overscanRight
+                && overscanBottom == other.overscanBottom
                 && rotation == other.rotation
                 && refreshRate == other.refreshRate
                 && logicalDensityDpi == other.logicalDensityDpi
@@ -222,6 +250,10 @@ public final class DisplayInfo implements Parcelable {
         largestNominalAppHeight = other.largestNominalAppHeight;
         logicalWidth = other.logicalWidth;
         logicalHeight = other.logicalHeight;
+        overscanLeft = other.overscanLeft;
+        overscanTop = other.overscanTop;
+        overscanRight = other.overscanRight;
+        overscanBottom = other.overscanBottom;
         rotation = other.rotation;
         refreshRate = other.refreshRate;
         logicalDensityDpi = other.logicalDensityDpi;
@@ -243,6 +275,10 @@ public final class DisplayInfo implements Parcelable {
         largestNominalAppHeight = source.readInt();
         logicalWidth = source.readInt();
         logicalHeight = source.readInt();
+        overscanLeft = source.readInt();
+        overscanTop = source.readInt();
+        overscanRight = source.readInt();
+        overscanBottom = source.readInt();
         rotation = source.readInt();
         refreshRate = source.readFloat();
         logicalDensityDpi = source.readInt();
@@ -265,6 +301,10 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(largestNominalAppHeight);
         dest.writeInt(logicalWidth);
         dest.writeInt(logicalHeight);
+        dest.writeInt(overscanLeft);
+        dest.writeInt(overscanTop);
+        dest.writeInt(overscanRight);
+        dest.writeInt(overscanBottom);
         dest.writeInt(rotation);
         dest.writeFloat(refreshRate);
         dest.writeInt(logicalDensityDpi);
@@ -318,18 +358,55 @@ public final class DisplayInfo implements Parcelable {
     // For debugging purposes
     @Override
     public String toString() {
-        return "DisplayInfo{\"" + name + "\", app " + appWidth + " x " + appHeight
-                + ", real " + logicalWidth + " x " + logicalHeight
-                + ", largest app " + largestNominalAppWidth + " x " + largestNominalAppHeight
-                + ", smallest app " + smallestNominalAppWidth + " x " + smallestNominalAppHeight
-                + ", " + refreshRate + " fps"
-                + ", rotation " + rotation
-                + ", density " + logicalDensityDpi
-                + ", " + physicalXDpi + " x " + physicalYDpi + " dpi"
-                + ", layerStack " + layerStack
-                + ", type " + Display.typeToString(type)
-                + ", address " + address
-                + flagsToString(flags) + "}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("DisplayInfo{\"");
+        sb.append(name);
+        sb.append("\", app ");
+        sb.append(appWidth);
+        sb.append(" x ");
+        sb.append(appHeight);
+        sb.append(", real ");
+        sb.append(logicalWidth);
+        sb.append(" x ");
+        sb.append(logicalHeight);
+        if (overscanLeft != 0 || overscanTop != 0 || overscanRight != 0 || overscanBottom != 0) {
+            sb.append(", overscan (");
+            sb.append(overscanLeft);
+            sb.append(",");
+            sb.append(overscanTop);
+            sb.append(",");
+            sb.append(overscanRight);
+            sb.append(",");
+            sb.append(overscanBottom);
+            sb.append(")");
+        }
+        sb.append(", largest app ");
+        sb.append(largestNominalAppWidth);
+        sb.append(" x ");
+        sb.append(largestNominalAppHeight);
+        sb.append(", smallest app ");
+        sb.append(smallestNominalAppWidth);
+        sb.append(" x ");
+        sb.append(smallestNominalAppHeight);
+        sb.append(", ");
+        sb.append(refreshRate);
+        sb.append(" fps, rotation");
+        sb.append(rotation);
+        sb.append(", density ");
+        sb.append(logicalDensityDpi);
+        sb.append(" (");
+        sb.append(physicalXDpi);
+        sb.append(" x ");
+        sb.append(physicalYDpi);
+        sb.append(") dpi, layerStack ");
+        sb.append(layerStack);
+        sb.append(", type ");
+        sb.append(Display.typeToString(type));
+        sb.append(", address ");
+        sb.append(address);
+        sb.append(flagsToString(flags));
+        sb.append("}");
+        return sb.toString();
     }
 
     private static String flagsToString(int flags) {
