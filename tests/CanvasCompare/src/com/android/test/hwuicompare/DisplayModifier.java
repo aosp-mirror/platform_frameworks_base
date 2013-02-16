@@ -41,11 +41,38 @@ public abstract class DisplayModifier {
     protected int mask() { return 0x0; };
 
     private static final RectF gRect = new RectF(0, 0, 200, 175);
-    private static final float[] gLinePts = new float[] {
-            100, 0, 200, 200, 200, 200, 0, 200, 0, 200, 100, 0
-    };
     private static final float[] gPts = new float[] {
             0, 100, 100, 0, 100, 200, 200, 100
+    };
+
+    private static final int NUM_PARALLEL_LINES = 24;
+    private static final float[] gTriPts = new float[] {
+        75, 0, 130, 130, 130, 130, 0, 130, 0, 130, 75, 0
+    };
+    private static final float[] gLinePts = new float[NUM_PARALLEL_LINES * 8 + gTriPts.length];
+    static {
+        int index;
+        for (index = 0; index < gTriPts.length; index++) {
+            gLinePts[index] = gTriPts[index];
+        }
+        float val = 0;
+        for (int i = 0; i < NUM_PARALLEL_LINES; i++) {
+            gLinePts[index + 0] = 150;
+            gLinePts[index + 1] = val;
+            gLinePts[index + 2] = 300;
+            gLinePts[index + 3] = val;
+            index += 4;
+            val += 8 + (2.0f/NUM_PARALLEL_LINES);
+        }
+        val = 0;
+        for (int i = 0; i < NUM_PARALLEL_LINES; i++) {
+            gLinePts[index + 0] = val;
+            gLinePts[index + 1] = 150;
+            gLinePts[index + 2] = val;
+            gLinePts[index + 3] = 300;
+            index += 4;
+            val += 8 + (2.0f/NUM_PARALLEL_LINES);
+        }
     };
 
     @SuppressWarnings("serial")
@@ -307,7 +334,7 @@ public abstract class DisplayModifier {
                             canvas.drawOval(gRect, paint);
                         }
                     });
-                    put("triLines", new DisplayModifier() {
+                    put("lines", new DisplayModifier() {
                         @Override
                         public void modifyDrawing(Paint paint, Canvas canvas) {
                             canvas.drawLines(gLinePts, paint);
