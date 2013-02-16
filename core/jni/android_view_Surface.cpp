@@ -206,8 +206,8 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
     ANativeWindow_Buffer outBuffer;
     Rect dirtyBounds(dirtyRegion.getBounds());
     status_t err = surface->lock(&outBuffer, &dirtyBounds);
+    dirtyRegion.set(dirtyBounds);
     if (err < 0) {
-        dirtyRegion.set(dirtyBounds);
         const char* const exception = (err == NO_MEMORY) ?
                 OutOfResourcesException :
                 "java/lang/IllegalArgumentException";
