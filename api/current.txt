@@ -20116,6 +20116,9 @@ package android.renderscript {
     method public static android.renderscript.Sampler CLAMP_LINEAR(android.renderscript.RenderScript);
     method public static android.renderscript.Sampler CLAMP_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
     method public static android.renderscript.Sampler CLAMP_NEAREST(android.renderscript.RenderScript);
+    method public static android.renderscript.Sampler MIRRORED_REPEAT_LINEAR(android.renderscript.RenderScript);
+    method public static android.renderscript.Sampler MIRRORED_REPEAT_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
+    method public static android.renderscript.Sampler MIRRORED_REPEAT_NEAREST(android.renderscript.RenderScript);
     method public static android.renderscript.Sampler WRAP_LINEAR(android.renderscript.RenderScript);
     method public static android.renderscript.Sampler WRAP_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
     method public static android.renderscript.Sampler WRAP_NEAREST(android.renderscript.RenderScript);
@@ -20143,6 +20146,7 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Sampler.Value LINEAR;
     enum_constant public static final android.renderscript.Sampler.Value LINEAR_MIP_LINEAR;
     enum_constant public static final android.renderscript.Sampler.Value LINEAR_MIP_NEAREST;
+    enum_constant public static final android.renderscript.Sampler.Value MIRRORED_REPEAT;
     enum_constant public static final android.renderscript.Sampler.Value NEAREST;
     enum_constant public static final android.renderscript.Sampler.Value WRAP;
   }

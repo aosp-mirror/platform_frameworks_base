@@ -39,7 +39,8 @@ public class Sampler extends BaseObj {
         LINEAR_MIP_LINEAR (2),
         LINEAR_MIP_NEAREST (5),
         WRAP (3),
-        CLAMP (4);
+        CLAMP (4),
+        MIRRORED_REPEAT (6);
 
         int mID;
         Value(int id) {
@@ -134,8 +135,8 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * Retrieve a sampler with ag set to linear, min linear mipmap linear, and
-     * to and wrap modes set to clamp.
+     * Retrieve a sampler with mag set to linear, min linear mipmap linear, and
+     * wrap modes set to clamp.
      *
      * @param rs Context to which the sampler will belong.
      *
@@ -174,7 +175,7 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * Retrieve a sampler with min and mag set to nearest and wrap modes set to
+     * Retrieve a sampler with min and mag set to linear and wrap modes set to
      * wrap.
      *
      * @param rs Context to which the sampler will belong.
@@ -194,8 +195,8 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * Retrieve a sampler with ag set to linear, min linear mipmap linear, and
-     * to and wrap modes set to wrap.
+     * Retrieve a sampler with mag set to linear, min linear mipmap linear, and
+     * wrap modes set to wrap.
      *
      * @param rs Context to which the sampler will belong.
      *
@@ -213,6 +214,65 @@ public class Sampler extends BaseObj {
         return rs.mSampler_WRAP_LINEAR_MIP_LINEAR;
     }
 
+    /**
+     * Retrieve a sampler with min and mag set to nearest and wrap modes set to
+     * mirrored repeat.
+     *
+     * @param rs Context to which the sampler will belong.
+     *
+     * @return Sampler
+     */
+    public static Sampler MIRRORED_REPEAT_NEAREST(RenderScript rs) {
+        if(rs.mSampler_MIRRORED_REPEAT_NEAREST == null) {
+            Builder b = new Builder(rs);
+            b.setMinification(Value.NEAREST);
+            b.setMagnification(Value.NEAREST);
+            b.setWrapS(Value.MIRRORED_REPEAT);
+            b.setWrapT(Value.MIRRORED_REPEAT);
+            rs.mSampler_MIRRORED_REPEAT_NEAREST = b.create();
+        }
+        return rs.mSampler_MIRRORED_REPEAT_NEAREST;
+    }
+
+    /**
+     * Retrieve a sampler with min and mag set to linear and wrap modes set to
+     * mirrored repeat.
+     *
+     * @param rs Context to which the sampler will belong.
+     *
+     * @return Sampler
+     */
+    public static Sampler MIRRORED_REPEAT_LINEAR(RenderScript rs) {
+        if(rs.mSampler_MIRRORED_REPEAT_LINEAR == null) {
+            Builder b = new Builder(rs);
+            b.setMinification(Value.LINEAR);
+            b.setMagnification(Value.LINEAR);
+            b.setWrapS(Value.MIRRORED_REPEAT);
+            b.setWrapT(Value.MIRRORED_REPEAT);
+            rs.mSampler_MIRRORED_REPEAT_LINEAR = b.create();
+        }
+        return rs.mSampler_MIRRORED_REPEAT_LINEAR;
+    }
+
+    /**
+     * Retrieve a sampler with min and mag set to linear and wrap modes set to
+     * mirrored repeat.
+     *
+     * @param rs Context to which the sampler will belong.
+     *
+     * @return Sampler
+     */
+    public static Sampler MIRRORED_REPEAT_LINEAR_MIP_LINEAR(RenderScript rs) {
+        if(rs.mSampler_MIRRORED_REPEAT_LINEAR_MIP_LINEAR == null) {
+            Builder b = new Builder(rs);
+            b.setMinification(Value.LINEAR_MIP_LINEAR);
+            b.setMagnification(Value.LINEAR);
+            b.setWrapS(Value.MIRRORED_REPEAT);
+            b.setWrapT(Value.MIRRORED_REPEAT);
+            rs.mSampler_MIRRORED_REPEAT_LINEAR_MIP_LINEAR = b.create();
+        }
+        return rs.mSampler_MIRRORED_REPEAT_LINEAR_MIP_LINEAR;
+    }
 
     /**
      * Builder for creating non-standard samplers.  Usefull if mix and match of
@@ -258,7 +318,7 @@ public class Sampler extends BaseObj {
         }
 
         public void setWrapS(Value v) {
-            if (v == Value.WRAP || v == Value.CLAMP) {
+            if (v == Value.WRAP || v == Value.CLAMP || v == Value.MIRRORED_REPEAT) {
                 mWrapS = v;
             } else {
                 throw new IllegalArgumentException("Invalid value");
@@ -266,7 +326,7 @@ public class Sampler extends BaseObj {
         }
 
         public void setWrapT(Value v) {
-            if (v == Value.WRAP || v == Value.CLAMP) {
+            if (v == Value.WRAP || v == Value.CLAMP || v == Value.MIRRORED_REPEAT) {
                 mWrapT = v;
             } else {
                 throw new IllegalArgumentException("Invalid value");
