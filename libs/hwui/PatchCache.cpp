@@ -51,10 +51,10 @@ int PatchCache::PatchDescription::compare(
     if (deltaInt != 0) return deltaInt;
 
     if (lhs.pixelWidth < rhs.pixelWidth) return -1;
-    if (lhs.pixelWidth > lhs.pixelWidth) return +1;
+    if (lhs.pixelWidth > rhs.pixelWidth) return +1;
 
     if (lhs.pixelHeight < rhs.pixelHeight) return -1;
-    if (lhs.pixelHeight > lhs.pixelHeight) return +1;
+    if (lhs.pixelHeight > rhs.pixelHeight) return +1;
 
     deltaInt = lhs.xCount - rhs.xCount;
     if (deltaInt != 0) return deltaInt;
