@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.app.ActivityThread;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
@@ -337,7 +338,9 @@ public class Camera {
             mEventHandler = null;
         }
 
-        native_setup(new WeakReference<Camera>(this), cameraId);
+        String packageName = ActivityThread.currentPackageName();
+
+        native_setup(new WeakReference<Camera>(this), cameraId, packageName);
     }
 
     /**
@@ -350,7 +353,9 @@ public class Camera {
         release();
     }
 
-    private native final void native_setup(Object camera_this, int cameraId);
+    private native final void native_setup(Object camera_this, int cameraId,
+                                           String packageName);
+
     private native final void native_release();
 
 

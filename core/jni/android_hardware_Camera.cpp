@@ -465,9 +465,16 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
 
 // connect to camera service
 static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
-    jobject weak_this, jint cameraId)
+    jobject weak_this, jint cameraId, jstring clientPackageName)
 {
-    sp<Camera> camera = Camera::connect(cameraId);
+    // Convert jstring to String16
+    const char16_t *rawClientName = env->GetStringChars(clientPackageName, NULL);
+    jsize rawClientNameLen = env->GetStringLength(clientPackageName);
+    String16 clientName(rawClientName, rawClientNameLen);
+    env->ReleaseStringChars(clientPackageName, rawClientName);
+
+    sp<Camera> camera = Camera::connect(cameraId, clientName,
+            Camera::USE_CALLING_UID);
 
     if (camera == NULL) {
         jniThrowRuntimeException(env, "Fail to connect to camera service");
@@ -859,7 +866,7 @@ static JNINativeMethod camMethods[] = {
     "(ILandroid/hardware/Camera$CameraInfo;)V",
     (void*)android_hardware_Camera_getCameraInfo },
   { "native_setup",
-    "(Ljava/lang/Object;I)V",
+    "(Ljava/lang/Object;ILjava/lang/String;)V",
     (void*)android_hardware_Camera_native_setup },
   { "native_release",
     "()V",

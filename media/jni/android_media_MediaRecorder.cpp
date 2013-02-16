@@ -416,9 +416,11 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
 
 
 static void
-android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
+                                         jstring packageName)
 {
     ALOGV("setup");
+
     sp<MediaRecorder> mr = new MediaRecorder();
     if (mr == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
@@ -432,6 +434,15 @@ android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak
     // create new listener and give it to MediaRecorder
     sp<JNIMediaRecorderListener> listener = new JNIMediaRecorderListener(env, thiz, weak_this);
     mr->setListener(listener);
+
+   // Convert client name jstring to String16
+    const char16_t *rawClientName = env->GetStringChars(packageName, NULL);
+    jsize rawClientNameLen = env->GetStringLength(packageName);
+    String16 clientName(rawClientName, rawClientNameLen);
+    env->ReleaseStringChars(packageName, rawClientName);
+
+    // pass client package name for permissions tracking
+    mr->setClientName(clientName);
 
     setMediaRecorder(env, thiz, mr);
 }
@@ -465,7 +476,7 @@ static JNINativeMethod gMethods[] = {
     {"native_reset",         "()V",                             (void *)android_media_MediaRecorder_native_reset},
     {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
     {"native_init",          "()V",                             (void *)android_media_MediaRecorder_native_init},
-    {"native_setup",         "(Ljava/lang/Object;)V",           (void *)android_media_MediaRecorder_native_setup},
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;)V", (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
 };
 
