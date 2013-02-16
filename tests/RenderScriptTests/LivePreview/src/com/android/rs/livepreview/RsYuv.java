@@ -80,8 +80,13 @@ public class RsYuv implements TextureView.SurfaceTextureListener
         Type t = tb.create();
         mAllocationOut = Allocation.createTyped(mRS, t, Allocation.USAGE_SCRIPT |
                                                         Allocation.USAGE_IO_OUTPUT);
-        mAllocationIn = Allocation.createSized(mRS, Element.U8(mRS), (mHeight * mWidth) +
-                                               ((mHeight / 2) * (mWidth / 2) * 2));
+
+
+        tb = new Type.Builder(mRS, Element.createPixel(mRS, Element.DataType.UNSIGNED_8, Element.DataKind.PIXEL_YUV));
+        tb.setX(mWidth);
+        tb.setY(mHeight);
+        tb.setYuvFormat(android.graphics.ImageFormat.NV21);
+        mAllocationIn = Allocation.createTyped(mRS, tb.create(), Allocation.USAGE_SCRIPT);
         mYuv.setInput(mAllocationIn);
         setupSurface();
 
