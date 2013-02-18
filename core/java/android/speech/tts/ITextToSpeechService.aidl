@@ -18,6 +18,7 @@ package android.speech.tts;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.speech.tts.ITextToSpeechCallback;
 
 /**
@@ -44,11 +45,12 @@ interface ITextToSpeechService {
      * @param callingInstance a binder representing the identity of the calling
      *        TextToSpeech object.
      * @param text The text to synthesize.
-     * @param filename The file to write the synthesized audio to.
+     * @param fileDescriptor The file descriptor to write the synthesized audio to. Has to be
+              writable.
      * @param param Request parameters.
      */
-    int synthesizeToFile(in IBinder callingInstance, in String text,
-        in String filename, in Bundle params);
+    int synthesizeToFileDescriptor(in IBinder callingInstance, in String text,
+        in ParcelFileDescriptor fileDescriptor, in Bundle params);
 
     /**
      * Plays an existing audio resource.

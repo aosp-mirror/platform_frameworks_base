@@ -27,11 +27,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1225,8 +1229,29 @@ public class TextToSpeech {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                return service.synthesizeToFile(getCallerIdentity(), text, filename,
-                        getParams(params));
+                ParcelFileDescriptor fileDescriptor;
+                int returnValue;
+                try {
+                    File file = new File(filename);
+                    if(file.exists() && !file.canWrite()) {
+                        Log.e(TAG, "Can't write to " + filename);
+                        return ERROR;
+                    }
+                    fileDescriptor = ParcelFileDescriptor.open(file,
+                            ParcelFileDescriptor.MODE_WRITE_ONLY |
+                            ParcelFileDescriptor.MODE_CREATE |
+                            ParcelFileDescriptor.MODE_TRUNCATE);
+                    returnValue = service.synthesizeToFileDescriptor(getCallerIdentity(), text,
+                            fileDescriptor, getParams(params));
+                    fileDescriptor.close();
+                    return returnValue;
+                } catch (FileNotFoundException e) {
+                    Log.e(TAG, "Opening file " + filename + " failed", e);
+                    return ERROR;
+                } catch (IOException e) {
+                    Log.e(TAG, "Closing file " + filename + " failed", e);
+                    return ERROR;
+                }
             }
         }, ERROR, "synthesizeToFile");
     }
