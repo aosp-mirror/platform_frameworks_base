@@ -731,7 +731,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void resetAllInternalStateLocked(final boolean updateOnlyWhenLocaleChanged) {
+    private void resetAllInternalStateLocked(final boolean updateOnlyWhenLocaleChanged,
+            final boolean resetDefaultEnabledIme) {
         if (!mSystemReady) {
             // not system ready
             return;
@@ -749,8 +750,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             // InputMethodAndSubtypeListManager should be reset when the locale is changed.
             mImListManager = new InputMethodAndSubtypeListManager(mContext, this);
-            buildInputMethodListLocked(mMethodList, mMethodMap,
-                    updateOnlyWhenLocaleChanged /* resetDefaultEnabledIme */);
+            buildInputMethodListLocked(mMethodList, mMethodMap, resetDefaultEnabledIme);
             if (!updateOnlyWhenLocaleChanged) {
                 final String selectedImiId = mSettings.getSelectedInputMethod();
                 if (TextUtils.isEmpty(selectedImiId)) {
@@ -775,14 +775,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private void checkCurrentLocaleChangedLocked() {
-        resetAllInternalStateLocked(true);
+        resetAllInternalStateLocked(true /* updateOnlyWhenLocaleChanged */,
+                true /* resetDefaultImeLocked */);
     }
 
     private void switchUserLocked(int newUserId) {
         mSettings.setCurrentUserId(newUserId);
         // InputMethodFileManager should be reset when the user is changed
         mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
-        resetAllInternalStateLocked(false);
+        final String defaultImiId = mSettings.getSelectedInputMethod();
+        final boolean needsToResetDefaultIme = TextUtils.isEmpty(defaultImiId);
+        if (DEBUG) {
+            Slog.d(TAG, "Switch user: " + newUserId + " current ime = " + defaultImiId);
+        }
+        resetAllInternalStateLocked(false  /* updateOnlyWhenLocaleChanged */,
+                needsToResetDefaultIme);
     }
 
     @Override
