@@ -21,16 +21,15 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.NetworkStateTracker.EVENT_STATE_CHANGED;
-import static com.google.testing.littlemock.LittleMock.anyInt;
-import static com.google.testing.littlemock.LittleMock.createCaptor;
-import static com.google.testing.littlemock.LittleMock.doNothing;
-import static com.google.testing.littlemock.LittleMock.doReturn;
-import static com.google.testing.littlemock.LittleMock.doThrow;
-import static com.google.testing.littlemock.LittleMock.eq;
-import static com.google.testing.littlemock.LittleMock.isA;
-import static com.google.testing.littlemock.LittleMock.mock;
-import static com.google.testing.littlemock.LittleMock.reset;
-import static com.google.testing.littlemock.LittleMock.verify;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.net.INetworkPolicyManager;
@@ -48,7 +47,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.util.LogPrinter;
 
-import com.google.testing.littlemock.ArgumentCaptor;
+import org.mockito.ArgumentCaptor;
 
 import java.net.InetAddress;
 import java.util.concurrent.Future;
@@ -128,7 +127,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         doReturn(mWifi.tracker)
                 .when(mNetFactory).createTracker(eq(TYPE_WIFI), isA(NetworkConfig.class));
 
-        final ArgumentCaptor<Handler> trackerHandler = createCaptor();
+        final ArgumentCaptor<Handler> trackerHandler = ArgumentCaptor.forClass(Handler.class);
         doNothing().when(mMobile.tracker)
                 .startMonitoring(isA(Context.class), trackerHandler.capture());
 
