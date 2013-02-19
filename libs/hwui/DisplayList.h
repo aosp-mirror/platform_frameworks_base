@@ -44,6 +44,7 @@ class SkRegion;
 namespace android {
 namespace uirenderer {
 
+class DeferredDisplayList;
 class DisplayListOp;
 class DisplayListRenderer;
 class OpenGLRenderer;
@@ -83,7 +84,8 @@ public:
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
-    status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0);
+    status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0,
+            DeferredDisplayList* deferredList = NULL);
 
     void output(uint32_t level = 0);
 

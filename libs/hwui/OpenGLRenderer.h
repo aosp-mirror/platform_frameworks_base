@@ -48,6 +48,34 @@
 namespace android {
 namespace uirenderer {
 
+struct DrawModifiers {
+    SkiaShader* mShader;
+    SkiaColorFilter* mColorFilter;
+
+    // Drop shadow
+    bool mHasShadow;
+    float mShadowRadius;
+    float mShadowDx;
+    float mShadowDy;
+    int mShadowColor;
+
+    // Draw filters
+    bool mHasDrawFilter;
+    int mPaintFilterClearBits;
+    int mPaintFilterSetBits;
+};
+
+struct DeferredDisplayState {
+    Rect mBounds; // local bounds, mapped with matrix to be in screen space coordinates, clipped.
+    int mMultipliedAlpha; // -1 if invalid (because caching not set)
+
+    // the below are set and used by the OpenGLRenderer at record and deferred playback
+    Rect mClip;
+    mat4 mMatrix;
+    SkiaShader* mShader;
+    DrawModifiers mDrawModifiers;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,9 +210,8 @@ public:
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
     virtual Rect* getClipRect();
 
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags,
-            uint32_t level = 0);
-    virtual void outputDisplayList(DisplayList* displayList, uint32_t level = 0);
+    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags);
+    virtual void outputDisplayList(DisplayList* displayList);
     virtual status_t drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
@@ -232,6 +259,23 @@ public:
     virtual void setupPaintFilter(int clearBits, int setBits);
 
     SkPaint* filterPaint(SkPaint* paint);
+
+    bool disallowDeferral() {
+        // returns true if the OpenGLRenderer's state can be completely represented by
+        // a DeferredDisplayState object
+        return !mSnapshot->clipRegion->isEmpty() ||
+                mSnapshot->alpha < 1.0 ||
+                (mSnapshot->flags & Snapshot::kFlagIsLayer) ||
+                (mSnapshot->flags & Snapshot::kFlagFboTarget); // ensure we're not in a layer
+    }
+
+    bool disallowReorder() { return mDrawReorderDisabled; }
+
+    bool storeDisplayState(DeferredDisplayState& state);
+    void restoreDisplayState(const DeferredDisplayState& state);
+
+    const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
+    void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
 
     ANDROID_API bool isCurrentTransformSimple() {
         return mSnapshot->transform->isSimple();
@@ -868,26 +912,11 @@ private:
     // State used to define the clipping region
     sp<Snapshot> mTilingSnapshot;
 
-    // Shaders
-    SkiaShader* mShader;
-
-    // Color filters
-    SkiaColorFilter* mColorFilter;
-
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
 
-    // Drop shadow
-    bool mHasShadow;
-    float mShadowRadius;
-    float mShadowDx;
-    float mShadowDy;
-    int mShadowColor;
-
-    // Draw filters
-    bool mHasDrawFilter;
-    int mPaintFilterClearBits;
-    int mPaintFilterSetBits;
+    // shader, filters, and shadow
+    DrawModifiers mDrawModifiers;
     SkPaint mFilteredPaint;
 
     // Various caches
@@ -925,6 +954,8 @@ private:
     // See PROPERTY_DISABLE_SCISSOR_OPTIMIZATION in
     // Properties.h
     bool mScissorOptimizationDisabled;
+    bool mDrawDeferDisabled;
+    bool mDrawReorderDisabled;
 
     // No-ops start/endTiling when set
     bool mSuppressTiling;

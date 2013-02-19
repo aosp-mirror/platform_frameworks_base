@@ -159,6 +159,13 @@ public:
         bottom += dy;
     }
 
+    void outset(float delta) {
+        left -= delta;
+        top -= delta;
+        right += delta;
+        bottom += delta;
+    }
+
     void snapToPixelBoundaries() {
         left = floorf(left + 0.5f);
         top = floorf(top + 0.5f);

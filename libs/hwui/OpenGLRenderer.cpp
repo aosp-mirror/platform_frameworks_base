@@ -32,6 +32,7 @@
 #include <ui/Rect.h>
 
 #include "OpenGLRenderer.h"
+#include "DeferredDisplayList.h"
 #include "DisplayListRenderer.h"
 #include "PathTessellator.h"
 #include "Properties.h"
@@ -111,16 +112,18 @@ static const Blender gBlendsSwap[] = {
 
 OpenGLRenderer::OpenGLRenderer():
         mCaches(Caches::getInstance()), mExtensions(Extensions::getInstance()) {
-    mShader = NULL;
-    mColorFilter = NULL;
-    mHasShadow = false;
-    mHasDrawFilter = false;
+    mDrawModifiers.mShader = NULL;
+    mDrawModifiers.mColorFilter = NULL;
+    mDrawModifiers.mHasShadow = false;
+    mDrawModifiers.mHasDrawFilter = false;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
     mFirstSnapshot = new Snapshot;
 
     mScissorOptimizationDisabled = false;
+    mDrawDeferDisabled = false;
+    mDrawReorderDisabled = false;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -136,6 +139,20 @@ void OpenGLRenderer::initProperties() {
                 mScissorOptimizationDisabled ? "disabled" : "enabled");
     } else {
         INIT_LOGD("  Scissor optimization enabled");
+    }
+
+    if (property_get(PROPERTY_DISABLE_DRAW_DEFER, property, "false")) {
+        mDrawDeferDisabled = !strcasecmp(property, "true");
+        INIT_LOGD("  Draw defer %s", mDrawDeferDisabled ? "disabled" : "enabled");
+    } else {
+        INIT_LOGD("  Draw defer enabled");
+    }
+
+    if (property_get(PROPERTY_DISABLE_DRAW_REORDER, property, "false")) {
+        mDrawReorderDisabled = !strcasecmp(property, "true");
+        INIT_LOGD("  Draw reorder %s", mDrawReorderDisabled ? "disabled" : "enabled");
+    } else {
+        INIT_LOGD("  Draw reorder enabled");
     }
 }
 
@@ -770,7 +787,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     layer->layer.set(bounds);
     layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->getHeight()),
             bounds.getWidth() / float(layer->getWidth()), 0.0f);
-    layer->setColorFilter(mColorFilter);
+    layer->setColorFilter(mDrawModifiers.mColorFilter);
     layer->setBlend(true);
     layer->setDirty(false);
 
@@ -1204,6 +1221,40 @@ void OpenGLRenderer::clearLayerRegions() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// State Deferral
+///////////////////////////////////////////////////////////////////////////////
+
+bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state) {
+    const Rect& currentClip = *(mSnapshot->clipRect);
+    const mat4& currentMatrix = *(mSnapshot->transform);
+
+    // state only has bounds initialized in local coordinates
+    if (!state.mBounds.isEmpty()) {
+        currentMatrix.mapRect(state.mBounds);
+        if (!state.mBounds.intersect(currentClip)) {
+            // quick rejected
+            return true;
+        }
+    }
+
+    state.mClip.set(currentClip);
+    state.mMatrix.load(currentMatrix);
+    state.mDrawModifiers = mDrawModifiers;
+    return false;
+}
+
+void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state) {
+    mSnapshot->transform->load(state.mMatrix);
+
+    // NOTE: a clip RECT will be saved and restored, but DeferredDisplayState doesn't support
+    // complex clips. In the future, we should add support for deferral of operations clipped by
+    // these. for now, we don't defer with complex clips (see OpenGLRenderer::disallowDeferral())
+    mSnapshot->setClip(state.mClip.left, state.mClip.top, state.mClip.right, state.mClip.bottom);
+    dirtyClip();
+    mDrawModifiers = state.mDrawModifiers;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Transforms
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1452,7 +1503,7 @@ void OpenGLRenderer::setupDraw(bool clear) {
     if (clear) clearLayerRegions();
     // Make sure setScissor & setStencil happen at the beginning of
     // this method
-    if (mDirtyClip) {
+    if (mDirtyClip && mCaches.scissorEnabled) {
         setScissorFromClip();
         setStencilFromClip();
     }
@@ -1524,14 +1575,14 @@ void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
 }
 
 void OpenGLRenderer::setupDrawShader() {
-    if (mShader) {
-        mShader->describe(mDescription, mExtensions);
+    if (mDrawModifiers.mShader) {
+        mDrawModifiers.mShader->describe(mDescription, mExtensions);
     }
 }
 
 void OpenGLRenderer::setupDrawColorFilter() {
-    if (mColorFilter) {
-        mColorFilter->describe(mDescription, mExtensions);
+    if (mDrawModifiers.mColorFilter) {
+        mDrawModifiers.mColorFilter->describe(mDescription, mExtensions);
     }
 }
 
@@ -1547,16 +1598,19 @@ void OpenGLRenderer::setupDrawBlending(SkXfermode::Mode mode, bool swapSrcDst) {
     // When the blending mode is kClear_Mode, we need to use a modulate color
     // argb=1,0,0,0
     accountForClear(mode);
-    chooseBlending((mColorSet && mColorA < 1.0f) || (mShader && mShader->blend()), mode,
-            mDescription, swapSrcDst);
+    bool blend = (mColorSet && mColorA < 1.0f) ||
+            (mDrawModifiers.mShader && mDrawModifiers.mShader->blend());
+    chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
 void OpenGLRenderer::setupDrawBlending(bool blend, SkXfermode::Mode mode, bool swapSrcDst) {
     // When the blending mode is kClear_Mode, we need to use a modulate color
     // argb=1,0,0,0
     accountForClear(mode);
-    chooseBlending(blend || (mColorSet && mColorA < 1.0f) || (mShader && mShader->blend()) ||
-            (mColorFilter && mColorFilter->blend()), mode, mDescription, swapSrcDst);
+    blend |= (mColorSet && mColorA < 1.0f) ||
+            (mDrawModifiers.mShader && mDrawModifiers.mShader->blend()) ||
+            (mDrawModifiers.mColorFilter && mDrawModifiers.mColorFilter->blend());
+    chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
 void OpenGLRenderer::setupDrawProgram() {
@@ -1609,7 +1663,7 @@ void OpenGLRenderer::setupDrawPointUniforms() {
 }
 
 void OpenGLRenderer::setupDrawColorUniforms() {
-    if ((mColorSet && !mShader) || (mShader && mSetShaderColor)) {
+    if ((mColorSet && !mDrawModifiers.mShader) || (mDrawModifiers.mShader && mSetShaderColor)) {
         mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
     }
 }
@@ -1621,23 +1675,25 @@ void OpenGLRenderer::setupDrawPureColorUniforms() {
 }
 
 void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
-    if (mShader) {
+    if (mDrawModifiers.mShader) {
         if (ignoreTransform) {
             mModelView.loadInverse(*mSnapshot->transform);
         }
-        mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &mTextureUnit);
+        mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
+                mModelView, *mSnapshot, &mTextureUnit);
     }
 }
 
 void OpenGLRenderer::setupDrawShaderIdentityUniforms() {
-    if (mShader) {
-        mShader->setupProgram(mCaches.currentProgram, mIdentity, *mSnapshot, &mTextureUnit);
+    if (mDrawModifiers.mShader) {
+        mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
+                mIdentity, *mSnapshot, &mTextureUnit);
     }
 }
 
 void OpenGLRenderer::setupDrawColorFilterUniforms() {
-    if (mColorFilter) {
-        mColorFilter->setupProgram(mCaches.currentProgram);
+    if (mDrawModifiers.mColorFilter) {
+        mDrawModifiers.mColorFilter->setupProgram(mCaches.currentProgram);
     }
 }
 
@@ -1726,21 +1782,24 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList,
-        Rect& dirty, int32_t flags, uint32_t level) {
-
+status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags) {
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
-        return displayList->replay(*this, dirty, flags, level);
+        if (CC_UNLIKELY(mDrawDeferDisabled)) {
+            return displayList->replay(*this, dirty, flags, 0);
+        }
+
+        DeferredDisplayList deferredList;
+        return displayList->replay(*this, dirty, flags, 0, &deferredList);
     }
 
     return DrawGlInfo::kStatusDone;
 }
 
-void OpenGLRenderer::outputDisplayList(DisplayList* displayList, uint32_t level) {
+void OpenGLRenderer::outputDisplayList(DisplayList* displayList) {
     if (displayList) {
-        displayList->output(level);
+        displayList->output(0);
     }
 }
 
@@ -1990,7 +2049,7 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     // Apply a scale transform on the canvas only when a shader is in use
     // Skia handles the ratio between the dst and src rects as a scale factor
     // when a shader is set
-    bool useScaleTransform = mShader && scaled;
+    bool useScaleTransform = mDrawModifiers.mShader && scaled;
     bool ignoreTransform = false;
 
     if (CC_LIKELY(mSnapshot->transform->isPureTranslate() && !useScaleTransform)) {
@@ -2445,15 +2504,15 @@ void OpenGLRenderer::drawTextShadow(SkPaint* paint, const char* text, int bytesC
     //       if shader-based correction is enabled
     mCaches.dropShadowCache.setFontRenderer(fontRenderer);
     const ShadowTexture* shadow = mCaches.dropShadowCache.get(
-            paint, text, bytesCount, count, mShadowRadius, positions);
+            paint, text, bytesCount, count, mDrawModifiers.mShadowRadius, positions);
     const AutoTexture autoCleanup(shadow);
 
-    const float sx = x - shadow->left + mShadowDx;
-    const float sy = y - shadow->top + mShadowDy;
+    const float sx = x - shadow->left + mDrawModifiers.mShadowDx;
+    const float sy = y - shadow->top + mDrawModifiers.mShadowDy;
 
-    const int shadowAlpha = ((mShadowColor >> 24) & 0xFF) * mSnapshot->alpha;
-    int shadowColor = mShadowColor;
-    if (mShader) {
+    const int shadowAlpha = ((mDrawModifiers.mShadowColor >> 24) & 0xFF) * mSnapshot->alpha;
+    int shadowColor = mDrawModifiers.mShadowColor;
+    if (mDrawModifiers.mShader) {
         shadowColor = 0xffffffff;
     }
 
@@ -2501,7 +2560,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    if (CC_UNLIKELY(mHasShadow)) {
+    if (CC_UNLIKELY(mDrawModifiers.mHasShadow)) {
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
                 alpha, mode, 0.0f, 0.0f);
     }
@@ -2592,7 +2651,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    if (CC_UNLIKELY(mHasShadow)) {
+    if (CC_UNLIKELY(mDrawModifiers.mHasShadow)) {
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer, alpha, mode,
                 oldX, oldY);
     }
@@ -2748,8 +2807,8 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
     mCaches.activeTexture(0);
 
     if (CC_LIKELY(!layer->region.isEmpty())) {
-        SkiaColorFilter* oldFilter = mColorFilter;
-        mColorFilter = layer->getColorFilter();
+        SkiaColorFilter* oldFilter = mDrawModifiers.mColorFilter;
+        mDrawModifiers.mColorFilter = layer->getColorFilter();
 
         if (layer->region.isRect()) {
             composeLayerRect(layer, layer->regionRect);
@@ -2788,7 +2847,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
 #endif
         }
 
-        mColorFilter = oldFilter;
+        mDrawModifiers.mColorFilter = oldFilter;
 
         if (layer->debugDrawUpdate) {
             layer->debugDrawUpdate = false;
@@ -2809,13 +2868,13 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::resetShader() {
-    mShader = NULL;
+    mDrawModifiers.mShader = NULL;
 }
 
 void OpenGLRenderer::setupShader(SkiaShader* shader) {
-    mShader = shader;
-    if (mShader) {
-        mShader->set(&mCaches.textureCache, &mCaches.gradientCache);
+    mDrawModifiers.mShader = shader;
+    if (mDrawModifiers.mShader) {
+        mDrawModifiers.mShader->set(&mCaches.textureCache, &mCaches.gradientCache);
     }
 }
 
@@ -2824,11 +2883,11 @@ void OpenGLRenderer::setupShader(SkiaShader* shader) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::resetColorFilter() {
-    mColorFilter = NULL;
+    mDrawModifiers.mColorFilter = NULL;
 }
 
 void OpenGLRenderer::setupColorFilter(SkiaColorFilter* filter) {
-    mColorFilter = filter;
+    mDrawModifiers.mColorFilter = filter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2836,15 +2895,15 @@ void OpenGLRenderer::setupColorFilter(SkiaColorFilter* filter) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::resetShadow() {
-    mHasShadow = false;
+    mDrawModifiers.mHasShadow = false;
 }
 
 void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
-    mHasShadow = true;
-    mShadowRadius = radius;
-    mShadowDx = dx;
-    mShadowDy = dy;
-    mShadowColor = color;
+    mDrawModifiers.mHasShadow = true;
+    mDrawModifiers.mShadowRadius = radius;
+    mDrawModifiers.mShadowDx = dx;
+    mDrawModifiers.mShadowDy = dy;
+    mDrawModifiers.mShadowColor = color;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2852,22 +2911,23 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::resetPaintFilter() {
-    mHasDrawFilter = false;
+    mDrawModifiers.mHasDrawFilter = false;
 }
 
 void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
-    mHasDrawFilter = true;
-    mPaintFilterClearBits = clearBits & SkPaint::kAllFlags;
-    mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
+    mDrawModifiers.mHasDrawFilter = true;
+    mDrawModifiers.mPaintFilterClearBits = clearBits & SkPaint::kAllFlags;
+    mDrawModifiers.mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
 }
 
 SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
-    if (CC_LIKELY(!mHasDrawFilter || !paint)) return paint;
+    if (CC_LIKELY(!mDrawModifiers.mHasDrawFilter || !paint)) return paint;
 
     uint32_t flags = paint->getFlags();
 
     mFilteredPaint = *paint;
-    mFilteredPaint.setFlags((flags & ~mPaintFilterClearBits) | mPaintFilterSetBits);
+    mFilteredPaint.setFlags((flags & ~mDrawModifiers.mPaintFilterClearBits) |
+            mDrawModifiers.mPaintFilterSetBits);
 
     return &mFilteredPaint;
 }
@@ -2967,7 +3027,7 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
 
     int color = paint->getColor();
     // If a shader is set, preserve only the alpha
-    if (mShader) {
+    if (mDrawModifiers.mShader) {
         color |= 0x00ffffff;
     }
     SkXfermode::Mode mode = getXfermode(paint->getXfermode());
@@ -3040,7 +3100,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode, bool ignoreTransform) {
     // If a shader is set, preserve only the alpha
-    if (mShader) {
+    if (mDrawModifiers.mShader) {
         color |= 0x00ffffff;
     }
 

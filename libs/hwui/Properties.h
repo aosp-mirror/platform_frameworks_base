@@ -82,6 +82,19 @@ enum DebugLevel {
  */
 #define PROPERTY_DISABLE_SCISSOR_OPTIMIZATION "ro.hwui.disable_scissor_opt"
 
+/**
+ * Disables draw operation deferral if set to "true", forcing draw
+ * commands to be issued to OpenGL in order, and processed in sequence
+ * with state-manipulation canvas commands.
+ */
+#define PROPERTY_DISABLE_DRAW_DEFER "debug.hwui.disable_draw_defer"
+
+/**
+ * Used to disable draw operation reordering when deferring draw operations
+ * Has no effect if PROPERTY_DISABLE_DRAW_DEFER is set to "true"
+ */
+#define PROPERTY_DISABLE_DRAW_REORDER "debug.hwui.disable_draw_reorder"
+
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
 #define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
