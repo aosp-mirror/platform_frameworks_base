@@ -553,7 +553,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     if (buf == NULL) {
         ALOGE("Out of mem allocating transfer buffer");
         err = ENOMEM;
-        goto cleanup;
+        goto done;
     }
 
     // Magic fields for the ustar file format

@@ -24,5 +24,12 @@
     <application android:allowClearUserData="false"
                  android:permission="android.permission.CONFIRM_FULL_BACKUP"
                  android:backupAgent="SharedStorageAgent" >
+
+        <service android:name=".ObbBackupService"
+                 android:enabled="true"
+                 android:exported="true">
+        </service>
+
     </application>
+
 </manifest>

@@ -472,6 +472,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 File efLocation = getExternalFilesDir(null);
                 if (efLocation != null) {
                     basePath = getExternalFilesDir(null).getCanonicalPath();
+                    mode = -1;  // < 0 is a token to skip attempting a chmod()
                 }
             }
         } else {
