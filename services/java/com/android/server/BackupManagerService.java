@@ -78,6 +78,7 @@ import android.util.StringBuilderPrinter;
 
 import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
+import com.android.internal.backup.IObbBackupService;
 import com.android.internal.backup.LocalTransport;
 import com.android.server.PackageManagerBackupAgent.Metadata;
 
@@ -363,15 +364,17 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class FullBackupParams extends FullParams {
         public boolean includeApks;
+        public boolean includeObbs;
         public boolean includeShared;
         public boolean allApps;
         public boolean includeSystem;
         public String[] packages;
 
-        FullBackupParams(ParcelFileDescriptor output, boolean saveApks, boolean saveShared,
-                boolean doAllApps, boolean doSystem, String[] pkgList) {
+        FullBackupParams(ParcelFileDescriptor output, boolean saveApks, boolean saveObbs,
+                boolean saveShared, boolean doAllApps, boolean doSystem, String[] pkgList) {
             fd = output;
             includeApks = saveApks;
+            includeObbs = saveObbs;
             includeShared = saveShared;
             allApps = doAllApps;
             includeSystem = doSystem;
@@ -550,7 +553,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // similar to normal backup/restore.
                 FullBackupParams params = (FullBackupParams)msg.obj;
                 PerformFullBackupTask task = new PerformFullBackupTask(params.fd,
-                        params.observer, params.includeApks,
+                        params.observer, params.includeApks, params.includeObbs,
                         params.includeShared, params.curPassword, params.encryptPassword,
                         params.allApps, params.includeSystem, params.packages, params.latch);
                 (new Thread(task)).start();
@@ -2306,13 +2309,132 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
 
-    // ----- Full backup to a file/socket -----
+    // ----- Full backup/restore to a file/socket -----
 
-    class PerformFullBackupTask implements Runnable {
+    abstract class ObbServiceClient {
+        public IObbBackupService mObbService;
+        public void setObbBinder(IObbBackupService binder) {
+            mObbService = binder;
+        }
+    }
+
+    class FullBackupObbConnection implements ServiceConnection {
+        volatile IObbBackupService mService;
+
+        FullBackupObbConnection() {
+            mService = null;
+        }
+
+        public void establish() {
+            if (DEBUG) Slog.i(TAG, "Initiating bind of OBB service on " + this);
+            Intent obbIntent = new Intent().setComponent(new ComponentName(
+                    "com.android.sharedstoragebackup",
+                    "com.android.sharedstoragebackup.ObbBackupService"));
+            BackupManagerService.this.mContext.bindService(
+                    obbIntent, this, Context.BIND_AUTO_CREATE);
+        }
+
+        public void tearDown() {
+            BackupManagerService.this.mContext.unbindService(this);
+        }
+
+        public boolean backupObbs(PackageInfo pkg, OutputStream out) {
+            boolean success = false;
+            waitForConnection();
+
+            ParcelFileDescriptor[] pipes = null;
+            try {
+                pipes = ParcelFileDescriptor.createPipe();
+                int token = generateToken();
+                prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, null);
+                mService.backupObbs(pkg.packageName, pipes[1], token, mBackupManagerBinder);
+                routeSocketDataToOutput(pipes[0], out);
+                success = waitUntilOperationComplete(token);
+            } catch (Exception e) {
+                Slog.w(TAG, "Unable to back up OBBs for " + pkg, e);
+            } finally {
+                try {
+                    out.flush();
+                    if (pipes != null) {
+                        if (pipes[0] != null) pipes[0].close();
+                        if (pipes[1] != null) pipes[1].close();
+                    }
+                } catch (IOException e) {
+                    Slog.w(TAG, "I/O error closing down OBB backup", e);
+                }
+            }
+            return success;
+        }
+
+        public void restoreObbFile(String pkgName, ParcelFileDescriptor data,
+                long fileSize, int type, String path, long mode, long mtime,
+                int token, IBackupManager callbackBinder) {
+            waitForConnection();
+
+            try {
+                mService.restoreObbFile(pkgName, data, fileSize, type, path, mode, mtime,
+                        token, callbackBinder);
+            } catch (Exception e) {
+                Slog.w(TAG, "Unable to restore OBBs for " + pkgName, e);
+            }
+        }
+
+        private void waitForConnection() {
+            synchronized (this) {
+                while (mService == null) {
+                    if (DEBUG) Slog.i(TAG, "...waiting for OBB service binding...");
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) { /* never interrupted */ }
+                }
+                if (DEBUG) Slog.i(TAG, "Connected to OBB service; continuing");
+            }
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            synchronized (this) {
+                mService = IObbBackupService.Stub.asInterface(service);
+                if (DEBUG) Slog.i(TAG, "OBB service connection " + mService
+                        + " connected on " + this);
+                this.notifyAll();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            synchronized (this) {
+                mService = null;
+                if (DEBUG) Slog.i(TAG, "OBB service connection disconnected on " + this);
+                this.notifyAll();
+            }
+        }
+        
+    }
+
+    private void routeSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
+            throws IOException {
+        FileInputStream raw = new FileInputStream(inPipe.getFileDescriptor());
+        DataInputStream in = new DataInputStream(raw);
+
+        byte[] buffer = new byte[32 * 1024];
+        int chunkTotal;
+        while ((chunkTotal = in.readInt()) > 0) {
+            while (chunkTotal > 0) {
+                int toRead = (chunkTotal > buffer.length) ? buffer.length : chunkTotal;
+                int nRead = in.read(buffer, 0, toRead);
+                out.write(buffer, 0, nRead);
+                chunkTotal -= nRead;
+            }
+        }
+    }
+
+    class PerformFullBackupTask extends ObbServiceClient implements Runnable {
         ParcelFileDescriptor mOutputFile;
         DeflaterOutputStream mDeflater;
         IFullBackupRestoreObserver mObserver;
         boolean mIncludeApks;
+        boolean mIncludeObbs;
         boolean mIncludeShared;
         boolean mAllApps;
         final boolean mIncludeSystem;
@@ -2322,6 +2444,7 @@ class BackupManagerService extends IBackupManager.Stub {
         AtomicBoolean mLatchObject;
         File mFilesDir;
         File mManifestFile;
+        
 
         class FullBackupRunner implements Runnable {
             PackageInfo mPackage;
@@ -2377,12 +2500,13 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         PerformFullBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
-                boolean includeApks, boolean includeShared, String curPassword,
-                String encryptPassword, boolean doAllApps, boolean doSystem, String[] packages,
-                AtomicBoolean latch) {
+                boolean includeApks, boolean includeObbs, boolean includeShared,
+                String curPassword, String encryptPassword, boolean doAllApps,
+                boolean doSystem, String[] packages, AtomicBoolean latch) {
             mOutputFile = fd;
             mObserver = observer;
             mIncludeApks = includeApks;
+            mIncludeObbs = includeObbs;
             mIncludeShared = includeShared;
             mAllApps = doAllApps;
             mIncludeSystem = doSystem;
@@ -2405,9 +2529,12 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
-            List<PackageInfo> packagesToBackup = new ArrayList<PackageInfo>();
-
             Slog.i(TAG, "--- Performing full-dataset backup ---");
+
+            List<PackageInfo> packagesToBackup = new ArrayList<PackageInfo>();
+            FullBackupObbConnection obbConnection = new FullBackupObbConnection();
+            obbConnection.establish();  // we'll want this later
+
             sendStartBackup();
 
             // doAllApps supersedes the package set if any
@@ -2557,6 +2684,15 @@ class BackupManagerService extends IBackupManager.Stub {
                 for (int i = 0; i < N; i++) {
                     pkg = packagesToBackup.get(i);
                     backupOnePackage(pkg, out);
+
+                    // after the app's agent runs to handle its private filesystem
+                    // contents, back up any OBB content it has on its behalf.
+                    if (mIncludeObbs) {
+                        boolean obbOkay = obbConnection.backupObbs(pkg, out);
+                        if (!obbOkay) {
+                            throw new RuntimeException("Failure writing OBB stack for " + pkg);
+                        }
+                    }
                 }
 
                 // Done!
@@ -2581,6 +2717,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     mLatchObject.notifyAll();
                 }
                 sendEndBackup();
+                obbConnection.tearDown();
                 if (DEBUG) Slog.d(TAG, "Full backup pass complete.");
                 mWakelock.release();
             }
@@ -2688,20 +2825,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     // Now pull data from the app and stuff it into the compressor
                     try {
-                        FileInputStream raw = new FileInputStream(pipes[0].getFileDescriptor());
-                        DataInputStream in = new DataInputStream(raw);
-
-                        byte[] buffer = new byte[16 * 1024];
-                        int chunkTotal;
-                        while ((chunkTotal = in.readInt()) > 0) {
-                            while (chunkTotal > 0) {
-                                int toRead = (chunkTotal > buffer.length)
-                                        ? buffer.length : chunkTotal;
-                                int nRead = in.read(buffer, 0, toRead);
-                                out.write(buffer, 0, nRead);
-                                chunkTotal -= nRead;
-                            }
-                        }
+                        routeSocketDataToOutput(pipes[0], out);
                     } catch (IOException e) {
                         Slog.i(TAG, "Caught exception reading from agent", e);
                     }
@@ -2900,7 +3024,7 @@ class BackupManagerService extends IBackupManager.Stub {
         ACCEPT_IF_APK
     }
 
-    class PerformFullRestoreTask implements Runnable {
+    class PerformFullRestoreTask extends ObbServiceClient implements Runnable {
         ParcelFileDescriptor mInputFile;
         String mCurrentPassword;
         String mDecryptPassword;
@@ -2909,6 +3033,7 @@ class BackupManagerService extends IBackupManager.Stub {
         IBackupAgent mAgent;
         String mAgentPackage;
         ApplicationInfo mTargetApp;
+        FullBackupObbConnection mObbConnection = null;
         ParcelFileDescriptor[] mPipes = null;
 
         long mBytes;
@@ -2937,6 +3062,7 @@ class BackupManagerService extends IBackupManager.Stub {
             mAgent = null;
             mAgentPackage = null;
             mTargetApp = null;
+            mObbConnection = new FullBackupObbConnection();
 
             // Which packages we've already wiped data on.  We prepopulate this
             // with a whitelist of packages known to be unclearable.
@@ -2980,6 +3106,7 @@ class BackupManagerService extends IBackupManager.Stub {
         @Override
         public void run() {
             Slog.i(TAG, "--- Performing full-dataset restore ---");
+            mObbConnection.establish();
             sendStartRestore();
 
             // Are we able to restore shared-storage data?
@@ -3067,6 +3194,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     mLatchObject.set(true);
                     mLatchObject.notifyAll();
                 }
+                mObbConnection.tearDown();
                 sendEndRestore();
                 Slog.d(TAG, "Full restore pass complete.");
                 mWakelock.release();
@@ -3319,22 +3447,30 @@ class BackupManagerService extends IBackupManager.Stub {
                             long toCopy = info.size;
                             final int token = generateToken();
                             try {
-                                if (DEBUG) Slog.d(TAG, "Invoking agent to restore file "
-                                        + info.path);
                                 prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, null);
-                                // fire up the app's agent listening on the socket.  If
-                                // the agent is running in the system process we can't
-                                // just invoke it asynchronously, so we provide a thread
-                                // for it here.
-                                if (mTargetApp.processName.equals("system")) {
-                                    Slog.d(TAG, "system process agent - spinning a thread");
-                                    RestoreFileRunnable runner = new RestoreFileRunnable(
-                                            mAgent, info, mPipes[0], token);
-                                    new Thread(runner).start();
+                                if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
+                                    if (DEBUG) Slog.d(TAG, "Restoring OBB file for " + pkg
+                                            + " : " + info.path);
+                                    mObbConnection.restoreObbFile(pkg, mPipes[0],
+                                            info.size, info.type, info.path, info.mode,
+                                            info.mtime, token, mBackupManagerBinder);
                                 } else {
-                                    mAgent.doRestoreFile(mPipes[0], info.size, info.type,
-                                            info.domain, info.path, info.mode, info.mtime,
-                                            token, mBackupManagerBinder);
+                                    if (DEBUG) Slog.d(TAG, "Invoking agent to restore file "
+                                            + info.path);
+                                    // fire up the app's agent listening on the socket.  If
+                                    // the agent is running in the system process we can't
+                                    // just invoke it asynchronously, so we provide a thread
+                                    // for it here.
+                                    if (mTargetApp.processName.equals("system")) {
+                                        Slog.d(TAG, "system process agent - spinning a thread");
+                                        RestoreFileRunnable runner = new RestoreFileRunnable(
+                                                mAgent, info, mPipes[0], token);
+                                        new Thread(runner).start();
+                                    } else {
+                                        mAgent.doRestoreFile(mPipes[0], info.size, info.type,
+                                                info.domain, info.path, info.mode, info.mtime,
+                                                token, mBackupManagerBinder);
+                                    }
                                 }
                             } catch (IOException e) {
                                 // couldn't dup the socket for a process-local restore
@@ -3342,7 +3478,7 @@ class BackupManagerService extends IBackupManager.Stub {
                                 agentSuccess = false;
                                 okay = false;
                             } catch (RemoteException e) {
-                                // whoops, remote agent went away.  We'll eat the content
+                                // whoops, remote entity went away.  We'll eat the content
                                 // ourselves, then, and not copy it over.
                                 Slog.e(TAG, "Agent crashed during full restore");
                                 agentSuccess = false;
@@ -3891,18 +4027,6 @@ class BackupManagerService extends IBackupManager.Stub {
                             slash = info.path.indexOf('/');
                             if (slash < 0) throw new IOException("Illegal semantic path in non-manifest " + info.path);
                             info.domain = info.path.substring(0, slash);
-                            // validate that it's one of the domains we understand
-                            if (!info.domain.equals(FullBackup.APK_TREE_TOKEN)
-                                    && !info.domain.equals(FullBackup.DATA_TREE_TOKEN)
-                                    && !info.domain.equals(FullBackup.DATABASE_TREE_TOKEN)
-                                    && !info.domain.equals(FullBackup.ROOT_TREE_TOKEN)
-                                    && !info.domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)
-                                    && !info.domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)
-                                    && !info.domain.equals(FullBackup.OBB_TREE_TOKEN)
-                                    && !info.domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
-                                throw new IOException("Unrecognized domain " + info.domain);
-                            }
-
                             info.path = info.path.substring(slash + 1);
                         }
                     }
@@ -4989,7 +5113,8 @@ class BackupManagerService extends IBackupManager.Stub {
     // Run a *full* backup pass for the given package, writing the resulting data stream
     // to the supplied file descriptor.  This method is synchronous and does not return
     // to the caller until the backup has been completed.
-    public void fullBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeShared,
+    public void fullBackup(ParcelFileDescriptor fd, boolean includeApks,
+            boolean includeObbs, boolean includeShared,
             boolean doAllApps, boolean includeSystem, String[] pkgList) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
 
@@ -5020,12 +5145,12 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             if (DEBUG) Slog.v(TAG, "Requesting full backup: apks=" + includeApks
-                    + " shared=" + includeShared + " all=" + doAllApps
+                    + " obb=" + includeObbs + " shared=" + includeShared + " all=" + doAllApps
                     + " pkgs=" + pkgList);
             Slog.i(TAG, "Beginning full backup...");
 
-            FullBackupParams params = new FullBackupParams(fd, includeApks, includeShared,
-                    doAllApps, includeSystem, pkgList);
+            FullBackupParams params = new FullBackupParams(fd, includeApks, includeObbs,
+                    includeShared, doAllApps, includeSystem, pkgList);
             final int token = generateToken();
             synchronized (mFullConfirmations) {
                 mFullConfirmations.put(token, params);

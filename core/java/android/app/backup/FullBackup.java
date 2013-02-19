@@ -89,7 +89,7 @@ public class FullBackup {
      *    last modification time of the output file.  if the {@code mode} parameter is
      *    negative then this parameter will be ignored.
      * @param outFile Location within the filesystem to place the data.  This must point
-     *    to a location that is writeable by the caller, prefereably using an absolute path.
+     *    to a location that is writeable by the caller, preferably using an absolute path.
      * @throws IOException
      */
     static public void restoreFile(ParcelFileDescriptor data,
