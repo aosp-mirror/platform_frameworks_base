@@ -444,16 +444,6 @@ public abstract class HardwareRenderer {
     /**
      * Creates a new display list that can be used to record batches of
      * drawing operations.
-     *
-     * @return A new display list.
-     */
-    public DisplayList createDisplayList() {
-        return createDisplayList(null);
-    }
-
-    /**
-     * Creates a new display list that can be used to record batches of
-     * drawing operations.
      * 
      * @param name The name of the display list, used for debugging purpose. May be null.
      * 
@@ -1356,24 +1346,16 @@ public abstract class HardwareRenderer {
 
                     dirty = beginFrame(canvas, dirty, surfaceState);
 
+                    DisplayList displayList = buildDisplayList(view, canvas);
+
                     int saveCount = 0;
                     int status = DisplayList.STATUS_DONE;
 
                     try {
-                        view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
-                                == View.PFLAG_INVALIDATED;
-                        view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
-
-                        long buildDisplayListStartTime = startBuildDisplayListProfiling();
-                        canvas.clearLayerUpdates();
-
-                        DisplayList displayList = buildDisplayList(view);
                         status = prepareFrame(dirty);
 
                         saveCount = canvas.save();
                         callbacks.onHardwarePreDraw(canvas);
-
-                        endBuildDisplayListProfiling(buildDisplayListStartTime);
 
                         if (displayList != null) {
                             status = drawDisplayList(attachInfo, canvas, displayList, status);
@@ -1381,6 +1363,8 @@ public abstract class HardwareRenderer {
                             // Shouldn't reach here
                             view.draw(canvas);
                         }
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "An error has occurred while drawing:", e);
                     } finally {
                         callbacks.onHardwarePostDraw(canvas);
                         canvas.restoreToCount(saveCount);
@@ -1406,6 +1390,23 @@ public abstract class HardwareRenderer {
             }
 
             return false;
+        }
+
+        private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {
+            view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
+                    == View.PFLAG_INVALIDATED;
+            view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
+
+            long buildDisplayListStartTime = startBuildDisplayListProfiling();
+            canvas.clearLayerUpdates();
+
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
+            DisplayList displayList = view.getDisplayList();
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+
+            endBuildDisplayListProfiling(buildDisplayListStartTime);
+
+            return displayList;
         }
 
         abstract void drawProfileData(View.AttachInfo attachInfo);
@@ -1453,17 +1454,6 @@ public abstract class HardwareRenderer {
                 //noinspection PointlessArithmeticExpression
                 mProfileData[mProfileCurrentFrame] = total;
             }
-        }
-
-        private static DisplayList buildDisplayList(View view) {
-            DisplayList displayList;
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-            try {
-                displayList = view.getDisplayList();
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            }
-            return displayList;
         }
 
         private int prepareFrame(Rect dirty) {
