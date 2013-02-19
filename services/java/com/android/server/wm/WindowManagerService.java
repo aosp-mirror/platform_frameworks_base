@@ -3152,8 +3152,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (mismatch || iterator.hasNext()) {
-                Slog.w(TAG, "validateAppTokens: Mismatch! ActivityManager=" + tasks
-                        + " WindowManager=" + iterator);
+                Slog.w(TAG, "validateAppTokens: Mismatch! ActivityManager=" + tasks);
+                Slog.w(TAG, "validateAppTokens: Mismatch! WindowManager=" + iterator);
             }
         }
     }
@@ -7268,6 +7268,7 @@ public class WindowManagerService extends IWindowManager.Stub
         performLayoutAndPlaceSurfacesLocked();
     }
 
+    @Override
     public void setOverscan(int displayId, int left, int top, int right, int bottom) {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
