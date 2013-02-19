@@ -110,6 +110,12 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void setOverscan(int displayId, int left, int top, int right, int bottom)
+            throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void closeSystemDialogs(String arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
