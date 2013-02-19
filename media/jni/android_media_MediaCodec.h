@@ -47,6 +47,8 @@ struct JMediaCodec : public RefBase {
             const sp<ICrypto> &crypto,
             int flags);
 
+    status_t createInputSurface(sp<IGraphicBufferProducer>* bufferProducer);
+
     status_t start();
     status_t stop();
 
@@ -75,6 +77,8 @@ struct JMediaCodec : public RefBase {
             JNIEnv *env, jobject bufferInfo, size_t *index, int64_t timeoutUs);
 
     status_t releaseOutputBuffer(size_t index, bool render);
+
+    status_t signalEndOfInputStream();
 
     status_t getOutputFormat(JNIEnv *env, jobject *format) const;
 
