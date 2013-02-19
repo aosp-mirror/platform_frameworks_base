@@ -21,6 +21,7 @@
 #include <private/hwui/DrawGlInfo.h>
 
 #include "DisplayList.h"
+#include "DeferredDisplayList.h"
 #include "DisplayListLogBuffer.h"
 #include "DisplayListOp.h"
 #include "DisplayListRenderer.h"
@@ -239,7 +240,7 @@ bool DisplayListRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
 }
 
 status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
-        Rect& dirty, int32_t flags, uint32_t level) {
+        Rect& dirty, int32_t flags) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
 

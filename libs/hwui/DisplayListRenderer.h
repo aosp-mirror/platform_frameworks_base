@@ -47,14 +47,11 @@ namespace uirenderer {
 // Display list
 ///////////////////////////////////////////////////////////////////////////////
 
+class DeferredDisplayList;
 class DisplayListRenderer;
 class DisplayListOp;
 class DrawOp;
 class StateOp;
-
-///////////////////////////////////////////////////////////////////////////////
-// Renderer
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Records drawing commands in a display list for latter playback.
@@ -98,8 +95,7 @@ public:
     virtual bool clipPath(SkPath* path, SkRegion::Op op);
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
 
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags,
-            uint32_t level = 0);
+    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags);
     virtual status_t drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);

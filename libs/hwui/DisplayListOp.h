@@ -22,6 +22,7 @@
 #include <private/hwui/DrawGlInfo.h>
 
 #include "OpenGLRenderer.h"
+#include "DeferredDisplayList.h"
 #include "DisplayListRenderer.h"
 #include "utils/LinearAllocator.h"
 
@@ -42,7 +43,6 @@
 // Use OP_LOG for logging with arglist, OP_LOGS if just printing char*
 #define OP_LOGS(s) OP_LOG("%s", s)
 #define OP_LOG(s, ...) ALOGD( "%*s" s, level * 2, "", __VA_ARGS__ )
-
 
 namespace android {
 namespace uirenderer {
@@ -74,10 +74,14 @@ public:
         kOpLogFlag_JSON = 0x2 // TODO: add?
     };
 
-    //TODO: for draw batching, DrawOps should override a virtual sub-method, with
-    // DrawOps::apply deferring operations to a different list if possible
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
             uint32_t level, bool caching, int multipliedAlpha) = 0;
+
+    // same as replay above, but draw operations will defer into the deferredList if possible
+    // NOTE: colorfilters, paintfilters, shaders, shadow, and complex clips prevent deferral
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
+            uint32_t level, bool caching, int multipliedAlpha,
+            DeferredDisplayList& deferredList) = 0;
 
     virtual void output(int level, uint32_t flags = 0) = 0;
 
@@ -98,7 +102,28 @@ public:
         return DrawGlInfo::kStatusDone;
     }
 
+    /**
+     * State operations are applied directly to the renderer, but can cause the deferred drawing op
+     * list to flush
+     */
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
+            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList& deferredList) {
+        status_t status = DrawGlInfo::kStatusDone;
+        if (requiresDrawOpFlush()) {
+            // will be setting renderer state that affects ops in deferredList, so flush list first
+            status |= deferredList.flush(renderer, dirty, flags, level);
+        }
+        applyState(renderer, saveCount);
+        return status;
+    }
+
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) = 0;
+
+    /**
+     * Returns true if it affects renderer drawing state in such a way to break deferral
+     * see OpenGLRenderer::disallowDeferral()
+     */
+    virtual bool requiresDrawOpFlush() { return false; }
 };
 
 class DrawOp : public DisplayListOp {
@@ -115,6 +140,33 @@ public:
         return applyDraw(renderer, dirty, level, caching, multipliedAlpha);
     }
 
+    /** Draw operations are stored in the deferredList with information necessary for playback */
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
+            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList& deferredList) {
+        if (mQuickRejected && CC_LIKELY(flags & DisplayList::kReplayFlag_ClipChildren)) {
+            return DrawGlInfo::kStatusDone;
+        }
+
+        if (renderer.disallowDeferral()) {
+            // dispatch draw immediately, since the renderer's state is too complex for deferral
+            return applyDraw(renderer, dirty, level, caching, multipliedAlpha);
+        }
+
+        if (!caching) multipliedAlpha = -1;
+        state.mMultipliedAlpha = multipliedAlpha;
+        if (!getLocalBounds(state.mBounds)) {
+            // empty bounds signify bounds can't be calculated
+            state.mBounds.setEmpty();
+        }
+
+        if (!renderer.storeDisplayState(state)) {
+            // op wasn't quick-rejected, so defer
+            deferredList.add(this, renderer.disallowReorder());
+        }
+
+        return DrawGlInfo::kStatusDone;
+    }
+
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
             bool caching, int multipliedAlpha) = 0;
 
@@ -125,6 +177,19 @@ public:
     void setQuickRejected(bool quickRejected) { mQuickRejected = quickRejected; }
     bool getQuickRejected() { return mQuickRejected; }
 
+    /** Batching disabled by default, turned on for individual ops */
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_None;
+    }
+
+    float strokeWidthOutset() { return mPaint->getStrokeWidth() * 0.5f; }
+
+public:
+    /**
+     * Stores the relevant canvas state of the object between deferral and replay (if the canvas
+     * state supports being stored) See OpenGLRenderer::simpleClipAndState()
+     */
+    DeferredDisplayState state;
 protected:
     SkPaint* getPaint(OpenGLRenderer& renderer) {
         return renderer.filterPaint(mPaint);
@@ -191,6 +256,8 @@ public:
     }
 
     virtual const char* name() { return "RestoreToCount"; }
+    // Note: don't have to return true for requiresDrawOpFlush - even though restore can create a
+    // complex clip, the clip and matrix are overridden by DeferredDisplayList::flush()
 
 private:
     int mCount;
@@ -211,6 +278,7 @@ public:
     }
 
     virtual const char* name() { return "SaveLayer"; }
+    virtual bool requiresDrawOpFlush() { return true; }
 
 private:
     Rect mArea;
@@ -232,6 +300,8 @@ public:
     }
 
     virtual const char* name() { return "SaveLayerAlpha"; }
+    virtual bool requiresDrawOpFlush() { return true; }
+
 private:
     Rect mArea;
     int mAlpha;
@@ -391,6 +461,7 @@ public:
     }
 
     virtual const char* name() { return "ClipPath"; }
+    virtual bool requiresDrawOpFlush() { return true; }
 
 private:
     SkPath* mPath;
@@ -413,6 +484,7 @@ public:
     }
 
     virtual const char* name() { return "ClipRegion"; }
+    virtual bool requiresDrawOpFlush() { return true; }
 
 private:
     SkRegion* mRegion;
@@ -582,6 +654,9 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmap"; }
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_Bitmap;
+    }
 
 protected:
     SkBitmap* mBitmap;
@@ -606,6 +681,9 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmap"; }
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_Bitmap;
+    }
 
 private:
     SkBitmap* mBitmap;
@@ -632,6 +710,9 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmapRect"; }
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_Bitmap;
+    }
 
 private:
     SkBitmap* mBitmap;
@@ -654,6 +735,9 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmapData"; }
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_Bitmap;
+    }
 };
 
 class DrawBitmapMeshOp : public DrawOp {
@@ -674,6 +758,9 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmapMesh"; }
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_Bitmap;
+    }
 
 private:
     SkBitmap* mBitmap;
@@ -708,6 +795,9 @@ public:
     }
 
     virtual const char* name() { return "DrawPatch"; }
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_Patch;
+    }
 
 private:
     SkBitmap* mBitmap;
@@ -748,14 +838,20 @@ public:
             : DrawBoundedOp(left, top, right, bottom, paint) {};
 
     bool getLocalBounds(Rect& localBounds) {
+        localBounds.set(mLocalBounds);
         if (mPaint && mPaint->getStyle() != SkPaint::kFill_Style) {
-            float outset = mPaint->getStrokeWidth() * 0.5f;
-            localBounds.set(mLocalBounds.left - outset, mLocalBounds.top - outset,
-                    mLocalBounds.right + outset, mLocalBounds.bottom + outset);
-        } else {
-            localBounds.set(mLocalBounds);
+            localBounds.outset(strokeWidthOutset());
         }
         return true;
+    }
+
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        if (mPaint->getPathEffect()) {
+            return DeferredDisplayList::kOpBatch_AlphaMaskTexture;
+        }
+        return mPaint->isAntiAlias() ?
+                DeferredDisplayList::kOpBatch_AlphaVertices :
+                DeferredDisplayList::kOpBatch_Vertices;
     }
 };
 
@@ -792,6 +888,10 @@ public:
     }
 
     virtual const char* name() { return "DrawRects"; }
+
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_Vertices;
+    }
 
 private:
     const float* mRects;
@@ -912,22 +1012,24 @@ public:
 
     virtual const char* name() { return "DrawPath"; }
 
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return DeferredDisplayList::kOpBatch_AlphaMaskTexture;
+    }
 private:
     SkPath* mPath;
 };
 
-class DrawLinesOp : public DrawOp {
+class DrawLinesOp : public DrawBoundedOp {
 public:
     DrawLinesOp(float* points, int count, SkPaint* paint)
-            : DrawOp(paint), mPoints(points), mCount(count) {
-        /* TODO: inherit from DrawBoundedOp and calculate localbounds something like:
+            : DrawBoundedOp(paint), mPoints(points), mCount(count) {
         for (int i = 0; i < count; i += 2) {
             mLocalBounds.left = fminf(mLocalBounds.left, points[i]);
             mLocalBounds.right = fmaxf(mLocalBounds.right, points[i]);
             mLocalBounds.top = fminf(mLocalBounds.top, points[i+1]);
             mLocalBounds.bottom = fmaxf(mLocalBounds.bottom, points[i+1]);
         }
-        */
+        mLocalBounds.outset(strokeWidthOutset());
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
@@ -940,6 +1042,12 @@ public:
     }
 
     virtual const char* name() { return "DrawLines"; }
+
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return mPaint->isAntiAlias() ?
+                DeferredDisplayList::kOpBatch_AlphaVertices :
+                DeferredDisplayList::kOpBatch_Vertices;
+    }
 
 protected:
     float* mPoints;
@@ -970,6 +1078,12 @@ public:
 
     virtual void output(int level, uint32_t flags) {
         OP_LOG("Draw some text, %d bytes", mBytesCount);
+    }
+
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return mPaint->getColor() == 0xff000000 ?
+                DeferredDisplayList::kOpBatch_Text :
+                DeferredDisplayList::kOpBatch_ColorText;
     }
 protected:
     const char* mText;
@@ -1042,6 +1156,12 @@ public:
 
     virtual const char* name() { return "DrawText"; }
 
+    virtual DeferredDisplayList::OpBatchId getBatchId() {
+        return mPaint->getColor() == 0xff000000 ?
+                DeferredDisplayList::kOpBatch_Text :
+                DeferredDisplayList::kOpBatch_ColorText;
+    }
+
 private:
     const char* mText;
     int mBytesCount;
@@ -1083,9 +1203,21 @@ class DrawDisplayListOp : public DrawOp {
 public:
     DrawDisplayListOp(DisplayList* displayList, int flags)
             : DrawOp(0), mDisplayList(displayList), mFlags(flags) {}
+
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
+            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList& deferredList) {
+        if (mDisplayList && mDisplayList->isRenderable()) {
+            return mDisplayList->replay(renderer, dirty, mFlags, level + 1, &deferredList);
+        }
+        return DrawGlInfo::kStatusDone;
+    }
+
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
             bool caching, int multipliedAlpha) {
-        return renderer.drawDisplayList(mDisplayList, dirty, mFlags, level + 1);
+        if (mDisplayList && mDisplayList->isRenderable()) {
+            return mDisplayList->replay(renderer, dirty, mFlags, level + 1);
+        }
+        return DrawGlInfo::kStatusDone;
     }
 
     virtual void output(int level, uint32_t flags) {
