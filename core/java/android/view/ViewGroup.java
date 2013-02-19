@@ -4413,7 +4413,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             v.mTop += offset;
             v.mBottom += offset;
             if (v.mDisplayList != null) {
-                v.mDisplayList.offsetTopBottom(offset);
+                v.mDisplayList.offsetTopAndBottom(offset);
                 invalidateViewProperty(false, false);
             }
         }

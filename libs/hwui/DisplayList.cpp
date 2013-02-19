@@ -263,6 +263,16 @@ void DisplayList::output(uint32_t level) {
     ALOGD("%*sDone (%p, %s)", level * 2, "", this, mName.string());
 }
 
+float DisplayList::getPivotX() {
+    updateMatrix();
+    return mPivotX;
+}
+
+float DisplayList::getPivotY() {
+    updateMatrix();
+    return mPivotY;
+}
+
 void DisplayList::updateMatrix() {
     if (mMatrixDirty) {
         if (!mTransformMatrix) {

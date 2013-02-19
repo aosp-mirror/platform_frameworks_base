@@ -105,6 +105,10 @@ public:
         }
     }
 
+    const char* getName() const {
+        return mName.string();
+    }
+
     void setClipChildren(bool clipChildren) {
         mClipChildren = clipChildren;
     }
@@ -112,6 +116,11 @@ public:
     void setStaticMatrix(SkMatrix* matrix) {
         delete mStaticMatrix;
         mStaticMatrix = new SkMatrix(*matrix);
+    }
+
+    // Can return NULL
+    SkMatrix* getStaticMatrix() {
+        return mStaticMatrix;
     }
 
     void setAnimationMatrix(SkMatrix* matrix) {
@@ -131,8 +140,16 @@ public:
         }
     }
 
+    float getAlpha() const {
+        return mAlpha;
+    }
+
     void setHasOverlappingRendering(bool hasOverlappingRendering) {
         mHasOverlappingRendering = hasOverlappingRendering;
+    }
+
+    bool hasOverlappingRendering() const {
+        return mHasOverlappingRendering;
     }
 
     void setTranslationX(float translationX) {
@@ -147,6 +164,10 @@ public:
         }
     }
 
+    float getTranslationX() const {
+        return mTranslationX;
+    }
+
     void setTranslationY(float translationY) {
         if (translationY != mTranslationY) {
             mTranslationY = translationY;
@@ -157,6 +178,10 @@ public:
                 mMatrixFlags |= TRANSLATION;
             }
         }
+    }
+
+    float getTranslationY() const {
+        return mTranslationY;
     }
 
     void setRotation(float rotation) {
@@ -171,6 +196,10 @@ public:
         }
     }
 
+    float getRotation() const {
+        return mRotation;
+    }
+
     void setRotationX(float rotationX) {
         if (rotationX != mRotationX) {
             mRotationX = rotationX;
@@ -181,6 +210,10 @@ public:
                 mMatrixFlags |= ROTATION_3D;
             }
         }
+    }
+
+    float getRotationX() const {
+        return mRotationX;
     }
 
     void setRotationY(float rotationY) {
@@ -195,6 +228,10 @@ public:
         }
     }
 
+    float getRotationY() const {
+        return mRotationY;
+    }
+
     void setScaleX(float scaleX) {
         if (scaleX != mScaleX) {
             mScaleX = scaleX;
@@ -205,6 +242,10 @@ public:
                 mMatrixFlags |= SCALE;
             }
         }
+    }
+
+    float getScaleX() const {
+        return mScaleX;
     }
 
     void setScaleY(float scaleY) {
@@ -219,6 +260,10 @@ public:
         }
     }
 
+    float getScaleY() const {
+        return mScaleY;
+    }
+
     void setPivotX(float pivotX) {
         mPivotX = pivotX;
         mMatrixDirty = true;
@@ -230,6 +275,8 @@ public:
         mPivotExplicitlySet = true;
     }
 
+    ANDROID_API float getPivotX();
+
     void setPivotY(float pivotY) {
         mPivotY = pivotY;
         mMatrixDirty = true;
@@ -240,6 +287,8 @@ public:
         }
         mPivotExplicitlySet = true;
     }
+
+    ANDROID_API float getPivotY();
 
     void setCameraDistance(float distance) {
         if (distance != mCameraDistance) {
@@ -253,6 +302,10 @@ public:
         }
     }
 
+    float getCameraDistance() const {
+        return mCameraDistance;
+    }
+
     void setLeft(int left) {
         if (left != mLeft) {
             mLeft = left;
@@ -261,6 +314,10 @@ public:
                 mMatrixDirty = true;
             }
         }
+    }
+
+    float getLeft() const {
+        return mLeft;
     }
 
     void setTop(int top) {
@@ -273,6 +330,10 @@ public:
         }
     }
 
+    float getTop() const {
+        return mTop;
+    }
+
     void setRight(int right) {
         if (right != mRight) {
             mRight = right;
@@ -283,6 +344,10 @@ public:
         }
     }
 
+    float getRight() const {
+        return mRight;
+    }
+
     void setBottom(int bottom) {
         if (bottom != mBottom) {
             mBottom = bottom;
@@ -291,6 +356,10 @@ public:
                 mMatrixDirty = true;
             }
         }
+    }
+
+    float getBottom() const {
+        return mBottom;
     }
 
     void setLeftTop(int left, int top) {
@@ -319,7 +388,7 @@ public:
         }
     }
 
-    void offsetLeftRight(int offset) {
+    void offsetLeftRight(float offset) {
         if (offset != 0) {
             mLeft += offset;
             mRight += offset;
@@ -329,7 +398,7 @@ public:
         }
     }
 
-    void offsetTopBottom(int offset) {
+    void offsetTopBottom(float offset) {
         if (offset != 0) {
             mTop += offset;
             mBottom += offset;

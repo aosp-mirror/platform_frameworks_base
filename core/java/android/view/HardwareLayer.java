@@ -24,7 +24,7 @@ import android.graphics.Rect;
 
 /**
  * A hardware layer can be used to render graphics operations into a hardware
- * friendly buffer. For instance, with an OpenGL backend, a hardware layer
+ * friendly buffer. For instance, with an OpenGL backend a hardware layer
  * would use a Frame Buffer Object (FBO.) The hardware layer can be used as
  * a drawing cache when a complex set of graphics operations needs to be
  * drawn several times.
@@ -68,7 +68,7 @@ abstract class HardwareLayer {
      * @param paint The paint used when the layer is drawn into the destination canvas.
      * @see View#setLayerPaint(android.graphics.Paint)
      */
-    void setLayerPaint(Paint paint) {}
+    void setLayerPaint(Paint paint) { }
 
     /**
      * Returns the minimum width of the layer.
@@ -144,6 +144,9 @@ abstract class HardwareLayer {
      * this layer.
      * 
      * @return A hardware canvas, or null if a canvas cannot be created
+     *
+     * @see #start(android.graphics.Canvas)
+     * @see #end(android.graphics.Canvas)
      */
     abstract HardwareCanvas getCanvas();
 
@@ -154,12 +157,14 @@ abstract class HardwareLayer {
 
     /**
      * This must be invoked before drawing onto this layer.
+     *
      * @param currentCanvas
      */
     abstract HardwareCanvas start(Canvas currentCanvas);
-    
+
     /**
      * This must be invoked after drawing onto this layer.
+     *
      * @param currentCanvas
      */
     abstract void end(Canvas currentCanvas);

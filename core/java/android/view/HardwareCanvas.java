@@ -23,8 +23,8 @@ import android.graphics.Rect;
 
 /**
  * Hardware accelerated canvas.
- *
- * @hide 
+ * 
+ * @hide
  */
 public abstract class HardwareCanvas extends Canvas {
     private String mName;
@@ -46,6 +46,8 @@ public abstract class HardwareCanvas extends Canvas {
      * @param name The name of the canvas, can be null
      *
      * @see #getName()
+     *
+     * @hide
      */
     public void setName(String name) {
         mName = name;
@@ -57,6 +59,8 @@ public abstract class HardwareCanvas extends Canvas {
      * @return The name of the canvas or null
      *
      * @see #setName(String)
+     *
+     * @hide
      */
     public String getName() {
         return mName;
@@ -67,27 +71,43 @@ public abstract class HardwareCanvas extends Canvas {
      * 
      * @param dirty The dirty rectangle to update, can be null.
      * @return {@link DisplayList#STATUS_DREW} if anything was drawn (such as a call to clear
-     * the canvas).
+     *         the canvas).
+     *
+     * @hide
      */
     public abstract int onPreDraw(Rect dirty);
 
     /**
      * Invoked after all drawing operation have been performed.
+     *
+     * @hide
      */
     public abstract void onPostDraw();
+
+    /**
+     * Draws the specified display list onto this canvas. The display list can only
+     * be drawn if {@link android.view.DisplayList#isValid()} returns true.
+     *
+     * @param displayList The display list to replay.
+     */
+    public void drawDisplayList(DisplayList displayList) {
+        drawDisplayList(displayList, null, DisplayList.FLAG_CLIP_CHILDREN);
+    }
 
     /**
      * Draws the specified display list onto this canvas.
      *
      * @param displayList The display list to replay.
      * @param dirty The dirty region to redraw in the next pass, matters only
-     *        if this method returns true, can be null.
+     *        if this method returns {@link DisplayList#STATUS_DRAW}, can be null.
      * @param flags Optional flags about drawing, see {@link DisplayList} for
      *              the possible flags.
      *
      * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW}, or
      *         {@link DisplayList#STATUS_INVOKE}, or'd with {@link DisplayList#STATUS_DREW}
      *         if anything was drawn.
+     *
+     * @hide
      */
     public abstract int drawDisplayList(DisplayList displayList, Rect dirty, int flags);
 
@@ -96,6 +116,8 @@ public abstract class HardwareCanvas extends Canvas {
      * tools to output display lists for selected nodes to the log.
      *
      * @param displayList The display list to be logged.
+     *
+     * @hide
      */
     abstract void outputDisplayList(DisplayList displayList);
 
@@ -106,6 +128,8 @@ public abstract class HardwareCanvas extends Canvas {
      * @param x The left coordinate of the layer
      * @param y The top coordinate of the layer
      * @param paint The paint used to draw the layer
+     *
+     * @hide
      */
     abstract void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint);
 
@@ -118,6 +142,8 @@ public abstract class HardwareCanvas extends Canvas {
      *                       
      * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
      *         {@link DisplayList#STATUS_INVOKE}
+     *
+     * @hide
      */
     public int callDrawGLFunction(int drawGLFunction) {
         // Noop - this is done in the display list recorder subclass
@@ -131,6 +157,8 @@ public abstract class HardwareCanvas extends Canvas {
      *              
      * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
      *         {@link DisplayList#STATUS_INVOKE}
+     *
+     * @hide
      */
     public int invokeFunctors(Rect dirty) {
         return DisplayList.STATUS_DONE;
@@ -143,7 +171,9 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @see #invokeFunctors(android.graphics.Rect)
      * @see #callDrawGLFunction(int)
-     * @see #detachFunctor(int) 
+     * @see #detachFunctor(int)
+     *
+     * @hide
      */
     abstract void detachFunctor(int functor);
 
@@ -154,7 +184,9 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @see #invokeFunctors(android.graphics.Rect)
      * @see #callDrawGLFunction(int)
-     * @see #detachFunctor(int) 
+     * @see #detachFunctor(int)
+     *
+     * @hide
      */
     abstract void attachFunctor(int functor);
 
@@ -164,13 +196,17 @@ public abstract class HardwareCanvas extends Canvas {
      * @param layer The layer to update
      *
      * @see #clearLayerUpdates()
+     *
+     * @hide
      */
     abstract void pushLayerUpdate(HardwareLayer layer);
 
     /**
      * Removes all enqueued layer updates.
      * 
-     * @see #pushLayerUpdate(HardwareLayer) 
+     * @see #pushLayerUpdate(HardwareLayer)
+     *
+     * @hide
      */
     abstract void clearLayerUpdates();
 }

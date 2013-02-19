@@ -49,7 +49,7 @@ import static javax.microedition.khronos.egl.EGL10.*;
 
 /**
  * Interface for rendering a view hierarchy using hardware acceleration.
- * 
+ *
  * @hide
  */
 public abstract class HardwareRenderer {
@@ -63,9 +63,9 @@ public abstract class HardwareRenderer {
     /**
      * Turn on to only refresh the parts of the screen that need updating.
      * When turned on the property defined by {@link #RENDER_DIRTY_REGIONS_PROPERTY}
-     * must also have the value "true". 
+     * must also have the value "true".
      */
-    public static final boolean RENDER_DIRTY_REGIONS = true;
+    static final boolean RENDER_DIRTY_REGIONS = true;
 
     /**
      * System property used to enable or disable dirty regions invalidation.
@@ -353,6 +353,8 @@ public abstract class HardwareRenderer {
      * resources.
      * 
      * @param cacheDir A directory the current process can write to
+     *
+     * @hide
      */
     public static void setupDiskCache(File cacheDir) {
         nSetupShadersDiskCache(new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath());
@@ -442,11 +444,22 @@ public abstract class HardwareRenderer {
     /**
      * Creates a new display list that can be used to record batches of
      * drawing operations.
+     *
+     * @return A new display list.
+     */
+    public DisplayList createDisplayList() {
+        return createDisplayList(null);
+    }
+
+    /**
+     * Creates a new display list that can be used to record batches of
+     * drawing operations.
      * 
-     * @param name The name of the display list, used for debugging purpose.
-     *             May be null
+     * @param name The name of the display list, used for debugging purpose. May be null.
      * 
      * @return A new display list.
+     *
+     * @hide
      */
     public abstract DisplayList createDisplayList(String name);
 
@@ -474,7 +487,6 @@ public abstract class HardwareRenderer {
     /**
      * Creates a new {@link SurfaceTexture} that can be used to render into the
      * specified hardware layer.
-     * 
      *
      * @param layer The layer to render into using a {@link android.graphics.SurfaceTexture}
      * 
@@ -1971,12 +1983,12 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque) {
+        public HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque) {
             return new GLES20RenderLayer(width, height, isOpaque);
         }
 
         @Override
-        SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
+        public SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
             return ((GLES20TextureLayer) layer).getSurfaceTexture();
         }
 

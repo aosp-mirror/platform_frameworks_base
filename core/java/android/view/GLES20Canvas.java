@@ -377,24 +377,13 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native int nGetDisplayList(int renderer, int displayList);
-    
-    static void destroyDisplayList(int displayList) {
-        nDestroyDisplayList(displayList);
+
+    @Override
+    void outputDisplayList(DisplayList displayList) {
+        nOutputDisplayList(mRenderer, ((GLES20DisplayList) displayList).getNativeDisplayList());
     }
 
-    private static native void nDestroyDisplayList(int displayList);
-
-    static int getDisplayListSize(int displayList) {
-        return nGetDisplayListSize(displayList);
-    }
-
-    private static native int nGetDisplayListSize(int displayList);
-
-    static void setDisplayListName(int displayList, String name) {
-        nSetDisplayListName(displayList, name);
-    }
-
-    private static native void nSetDisplayListName(int displayList, String name);
+    private static native void nOutputDisplayList(int renderer, int displayList);
 
     @Override
     public int drawDisplayList(DisplayList displayList, Rect dirty, int flags) {
@@ -404,13 +393,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nDrawDisplayList(int renderer, int displayList,
             Rect dirty, int flags);
-
-    @Override
-    void outputDisplayList(DisplayList displayList) {
-        nOutputDisplayList(mRenderer, ((GLES20DisplayList) displayList).getNativeDisplayList());
-    }
-
-    private static native void nOutputDisplayList(int renderer, int displayList);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
