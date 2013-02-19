@@ -1314,7 +1314,7 @@ public class Editor {
                     blockDisplayList = mTextDisplayLists[blockIndex] =
                             mTextView.getHardwareRenderer().createDisplayList("Text " + blockIndex);
                 } else {
-                    if (blockIsInvalid) blockDisplayList.invalidate();
+                    if (blockIsInvalid) blockDisplayList.clear();
                 }
 
                 final boolean blockDisplayListIsInvalid = !blockDisplayList.isValid();
@@ -1337,19 +1337,16 @@ public class Editor {
 
                     // Rebuild display list if it is invalid
                     if (blockDisplayListIsInvalid) {
-                        final HardwareCanvas hardwareCanvas = blockDisplayList.start();
+                        final HardwareCanvas hardwareCanvas = blockDisplayList.start(
+                                right - left, bottom - top);
                         try {
-                            // Tighten the bounds of the viewport to the actual text size
-                            hardwareCanvas.setViewport(right - left, bottom - top);
-                            // The dirty rect should always be null for a display list
-                            hardwareCanvas.onPreDraw(null);
-                            // drawText is always relative to TextView's origin, this translation brings
-                            // this range of text back to the top left corner of the viewport
+                            // drawText is always relative to TextView's origin, this translation
+                            // brings this range of text back to the top left corner of the viewport
                             hardwareCanvas.translate(-left, -top);
                             layout.drawText(hardwareCanvas, blockBeginLine, blockEndLine);
-                            // No need to untranslate, previous context is popped after drawDisplayList
+                            // No need to untranslate, previous context is popped after
+                            // drawDisplayList
                         } finally {
-                            hardwareCanvas.onPostDraw();
                             blockDisplayList.end();
                             // Same as drawDisplayList below, handled by our TextView's parent
                             blockDisplayList.setClipChildren(false);
@@ -1430,7 +1427,7 @@ public class Editor {
             while (i < numberOfBlocks) {
                 final int blockIndex = blockIndices[i];
                 if (blockIndex != DynamicLayout.INVALID_BLOCK_INDEX) {
-                    mTextDisplayLists[blockIndex].invalidate();
+                    mTextDisplayLists[blockIndex].clear();
                 }
                 if (blockEndLines[i] >= lastLine) break;
                 i++;
@@ -1441,7 +1438,7 @@ public class Editor {
     void invalidateTextDisplayList() {
         if (mTextDisplayLists != null) {
             for (int i = 0; i < mTextDisplayLists.length; i++) {
-                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].invalidate();
+                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].clear();
             }
         }
     }

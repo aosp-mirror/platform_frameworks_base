@@ -280,7 +280,7 @@ void OpenGLRenderer::startTiling(const sp<Snapshot>& s, bool opaque) {
 void OpenGLRenderer::startTiling(const Rect& clip, int windowHeight, bool opaque) {
     if (!mSuppressTiling) {
         mCaches.startTiling(clip.left, windowHeight - clip.bottom,
-                    clip.right - clip.left, clip.bottom - clip.top, opaque);
+                clip.right - clip.left, clip.bottom - clip.top, opaque);
     }
 }
 
