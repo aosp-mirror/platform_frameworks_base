@@ -460,7 +460,8 @@ class ContextImpl extends Context {
         registerService(STORAGE_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     try {
-                        return new StorageManager(ctx.mMainThread.getHandler().getLooper());
+                        return new StorageManager(
+                                ctx.getContentResolver(), ctx.mMainThread.getHandler().getLooper());
                     } catch (RemoteException rex) {
                         Log.e(TAG, "Failed to create StorageManager", rex);
                         return null;
