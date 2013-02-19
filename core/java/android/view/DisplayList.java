@@ -60,7 +60,6 @@ import android.graphics.Matrix;
  *
  * <h3>Rendering a display list on a View</h3>
  * <pre class="prettyprint">
- *     @Override
  *     protected void onDraw(Canvas canvas) {
  *         if (canvas.isHardwareAccelerated()) {
  *             HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
@@ -102,7 +101,6 @@ import android.graphics.Matrix;
  *         }
  *     }
  *
- *     @Override
  *     protected void onDraw(Canvas canvas) {
  *         if (canvas.isHardwareAccelerated()) {
  *             HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
