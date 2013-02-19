@@ -22,6 +22,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.UserHandle;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AbstractFuture;
@@ -133,12 +134,28 @@ public class BroadcastInterceptingContext extends ContextWrapper {
     }
 
     @Override
+    public void sendBroadcast(Intent intent, String receiverPermission) {
+        sendBroadcast(intent);
+    }
+
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user) {
+        sendBroadcast(intent);
+    }
+
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission) {
+        sendBroadcast(intent);
+    }
+
+    @Override
     public void sendStickyBroadcast(Intent intent) {
         sendBroadcast(intent);
     }
 
     @Override
-    public void sendBroadcast(Intent intent, String receiverPermission) {
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
         sendBroadcast(intent);
     }
 
