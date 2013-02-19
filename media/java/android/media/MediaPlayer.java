@@ -948,7 +948,12 @@ public class MediaPlayer
 
     private void setDataSource(String path, String[] keys, String[] values)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        File file = new File(path);
+        final Uri uri = Uri.parse(path);
+        if ("file".equals(uri.getScheme())) {
+            path = uri.getPath();
+        }
+
+        final File file = new File(path);
         if (file.exists()) {
             FileInputStream is = new FileInputStream(file);
             FileDescriptor fd = is.getFD();
