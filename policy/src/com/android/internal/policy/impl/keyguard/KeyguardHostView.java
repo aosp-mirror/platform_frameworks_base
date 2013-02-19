@@ -136,6 +136,16 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetHost = new AppWidgetHost(
                 context, APPWIDGET_HOST_ID, mOnClickHandler, Looper.myLooper());
         mAppWidgetHost.setUserId(mUserId);
+
+        DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (dpm != null) {
+            mDisabledFeatures = getDisabledFeatures(dpm);
+            mCameraDisabled = dpm.getCameraDisabled(null);
+        }
+
+        mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
+
         cleanupAppWidgetIds();
 
         mAppWidgetManager = AppWidgetManager.getInstance(mContext);
@@ -143,14 +153,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         mViewStateManager = new KeyguardViewStateManager(this);
 
-        DevicePolicyManager dpm =
-            (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null) {
-            mDisabledFeatures = getDisabledFeatures(dpm);
-            mCameraDisabled = dpm.getCameraDisabled(null);
-        }
-
-        mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
         mUserSetupCompleted = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
 
@@ -172,19 +174,21 @@ public class KeyguardHostView extends KeyguardViewBase {
             mCleanupAppWidgetsOnBootCompleted = true;
             return;
         }
-        // Clean up appWidgetIds that are bound to lockscreen, but not actually used
-        // This is only to clean up after another bug: we used to not call
-        // deleteAppWidgetId when a user manually deleted a widget in keyguard. This code
-        // shouldn't have to run more than once per user. AppWidgetProviders rely on callbacks
-        // that are triggered by deleteAppWidgetId, which is why we're doing this
-        int[] appWidgetIdsInKeyguardSettings = mLockPatternUtils.getAppWidgets();
-        int[] appWidgetIdsBoundToHost = mAppWidgetHost.getAppWidgetIds();
-        for (int i = 0; i < appWidgetIdsBoundToHost.length; i++) {
-            int appWidgetId = appWidgetIdsBoundToHost[i];
-            if (!contains(appWidgetIdsInKeyguardSettings, appWidgetId)) {
-                Log.d(TAG, "Found a appWidgetId that's not being used by keyguard, deleting id "
-                        + appWidgetId);
-                mAppWidgetHost.deleteAppWidgetId(appWidgetId);
+        if (!mSafeModeEnabled && !widgetsDisabledByDpm()) {
+            // Clean up appWidgetIds that are bound to lockscreen, but not actually used
+            // This is only to clean up after another bug: we used to not call
+            // deleteAppWidgetId when a user manually deleted a widget in keyguard. This code
+            // shouldn't have to run more than once per user. AppWidgetProviders rely on callbacks
+            // that are triggered by deleteAppWidgetId, which is why we're doing this
+            int[] appWidgetIdsInKeyguardSettings = mLockPatternUtils.getAppWidgets();
+            int[] appWidgetIdsBoundToHost = mAppWidgetHost.getAppWidgetIds();
+            for (int i = 0; i < appWidgetIdsBoundToHost.length; i++) {
+                int appWidgetId = appWidgetIdsBoundToHost[i];
+                if (!contains(appWidgetIdsInKeyguardSettings, appWidgetId)) {
+                    Log.d(TAG, "Found a appWidgetId that's not being used by keyguard, deleting id "
+                            + appWidgetId);
+                    mAppWidgetHost.deleteAppWidgetId(appWidgetId);
+                }
             }
         }
     }
