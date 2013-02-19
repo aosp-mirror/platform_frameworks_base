@@ -86,10 +86,11 @@ function buildButton(form) {
 
   if (form["package"].value != "com.example.android") {
     $("#preview").show();
-    $("#snippet").show().html(linkStartCode + "apps/details?id=" + form["package"].value
+    var packageName = escapeHTML(form["package"].value);
+    $("#snippet").show().html(linkStartCode + "apps/details?id=" + packageName
             + imageStartCode + altText + imageSrcCode
             + selectedValue + imageEndCode);
-    $("#button-preview").html(linkStart + "apps/details?id=" + form["package"].value
+    $("#button-preview").html(linkStart + "apps/details?id=" + packageName
             + imageStart + altText + imageSrc
             + selectedValue + imageEnd);
             
@@ -97,10 +98,11 @@ function buildButton(form) {
     _gaq.push(['_trackEvent', 'Distribute', 'Create Google Play Badge', 'Package ' + selectedValue]);
   } else if (form["publisher"].value != "Example, Inc.") {
     $("#preview").show();
-    $("#snippet").show().html(linkStartCode + "search?q=pub:" + form["publisher"].value
+    var publisherName = escapeHTML(form["publisher"].value);
+    $("#snippet").show().html(linkStartCode + "search?q=pub:" + publisherName
             + imageStartCode + altText + imageSrcCode
             + selectedValue + imageEndCode);
-    $("#button-preview").html(linkStart + "search?q=pub:" + form["publisher"].value
+    $("#button-preview").html(linkStart + "search?q=pub:" + publisherName
             + imageStart + altText + imageSrc
             + selectedValue + imageEnd);
    
