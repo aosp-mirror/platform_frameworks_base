@@ -143,6 +143,19 @@ final class LogicalDisplay {
         }
     }
 
+    public void setOverscan(int left, int top, int right, int bottom) {
+        mInfo.overscanLeft = left;
+        mInfo.overscanTop = top;
+        mInfo.overscanRight = right;
+        mInfo.overscanBottom = bottom;
+        if (mOverrideDisplayInfo != null) {
+            mOverrideDisplayInfo.overscanLeft = left;
+            mOverrideDisplayInfo.overscanTop = top;
+            mOverrideDisplayInfo.overscanRight = right;
+            mOverrideDisplayInfo.overscanBottom = bottom;
+        }
+    }
+
     /**
      * Returns true if the logical display is in a valid state.
      * This method should be checked after calling {@link #updateLocked} to handle the

@@ -65,6 +65,8 @@ interface IWindowManager
     void setForcedDisplayDensity(int displayId, int density);
     void clearForcedDisplayDensity(int displayId);
 
+    void setOverscan(int displayId, int left, int top, int right, int bottom);
+
     // Is the device configured to have a full system bar for larger screens?
     boolean hasSystemNavBar();
 

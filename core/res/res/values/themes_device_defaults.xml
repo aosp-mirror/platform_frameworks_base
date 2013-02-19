@@ -202,12 +202,17 @@ easier.
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
     <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Holo.NoActionBar" >
-
     </style>
+
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar -->
     <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Holo.NoActionBar.Fullscreen" >
-
     </style>
+
+    <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar and
+    extending in to overscan region. -->
+    <style name="Theme.DeviceDefault.NoActionBar.Overscan" parent="Theme.Holo.NoActionBar.Overscan" >
+    </style>
+
     <!-- Variant of {@link #Theme_DeviceDefault} with a light-colored style -->
     <style name="Theme.DeviceDefault.Light" parent="Theme.Holo.Light" >
         <!-- Text styles -->
@@ -356,11 +361,14 @@ easier.
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
     <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Holo.Light.NoActionBar" >
-
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar -->
     <style name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" parent="Theme.Holo.Light.NoActionBar.Fullscreen" >
-
+    </style>
+    <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar
+    and extending in to overscan region-->
+    <style name="Theme.DeviceDefault.Light.NoActionBar.Overscan"
+           parent="Theme.Holo.Light.NoActionBar.Overscan" >
     </style>
     <!-- DeviceDefault theme for dialog windows and activities. This changes the window to be
     floating (not fill the entire screen), and puts a frame around its contents. You can set this
