@@ -324,6 +324,18 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     /**
+     * Sets the overscan insets for a particular display.
+     */
+    public void setOverscan(int displayId, int left, int top, int right, int bottom) {
+        synchronized (mSyncRoot) {
+            LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display != null) {
+                display.setOverscan(left, top, right, bottom);
+            }
+        }
+    }
+
+    /**
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
      */

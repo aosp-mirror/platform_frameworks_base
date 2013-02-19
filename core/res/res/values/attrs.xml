@@ -312,6 +312,8 @@
         <attr name="windowNoTitle" format="boolean" />
         <!-- Flag indicating whether this window should fill the entire screen. -->
         <attr name="windowFullscreen" format="boolean" />
+        <!-- Flag indicating whether this window should extend into overscan region. -->
+        <attr name="windowOverscan" format="boolean" />
         <!-- Flag indicating whether this is a floating window. -->
         <attr name="windowIsFloating" format="boolean" />
         <!-- Flag indicating whether this is a translucent window. -->
@@ -1562,6 +1564,7 @@
         <attr name="windowFrame" />
         <attr name="windowNoTitle" />
         <attr name="windowFullscreen" />
+        <attr name="windowOverscan" />
         <attr name="windowIsFloating" />
         <attr name="windowIsTranslucent" />
         <attr name="windowShowWallpaper" />

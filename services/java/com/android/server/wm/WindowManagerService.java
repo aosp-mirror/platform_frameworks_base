@@ -320,6 +320,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final AppOpsManager mAppOps;
 
+    final DisplaySettings mDisplaySettings;
+
     /**
      * All currently active sessions with clients.
      */
@@ -731,6 +733,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mDisplayManagerService = displayManager;
         mHeadless = displayManager.isHeadless();
+        mDisplaySettings = new DisplaySettings(context);
+        mDisplaySettings.readSettingsLocked();
 
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mDisplayManager.registerDisplayListener(this, null);
@@ -7089,6 +7093,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setForcedDisplaySize(int displayId, int width, int height) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " +
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        }
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("Can only set the default display");
+        }
         synchronized(mWindowMap) {
             // Set some sort of reasonable bounds on the size of the display that we
             // will try to emulate.
@@ -7160,6 +7173,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void clearForcedDisplaySize(int displayId) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " +
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        }
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("Can only set the default display");
+        }
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null) {
@@ -7173,6 +7195,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setForcedDisplayDensity(int displayId, int density) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " +
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        }
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("Can only set the default display");
+        }
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null) {
@@ -7195,6 +7226,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void clearForcedDisplayDensity(int displayId) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " +
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        }
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("Can only set the default display");
+        }
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null) {
@@ -7231,6 +7271,33 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         performLayoutAndPlaceSurfacesLocked();
+    }
+
+    public void setOverscan(int displayId, int left, int top, int right, int bottom) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " +
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        }
+        synchronized(mWindowMap) {
+            DisplayContent displayContent = getDisplayContentLocked(displayId);
+            if (displayContent != null) {
+                mDisplayManagerService.setOverscan(displayId, left, top, right, bottom);
+                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                synchronized(displayContent.mDisplaySizeLock) {
+                    displayInfo.overscanLeft = left;
+                    displayInfo.overscanTop = top;
+                    displayInfo.overscanRight = right;
+                    displayInfo.overscanBottom = bottom;
+                }
+                mPolicy.setDisplayOverscan(displayContent.getDisplay(), left, top, right, bottom);
+                displayContent.layoutNeeded = true;
+                mDisplaySettings.setOverscanLocked(displayInfo.name, left, top, right, bottom);
+                mDisplaySettings.writeSettingsLocked();
+                performLayoutAndPlaceSurfacesLocked();
+            }
+        }
     }
 
     @Override
@@ -9694,7 +9761,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (dumpAll) {
             pw.print("  mSystemDecorRect="); pw.print(mSystemDecorRect.toShortString());
                     pw.print(" mSystemDecorLayer="); pw.print(mSystemDecorLayer);
-                    pw.print(" mScreenRecr="); pw.println(mScreenRect.toShortString());
+                    pw.print(" mScreenRect="); pw.println(mScreenRect.toShortString());
             if (mLastStatusBarVisibility != 0) {
                 pw.print("  mLastStatusBarVisibility=0x");
                         pw.println(Integer.toHexString(mLastStatusBarVisibility));
@@ -9973,12 +10040,28 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private DisplayContent newDisplayContentLocked(final Display display) {
+        DisplayContent displayContent = new DisplayContent(display);
+        mDisplayContents.put(display.getDisplayId(), displayContent);
+        final Rect rect = new Rect();
+        DisplayInfo info = displayContent.getDisplayInfo();
+        mDisplaySettings.getOverscanLocked(info.name, rect);
+        info.overscanLeft = rect.left;
+        info.overscanTop = rect.top;
+        info.overscanRight = rect.right;
+        info.overscanBottom = rect.bottom;
+        mDisplayManagerService.setOverscan(display.getDisplayId(), rect.left, rect.top,
+                rect.right, rect.bottom);
+        mPolicy.setDisplayOverscan(displayContent.getDisplay(), rect.left, rect.top,
+                rect.right, rect.bottom);
+        return displayContent;
+    }
+
     public void createDisplayContentLocked(final Display display) {
         if (display == null) {
             throw new IllegalArgumentException("getDisplayContent: display must not be null");
         }
-        final DisplayContent displayContent = new DisplayContent(display);
-        mDisplayContents.put(display.getDisplayId(), displayContent);
+        newDisplayContentLocked(display);
     }
 
     /**
@@ -9992,8 +10075,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayContent == null) {
             final Display display = mDisplayManager.getDisplay(displayId);
             if (display != null) {
-                displayContent = new DisplayContent(display);
-                mDisplayContents.put(displayId, displayContent);
+                displayContent = newDisplayContentLocked(display);
             }
         }
         return displayContent;

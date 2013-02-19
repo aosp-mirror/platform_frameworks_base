@@ -166,6 +166,7 @@ please see themes_device_defaults.xml.
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
+        <item name="windowOverscan">false</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
@@ -403,6 +404,14 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
+    <!-- Variant of {@link #Theme} that has no title bar and no status bar and extending
+        into the display overscan region. -->
+    <style name="Theme.NoTitleBar.Overscan">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <!-- Theme for a light background with dark text on top.  Set your activity
          to this theme if you would like such an appearance.  As with the
          default theme, you should try to assume little more than that the
@@ -495,6 +504,14 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
+    <!-- Variant of {@link #Theme_Light} that has no title bar and
+         no status bar and extending into the display overscan region. -->
+    <style name="Theme.Light.NoTitleBar.Overscan">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <!-- Variant on {@link #Theme} that ensures the background is
          completely black.  This is useful for things like image viewers and
          media players.   If you want the normal (dark background) theme
@@ -516,6 +533,14 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
+    <!-- Variant of {@link #Theme_Black} that has no title bar and
+         no status bar and extending into the display overscan region. -->
+    <style name="Theme.Black.NoTitleBar.Overscan">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <!-- Theme for windows that want to have the user's selected
          wallpaper appear behind them (for API level 10 and lower).  -->
     <style name="Theme.Wallpaper">
@@ -1010,6 +1035,7 @@ please see themes_device_defaults.xml.
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
+        <item name="windowOverscan">false</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
@@ -1324,6 +1350,7 @@ please see themes_device_defaults.xml.
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
+        <item name="windowOverscan">false</item>
         <item name="windowIsFloating">false</item>
         <item name="android:windowContentOverlay">@android:drawable/ab_solid_shadow_holo</item>
         <item name="windowShowWallpaper">false</item>
@@ -1563,6 +1590,14 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <!-- Variant of the holographic (dark) theme that has no title bar and fills
+         the entire screen and extends into the display overscan region. -->
+    <style name="Theme.Holo.NoActionBar.Overscan">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <!-- Variant of the holographic (light) theme with no action bar. -->
     <style name="Theme.Holo.Light.NoActionBar">
         <item name="android:windowActionBar">false</item>
@@ -1576,6 +1611,14 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
  
+    <!-- Variant of the holographic (light) theme that has no title bar and fills
+         the entire screen and extends into the display overscan region. -->
+    <style name="Theme.Holo.Light.NoActionBar.Overscan">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <!-- Dialog themes for Holo -->
     <eat-comment />
 
