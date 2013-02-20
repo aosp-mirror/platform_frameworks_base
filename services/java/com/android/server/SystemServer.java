@@ -62,6 +62,7 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.search.SearchManagerService;
 import com.android.server.usb.UsbService;
+import com.android.server.wifi.WifiService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
