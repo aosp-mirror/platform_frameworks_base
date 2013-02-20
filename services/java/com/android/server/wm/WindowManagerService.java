@@ -5312,8 +5312,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (DEBUG_ORIENTATION) Slog.v(TAG, "freezeRotation: mRotation=" + mRotation);
 
-        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED,
-                rotation == -1 ? mRotation : rotation);
+        long origId = Binder.clearCallingIdentity();
+        try {
+            mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED,
+                    rotation == -1 ? mRotation : rotation);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+
         updateRotationUnchecked(false, false);
     }
 
@@ -5330,7 +5336,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (DEBUG_ORIENTATION) Slog.v(TAG, "thawRotation: mRotation=" + mRotation);
 
-        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE, 777); // rot not used
+        long origId = Binder.clearCallingIdentity();
+        try {
+            mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE,
+                    777); // rot not used
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+
         updateRotationUnchecked(false, false);
     }
 
