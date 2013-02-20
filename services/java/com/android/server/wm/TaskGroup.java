@@ -23,4 +23,9 @@ import java.util.ArrayList;
 public class TaskGroup {
     public int taskId = -1;
     public ArrayList<IApplicationToken> tokens = new ArrayList<IApplicationToken>();
+
+    @Override
+    public String toString() {
+        return "id=" + taskId + " tokens=" + tokens;
+    }
 }

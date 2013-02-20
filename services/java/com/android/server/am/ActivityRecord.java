@@ -471,6 +471,7 @@ final class ActivityRecord {
     void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
         if (inHistory && !finishing) {
             if (task != null) {
+                task.removeActivity(this);
                 task.numActivities--;
             }
             if (newTask != null) {
@@ -505,6 +506,7 @@ final class ActivityRecord {
             inHistory = false;
             if (task != null && !finishing) {
                 task.numActivities--;
+                task = null;
             }
             clearOptionsLocked();
         }
@@ -539,7 +541,7 @@ final class ActivityRecord {
         ActivityResult r = new ActivityResult(from, resultWho,
         		requestCode, resultCode, resultData);
         if (results == null) {
-            results = new ArrayList();
+            results = new ArrayList<ResultInfo>();
         }
         results.add(r);
     }
@@ -950,6 +952,8 @@ final class ActivityRecord {
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" t");
+        sb.append(task.taskId);
         sb.append(" u");
         sb.append(userId);
         sb.append(' ');
