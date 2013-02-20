@@ -485,14 +485,12 @@ public class ImageWallpaper extends WallpaperService {
 
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-            if (!mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
-                throw new RuntimeException("Cannot swap buffers");
-            }
+            boolean status = mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
             checkEglError();
 
             finishGL();
 
-            return true;
+            return status;
         }
 
         private FloatBuffer createMesh(int left, int top, float right, float bottom) {
