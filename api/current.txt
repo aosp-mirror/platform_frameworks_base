@@ -22969,9 +22969,14 @@ package android.text.style {
 
   public class EasyEditSpan implements android.text.ParcelableSpan {
     ctor public EasyEditSpan();
+    ctor public EasyEditSpan(android.app.PendingIntent);
+    ctor public EasyEditSpan(android.os.Parcel);
     method public int describeContents();
     method public int getSpanTypeId();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String EXTRA_TEXT_CHANGED_TYPE = "android.text.style.EXTRA_TEXT_CHANGED_TYPE";
+    field public static final int TEXT_DELETED = 1; // 0x1
+    field public static final int TEXT_MODIFIED = 2; // 0x2
   }
 
   public class ForegroundColorSpan extends android.text.style.CharacterStyle implements android.text.ParcelableSpan android.text.style.UpdateAppearance {
