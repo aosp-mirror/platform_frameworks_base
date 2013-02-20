@@ -11449,6 +11449,11 @@ package android.media {
     field public static final int MPEG4ProfileSimpleFBA = 128; // 0x80
     field public static final int MPEG4ProfileSimpleFace = 64; // 0x40
     field public static final int MPEG4ProfileSimpleScalable = 2; // 0x2
+    field public static final int VP8Level_Version0 = 1; // 0x1
+    field public static final int VP8Level_Version1 = 2; // 0x2
+    field public static final int VP8Level_Version2 = 4; // 0x4
+    field public static final int VP8Level_Version3 = 8; // 0x8
+    field public static final int VP8ProfileMain = 1; // 0x1
     field public int level;
     field public int profile;
   }
