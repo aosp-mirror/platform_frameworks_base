@@ -86,7 +86,8 @@ import java.util.Set;
  * <strong>data scheme+authority+path</strong> if specified) must match.
  *
  * <p><strong>Action</strong> matches if any of the given values match the
- * Intent action, <em>or</em> if no actions were specified in the filter.
+ * Intent action; if the filter specifies no actions, then it will only match
+ * Intents that do not contain an action.
  *
  * <p><strong>Data Type</strong> matches if any of the given values match the
  * Intent type.  The Intent

@@ -2610,7 +2610,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String CATEGORY_SAMPLE_CODE = "android.intent.category.SAMPLE_CODE";
     /**
      * Used to indicate that a GET_CONTENT intent only wants URIs that can be opened with
-     * ContentResolver.openInputStream. Openable URIs must support the columns in OpenableColumns
+     * ContentResolver.openInputStream. Openable URIs must support the columns in
+     * {@link android.provider.OpenableColumns}
      * when queried, though it is allowable for those columns to be blank.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
