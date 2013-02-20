@@ -757,7 +757,7 @@ public class TextUtils {
                     break;
 
                 case EASY_EDIT_SPAN:
-                    readSpan(p, sp, new EasyEditSpan(p));
+                    readSpan(p, sp, new EasyEditSpan());
                     break;
 
                 case LOCALE_SPAN:

@@ -20,8 +20,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.EditableInputConnection;
 
 import android.R;
-import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.content.ClipData;
 import android.content.ClipData.Item;
 import android.content.Context;
@@ -1892,23 +1890,10 @@ public class Editor {
 
                 // Make sure there is only at most one EasyEditSpan in the text
                 if (mPopupWindow.mEasyEditSpan != null) {
-                    mPopupWindow.mEasyEditSpan.setDeleteEnabled(false);
+                    text.removeSpan(mPopupWindow.mEasyEditSpan);
                 }
 
                 mPopupWindow.setEasyEditSpan((EasyEditSpan) span);
-                mPopupWindow.setOnDeleteListener(new EasyEditDeleteListener() {
-                    @Override
-                    public void onDeleteClick(EasyEditSpan span) {
-                        Editable editable = (Editable) mTextView.getText();
-                        int start = editable.getSpanStart(span);
-                        int end = editable.getSpanEnd(span);
-                        if (start >= 0 && end >= 0) {
-                            sendNotification(EasyEditSpan.TEXT_DELETED, span);
-                            mTextView.deleteText_internal(start, end);
-                        }
-                        editable.removeSpan(span);
-                    }
-                });
 
                 if (mTextView.getWindowVisibility() != View.VISIBLE) {
                     // The window is not visible yet, ignore the text change.
@@ -1942,10 +1927,8 @@ public class Editor {
         @Override
         public void onSpanChanged(Spannable text, Object span, int previousStart, int previousEnd,
                 int newStart, int newEnd) {
-            if (mPopupWindow != null && span instanceof EasyEditSpan) {
-                EasyEditSpan easyEditSpan = (EasyEditSpan) span;
-                sendNotification(EasyEditSpan.TEXT_MODIFIED, easyEditSpan);
-                text.removeSpan(easyEditSpan);
+            if (mPopupWindow != null && span == mPopupWindow.mEasyEditSpan) {
+                text.removeSpan(mPopupWindow.mEasyEditSpan);
             }
         }
 
@@ -1955,31 +1938,6 @@ public class Editor {
                 mTextView.removeCallbacks(mHidePopup);
             }
         }
-
-        private void sendNotification(int textChangedType, EasyEditSpan span) {
-            try {
-                PendingIntent pendingIntent = span.getPendingIntent();
-                if (pendingIntent != null) {
-                    Intent intent = new Intent();
-                    intent.putExtra(EasyEditSpan.EXTRA_TEXT_CHANGED_TYPE, textChangedType);
-                    pendingIntent.send(mTextView.getContext(), 0, intent);
-                }
-            } catch (CanceledException e) {
-                // This should not happen, as we should try to send the intent only once.
-                Log.w(TAG, "PendingIntent for notification cannot be sent", e);
-            }
-        }
-    }
-
-    /**
-     * Listens for the delete event triggered by {@link EasyEditPopupWindow}.
-     */
-    private interface EasyEditDeleteListener {
-
-        /**
-         * Clicks the delete pop-up.
-         */
-        void onDeleteClick(EasyEditSpan span);
     }
 
     /**
@@ -1992,7 +1950,6 @@ public class Editor {
                 com.android.internal.R.layout.text_edit_action_popup_text;
         private TextView mDeleteTextView;
         private EasyEditSpan mEasyEditSpan;
-        private EasyEditDeleteListener mOnDeleteListener;
 
         @Override
         protected void createPopupWindow() {
@@ -2027,26 +1984,16 @@ public class Editor {
             mEasyEditSpan = easyEditSpan;
         }
 
-        private void setOnDeleteListener(EasyEditDeleteListener listener) {
-            mOnDeleteListener = listener;
-        }
-
         @Override
         public void onClick(View view) {
-            if (view == mDeleteTextView
-                    && mEasyEditSpan != null && mEasyEditSpan.isDeleteEnabled()
-                    && mOnDeleteListener != null) {
-                mOnDeleteListener.onDeleteClick(mEasyEditSpan);
+            if (view == mDeleteTextView) {
+                Editable editable = (Editable) mTextView.getText();
+                int start = editable.getSpanStart(mEasyEditSpan);
+                int end = editable.getSpanEnd(mEasyEditSpan);
+                if (start >= 0 && end >= 0) {
+                    mTextView.deleteText_internal(start, end);
+                }
             }
-        }
-
-        @Override
-        public void hide() {
-            if (mEasyEditSpan != null) {
-                mEasyEditSpan.setDeleteEnabled(false);
-            }
-            mOnDeleteListener = null;
-            super.hide();
         }
 
         @Override
