@@ -436,13 +436,8 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
         Caches::getInstance().eventMark(strlen(op->name()), op->name());
 #endif
 
-        if (deferredList) {
-            drawGlStatus |= op->replay(renderer, dirty, flags,
-                    saveCount, level, mCaching, mMultipliedAlpha, *deferredList);
-        } else {
-            drawGlStatus |= op->replay(renderer, dirty, flags,
-                    saveCount, level, mCaching, mMultipliedAlpha);
-        }
+        drawGlStatus |= op->replay(renderer, dirty, flags,
+                saveCount, level, mCaching, mMultipliedAlpha, deferredList);
         logBuffer.writeCommand(level, op->name());
     }
 

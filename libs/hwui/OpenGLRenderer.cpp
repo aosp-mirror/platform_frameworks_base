@@ -1235,6 +1235,8 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state) {
             // quick rejected
             return true;
         }
+    } else {
+        state.mBounds.set(currentClip);
     }
 
     state.mClip.set(currentClip);
