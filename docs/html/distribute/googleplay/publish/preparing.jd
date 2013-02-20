@@ -2,7 +2,7 @@ page.title=Publishing Checklist for Google Play
 @jd:body
 
 <div id="qv-wrapper"><div id="qv">
-<h2>Checklist:</h2>
+<h2>Checklist</h2>
 <ol>
 <li><a href="#process">1. Understand the publishing process</a></li>
 <li><a href="#policies">2. Understand Google Play policies</a></li>
@@ -399,14 +399,6 @@ attracts and engages users, so you should consider having a professional produce
 them for you. Screen shots and videos are also very important, because they show
 what your app looks like, how it's used or played, and what makes it different.</p>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<h3>Localize your promotional graphics and videos<span class="new"> new!</span></h3>
-<p>Google Play now lets you provide different promotional graphics for each
-language you support. Localizing your graphics helps you reach your global
-user base more effectively and is highly recommended.</p>
-</div>
-</div>
 <p>All of your graphic assets should be designed so that they are easy to see
 and highlight your app or brand in a colorful, interesting way. The assets
 should reference the same logo and icon as users will actually find in the All
@@ -417,8 +409,8 @@ be also be displayed to users on your product details page. </p>
 <p>To help you market your app more effectively to a global audience, Google
 Play lets you create localized versions of your promotional graphics,
 screenshots, and videos and upload them to the Developer Console. When a user
-visits your app's store listing, Google Play displays the promotional graphic
-and video that you've provided for the user's language.</p>
+visits your app's store listing, Google Play displays the promotional graphic,
+screenshots and video that you've provided for the user's language.</p>
 
 <p>To localize your promotional graphics, you can translate any embedded text, use
 different imagery or presentation, or change your marketing approach to best address the needs
@@ -427,11 +419,11 @@ includes and embedded product name or tag line, you can translate that text
 and add it to a localized version of the promotional graphic.</p>
 
 <p>Because your localized graphic assets and videos are so important, you should get
-started on creating them and localizing them as needed, well in advance of your target
+started on creating them and localizing them well in advance of your target
 publishing date. </p>
 
 <p class="note"><strong>Note:</strong> Localized promotional graphics and videos are supported
-in the Developer Console Preview only.</p>
+only in the new Developer Console design.</p>
 
 <table>
 <tr>
