@@ -26,6 +26,7 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
+import android.app.INotificationListener;
 import android.app.ITransientNotification;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -151,6 +152,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     private boolean mInCall = false;
     private boolean mNotificationPulseEnabled;
 
+    // used as a mutex for access to all active notifications & listeners
     private final ArrayList<NotificationRecord> mNotificationList =
             new ArrayList<NotificationRecord>();
 
@@ -160,6 +162,8 @@ public class NotificationManagerService extends INotificationManager.Stub
     private NotificationRecord mLedNotification;
 
     private final AppOpsManager mAppOps;
+
+    private ArrayList<NotificationListenerInfo> mListeners = new ArrayList<NotificationListenerInfo>();
 
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
@@ -173,6 +177,38 @@ public class NotificationManagerService extends INotificationManager.Stub
     private static final String TAG_BLOCKED_PKGS = "blocked-packages";
     private static final String TAG_PACKAGE = "package";
     private static final String ATTR_NAME = "name";
+
+    private class NotificationListenerInfo implements DeathRecipient {
+        INotificationListener listener;
+        int userid;
+        public NotificationListenerInfo(INotificationListener listener, int userid) {
+            this.listener = listener;
+            this.userid = userid;
+        }
+
+        public void notifyPostedIfUserMatch(StatusBarNotification sbn) {
+            if (this.userid != sbn.getUserId()) return;
+            try {
+                listener.onNotificationPosted(sbn);
+            } catch (RemoteException ex) {
+                // not there?
+            }
+        }
+
+        public void notifyRemovedIfUserMatch(StatusBarNotification sbn) {
+            if (this.userid != sbn.getUserId()) return;
+            try {
+                listener.onNotificationRemoved(sbn);
+            } catch (RemoteException ex) {
+                // not there?
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            unregisterListener(this.listener, this.userid);
+        }
+    }
 
     private static class Archive {
         static final int BUFFER_SIZE = 1000;
@@ -404,6 +440,56 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
         }
         return tmp;
+    }
+
+    @Override
+    public void registerListener(final INotificationListener listener, final int userid) {
+        checkCallerIsSystem();
+        synchronized (mNotificationList) {
+            try {
+                NotificationListenerInfo info = new NotificationListenerInfo(listener, userid);
+                listener.asBinder().linkToDeath(info, 0);
+                mListeners.add(info);
+            } catch (RemoteException e) {
+                // already dead
+            }
+        }
+    }
+
+    @Override
+    public void unregisterListener(INotificationListener listener, int userid) {
+        checkCallerIsSystem();
+        synchronized (mNotificationList) {
+            final int N = mListeners.size();
+            for (int i=N-1; i>=0; i--) {
+                final NotificationListenerInfo info = mListeners.get(i);
+                if (info.listener == listener && info.userid == userid) {
+                    mListeners.remove(listener);
+                }
+            }
+        }
+    }
+
+    private void notifyPostedLocked(NotificationRecord n) {
+        final StatusBarNotification sbn = n.sbn;
+        for (final NotificationListenerInfo info : mListeners) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    info.notifyPostedIfUserMatch(sbn);
+                }});
+        }
+    }
+
+    private void notifyRemovedLocked(NotificationRecord n) {
+        final StatusBarNotification sbn = n.sbn;
+        for (final NotificationListenerInfo info : mListeners) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    info.notifyRemovedIfUserMatch(sbn);
+                }});
+        }
     }
 
     public static final class NotificationRecord
@@ -1165,6 +1251,8 @@ public class NotificationManagerService extends INotificationManager.Stub
 
                 // finally, keep some of this information around for later use
                 mArchive.record(n);
+
+                notifyPostedLocked(r);
             } else {
                 Slog.e(TAG, "Ignoring notification with icon==0: " + notification);
                 if (old != null && old.statusBarKey != null) {
@@ -1175,6 +1263,8 @@ public class NotificationManagerService extends INotificationManager.Stub
                     finally {
                         Binder.restoreCallingIdentity(identity);
                     }
+
+                    notifyRemovedLocked(r);
                 }
                 return; // do not play sounds, show lights, etc. for invalid notifications
             }
@@ -1341,6 +1431,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 Binder.restoreCallingIdentity(identity);
             }
             r.statusBarKey = null;
+            notifyRemovedLocked(r);
         }
 
         // sound
