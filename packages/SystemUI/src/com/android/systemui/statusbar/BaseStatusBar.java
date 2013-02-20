@@ -462,7 +462,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
-        mSearchPanelView.setLayoutDirection(mLayoutDirection);
 
         WindowManager.LayoutParams lp = getSearchLayoutParams(mSearchPanelView.getLayoutParams());
 
@@ -739,7 +738,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
-        row.setLayoutDirection(mLayoutDirection);
 
         // for blaming (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.pkg);
@@ -787,7 +785,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             params.minHeight = minHeight;
             params.maxHeight = minHeight;
             adaptive.addView(expandedOneU, params);
-            expandedOneU.setLayoutDirection(mLayoutDirection);
         }
         if (expandedLarge != null) {
             SizeAdaptiveLayout.LayoutParams params =
@@ -795,7 +792,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             params.minHeight = minHeight+1;
             params.maxHeight = maxHeight;
             adaptive.addView(expandedLarge, params);
-            expandedLarge.setLayoutDirection(mLayoutDirection);
         }
         row.setDrawingCacheEnabled(true);
 

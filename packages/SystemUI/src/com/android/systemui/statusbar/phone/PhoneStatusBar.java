@@ -348,7 +348,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
                 return mStatusBarWindow.onTouchEvent(event);
             }});
-        mStatusBarWindow.setLayoutDirection(mLayoutDirection);
 
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
@@ -380,7 +379,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
             mIntruderAlertView.setVisibility(View.GONE);
             mIntruderAlertView.setBar(this);
-            mIntruderAlertView.setLayoutDirection(mLayoutDirection);
         }
         if (MULTIUSER_DEBUG) {
             mNotificationPanelDebugText = (TextView) mNotificationPanel.findViewById(R.id.header_debug_info);
@@ -398,7 +396,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
-                mNavigationBarView.setLayoutDirection(mLayoutDirection);
             }
         } catch (RemoteException ex) {
             // no window manager? good luck with that
@@ -963,11 +960,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     protected void refreshLayout(int layoutDirection) {
-        mStatusBarWindow.setLayoutDirection(layoutDirection);
-        if (ENABLE_INTRUDERS) {
-            mIntruderAlertView.setLayoutDirection(layoutDirection);
-        }
-
         if (mNavigationBarView != null) {
             mNavigationBarView.setLayoutDirection(layoutDirection);
         }
@@ -1030,7 +1022,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             View v = toShow.get(i);
             if (v.getParent() == null) {
                 mPile.addView(v, i);
-                v.setLayoutDirection(mLayoutDirection);
             }
         }
 

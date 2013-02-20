@@ -247,7 +247,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mNotificationPanel.show(false, false);
         mNotificationPanel.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
-        mNotificationPanel.setLayoutDirection(mLayoutDirection);
 
         // the battery icon
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
@@ -313,7 +312,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
         mInputMethodsPanel.setImeSwitchButton(mInputMethodSwitchButton);
-        mInputMethodsPanel.setLayoutDirection(mLayoutDirection);
         mStatusBarView.setIgnoreChildren(2, mInputMethodSwitchButton, mInputMethodsPanel);
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -337,7 +335,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                 MSG_CLOSE_COMPAT_MODE_PANEL, mCompatModePanel));
         mCompatModePanel.setTrigger(mCompatModeButton);
         mCompatModePanel.setVisibility(View.GONE);
-        mCompatModePanel.setLayoutDirection(mLayoutDirection);
         mStatusBarView.setIgnoreChildren(3, mCompatModeButton, mCompatModePanel);
         lp = new WindowManager.LayoutParams(
                 250,
@@ -395,13 +392,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     @Override
     protected void refreshLayout(int layoutDirection) {
-        mStatusBarView.setLayoutDirection(layoutDirection);
-        if (mCompatibilityHelpDialog != null) {
-            mCompatibilityHelpDialog.setLayoutDirection(layoutDirection);
-        }
         mNotificationPanel.refreshLayout(layoutDirection);
-        mInputMethodsPanel.setLayoutDirection(layoutDirection);
-        mCompatModePanel.setLayoutDirection(layoutDirection);
     }
 
     protected void loadDimens() {
@@ -463,7 +454,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
                 context, R.layout.system_bar, null);
         mStatusBarView = sb;
-        mStatusBarView.setLayoutDirection(mLayoutDirection);
 
         sb.setHandler(mHandler);
 
@@ -1134,7 +1124,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
 
         mCompatibilityHelpDialog = View.inflate(mContext, R.layout.compat_mode_help, null);
-        mCompatibilityHelpDialog.setLayoutDirection(mLayoutDirection);
         View button = mCompatibilityHelpDialog.findViewById(R.id.button);
 
         button.setOnClickListener(new View.OnClickListener() {
