@@ -937,6 +937,8 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawLines(float[] pts, int offset, int count, Paint paint) {
+        if (count < 4) return;
+
         if ((offset | count) < 0 || offset + count > pts.length) {
             throw new IllegalArgumentException("The lines array must contain 4 elements per line.");
         }
@@ -1060,6 +1062,8 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPoints(float[] pts, int offset, int count, Paint paint) {
+        if (count < 2) return;
+
         int modifiers = setupModifiers(paint, MODIFIER_COLOR_FILTER | MODIFIER_SHADER);
         try {
             nDrawPoints(mRenderer, pts, offset, count, paint.mNativePaint);
