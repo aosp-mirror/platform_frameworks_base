@@ -27,7 +27,7 @@
         android:paddingRight="10dp"
         android:src="@drawable/ic_qs_brightness_auto_off"
         />
-    <com.android.systemui.statusbar.policy.ToggleSlider
+    <com.android.systemui.settings.ToggleSlider
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
         android:layout_height="40dp"
