@@ -19,40 +19,28 @@ package com.android.server.wifi;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
-import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiStateMachine;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiWatchdogStateMachine;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WpsInfo;
-import android.net.wifi.WpsResult;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.net.NetworkInfo;
-import android.net.NetworkInfo.State;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
-import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Messenger;
@@ -61,12 +49,10 @@ import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -75,11 +61,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.TelephonyIntents;
@@ -97,13 +79,13 @@ import com.android.internal.R;
 // as a SM to track soft AP/client/adhoc bring up based
 // on device idle state, airplane mode and boot.
 
-public class WifiService extends IWifiManager.Stub {
+public final class WifiService extends IWifiManager.Stub {
     private static final String TAG = "WifiService";
     private static final boolean DBG = false;
 
     private final WifiStateMachine mWifiStateMachine;
 
-    private Context mContext;
+    private final Context mContext;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mIdleIntent;
@@ -130,19 +112,14 @@ public class WifiService extends IWifiManager.Stub {
     private final IBatteryStats mBatteryStats;
     private final AppOpsManager mAppOps;
 
-    private boolean mEnableTrafficStatsPoll = false;
-    private int mTrafficStatsPollToken = 0;
-    private long mTxPkts;
-    private long mRxPkts;
-    /* Tracks last reported data activity */
-    private int mDataActivity;
     private String mInterfaceName;
 
-    /**
-     * Interval in milliseconds between polling for traffic
-     * statistics
-     */
-    private static final int POLL_TRAFFIC_STATS_INTERVAL_MSECS = 1000;
+    /* Tracks the open wi-fi network notification */
+    private WifiNotificationController mNotificationController;
+    /* Polls traffic stats and notifies clients */
+    private WifiTrafficPoller mTrafficPoller;
+    /* Tracks the persisted states for wi-fi & airplane mode */
+    private WifiSettingsStore mSettingsStore;
 
     /**
      * See {@link Settings.Global#WIFI_IDLE_MS}. This is the default value if a
@@ -156,77 +133,13 @@ public class WifiService extends IWifiManager.Stub {
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
 
-    private static final int WIFI_DISABLED                  = 0;
-    private static final int WIFI_ENABLED                   = 1;
-    /* Wifi enabled while in airplane mode */
-    private static final int WIFI_ENABLED_AIRPLANE_OVERRIDE = 2;
-    /* Wifi disabled due to airplane mode on */
-    private static final int WIFI_DISABLED_AIRPLANE_ON      = 3;
-
-    /* Persisted state that tracks the wifi & airplane interaction from settings */
-    private AtomicInteger mPersistWifiState = new AtomicInteger(WIFI_DISABLED);
-    /* Tracks current airplane mode state */
-    private AtomicBoolean mAirplaneModeOn = new AtomicBoolean(false);
-    /* Tracks whether wifi is enabled from WifiStateMachine's perspective */
-    private boolean mWifiEnabled;
-
     /* The work source (UID) that triggered the current WIFI scan, synchronized
      * on this */
     private WorkSource mScanWorkSource;
 
     private boolean mIsReceiverRegistered = false;
 
-
     NetworkInfo mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, "WIFI", "");
-
-    // Variables relating to the 'available networks' notification
-    /**
-     * The icon to show in the 'available networks' notification. This will also
-     * be the ID of the Notification given to the NotificationManager.
-     */
-    private static final int ICON_NETWORKS_AVAILABLE =
-            com.android.internal.R.drawable.stat_notify_wifi_in_range;
-    /**
-     * When a notification is shown, we wait this amount before possibly showing it again.
-     */
-    private final long NOTIFICATION_REPEAT_DELAY_MS;
-    /**
-     * Whether the user has set the setting to show the 'available networks' notification.
-     */
-    private boolean mNotificationEnabled;
-    /**
-     * Observes the user setting to keep {@link #mNotificationEnabled} in sync.
-     */
-    private NotificationEnabledSettingObserver mNotificationEnabledSettingObserver;
-    /**
-     * The {@link System#currentTimeMillis()} must be at least this value for us
-     * to show the notification again.
-     */
-    private long mNotificationRepeatTime;
-    /**
-     * The Notification object given to the NotificationManager.
-     */
-    private Notification mNotification;
-    /**
-     * Whether the notification is being shown, as set by us. That is, if the
-     * user cancels the notification, we will not receive the callback so this
-     * will still be true. We only guarantee if this is false, then the
-     * notification is not showing.
-     */
-    private boolean mNotificationShown;
-    /**
-     * The number of continuous scans that must occur before consider the
-     * supplicant in a scanning state. This allows supplicant to associate with
-     * remembered networks that are in the scan results.
-     */
-    private static final int NUM_SCANS_BEFORE_ACTUALLY_SCANNING = 3;
-    /**
-     * The number of scans since the last network state change. When this
-     * exceeds {@link #NUM_SCANS_BEFORE_ACTUALLY_SCANNING}, we consider the
-     * supplicant to actually be scanning. When the network state changes to
-     * something other than scanning, we reset this to 0.
-     */
-    private int mNumScansSinceNetworkStateChange;
 
     /**
      * Asynchronous channel to WifiStateMachine
@@ -241,9 +154,9 @@ public class WifiService extends IWifiManager.Stub {
     /**
      * Handles client connections
      */
-    private class AsyncServiceHandler extends Handler {
+    private class ClientHandler extends Handler {
 
-        AsyncServiceHandler(android.os.Looper looper) {
+        ClientHandler(android.os.Looper looper) {
             super(looper);
         }
 
@@ -273,48 +186,13 @@ public class WifiService extends IWifiManager.Stub {
                     ac.connect(mContext, this, msg.replyTo);
                     break;
                 }
-                case WifiManager.ENABLE_TRAFFIC_STATS_POLL: {
-                    mEnableTrafficStatsPoll = (msg.arg1 == 1);
-                    mTrafficStatsPollToken++;
-                    if (mEnableTrafficStatsPoll) {
-                        notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, WifiManager.TRAFFIC_STATS_POLL,
-                                mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
-                    }
-                    break;
-                }
-                case WifiManager.TRAFFIC_STATS_POLL: {
-                    if (msg.arg1 == mTrafficStatsPollToken) {
-                        notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, WifiManager.TRAFFIC_STATS_POLL,
-                                mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
-                    }
-                    break;
-                }
-                case WifiManager.CONNECT_NETWORK: {
-                    mWifiStateMachine.sendMessage(Message.obtain(msg));
-                    break;
-                }
-                case WifiManager.SAVE_NETWORK: {
-                    mWifiStateMachine.sendMessage(Message.obtain(msg));
-                    break;
-                }
-                case WifiManager.FORGET_NETWORK: {
-                    mWifiStateMachine.sendMessage(Message.obtain(msg));
-                    break;
-                }
-                case WifiManager.START_WPS: {
-                    mWifiStateMachine.sendMessage(Message.obtain(msg));
-                    break;
-                }
-                case WifiManager.CANCEL_WPS: {
-                    mWifiStateMachine.sendMessage(Message.obtain(msg));
-                    break;
-                }
-                case WifiManager.DISABLE_NETWORK: {
-                    mWifiStateMachine.sendMessage(Message.obtain(msg));
-                    break;
-                }
+                /* Client commands are forwarded to state machine */
+                case WifiManager.CONNECT_NETWORK:
+                case WifiManager.SAVE_NETWORK:
+                case WifiManager.FORGET_NETWORK:
+                case WifiManager.START_WPS:
+                case WifiManager.CANCEL_WPS:
+                case WifiManager.DISABLE_NETWORK:
                 case WifiManager.RSSI_PKTCNT_FETCH: {
                     mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
@@ -326,7 +204,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
     }
-    private AsyncServiceHandler mAsyncServiceHandler;
+    private ClientHandler mClientHandler;
 
     /**
      * Handles interaction with WifiStateMachine
@@ -375,7 +253,7 @@ public class WifiService extends IWifiManager.Stub {
     private final WorkSource mTmpWorkSource = new WorkSource();
     private WifiWatchdogStateMachine mWifiWatchdogStateMachine;
 
-    WifiService(Context context) {
+    public WifiService(Context context) {
         mContext = context;
 
         mInterfaceName =  SystemProperties.get("wifi.interface", "wlan0");
@@ -389,65 +267,35 @@ public class WifiService extends IWifiManager.Stub {
         Intent idleIntent = new Intent(ACTION_DEVICE_IDLE, null);
         mIdleIntent = PendingIntent.getBroadcast(mContext, IDLE_REQUEST, idleIntent, 0);
 
+        mNotificationController = new WifiNotificationController(mContext, mWifiStateMachine);
+        mTrafficPoller = new WifiTrafficPoller(mContext, mClients, mInterfaceName);
+        mSettingsStore = new WifiSettingsStore(mContext);
+
         mContext.registerReceiver(
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        mAirplaneModeOn.set(isAirplaneModeOn());
-                        handleAirplaneModeToggled(mAirplaneModeOn.get());
+                        mSettingsStore.handleAirplaneModeToggled();
                         updateWifiState();
                     }
                 },
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-
         mContext.registerReceiver(
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-                            int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                                    WifiManager.WIFI_STATE_DISABLED);
-
-                            mWifiEnabled = (wifiState == WifiManager.WIFI_STATE_ENABLED);
-
-                           // reset & clear notification on any wifi state change
-                            resetNotification();
-                        } else if (intent.getAction().equals(
-                                WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-                            mNetworkInfo = (NetworkInfo) intent.getParcelableExtra(
-                                    WifiManager.EXTRA_NETWORK_INFO);
-                            // reset & clear notification on a network connect & disconnect
-                            switch(mNetworkInfo.getDetailedState()) {
-                                case CONNECTED:
-                                case DISCONNECTED:
-                                case CAPTIVE_PORTAL_CHECK:
-                                    evaluateTrafficStatsPolling();
-                                    resetNotification();
-                                    break;
-                            }
-                        } else if (intent.getAction().equals(
+                        if (intent.getAction().equals(
                                 WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
                             noteScanEnd();
-                            checkAndSetNotification();
                         }
                     }
-                }, filter);
+                }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
         HandlerThread wifiThread = new HandlerThread("WifiService");
         wifiThread.start();
-        mAsyncServiceHandler = new AsyncServiceHandler(wifiThread.getLooper());
+        mClientHandler = new ClientHandler(wifiThread.getLooper());
         mWifiStateMachineHandler = new WifiStateMachineHandler(wifiThread.getLooper());
-
-        // Setting is in seconds
-        NOTIFICATION_REPEAT_DELAY_MS = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
-        mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(new Handler());
-        mNotificationEnabledSettingObserver.register();
     }
 
     /** Tell battery stats about a new WIFI scan */
@@ -495,10 +343,8 @@ public class WifiService extends IWifiManager.Stub {
      * This function is used only at boot time
      */
     public void checkAndStartWifi() {
-        mAirplaneModeOn.set(isAirplaneModeOn());
-        mPersistWifiState.set(getPersistedWifiState());
-        /* Start if Wi-Fi should be enabled or the saved state indicates Wi-Fi was on */
-        boolean wifiEnabled = shouldWifiBeEnabled() || testAndClearWifiSavedState();
+        /* Check if wi-fi needs to be enabled */
+        boolean wifiEnabled = mSettingsStore.shouldWifiBeEnabled();
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
 
@@ -509,75 +355,6 @@ public class WifiService extends IWifiManager.Stub {
         mWifiWatchdogStateMachine = WifiWatchdogStateMachine.
                makeWifiWatchdogStateMachine(mContext);
 
-    }
-
-    private boolean testAndClearWifiSavedState() {
-        final ContentResolver cr = mContext.getContentResolver();
-        int wifiSavedState = 0;
-        try {
-            wifiSavedState = Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE);
-            if(wifiSavedState == 1)
-                Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);
-        } catch (Settings.SettingNotFoundException e) {
-            ;
-        }
-        return (wifiSavedState == 1);
-    }
-
-    private int getPersistedWifiState() {
-        final ContentResolver cr = mContext.getContentResolver();
-        try {
-            return Settings.Global.getInt(cr, Settings.Global.WIFI_ON);
-        } catch (Settings.SettingNotFoundException e) {
-            Settings.Global.putInt(cr, Settings.Global.WIFI_ON, WIFI_DISABLED);
-            return WIFI_DISABLED;
-        }
-    }
-
-    private boolean shouldWifiBeEnabled() {
-        if (mAirplaneModeOn.get()) {
-            return mPersistWifiState.get() == WIFI_ENABLED_AIRPLANE_OVERRIDE;
-        } else {
-            return mPersistWifiState.get() != WIFI_DISABLED;
-        }
-    }
-
-    private void handleWifiToggled(boolean wifiEnabled) {
-        boolean airplaneEnabled = mAirplaneModeOn.get() && isAirplaneToggleable();
-        if (wifiEnabled) {
-            if (airplaneEnabled) {
-                persistWifiState(WIFI_ENABLED_AIRPLANE_OVERRIDE);
-            } else {
-                persistWifiState(WIFI_ENABLED);
-            }
-        } else {
-            // When wifi state is disabled, we do not care
-            // if airplane mode is on or not. The scenario of
-            // wifi being disabled due to airplane mode being turned on
-            // is handled handleAirplaneModeToggled()
-            persistWifiState(WIFI_DISABLED);
-        }
-    }
-
-    private void handleAirplaneModeToggled(boolean airplaneEnabled) {
-        if (airplaneEnabled) {
-            // Wifi disabled due to airplane on
-            if (mWifiEnabled) {
-                persistWifiState(WIFI_DISABLED_AIRPLANE_ON);
-            }
-        } else {
-            /* On airplane mode disable, restore wifi state if necessary */
-            if (testAndClearWifiSavedState() ||
-                    mPersistWifiState.get() == WIFI_ENABLED_AIRPLANE_OVERRIDE) {
-                persistWifiState(WIFI_ENABLED);
-            }
-        }
-    }
-
-    private void persistWifiState(int state) {
-        final ContentResolver cr = mContext.getContentResolver();
-        mPersistWifiState.set(state);
-        Settings.Global.putInt(cr, Settings.Global.WIFI_ON, state);
     }
 
     /**
@@ -640,22 +417,23 @@ public class WifiService extends IWifiManager.Stub {
             Slog.e(TAG, "Invoking mWifiStateMachine.setWifiEnabled\n");
         }
 
-        if (enable) {
-            reportStartWorkSource();
-        }
-        mWifiStateMachine.setWifiEnabled(enable);
-
         /*
-         * Caller might not have WRITE_SECURE_SETTINGS,
-         * only CHANGE_WIFI_STATE is enforced
-         */
+        * Caller might not have WRITE_SECURE_SETTINGS,
+        * only CHANGE_WIFI_STATE is enforced
+        */
 
         long ident = Binder.clearCallingIdentity();
         try {
-            handleWifiToggled(enable);
+            mSettingsStore.handleWifiToggled(enable);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+
+        if (enable) {
+            reportStartWorkSource();
+        }
+
+        mWifiStateMachine.setWifiEnabled(enable);
 
         if (enable) {
             if (!mIsReceiverRegistered) {
@@ -1047,7 +825,7 @@ public class WifiService extends IWifiManager.Stub {
     public Messenger getWifiServiceMessenger() {
         enforceAccessPermission();
         enforceChangePermission();
-        return new Messenger(mAsyncServiceHandler);
+        return new Messenger(mClientHandler);
     }
 
     /** Get a reference to WifiStateMachine handler for AsyncChannel communication */
@@ -1082,14 +860,12 @@ public class WifiService extends IWifiManager.Stub {
                 }
                 mAlarmManager.cancel(mIdleIntent);
                 mScreenOff = false;
-                evaluateTrafficStatsPolling();
                 setDeviceIdleAndUpdateWifi(false);
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 if (DBG) {
                     Slog.d(TAG, "ACTION_SCREEN_OFF");
                 }
                 mScreenOff = true;
-                evaluateTrafficStatsPolling();
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
                  * AND the "stay on while plugged in" setting doesn't match the
@@ -1221,11 +997,11 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         /* Disable tethering when airplane mode is enabled */
-        if (mAirplaneModeOn.get()) {
+        if (mSettingsStore.isAirplaneModeOn()) {
             mWifiStateMachine.setWifiApEnabled(null, false);
         }
 
-        if (shouldWifiBeEnabled()) {
+        if (mSettingsStore.shouldWifiBeEnabled()) {
             if (wifiShouldBeStarted) {
                 reportStartWorkSource();
                 mWifiStateMachine.setWifiEnabled(true);
@@ -1253,30 +1029,6 @@ public class WifiService extends IWifiManager.Stub {
         mContext.registerReceiver(mReceiver, intentFilter);
     }
 
-    private boolean isAirplaneSensitive() {
-        String airplaneModeRadios = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.AIRPLANE_MODE_RADIOS);
-        return airplaneModeRadios == null
-            || airplaneModeRadios.contains(Settings.Global.RADIO_WIFI);
-    }
-
-    private boolean isAirplaneToggleable() {
-        String toggleableRadios = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
-        return toggleableRadios != null
-            && toggleableRadios.contains(Settings.Global.RADIO_WIFI);
-    }
-
-    /**
-     * Returns true if Wi-Fi is sensitive to airplane mode, and airplane mode is
-     * currently on.
-     * @return {@code true} if airplane mode is on.
-     */
-    private boolean isAirplaneModeOn() {
-        return isAirplaneSensitive() && Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
-    }
-
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -1296,18 +1048,9 @@ public class WifiService extends IWifiManager.Stub {
         pw.println("mEmergencyCallbackMode " + mEmergencyCallbackMode);
         pw.println("mMulticastEnabled " + mMulticastEnabled);
         pw.println("mMulticastDisabled " + mMulticastDisabled);
-        pw.println("mEnableTrafficStatsPoll " + mEnableTrafficStatsPoll);
-        pw.println("mTrafficStatsPollToken " + mTrafficStatsPollToken);
-        pw.println("mTxPkts " + mTxPkts);
-        pw.println("mRxPkts " + mRxPkts);
-        pw.println("mDataActivity " + mDataActivity);
-        pw.println("mPersistWifiState " + mPersistWifiState.get());
-        pw.println("mAirplaneModeOn " + mAirplaneModeOn.get());
-        pw.println("mWifiEnabled " + mWifiEnabled);
-        pw.println("mNotificationEnabled " + mNotificationEnabled);
-        pw.println("mNotificationRepeatTime " + mNotificationRepeatTime);
-        pw.println("mNotificationShown " + mNotificationShown);
-        pw.println("mNumScansSinceNetworkStateChange " + mNumScansSinceNetworkStateChange);
+        mSettingsStore.dump(fd, pw, args);
+        mNotificationController.dump(fd, pw, args);
+        mTrafficPoller.dump(fd, pw, args);
 
         pw.println("Latest scan results:");
         List<ScanResult> scanResults = mWifiStateMachine.syncGetScanResultsList();
@@ -1700,194 +1443,4 @@ public class WifiService extends IWifiManager.Stub {
             return (mMulticasters.size() > 0);
         }
     }
-
-    /**
-     * Evaluate if traffic stats polling is needed based on
-     * connection and screen on status
-     */
-    private void evaluateTrafficStatsPolling() {
-        Message msg;
-        if (mNetworkInfo.getDetailedState() == DetailedState.CONNECTED && !mScreenOff) {
-            msg = Message.obtain(mAsyncServiceHandler,
-                    WifiManager.ENABLE_TRAFFIC_STATS_POLL, 1, 0);
-        } else {
-            msg = Message.obtain(mAsyncServiceHandler,
-                    WifiManager.ENABLE_TRAFFIC_STATS_POLL, 0, 0);
-        }
-        msg.sendToTarget();
-    }
-
-    private void notifyOnDataActivity() {
-        long sent, received;
-        long preTxPkts = mTxPkts, preRxPkts = mRxPkts;
-        int dataActivity = WifiManager.DATA_ACTIVITY_NONE;
-
-        mTxPkts = TrafficStats.getTxPackets(mInterfaceName);
-        mRxPkts = TrafficStats.getRxPackets(mInterfaceName);
-
-        if (preTxPkts > 0 || preRxPkts > 0) {
-            sent = mTxPkts - preTxPkts;
-            received = mRxPkts - preRxPkts;
-            if (sent > 0) {
-                dataActivity |= WifiManager.DATA_ACTIVITY_OUT;
-            }
-            if (received > 0) {
-                dataActivity |= WifiManager.DATA_ACTIVITY_IN;
-            }
-
-            if (dataActivity != mDataActivity && !mScreenOff) {
-                mDataActivity = dataActivity;
-                for (AsyncChannel client : mClients) {
-                    client.sendMessage(WifiManager.DATA_ACTIVITY_NOTIFICATION, mDataActivity);
-                }
-            }
-        }
-    }
-
-
-    private void checkAndSetNotification() {
-        // If we shouldn't place a notification on available networks, then
-        // don't bother doing any of the following
-        if (!mNotificationEnabled) return;
-
-        State state = mNetworkInfo.getState();
-        if ((state == NetworkInfo.State.DISCONNECTED)
-                || (state == NetworkInfo.State.UNKNOWN)) {
-            // Look for an open network
-            List<ScanResult> scanResults = mWifiStateMachine.syncGetScanResultsList();
-            if (scanResults != null) {
-                int numOpenNetworks = 0;
-                for (int i = scanResults.size() - 1; i >= 0; i--) {
-                    ScanResult scanResult = scanResults.get(i);
-
-                    //A capability of [ESS] represents an open access point
-                    //that is available for an STA to connect
-                    if (scanResult.capabilities != null &&
-                            scanResult.capabilities.equals("[ESS]")) {
-                        numOpenNetworks++;
-                    }
-                }
-
-                if (numOpenNetworks > 0) {
-                    if (++mNumScansSinceNetworkStateChange >= NUM_SCANS_BEFORE_ACTUALLY_SCANNING) {
-                        /*
-                         * We've scanned continuously at least
-                         * NUM_SCANS_BEFORE_NOTIFICATION times. The user
-                         * probably does not have a remembered network in range,
-                         * since otherwise supplicant would have tried to
-                         * associate and thus resetting this counter.
-                         */
-                        setNotificationVisible(true, numOpenNetworks, false, 0);
-                    }
-                    return;
-                }
-            }
-        }
-
-        // No open networks in range, remove the notification
-        setNotificationVisible(false, 0, false, 0);
-    }
-
-    /**
-     * Clears variables related to tracking whether a notification has been
-     * shown recently and clears the current notification.
-     */
-    private void resetNotification() {
-        mNotificationRepeatTime = 0;
-        mNumScansSinceNetworkStateChange = 0;
-        setNotificationVisible(false, 0, false, 0);
-    }
-
-    /**
-     * Display or don't display a notification that there are open Wi-Fi networks.
-     * @param visible {@code true} if notification should be visible, {@code false} otherwise
-     * @param numNetworks the number networks seen
-     * @param force {@code true} to force notification to be shown/not-shown,
-     * even if it is already shown/not-shown.
-     * @param delay time in milliseconds after which the notification should be made
-     * visible or invisible.
-     */
-    private void setNotificationVisible(boolean visible, int numNetworks, boolean force,
-            int delay) {
-
-        // Since we use auto cancel on the notification, when the
-        // mNetworksAvailableNotificationShown is true, the notification may
-        // have actually been canceled.  However, when it is false we know
-        // for sure that it is not being shown (it will not be shown any other
-        // place than here)
-
-        // If it should be hidden and it is already hidden, then noop
-        if (!visible && !mNotificationShown && !force) {
-            return;
-        }
-
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Message message;
-        if (visible) {
-
-            // Not enough time has passed to show the notification again
-            if (System.currentTimeMillis() < mNotificationRepeatTime) {
-                return;
-            }
-
-            if (mNotification == null) {
-                // Cache the Notification object.
-                mNotification = new Notification();
-                mNotification.when = 0;
-                mNotification.icon = ICON_NETWORKS_AVAILABLE;
-                mNotification.flags = Notification.FLAG_AUTO_CANCEL;
-                mNotification.contentIntent = TaskStackBuilder.create(mContext)
-                        .addNextIntentWithParentStack(
-                                new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK))
-                        .getPendingIntent(0, 0, null, UserHandle.CURRENT);
-            }
-
-            CharSequence title = mContext.getResources().getQuantityText(
-                    com.android.internal.R.plurals.wifi_available, numNetworks);
-            CharSequence details = mContext.getResources().getQuantityText(
-                    com.android.internal.R.plurals.wifi_available_detailed, numNetworks);
-            mNotification.tickerText = title;
-            mNotification.setLatestEventInfo(mContext, title, details, mNotification.contentIntent);
-
-            mNotificationRepeatTime = System.currentTimeMillis() + NOTIFICATION_REPEAT_DELAY_MS;
-
-            notificationManager.notifyAsUser(null, ICON_NETWORKS_AVAILABLE, mNotification,
-                    UserHandle.ALL);
-        } else {
-            notificationManager.cancelAsUser(null, ICON_NETWORKS_AVAILABLE, UserHandle.ALL);
-        }
-
-        mNotificationShown = visible;
-    }
-
-    private class NotificationEnabledSettingObserver extends ContentObserver {
-
-        public NotificationEnabledSettingObserver(Handler handler) {
-            super(handler);
-        }
-
-        public void register() {
-            ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Settings.Global.getUriFor(
-                Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON), true, this);
-            mNotificationEnabled = getValue();
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-
-            mNotificationEnabled = getValue();
-            resetNotification();
-        }
-
-        private boolean getValue() {
-            return Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1) == 1;
-        }
-    }
-
-
 }
