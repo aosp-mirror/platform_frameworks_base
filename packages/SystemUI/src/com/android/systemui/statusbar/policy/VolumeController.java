@@ -27,6 +27,8 @@ import android.util.Slog;
 import android.view.IWindowManager;
 import android.widget.CompoundButton;
 
+import com.android.systemui.settings.ToggleSlider;
+
 public class VolumeController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.VolumeController";
     private static final int STREAM = AudioManager.STREAM_NOTIFICATION;

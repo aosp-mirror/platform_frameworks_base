@@ -27,10 +27,8 @@ import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.WifiState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.BrightnessController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.ToggleSlider;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
@@ -70,7 +68,6 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.ImageView;
@@ -100,12 +97,7 @@ class QuickSettings {
     private BluetoothAdapter mBluetoothAdapter;
     private WifiManager mWifiManager;
 
-    private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
-
-    private Dialog mBrightnessDialog;
-    private int mBrightnessDialogShortTimeout;
-    private int mBrightnessDialogLongTimeout;
 
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
 
@@ -146,10 +138,6 @@ class QuickSettings {
         mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
         mChargingBatteryLevels =
                 (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery_charging);
-        mBrightnessDialogLongTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_long_timeout);
-        mBrightnessDialogShortTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_short_timeout);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
@@ -352,7 +340,6 @@ class QuickSettings {
                 TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
                 tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
                 tv.setText(state.label);
-                dismissBrightnessDialog(mBrightnessDialogShortTimeout);
             }
         });
         parent.addView(brightnessTile);
@@ -776,72 +763,12 @@ class QuickSettings {
         }
         ((QuickSettingsContainerView)mContainerView).updateResources();
         mContainerView.requestLayout();
-
-        // Reset the dialog
-        boolean isBrightnessDialogVisible = false;
-        if (mBrightnessDialog != null) {
-            removeAllBrightnessDialogCallbacks();
-
-            isBrightnessDialogVisible = mBrightnessDialog.isShowing();
-            mBrightnessDialog.dismiss();
-        }
-        mBrightnessDialog = null;
-        if (isBrightnessDialogVisible) {
-            showBrightnessDialog();
-        }
     }
 
-    private void removeAllBrightnessDialogCallbacks() {
-        mHandler.removeCallbacks(mDismissBrightnessDialogRunnable);
-    }
-
-    private Runnable mDismissBrightnessDialogRunnable = new Runnable() {
-        public void run() {
-            if (mBrightnessDialog != null && mBrightnessDialog.isShowing()) {
-                mBrightnessDialog.dismiss();
-            }
-            removeAllBrightnessDialogCallbacks();
-        };
-    };
 
     private void showBrightnessDialog() {
-        if (mBrightnessDialog == null) {
-            mBrightnessDialog = new Dialog(mContext);
-            mBrightnessDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            mBrightnessDialog.setContentView(R.layout.quick_settings_brightness_dialog);
-            mBrightnessDialog.setCanceledOnTouchOutside(true);
-
-            mBrightnessController = new BrightnessController(mContext,
-                    (ImageView) mBrightnessDialog.findViewById(R.id.brightness_icon),
-                    (ToggleSlider) mBrightnessDialog.findViewById(R.id.brightness_slider));
-            mBrightnessController.addStateChangedCallback(mModel);
-            mBrightnessDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    mBrightnessController = null;
-                }
-            });
-
-            mBrightnessDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-            mBrightnessDialog.getWindow().getAttributes().privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-            mBrightnessDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        }
-        if (!mBrightnessDialog.isShowing()) {
-            try {
-                WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
-            } catch (RemoteException e) {
-            }
-            mBrightnessDialog.show();
-            dismissBrightnessDialog(mBrightnessDialogLongTimeout);
-        }
-    }
-
-    private void dismissBrightnessDialog(int timeout) {
-        removeAllBrightnessDialogCallbacks();
-        if (mBrightnessDialog != null) {
-            mHandler.postDelayed(mDismissBrightnessDialogRunnable, timeout);
-        }
+        Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
+        mContext.sendBroadcast(intent);
     }
 
     private void showBugreportDialog() {

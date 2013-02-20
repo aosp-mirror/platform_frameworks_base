@@ -100,7 +100,7 @@
                 style="@style/SystemBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_brightness"
                 />
-        <com.android.systemui.statusbar.policy.ToggleSlider
+        <com.android.systemui.settings.ToggleSlider
                 android:id="@+id/brightness"
                 android:layout_width="0dp"
                 android:layout_height="fill_parent"
