@@ -14,24 +14,25 @@ you'll find in the Developer Console.</p>
 <img src="{@docRoot}images/gp-dc-home.png" style="width:600px;padding:4px;margin-bottom:0em;">
 </div>
 <p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Developer Console home page</span>: Gives you a quick
-overview of your apps, lets you jump to stats, reviews, or product details, or
+style="font-weight:500;">All applications page</span>: Gives you a quick
+overview of your apps, lets you jump to stats, reviews, and product details, or
 upload a new app. </p>
 </div>
 
-<h3 id="profile">Your Developer Profile</h3>
+
+<h3 id="profile">Your Account Details</h3>
 
 <div style="width:408px;float:right;margin:1.5em;">
 <div style="width:410px;border:1px solid #DDD;">
 <img src="{@docRoot}images/gp-dc-profile.png" style="width:400px;padding:4px;margin-bottom:0em;">
 </div>
 <p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Developer profile</span>: Specifies your developer
-identity and contact information, stores your developer key, and more.</p>
+style="font-weight:500;">Account details page</span>: Specifies your developer
+identity and contact information, accounts for app testing, and more.</p>
 </div>
 
 <p>Your developer profile identifies you to Google Play and to your customers.
-During registration you can provide information for your profile, but you can go
+During registration you must provide information for your profile, but you can go
 back at any time to edit the information and change your settings. </p>
 
 <p>Your developer profile contains:</p>
@@ -39,10 +40,10 @@ back at any time to edit the information and change your settings. </p>
 <li>Your developer name &mdash; the name you want to show users on your product
 details page and elsewhere on Google Play. 
 <li>Your developer contact information &mdash; how Google can contact you if
-needed (this information isn't exposed to users.
+needed (this information isn't exposed to users).
 <li>Merchant information, in-app billing information.</li>
-<li>Your developer public key for licensing and In-app Billing.</li>
 </ul>
+
 
 <h3 id="user-accounts">Multiple user accounts</h3>
 
@@ -52,6 +53,7 @@ is the <em>account owner</em>, with full access to all parts of the Console. The
 owner can add <em>user accounts</em> and manage what parts of the Console they
 have access to. For example, an owner can grant users access to publishing and
 app configuration, but not access to financial reports. </p>
+
 
 <h3 id="merchant">Linking your Merchant Account</h3>
 
@@ -65,15 +67,16 @@ sales. </p>
 <img src="{@docRoot}images/gp-dc-details.png" style="width:400px;padding:4px;margin-bottom:0em;">
 </div>
 <p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Product details page</span>: Lets you upload your
+style="font-weight:500;">Store Listing page</span>: Lets you upload your
 graphic assets, description, support information, and other information to
 create the product details page for a specific app.</p>
 </div>
 
-<h3 id="details">Your product and listing details</h3>
+
+<h3 id="details">Your store listing details</h3>
 
 <p>The Developer Console lets you set up a colorful storefront page for your app
-called the <em>product details page</em>. Your product details page is the home
+called the <em>Store Listing page</em>. Your Store Listing page is the home
 for your app in Google Play &mdash; it's the page users see on their mobile
 phones or on the web when they want to learn about your app and download it.
 </p>
@@ -83,11 +86,12 @@ what's great about your app, and you can provide a localized description, add
 notes about the latest version, and more. You can update your store listing at
 any time, even if you don’t have a new version of your application.</p>
 
+
 <h3 id="uploading">Uploading and publishing</h3>
 
 <p>From the Developer Console you can quickly upload a release-ready APK and
 publish it when you're ready. The app is a <em>draft</em> until you publish it,
-at which time Google Play makes your product details page and app available to
+at which time Google Play makes your store listing and app available to
 users. You can unpublish the app at any time.</p>
 
 <h3 id="controls">Distribution Controls</h3>
@@ -98,6 +102,7 @@ want to target.</p>
 
 <p>You can also see the list of devices that your app is currently available to,
 based on any distribution rules declared in its manifest file.</p>
+
 
 <h3 id="profile">Selling and pricing your Products</h3>
 
@@ -115,25 +120,25 @@ download). </p>
 <li>If you publish your app as free, <span style="font-weight:500;">it must
 remain free</span>. Free apps can be downloaded by any users in Google
 Play.</li>
-<li>If you publish it as priced, you can change it to free, Priced apps can be
-purchased and downloaded only by users who have registered a forms of payment
+<li>If you publish it as priced, you can later change it to free. Priced apps can be
+purchased and downloaded only by users who have registered a form of payment
 in Google Play.</li>
 </ul>
 
 <p>In addition, you can sell in-app products and subscriptions in your app,
-whether it is free or priced. You can set prices separately for priced apps,
+whether the app is free or priced. You can set prices separately for priced apps,
 in-app products, and subscriptions.</p>
 
 <p>If you are selling a priced app or in-app products or subscriptions, the
 Developer Console lets you set prices in a large number of different currencies.
-When users around the world visit your product details page, they see the price
+When users around the world visit your store listing, they see the price
 of your app in their own currency. For most countries, the price you set is the
 final price charged to users, inclusive of taxes. </p>
 
 <p>To help you manage your prices, the Developer Console provides an autofill
 capability that uses recent exchange rates to populate the prices in all
 supported currencies. You can change prices for apps and in-app products at any
-time, just by saving changes in the Develoer Console.</p>
+time, just by saving changes in the Developer Console.</p>
 
 <h3>In-app Billing</h3>
 
@@ -159,14 +164,14 @@ You can filter  reviews in a number of ways to locate issues more easily
 and support your customers more effectively.</p>
 </div>
 
-<h3>User reviews and error reports</h3>
+<h3>User reviews and crash reports</h3>
 
 <p>Google Play makes it easy for users to submit reviews of your app for the
 benefit of other users. The reviews are also extremely important to you, since
 they give you usability feedback, support requests, and important functionality
 issues direct from your customers. </p>
 
-<p>The Developer console also lets you see error reports, with stack trace and
+<p>The Developer Console also lets you see crash reports, with stack trace and
 other data, submitted automatically from Android devices, for debugging and
 improving your app.</p>
 
@@ -177,7 +182,8 @@ performance of your app. </p>
 
 <p>You can view installations of your app measured by unique users, as well as
 by unique devices. For user installations, you can view active installs, total
-installs, and daily installs and uninstalls. For devices, you can see active
+installs, daily installs and uninstalls, and metrics about the user reviews.
+For devices, you can see active
 installs as well as daily installs, uninstalls, and upgrades.</p>
 
 <p>You can zoom into the installation numbers along several dimensions,
@@ -197,6 +203,6 @@ timeline.</p>
 style="width:600px;padding:4px;margin-bottom:0em;">
 </div>
 <p class="image-caption" style="padding:.5em"><span style="font-weight:500;">App
-installation statistics page</span>: Shows you a variety of statistics about a
+statistics page</span>: Shows you a variety of statistics about a
 specific app's installation performance over time.</p>
 </div>
