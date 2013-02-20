@@ -156,6 +156,8 @@ public class PatternsTest extends TestCase {
                 "Me: 16505551212 this\n",
                 "Me: 6505551212 this\n",
                 "Me: 5551212 this\n",
+                "Me: 2211 this\n",
+                "Me: 112 this\n",
 
                 "Me: 1-650-555-1212 this\n",
                 "Me: (650) 555-1212 this\n",
