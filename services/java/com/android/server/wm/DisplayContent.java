@@ -228,6 +228,10 @@ class DisplayContent {
         public void remove() {
             throw new IllegalArgumentException();
         }
+
+        @Override public String toString() {
+            return mTaskLists.toString();
+        }
     }
 
     class AppTokenIterator implements Iterator<AppWindowToken> {
@@ -293,6 +297,10 @@ class DisplayContent {
                 size += iterator.next().mAppTokens.size();
             }
             return size;
+        }
+
+        @Override public String toString() {
+            return mIterator.toString();
         }
     }
 

@@ -23,6 +23,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 class TaskRecord extends ThumbnailHolder {
     final int taskId;       // Unique identifier for this task.
@@ -39,7 +40,11 @@ class TaskRecord extends ThumbnailHolder {
 
     String stringName;      // caching of toString() result.
     int userId;             // user for which this task was created
-    
+
+    int numFullscreen;      // Number of fullscreen activities.
+
+    final ArrayList<ActivityRecord> mActivities = new ArrayList<ActivityRecord>();
+
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
         taskId = _taskId;
         affinity = info.taskAffinity;
@@ -104,12 +109,49 @@ class TaskRecord extends ThumbnailHolder {
             userId = UserHandle.getUserId(info.applicationInfo.uid);
         }
     }
-    
+
+    ActivityRecord getTopActivity() {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = mActivities.get(i);
+            if (r.finishing) {
+                continue;
+            }
+            return r;
+        }
+        return null;
+    }
+
+    void addActivityAtBottom(ActivityRecord r) {
+        if (!mActivities.remove(r) && r.fullscreen) {
+            // Was not previously in list.
+            numFullscreen++;
+        }
+        mActivities.add(0, r);
+    }
+
+    void addActivityToTop(ActivityRecord r) {
+        if (!mActivities.remove(r) && r.fullscreen) {
+            // Was not previously in list.
+            numFullscreen++;
+        }
+        mActivities.add(r);
+    }
+
+    /** @return true if this was the last activity in the task */
+    boolean removeActivity(ActivityRecord r) {
+        if (mActivities.remove(r) && r.fullscreen) {
+            // Was previously in list.
+            numFullscreen--;
+        }
+        return mActivities.size() == 0;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         if (numActivities != 0 || rootWasReset || userId != 0) {
             pw.print(prefix); pw.print("numActivities="); pw.print(numActivities);
                     pw.print(" rootWasReset="); pw.print(rootWasReset);
-                    pw.print(" userId="); pw.println(userId);
+                    pw.print(" userId="); pw.print(userId);
+                    pw.print(" numFullscreen="); pw.println(numFullscreen);
         }
         if (affinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.println(affinity);
@@ -136,6 +178,7 @@ class TaskRecord extends ThumbnailHolder {
             pw.print(prefix); pw.print("realActivity=");
             pw.println(realActivity.flattenToShortString());
         }
+        pw.print(prefix); pw.print("Activities="); pw.println(mActivities);
         if (!askedCompatMode) {
             pw.print(prefix); pw.print("askedCompatMode="); pw.println(askedCompatMode);
         }
@@ -146,6 +189,7 @@ class TaskRecord extends ThumbnailHolder {
                 pw.print((getInactiveDuration()/1000)); pw.println("s)");
     }
 
+    @Override
     public String toString() {
         if (stringName != null) {
             return stringName;
@@ -156,19 +200,21 @@ class TaskRecord extends ThumbnailHolder {
         sb.append(" #");
         sb.append(taskId);
         if (affinity != null) {
-            sb.append(" A ");
+            sb.append(" A=");
             sb.append(affinity);
         } else if (intent != null) {
-            sb.append(" I ");
+            sb.append(" I=");
             sb.append(intent.getComponent().flattenToShortString());
         } else if (affinityIntent != null) {
-            sb.append(" aI ");
+            sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
         } else {
             sb.append(" ??");
         }
-        sb.append(" U ");
+        sb.append(" U=");
         sb.append(userId);
+        sb.append(" sz=");
+        sb.append(mActivities.size());
         sb.append('}');
         return stringName = sb.toString();
     }
