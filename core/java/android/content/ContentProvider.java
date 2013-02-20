@@ -871,6 +871,18 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * their responsibility to close it when done.  That is, the implementation
      * of this method should create a new ParcelFileDescriptor for each call.
      *
+     * <p class="note">For use in Intents, you will want to implement {@link #getType}
+     * to return the appropriate MIME type for the data returned here with
+     * the same URI.  This will allow intent resolution to automatically determine the data MIME
+     * type and select the appropriate matching targets as part of its operation.</p>
+     *
+     * <p class="note">For better interoperability with other applications, it is recommended
+     * that for any URIs that can be opened, you also support queries on them
+     * containing at least the columns specified by {@link android.provider.OpenableColumns}.
+     * You may also want to support other common columns if you have additional meta-data
+     * to supply, such as {@link android.provider.MediaStore.MediaColumns#DATE_ADDED}
+     * in {@link android.provider.MediaStore.MediaColumns}.</p>
+     *
      * @param uri The URI whose file is to be opened.
      * @param mode Access mode for the file.  May be "r" for read-only access,
      * "rw" for read and write access, or "rwt" for read and write access
@@ -886,6 +898,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @see #openAssetFile(Uri, String)
      * @see #openFileHelper(Uri, String)
+     * @see #getType(android.net.Uri)
      */
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException {
@@ -913,6 +926,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * {@link AssetFileDescriptor#UNKNOWN_LENGTH} to be compatible with
      * applications that can not handle sub-sections of files.</p>
      *
+     * <p class="note">For use in Intents, you will want to implement {@link #getType}
+     * to return the appropriate MIME type for the data returned here with
+     * the same URI.  This will allow intent resolution to automatically determine the data MIME
+     * type and select the appropriate matching targets as part of its operation.</p>
+     *
+     * <p class="note">For better interoperability with other applications, it is recommended
+     * that for any URIs that can be opened, you also support queries on them
+     * containing at least the columns specified by {@link android.provider.OpenableColumns}.</p>
+     *
      * @param uri The URI whose file is to be opened.
      * @param mode Access mode for the file.  May be "r" for read-only access,
      * "w" for write-only access (erasing whatever data is currently in
@@ -930,6 +952,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * 
      * @see #openFile(Uri, String)
      * @see #openFileHelper(Uri, String)
+     * @see #getType(android.net.Uri)
      */
     public AssetFileDescriptor openAssetFile(Uri uri, String mode)
             throws FileNotFoundException {
@@ -1009,11 +1032,18 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * perform data conversions to generate data of the desired type.
      *
      * <p>The default implementation compares the given mimeType against the
-     * result of {@link #getType(Uri)} and, if the match, simple calls
+     * result of {@link #getType(Uri)} and, if they match, simply calls
      * {@link #openAssetFile(Uri, String)}.
      *
      * <p>See {@link ClipData} for examples of the use and implementation
      * of this method.
+     *
+     * <p class="note">For better interoperability with other applications, it is recommended
+     * that for any URIs that can be opened, you also support queries on them
+     * containing at least the columns specified by {@link android.provider.OpenableColumns}.
+     * You may also want to support other common columns if you have additional meta-data
+     * to supply, such as {@link android.provider.MediaStore.MediaColumns#DATE_ADDED}
+     * in {@link android.provider.MediaStore.MediaColumns}.</p>
      *
      * @param uri The data in the content provider being queried.
      * @param mimeTypeFilter The type of data the client desires.  May be
