@@ -1199,7 +1199,7 @@ public class Canvas {
      * meshHeight+1 vertices down. The verts array is accessed in row-major
      * order, so that the first meshWidth+1 vertices are distributed across the
      * top of the bitmap from left to right. A more general version of this
-     * methid is drawVertices().
+     * method is drawVertices().
      *
      * @param bitmap The bitmap to draw using the mesh
      * @param meshWidth The number of columns in the mesh. Nothing is drawn if
@@ -1208,7 +1208,7 @@ public class Canvas {
      *                   this is 0
      * @param verts Array of x,y pairs, specifying where the mesh should be
      *              drawn. There must be at least
-     *              (meshWidth+1) * (meshHeight+1) * 2 + meshOffset values
+     *              (meshWidth+1) * (meshHeight+1) * 2 + vertOffset values
      *              in the array
      * @param vertOffset Number of verts elements to skip before drawing
      * @param colors May be null. Specifies a color at each vertex, which is

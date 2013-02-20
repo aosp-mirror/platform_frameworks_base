@@ -74,14 +74,11 @@ public:
         kOpLogFlag_JSON = 0x2 // TODO: add?
     };
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha) = 0;
-
-    // same as replay above, but draw operations will defer into the deferredList if possible
-    // NOTE: colorfilters, paintfilters, shaders, shadow, and complex clips prevent deferral
+    // If a DeferredDisplayList is supplied, DrawOps will be stored until the list is flushed
+    // NOTE: complex clips and layers prevent deferral
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
             uint32_t level, bool caching, int multipliedAlpha,
-            DeferredDisplayList& deferredList) = 0;
+            DeferredDisplayList* deferredList) = 0;
 
     virtual void output(int level, uint32_t flags = 0) = 0;
 
@@ -96,22 +93,16 @@ public:
 
     virtual ~StateOp() {}
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha) {
-        applyState(renderer, saveCount);
-        return DrawGlInfo::kStatusDone;
-    }
-
     /**
      * State operations are applied directly to the renderer, but can cause the deferred drawing op
      * list to flush
      */
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList& deferredList) {
+            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList* deferredList) {
         status_t status = DrawGlInfo::kStatusDone;
-        if (requiresDrawOpFlush()) {
+        if (deferredList && requiresDrawOpFlush()) {
             // will be setting renderer state that affects ops in deferredList, so flush list first
-            status |= deferredList.flush(renderer, dirty, flags, level);
+            status |= deferredList->flush(renderer, dirty, flags, level);
         }
         applyState(renderer, saveCount);
         return status;
@@ -131,23 +122,14 @@ public:
     DrawOp(SkPaint* paint)
             : mPaint(paint), mQuickRejected(false) {}
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha) {
-        if (mQuickRejected && CC_LIKELY(flags & DisplayList::kReplayFlag_ClipChildren)) {
-            return DrawGlInfo::kStatusDone;
-        }
-
-        return applyDraw(renderer, dirty, level, caching, multipliedAlpha);
-    }
-
     /** Draw operations are stored in the deferredList with information necessary for playback */
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList& deferredList) {
+            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList* deferredList) {
         if (mQuickRejected && CC_LIKELY(flags & DisplayList::kReplayFlag_ClipChildren)) {
             return DrawGlInfo::kStatusDone;
         }
 
-        if (renderer.disallowDeferral()) {
+        if (!deferredList || renderer.disallowDeferral()) {
             // dispatch draw immediately, since the renderer's state is too complex for deferral
             return applyDraw(renderer, dirty, level, caching, multipliedAlpha);
         }
@@ -161,7 +143,7 @@ public:
 
         if (!renderer.storeDisplayState(state)) {
             // op wasn't quick-rejected, so defer
-            deferredList.add(this, renderer.disallowReorder());
+            deferredList->add(this, renderer.disallowReorder());
         }
 
         return DrawGlInfo::kStatusDone;
@@ -184,7 +166,6 @@ public:
 
     float strokeWidthOutset() { return mPaint->getStrokeWidth() * 0.5f; }
 
-public:
     /**
      * Stores the relevant canvas state of the object between deferral and replay (if the canvas
      * state supports being stored) See OpenGLRenderer::simpleClipAndState()
@@ -204,7 +185,20 @@ public:
     DrawBoundedOp(float left, float top, float right, float bottom, SkPaint* paint)
             : DrawOp(paint), mLocalBounds(left, top, right, bottom) {}
 
-    // default constructor for area, to be overridden in child constructor body
+    // Calculates bounds as smallest rect encompassing all points
+    // NOTE: requires at least 1 vertex, and doesn't account for stroke size (should be handled in
+    // subclass' constructor)
+    DrawBoundedOp(const float* points, int count, SkPaint* paint)
+            : DrawOp(paint), mLocalBounds(points[0], points[1], points[0], points[1]) {
+        for (int i = 2; i < count; i += 2) {
+            mLocalBounds.left = fminf(mLocalBounds.left, points[i]);
+            mLocalBounds.right = fmaxf(mLocalBounds.right, points[i]);
+            mLocalBounds.top = fminf(mLocalBounds.top, points[i + 1]);
+            mLocalBounds.bottom = fmaxf(mLocalBounds.bottom, points[i + 1]);
+        }
+    }
+
+    // default empty constructor for bounds, to be overridden in child constructor body
     DrawBoundedOp(SkPaint* paint)
             : DrawOp(paint) {}
 
@@ -740,11 +734,12 @@ public:
     }
 };
 
-class DrawBitmapMeshOp : public DrawOp {
+class DrawBitmapMeshOp : public DrawBoundedOp {
 public:
     DrawBitmapMeshOp(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint)
-            : DrawOp(paint), mBitmap(bitmap), mMeshWidth(meshWidth), mMeshHeight(meshHeight),
+            : DrawBoundedOp(vertices, 2 * (meshWidth + 1) * (meshHeight + 1), paint),
+            mBitmap(bitmap), mMeshWidth(meshWidth), mMeshHeight(meshHeight),
             mVertices(vertices), mColors(colors) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
@@ -873,10 +868,11 @@ public:
     virtual const char* name() { return "DrawRect"; }
 };
 
-class DrawRectsOp : public DrawOp {
+class DrawRectsOp : public DrawBoundedOp {
 public:
     DrawRectsOp(const float* rects, int count, SkPaint* paint)
-            : DrawOp(paint), mRects(rects), mCount(count) {}
+            : DrawBoundedOp(rects, count, paint),
+            mRects(rects), mCount(count) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
             bool caching, int multipliedAlpha) {
@@ -1022,13 +1018,8 @@ private:
 class DrawLinesOp : public DrawBoundedOp {
 public:
     DrawLinesOp(float* points, int count, SkPaint* paint)
-            : DrawBoundedOp(paint), mPoints(points), mCount(count) {
-        for (int i = 0; i < count; i += 2) {
-            mLocalBounds.left = fminf(mLocalBounds.left, points[i]);
-            mLocalBounds.right = fmaxf(mLocalBounds.right, points[i]);
-            mLocalBounds.top = fminf(mLocalBounds.top, points[i+1]);
-            mLocalBounds.bottom = fmaxf(mLocalBounds.bottom, points[i+1]);
-        }
+            : DrawBoundedOp(points, count, paint),
+            mPoints(points), mCount(count) {
         mLocalBounds.outset(strokeWidthOutset());
     }
 
@@ -1199,26 +1190,23 @@ private:
     Functor* mFunctor;
 };
 
-class DrawDisplayListOp : public DrawOp {
+class DrawDisplayListOp : public DrawBoundedOp {
 public:
     DrawDisplayListOp(DisplayList* displayList, int flags)
-            : DrawOp(0), mDisplayList(displayList), mFlags(flags) {}
+            : DrawBoundedOp(0, 0, displayList->getWidth(), displayList->getHeight(), 0),
+            mDisplayList(displayList), mFlags(flags) {}
 
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList& deferredList) {
+            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList* deferredList) {
         if (mDisplayList && mDisplayList->isRenderable()) {
-            return mDisplayList->replay(renderer, dirty, mFlags, level + 1, &deferredList);
+            return mDisplayList->replay(renderer, dirty, mFlags, level + 1, deferredList);
         }
         return DrawGlInfo::kStatusDone;
     }
 
+    // NOT USED, since replay is overridden
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
-        if (mDisplayList && mDisplayList->isRenderable()) {
-            return mDisplayList->replay(renderer, dirty, mFlags, level + 1);
-        }
-        return DrawGlInfo::kStatusDone;
-    }
+            bool caching, int multipliedAlpha) { return DrawGlInfo::kStatusDone; }
 
     virtual void output(int level, uint32_t flags) {
         OP_LOG("Draw Display List %p, flags %#x", mDisplayList, mFlags);
