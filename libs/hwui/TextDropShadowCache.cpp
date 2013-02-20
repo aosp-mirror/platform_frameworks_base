@@ -222,7 +222,7 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
         }
 
         // Cleanup shadow
-        delete shadow.image;
+        free(shadow.image);
     }
 
     return texture;

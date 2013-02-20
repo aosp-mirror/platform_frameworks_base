@@ -798,7 +798,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
     mRsScript->blur(ain, aout);
 
     // replace the original image's pointer, avoiding a copy back to the original buffer
-    delete *image;
+    free(*image);
     *image = outImage;
 }
 
