@@ -313,6 +313,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // bar can be hidden but not extending into the overscan area.
     int mUnrestrictedScreenLeft, mUnrestrictedScreenTop;
     int mUnrestrictedScreenWidth, mUnrestrictedScreenHeight;
+    // Like mOverscanScreen*, but allowed to move into the overscan region where appropriate.
+    int mRestrictedOverscanScreenLeft, mRestrictedOverscanScreenTop;
+    int mRestrictedOverscanScreenWidth, mRestrictedOverscanScreenHeight;
     // The current size of the screen; these may be different than (0,0)-(dw,dh)
     // if the status bar can't be hidden; in that case it effectively carves out
     // that area of the display from all other windows.
@@ -2415,10 +2418,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             overscanRight = 0;
             overscanBottom = 0;
         }
-        mOverscanScreenLeft = 0;
-        mOverscanScreenTop = 0;
-        mOverscanScreenWidth = displayWidth;
-        mOverscanScreenHeight = displayHeight;
+        mOverscanScreenLeft = mRestrictedOverscanScreenLeft = 0;
+        mOverscanScreenTop = mRestrictedOverscanScreenTop = 0;
+        mOverscanScreenWidth = mRestrictedOverscanScreenWidth = displayWidth;
+        mOverscanScreenHeight = mRestrictedOverscanScreenHeight = displayHeight;
         mSystemLeft = 0;
         mSystemTop = 0;
         mSystemRight = displayWidth;
@@ -2492,7 +2495,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (navVisible) {
                         mNavigationBar.showLw(true);
                         mDockBottom = mTmpNavigationFrame.top;
-                        mRestrictedScreenHeight = mDockBottom - mDockTop;
+                        mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
+                        mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
                     } else {
                         // We currently want to hide the navigation UI.
                         mNavigationBar.hideLw(true);
@@ -2512,7 +2516,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (navVisible) {
                         mNavigationBar.showLw(true);
                         mDockRight = mTmpNavigationFrame.left;
-                        mRestrictedScreenWidth = mDockRight - mDockLeft;
+                        mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
+                        mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
                     } else {
                         // We currently want to hide the navigation UI.
                         mNavigationBar.hideLw(true);
@@ -2776,15 +2781,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // application extend into the unrestricted overscan screen area.  We
                         // only do this for application windows to ensure no window that
                         // can be above the nav bar can do this.
-                        pf.left = df.left = mUnrestrictedScreenLeft;
-                        pf.top = df.top = mUnrestrictedScreenTop;
-                        pf.right = df.right = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
-                        pf.bottom = df.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                        pf.left = df.left = mOverscanScreenLeft;
+                        pf.top = df.top = mOverscanScreenTop;
+                        pf.right = df.right = mOverscanScreenLeft + mOverscanScreenWidth;
+                        pf.bottom = df.bottom = mOverscanScreenTop + mOverscanScreenHeight;
                     } else {
-                        pf.left = df.left = mRestrictedScreenLeft;
-                        pf.top = df.top = mRestrictedScreenTop;
-                        pf.right = df.right = mRestrictedScreenLeft+mRestrictedScreenWidth;
-                        pf.bottom = df.bottom = mRestrictedScreenTop+mRestrictedScreenHeight;
+                        pf.left = df.left = mRestrictedOverscanScreenLeft;
+                        pf.top = df.top = mRestrictedOverscanScreenTop;
+                        pf.right = df.right = mRestrictedOverscanScreenLeft
+                                + mRestrictedOverscanScreenWidth;
+                        pf.bottom = df.bottom = mRestrictedOverscanScreenTop
+                                + mRestrictedOverscanScreenHeight;
                     }
 
                     if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
@@ -2859,6 +2866,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.right = df.right = cf.right = mOverscanScreenLeft + mOverscanScreenWidth;
                     pf.bottom = df.bottom = cf.bottom
                             = mOverscanScreenTop + mOverscanScreenHeight;
+                } else if (attrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER) {
+                    // The wallpaper mostly goes into the overscan region.
+                    pf.left = df.left = cf.left = mRestrictedOverscanScreenLeft;
+                    pf.top = df.top = cf.top = mRestrictedOverscanScreenTop;
+                    pf.right = df.right = cf.right
+                            = mRestrictedOverscanScreenLeft + mRestrictedOverscanScreenWidth;
+                    pf.bottom = df.bottom = cf.bottom
+                            = mRestrictedOverscanScreenTop + mRestrictedOverscanScreenHeight;
                 } else if ((attrs.flags & FLAG_LAYOUT_IN_OVERSCAN) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                         && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
@@ -4712,6 +4727,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pw.print(" right="); pw.print(mOverscanRight);
                     pw.print(" bottom="); pw.println(mOverscanBottom);
         }
+        pw.print(prefix); pw.print("mRestrictedOverscanScreen=(");
+                pw.print(mRestrictedOverscanScreenLeft);
+                pw.print(","); pw.print(mRestrictedOverscanScreenTop);
+                pw.print(") "); pw.print(mRestrictedOverscanScreenWidth);
+                pw.print("x"); pw.println(mRestrictedOverscanScreenHeight);
         pw.print(prefix); pw.print("mUnrestrictedScreen=("); pw.print(mUnrestrictedScreenLeft);
                 pw.print(","); pw.print(mUnrestrictedScreenTop);
                 pw.print(") "); pw.print(mUnrestrictedScreenWidth);
