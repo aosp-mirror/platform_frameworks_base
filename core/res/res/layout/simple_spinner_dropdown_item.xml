@@ -23,4 +23,5 @@
     android:singleLine="true"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/dropdownListPreferredItemHeight"
-    android:ellipsize="marquee" />
+    android:ellipsize="marquee"
+    android:textAlignment="inherit"/>
