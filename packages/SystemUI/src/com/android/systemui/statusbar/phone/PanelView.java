@@ -149,9 +149,17 @@ public class PanelView extends FrameLayout {
             }
         }
         public float getXVelocity() {
+            if (Float.isNaN(mVX)) {
+                Slog.v("FlingTracker", "warning: vx=NaN");
+                // XXX: should return 0
+            }
             return mVX;
         }
         public float getYVelocity() {
+            if (Float.isNaN(mVY)) {
+                Slog.v("FlingTracker", "warning: vx=NaN");
+                // XXX: should return 0
+            }
             return mVY;
         }
         public void recycle() {
@@ -284,6 +292,9 @@ public class PanelView extends FrameLayout {
                     || ((mRubberbanding || !mClosing) && mExpandedHeight == fh)) {
                 post(mStopAnimator);
             }
+        } else {
+            Slog.v(TAG, "animationTick called with dtms=" + dtms + "; nothing to do (h="
+                    + mExpandedHeight + " v=" + mVel + ")");
         }
     }
 
@@ -374,7 +385,7 @@ public class PanelView extends FrameLayout {
                         case MotionEvent.ACTION_MOVE:
                             final float h = rawY - mAbsPos[1] - mTouchOffset;
                             if (h > mPeekHeight) {
-                                if (mPeekAnimator != null && mPeekAnimator.isRunning()) {
+                                if (mPeekAnimator != null && mPeekAnimator.isStarted()) {
                                     mPeekAnimator.cancel();
                                 }
                                 mJustPeeked = false;
@@ -505,7 +516,7 @@ public class PanelView extends FrameLayout {
     public void setExpandedHeight(float height) {
         if (DEBUG) LOG("setExpandedHeight(%.1f)", height);
         mRubberbanding = false;
-        if (mTimeAnimator.isRunning()) {
+        if (mTimeAnimator.isStarted()) {
             post(mStopAnimator);
         }
         setExpandedHeightInternal(height);
@@ -519,6 +530,11 @@ public class PanelView extends FrameLayout {
     }
 
     public void setExpandedHeightInternal(float h) {
+        if (Float.isNaN(h)) {
+            Slog.v(TAG, "setExpandedHeightInternal: warning: h=NaN");
+            // XXX: should set h to 0
+        }
+
         float fh = getFullHeight();
         if (fh == 0) {
             // Hmm, full height hasn't been computed yet
@@ -526,6 +542,7 @@ public class PanelView extends FrameLayout {
 
         if (h < 0) h = 0;
         if (!(mRubberbandingEnabled && (mTracking || mRubberbanding)) && h > fh) h = fh;
+
         mExpandedHeight = h;
 
         if (DEBUG) LOG("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
@@ -548,6 +565,10 @@ public class PanelView extends FrameLayout {
     }
 
     public void setExpandedFraction(float frac) {
+        if (Float.isNaN(frac)) {
+            Slog.v(TAG, "setExpandedFraction: frac=NaN");
+            // XXX: set frac to 0 to defend
+        }
         setExpandedHeight(getFullHeight() * frac);
     }
 
