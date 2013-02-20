@@ -70,10 +70,14 @@ final class WifiSettingsStore {
        return mAirplaneModeOn;
     }
 
-    synchronized void handleWifiToggled(boolean wifiEnabled) {
-        boolean airplaneEnabled = mAirplaneModeOn && isAirplaneToggleable();
+    synchronized boolean handleWifiToggled(boolean wifiEnabled) {
+        // Can Wi-Fi be toggled in airplane mode ?
+        if (mAirplaneModeOn && !isAirplaneToggleable()) {
+            return false;
+        }
+
         if (wifiEnabled) {
-            if (airplaneEnabled) {
+            if (mAirplaneModeOn) {
                 persistWifiState(WIFI_ENABLED_AIRPLANE_OVERRIDE);
             } else {
                 persistWifiState(WIFI_ENABLED);
@@ -85,9 +89,15 @@ final class WifiSettingsStore {
             // is handled handleAirplaneModeToggled()
             persistWifiState(WIFI_DISABLED);
         }
+        return true;
     }
 
-    synchronized void handleAirplaneModeToggled() {
+    synchronized boolean handleAirplaneModeToggled() {
+        // Is Wi-Fi sensitive to airplane mode changes ?
+        if (!isAirplaneSensitive()) {
+            return false;
+        }
+
         mAirplaneModeOn = getPersistedAirplaneModeOn();
         if (mAirplaneModeOn) {
             // Wifi disabled due to airplane on
@@ -101,6 +111,7 @@ final class WifiSettingsStore {
                 persistWifiState(WIFI_ENABLED);
             }
         }
+        return true;
     }
 
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -161,7 +172,7 @@ final class WifiSettingsStore {
     }
 
     private boolean getPersistedAirplaneModeOn() {
-        return isAirplaneSensitive() && Settings.Global.getInt(mContext.getContentResolver(),
+        return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
     }
 }
