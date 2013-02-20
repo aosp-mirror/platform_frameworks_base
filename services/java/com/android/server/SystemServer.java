@@ -255,7 +255,7 @@ class ServerThread extends Thread {
             }
 
             ActivityManagerService.setSystemProcess();
-            
+
             Slog.i(TAG, "User Service");
             ServiceManager.addService(Context.USER_SERVICE,
                     UserManagerService.getInstance());
@@ -735,6 +735,13 @@ class ServerThread extends Thread {
                 } catch (Throwable e) {
                     reportWtf("starting DreamManagerService", e);
                 }
+            }
+
+            try {
+                Slog.i(TAG, "IdleMaintenanceService");
+                new IdleMaintenanceService(context);
+            } catch (Throwable e) {
+                reportWtf("starting IdleMaintenanceService", e);
             }
         }
 

@@ -2319,6 +2319,61 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.DOCK_EVENT";
 
     /**
+     * Broadcast Action: A broadcast when idle maintenance can be started.
+     * This means that the user is not interacting with the device and is
+     * not expected to do so soon. Typical use of the idle maintenance is
+     * to perform somehow expensive tasks that can be postponed at a moment
+     * when they will not degrade user experience.
+     * <p>
+     * <p class="note">In order to keep the device responsive in case of an
+     * unexpected user interaction, implementations of a maintenance task
+     * should be interruptible. In such a scenario a broadcast with action
+     * {@link #ACTION_IDLE_MAINTENANCE_END} will be sent. In other words, you
+     * should not do the maintenance work in
+     * {@link BroadcastReceiver#onReceive(Context, Intent)}, rather start a
+     * maintenance service by {@link Context#startService(Intent)}. Also
+     * you should hold a wake lock while your maintenance service is running
+     * to prevent the device going to sleep.
+     * </p>
+     * <p>
+     * <p class="note">This is a protected intent that can only be sent by
+     * the system.
+     * </p>
+     *
+     * @see #ACTION_IDLE_MAINTENANCE_END
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_IDLE_MAINTENANCE_START =
+            "android.intent.action.ACTION_IDLE_MAINTENANCE_START";
+
+    /**
+     * Broadcast Action:  A broadcast when idle maintenance should be stopped.
+     * This means that the user was not interacting with the device as a result
+     * of which a broadcast with action {@link #ACTION_IDLE_MAINTENANCE_START}
+     * was sent and now the user started interacting with the device. Typical
+     * use of the idle maintenance is to perform somehow expensive tasks that
+     * can be postponed at a moment when they will not degrade user experience.
+     * <p>
+     * <p class="note">In order to keep the device responsive in case of an
+     * unexpected user interaction, implementations of a maintenance task
+     * should be interruptible. Hence, on receiving a broadcast with this
+     * action, the maintenance task should be interrupted as soon as possible.
+     * In other words, you should not do the maintenance work in
+     * {@link BroadcastReceiver#onReceive(Context, Intent)}, rather stop the
+     * maintenance service that was started on receiving of
+     * {@link #ACTION_IDLE_MAINTENANCE_START}.Also you should release the wake
+     * lock you acquired when your maintenance service started.
+     * </p>
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @see #ACTION_IDLE_MAINTENANCE_START
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_IDLE_MAINTENANCE_END =
+            "android.intent.action.ACTION_IDLE_MAINTENANCE_END";
+
+    /**
      * Broadcast Action: a remote intent is to be broadcasted.
      *
      * A remote intent is used for remote RPC between devices. The remote intent
