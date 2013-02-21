@@ -19,9 +19,6 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
 import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
 
-import android.graphics.Rect;
-import android.os.Debug;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -138,7 +135,7 @@ class DisplayContent {
             mTaskIdToTaskList.put(wtoken.groupId, task);
             mTaskLists.add(task);
         } else {
-            task.mAppTokens.add(wtoken);
+            task.mAppTokens.add(addPos, wtoken);
         }
     }
 
@@ -189,55 +186,10 @@ class DisplayContent {
         return mTmpAppIterator;
     }
 
-    class TaskListsIterator implements Iterator<TaskList> {
-        private int mCur;
-        private boolean mReverse;
-
-        TaskListsIterator() {
-            this(false);
-        }
-
-        TaskListsIterator(boolean reverse) {
-            reset(reverse);
-        }
-
-        void reset(boolean reverse) {
-            mReverse = reverse;
-            mCur = reverse ? mTaskLists.size() - 1 : 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (mReverse) {
-                return mCur >= 0;
-            }
-            return mCur < mTaskLists.size();
-        }
-
-        @Override
-        public TaskList next() {
-            if (hasNext()) {
-                TaskList taskList = mTaskLists.get(mCur);
-                mCur += (mReverse ? -1 : 1);
-                return taskList;
-            }
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove() {
-            throw new IllegalArgumentException();
-        }
-
-        @Override public String toString() {
-            return mTaskLists.toString();
-        }
-    }
-
     class AppTokenIterator implements Iterator<AppWindowToken> {
-        final TaskListsIterator mIterator = new TaskListsIterator();
         boolean mReverse;
-        int mCur;
+        int mTasksNdx;
+        int mActivityNdx;
         TaskList mTaskList;
 
         public AppTokenIterator() {
@@ -250,14 +202,23 @@ class DisplayContent {
 
         void reset(boolean reverse) {
             mReverse = reverse;
-            mIterator.reset(reverse);
+            mTasksNdx = reverse ? mTaskLists.size() - 1 : 0;
             getNextTaskList();
         }
 
         private void getNextTaskList() {
-            if (mIterator.hasNext()) {
-                mTaskList = mIterator.next();
-                mCur = mReverse ? mTaskList.mAppTokens.size() - 1 : 0;
+            if (mReverse) {
+                if (mTasksNdx >= 0) {
+                    mTaskList = mTaskLists.get(mTasksNdx);
+                    --mTasksNdx;
+                    mActivityNdx = mTaskList.mAppTokens.size() - 1;
+                }
+            } else {
+                if (mTasksNdx < mTaskLists.size()) {
+                    mTaskList = mTaskLists.get(mTasksNdx);
+                    ++mTasksNdx;
+                    mActivityNdx = 0;
+                }
             }
         }
 
@@ -267,16 +228,16 @@ class DisplayContent {
                 return false;
             }
             if (mReverse) {
-                return mCur >= 0;
+                return mActivityNdx >= 0;
             }
-            return mCur < mTaskList.mAppTokens.size();
+            return mActivityNdx < mTaskList.mAppTokens.size();
         }
 
         @Override
         public AppWindowToken next() {
             if (hasNext()) {
-                AppWindowToken wtoken = mTaskList.mAppTokens.get(mCur);
-                mCur += mReverse ? -1 : 1;
+                AppWindowToken wtoken = mTaskList.mAppTokens.get(mActivityNdx);
+                mActivityNdx += mReverse ? -1 : 1;
                 if (!hasNext()) {
                     getNextTaskList();
                 }
@@ -292,15 +253,14 @@ class DisplayContent {
 
         int size() {
             int size = 0;
-            final TaskListsIterator iterator = new TaskListsIterator();
-            while (iterator.hasNext()) {
-                size += iterator.next().mAppTokens.size();
+            for (int i = mTaskLists.size() - 1; i >= 0; --i) {
+                size += mTaskLists.get(i).mAppTokens.size();
             }
             return size;
         }
 
         @Override public String toString() {
-            return mIterator.toString();
+            return mTaskLists.toString();
         }
     }
 
