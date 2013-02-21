@@ -448,7 +448,7 @@ public class Notification implements Parcelable
      * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
      * @hide
      */
-    private static class Action implements Parcelable {
+    public static class Action implements Parcelable {
         public int icon;
         public CharSequence title;
         public PendingIntent actionIntent;
@@ -500,7 +500,10 @@ public class Notification implements Parcelable
         };
     }
 
-    private Action[] actions;
+    /**
+     * @hide
+     */
+    public Action[] actions;
 
     /**
      * Constructs a Notification object with default values.
