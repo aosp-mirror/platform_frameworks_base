@@ -1046,7 +1046,7 @@ class AppWidgetServiceImpl {
             if (id.host.callbacks != null) {
                 try {
                     // the lock is held, but this is a oneway call
-                    id.host.callbacks.updateAppWidget(id.appWidgetId, views);
+                    id.host.callbacks.updateAppWidget(id.appWidgetId, views, mUserId);
                 } catch (RemoteException e) {
                     // It failed; remove the callback. No need to prune because
                     // we know that this host is still referenced by this instance.
@@ -1065,7 +1065,7 @@ class AppWidgetServiceImpl {
             if (id.host.callbacks != null) {
                 try {
                     // the lock is held, but this is a oneway call
-                    id.host.callbacks.viewDataChanged(id.appWidgetId, viewId);
+                    id.host.callbacks.viewDataChanged(id.appWidgetId, viewId, mUserId);
                 } catch (RemoteException e) {
                     // It failed; remove the callback. No need to prune because
                     // we know that this host is still referenced by this instance.
@@ -1934,7 +1934,8 @@ class AppWidgetServiceImpl {
                                 id.views = null;
                                 if (id.host != null && id.host.callbacks != null) {
                                     try {
-                                        id.host.callbacks.providerChanged(id.appWidgetId, p.info);
+                                        id.host.callbacks.providerChanged(id.appWidgetId, p.info,
+                                                mUserId);
                                     } catch (RemoteException ex) {
                                         // It failed; remove the callback. No need to prune because
                                         // we know that this host is still referenced by this
@@ -2001,7 +2002,7 @@ class AppWidgetServiceImpl {
             Host host = mHosts.get(i);
             try {
                 if (host.callbacks != null) {
-                    host.callbacks.providersChanged();
+                    host.callbacks.providersChanged(mUserId);
                 }
             } catch (RemoteException ex) {
                 // It failed; remove the callback. No need to prune because

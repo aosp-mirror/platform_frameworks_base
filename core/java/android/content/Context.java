@@ -2691,6 +2691,14 @@ public abstract class Context {
             throws PackageManager.NameNotFoundException;
 
     /**
+     * Get the userId associated with this context
+     * @return user id
+     *
+     * @hide
+     */
+    public abstract int getUserId();
+
+    /**
      * Return a new Context object for the current Context but whose resources
      * are adjusted to match the given Configuration.  Each call to this method
      * returns a new instance of a Context object; Context objects are not

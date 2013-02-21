@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -121,107 +121,67 @@ class AppWidgetService extends IAppWidgetService.Stub
         }, userFilter);
     }
 
-    /**
-     * This returns the user id of the caller, if the caller is not the system process,
-     * otherwise it assumes that the calls are from the lockscreen and hence are meant for the
-     * current user. TODO: Instead, have lockscreen make explicit calls with userId
-     */
-    private int getCallingOrCurrentUserId() {
-        int callingUid = Binder.getCallingUid();
-        // Also check the PID because Settings (power control widget) also runs as System UID
-        if (callingUid == android.os.Process.myUid()
-                && Binder.getCallingPid() == android.os.Process.myPid()) {
-            try {
-                return ActivityManagerNative.getDefault().getCurrentUser().id;
-            } catch (RemoteException re) {
-                return UserHandle.getUserId(callingUid);
-            }
-        } else {
-            return UserHandle.getUserId(callingUid);
-        }
-    }
-
     @Override
-    public int allocateAppWidgetId(String packageName, int hostId) throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).allocateAppWidgetId(
-                packageName, hostId);
-    }
-
-    @Override
-    public int[] getAppWidgetIdsForHost(int hostId) throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetIdsForHost(hostId);
-    }
-    
-    @Override
-    public void deleteAppWidgetId(int appWidgetId) throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).deleteAppWidgetId(appWidgetId);
-    }
-
-    @Override
-    public void deleteHost(int hostId) throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).deleteHost(hostId);
-    }
-
-    @Override
-    public void deleteAllHosts() throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).deleteAllHosts();
-    }
-
-    @Override
-    public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options)
+    public int allocateAppWidgetId(String packageName, int hostId, int userId)
             throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).bindAppWidgetId(appWidgetId, provider,
-                options);
+        return getImplForUser(userId).allocateAppWidgetId(packageName, hostId);
+    }
+
+    @Override
+    public int[] getAppWidgetIdsForHost(int hostId, int userId) throws RemoteException {
+        return getImplForUser(userId).getAppWidgetIdsForHost(hostId);
+    }
+
+    @Override
+    public void deleteAppWidgetId(int appWidgetId, int userId) throws RemoteException {
+        getImplForUser(userId).deleteAppWidgetId(appWidgetId);
+    }
+
+    @Override
+    public void deleteHost(int hostId, int userId) throws RemoteException {
+        getImplForUser(userId).deleteHost(hostId);
+    }
+
+    @Override
+    public void deleteAllHosts(int userId) throws RemoteException {
+        getImplForUser(userId).deleteAllHosts();
+    }
+
+    @Override
+    public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options, int userId)
+            throws RemoteException {
+        getImplForUser(userId).bindAppWidgetId(appWidgetId, provider, options);
     }
 
     @Override
     public boolean bindAppWidgetIdIfAllowed(
-            String packageName, int appWidgetId, ComponentName provider, Bundle options)
+            String packageName, int appWidgetId, ComponentName provider, Bundle options, int userId)
                     throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).bindAppWidgetIdIfAllowed(
+        return getImplForUser(userId).bindAppWidgetIdIfAllowed(
                 packageName, appWidgetId, provider, options);
     }
 
     @Override
-    public boolean hasBindAppWidgetPermission(String packageName) throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).hasBindAppWidgetPermission(
-                packageName);
+    public boolean hasBindAppWidgetPermission(String packageName, int userId)
+            throws RemoteException {
+        return getImplForUser(userId).hasBindAppWidgetPermission(packageName);
     }
 
     @Override
-    public void setBindAppWidgetPermission(String packageName, boolean permission)
+    public void setBindAppWidgetPermission(String packageName, boolean permission, int userId)
             throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).setBindAppWidgetPermission(
-                packageName, permission);
+        getImplForUser(userId).setBindAppWidgetPermission(packageName, permission);
     }
 
     @Override
     public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection,
             int userId) throws RemoteException {
-        if (Binder.getCallingPid() != android.os.Process.myPid()
-                && userId != UserHandle.getCallingUserId()) {
-            throw new SecurityException("Call from non-system process. Calling uid = "
-                    + Binder.getCallingUid());
-        }
-        getImplForUser(userId).bindRemoteViewsService(
-                appWidgetId, intent, connection);
+        getImplForUser(userId).bindRemoteViewsService(appWidgetId, intent, connection);
     }
 
     @Override
     public int[] startListening(IAppWidgetHost host, String packageName, int hostId,
-            List<RemoteViews> updatedViews) throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).startListening(host,
-                packageName, hostId, updatedViews);
-    }
-
-    @Override
-    public int[] startListeningAsUser(IAppWidgetHost host, String packageName, int hostId,
             List<RemoteViews> updatedViews, int userId) throws RemoteException {
-        if (Binder.getCallingPid() != android.os.Process.myPid()
-                && userId != UserHandle.getCallingUserId()) {
-            throw new SecurityException("Call from non-system process. Calling uid = "
-                    + Binder.getCallingUid());
-        }
         return getImplForUser(userId).startListening(host, packageName, hostId, updatedViews);
     }
 
@@ -250,7 +210,19 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
+    private void checkPermission(int userId) {
+        int realUserId = ActivityManager.handleIncomingUser(
+                Binder.getCallingPid(),
+                Binder.getCallingUid(),
+                userId,
+                false, /* allowAll */
+                true, /* requireFull */
+                this.getClass().getSimpleName(),
+                this.getClass().getPackage().getName());
+    }
+
     private AppWidgetServiceImpl getImplForUser(int userId) {
+        checkPermission(userId);
         boolean sendInitial = false;
         AppWidgetServiceImpl service;
         synchronized (mAppWidgetServices) {
@@ -272,86 +244,73 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     @Override
-    public int[] getAppWidgetIds(ComponentName provider) throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetIds(provider);
+    public int[] getAppWidgetIds(ComponentName provider, int userId) throws RemoteException {
+        return getImplForUser(userId).getAppWidgetIds(provider);
     }
 
     @Override
-    public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetInfo(appWidgetId);
-    }
-
-    @Override
-    public RemoteViews getAppWidgetViews(int appWidgetId) throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetViews(appWidgetId);
-    }
-
-    @Override
-    public void updateAppWidgetOptions(int appWidgetId, Bundle options) {
-        getImplForUser(getCallingOrCurrentUserId()).updateAppWidgetOptions(appWidgetId, options);
-    }
-
-    @Override
-    public Bundle getAppWidgetOptions(int appWidgetId) {
-        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetOptions(appWidgetId);
-    }
-
-    @Override
-    public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter)
+    public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId, int userId)
             throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).getInstalledProviders(categoryFilter);
+        return getImplForUser(userId).getAppWidgetInfo(appWidgetId);
     }
 
     @Override
-    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId)
+    public RemoteViews getAppWidgetViews(int appWidgetId, int userId) throws RemoteException {
+        return getImplForUser(userId).getAppWidgetViews(appWidgetId);
+    }
+
+    @Override
+    public void updateAppWidgetOptions(int appWidgetId, Bundle options, int userId) {
+        getImplForUser(userId).updateAppWidgetOptions(appWidgetId, options);
+    }
+
+    @Override
+    public Bundle getAppWidgetOptions(int appWidgetId, int userId) {
+        return getImplForUser(userId).getAppWidgetOptions(appWidgetId);
+    }
+
+    @Override
+    public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter, int userId)
             throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).notifyAppWidgetViewDataChanged(
+        return getImplForUser(userId).getInstalledProviders(categoryFilter);
+    }
+
+    @Override
+    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId, int userId)
+            throws RemoteException {
+        getImplForUser(userId).notifyAppWidgetViewDataChanged(
                 appWidgetIds, viewId);
     }
 
     @Override
-    public void partiallyUpdateAppWidgetIds(int[] appWidgetIds, RemoteViews views)
+    public void partiallyUpdateAppWidgetIds(int[] appWidgetIds, RemoteViews views, int userId)
             throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).partiallyUpdateAppWidgetIds(
+        getImplForUser(userId).partiallyUpdateAppWidgetIds(
                 appWidgetIds, views);
     }
 
     @Override
-    public void stopListening(int hostId) throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).stopListening(hostId);
-    }
-
-    @Override
-    public void stopListeningAsUser(int hostId, int userId) throws RemoteException {
-        if (Binder.getCallingPid() != android.os.Process.myPid()
-                && userId != UserHandle.getCallingUserId()) {
-            throw new SecurityException("Call from non-system process. Calling uid = "
-                    + Binder.getCallingUid());
-        }
+    public void stopListening(int hostId, int userId) throws RemoteException {
         getImplForUser(userId).stopListening(hostId);
     }
 
     @Override
     public void unbindRemoteViewsService(int appWidgetId, Intent intent, int userId)
             throws RemoteException {
-        if (Binder.getCallingPid() != android.os.Process.myPid()
-                && userId != UserHandle.getCallingUserId()) {
-            throw new SecurityException("Call from non-system process. Calling uid = "
-                    + Binder.getCallingUid());
-        }
         getImplForUser(userId).unbindRemoteViewsService(
                 appWidgetId, intent);
     }
 
     @Override
-    public void updateAppWidgetIds(int[] appWidgetIds, RemoteViews views) throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).updateAppWidgetIds(appWidgetIds, views);
+    public void updateAppWidgetIds(int[] appWidgetIds, RemoteViews views, int userId)
+            throws RemoteException {
+        getImplForUser(userId).updateAppWidgetIds(appWidgetIds, views);
     }
 
     @Override
-    public void updateAppWidgetProvider(ComponentName provider, RemoteViews views)
+    public void updateAppWidgetProvider(ComponentName provider, RemoteViews views, int userId)
             throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).updateAppWidgetProvider(provider, views);
+        getImplForUser(userId).updateAppWidgetProvider(provider, views);
     }
 
     @Override

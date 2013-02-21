@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
 import android.widget.RemoteViews.OnClickHandler;
@@ -55,38 +56,39 @@ public class AppWidgetHost {
 
     Context mContext;
     String mPackageName;
+    Handler mHandler;
+    int mHostId;
+    Callbacks mCallbacks = new Callbacks();
+    final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();
+    private OnClickHandler mOnClickHandler;
 
     class Callbacks extends IAppWidgetHost.Stub {
-        public void updateAppWidget(int appWidgetId, RemoteViews views) {
+        public void updateAppWidget(int appWidgetId, RemoteViews views, int userId) {
             if (isLocalBinder() && views != null) {
                 views = views.clone();
-                views.setUser(mUser);
+                views.setUser(new UserHandle(userId));
             }
-            Message msg = mHandler.obtainMessage(HANDLE_UPDATE);
-            msg.arg1 = appWidgetId;
-            msg.obj = views;
+            Message msg = mHandler.obtainMessage(HANDLE_UPDATE, appWidgetId, userId, views);
             msg.sendToTarget();
         }
 
-        public void providerChanged(int appWidgetId, AppWidgetProviderInfo info) {
+        public void providerChanged(int appWidgetId, AppWidgetProviderInfo info, int userId) {
             if (isLocalBinder() && info != null) {
                 info = info.clone();
             }
-            Message msg = mHandler.obtainMessage(HANDLE_PROVIDER_CHANGED);
-            msg.arg1 = appWidgetId;
-            msg.obj = info;
+            Message msg = mHandler.obtainMessage(HANDLE_PROVIDER_CHANGED,
+                    appWidgetId, userId, info);
             msg.sendToTarget();
         }
 
-        public void providersChanged() {
-            Message msg = mHandler.obtainMessage(HANDLE_PROVIDERS_CHANGED);
+        public void providersChanged(int userId) {
+            Message msg = mHandler.obtainMessage(HANDLE_PROVIDERS_CHANGED, userId, 0);
             msg.sendToTarget();
         }
 
-        public void viewDataChanged(int appWidgetId, int viewId) {
-            Message msg = mHandler.obtainMessage(HANDLE_VIEW_DATA_CHANGED);
-            msg.arg1 = appWidgetId;
-            msg.arg2 = viewId;
+        public void viewDataChanged(int appWidgetId, int viewId, int userId) {
+            Message msg = mHandler.obtainMessage(HANDLE_VIEW_DATA_CHANGED,
+                    appWidgetId, viewId, userId);
             msg.sendToTarget();
         }
     }
@@ -99,7 +101,7 @@ public class AppWidgetHost {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case HANDLE_UPDATE: {
-                    updateAppWidgetView(msg.arg1, (RemoteViews)msg.obj);
+                    updateAppWidgetView(msg.arg1, (RemoteViews)msg.obj, msg.arg2);
                     break;
                 }
                 case HANDLE_PROVIDER_CHANGED: {
@@ -107,25 +109,16 @@ public class AppWidgetHost {
                     break;
                 }
                 case HANDLE_PROVIDERS_CHANGED: {
-                    onProvidersChanged();
+                    onProvidersChanged(msg.arg1);
                     break;
                 }
                 case HANDLE_VIEW_DATA_CHANGED: {
-                    viewDataChanged(msg.arg1, msg.arg2);
+                    viewDataChanged(msg.arg1, msg.arg2, (Integer) msg.obj);
                     break;
                 }
             }
         }
     }
-
-    Handler mHandler;
-
-    int mHostId;
-    Callbacks mCallbacks = new Callbacks();
-    final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();
-    private OnClickHandler mOnClickHandler;
-    // Optionally set by lockscreen
-    private UserHandle mUser;
 
     public AppWidgetHost(Context context, int hostId) {
         this(context, hostId, null, context.getMainLooper());
@@ -140,14 +133,9 @@ public class AppWidgetHost {
         mOnClickHandler = handler;
         mHandler = new UpdateHandler(looper);
         mDisplayMetrics = context.getResources().getDisplayMetrics();
-        mUser = Process.myUserHandle();
         bindService();
     }
 
-    /** @hide */
-    public void setUserId(int userId) {
-        mUser = new UserHandle(userId);
-    }
 
     private static void bindService() {
         synchronized (sServiceLock) {
@@ -163,23 +151,15 @@ public class AppWidgetHost {
      * becomes visible, i.e. from onStart() in your Activity.
      */
     public void startListening() {
-        startListeningAsUser(UserHandle.myUserId());
-    }
-
-    /**
-     * Start receiving onAppWidgetChanged calls for your AppWidgets.  Call this when your activity
-     * becomes visible, i.e. from onStart() in your Activity.
-     * @hide
-     */
-    public void startListeningAsUser(int userId) {
         int[] updatedIds;
         ArrayList<RemoteViews> updatedViews = new ArrayList<RemoteViews>();
 
+        final int userId = mContext.getUserId();
         try {
             if (mPackageName == null) {
                 mPackageName = mContext.getPackageName();
             }
-            updatedIds = sService.startListeningAsUser(
+            updatedIds = sService.startListening(
                     mCallbacks, mPackageName, mHostId, updatedViews, userId);
         }
         catch (RemoteException e) {
@@ -191,7 +171,7 @@ public class AppWidgetHost {
             if (updatedViews.get(i) != null) {
                 updatedViews.get(i).setUser(new UserHandle(userId));
             }
-            updateAppWidgetView(updatedIds[i], updatedViews.get(i));
+            updateAppWidgetView(updatedIds[i], updatedViews.get(i), userId);
         }
     }
 
@@ -201,26 +181,14 @@ public class AppWidgetHost {
      */
     public void stopListening() {
         try {
-            sService.stopListeningAsUser(mHostId, UserHandle.myUserId());
+            sService.stopListening(mHostId, mContext.getUserId());
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
-    }
 
-    /**
-     * Stop receiving onAppWidgetChanged calls for your AppWidgets.  Call this when your activity is
-     * no longer visible, i.e. from onStop() in your Activity.
-     * @hide
-     */
-    public void stopListeningAsUser(int userId) {
-        try {
-            sService.stopListeningAsUser(mHostId, userId);
-        }
-        catch (RemoteException e) {
-            throw new RuntimeException("system server dead?", e);
-        }
-        // Also clear the views
+        // This is here because keyguard needs it since it'll be switching users after this call.
+        // If it turns out other apps need to call this often, we should re-think how this works.
         clearViews();
     }
 
@@ -230,11 +198,12 @@ public class AppWidgetHost {
      * @return a appWidgetId
      */
     public int allocateAppWidgetId() {
+
         try {
             if (mPackageName == null) {
                 mPackageName = mContext.getPackageName();
             }
-            return sService.allocateAppWidgetId(mPackageName, mHostId);
+            return sService.allocateAppWidgetId(mPackageName, mHostId, mContext.getUserId());
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -247,7 +216,7 @@ public class AppWidgetHost {
      * @return a appWidgetId
      * @hide
      */
-    public static int allocateAppWidgetIdForSystem(int hostId) {
+    public static int allocateAppWidgetIdForSystem(int hostId, int userId) {
         checkCallerIsSystem();
         try {
             if (sService == null) {
@@ -256,7 +225,7 @@ public class AppWidgetHost {
             Context systemContext =
                     (Context) ActivityThread.currentActivityThread().getSystemContext();
             String packageName = systemContext.getPackageName();
-            return sService.allocateAppWidgetId(packageName, hostId);
+            return sService.allocateAppWidgetId(packageName, hostId, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
@@ -272,7 +241,7 @@ public class AppWidgetHost {
             if (sService == null) {
                 bindService();
             }
-            return sService.getAppWidgetIdsForHost(mHostId);
+            return sService.getAppWidgetIdsForHost(mHostId, mContext.getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
@@ -297,7 +266,7 @@ public class AppWidgetHost {
         synchronized (mViews) {
             mViews.remove(appWidgetId);
             try {
-                sService.deleteAppWidgetId(appWidgetId);
+                sService.deleteAppWidgetId(appWidgetId, mContext.getUserId());
             }
             catch (RemoteException e) {
                 throw new RuntimeException("system server dead?", e);
@@ -309,13 +278,13 @@ public class AppWidgetHost {
      * Stop listening to changes for this AppWidget.
      * @hide
      */
-    public static void deleteAppWidgetIdForSystem(int appWidgetId) {
+    public static void deleteAppWidgetIdForSystem(int appWidgetId, int userId) {
         checkCallerIsSystem();
         try {
             if (sService == null) {
                 bindService();
             }
-            sService.deleteAppWidgetId(appWidgetId);
+            sService.deleteAppWidgetId(appWidgetId, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
@@ -331,7 +300,7 @@ public class AppWidgetHost {
      */
     public void deleteHost() {
         try {
-            sService.deleteHost(mHostId);
+            sService.deleteHost(mHostId, mContext.getUserId());
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -347,8 +316,16 @@ public class AppWidgetHost {
      * </ul>
      */
     public static void deleteAllHosts() {
+        deleteAllHosts(UserHandle.myUserId());
+    }
+
+    /**
+     * Private method containing a userId
+     * @hide
+     */
+    public static void deleteAllHosts(int userId) {
         try {
-            sService.deleteAllHosts();
+            sService.deleteAllHosts(userId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -361,8 +338,9 @@ public class AppWidgetHost {
      */
     public final AppWidgetHostView createView(Context context, int appWidgetId,
             AppWidgetProviderInfo appWidget) {
+        final int userId = context.getUserId();
         AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
-        view.setUserId(mUser.getIdentifier());
+        view.setUserId(userId);
         view.setOnClickHandler(mOnClickHandler);
         view.setAppWidget(appWidgetId, appWidget);
         synchronized (mViews) {
@@ -370,9 +348,9 @@ public class AppWidgetHost {
         }
         RemoteViews views;
         try {
-            views = sService.getAppWidgetViews(appWidgetId);
+            views = sService.getAppWidgetViews(appWidgetId, userId);
             if (views != null) {
-                views.setUser(mUser);
+                views.setUser(new UserHandle(mContext.getUserId()));
             }
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -422,10 +400,20 @@ public class AppWidgetHost {
      * are added, updated or removed, or widget components are enabled or disabled.)
      */
     protected void onProvidersChanged() {
-        // Do nothing
+        onProvidersChanged(mContext.getUserId());
     }
 
-    void updateAppWidgetView(int appWidgetId, RemoteViews views) {
+    /**
+     * Private method containing a userId
+     * @hide
+     */
+    protected void onProvidersChanged(int userId) {
+        checkUserMatch(userId);
+        // Does nothing
+    }
+
+    void updateAppWidgetView(int appWidgetId, RemoteViews views, int userId) {
+        checkUserMatch(userId);
         AppWidgetHostView v;
         synchronized (mViews) {
             v = mViews.get(appWidgetId);
@@ -435,13 +423,24 @@ public class AppWidgetHost {
         }
     }
 
-    void viewDataChanged(int appWidgetId, int viewId) {
+    void viewDataChanged(int appWidgetId, int viewId, int userId) {
+        checkUserMatch(userId);
         AppWidgetHostView v;
         synchronized (mViews) {
             v = mViews.get(appWidgetId);
         }
         if (v != null) {
             v.viewDataChanged(viewId);
+        }
+    }
+
+    // Ensure that the userId passed to us agrees with the one associated with this instance
+    // of AppWidgetHost.
+    // TODO: This should be removed in production code.
+    private void checkUserMatch(int userId) {
+        if (userId != mContext.getUserId()) {
+            throw new IllegalStateException(
+                "User ids don't match, userId=" + userId + ", mUserId=" + mContext.getUserId());
         }
     }
 
