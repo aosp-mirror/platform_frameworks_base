@@ -178,8 +178,8 @@ public class WebAppInterface {
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
 to 17 or higher, <strong>you
 must add the {@code &#64;JavascriptInterface} annotation</strong> to any method that you want
-available your web page code (the method must also be public). If you do not provide the
-annotation, then the method will not accessible by your web page when running on Android 4.2 or
+available to your JavaScript (the method must also be public). If you do not provide the
+annotation, the method is not accessible by your web page when running on Android 4.2 or
 higher.</p>
 
 <p>In this example, the {@code WebAppInterface} class allows the web page to create a {@link
