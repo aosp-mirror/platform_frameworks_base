@@ -70,6 +70,7 @@ public class ConnectivityManager {
      * For a disconnect event, the boolean extra EXTRA_NO_CONNECTIVITY
      * is set to {@code true} if there are no connected networks at all.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
@@ -78,6 +79,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String CONNECTIVITY_ACTION_IMMEDIATE =
             "android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE";
 
@@ -198,6 +200,7 @@ public class ConnectivityManager {
      * the network and it's condition.
      * @hide
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String INET_CONDITION_ACTION =
             "android.net.conn.INET_CONDITION_ACTION";
 
@@ -206,6 +209,7 @@ public class ConnectivityManager {
      * TODO - finish the doc
      * @hide
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TETHER_STATE_CHANGED =
             "android.net.conn.TETHER_STATE_CHANGED";
 
@@ -233,6 +237,7 @@ public class ConnectivityManager {
      * notification.
      * @hide
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CAPTIVE_PORTAL_TEST_COMPLETED =
             "android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED";
     /**

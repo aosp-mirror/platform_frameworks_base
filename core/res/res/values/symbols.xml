@@ -1516,6 +1516,7 @@
   <java-symbol type="color" name="config_defaultNotificationColor" />
   <java-symbol type="drawable" name="ic_notification_ime_default" />
   <java-symbol type="drawable" name="ic_notify_wifidisplay" />
+  <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="stat_notify_car_mode" />
   <java-symbol type="drawable" name="stat_notify_disabled" />
   <java-symbol type="drawable" name="stat_notify_disk_full" />
@@ -1649,7 +1650,7 @@
   <java-symbol type="string" name="vpn_lockdown_connecting" />
   <java-symbol type="string" name="vpn_lockdown_connected" />
   <java-symbol type="string" name="vpn_lockdown_error" />
-  <java-symbol type="string" name="vpn_lockdown_reset" />
+  <java-symbol type="string" name="vpn_lockdown_config" />
   <java-symbol type="string" name="wallpaper_binding_label" />
   <java-symbol type="string" name="wifi_display_notification_title" />
   <java-symbol type="string" name="wifi_display_notification_message" />
