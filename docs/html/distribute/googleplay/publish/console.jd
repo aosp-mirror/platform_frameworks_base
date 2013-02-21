@@ -1,4 +1,4 @@
-page.title=The Developer Console
+page.title=Developer Console
 @jd:body
 
 
@@ -9,41 +9,40 @@ Developer Console, which will be the home for your app publishing operations and
 tools on Google Play. This sections below introduce a few of the key areas
 you'll find in the Developer Console.</p>
 
-<div style="width:610px;margin-left:">
-<div style="width:610px;border:1px solid #DDD;">
-<img src="{@docRoot}images/gp-dc-home.png" style="width:600px;padding:4px;margin-bottom:0em;">
-</div>
-<p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">All applications page</span>: Gives you a quick
+<div class="figure" style="width:756px;">
+<img src="{@docRoot}images/gp-dc-home.png" class="frame">
+<p class="img-caption"><strong>All applications page</strong>: Gives you a quick
 overview of your apps, lets you jump to stats, reviews, and product details, or
 upload a new app. </p>
 </div>
 
-
-<h3 id="profile">Your Account Details</h3>
-
-<div style="width:408px;float:right;margin:1.5em;">
-<div style="width:410px;border:1px solid #DDD;">
-<img src="{@docRoot}images/gp-dc-profile.png" style="width:400px;padding:4px;margin-bottom:0em;">
-</div>
-<p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Account details page</span>: Specifies your developer
+<div class="figure-right" style="width:450px;">
+<img src="{@docRoot}images/gp-dc-profile.png" class="frame">
+<p class="img-caption"><strong>Account details page</strong>: Specifies your developer
 identity and contact information, accounts for app testing, and more.</p>
 </div>
 
-<p>Your developer profile identifies you to Google Play and to your customers.
-During registration you must provide information for your profile, but you can go
-back at any time to edit the information and change your settings. </p>
+<h3 id="profile">Your account details</h3>
+
+<p>The account details page is where you specify basic information about yourself
+or your company in a developer profile. The information in your developer profile
+is important because it identifies you to Google Play and also to your customers.</p>
+
+<p>During registration you must provide the information for your profile, but you can
+go back at any time to edit the information and change your settings. </p>
 
 <p>Your developer profile contains:</p>
 <ul>
-<li>Your developer name &mdash; the name you want to show users on your product
-details page and elsewhere on Google Play. 
+<li>Your developer name &mdash; the name you want to show users on your store
+listing page and elsewhere on Google Play. </li>
 <li>Your developer contact information &mdash; how Google can contact you if
-needed (this information isn't exposed to users).
-<li>Merchant information, in-app billing information.</li>
+needed (this information isn't exposed to users).</li>
+<li>Your developer website URL &mdash; shown to users on your store listing page
+so they can learn more about your company or products.</li>
 </ul>
 
+<p>On the account details page you can also register for a merchant account, set
+up test accounts for Google Play licensing, and more. </p>
 
 <h3 id="user-accounts">Multiple user accounts</h3>
 
@@ -55,23 +54,19 @@ have access to. For example, an owner can grant users access to publishing and
 app configuration, but not access to financial reports. </p>
 
 
+<div class="figure-right" style="width:450px;">
+<img src="{@docRoot}images/gp-dc-details.png" class="frame">
+<p class="img-caption"><strong>Store listing page</strong>: Lets you upload your
+graphic assets, description, support information, and other information to
+create the store listing page for a specific app.</p>
+</div>
+
 <h3 id="merchant">Linking your Merchant Account</h3>
 
 <p>If you want to sell apps or in-app products, you can link your Google
 Checkout Merchant account to your developer profile. Google Play uses the linked
 Checkout account for financial and tax identification and monthly payouts of
 sales. </p>
-
-<div style="width:410px;float:right;margin:1.5em;">
-<div style="width:410px;border:1px solid #DDD;">
-<img src="{@docRoot}images/gp-dc-details.png" style="width:400px;padding:4px;margin-bottom:0em;">
-</div>
-<p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Store Listing page</span>: Lets you upload your
-graphic assets, description, support information, and other information to
-create the product details page for a specific app.</p>
-</div>
-
 
 <h3 id="details">Your store listing details</h3>
 
@@ -86,15 +81,14 @@ what's great about your app, and you can provide a localized description, add
 notes about the latest version, and more. You can update your store listing at
 any time, even if you don’t have a new version of your application.</p>
 
-
 <h3 id="uploading">Uploading and publishing</h3>
 
 <p>From the Developer Console you can quickly upload a release-ready APK and
 publish it when you're ready. The app is a <em>draft</em> until you publish it,
-at which time Google Play makes your store listing and app available to
+at which time Google Play makes your store listing page and app available to
 users. You can unpublish the app at any time.</p>
 
-<h3 id="controls">Distribution Controls</h3>
+<h3 id="controls">Distribution controls</h3>
 
 <p>In the Developer Console you can manage what countries and territories the
 app is distributed to and, for some countries, you can choose what carriers you
@@ -103,8 +97,7 @@ want to target.</p>
 <p>You can also see the list of devices that your app is currently available to,
 based on any distribution rules declared in its manifest file.</p>
 
-
-<h3 id="profile">Selling and pricing your Products</h3>
+<h3 id="selling">Selling and pricing your products</h3>
 
 <p>The Developer Console gives you tools to set prices for your apps and in-app
 products. Your app can either be free to download or priced (charged before
@@ -149,17 +142,18 @@ time, just by saving changes in the Developer Console.</p>
 <a href="{@docRoot}google/play/billing/index.html">In-app Billing</span></a>
 developer documentation.</p></div></div>
 
-<p><a href="{@docRoot}google/play/billing/index.html">In-app Billing</a> is a Google Play service that lets you monetize your apps in more ways by selling in-app products and subscriptions. In-app products are one-time purchases, while  subscriptions are recurring charges on an monthly or annual basis.</p>
+<p><a href="{@docRoot}google/play/billing/index.html">In-app Billing</a> is
+a Google Play service that lets you monetize your apps in more ways by selling
+in-app products and subscriptions. In-app products are one-time purchases, while
+subscriptions are recurring charges on an monthly or annual basis.</p>
 
 <p>From the Developer Console you can create product lists for in-app
 products and subscriptions, set prices, and publish.</p>
 
-<div style="width:410px;float:right;margin:1.5em;">
-<div style="width:410px;border:1px solid #DDD;">
-<img src="{@docRoot}images/gp-dc-reviews.png" style="width:400px;padding:4px;margin-bottom:0em;">
-</div>
-<p class="image-caption" style="padding:.5em"><span style="font-weight:500;">User
-reviews page</span>: Gives you access to user reviews for a specific app.
+<div class="figure-right" style="width:410px;">
+<img src="{@docRoot}images/gp-dc-reviews.png" class="frame">
+<p class="img-caption"><strong>User
+reviews page</strong>: Gives you access to user reviews for a specific app.
 You can filter  reviews in a number of ways to locate issues more easily
 and support your customers more effectively.</p>
 </div>
@@ -182,7 +176,7 @@ performance of your app. </p>
 
 <p>You can view installations of your app measured by unique users, as well as
 by unique devices. For user installations, you can view active installs, total
-installs, daily installs and uninstalls, and metrics about the user reviews.
+installs, daily installs and uninstalls, and metrics about user ratings.
 For devices, you can see active
 installs as well as daily installs, uninstalls, and upgrades.</p>
 
@@ -197,12 +191,8 @@ other factors. You can even focus in on data inside a dimension by adding
 specific points (such as individual platform versions or languages) to the
 timeline.</p>
 
-<div style="width:610px;margin:1.5em;margin-left:0">
-<div style="width:610px;border:1px solid #DDD;">
-<img src="{@docRoot}images/gp-dc-stats.png" 
-style="width:600px;padding:4px;margin-bottom:0em;">
-</div>
-<p class="image-caption" style="padding:.5em"><span style="font-weight:500;">App
-statistics page</span>: Shows you a variety of statistics about a
-specific app's installation performance over time.</p>
+<div style="width:530px;">
+<img src="{@docRoot}images/gp-dc-stats.png" class="frame">
+<p class="img-caption"><strong>App statistics page</strong>: Shows you a variety
+of statistics about a specific app's installation performance over time.</p>
 </div>
