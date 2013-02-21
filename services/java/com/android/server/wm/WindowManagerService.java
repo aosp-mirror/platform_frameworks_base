@@ -3336,12 +3336,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            AppWindowToken atoken = findAppWindowToken(token);
+            final AppWindowToken atoken = findAppWindowToken(token);
             if (atoken == null) {
                 Slog.w(TAG, "Attempted to set group id of non-existing app token: " + token);
                 return;
             }
-            mTaskIdToDisplayContents.get(atoken.groupId).setAppTaskId(atoken, groupId);
+            DisplayContent displayContent = mTaskIdToDisplayContents.get(atoken.groupId);
+            if (displayContent == null) {
+                Slog.w(TAG, "setAppGroupId: No DisplayContent for taskId=" + atoken.groupId);
+                displayContent = getDefaultDisplayContentLocked();
+            }
+            displayContent.setAppTaskId(atoken, groupId);
         }
     }
 
