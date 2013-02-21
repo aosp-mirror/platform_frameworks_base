@@ -200,6 +200,7 @@ public class LockdownVpnTracker {
             // TODO: support non-standard port numbers
             mNetService.setFirewallEgressDestRule(mProfile.server, 500, true);
             mNetService.setFirewallEgressDestRule(mProfile.server, 4500, true);
+            mNetService.setFirewallEgressDestRule(mProfile.server, 1701, true);
         } catch (RemoteException e) {
             throw new RuntimeException("Problem setting firewall rules", e);
         }
@@ -225,6 +226,7 @@ public class LockdownVpnTracker {
         try {
             mNetService.setFirewallEgressDestRule(mProfile.server, 500, false);
             mNetService.setFirewallEgressDestRule(mProfile.server, 4500, false);
+            mNetService.setFirewallEgressDestRule(mProfile.server, 1701, false);
         } catch (RemoteException e) {
             throw new RuntimeException("Problem setting firewall rules", e);
         }
