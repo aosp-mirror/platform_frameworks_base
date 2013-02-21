@@ -167,7 +167,7 @@ public class WifiStressTest
                     ssidAppearInScanResultsCount, i));
             long startTime = System.currentTimeMillis();
             mAct.scanResultAvailable = false;
-            assertTrue("start scan failed", mAct.mWifiManager.startScanActive());
+            assertTrue("start scan failed", mAct.mWifiManager.startScan());
             while (true) {
                 if ((System.currentTimeMillis() - startTime) >
                 ConnectivityManagerTestActivity.WIFI_SCAN_TIMEOUT) {
