@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -227,7 +228,6 @@ public abstract class BackupAgent extends ContextWrapper {
         String libDir = (appInfo.nativeLibraryDir != null)
                 ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
                 : null;
-        String externalFilesDir = getExternalFilesDir(null).getCanonicalPath();
 
         // Filters, the scan queue, and the set of resulting entities
         HashSet<String> filterSet = new HashSet<String>();
@@ -259,8 +259,17 @@ public abstract class BackupAgent extends ContextWrapper {
         // getExternalFilesDir() location associated with this app.  Technically there should
         // not be any files here if the app does not properly have permission to access
         // external storage, but edge cases happen. fullBackupFileTree() catches
-        // IOExceptions and similar, and treats them as non-fatal, so we rely on that here.
-        fullBackupFileTree(packageName, FullBackup.MANAGED_EXTERNAL_TREE_TOKEN, externalFilesDir, null, data);
+        // IOExceptions and similar, and treats them as non-fatal, so we rely on that; and
+        // we know a priori that processes running as the system UID are not permitted to
+        // access external storage, so we check for that as well to avoid nastygrams in
+        // the log.
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            File efLocation = getExternalFilesDir(null);
+            if (efLocation != null) {
+                fullBackupFileTree(packageName, FullBackup.MANAGED_EXTERNAL_TREE_TOKEN,
+                        efLocation.getCanonicalPath(), null, data);
+            }
+        }
     }
 
     /**
@@ -281,7 +290,7 @@ public abstract class BackupAgent extends ContextWrapper {
         String spDir;
         String cacheDir;
         String libDir;
-        String efDir;
+        String efDir = null;
         String filePath;
 
         ApplicationInfo appInfo = getApplicationInfo();
@@ -295,7 +304,14 @@ public abstract class BackupAgent extends ContextWrapper {
             libDir = (appInfo.nativeLibraryDir == null)
                     ? null
                     : new File(appInfo.nativeLibraryDir).getCanonicalPath();
-            efDir = getExternalFilesDir(null).getCanonicalPath();
+
+            // may or may not have external files access to attempt backup/restore there
+            if (Process.myUid() != Process.SYSTEM_UID) {
+                File efLocation = getExternalFilesDir(null);
+                if (efLocation != null) {
+                    efDir = efLocation.getCanonicalPath();
+                }
+            }
 
             // Now figure out which well-defined tree the file is placed in, working from
             // most to least specific.  We also specifically exclude the lib and cache dirs.
@@ -324,7 +340,7 @@ public abstract class BackupAgent extends ContextWrapper {
         } else if (filePath.startsWith(mainDir)) {
             domain = FullBackup.ROOT_TREE_TOKEN;
             rootpath = mainDir;
-        } else if (filePath.startsWith(efDir)) {
+        } else if ((efDir != null) && filePath.startsWith(efDir)) {
             domain = FullBackup.MANAGED_EXTERNAL_TREE_TOKEN;
             rootpath = efDir;
         } else {
@@ -451,7 +467,13 @@ public abstract class BackupAgent extends ContextWrapper {
         } else if (domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
             basePath = getCacheDir().getCanonicalPath();
         } else if (domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
-            basePath = getExternalFilesDir(null).getCanonicalPath();
+            // make sure we can try to restore here before proceeding
+            if (Process.myUid() != Process.SYSTEM_UID) {
+                File efLocation = getExternalFilesDir(null);
+                if (efLocation != null) {
+                    basePath = getExternalFilesDir(null).getCanonicalPath();
+                }
+            }
         } else {
             // Not a supported location
             Log.i(TAG, "Data restored from non-app domain " + domain + ", ignoring");

@@ -3897,6 +3897,7 @@ class BackupManagerService extends IBackupManager.Stub {
                                     && !info.domain.equals(FullBackup.DATABASE_TREE_TOKEN)
                                     && !info.domain.equals(FullBackup.ROOT_TREE_TOKEN)
                                     && !info.domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)
+                                    && !info.domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)
                                     && !info.domain.equals(FullBackup.OBB_TREE_TOKEN)
                                     && !info.domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
                                 throw new IOException("Unrecognized domain " + info.domain);
