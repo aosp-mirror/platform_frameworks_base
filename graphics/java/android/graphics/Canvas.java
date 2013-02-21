@@ -138,6 +138,7 @@ public class Canvas {
         final int oldCanvas = mNativeCanvas;
         mNativeCanvas = nativeCanvas;
         mFinalizer.mNativeCanvas = nativeCanvas;
+        copyNativeCanvasState(oldCanvas, mNativeCanvas);
         finalizer(oldCanvas);
     }
     
@@ -1612,6 +1613,7 @@ public class Canvas {
     public static native void freeTextLayoutCaches();
 
     private static native int initRaster(int nativeBitmapOrZero);
+    private static native void copyNativeCanvasState(int srcCanvas, int dstCanvas);
     private static native int native_saveLayer(int nativeCanvas, RectF bounds,
                                                int paint, int layerFlags);
     private static native int native_saveLayer(int nativeCanvas, float l,

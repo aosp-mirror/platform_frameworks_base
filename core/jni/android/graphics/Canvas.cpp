@@ -65,6 +65,16 @@ public:
         return bitmap ? new SkCanvas(*bitmap) : new SkCanvas;
     }
     
+    static void copyCanvasState(JNIEnv* env, jobject clazz,
+                                SkCanvas* srcCanvas, SkCanvas* dstCanvas) {
+        if (srcCanvas && dstCanvas) {
+            if (NULL != srcCanvas->getDevice() && NULL != dstCanvas->getDevice()) {
+                dstCanvas->clipRegion(srcCanvas->getTotalClip());
+            }
+            dstCanvas->setMatrix(srcCanvas->getTotalMatrix());
+        }
+    }
+
     static void freeCaches(JNIEnv* env, jobject) {
         // these are called in no particular order
         SkImageRef_GlobalPool::SetRAMUsed(0);
@@ -948,6 +958,7 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
 static JNINativeMethod gCanvasMethods[] = {
     {"finalizer", "(I)V", (void*) SkCanvasGlue::finalizer},
     {"initRaster","(I)I", (void*) SkCanvasGlue::initRaster},
+    {"copyNativeCanvasState","(II)V", (void*) SkCanvasGlue::copyCanvasState},
     {"isOpaque","()Z", (void*) SkCanvasGlue::isOpaque},
     {"getWidth","()I", (void*) SkCanvasGlue::getWidth},
     {"getHeight","()I", (void*) SkCanvasGlue::getHeight},
