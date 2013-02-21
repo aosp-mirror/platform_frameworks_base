@@ -934,12 +934,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @param service The service.
      * @return True if the service was removed, false otherwise.
      */
-    private void removeServiceLocked(Service service) {
-        UserState userState = getUserStateLocked(service.mUserId);
+    private void removeServiceLocked(Service service, UserState userState) {
         userState.mBoundServices.remove(service);
         userState.mComponentNameToServiceMap.remove(service.mComponentName);
         service.unlinkToOwnDeath();
-        service.dispose();
     }
 
     /**
@@ -1672,11 +1670,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean bindLocked() {
             UserState userState = getUserStateLocked(mUserId);
             if (!mIsAutomation) {
-                if (mService == null) {
-                    if (mContext.bindServiceAsUser(mIntent, this, Context.BIND_AUTO_CREATE,
-                            new UserHandle(mUserId))) {
-                        userState.mBindingServices.add(mComponentName);
-                    }
+                if (mService == null && mContext.bindServiceAsUser(
+                        mIntent, this, Context.BIND_AUTO_CREATE, new UserHandle(mUserId))) {
+                    userState.mBindingServices.add(mComponentName);
                 }
             } else {
                 userState.mBindingServices.add(mComponentName);
@@ -1697,14 +1693,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (mService == null) {
                 return false;
             }
+            UserState userState = getUserStateLocked(mUserId);
             if (!mIsAutomation) {
                 mContext.unbindService(this);
             } else {
-                UserState userState = getUserStateLocked(mUserId);
                 userState.mUiAutomationService = null;
                 userState.mUiAutomationServiceClient = null;
             }
-            removeServiceLocked(this);
+            removeServiceLocked(this, userState);
+            dispose();
             return true;
         }
 
@@ -1750,11 +1747,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mService = service;
                 mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
                 UserState userState = getUserStateLocked(mUserId);
+                addServiceLocked(this, userState);
                 if (!userState.mBindingServices.contains(mComponentName)) {
                     binderDied();
                 } else {
                     userState.mBindingServices.remove(mComponentName);
-                    addServiceLocked(this, userState);
                     onUserStateChangedLocked(userState);
                 }
             }
@@ -2106,9 +2103,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public void binderDied() {
             synchronized (mLock) {
-                // The death recipient is unregistered in tryRemoveServiceLocked
-                removeServiceLocked(this);
                 UserState userState = getUserStateLocked(mUserId);
+                // The death recipient is unregistered in removeServiceLocked
+                removeServiceLocked(this, userState);
+                dispose();
                 if (mIsAutomation) {
                     // We no longer have an automation service, so restore
                     // the state based on values in the settings database.
