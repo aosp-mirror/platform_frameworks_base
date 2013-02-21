@@ -275,8 +275,9 @@ public final class WifiService extends IWifiManager.Stub {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        mSettingsStore.handleAirplaneModeToggled();
-                        updateWifiState();
+                        if (mSettingsStore.handleAirplaneModeToggled()) {
+                            updateWifiState();
+                        }
                     }
                 },
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
@@ -424,7 +425,10 @@ public final class WifiService extends IWifiManager.Stub {
 
         long ident = Binder.clearCallingIdentity();
         try {
-            mSettingsStore.handleWifiToggled(enable);
+            if (! mSettingsStore.handleWifiToggled(enable)) {
+                // Nothing to do if wifi cannot be toggled
+                return true;
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
