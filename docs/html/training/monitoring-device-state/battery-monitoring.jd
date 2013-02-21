@@ -65,7 +65,7 @@ boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                      status == BatteryManager.BATTERY_STATUS_FULL;
 
 // How are we charging?
-int chargePlug = battery.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
 boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;
 boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 
@@ -119,8 +119,8 @@ the rate of your background updates if the battery charge is below a certain lev
 <p>You can find the current battery charge by extracting the current battery level and scale from
 the battery status intent as shown here:</p>
 
-<pre>int level = battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-int scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+<pre>int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
 float batteryPct = level / (float)scale;</pre>
 
