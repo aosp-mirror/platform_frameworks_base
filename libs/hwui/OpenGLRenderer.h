@@ -198,6 +198,7 @@ public:
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
+    bool hasRectToRectTransform();
     ANDROID_API void getMatrix(SkMatrix* matrix);
     virtual void setMatrix(SkMatrix* matrix);
     virtual void concatMatrix(SkMatrix* matrix);

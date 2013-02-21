@@ -132,15 +132,6 @@ bool Snapshot::clipTransformed(const Rect& r, SkRegion::Op op) {
             }
             break;
         }
-        case SkRegion::kUnion_Op: {
-            if (CC_UNLIKELY(!clipRegion->isEmpty())) {
-                ensureClipRegion();
-                clipped = clipRegionOp(r.left, r.top, r.right, r.bottom, SkRegion::kUnion_Op);
-            } else {
-                clipped = clipRect->unionWith(r);
-            }
-            break;
-        }
         case SkRegion::kReplace_Op: {
             setClip(r.left, r.top, r.right, r.bottom);
             clipped = true;
