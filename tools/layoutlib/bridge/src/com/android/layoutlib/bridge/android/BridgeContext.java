@@ -1398,4 +1398,12 @@ public final class BridgeContext extends Context {
         // pass
         return null;
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getUserId() {
+        return 0; // not used
+    }
 }
