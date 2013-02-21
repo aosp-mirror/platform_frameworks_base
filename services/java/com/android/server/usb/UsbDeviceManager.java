@@ -573,14 +573,19 @@ public class UsbDeviceManager {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                 intent.putExtra("state", (enabled ? 1 : 0));
                 if (enabled) {
+                    Scanner scanner = null;
                     try {
-                        Scanner scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
+                        scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
                         int card = scanner.nextInt();
                         int device = scanner.nextInt();
                         intent.putExtra("card", card);
                         intent.putExtra("device", device);
                     } catch (FileNotFoundException e) {
                         Slog.e(TAG, "could not open audio source PCM file", e);
+                    } finally {
+                        if (scanner != null) {
+                            scanner.close();
+                        }
                     }
                 }
                 mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
