@@ -3512,8 +3512,8 @@
     <string name="vpn_lockdown_connected">Always-on VPN connected</string>
     <!-- Notification title when error connecting to lockdown VPN. -->
     <string name="vpn_lockdown_error">Always-on VPN error</string>
-    <!-- Notification body that indicates user can touch to cycle lockdown VPN connection. -->
-    <string name="vpn_lockdown_reset">Touch to reset connection</string>
+    <!-- Notification body that indicates user can touch to configure lockdown VPN connection. -->
+    <string name="vpn_lockdown_config">Touch to configure</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
