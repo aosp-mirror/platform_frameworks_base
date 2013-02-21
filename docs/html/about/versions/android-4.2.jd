@@ -111,6 +111,20 @@ android:targetSdkVersion}</a> and <a href="{@docRoot}guide/topics/manifest/uses-
 android:minSdkVersion}</a> is lower than 17, your app is not able to modify the settings that have
 moved to {@link android.provider.Settings.Global} when running on Android 4.2 and higher.</p>
   </li>
+
+  <li>If your app uses {@link android.webkit.WebView}, Android 4.2 adds an additional layer of
+  security so you can more safely <b>bind JavaScript to your
+  Android code</b>. If you set your
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+  to 17 or higher, you must now add the {@code @JavascriptInterface} annotation to any method that you
+  want available to your JavaScript (the method must also be public). If you do not provide the
+  annotation, the method is not accessible by a web page in your {@link android.webkit.WebView}
+  when running on Android 4.2 or higher. If you set the
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+  to 16 or lower, the annotation is not required, but we recommend that you update your target version
+  and add the annotation for additional security.
+    <p>Read more about <a href="{@docRoot}guide/webapps/webview.html#BindingJavaScript">binding
+    JavaScript code to Android code</a>.</p></li>
 </ul>
 
 
