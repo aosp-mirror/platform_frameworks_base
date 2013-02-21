@@ -3139,6 +3139,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 while (v >= 0) {
+                    if (!iterator.hasNext()) {
+                        mismatch = true;
+                        break;
+                    }
                     AppWindowToken atoken = iterator.next();
                     if (atoken.removed) {
                         continue;
