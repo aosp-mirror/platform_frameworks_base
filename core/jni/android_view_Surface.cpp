@@ -116,8 +116,8 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
 
 // ----------------------------------------------------------------------------
 
-static bool isSurfaceValid(const sp<Surface>& sur) {
-    return sur != 0 && sur->getISurfaceTexture() != 0;
+static inline bool isSurfaceValid(const sp<Surface>& sur) {
+    return Surface::isValid(sur);
 }
 
 // ----------------------------------------------------------------------------
