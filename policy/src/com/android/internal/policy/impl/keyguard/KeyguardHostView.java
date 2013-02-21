@@ -30,6 +30,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -102,8 +103,9 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private boolean mUserSetupCompleted;
 
-    // User for whom this host view was created
-    private int mUserId;
+    // User for whom this host view was created.  Final because we should never change the
+    // id without reconstructing an instance of KeyguardHostView. See note below...
+    private final int mUserId;
 
     private KeyguardMultiUserSelectorView mKeyguardMultiUserSelectorView;
 
@@ -132,10 +134,35 @@ public class KeyguardHostView extends KeyguardViewBase {
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLockPatternUtils = new LockPatternUtils(context);
+
+        // Note: This depends on KeyguardHostView getting reconstructed every time the
+        // user switches, since mUserId will be used for the entire session.
+        // Once created, keyguard should *never* re-use this instance with another user.
+        // In other words, mUserId should never change - hence it's marked final.
         mUserId = mLockPatternUtils.getCurrentUser();
-        mAppWidgetHost = new AppWidgetHost(
-                context, APPWIDGET_HOST_ID, mOnClickHandler, Looper.myLooper());
-        mAppWidgetHost.setUserId(mUserId);
+
+        Context userContext = null;
+        try {
+            final String packageName = "system";
+            userContext = mContext.createPackageContextAsUser(packageName, 0,
+                    new UserHandle(mUserId));
+
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+            // This should never happen, but it's better to have no widgets than to crash.
+            userContext = context;
+        }
+
+        // These need to be created with the user context...
+        mAppWidgetHost = new AppWidgetHost(userContext, APPWIDGET_HOST_ID, mOnClickHandler,
+                Looper.myLooper());
+        mAppWidgetManager = AppWidgetManager.getInstance(userContext);
+
+        cleanupAppWidgetIds();
+
+        mSecurityModel = new KeyguardSecurityModel(context);
+
+        mViewStateManager = new KeyguardViewStateManager(this);
 
         DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -355,19 +382,15 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mAppWidgetHost.startListeningAsUser(mUserId);
+        mAppWidgetHost.startListening();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallbacks);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mAppWidgetHost.stopListeningAsUser(mUserId);
+        mAppWidgetHost.stopListening();
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallbacks);
-    }
-
-    private AppWidgetHost getAppWidgetHost() {
-        return mAppWidgetHost;
     }
 
     void addWidget(AppWidgetHostView view, int pageIndex) {
@@ -1020,12 +1043,13 @@ public class KeyguardHostView extends KeyguardViewBase {
     private boolean addWidget(int appId, int pageIndex, boolean updateDbIfFailed) {
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appId);
         if (appWidgetInfo != null) {
-            AppWidgetHostView view = getAppWidgetHost().createView(mContext, appId, appWidgetInfo);
+            AppWidgetHostView view = mAppWidgetHost.createView(mContext, appId, appWidgetInfo);
             addWidget(view, pageIndex);
             return true;
         } else {
             if (updateDbIfFailed) {
-                Log.w(TAG, "AppWidgetInfo for app widget id " + appId + " was null, deleting");
+                Log.w(TAG, "*** AppWidgetInfo for app widget id " + appId + "  was null for user"
+                        + mUserId + ", deleting");
                 mAppWidgetHost.deleteAppWidgetId(appId);
                 mLockPatternUtils.removeAppWidget(appId);
             }
