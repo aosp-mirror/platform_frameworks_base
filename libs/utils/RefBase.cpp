@@ -480,7 +480,7 @@ void RefBase::weakref_type::printRefs() const
 
 void RefBase::weakref_type::trackMe(bool enable, bool retain)
 {
-    static_cast<const weakref_impl*>(this)->trackMe(enable, retain);
+    static_cast<weakref_impl*>(this)->trackMe(enable, retain);
 }
 
 RefBase::weakref_type* RefBase::createWeak(const void* id) const
