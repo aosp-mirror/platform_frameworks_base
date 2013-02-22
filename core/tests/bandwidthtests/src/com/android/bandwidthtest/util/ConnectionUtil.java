@@ -588,7 +588,7 @@ public class ConnectionUtil {
                 return true;
             } else {
                 // Start an active scan
-                mWifiManager.startScanActive();
+                mWifiManager.startScan();
                 mScanResultIsAvailable = false;
                 long startTime = System.currentTimeMillis();
                 while (!mScanResultIsAvailable) {

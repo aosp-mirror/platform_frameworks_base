@@ -733,26 +733,7 @@ public class WifiManager {
      */
     public boolean startScan() {
         try {
-            mService.startScan(false);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Request a scan for access points. Returns immediately. The availability
-     * of the results is made known later by means of an asynchronous event sent
-     * on completion of the scan.
-     * This is a variant of startScan that forces an active scan, even if passive
-     * scans are the current default
-     * @return {@code true} if the operation succeeded, i.e., the scan was initiated
-     *
-     * @hide
-     */
-    public boolean startScanActive() {
-        try {
-            mService.startScan(true);
+            mService.startScan();
             return true;
         } catch (RemoteException e) {
             return false;
