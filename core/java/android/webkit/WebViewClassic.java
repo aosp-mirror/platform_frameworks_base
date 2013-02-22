@@ -7909,7 +7909,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mPictureListener != null) {
             // trigger picture listener for hardware layers. Software layers are
             // triggered in setNewPicture
-            mPictureListener.onNewPicture(getWebView(), capturePicture());
+            // TODO: Update CUR_DEVELOPMENT when appropriate JBMR2 constant is
+            // available.
+            Picture picture = mContext.getApplicationInfo().targetSdkVersion <
+                    Build.VERSION_CODES.CUR_DEVELOPMENT ? capturePicture() : null;
+            mPictureListener.onNewPicture(getWebView(), picture);
         }
     }
 
@@ -7994,7 +7998,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     || mWebView.getLayerType() == View.LAYER_TYPE_SOFTWARE) {
                 // trigger picture listener for software layers. Hardware layers are
                 // triggered in pageSwapCallback
-                mPictureListener.onNewPicture(getWebView(), capturePicture());
+                // TODO: Update CUR_DEVELOPMENT when appropriate JBMR2 constant is
+                // available.
+                Picture picture = mContext.getApplicationInfo().targetSdkVersion <
+                        Build.VERSION_CODES.CUR_DEVELOPMENT ? capturePicture() : null;
+                mPictureListener.onNewPicture(getWebView(), picture);
             }
         }
     }
