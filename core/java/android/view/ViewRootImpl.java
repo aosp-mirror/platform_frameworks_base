@@ -229,6 +229,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
     int mClientWindowLayoutFlags;
+    boolean mLastOverscanRequested;
 
     /** @hide */
     public static final int EVENT_NOT_HANDLED = 0;
@@ -262,6 +263,7 @@ public final class ViewRootImpl implements ViewParent,
     // These are accessed by multiple threads.
     final Rect mWinFrame; // frame given by window manager.
 
+    final Rect mPendingOverscanInsets = new Rect();
     final Rect mPendingVisibleInsets = new Rect();
     final Rect mPendingContentInsets = new Rect();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
@@ -566,6 +568,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (mTranslator != null) {
                     mTranslator.translateRectInScreenToAppWindow(mAttachInfo.mContentInsets);
                 }
+                mPendingOverscanInsets.set(0, 0, 0, 0);
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
                 if (DEBUG_LAYOUT) Log.v(TAG, "Added window " + mWindow);
@@ -1255,6 +1258,9 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mInTouchMode = !mAddedTouchMode;
                 ensureTouchModeLocally(mAddedTouchMode);
             } else {
+                if (!mPendingOverscanInsets.equals(mAttachInfo.mOverscanInsets)) {
+                    insetsChanged = true;
+                }
                 if (!mPendingContentInsets.equals(mAttachInfo.mContentInsets)) {
                     insetsChanged = true;
                 }
@@ -1320,15 +1326,20 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (params != null && (host.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) != 0) {
-            if (!PixelFormat.formatHasAlpha(params.format)) {
-                params.format = PixelFormat.TRANSLUCENT;
+        if (params != null) {
+            if ((host.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) != 0) {
+                if (!PixelFormat.formatHasAlpha(params.format)) {
+                    params.format = PixelFormat.TRANSLUCENT;
+                }
             }
+            mAttachInfo.mOverscanRequested = (params.flags
+                    & WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN) != 0;
         }
 
         if (mFitSystemWindowsRequested) {
             mFitSystemWindowsRequested = false;
             mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
+            mLastOverscanRequested = mAttachInfo.mOverscanRequested;
             host.fitSystemWindows(mFitSystemWindowsInsets);
             if (mLayoutRequested) {
                 // Short-circuit catching a new layout request here, so
@@ -1383,7 +1394,6 @@ public final class ViewRootImpl implements ViewParent,
 
             boolean hwInitialized = false;
             boolean contentInsetsChanged = false;
-            boolean visibleInsetsChanged;
             boolean hadSurface = mSurface.isValid();
 
             try {
@@ -1396,6 +1406,7 @@ public final class ViewRootImpl implements ViewParent,
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
 
                 if (DEBUG_LAYOUT) Log.v(TAG, "relayout: frame=" + frame.toShortString()
+                        + " overscan=" + mPendingOverscanInsets.toShortString()
                         + " content=" + mPendingContentInsets.toShortString()
                         + " visible=" + mPendingVisibleInsets.toShortString()
                         + " surface=" + mSurface);
@@ -1407,9 +1418,11 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingConfiguration.seq = 0;
                 }
 
+                final boolean overscanInsetsChanged = !mPendingOverscanInsets.equals(
+                        mAttachInfo.mOverscanInsets);
                 contentInsetsChanged = !mPendingContentInsets.equals(
                         mAttachInfo.mContentInsets);
-                visibleInsetsChanged = !mPendingVisibleInsets.equals(
+                final boolean visibleInsetsChanged = !mPendingVisibleInsets.equals(
                         mAttachInfo.mVisibleInsets);
                 if (contentInsetsChanged) {
                     if (mWidth > 0 && mHeight > 0 && lp != null &&
@@ -1486,9 +1499,18 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
                             + mAttachInfo.mContentInsets);
                 }
+                if (overscanInsetsChanged) {
+                    mAttachInfo.mOverscanInsets.set(mPendingOverscanInsets);
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Overscan insets changing to: "
+                            + mAttachInfo.mOverscanInsets);
+                    // Need to relayout with content insets.
+                    contentInsetsChanged = true;
+                }
                 if (contentInsetsChanged || mLastSystemUiVisibility !=
-                        mAttachInfo.mSystemUiVisibility || mFitSystemWindowsRequested) {
+                        mAttachInfo.mSystemUiVisibility || mFitSystemWindowsRequested
+                        || mLastOverscanRequested != mAttachInfo.mOverscanRequested) {
                     mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
+                    mLastOverscanRequested = mAttachInfo.mOverscanRequested;
                     mFitSystemWindowsRequested = false;
                     mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
                     host.fitSystemWindows(mFitSystemWindowsInsets);
@@ -2942,6 +2964,7 @@ public final class ViewRootImpl implements ViewParent,
                 // Recycled in the fall through...
                 SomeArgs args = (SomeArgs) msg.obj;
                 if (mWinFrame.equals(args.arg1)
+                        && mPendingOverscanInsets.equals(args.arg5)
                         && mPendingContentInsets.equals(args.arg2)
                         && mPendingVisibleInsets.equals(args.arg3)
                         && args.arg4 == null) {
@@ -2958,6 +2981,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
 
                     mWinFrame.set((Rect) args.arg1);
+                    mPendingOverscanInsets.set((Rect) args.arg5);
                     mPendingContentInsets.set((Rect) args.arg2);
                     mPendingVisibleInsets.set((Rect) args.arg3);
 
@@ -4031,7 +4055,7 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
-                mWinFrame, mPendingContentInsets, mPendingVisibleInsets,
+                mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingConfiguration, mSurface);
         //Log.d(TAG, "<<<<<< BACK FROM relayout");
         if (restore) {
@@ -4040,6 +4064,7 @@ public final class ViewRootImpl implements ViewParent,
         
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWinFrame(mWinFrame);
+            mTranslator.translateRectInScreenToAppWindow(mPendingOverscanInsets);
             mTranslator.translateRectInScreenToAppWindow(mPendingContentInsets);
             mTranslator.translateRectInScreenToAppWindow(mPendingVisibleInsets);
         }
@@ -4245,7 +4270,7 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    public void dispatchResized(Rect frame, Rect contentInsets,
+    public void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
@@ -4254,6 +4279,7 @@ public final class ViewRootImpl implements ViewParent,
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWindow(frame);
+            mTranslator.translateRectInScreenToAppWindow(overscanInsets);
             mTranslator.translateRectInScreenToAppWindow(contentInsets);
             mTranslator.translateRectInScreenToAppWindow(visibleInsets);
         }
@@ -4263,6 +4289,7 @@ public final class ViewRootImpl implements ViewParent,
         args.arg2 = sameProcessCall ? new Rect(contentInsets) : contentInsets;
         args.arg3 = sameProcessCall ? new Rect(visibleInsets) : visibleInsets;
         args.arg4 = sameProcessCall && newConfig != null ? new Configuration(newConfig) : newConfig;
+        args.arg5 = sameProcessCall ? new Rect(overscanInsets) : overscanInsets;
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -4997,11 +5024,11 @@ public final class ViewRootImpl implements ViewParent,
             mWindowSession = viewAncestor.mWindowSession;
         }
 
-        public void resized(Rect frame, Rect contentInsets,
+        public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchResized(frame, contentInsets,
+                viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
                         visibleInsets, reportDraw, newConfig);
             }
         }
