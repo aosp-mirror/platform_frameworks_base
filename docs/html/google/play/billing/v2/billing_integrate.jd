@@ -511,7 +511,7 @@ is an instance of the <code>MarketBillingService</code> interface.</p>
 three keys that are required for all requests: <code>BILLING_REQUEST</code>,
 <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. If you are offering subscriptions in
 your app, set the API_VERSION key to a value of "2", to confirm that In-app Billing v2 is
-available. For an examnple, see
+available. For an example, see
 <a href="{@docRoot}google/play/billing/v2/billing_subscriptions.html#version">Subscriptions</a>.</p>
 
 <p>The <code>CHECK_BILLING_SUPPORTED</code> request returns a synchronous {@link
