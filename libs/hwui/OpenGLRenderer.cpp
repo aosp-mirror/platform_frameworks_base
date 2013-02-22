@@ -1799,7 +1799,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, 
 
 void OpenGLRenderer::outputDisplayList(DisplayList* displayList) {
     if (displayList) {
-        displayList->output(0);
+        displayList->output(1);
     }
 }
 
