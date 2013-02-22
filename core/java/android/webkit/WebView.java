@@ -334,7 +334,8 @@ public class WebView extends AbsoluteLayout
          * See {@link WebView#capturePicture} for details of the picture.
          *
          * @param view the WebView that owns the picture
-         * @param picture the new picture
+         * @param picture the new picture. Applications targetting Jelly
+         *         Bean MR2 or above will always receive a null Picture.
          * @deprecated Deprecated due to internal changes.
          */
         @Deprecated
