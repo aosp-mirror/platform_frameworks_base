@@ -339,11 +339,6 @@ public class SurfaceControl {
         nativeSetLayer(mNativeObject, zorder);
     }
 
-    public void setPosition(int x, int y) {
-        checkNotReleased();
-        nativeSetPosition(mNativeObject, (float)x, (float)y);
-    }
-
     public void setPosition(float x, float y) {
         checkNotReleased();
         nativeSetPosition(mNativeObject, x, y);
