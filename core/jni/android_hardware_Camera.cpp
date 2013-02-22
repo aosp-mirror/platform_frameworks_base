@@ -537,7 +537,10 @@ static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    sp<Surface> surface = android_view_Surface_getSurface(env, jSurface);
+    sp<Surface> surface;
+    if (jSurface) {
+        surface = android_view_Surface_getSurface(env, jSurface);
+    }
 
     if (camera->setPreviewDisplay(surface) != NO_ERROR) {
         jniThrowException(env, "java/io/IOException", "setPreviewDisplay failed");
