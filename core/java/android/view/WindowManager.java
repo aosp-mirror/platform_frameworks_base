@@ -1193,6 +1193,37 @@ public interface WindowManager extends ViewManager {
         public float buttonBrightness = BRIGHTNESS_OVERRIDE_NONE;
 
         /**
+         * Value for {@link #rotationAnimation} to define the animation used to
+         * specify that this window will rotate in or out following a rotation.
+         */
+        public static final int ROTATION_ANIMATION_ROTATE = 0;
+
+        /**
+         * Value for {@link #rotationAnimation} to define the animation used to
+         * specify that this window will fade in or out following a rotation.
+         */
+        public static final int ROTATION_ANIMATION_CROSSFADE = 1;
+
+        /**
+         * Value for {@link #rotationAnimation} to define the animation used to
+         * specify that this window will immediately disappear or appear following
+         * a rotation.
+         */
+        public static final int ROTATION_ANIMATION_JUMPCUT = 2;
+
+        /**
+         * Define the animation used on this window for entry or exit following
+         * a rotation. This only works if the incoming and outgoing topmost
+         * opaque windows have the #FLAG_FULLSCREEN bit set and are not covered
+         * by other windows.
+         * 
+         * @see #ROTATION_ANIMATION_ROTATE
+         * @see #ROTATION_ANIMATION_CROSSFADE
+         * @see #ROTATION_ANIMATION_JUMPCUT
+         */
+        public int rotationAnimation = ROTATION_ANIMATION_ROTATE;
+
+        /**
          * Identifier for this window.  This will usually be filled in for
          * you.
          */
@@ -1367,6 +1398,7 @@ public interface WindowManager extends ViewManager {
             out.writeFloat(dimAmount);
             out.writeFloat(screenBrightness);
             out.writeFloat(buttonBrightness);
+            out.writeInt(rotationAnimation);
             out.writeStrongBinder(token);
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
@@ -1408,6 +1440,7 @@ public interface WindowManager extends ViewManager {
             dimAmount = in.readFloat();
             screenBrightness = in.readFloat();
             buttonBrightness = in.readFloat();
+            rotationAnimation = in.readInt();
             token = in.readStrongBinder();
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -1432,18 +1465,19 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_MODE_CHANGED = 1<<9;
         public static final int SCREEN_ORIENTATION_CHANGED = 1<<10;
         public static final int SCREEN_BRIGHTNESS_CHANGED = 1<<11;
+        public static final int ROTATION_ANIMATION_CHANGED = 1<<12;
         /** {@hide} */
-        public static final int BUTTON_BRIGHTNESS_CHANGED = 1<<12;
+        public static final int BUTTON_BRIGHTNESS_CHANGED = 1<<13;
         /** {@hide} */
-        public static final int SYSTEM_UI_VISIBILITY_CHANGED = 1<<13;
+        public static final int SYSTEM_UI_VISIBILITY_CHANGED = 1<<14;
         /** {@hide} */
-        public static final int SYSTEM_UI_LISTENER_CHANGED = 1<<14;
+        public static final int SYSTEM_UI_LISTENER_CHANGED = 1<<15;
         /** {@hide} */
-        public static final int INPUT_FEATURES_CHANGED = 1<<15;
+        public static final int INPUT_FEATURES_CHANGED = 1<<16;
         /** {@hide} */
-        public static final int PRIVATE_FLAGS_CHANGED = 1<<16;
+        public static final int PRIVATE_FLAGS_CHANGED = 1<<17;
         /** {@hide} */
-        public static final int USER_ACTIVITY_TIMEOUT_CHANGED = 1<<17;
+        public static final int USER_ACTIVITY_TIMEOUT_CHANGED = 1<<18;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -1542,6 +1576,10 @@ public interface WindowManager extends ViewManager {
             if (buttonBrightness != o.buttonBrightness) {
                 buttonBrightness = o.buttonBrightness;
                 changes |= BUTTON_BRIGHTNESS_CHANGED;
+            }
+            if (rotationAnimation != o.rotationAnimation) {
+                rotationAnimation = o.rotationAnimation;
+                changes |= ROTATION_ANIMATION_CHANGED;
             }
     
             if (screenOrientation != o.screenOrientation) {
@@ -1644,6 +1682,10 @@ public interface WindowManager extends ViewManager {
             if (buttonBrightness != BRIGHTNESS_OVERRIDE_NONE) {
                 sb.append(" bbrt=");
                 sb.append(buttonBrightness);
+            }
+            if (rotationAnimation != ROTATION_ANIMATION_ROTATE) {
+                sb.append(" rotAnim=");
+                sb.append(rotationAnimation);
             }
             if ((flags & FLAG_COMPATIBLE_WINDOW) != 0) {
                 sb.append(" compatible=true");

@@ -1737,6 +1737,51 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 0;
     }
 
+    @Override
+    public void selectRotationAnimationLw(int anim[]) {
+        if (PRINT_ANIM) Slog.i(TAG, "selectRotationAnimation mTopFullscreen="
+                + mTopFullscreenOpaqueWindowState + " rotationAnimation="
+                + (mTopFullscreenOpaqueWindowState == null ?
+                        "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation));
+        if (mTopFullscreenOpaqueWindowState != null && mTopIsFullscreen) {
+            switch (mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation) {
+                case ROTATION_ANIMATION_CROSSFADE:
+                    anim[0] = R.anim.rotation_animation_xfade_exit;
+                    anim[1] = R.anim.rotation_animation_enter;
+                    break;
+                case ROTATION_ANIMATION_JUMPCUT:
+                    anim[0] = R.anim.rotation_animation_jump_exit;
+                    anim[1] = R.anim.rotation_animation_enter;
+                    break;
+                case ROTATION_ANIMATION_ROTATE:
+                default:
+                    anim[0] = anim[1] = 0;
+                    break;
+            }
+        } else {
+            anim[0] = anim[1] = 0;
+        }
+    }
+
+    @Override
+    public boolean validateRotationAnimationLw(int exitAnimId, int enterAnimId,
+            boolean forceDefault) {
+        switch (exitAnimId) {
+            case R.anim.rotation_animation_xfade_exit:
+            case R.anim.rotation_animation_jump_exit:
+                // These are the only cases that matter.
+                if (forceDefault) {
+                    return false;
+                }
+                int anim[] = new int[2];
+                selectRotationAnimationLw(anim);
+                return (exitAnimId == anim[0] && enterAnimId == anim[1]);
+            default:
+                return true;
+        }
+    }
+
+    @Override
     public Animation createForceHideEnterAnimation(boolean onWallpaper) {
         return AnimationUtils.loadAnimation(mContext, onWallpaper
                 ? com.android.internal.R.anim.lock_screen_wallpaper_behind_enter

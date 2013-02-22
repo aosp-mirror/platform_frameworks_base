@@ -1487,6 +1487,9 @@
   <java-symbol type="anim" name="screen_user_exit" />
   <java-symbol type="anim" name="screen_user_enter" />
   <java-symbol type="anim" name="window_move_from_decor" />
+  <java-symbol type="anim" name="rotation_animation_jump_exit" />
+  <java-symbol type="anim" name="rotation_animation_xfade_exit" />
+  <java-symbol type="anim" name="rotation_animation_enter" />
   <java-symbol type="array" name="config_autoBrightnessButtonBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />

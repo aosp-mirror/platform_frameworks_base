@@ -684,6 +684,31 @@ public interface WindowManagerPolicy {
     public int selectAnimationLw(WindowState win, int transit);
 
     /**
+     * Determine the animation to run for a rotation transition based on the
+     * top fullscreen windows {@link WindowManager.LayoutParams#rotationAnimation}
+     * and whether it is currently fullscreen and frontmost.
+     * 
+     * @param anim The exiting animation resource id is stored in anim[0], the 
+     * entering animation resource id is stored in anim[1].
+     */
+    public void selectRotationAnimationLw(int anim[]);
+
+    /**
+     * Validate whether the current top fullscreen has specified the same
+     * {@link WindowManager.LayoutParams#rotationAnimation} value as that
+     * being passed in from the previous top fullscreen window.
+     *
+     * @param exitAnimId exiting resource id from the previous window.
+     * @param enterAnimId entering resource id from the previous window.
+     * @param forceDefault For rotation animations only, if true ignore the
+     * animation values and just return false.
+     * @return true if the previous values are still valid, false if they
+     * should be replaced with the default.
+     */
+    public boolean validateRotationAnimationLw(int exitAnimId, int enterAnimId,
+            boolean forceDefault);
+
+    /**
      * Create and return an animation to re-display a force hidden window.
      */
     public Animation createForceHideEnterAnimation(boolean onWallpaper);
@@ -909,6 +934,7 @@ public interface WindowManagerPolicy {
      * @see android.app.KeyguardManager.KeyguardLock#disableKeyguard()
      * @see android.app.KeyguardManager.KeyguardLock#reenableKeyguard()
      */
+    @SuppressWarnings("javadoc")
     public void enableKeyguard(boolean enabled);
 
     /**
@@ -924,6 +950,7 @@ public interface WindowManagerPolicy {
      * @param callback Callback to send the result back.
      * @see android.app.KeyguardManager#exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult)
      */
+    @SuppressWarnings("javadoc")
     void exitKeyguardSecurely(OnKeyguardExitResult callback);
 
     /**
