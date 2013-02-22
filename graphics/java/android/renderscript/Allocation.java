@@ -1246,24 +1246,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     *
-     *
-     * @hide
-     *
-     */
-    public SurfaceTexture getSurfaceTexture() {
-        if ((mUsage & USAGE_IO_INPUT) == 0) {
-            throw new RSInvalidStateException("Allocation is not a surface texture.");
-        }
-
-        int id = mRS.nAllocationGetSurfaceTextureID(getID(mRS));
-        SurfaceTexture st = new SurfaceTexture(id);
-        mRS.nAllocationGetSurfaceTextureID2(getID(mRS), st);
-
-        return st;
-    }
-
-    /**
      * For allocations used with io operations, returns the handle
      * onto a raw buffer that is being managed by the screen
      * compositor.
@@ -1272,7 +1254,10 @@ public class Allocation extends BaseObj {
      *
      */
     public Surface getSurface() {
-        return new Surface(getSurfaceTexture());
+        if ((mUsage & USAGE_IO_INPUT) == 0) {
+            throw new RSInvalidStateException("Allocation is not a surface texture.");
+        }
+        return mRS.nAllocationGetSurface(getID(mRS));
     }
 
     /**
@@ -1287,19 +1272,6 @@ public class Allocation extends BaseObj {
         }
 
         mRS.nAllocationSetSurface(getID(mRS), sur);
-    }
-
-    /**
-     * @hide
-     */
-    public void setSurfaceTexture(SurfaceTexture st) {
-        mRS.validate();
-        if ((mUsage & USAGE_IO_OUTPUT) == 0) {
-            throw new RSInvalidStateException("Allocation is not USAGE_IO_OUTPUT.");
-        }
-
-        Surface s = new Surface(st);
-        mRS.nAllocationSetSurface(getID(mRS), s);
     }
 
     /**

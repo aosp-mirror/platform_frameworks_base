@@ -303,15 +303,10 @@ public class RenderScript {
         validate();
         rsnAllocationSyncAll(mContext, alloc, src);
     }
-    native int rsnAllocationGetSurfaceTextureID(int con, int alloc);
-    synchronized int nAllocationGetSurfaceTextureID(int alloc) {
+    native Surface rsnAllocationGetSurface(int con, int alloc);
+    synchronized Surface nAllocationGetSurface(int alloc) {
         validate();
-        return rsnAllocationGetSurfaceTextureID(mContext, alloc);
-    }
-    native void rsnAllocationGetSurfaceTextureID2(int con, int alloc, SurfaceTexture st);
-    synchronized void nAllocationGetSurfaceTextureID2(int alloc, SurfaceTexture st) {
-        validate();
-        rsnAllocationGetSurfaceTextureID2(mContext, alloc, st);
+        return rsnAllocationGetSurface(mContext, alloc);
     }
     native void rsnAllocationSetSurface(int con, int alloc, Surface sur);
     synchronized void nAllocationSetSurface(int alloc, Surface sur) {

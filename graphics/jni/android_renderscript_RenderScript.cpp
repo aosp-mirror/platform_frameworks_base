@@ -237,23 +237,6 @@ nContextSetSurface(JNIEnv *_env, jobject _this, RsContext con, jint width, jint 
 }
 
 static void
-nContextSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con, jint width, jint height, jobject sur)
-{
-    LOG_API("nContextSetSurfaceTexture, con(%p), width(%i), height(%i), surface(%p)", con, width, height, (Surface *)sur);
-
-    sp<ANativeWindow> window;
-    sp<GLConsumer> st;
-    if (sur == 0) {
-
-    } else {
-        st = SurfaceTexture_getSurfaceTexture(_env, sur);
-        window = new Surface(st->getBufferQueue());
-    }
-
-    rsContextSetSurface(con, width, height, window.get());
-}
-
-static void
 nContextDestroy(JNIEnv *_env, jobject _this, RsContext con)
 {
     LOG_API("nContextDestroy, con(%p)", con);
@@ -487,20 +470,17 @@ nAllocationSyncAll(JNIEnv *_env, jobject _this, RsContext con, jint a, jint bits
     rsAllocationSyncAll(con, (RsAllocation)a, (RsAllocationUsageType)bits);
 }
 
-static jint
-nAllocationGetSurfaceTextureID(JNIEnv *_env, jobject _this, RsContext con, jint a)
+static jobject
+nAllocationGetSurface(JNIEnv *_env, jobject _this, RsContext con, jint a)
 {
-    LOG_API("nAllocationGetSurfaceTextureID, con(%p), a(%p)", con, (RsAllocation)a);
-    return rsAllocationGetSurfaceTextureID(con, (RsAllocation)a);
-}
+    LOG_API("nAllocationGetSurface, con(%p), a(%p)", con, (RsAllocation)a);
 
-static void
-nAllocationGetSurfaceTextureID2(JNIEnv *_env, jobject _this, RsContext con, jint a, jobject jst)
-{
-    LOG_API("nAllocationGetSurfaceTextureID2, con(%p), a(%p)", con, (RsAllocation)a);
-    sp<GLConsumer> st = SurfaceTexture_getSurfaceTexture(_env, jst);
+    IGraphicBufferProducer *v = (IGraphicBufferProducer *)rsAllocationGetSurface(con, (RsAllocation)a);
+    sp<IGraphicBufferProducer> bp = v;
+    v->decStrong(NULL);
 
-    rsAllocationGetSurfaceTextureID2(con, (RsAllocation)a, st.get(), sizeof(GLConsumer *));
+    jobject o = android_view_Surface_createFromIGraphicBufferProducer(_env, bp);
+    return o;
 }
 
 static void
@@ -1488,7 +1468,6 @@ static JNINativeMethod methods[] = {
 {"rsnContextFinish",                 "(I)V",                                  (void*)nContextFinish },
 {"rsnContextSetPriority",            "(II)V",                                 (void*)nContextSetPriority },
 {"rsnContextSetSurface",             "(IIILandroid/view/Surface;)V",          (void*)nContextSetSurface },
-{"rsnContextSetSurfaceTexture",      "(IIILandroid/graphics/SurfaceTexture;)V", (void*)nContextSetSurfaceTexture },
 {"rsnContextDestroy",                "(I)V",                                  (void*)nContextDestroy },
 {"rsnContextDump",                   "(II)V",                                 (void*)nContextDump },
 {"rsnContextPause",                  "(I)V",                                  (void*)nContextPause },
@@ -1526,8 +1505,7 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationCopyToBitmap",        "(IILandroid/graphics/Bitmap;)V",        (void*)nAllocationCopyToBitmap },
 
 {"rsnAllocationSyncAll",             "(III)V",                                (void*)nAllocationSyncAll },
-{"rsnAllocationGetSurfaceTextureID", "(II)I",                                 (void*)nAllocationGetSurfaceTextureID },
-{"rsnAllocationGetSurfaceTextureID2","(IILandroid/graphics/SurfaceTexture;)V",(void*)nAllocationGetSurfaceTextureID2 },
+{"rsnAllocationGetSurface",          "(II)Landroid/view/Surface;",            (void*)nAllocationGetSurface },
 {"rsnAllocationSetSurface",          "(IILandroid/view/Surface;)V",           (void*)nAllocationSetSurface },
 {"rsnAllocationIoSend",              "(II)V",                                 (void*)nAllocationIoSend },
 {"rsnAllocationIoReceive",           "(II)V",                                 (void*)nAllocationIoReceive },

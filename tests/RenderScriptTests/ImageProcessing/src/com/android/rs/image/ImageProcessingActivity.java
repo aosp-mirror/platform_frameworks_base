@@ -97,7 +97,8 @@ public class ImageProcessingActivity extends Activity
         EXPOSURE ("Exposure"),
         WHITE_BALANCE ("White Balance"),
         COLOR_CUBE ("Color Cube"),
-        COLOR_CUBE_3D_INTRINSIC ("Color Cube (3D LUT intrinsic)");
+        COLOR_CUBE_3D_INTRINSIC ("Color Cube (3D LUT intrinsic)"),
+        USAGE_IO ("Usage io)");
 
 
         private final String name;
@@ -351,6 +352,9 @@ public class ImageProcessingActivity extends Activity
             break;
         case COLOR_CUBE_3D_INTRINSIC:
             mTest = new ColorCube(true);
+            break;
+        case USAGE_IO:
+            mTest = new UsageIO();
             break;
         }
 
