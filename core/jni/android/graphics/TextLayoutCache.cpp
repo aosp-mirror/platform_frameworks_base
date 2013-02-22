@@ -340,7 +340,7 @@ TextLayoutShaper::TextLayoutShaper() {
 }
 
 void TextLayoutShaper::init() {
-    mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
+    mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, SkTypeface::kNormal);
 }
 
 void TextLayoutShaper::unrefTypefaces() {

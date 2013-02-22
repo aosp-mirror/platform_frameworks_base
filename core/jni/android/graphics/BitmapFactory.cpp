@@ -231,7 +231,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     }
 
     SkAutoTDelete<SkImageDecoder> add(decoder);
-    SkAutoTDelete<SkBitmap> adb(bitmap, !useExistingBitmap);
+    SkAutoTDelete<SkBitmap> adb(!useExistingBitmap ? bitmap : NULL);
 
     decoder->setPeeker(&peeker);
     if (!isPurgeable) {

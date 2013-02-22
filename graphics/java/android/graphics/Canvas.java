@@ -37,8 +37,8 @@ import javax.microedition.khronos.opengles.GL;
  * Canvas and Drawables</a> developer guide.</p></div>
  */
 public class Canvas {
-    // assigned in constructors, freed in finalizer
-    final int mNativeCanvas;
+    // assigned in constructors or setBitmap, freed in finalizer
+    int mNativeCanvas;
     
     // may be null
     private Bitmap mBitmap;
@@ -71,7 +71,7 @@ public class Canvas {
     private final CanvasFinalizer mFinalizer;
 
     private static class CanvasFinalizer {
-        private final int mNativeCanvas;
+        private int mNativeCanvas;
 
         public CanvasFinalizer(int nativeCanvas) {
             mNativeCanvas = nativeCanvas;
@@ -131,6 +131,18 @@ public class Canvas {
     }
 
     /**
+     * Replace existing canvas while ensuring that the swap has occurred before
+     * the previous native canvas is unreferenced.
+     */
+    private void safeCanvasSwap(int nativeCanvas) {
+        final int oldCanvas = mNativeCanvas;
+        mNativeCanvas = nativeCanvas;
+        mFinalizer.mNativeCanvas = nativeCanvas;
+        copyNativeCanvasState(oldCanvas, mNativeCanvas);
+        finalizer(oldCanvas);
+    }
+    
+    /**
      * Returns null.
      * 
      * @deprecated This method is not supported and should not be invoked.
@@ -156,11 +168,11 @@ public class Canvas {
     }
 
     /**
-     * Specify a bitmap for the canvas to draw into.  As a side-effect, also
-     * updates the canvas's target density to match that of the bitmap.
+     * Specify a bitmap for the canvas to draw into. As a side-effect, the
+     * canvas' target density is updated to match that of the bitmap while all
+     * other state such as the layers, filters, matrix, and clip are reset.
      *
      * @param bitmap Specifies a mutable bitmap for the canvas to draw into.
-     * 
      * @see #setDensity(int)
      * @see #getDensity()
      */
@@ -169,17 +181,19 @@ public class Canvas {
             throw new RuntimeException("Can't set a bitmap device on a GL canvas");
         }
 
-        int pointer = 0;
-        if (bitmap != null) {
+        if (bitmap == null) {
+            safeCanvasSwap(initRaster(0));
+            mDensity = Bitmap.DENSITY_NONE;
+        } else {
             if (!bitmap.isMutable()) {
                 throw new IllegalStateException();
             }
             throwIfRecycled(bitmap);
+
+            safeCanvasSwap(initRaster(bitmap.ni()));
             mDensity = bitmap.mDensity;
-            pointer = bitmap.ni();
         }
 
-        native_setBitmap(mNativeCanvas, pointer);
         mBitmap = bitmap;
     }
     
@@ -694,7 +708,7 @@ public class Canvas {
      *              does not intersect with the canvas' clip
      */
     public boolean quickReject(RectF rect, EdgeType type) {
-        return native_quickReject(mNativeCanvas, rect, type.nativeInt);
+        return native_quickReject(mNativeCanvas, rect);
     }
 
     /**
@@ -714,7 +728,7 @@ public class Canvas {
      *                    does not intersect with the canvas' clip
      */
     public boolean quickReject(Path path, EdgeType type) {
-        return native_quickReject(mNativeCanvas, path.ni(), type.nativeInt);
+        return native_quickReject(mNativeCanvas, path.ni());
     }
 
     /**
@@ -737,9 +751,9 @@ public class Canvas {
      * @return            true if the rect (transformed by the canvas' matrix)
      *                    does not intersect with the canvas' clip
      */
-    public boolean quickReject(float left, float top, float right, float bottom, EdgeType type) {
-        return native_quickReject(mNativeCanvas, left, top, right, bottom,
-                                  type.nativeInt);
+    public boolean quickReject(float left, float top, float right, float bottom,
+                               EdgeType type) {
+        return native_quickReject(mNativeCanvas, left, top, right, bottom);
     }
 
     /**
@@ -1599,7 +1613,7 @@ public class Canvas {
     public static native void freeTextLayoutCaches();
 
     private static native int initRaster(int nativeBitmapOrZero);
-    private static native void native_setBitmap(int nativeCanvas, int bitmap);
+    private static native void copyNativeCanvasState(int srcCanvas, int dstCanvas);
     private static native int native_saveLayer(int nativeCanvas, RectF bounds,
                                                int paint, int layerFlags);
     private static native int native_saveLayer(int nativeCanvas, float l,
@@ -1630,15 +1644,12 @@ public class Canvas {
                                                        Rect bounds);
     private static native void native_getCTM(int canvas, int matrix);
     private static native boolean native_quickReject(int nativeCanvas,
-                                                     RectF rect,
-                                                     int native_edgeType);
+                                                     RectF rect);
     private static native boolean native_quickReject(int nativeCanvas,
-                                                     int path,
-                                                     int native_edgeType);
+                                                     int path);
     private static native boolean native_quickReject(int nativeCanvas,
                                                      float left, float top,
-                                                     float right, float bottom,
-                                                     int native_edgeType);
+                                                     float right, float bottom);
     private static native void native_drawRGB(int nativeCanvas, int r, int g,
                                               int b);
     private static native void native_drawARGB(int nativeCanvas, int a, int r,

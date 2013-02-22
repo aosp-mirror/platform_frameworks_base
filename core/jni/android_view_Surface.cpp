@@ -55,7 +55,6 @@ static struct {
     jfieldID mNativeObject;
     jfieldID mGenerationId;
     jfieldID mCanvas;
-    jfieldID mCanvasSaveCount;
     jmethodID ctor;
 } gSurfaceClassInfo;
 
@@ -67,9 +66,14 @@ static struct {
 } gRectClassInfo;
 
 static struct {
+    jfieldID mFinalizer;
     jfieldID mNativeCanvas;
     jfieldID mSurfaceFormat;
 } gCanvasClassInfo;
+
+static struct {
+    jfieldID mNativeCanvas;
+} gCanvasFinalizerClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -180,6 +184,15 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
     }
 }
 
+static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
+  jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
+  SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
+          env->GetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas));
+  env->SetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas, (int)newCanvas);
+  env->SetIntField(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (int)newCanvas);
+  SkSafeUnref(previousCanvas);
+}
+
 static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObject, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
@@ -219,8 +232,6 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
     jobject canvasObj = env->GetObjectField(surfaceObj, gSurfaceClassInfo.mCanvas);
     env->SetIntField(canvasObj, gCanvasClassInfo.mSurfaceFormat, outBuffer.format);
 
-    SkCanvas* nativeCanvas = reinterpret_cast<SkCanvas*>(
-            env->GetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas));
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
     bitmap.setConfig(convertPixelFormat(outBuffer.format), outBuffer.width, outBuffer.height, bpr);
@@ -233,7 +244,9 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
         // be safe with an empty bitmap.
         bitmap.setPixels(NULL);
     }
-    nativeCanvas->setBitmapDevice(bitmap);
+
+    SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
+    swapCanvasPtr(env, canvasObj, nativeCanvas);
 
     SkRegion clipReg;
     if (dirtyRegion.isRect()) { // very common case
@@ -249,9 +262,6 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
     }
 
     nativeCanvas->clipRegion(clipReg);
-
-    int saveCount = nativeCanvas->save();
-    env->SetIntField(surfaceObj, gSurfaceClassInfo.mCanvasSaveCount, saveCount);
 
     if (dirtyRectObj) {
         const Rect& bounds(dirtyRegion.getBounds());
@@ -277,12 +287,8 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jobject surfaceObj, jint nati
     }
 
     // detach the canvas from the surface
-    SkCanvas* nativeCanvas = reinterpret_cast<SkCanvas*>(
-            env->GetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas));
-    int saveCount = env->GetIntField(surfaceObj, gSurfaceClassInfo.mCanvasSaveCount);
-    nativeCanvas->restoreToCount(saveCount);
-    nativeCanvas->setBitmapDevice(SkBitmap());
-    env->SetIntField(surfaceObj, gSurfaceClassInfo.mCanvasSaveCount, 0);
+    SkCanvas* nativeCanvas = SkNEW(SkCanvas);
+    swapCanvasPtr(env, canvasObj, nativeCanvas);
 
     // unlock surface
     status_t err = surface->unlockAndPost();
@@ -382,13 +388,15 @@ int register_android_view_Surface(JNIEnv* env)
             env->GetFieldID(gSurfaceClassInfo.clazz, "mGenerationId", "I");
     gSurfaceClassInfo.mCanvas =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvas", "Landroid/graphics/Canvas;");
-    gSurfaceClassInfo.mCanvasSaveCount =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvasSaveCount", "I");
-    gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");
+    gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "()V");
 
     clazz = env->FindClass("android/graphics/Canvas");
+    gCanvasClassInfo.mFinalizer = env->GetFieldID(clazz, "mFinalizer", "Landroid/graphics/Canvas$CanvasFinalizer;");
     gCanvasClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "I");
     gCanvasClassInfo.mSurfaceFormat = env->GetFieldID(clazz, "mSurfaceFormat", "I");
+
+    clazz = env->FindClass("android/graphics/Canvas$CanvasFinalizer");
+    gCanvasFinalizerClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "I");
 
     clazz = env->FindClass("android/graphics/Rect");
     gRectClassInfo.left = env->GetFieldID(clazz, "left", "I");
