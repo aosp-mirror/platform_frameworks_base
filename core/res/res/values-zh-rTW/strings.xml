@@ -1269,7 +1269,8 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在連線至永久連線的 VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已連線至永久連線的 VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"永久連線的 VPN 發生錯誤"</string>
-    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"輕觸即可重設連線"</string>
+    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未選擇任何檔案"</string>
     <string name="reset" msgid="2448168080964209908">"重設"</string>

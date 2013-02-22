@@ -1269,7 +1269,8 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"연결 유지 VPN에 연결하는 중…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"연결 유지 VPN에 연결됨"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"연결 유지 VPN 오류"</string>
-    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"터치하여 연결 재설정"</string>
+    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"파일 선택"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"파일을 선택하지 않았습니다."</string>
     <string name="reset" msgid="2448168080964209908">"초기화"</string>

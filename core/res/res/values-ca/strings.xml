@@ -1269,7 +1269,8 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"T\'estàs connectant a la VPN sempre activada…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Estàs connectat a la VPN sempre activada"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Error de la VPN sempre activada"</string>
-    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"Toca per restablir la connexió"</string>
+    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Trieu un fitxer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No s\'ha escollit cap fitxer"</string>
     <string name="reset" msgid="2448168080964209908">"Reinicia"</string>
