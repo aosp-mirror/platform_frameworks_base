@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 #ifndef ANDROID_HWUI_DISPLAY_OPERATION_H
 #define ANDROID_HWUI_DISPLAY_OPERATION_H
+
+#ifndef LOG_TAG
+    #define LOG_TAG "OpenGLRenderer"
+#endif
 
 #include <SkXfermode.h>
 

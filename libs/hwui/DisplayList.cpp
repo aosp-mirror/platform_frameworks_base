@@ -251,16 +251,18 @@ size_t DisplayList::getSize() {
  * display list. This function should remain in sync with the replay() function.
  */
 void DisplayList::output(uint32_t level) {
-    ALOGD("%*sStart display list (%p, %s, render=%d)", level * 2, "", this,
+    ALOGD("%*sStart display list (%p, %s, render=%d)", (level - 1) * 2, "", this,
             mName.string(), isRenderable());
+    ALOGD("%*s%s %d", level * 2, "", "Save",
+            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
-    ALOGD("%*s%s %d", level * 2, "", "Save", SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     outputViewProperties(level);
     int flags = DisplayListOp::kOpLogFlag_Recurse;
     for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
         mDisplayListData->displayListOps[i]->output(level, flags);
     }
-    ALOGD("%*sDone (%p, %s)", level * 2, "", this, mName.string());
+
+    ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, mName.string());
 }
 
 float DisplayList::getPivotX() {
