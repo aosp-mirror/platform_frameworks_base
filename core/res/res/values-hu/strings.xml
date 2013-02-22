@@ -994,7 +994,7 @@
     <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> nap múlva"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"e napon: <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"ekkor: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"év: <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"nap"</string>
     <string name="days" msgid="4774547661021344602">"nap"</string>
@@ -1269,7 +1269,8 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Csatlakozás a mindig bekapcsolt VPN-hez..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Csatlakozva a mindig bekapcsolt VPN-hez"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Hiba a mindig bekapcsolt VPN-nel"</string>
-    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"Érintse meg a kapcsolat alaphelyzetbe állításához."</string>
+    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Fájl kiválasztása"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nincs fájl kiválasztva"</string>
     <string name="reset" msgid="2448168080964209908">"Alaphelyzet"</string>

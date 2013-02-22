@@ -1269,7 +1269,8 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til Always-on VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Always-on VPN er forbundet"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i Always-on VPN"</string>
-    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"Tryk for at nulstille forbindelsen"</string>
+    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Vælg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
     <string name="reset" msgid="2448168080964209908">"Nulstil"</string>

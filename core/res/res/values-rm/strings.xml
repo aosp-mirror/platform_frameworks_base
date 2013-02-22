@@ -1993,7 +1993,7 @@
     <skip />
     <!-- no translation found for vpn_lockdown_error (6009249814034708175) -->
     <skip />
-    <!-- no translation found for vpn_lockdown_reset (5365010427963548932) -->
+    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
     <skip />
     <string name="upload_file" msgid="2897957172366730416">"Tscherner ina datoteca"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nagina datoteca tschernida"</string>
