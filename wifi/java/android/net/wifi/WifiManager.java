@@ -499,16 +499,14 @@ public class WifiManager {
     IWifiManager mService;
 
     private static final int INVALID_KEY = 0;
-    private int mListenerKey = 1;
-    private final SparseArray mListenerMap = new SparseArray();
-    private final Object mListenerMapLock = new Object();
+    private static int sListenerKey = 1;
+    private static final SparseArray sListenerMap = new SparseArray();
+    private static final Object sListenerMapLock = new Object();
 
-    private AsyncChannel mAsyncChannel = new AsyncChannel();
-    private ServiceHandler mHandler;
-    private Messenger mWifiServiceMessenger;
-    private final CountDownLatch mConnected = new CountDownLatch(1);
+    private static AsyncChannel sAsyncChannel;
+    private static CountDownLatch sConnected;
 
-    private static Object sThreadRefLock = new Object();
+    private static final Object sThreadRefLock = new Object();
     private static int sThreadRefCount;
     private static HandlerThread sHandlerThread;
 
@@ -899,7 +897,7 @@ public class WifiManager {
      */
     public void getTxPacketCount(TxPacketCountListener listener) {
         validateChannel();
-        mAsyncChannel.sendMessage(RSSI_PKTCNT_FETCH, 0, putListener(listener));
+        sAsyncChannel.sendMessage(RSSI_PKTCNT_FETCH, 0, putListener(listener));
     }
 
     /**
@@ -1231,7 +1229,7 @@ public class WifiManager {
         public void onFailure(int reason);
     }
 
-    private class ServiceHandler extends Handler {
+    private static class ServiceHandler extends Handler {
         ServiceHandler(Looper looper) {
             super(looper);
         }
@@ -1242,14 +1240,14 @@ public class WifiManager {
             switch (message.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     if (message.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
+                        sAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
                     } else {
                         Log.e(TAG, "Failed to set up channel connection");
                         // This will cause all further async API calls on the WifiManager
                         // to fail and throw an exception
-                        mAsyncChannel = null;
+                        sAsyncChannel = null;
                     }
-                    mConnected.countDown();
+                    sConnected.countDown();
                     break;
                 case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
                     // Ignore
@@ -1258,7 +1256,7 @@ public class WifiManager {
                     Log.e(TAG, "Channel connection lost");
                     // This will cause all further async API calls on the WifiManager
                     // to fail and throw an exception
-                    mAsyncChannel = null;
+                    sAsyncChannel = null;
                     getLooper().quit();
                     break;
                     /* ActionListeners grouped together */
@@ -1286,8 +1284,8 @@ public class WifiManager {
                         WpsResult result = (WpsResult) message.obj;
                         ((WpsListener) listener).onStartSuccess(result.pin);
                         //Listener needs to stay until completion or failure
-                        synchronized(mListenerMapLock) {
-                            mListenerMap.put(message.arg2, listener);
+                        synchronized(sListenerMapLock) {
+                            sListenerMap.put(message.arg2, listener);
                         }
                     }
                     break;
@@ -1322,52 +1320,54 @@ public class WifiManager {
         }
     }
 
-    private int putListener(Object listener) {
+    private static int putListener(Object listener) {
         if (listener == null) return INVALID_KEY;
         int key;
-        synchronized (mListenerMapLock) {
+        synchronized (sListenerMapLock) {
             do {
-                key = mListenerKey++;
+                key = sListenerKey++;
             } while (key == INVALID_KEY);
-            mListenerMap.put(key, listener);
+            sListenerMap.put(key, listener);
         }
         return key;
     }
 
-    private Object removeListener(int key) {
+    private static Object removeListener(int key) {
         if (key == INVALID_KEY) return null;
-        synchronized (mListenerMapLock) {
-            Object listener = mListenerMap.get(key);
-            mListenerMap.remove(key);
+        synchronized (sListenerMapLock) {
+            Object listener = sListenerMap.get(key);
+            sListenerMap.remove(key);
             return listener;
         }
     }
 
     private void init() {
-        mWifiServiceMessenger = getWifiServiceMessenger();
-        if (mWifiServiceMessenger == null) {
-            mAsyncChannel = null;
-            return;
-        }
-
         synchronized (sThreadRefLock) {
             if (++sThreadRefCount == 1) {
-                sHandlerThread = new HandlerThread("WifiManager");
-                sHandlerThread.start();
-            }
-        }
+                Messenger messenger = getWifiServiceMessenger();
+                if (messenger == null) {
+                    sAsyncChannel = null;
+                    return;
+                }
 
-        mHandler = new ServiceHandler(sHandlerThread.getLooper());
-        mAsyncChannel.connect(mContext, mHandler, mWifiServiceMessenger);
-        try {
-            mConnected.await();
-        } catch (InterruptedException e) {
-            Log.e(TAG, "interrupted wait at init");
+                sHandlerThread = new HandlerThread("WifiManager");
+                sAsyncChannel = new AsyncChannel();
+                sConnected = new CountDownLatch(1);
+
+                sHandlerThread.start();
+                Handler handler = new ServiceHandler(sHandlerThread.getLooper());
+                sAsyncChannel.connect(mContext, handler, messenger);
+                try {
+                    sConnected.await();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "interrupted wait at init");
+                }
+            }
         }
     }
 
     private void validateChannel() {
-        if (mAsyncChannel == null) throw new IllegalStateException(
+        if (sAsyncChannel == null) throw new IllegalStateException(
                 "No permission to access and change wifi or a bad initialization");
     }
 
@@ -1392,7 +1392,7 @@ public class WifiManager {
         validateChannel();
         // Use INVALID_NETWORK_ID for arg1 when passing a config object
         // arg1 is used to pass network id when the network already exists
-        mAsyncChannel.sendMessage(CONNECT_NETWORK, WifiConfiguration.INVALID_NETWORK_ID,
+        sAsyncChannel.sendMessage(CONNECT_NETWORK, WifiConfiguration.INVALID_NETWORK_ID,
                 putListener(listener), config);
     }
 
@@ -1412,7 +1412,7 @@ public class WifiManager {
     public void connect(int networkId, ActionListener listener) {
         if (networkId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         validateChannel();
-        mAsyncChannel.sendMessage(CONNECT_NETWORK, networkId, putListener(listener));
+        sAsyncChannel.sendMessage(CONNECT_NETWORK, networkId, putListener(listener));
     }
 
     /**
@@ -1436,7 +1436,7 @@ public class WifiManager {
     public void save(WifiConfiguration config, ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         validateChannel();
-        mAsyncChannel.sendMessage(SAVE_NETWORK, 0, putListener(listener), config);
+        sAsyncChannel.sendMessage(SAVE_NETWORK, 0, putListener(listener), config);
     }
 
     /**
@@ -1455,7 +1455,7 @@ public class WifiManager {
     public void forget(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         validateChannel();
-        mAsyncChannel.sendMessage(FORGET_NETWORK, netId, putListener(listener));
+        sAsyncChannel.sendMessage(FORGET_NETWORK, netId, putListener(listener));
     }
 
     /**
@@ -1470,7 +1470,7 @@ public class WifiManager {
     public void disable(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         validateChannel();
-        mAsyncChannel.sendMessage(DISABLE_NETWORK, netId, putListener(listener));
+        sAsyncChannel.sendMessage(DISABLE_NETWORK, netId, putListener(listener));
     }
 
     /**
@@ -1485,7 +1485,7 @@ public class WifiManager {
     public void startWps(WpsInfo config, WpsListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         validateChannel();
-        mAsyncChannel.sendMessage(START_WPS, 0, putListener(listener), config);
+        sAsyncChannel.sendMessage(START_WPS, 0, putListener(listener), config);
     }
 
     /**
@@ -1498,7 +1498,7 @@ public class WifiManager {
      */
     public void cancelWps(ActionListener listener) {
         validateChannel();
-        mAsyncChannel.sendMessage(CANCEL_WPS, 0, putListener(listener));
+        sAsyncChannel.sendMessage(CANCEL_WPS, 0, putListener(listener));
     }
 
     /**
@@ -1974,8 +1974,8 @@ public class WifiManager {
     protected void finalize() throws Throwable {
         try {
             synchronized (sThreadRefLock) {
-                if (--sThreadRefCount == 0 && sHandlerThread != null) {
-                    sHandlerThread.getLooper().quit();
+                if (--sThreadRefCount == 0 && sAsyncChannel != null) {
+                    sAsyncChannel.disconnect();
                 }
             }
         } finally {
