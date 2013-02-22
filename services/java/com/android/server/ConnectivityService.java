@@ -2999,7 +2999,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public ProxyProperties getProxy() {
-        enforceAccessPermission();
+        // this information is already available as a world read/writable jvm property
+        // so this API change wouldn't have a benifit.  It also breaks the passing
+        // of proxy info to all the JVMs.
+        // enforceAccessPermission();
         synchronized (mDefaultProxyLock) {
             return mDefaultProxyDisabled ? null : mDefaultProxy;
         }
@@ -3051,7 +3054,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public ProxyProperties getGlobalProxy() {
-        enforceAccessPermission();
+        // this information is already available as a world read/writable jvm property
+        // so this API change wouldn't have a benifit.  It also breaks the passing
+        // of proxy info to all the JVMs.
+        // enforceAccessPermission();
         synchronized (mGlobalProxyLock) {
             return mGlobalProxy;
         }
