@@ -159,7 +159,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             name = line + name_pos;
             nameLen = strlen(name);
 
-            if (strstr(name, "[heap]") == name) {
+            if ((strstr(name, "[heap]") == name) ||
+                (strstr(name, "/dev/ashmem/libc malloc") == name)) {
                 whichHeap = HEAP_NATIVE;
             } else if (strstr(name, "/dev/ashmem/dalvik-") == name) {
                 whichHeap = HEAP_DALVIK;
