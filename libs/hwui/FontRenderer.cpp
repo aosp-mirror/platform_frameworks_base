@@ -563,9 +563,15 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     int penX = radius - bounds.left;
     int penY = radius - bounds.bottom;
 
-    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
-            Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, NULL, positions);
-    blurImage(&dataBuffer, paddedWidth, paddedHeight, radius);
+    if ((bounds.right > bounds.left) && (bounds.top > bounds.bottom)) {
+        // text has non-whitespace, so draw and blur to create the shadow
+        // NOTE: bounds.isEmpty() can't be used here, since vertical coordinates are inverted
+        // TODO: don't draw pure whitespace in the first place, and avoid needing this check
+        mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
+                Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, NULL, positions);
+
+        blurImage(&dataBuffer, paddedWidth, paddedHeight, radius);
+    }
 
     DropShadow image;
     image.width = paddedWidth;
@@ -774,6 +780,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
 
         delete[] gaussian;
         delete[] scratch;
+        return;
     }
 
     uint8_t* outImage = (uint8_t*)memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
