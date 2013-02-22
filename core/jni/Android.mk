@@ -162,7 +162,8 @@ LOCAL_C_INCLUDES += \
 	external/skia/include/effects \
 	external/skia/include/images \
 	external/skia/include/ports \
-	external/skia/src/ports \
+	external/skia/src/core \
+	external/skia/src/images \
 	external/skia/include/utils \
 	external/sqlite/dist \
 	external/sqlite/android \

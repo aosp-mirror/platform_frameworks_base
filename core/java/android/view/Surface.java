@@ -75,7 +75,6 @@ public class Surface implements Parcelable {
 
     private int mGenerationId; // incremented each time mNativeSurface changes
     private final Canvas mCanvas = new CompatibleCanvas();
-    private int mCanvasSaveCount; // Canvas save count at time of lockCanvas()
 
     // The Translator for density compatibility mode.  This is used for scaling
     // the canvas to perform the appropriate density transformation.

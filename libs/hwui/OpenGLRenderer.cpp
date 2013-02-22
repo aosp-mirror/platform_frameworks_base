@@ -81,7 +81,7 @@ static const Blender gBlends[] = {
     { SkXfermode::kDstATop_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
     { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
     { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
-    { SkXfermode::kMultiply_Mode, GL_ZERO,                GL_SRC_COLOR },
+    { SkXfermode::kModulate_Mode, GL_ZERO,                GL_SRC_COLOR },
     { SkXfermode::kScreen_Mode,   GL_ONE,                 GL_ONE_MINUS_SRC_COLOR }
 };
 
@@ -102,7 +102,7 @@ static const Blender gBlendsSwap[] = {
     { SkXfermode::kDstATop_Mode,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
     { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
     { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
-    { SkXfermode::kMultiply_Mode, GL_DST_COLOR,           GL_ZERO },
+    { SkXfermode::kModulate_Mode, GL_DST_COLOR,           GL_ZERO },
     { SkXfermode::kScreen_Mode,   GL_ONE_MINUS_DST_COLOR, GL_ONE }
 };
 
