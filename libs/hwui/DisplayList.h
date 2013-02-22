@@ -75,7 +75,8 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    void setViewProperties(OpenGLRenderer& renderer, uint32_t level);
+    status_t setViewProperties(OpenGLRenderer& renderer, Rect& dirty,
+            int32_t flags, uint32_t level, DeferredDisplayList* deferredList);
     void outputViewProperties(uint32_t level);
 
     ANDROID_API size_t getSize();

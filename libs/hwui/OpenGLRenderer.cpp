@@ -1284,6 +1284,10 @@ void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
     }
 }
 
+bool OpenGLRenderer::hasRectToRectTransform() {
+    return CC_LIKELY(mSnapshot->transform->rectToRect());
+}
+
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
     mSnapshot->transform->copyTo(*matrix);
 }
@@ -1505,8 +1509,10 @@ void OpenGLRenderer::setupDraw(bool clear) {
     if (clear) clearLayerRegions();
     // Make sure setScissor & setStencil happen at the beginning of
     // this method
-    if (mDirtyClip && mCaches.scissorEnabled) {
-        setScissorFromClip();
+    if (mDirtyClip) {
+        if (mCaches.scissorEnabled) {
+            setScissorFromClip();
+        }
         setStencilFromClip();
     }
     mDescription.reset();

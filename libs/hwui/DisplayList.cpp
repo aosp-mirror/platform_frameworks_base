@@ -356,7 +356,9 @@ void DisplayList::outputViewProperties(uint32_t level) {
     }
 }
 
-void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t level) {
+status_t DisplayList::setViewProperties(OpenGLRenderer& renderer, Rect& dirty,
+        int32_t flags, uint32_t level, DeferredDisplayList* deferredList) {
+    status_t status = DrawGlInfo::kStatusDone;
 #if DEBUG_DISPLAYLIST
     outputViewProperties(level);
 #endif
@@ -377,6 +379,9 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t level) {
         }
     }
     if (mAlpha < 1 && !mCaching) {
+        // flush since we'll either enter a Layer, or set alpha, both not supported in deferral
+        status |= deferredList->flush(renderer, dirty, flags, level);
+
         if (!mHasOverlappingRendering) {
             renderer.setAlpha(mAlpha);
         } else {
@@ -392,9 +397,14 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t level) {
         }
     }
     if (mClipChildren && !mCaching) {
+        if (CC_UNLIKELY(!renderer.hasRectToRectTransform())) {
+            // flush, since clip will likely be a region
+            status |= deferredList->flush(renderer, dirty, flags, level);
+        }
         renderer.clipRect(0, 0, mRight - mLeft, mBottom - mTop,
                 SkRegion::kIntersect_Op);
     }
+    return status;
 }
 
 status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level,
@@ -414,12 +424,7 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
     DISPLAY_LIST_LOGD("%*sSave %d %d", level * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
 
-    if (mAlpha < 1 && !mCaching && CC_LIKELY(deferredList)) {
-        // flush before a saveLayerAlpha/setAlpha
-        // TODO: make this cleaner
-        drawGlStatus |= deferredList->flush(renderer, dirty, flags, level);
-    }
-    setViewProperties(renderer, level);
+    drawGlStatus |= setViewProperties(renderer, dirty, flags, level, deferredList);
 
     if (renderer.quickRejectNoScissor(0, 0, mWidth, mHeight)) {
         DISPLAY_LIST_LOGD("%*sRestoreToCount %d", level * 2, "", restoreTo);

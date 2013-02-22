@@ -100,7 +100,7 @@ public:
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
             uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList* deferredList) {
         status_t status = DrawGlInfo::kStatusDone;
-        if (deferredList && requiresDrawOpFlush()) {
+        if (deferredList && requiresDrawOpFlush(renderer)) {
             // will be setting renderer state that affects ops in deferredList, so flush list first
             status |= deferredList->flush(renderer, dirty, flags, level);
         }
@@ -114,7 +114,7 @@ public:
      * Returns true if it affects renderer drawing state in such a way to break deferral
      * see OpenGLRenderer::disallowDeferral()
      */
-    virtual bool requiresDrawOpFlush() { return false; }
+    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return false; }
 };
 
 class DrawOp : public DisplayListOp {
@@ -272,7 +272,7 @@ public:
     }
 
     virtual const char* name() { return "SaveLayer"; }
-    virtual bool requiresDrawOpFlush() { return true; }
+    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
 
 private:
     Rect mArea;
@@ -294,7 +294,7 @@ public:
     }
 
     virtual const char* name() { return "SaveLayerAlpha"; }
-    virtual bool requiresDrawOpFlush() { return true; }
+    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
 
 private:
     Rect mArea;
@@ -434,7 +434,16 @@ public:
 
     virtual const char* name() { return "ClipRect"; }
 
+    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) {
+        // TODO: currently, we flush when we *might* cause a clip region to exist. Ideally, we
+        // should only flush when a non-rectangular clip would result
+        return !renderer.hasRectToRectTransform() || !hasRectToRectOp();
+    }
+
 private:
+    inline bool hasRectToRectOp() {
+        return mOp == SkRegion::kIntersect_Op || mOp == SkRegion::kReplace_Op;
+    }
     Rect mArea;
     SkRegion::Op mOp;
 };
@@ -455,7 +464,7 @@ public:
     }
 
     virtual const char* name() { return "ClipPath"; }
-    virtual bool requiresDrawOpFlush() { return true; }
+    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
 
 private:
     SkPath* mPath;
@@ -478,7 +487,7 @@ public:
     }
 
     virtual const char* name() { return "ClipRegion"; }
-    virtual bool requiresDrawOpFlush() { return true; }
+    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
 
 private:
     SkRegion* mRegion;
