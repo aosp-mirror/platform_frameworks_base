@@ -544,6 +544,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     DragState mDragState = null;
 
+    // For frozen screen animations.
+    int mExitAnimId, mEnterAnimId;
+
     /** Pulled out of performLayoutAndPlaceSurfacesLockedInner in order to refactor into multiple
      * methods. */
     class LayoutFields {
@@ -3505,7 +3508,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (currentConfig.diff(mTempConfiguration) != 0) {
                     mWaitingForConfig = true;
                     getDefaultDisplayContentLocked().layoutNeeded = true;
-                    startFreezingDisplayLocked(false, 0, 0);
+                    int anim[] = new int[2];
+                    if (mAnimator.isDimmingLocked(Display.DEFAULT_DISPLAY)) {
+                        anim[0] = anim[1] = 0;
+                    } else {
+                        mPolicy.selectRotationAnimationLw(anim);
+                    }
+                    startFreezingDisplayLocked(false, anim[0], anim[1]);
                     config = new Configuration(mTempConfiguration);
                 }
             }
@@ -5485,7 +5494,13 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
         getDefaultDisplayContentLocked().layoutNeeded = true;
-        startFreezingDisplayLocked(inTransaction, 0, 0);
+        final int[] anim = new int[2];
+        if (mAnimator.isDimmingLocked(Display.DEFAULT_DISPLAY)) {
+            anim[0] = anim[1] = 0;
+        } else {
+            mPolicy.selectRotationAnimationLw(anim);
+        }
+        startFreezingDisplayLocked(inTransaction, anim[0], anim[1]);
         // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
         screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
@@ -9246,8 +9261,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
-    private void startFreezingDisplayLocked(boolean inTransaction,
-            int exitAnim, int enterAnim) {
+    private void startFreezingDisplayLocked(boolean inTransaction, int exitAnim, int enterAnim) {
         if (mDisplayFrozen) {
             return;
         }
@@ -9279,6 +9293,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (CUSTOM_SCREEN_ROTATION) {
+            mExitAnimId = exitAnim;
+            mEnterAnimId = enterAnim;
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
             final int displayId = displayContent.getDisplayId();
             ScreenRotationAnimation screenRotationAnimation =
@@ -9292,8 +9308,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext,
                     display, mFxSession, inTransaction, displayInfo.logicalWidth,
-                    displayInfo.logicalHeight, display.getRotation(),
-                    exitAnim, enterAnim);
+                    displayInfo.logicalHeight, display.getRotation());
             mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
         }
     }
@@ -9331,9 +9346,14 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
             // TODO(multidisplay): rotation on main screen only.
             DisplayInfo displayInfo = displayContent.getDisplayInfo();
+            // Get rotation animation again, with new top window
+            boolean isDimming = mAnimator.isDimmingLocked(Display.DEFAULT_DISPLAY);
+            if (!mPolicy.validateRotationAnimationLw(mExitAnimId, mEnterAnimId, isDimming)) {
+                mExitAnimId = mEnterAnimId = 0;
+            }
             if (screenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                     mTransitionAnimationScale, displayInfo.logicalWidth,
-                        displayInfo.logicalHeight)) {
+                        displayInfo.logicalHeight, mExitAnimId, mEnterAnimId)) {
                 scheduleAnimationLocked();
             } else {
                 screenRotationAnimation.kill();

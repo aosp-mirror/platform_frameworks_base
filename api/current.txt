@@ -26289,6 +26289,10 @@ package android.view {
     field public static final deprecated int MEMORY_TYPE_HARDWARE = 1; // 0x1
     field public static final deprecated int MEMORY_TYPE_NORMAL = 0; // 0x0
     field public static final deprecated int MEMORY_TYPE_PUSH_BUFFERS = 3; // 0x3
+    field public static final int ROTATION_ANIMATION_CHANGED = 4096; // 0x1000
+    field public static final int ROTATION_ANIMATION_CROSSFADE = 1; // 0x1
+    field public static final int ROTATION_ANIMATION_JUMPCUT = 2; // 0x2
+    field public static final int ROTATION_ANIMATION_ROTATE = 0; // 0x0
     field public static final int SCREEN_BRIGHTNESS_CHANGED = 2048; // 0x800
     field public static final int SCREEN_ORIENTATION_CHANGED = 1024; // 0x400
     field public static final int SOFT_INPUT_ADJUST_NOTHING = 48; // 0x30
@@ -26339,6 +26343,7 @@ package android.view {
     field public float horizontalWeight;
     field public deprecated int memoryType;
     field public java.lang.String packageName;
+    field public int rotationAnimation;
     field public float screenBrightness;
     field public int screenOrientation;
     field public int softInputMode;

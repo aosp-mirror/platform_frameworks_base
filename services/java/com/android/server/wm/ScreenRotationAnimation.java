@@ -49,7 +49,6 @@ class ScreenRotationAnimation {
     BlackFrame mExitingBlackFrame;
     BlackFrame mEnteringBlackFrame;
     int mWidth, mHeight;
-    int mExitAnimId, mEnterAnimId;
 
     int mOriginalRotation;
     int mOriginalWidth, mOriginalHeight;
@@ -190,12 +189,9 @@ class ScreenRotationAnimation {
     }
 
     public ScreenRotationAnimation(Context context, Display display, SurfaceSession session,
-            boolean inTransaction, int originalWidth, int originalHeight, int originalRotation,
-            int exitAnim, int enterAnim) {
+            boolean inTransaction, int originalWidth, int originalHeight, int originalRotation) {
         mContext = context;
         mDisplay = display;
-        mExitAnimId = exitAnim;
-        mEnterAnimId = enterAnim;
 
         // Screenshot does NOT include rotation!
         if (originalRotation == Surface.ROTATION_90
@@ -321,7 +317,7 @@ class ScreenRotationAnimation {
         setRotationInTransaction(rotation);
         if (TWO_PHASE_ANIMATION) {
             return startAnimation(session, maxAnimationDuration, animationScale,
-                    finalWidth, finalHeight, false);
+                    finalWidth, finalHeight, false, 0, 0);
         }
 
         // Don't start animation yet.
@@ -332,7 +328,8 @@ class ScreenRotationAnimation {
      * Returns true if animating.
      */
     private boolean startAnimation(SurfaceSession session, long maxAnimationDuration,
-            float animationScale, int finalWidth, int finalHeight, boolean dismissing) {
+            float animationScale, int finalWidth, int finalHeight, boolean dismissing,
+            int exitAnim, int enterAnim) {
         if (mSurfaceControl == null) {
             // Can't do animation.
             return false;
@@ -375,10 +372,10 @@ class ScreenRotationAnimation {
                 + " origWidth=" + mOriginalWidth + " origHeight=" + mOriginalHeight);
 
         final boolean customAnim;
-        if (mExitAnimId != 0 && mEnterAnimId != 0) {
+        if (exitAnim != 0 && enterAnim != 0) {
             customAnim = true;
-            mRotateExitAnimation = AnimationUtils.loadAnimation(mContext, mExitAnimId);
-            mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext, mEnterAnimId);
+            mRotateExitAnimation = AnimationUtils.loadAnimation(mContext, exitAnim);
+            mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext, enterAnim);
         } else {
             customAnim = false;
             switch (delta) {
@@ -578,7 +575,7 @@ class ScreenRotationAnimation {
      * Returns true if animating.
      */
     public boolean dismiss(SurfaceSession session, long maxAnimationDuration,
-            float animationScale, int finalWidth, int finalHeight) {
+            float animationScale, int finalWidth, int finalHeight, int exitAnim, int enterAnim) {
         if (DEBUG_STATE) Slog.v(TAG, "Dismiss!");
         if (mSurfaceControl == null) {
             // Can't do animation.
@@ -586,7 +583,7 @@ class ScreenRotationAnimation {
         }
         if (!mStarted) {
             startAnimation(session, maxAnimationDuration, animationScale, finalWidth, finalHeight,
-                    true);
+                    true, exitAnim, enterAnim);
         }
         if (!mStarted) {
             return false;
