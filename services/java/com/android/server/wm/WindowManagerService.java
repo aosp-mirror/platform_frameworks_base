@@ -3158,7 +3158,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mismatch || iterator.hasNext()) {
                 Slog.w(TAG, "validateAppTokens: Mismatch! ActivityManager=" + tasks);
                 Slog.w(TAG, "validateAppTokens: Mismatch! WindowManager=" + iterator);
-                Slog.w(TAG, "validateAppTokens: Mismatch! Callers=" + Debug.getCallers(4));
             }
         }
     }

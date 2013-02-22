@@ -4850,8 +4850,44 @@ final class ActivityStack {
      * @return Returns true if the move completed, false if not.
      */
     final boolean moveTaskToBackLocked(int task, ActivityRecord reason) {
-        Slog.i(TAG, "moveTaskToBack: " + task);
+        if (!newMoveTaskToBackLocked(task, reason)) {
+            return false;
+        }
 
+        final int N = mHistory.size();
+        int bottom = 0;
+        int pos = 0;
+
+        // Shift all activities with this task down to the bottom
+        // of the stack, keeping them in the same internal order.
+        while (pos < N) {
+            ActivityRecord r = mHistory.get(pos);
+            if (localLOGV) Slog.v(
+                TAG, "At " + pos + " ckp " + r.task + ": " + r);
+            if (r.task.taskId == task) {
+                if (localLOGV) Slog.v(TAG, "Removing and adding at " + (N-1));
+                if (DEBUG_ADD_REMOVE) {
+                    RuntimeException here = new RuntimeException("here");
+                    here.fillInStackTrace();
+                    Slog.i(TAG, "Removing and adding activity " + r + " to stack at "
+                            + bottom, here);
+                }
+                mHistory.remove(pos);
+                mHistory.add(bottom, r);
+                bottom++;
+            }
+            pos++;
+        }
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
+        }
+
+        return true;
+    }
+
+    final boolean newMoveTaskToBackLocked(int task, ActivityRecord reason) {
+        Slog.i(TAG, "moveTaskToBack: " + task);
+        
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
@@ -4881,36 +4917,6 @@ final class ActivityStack {
         mTaskHistory.remove(tr);
         mTaskHistory.add(0, tr);
 
-        // BEGIN REGION TO REMOVE.
-        final int N = mHistory.size();
-        int bottom = 0;
-        int pos = 0;
-
-        // Shift all activities with this task down to the bottom
-        // of the stack, keeping them in the same internal order.
-        while (pos < N) {
-            ActivityRecord r = mHistory.get(pos);
-            if (localLOGV) Slog.v(
-                TAG, "At " + pos + " ckp " + r.task + ": " + r);
-            if (r.task.taskId == task) {
-                if (localLOGV) Slog.v(TAG, "Removing and adding at " + (N-1));
-                if (DEBUG_ADD_REMOVE) {
-                    RuntimeException here = new RuntimeException("here");
-                    here.fillInStackTrace();
-                    Slog.i(TAG, "Removing and adding activity " + r + " to stack at "
-                            + bottom, here);
-                }
-                mHistory.remove(pos);
-                mHistory.add(bottom, r);
-                bottom++;
-            }
-            pos++;
-        }
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
-        // END REGION TO REMOVE
-
         if (reason != null &&
                 (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
             mService.mWindowManager.prepareAppTransition(AppTransition.TRANSIT_NONE, false);
@@ -4923,7 +4929,6 @@ final class ActivityStack {
                     AppTransition.TRANSIT_TASK_TO_BACK, false);
         }
         mService.mWindowManager.moveTaskToBottom(task);
-
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
