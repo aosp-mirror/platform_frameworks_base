@@ -1261,6 +1261,13 @@ public class Allocation extends BaseObj {
     }
 
     /**
+     * @hide
+     */
+    public void setSurfaceTexture(SurfaceTexture st) {
+        setSurface(new Surface(st));
+    }
+
+    /**
      * Associate a surface for io output with this allocation
      *
      * @param sur Surface to associate with allocation
