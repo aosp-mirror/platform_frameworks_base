@@ -154,6 +154,8 @@ public interface WindowManagerPolicy {
          * @param displayFrame The frame of the overall display in which this
          * window can appear, used for constraining the overall dimensions
          * of the window.
+         * @param overlayFrame The frame within the display that is inside
+         * of the overlay region.
          * @param contentFrame The frame within the display in which we would
          * like active content to appear.  This will cause windows behind to
          * be resized to match the given content frame.
@@ -165,7 +167,7 @@ public interface WindowManagerPolicy {
          * are visible.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
-                Rect contentFrame, Rect visibleFrame);
+                Rect overlayFrame, Rect contentFrame, Rect visibleFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -191,6 +193,15 @@ public interface WindowManagerPolicy {
          * @return Rect The rectangle holding the display frame.
          */
         public Rect getDisplayFrameLw();
+
+        /**
+         * Retrieve the frame of the area inside the overscan region of the
+         * display that this window was last laid out in.  Must be called with the
+         * window manager lock held.
+         *
+         * @return Rect The rectangle holding the display overscan frame.
+         */
+        public Rect getOverscanFrameLw();
 
         /**
          * Retrieve the frame of the content area that this window was last

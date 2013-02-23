@@ -2640,7 +2640,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
-            Rect outFrame, Rect outContentInsets,
+            Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
         boolean toBeDisplayed = false;
         boolean inTouchMode;
@@ -2907,6 +2907,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mAppToken.updateReportedVisibilityLocked();
             }
             outFrame.set(win.mCompatFrame);
+            outOverscanInsets.set(win.mOverscanInsets);
             outContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             if (localLOGV) Slog.v(
@@ -8127,6 +8128,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private void updateResizingWindows(final WindowState w) {
         final WindowStateAnimator winAnimator = w.mWinAnimator;
         if (w.mHasSurface && w.mLayoutSeq == mLayoutSeq) {
+            w.mOverscanInsetsChanged |=
+                    !w.mLastOverscanInsets.equals(w.mOverscanInsets);
             w.mContentInsetsChanged |=
                     !w.mLastContentInsets.equals(w.mContentInsets);
             w.mVisibleInsetsChanged |=
@@ -8154,6 +8157,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " configChanged=" + configChanged);
                 }
 
+                w.mLastOverscanInsets.set(w.mOverscanInsets);
                 w.mLastContentInsets.set(w.mContentInsets);
                 w.mLastVisibleInsets.set(w.mVisibleInsets);
                 makeWindowFreezingScreenIfNeededLocked(w);
@@ -8690,9 +8694,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ORIENTATION &&
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                         TAG, "Resizing " + win + " WITH DRAW PENDING");
-                win.mClient.resized(win.mFrame, win.mLastContentInsets, win.mLastVisibleInsets,
+                win.mClient.resized(win.mFrame, win.mLastOverscanInsets, win.mLastContentInsets,
+                        win.mLastVisibleInsets,
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
                         configChanged ? win.mConfiguration : null);
+                win.mOverscanInsetsChanged = false;
                 win.mContentInsetsChanged = false;
                 win.mVisibleInsetsChanged = false;
                 winAnimator.mSurfaceResized = false;
@@ -9656,6 +9662,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void dumpDisplayContentsLocked(PrintWriter pw, boolean dumpAll) {
+        pw.println("WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)");
+        if (mDisplayReady) {
+            DisplayContentsIterator dCIterator = new DisplayContentsIterator();
+            while (dCIterator.hasNext()) {
+                dCIterator.next().dump("  ", pw);
+            }
+        } else {
+            pw.println("  NO DISPLAY");
+        }
+    }
+
     void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         pw.println("WINDOW MANAGER WINDOWS (dumpsys window windows)");
@@ -9777,15 +9795,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         pw.println();
-        pw.println("  DisplayContents:");
-        if (mDisplayReady) {
-            DisplayContentsIterator dCIterator = new DisplayContentsIterator();
-            while (dCIterator.hasNext()) {
-                dCIterator.next().dump("    ", pw);
-            }
-        } else {
-            pw.println("  NO DISPLAY");
-        }
         pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
         pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
         if (mLastFocus != mCurrentFocus) {
@@ -9965,6 +9974,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    p[policy]: policy state");
                 pw.println("    a[animator]: animator state");
                 pw.println("    s[essions]: active sessions");
+                pw.println("    d[isplays]: active display contents");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
                 pw.println("  cmd may also be a NAME to dump windows.  NAME may");
@@ -10001,6 +10011,11 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("sessions".equals(cmd) || "s".equals(cmd)) {
                 synchronized(mWindowMap) {
                     dumpSessionsLocked(pw, true);
+                }
+                return;
+            } else if ("displays".equals(cmd) || "d".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpDisplayContentsLocked(pw, true);
                 }
                 return;
             } else if ("tokens".equals(cmd) || "t".equals(cmd)) {
@@ -10049,6 +10064,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpSessionsLocked(pw, dumpAll);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpDisplayContentsLocked(pw, dumpAll);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");

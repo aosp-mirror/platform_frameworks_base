@@ -153,6 +153,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mContentInsetsChanged;
 
     /**
+     * Insets that determine the area covered by the display overscan region.  These are in the
+     * application's coordinate space (without compatibility scale applied).
+     */
+    final Rect mOverscanInsets = new Rect();
+    final Rect mLastOverscanInsets = new Rect();
+    boolean mOverscanInsetsChanged;
+
+    /**
      * Set to true if we are waiting for this window to receive its
      * given internal insets before laying out other windows based on it.
      */
@@ -206,6 +214,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     final Rect mContainingFrame = new Rect();
     final Rect mDisplayFrame = new Rect();
+    final Rect mOverscanFrame = new Rect();
     final Rect mContentFrame = new Rect();
     final Rect mParentFrame = new Rect();
     final Rect mVisibleFrame = new Rect();
@@ -401,7 +410,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(Rect pf, Rect df, Rect cf, Rect vf) {
+    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf) {
         mHaveFrame = true;
 
         final Rect container = mContainingFrame;
@@ -458,6 +467,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContentChanged = true;
         }
 
+        final Rect overscan = mOverscanFrame;
+        overscan.set(of);
+
         final Rect content = mContentFrame;
         content.set(cf);
 
@@ -489,8 +501,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // Now make sure the window fits in the overall display.
         Gravity.applyDisplay(mAttrs.gravity, df, frame);
 
-        // Make sure the system, content and visible frames are inside of the
+        // Make sure the overscan, content and visible frames are inside of the
         // final window frame.
+        if (overscan.left < frame.left) overscan.left = frame.left;
+        if (overscan.top < frame.top) overscan.top = frame.top;
+        if (overscan.right > frame.right) overscan.right = frame.right;
+        if (overscan.bottom > frame.bottom) overscan.bottom = frame.bottom;
         if (content.left < frame.left) content.left = frame.left;
         if (content.top < frame.top) content.top = frame.top;
         if (content.right > frame.right) content.right = frame.right;
@@ -499,6 +515,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (visible.top < frame.top) visible.top = frame.top;
         if (visible.right > frame.right) visible.right = frame.right;
         if (visible.bottom > frame.bottom) visible.bottom = frame.bottom;
+
+        final Rect overscanInsets = mOverscanInsets;
+        overscanInsets.left = overscan.left-frame.left;
+        overscanInsets.top = overscan.top-frame.top;
+        overscanInsets.right = frame.right-overscan.right;
+        overscanInsets.bottom = frame.bottom-overscan.bottom;
 
         final Rect contentInsets = mContentInsets;
         contentInsets.left = content.left-frame.left;
@@ -517,6 +539,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // If there is a size compatibility scale being applied to the
             // window, we need to apply this to its insets so that they are
             // reported to the app in its coordinate space.
+            overscanInsets.scale(mInvGlobalScale);
             contentInsets.scale(mInvGlobalScale);
             visibleInsets.scale(mInvGlobalScale);
 
@@ -557,6 +580,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public Rect getDisplayFrameLw() {
         return mDisplayFrame;
+    }
+
+    @Override
+    public Rect getOverscanFrameLw() {
+        return mOverscanFrame;
     }
 
     @Override
@@ -1259,17 +1287,21 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("Frames: containing=");
                     mContainingFrame.printShortString(pw);
                     pw.print(" parent="); mParentFrame.printShortString(pw);
-                    pw.print(" display="); mDisplayFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("    display="); mDisplayFrame.printShortString(pw);
+                    pw.print(" overscan="); mOverscanFrame.printShortString(pw);
                     pw.println();
             pw.print(prefix); pw.print("    content="); mContentFrame.printShortString(pw);
                     pw.print(" visible="); mVisibleFrame.printShortString(pw);
                     pw.println();
-            pw.print(prefix); pw.print("Cur insets: content=");
-                    mContentInsets.printShortString(pw);
+            pw.print(prefix); pw.print("Cur insets: overscan=");
+                    mOverscanInsets.printShortString(pw);
+                    pw.print(" content="); mContentInsets.printShortString(pw);
                     pw.print(" visible="); mVisibleInsets.printShortString(pw);
                     pw.println();
-            pw.print(prefix); pw.print("Lst insets: content=");
-                    mLastContentInsets.printShortString(pw);
+            pw.print(prefix); pw.print("Lst insets: overscan=");
+                    mLastOverscanInsets.printShortString(pw);
+                    pw.print(" content="); mLastContentInsets.printShortString(pw);
                     pw.print(" visible="); mLastVisibleInsets.printShortString(pw);
                     pw.println();
         }

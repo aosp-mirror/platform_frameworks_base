@@ -39,6 +39,7 @@ public final class SomeArgs {
     public Object arg2;
     public Object arg3;
     public Object arg4;
+    public Object arg5;
     public int argi1;
     public int argi2;
     public int argi3;
@@ -85,6 +86,7 @@ public final class SomeArgs {
         arg2 = null;
         arg3 = null;
         arg4 = null;
+        arg5 = null;
         argi1 = 0;
         argi2 = 0;
         argi3 = 0;

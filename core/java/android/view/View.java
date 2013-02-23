@@ -5679,17 +5679,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS) {
             mUserPaddingStart = UNDEFINED_PADDING;
             mUserPaddingEnd = UNDEFINED_PADDING;
-            if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
-                    || mAttachInfo == null
-                    || (mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0) {
-                internalSetPadding(insets.left, insets.top, insets.right, insets.bottom);
-                return true;
-            } else {
-                internalSetPadding(0, 0, 0, 0);
-                return false;
+            Rect localInsets = sThreadLocal.get();
+            if (localInsets == null) {
+                localInsets = new Rect();
+                sThreadLocal.set(localInsets);
             }
+            boolean res = computeFitSystemWindows(insets, localInsets);
+            internalSetPadding(localInsets.left, localInsets.top,
+                    localInsets.right, localInsets.bottom);
+            return res;
         }
         return false;
+    }
+
+    /**
+     * @hide Compute the insets that should be consumed by this view and the ones
+     * that should propagate to those under it.
+     */
+    protected boolean computeFitSystemWindows(Rect inoutInsets, Rect outLocalInsets) {
+        if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
+                || mAttachInfo == null
+                || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0
+                        && !mAttachInfo.mOverscanRequested)) {
+            outLocalInsets.set(inoutInsets);
+            inoutInsets.set(0, 0, 0, 0);
+            return true;
+        } else {
+            // The application wants to take care of fitting system window for
+            // the content...  however we still need to take care of any overscan here.
+            final Rect overscan = mAttachInfo.mOverscanInsets;
+            outLocalInsets.set(overscan);
+            inoutInsets.left -= overscan.left;
+            inoutInsets.top -= overscan.top;
+            inoutInsets.right -= overscan.right;
+            inoutInsets.bottom -= overscan.bottom;
+            return false;
+        }
     }
 
     /**
@@ -17919,6 +17944,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         /**
          * For windows that are full-screen but using insets to layout inside
+         * of the screen areas, these are the current insets to appear inside
+         * the overscan area of the display.
+         */
+        final Rect mOverscanInsets = new Rect();
+
+        /**
+         * For windows that are full-screen but using insets to layout inside
          * of the screen decorations, these are the current insets for the
          * content of the window.
          */
@@ -18018,6 +18050,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * attached.
          */
         boolean mHasSystemUiListeners;
+
+        /**
+         * Set if the window has requested to extend into the overscan region
+         * via WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN.
+         */
+        boolean mOverscanRequested;
 
         /**
          * Set if the visibility of any views has changed.

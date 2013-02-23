@@ -41,7 +41,7 @@ public class ActionBarOverlayLayout extends FrameLayout {
     private ActionBarView mActionView;
     private View mActionBarBottom;
     private int mLastSystemUiVisibility;
-    private final Rect mZeroRect = new Rect(0, 0, 0, 0);
+    private final Rect mLocalInsets = new Rect();
 
     static final int[] mActionBarSizeAttr = new int [] {
             com.android.internal.R.attr.actionBarSize
@@ -165,13 +165,8 @@ public class ActionBarOverlayLayout extends FrameLayout {
         // make sure its content is not being covered by system UI...  though it
         // will still be covered by the action bar since they have requested it to
         // overlay.
-        if ((vis & SYSTEM_UI_LAYOUT_FLAGS) == 0) {
-            changed |= applyInsets(mContent, insets, true, true, true, true);
-            // The insets are now consumed.
-            insets.set(0, 0, 0, 0);
-        } else {
-            changed |= applyInsets(mContent, mZeroRect, true, true, true, true);
-        }
+        boolean res = computeFitSystemWindows(insets, mLocalInsets);
+        changed |= applyInsets(mContent, mLocalInsets, true, true, true, true);
 
 
         if (stable || mActionBarTop.getVisibility() == VISIBLE) {
@@ -190,7 +185,7 @@ public class ActionBarOverlayLayout extends FrameLayout {
         if (mActionView.isSplitActionBar()) {
             if (stable || (mActionBarBottom != null
                     && mActionBarBottom.getVisibility() == VISIBLE)) {
-                // If action bar is split, adjust buttom insets for it.
+                // If action bar is split, adjust bottom insets for it.
                 insets.bottom += mActionBarHeight;
             }
         }
@@ -199,7 +194,8 @@ public class ActionBarOverlayLayout extends FrameLayout {
             requestLayout();
         }
 
-        return super.fitSystemWindows(insets);
+        super.fitSystemWindows(insets);
+        return true;
     }
 
     void pullChildren() {

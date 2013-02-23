@@ -63,6 +63,9 @@ interface IWindowSession {
      * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
+     * @param outOverscanInsets Rect in which is placed the offsets from
+     * <var>outFrame</var> in which the content of the window are inside
+     * of the display's overlay region.
      * @param outContentInsets Rect in which is placed the offsets from
      * <var>outFrame</var> in which the content of the window should be
      * placed.  This can be used to modify the window layout to ensure its
@@ -84,7 +87,7 @@ interface IWindowSession {
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, out Rect outFrame,
+            int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets,
             out Configuration outConfig, out Surface outSurface);
 
