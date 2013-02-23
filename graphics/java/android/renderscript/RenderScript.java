@@ -102,6 +102,16 @@ public class RenderScript {
         f.mkdirs();
     }
 
+    public enum ContextType {
+        NORMAL (0),
+        DEBUG (1),
+        PROFILE (2);
+
+        int mID;
+        ContextType(int id) {
+            mID = id;
+        }
+    }
 
     // Methods below are wrapped to protect the non-threadsafe
     // lockless fifo.
@@ -122,9 +132,9 @@ public class RenderScript {
                                   stencilMin, stencilPref,
                                   samplesMin, samplesPref, samplesQ, dpi);
     }
-    native int  rsnContextCreate(int dev, int ver, int sdkVer);
-    synchronized int nContextCreate(int dev, int ver, int sdkVer) {
-        return rsnContextCreate(dev, ver, sdkVer);
+    native int  rsnContextCreate(int dev, int ver, int sdkVer, int contextType);
+    synchronized int nContextCreate(int dev, int ver, int sdkVer, int contextType) {
+        return rsnContextCreate(dev, ver, sdkVer, contextType);
     }
     native void rsnContextDestroy(int con);
     synchronized void nContextDestroy() {
@@ -1012,17 +1022,24 @@ public class RenderScript {
     }
 
     /**
+     * @hide
+     */
+    public static RenderScript create(Context ctx, int sdkVersion) {
+        return create(ctx, sdkVersion, ContextType.NORMAL);
+    }
+
+    /**
      * Create a basic RenderScript context.
      *
      * @hide
      * @param ctx The context.
      * @return RenderScript
      */
-    public static RenderScript create(Context ctx, int sdkVersion) {
+    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct) {
         RenderScript rs = new RenderScript(ctx);
 
         rs.mDev = rs.nDeviceCreate();
-        rs.mContext = rs.nContextCreate(rs.mDev, 0, sdkVersion);
+        rs.mContext = rs.nContextCreate(rs.mDev, 0, sdkVersion, ct.mID);
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
         }
@@ -1038,8 +1055,20 @@ public class RenderScript {
      * @return RenderScript
      */
     public static RenderScript create(Context ctx) {
+        return create(ctx, ContextType.NORMAL);
+    }
+
+    /**
+     * Create a basic RenderScript context.
+     *
+     * @hide
+     *
+     * @param ctx The context.
+     * @return RenderScript
+     */
+    public static RenderScript create(Context ctx, ContextType ct) {
         int v = ctx.getApplicationInfo().targetSdkVersion;
-        return create(ctx, v);
+        return create(ctx, v, ct);
     }
 
     /**
