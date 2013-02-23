@@ -1183,6 +1183,12 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
                 break;
             }
         }
+
+        // Disable kernel key repeat since we handle it ourselves
+        unsigned int repeatRate[] = {0,0};
+        if (ioctl(fd, EVIOCSREP, repeatRate)) {
+            ALOGW("Unable to disable kernel key repeat for %s: %s", devicePath, strerror(errno));
+        }
     }
 
     // If the device isn't recognized as something we handle, don't monitor it.
