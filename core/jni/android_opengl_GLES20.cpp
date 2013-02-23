@@ -2127,14 +2127,14 @@ android_glGetAttachedShaders__IILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
     }
 }
 
-/* int glGetAttribLocation ( GLuint program, const char *name ) */
+/* GLint glGetAttribLocation ( GLuint program, const char *name ) */
 static jint
 android_glGetAttribLocation__ILjava_lang_String_2
   (JNIEnv *_env, jobject _this, jint program, jstring name) {
     jint _exception = 0;
     const char * _exceptionType;
     const char * _exceptionMessage;
-    int _returnValue = 0;
+    GLint _returnValue = 0;
     const char* _nativename = 0;
 
     if (!name) {
@@ -3983,14 +3983,14 @@ android_glGetUniformiv__IILjava_nio_IntBuffer_2
     }
 }
 
-/* int glGetUniformLocation ( GLuint program, const char *name ) */
+/* GLint glGetUniformLocation ( GLuint program, const char *name ) */
 static jint
 android_glGetUniformLocation__ILjava_lang_String_2
   (JNIEnv *_env, jobject _this, jint program, jstring name) {
     jint _exception = 0;
     const char * _exceptionType;
     const char * _exceptionMessage;
-    int _returnValue = 0;
+    GLint _returnValue = 0;
     const char* _nativename = 0;
 
     if (!name) {

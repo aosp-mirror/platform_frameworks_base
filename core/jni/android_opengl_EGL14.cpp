@@ -1,5 +1,4 @@
 /*
-**
 ** Copyright 2012, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -605,7 +604,7 @@ android_eglCreateWindowSurfaceTexture
     jint _remaining;
     EGLint *attrib_list = (EGLint *) 0;
     android::sp<ANativeWindow> window;
-    android::sp<android::GLConsumer> surfaceTexture;
+    android::sp<android::GLConsumer> glConsumer;
 
     if (!attrib_list_ref) {
         _exception = 1;
@@ -626,12 +625,12 @@ not_valid_surface:
         _exceptionMessage = "Make sure the SurfaceView or associated SurfaceHolder has a valid Surface";
         goto exit;
     }
-    surfaceTexture = android::SurfaceTexture_getSurfaceTexture(_env, win);
+    glConsumer = android::SurfaceTexture_getSurfaceTexture(_env, win);
 
-    if (surfaceTexture == NULL)
+    if (glConsumer == NULL)
         goto not_valid_surface;
 
-    window = new android::Surface(surfaceTexture->getBufferQueue());
+    window = new android::Surface(glConsumer->getBufferQueue());
 
     if (window == NULL)
         goto not_valid_surface;
