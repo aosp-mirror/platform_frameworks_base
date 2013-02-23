@@ -914,7 +914,7 @@ public class GLES20 {
         java.nio.IntBuffer shaders
     );
 
-    // C function int glGetAttribLocation ( GLuint program, const char *name )
+    // C function GLint glGetAttribLocation ( GLuint program, const char *name )
 
     public static native int glGetAttribLocation(
         int program,
@@ -1236,7 +1236,7 @@ public class GLES20 {
         java.nio.IntBuffer params
     );
 
-    // C function int glGetUniformLocation ( GLuint program, const char *name )
+    // C function GLint glGetUniformLocation ( GLuint program, const char *name )
 
     public static native int glGetUniformLocation(
         int program,
