@@ -20081,6 +20081,14 @@ package android.renderscript {
     method public void setPriority(android.renderscript.RenderScript.Priority);
   }
 
+  public static final class RenderScript.ContextType extends java.lang.Enum {
+    method public static android.renderscript.RenderScript.ContextType valueOf(java.lang.String);
+    method public static final android.renderscript.RenderScript.ContextType[] values();
+    enum_constant public static final android.renderscript.RenderScript.ContextType DEBUG;
+    enum_constant public static final android.renderscript.RenderScript.ContextType NORMAL;
+    enum_constant public static final android.renderscript.RenderScript.ContextType PROFILE;
+  }
+
   public static final class RenderScript.Priority extends java.lang.Enum {
     method public static android.renderscript.RenderScript.Priority valueOf(java.lang.String);
     method public static final android.renderscript.RenderScript.Priority[] values();
