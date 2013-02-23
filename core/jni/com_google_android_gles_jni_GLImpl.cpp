@@ -541,8 +541,8 @@ static void
 android_glDeleteTextures__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray textures_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *textures_base = (GLuint *) 0;
     jint _remaining;
     GLuint *textures = (GLuint *) 0;
@@ -590,8 +590,8 @@ static void
 android_glDeleteTextures__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject textures_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -694,8 +694,8 @@ static void
 android_glDrawElements__IIILjava_nio_Buffer_2
   (JNIEnv *_env, jobject _this, jint mode, jint count, jint type, jobject indices_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -775,8 +775,8 @@ static void
 android_glFogfv__I_3FI
   (JNIEnv *_env, jobject _this, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -816,7 +816,7 @@ android_glFogfv__I_3FI
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -849,8 +849,8 @@ static void
 android_glFogfv__ILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -879,7 +879,7 @@ android_glFogfv__ILjava_nio_FloatBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -921,8 +921,8 @@ static void
 android_glFogxv__I_3II
   (JNIEnv *_env, jobject _this, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -962,7 +962,7 @@ android_glFogxv__I_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -995,8 +995,8 @@ static void
 android_glFogxv__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -1025,7 +1025,7 @@ android_glFogxv__ILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1094,8 +1094,8 @@ static void
 android_glGenTextures__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray textures_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *textures_base = (GLuint *) 0;
     jint _remaining;
     GLuint *textures = (GLuint *) 0;
@@ -1143,8 +1143,8 @@ static void
 android_glGenTextures__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject textures_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -1189,8 +1189,8 @@ static void
 android_glGetIntegerv__I_3II
   (JNIEnv *_env, jobject _this, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -1536,7 +1536,7 @@ android_glGetIntegerv__I_3II
             _needed = getNumCompressedTextureFormats();
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1569,8 +1569,8 @@ static void
 android_glGetIntegerv__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -1905,7 +1905,7 @@ android_glGetIntegerv__ILjava_nio_IntBuffer_2
             _needed = getNumCompressedTextureFormats();
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1962,8 +1962,8 @@ static void
 android_glLightModelfv__I_3FI
   (JNIEnv *_env, jobject _this, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -1994,7 +1994,7 @@ android_glLightModelfv__I_3FI
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2027,8 +2027,8 @@ static void
 android_glLightModelfv__ILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -2048,7 +2048,7 @@ android_glLightModelfv__ILjava_nio_FloatBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2090,8 +2090,8 @@ static void
 android_glLightModelxv__I_3II
   (JNIEnv *_env, jobject _this, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -2122,7 +2122,7 @@ android_glLightModelxv__I_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2155,8 +2155,8 @@ static void
 android_glLightModelxv__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -2176,7 +2176,7 @@ android_glLightModelxv__ILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2219,8 +2219,8 @@ static void
 android_glLightfv__II_3FI
   (JNIEnv *_env, jobject _this, jint light, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -2277,7 +2277,7 @@ android_glLightfv__II_3FI
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2311,8 +2311,8 @@ static void
 android_glLightfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint light, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -2358,7 +2358,7 @@ android_glLightfv__IILjava_nio_FloatBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2402,8 +2402,8 @@ static void
 android_glLightxv__II_3II
   (JNIEnv *_env, jobject _this, jint light, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -2460,7 +2460,7 @@ android_glLightxv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2494,8 +2494,8 @@ static void
 android_glLightxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint light, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -2541,7 +2541,7 @@ android_glLightxv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2599,8 +2599,8 @@ static void
 android_glLoadMatrixf___3FI
   (JNIEnv *_env, jobject _this, jfloatArray m_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *m_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *m = (GLfloat *) 0;
@@ -2663,8 +2663,8 @@ static void
 android_glLoadMatrixx___3II
   (JNIEnv *_env, jobject _this, jintArray m_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *m_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *m = (GLfixed *) 0;
@@ -2747,8 +2747,8 @@ static void
 android_glMaterialfv__II_3FI
   (JNIEnv *_env, jobject _this, jint face, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -2791,7 +2791,7 @@ android_glMaterialfv__II_3FI
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2825,8 +2825,8 @@ static void
 android_glMaterialfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint face, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -2858,7 +2858,7 @@ android_glMaterialfv__IILjava_nio_FloatBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2902,8 +2902,8 @@ static void
 android_glMaterialxv__II_3II
   (JNIEnv *_env, jobject _this, jint face, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -2946,7 +2946,7 @@ android_glMaterialxv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -2980,8 +2980,8 @@ static void
 android_glMaterialxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint face, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -3013,7 +3013,7 @@ android_glMaterialxv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -3055,8 +3055,8 @@ static void
 android_glMultMatrixf___3FI
   (JNIEnv *_env, jobject _this, jfloatArray m_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *m_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *m = (GLfloat *) 0;
@@ -3119,8 +3119,8 @@ static void
 android_glMultMatrixx___3II
   (JNIEnv *_env, jobject _this, jintArray m_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *m_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *m = (GLfixed *) 0;
@@ -3525,8 +3525,8 @@ static void
 android_glTexEnvfv__II_3FI
   (JNIEnv *_env, jobject _this, jint target, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -3563,7 +3563,7 @@ android_glTexEnvfv__II_3FI
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -3597,8 +3597,8 @@ static void
 android_glTexEnvfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -3624,7 +3624,7 @@ android_glTexEnvfv__IILjava_nio_FloatBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -3668,8 +3668,8 @@ static void
 android_glTexEnvxv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -3706,7 +3706,7 @@ android_glTexEnvxv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -3740,8 +3740,8 @@ static void
 android_glTexEnvxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -3767,7 +3767,7 @@ android_glTexEnvxv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -3944,8 +3944,8 @@ static jint
 android_glQueryMatrixxOES___3II_3II
   (JNIEnv *_env, jobject _this, jintArray mantissa_ref, jint mantissaOffset, jintArray exponent_ref, jint exponentOffset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLbitfield _returnValue = -1;
     GLfixed *mantissa_base = (GLfixed *) 0;
     jint _mantissaRemaining;
@@ -4025,8 +4025,8 @@ static jint
 android_glQueryMatrixxOES__Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jobject mantissa_buf, jobject exponent_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _mantissaArray = (jarray) 0;
     jint _mantissaBufferOffset = (jint) 0;
     jarray _exponentArray = (jarray) 0;
@@ -4092,8 +4092,8 @@ static void
 android_glBufferData__IILjava_nio_Buffer_2I
   (JNIEnv *_env, jobject _this, jint target, jint size, jobject data_buf, jint usage) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -4133,8 +4133,8 @@ static void
 android_glBufferSubData__IIILjava_nio_Buffer_2
   (JNIEnv *_env, jobject _this, jint target, jint offset, jint size, jobject data_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -4172,8 +4172,8 @@ static void
 android_glClipPlanef__I_3FI
   (JNIEnv *_env, jobject _this, jint plane, jfloatArray equation_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *equation_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *equation = (GLfloat *) 0;
@@ -4221,8 +4221,8 @@ static void
 android_glClipPlanef__ILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint plane, jobject equation_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -4258,8 +4258,8 @@ static void
 android_glClipPlanex__I_3II
   (JNIEnv *_env, jobject _this, jint plane, jintArray equation_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *equation_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *equation = (GLfixed *) 0;
@@ -4307,8 +4307,8 @@ static void
 android_glClipPlanex__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint plane, jobject equation_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -4368,8 +4368,8 @@ static void
 android_glDeleteBuffers__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray buffers_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *buffers_base = (GLuint *) 0;
     jint _remaining;
     GLuint *buffers = (GLuint *) 0;
@@ -4417,8 +4417,8 @@ static void
 android_glDeleteBuffers__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject buffers_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -4454,8 +4454,8 @@ static void
 android_glDrawElements__IIII
   (JNIEnv *_env, jobject _this, jint mode, jint count, jint type, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     glDrawElements(
         (GLenum)mode,
         (GLsizei)count,
@@ -4472,8 +4472,8 @@ static void
 android_glGenBuffers__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray buffers_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *buffers_base = (GLuint *) 0;
     jint _remaining;
     GLuint *buffers = (GLuint *) 0;
@@ -4521,8 +4521,8 @@ static void
 android_glGenBuffers__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject buffers_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -4558,8 +4558,8 @@ static void
 android_glGetBooleanv__I_3ZI
   (JNIEnv *_env, jobject _this, jint pname, jbooleanArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLboolean *params_base = (GLboolean *) 0;
     jint _remaining;
     GLboolean *params = (GLboolean *) 0;
@@ -4640,8 +4640,8 @@ static void
 android_glGetClipPlanef__I_3FI
   (JNIEnv *_env, jobject _this, jint pname, jfloatArray eqn_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *eqn_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *eqn = (GLfloat *) 0;
@@ -4706,8 +4706,8 @@ static void
 android_glGetClipPlanex__I_3II
   (JNIEnv *_env, jobject _this, jint pname, jintArray eqn_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *eqn_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *eqn = (GLfixed *) 0;
@@ -4772,8 +4772,8 @@ static void
 android_glGetFixedv__I_3II
   (JNIEnv *_env, jobject _this, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -4838,8 +4838,8 @@ static void
 android_glGetFloatv__I_3FI
   (JNIEnv *_env, jobject _this, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -4904,8 +4904,8 @@ static void
 android_glGetLightfv__II_3FI
   (JNIEnv *_env, jobject _this, jint light, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -4962,7 +4962,7 @@ android_glGetLightfv__II_3FI
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -4996,8 +4996,8 @@ static void
 android_glGetLightfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint light, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5043,7 +5043,7 @@ android_glGetLightfv__IILjava_nio_FloatBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5076,8 +5076,8 @@ static void
 android_glGetLightxv__II_3II
   (JNIEnv *_env, jobject _this, jint light, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -5134,7 +5134,7 @@ android_glGetLightxv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5168,8 +5168,8 @@ static void
 android_glGetLightxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint light, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5215,7 +5215,7 @@ android_glGetLightxv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5248,8 +5248,8 @@ static void
 android_glGetMaterialfv__II_3FI
   (JNIEnv *_env, jobject _this, jint face, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -5292,7 +5292,7 @@ android_glGetMaterialfv__II_3FI
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5326,8 +5326,8 @@ static void
 android_glGetMaterialfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint face, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5359,7 +5359,7 @@ android_glGetMaterialfv__IILjava_nio_FloatBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5392,8 +5392,8 @@ static void
 android_glGetMaterialxv__II_3II
   (JNIEnv *_env, jobject _this, jint face, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -5436,7 +5436,7 @@ android_glGetMaterialxv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5470,8 +5470,8 @@ static void
 android_glGetMaterialxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint face, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5503,7 +5503,7 @@ android_glGetMaterialxv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5536,8 +5536,8 @@ static void
 android_glGetTexEnviv__II_3II
   (JNIEnv *_env, jobject _this, jint env, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -5574,7 +5574,7 @@ android_glGetTexEnviv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5608,8 +5608,8 @@ static void
 android_glGetTexEnviv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint env, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5635,7 +5635,7 @@ android_glGetTexEnviv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5668,8 +5668,8 @@ static void
 android_glGetTexEnvxv__II_3II
   (JNIEnv *_env, jobject _this, jint env, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -5706,7 +5706,7 @@ android_glGetTexEnvxv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5740,8 +5740,8 @@ static void
 android_glGetTexEnvxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint env, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5767,7 +5767,7 @@ android_glGetTexEnvxv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5800,8 +5800,8 @@ static void
 android_glGetTexParameterfv__II_3FI
   (JNIEnv *_env, jobject _this, jint target, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -5850,8 +5850,8 @@ static void
 android_glGetTexParameterfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5888,8 +5888,8 @@ static void
 android_glGetTexParameteriv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -5938,8 +5938,8 @@ static void
 android_glGetTexParameteriv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -5976,8 +5976,8 @@ static void
 android_glGetTexParameterxv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -6026,8 +6026,8 @@ static void
 android_glGetTexParameterxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6118,8 +6118,8 @@ static void
 android_glPointParameterfv__I_3FI
   (JNIEnv *_env, jobject _this, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -6167,8 +6167,8 @@ static void
 android_glPointParameterfv__ILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6214,8 +6214,8 @@ static void
 android_glPointParameterxv__I_3II
   (JNIEnv *_env, jobject _this, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -6263,8 +6263,8 @@ static void
 android_glPointParameterxv__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6346,8 +6346,8 @@ static void
 android_glTexEnviv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -6384,7 +6384,7 @@ android_glTexEnviv__II_3II
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6418,8 +6418,8 @@ static void
 android_glTexEnviv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6445,7 +6445,7 @@ android_glTexEnviv__IILjava_nio_IntBuffer_2
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6478,8 +6478,8 @@ static void
 android_glTexParameterfv__II_3FI
   (JNIEnv *_env, jobject _this, jint target, jint pname, jfloatArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -6528,8 +6528,8 @@ static void
 android_glTexParameterfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6577,8 +6577,8 @@ static void
 android_glTexParameteriv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -6627,8 +6627,8 @@ static void
 android_glTexParameteriv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6665,8 +6665,8 @@ static void
 android_glTexParameterxv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *params_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
@@ -6715,8 +6715,8 @@ static void
 android_glTexParameterxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6787,8 +6787,8 @@ static void
 android_glDrawTexfvOES___3FI
   (JNIEnv *_env, jobject _this, jfloatArray coords_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *coords_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *coords = (GLfloat *) 0;
@@ -6835,8 +6835,8 @@ static void
 android_glDrawTexfvOES__Ljava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jobject coords_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6884,8 +6884,8 @@ static void
 android_glDrawTexivOES___3II
   (JNIEnv *_env, jobject _this, jintArray coords_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *coords_base = (GLint *) 0;
     jint _remaining;
     GLint *coords = (GLint *) 0;
@@ -6932,8 +6932,8 @@ static void
 android_glDrawTexivOES__Ljava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jobject coords_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -6981,8 +6981,8 @@ static void
 android_glDrawTexsvOES___3SI
   (JNIEnv *_env, jobject _this, jshortArray coords_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLshort *coords_base = (GLshort *) 0;
     jint _remaining;
     GLshort *coords = (GLshort *) 0;
@@ -7029,8 +7029,8 @@ static void
 android_glDrawTexsvOES__Ljava_nio_ShortBuffer_2
   (JNIEnv *_env, jobject _this, jobject coords_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -7078,8 +7078,8 @@ static void
 android_glDrawTexxvOES___3II
   (JNIEnv *_env, jobject _this, jintArray coords_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfixed *coords_base = (GLfixed *) 0;
     jint _remaining;
     GLfixed *coords = (GLfixed *) 0;
@@ -7126,8 +7126,8 @@ static void
 android_glDrawTexxvOES__Ljava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jobject coords_buf) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -7338,8 +7338,8 @@ android_glDeleteFramebuffersOES__I_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *framebuffers_base = (GLuint *) 0;
     jint _remaining;
     GLuint *framebuffers = (GLuint *) 0;
@@ -7392,8 +7392,8 @@ android_glDeleteFramebuffersOES__ILjava_nio_IntBuffer_2
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -7434,8 +7434,8 @@ android_glDeleteRenderbuffersOES__I_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *renderbuffers_base = (GLuint *) 0;
     jint _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
@@ -7488,8 +7488,8 @@ android_glDeleteRenderbuffersOES__ILjava_nio_IntBuffer_2
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -7579,8 +7579,8 @@ android_glGenFramebuffersOES__I_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *framebuffers_base = (GLuint *) 0;
     jint _remaining;
     GLuint *framebuffers = (GLuint *) 0;
@@ -7633,8 +7633,8 @@ android_glGenFramebuffersOES__ILjava_nio_IntBuffer_2
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -7675,8 +7675,8 @@ android_glGenRenderbuffersOES__I_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLuint *renderbuffers_base = (GLuint *) 0;
     jint _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
@@ -7729,8 +7729,8 @@ android_glGenRenderbuffersOES__ILjava_nio_IntBuffer_2
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -7771,8 +7771,8 @@ android_glGetFramebufferAttachmentParameterivOES__III_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -7851,8 +7851,8 @@ android_glGetRenderbufferParameterivOES__II_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -7929,8 +7929,8 @@ android_glGetTexGenfv__II_3FI
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -8007,8 +8007,8 @@ android_glGetTexGeniv__II_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -8085,8 +8085,8 @@ android_glGetTexGenxv__II_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -8228,8 +8228,8 @@ android_glTexGenfv__II_3FI
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLfloat *params_base = (GLfloat *) 0;
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
@@ -8322,8 +8322,8 @@ android_glTexGeniv__II_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
@@ -8416,8 +8416,8 @@ android_glTexGenxv__II_3II
             return;
     }
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     GLint *params_base = (GLint *) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
