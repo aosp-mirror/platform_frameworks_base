@@ -381,8 +381,10 @@ status_t DisplayList::setViewProperties(OpenGLRenderer& renderer, Rect& dirty,
         }
     }
     if (mAlpha < 1 && !mCaching) {
-        // flush since we'll either enter a Layer, or set alpha, both not supported in deferral
-        status |= deferredList->flush(renderer, dirty, flags, level);
+        if (deferredList) {
+            // flush since we'll either enter a Layer, or set alpha, both not supported in deferral
+            status |= deferredList->flush(renderer, dirty, flags, level);
+        }
 
         if (!mHasOverlappingRendering) {
             renderer.setAlpha(mAlpha);
@@ -399,7 +401,7 @@ status_t DisplayList::setViewProperties(OpenGLRenderer& renderer, Rect& dirty,
         }
     }
     if (mClipChildren && !mCaching) {
-        if (CC_UNLIKELY(!renderer.hasRectToRectTransform())) {
+        if (deferredList && CC_UNLIKELY(!renderer.hasRectToRectTransform())) {
             // flush, since clip will likely be a region
             status |= deferredList->flush(renderer, dirty, flags, level);
         }
