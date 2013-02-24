@@ -520,7 +520,6 @@ public class StateMachine {
             return mDstState;
         }
 
-
         /**
          * @return the original state that received the message.
          */
@@ -551,7 +550,7 @@ public class StateMachine {
             } else {
                 sb.append(what);
             }
-            if ( ! TextUtils.isEmpty(mInfo)) {
+            if (!TextUtils.isEmpty(mInfo)) {
                 sb.append(" ");
                 sb.append(mInfo);
             }
@@ -656,8 +655,7 @@ public class StateMachine {
          *
          */
         synchronized void add(StateMachine sm, Message msg, String messageInfo, IState state,
-                IState orgState,
-                IState transToState) {
+                IState orgState, IState transToState) {
             mCount += 1;
             if (mLogRecVector.size() < mMaxSize) {
                 mLogRecVector.add(new LogRec(sm, msg, messageInfo, state, orgState, transToState));
@@ -671,7 +669,6 @@ public class StateMachine {
             }
         }
     }
-
 
     private static class SmHandler extends Handler {
 
@@ -730,15 +727,13 @@ public class StateMachine {
              */
             @Override
             public String toString() {
-                return "state=" + state.getName() + ",active=" + active
-                        + ",parent=" + ((parentStateInfo == null) ?
-                                        "null" : parentStateInfo.state.getName());
+                return "state=" + state.getName() + ",active=" + active + ",parent="
+                        + ((parentStateInfo == null) ? "null" : parentStateInfo.state.getName());
             }
         }
 
         /** The map of all of the states in the state machine */
-        private HashMap<State, StateInfo> mStateInfo =
-            new HashMap<State, StateInfo>();
+        private HashMap<State, StateInfo> mStateInfo = new HashMap<State, StateInfo>();
 
         /** The initial state that will process the first message */
         private State mInitialState;
@@ -788,14 +783,14 @@ public class StateMachine {
             if (mIsConstructionCompleted) {
                 /** Normal path */
                 msgProcessedState = processMsg(msg);
-            } else if (!mIsConstructionCompleted &&
-                    (mMsg.what == SM_INIT_CMD) && (mMsg.obj == mSmHandlerObj)) {
+            } else if (!mIsConstructionCompleted && (mMsg.what == SM_INIT_CMD)
+                    && (mMsg.obj == mSmHandlerObj)) {
                 /** Initial one time path. */
                 mIsConstructionCompleted = true;
                 invokeEnterMethods(0);
             } else {
-                throw new RuntimeException("StateMachine.handleMessage: " +
-                            "The start method not called, received msg: " + msg);
+                throw new RuntimeException("StateMachine.handleMessage: "
+                        + "The start method not called, received msg: " + msg);
             }
             performTransitions(msgProcessedState, msg);
 
@@ -830,8 +825,8 @@ public class StateMachine {
                 }
             } else if (recordLogMsg) {
                 /** Record message */
-               mLogRecords.add(mSm, mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
-                        orgState, mDestState);
+                mLogRecords.add(mSm, mMsg, mSm.getLogRecString(mMsg), msgProcessedState, orgState,
+                        mDestState);
             }
 
             State destState = mDestState;
@@ -851,7 +846,6 @@ public class StateMachine {
                     invokeExitMethods(commonStateInfo);
                     int stateStackEnteringIndex = moveTempStateStackToStateStack();
                     invokeEnterMethods(stateStackEnteringIndex);
-
 
                     /**
                      * Since we have transitioned to a new state we need to have
@@ -979,7 +973,7 @@ public class StateMachine {
                         mSm.log("processMsg: " + curStateInfo.state.getName());
                     }
                 }
-           }
+            }
             return (curStateInfo != null) ? curStateInfo.state : null;
         }
 
@@ -988,8 +982,8 @@ public class StateMachine {
          * up to the common ancestor state.
          */
         private final void invokeExitMethods(StateInfo commonStateInfo) {
-            while ((mStateStackTopIndex >= 0) &&
-                    (mStateStack[mStateStackTopIndex] != commonStateInfo)) {
+            while ((mStateStackTopIndex >= 0)
+                    && (mStateStack[mStateStackTopIndex] != commonStateInfo)) {
                 State curState = mStateStack[mStateStackTopIndex].state;
                 if (mDbg) mSm.log("invokeExitMethods: " + curState.getName());
                 curState.exit();
@@ -1019,7 +1013,7 @@ public class StateMachine {
              * as the most resent message and end with the oldest
              * messages at the front of the queue.
              */
-            for (int i = mDeferredMessages.size() - 1; i >= 0; i-- ) {
+            for (int i = mDeferredMessages.size() - 1; i >= 0; i--) {
                 Message curMsg = mDeferredMessages.get(i);
                 if (mDbg) mSm.log("moveDeferredMessageAtFrontOfQueue; what=" + curMsg.what);
                 sendMessageAtFrontOfQueue(curMsg);
@@ -1047,9 +1041,9 @@ public class StateMachine {
 
             mStateStackTopIndex = j - 1;
             if (mDbg) {
-                mSm.log("moveTempStackToStateStack: X mStateStackTop="
-                      + mStateStackTopIndex + ",startingIndex=" + startingIndex
-                      + ",Top=" + mStateStack[mStateStackTopIndex].state.getName());
+                mSm.log("moveTempStackToStateStack: X mStateStackTop=" + mStateStackTopIndex
+                        + ",startingIndex=" + startingIndex + ",Top="
+                        + mStateStack[mStateStackTopIndex].state.getName());
             }
             return startingIndex;
         }
@@ -1081,7 +1075,7 @@ public class StateMachine {
 
             if (mDbg) {
                 mSm.log("setupTempStateStackWithStatesToEnter: X mTempStateStackCount="
-                      + mTempStateStackCount + ",curStateInfo: " + curStateInfo);
+                        + mTempStateStackCount + ",curStateInfo: " + curStateInfo);
             }
             return curStateInfo;
         }
@@ -1091,8 +1085,7 @@ public class StateMachine {
          */
         private final void setupInitialStateStack() {
             if (mDbg) {
-                mSm.log("setupInitialStateStack: E mInitialState="
-                    + mInitialState.getName());
+                mSm.log("setupInitialStateStack: E mInitialState=" + mInitialState.getName());
             }
 
             StateInfo curStateInfo = mStateInfo.get(mInitialState);
@@ -1132,8 +1125,8 @@ public class StateMachine {
          */
         private final StateInfo addState(State state, State parent) {
             if (mDbg) {
-                mSm.log("addStateInternal: E state=" + state.getName()
-                        + ",parent=" + ((parent == null) ? "" : parent.getName()));
+                mSm.log("addStateInternal: E state=" + state.getName() + ",parent="
+                        + ((parent == null) ? "" : parent.getName()));
             }
             StateInfo parentStateInfo = null;
             if (parent != null) {
@@ -1150,9 +1143,9 @@ public class StateMachine {
             }
 
             // Validate that we aren't adding the same state in two different hierarchies.
-            if ((stateInfo.parentStateInfo != null) &&
-                    (stateInfo.parentStateInfo != parentStateInfo)) {
-                    throw new RuntimeException("state already added");
+            if ((stateInfo.parentStateInfo != null)
+                    && (stateInfo.parentStateInfo != parentStateInfo)) {
+                throw new RuntimeException("state already added");
             }
             stateInfo.state = state;
             stateInfo.parentStateInfo = parentStateInfo;
@@ -1509,8 +1502,7 @@ public class StateMachine {
      *
      * @return  A Message object from the global pool
      */
-    public final Message obtainMessage()
-    {
+    public final Message obtainMessage() {
         return Message.obtain(mSmHandler);
     }
 
@@ -1542,8 +1534,7 @@ public class StateMachine {
      * @param obj is assigned to Message.obj.
      * @return  A Message object from the global pool
      */
-    public final Message obtainMessage(int what, Object obj)
-    {
+    public final Message obtainMessage(int what, Object obj) {
         return Message.obtain(mSmHandler, what, obj);
     }
 
@@ -1561,8 +1552,7 @@ public class StateMachine {
      * @param arg2  is assigned to Message.arg2
      * @return  A Message object from the global pool
      */
-    public final Message obtainMessage(int what, int arg1, int arg2)
-    {
+    public final Message obtainMessage(int what, int arg1, int arg2) {
         return Message.obtain(mSmHandler, what, arg1, arg2);
     }
 
@@ -1581,8 +1571,7 @@ public class StateMachine {
      * @param obj is assigned to Message.obj
      * @return  A Message object from the global pool
      */
-    public final Message obtainMessage(int what, int arg1, int arg2, Object obj)
-    {
+    public final Message obtainMessage(int what, int arg1, int arg2, Object obj) {
         return Message.obtain(mSmHandler, what, arg1, arg2, obj);
     }
 
@@ -1609,7 +1598,7 @@ public class StateMachine {
         SmHandler smh = mSmHandler;
         if (smh == null) return;
 
-        smh.sendMessage(obtainMessage(what,obj));
+        smh.sendMessage(obtainMessage(what, obj));
     }
 
     /**
@@ -1798,34 +1787,84 @@ public class StateMachine {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(getName() + ":");
         pw.println(" total records=" + getLogRecCount());
-        for (int i=0; i < getLogRecSize(); i++) {
+        for (int i = 0; i < getLogRecSize(); i++) {
             pw.printf(" rec[%d]: %s\n", i, getLogRec(i).toString());
             pw.flush();
         }
         pw.println("curState=" + getCurrentState().getName());
     }
 
+    /**
+     * Log with debug and add to the LogRecords.
+     *
+     * @param s is string log
+     */
+    protected void logAndAddLogRec(String s) {
+        addLogRec(s);
+        log(s);
+    }
+
+    /**
+     * Log with debug
+     *
+     * @param s is string log
+     */
     protected void log(String s) {
         Log.d(mName, s);
     }
 
-    protected void logv(String s) {
-        Log.v(mName, s);
-    }
-
-    protected void logi(String s) {
-        Log.i(mName, s);
-    }
-
+    /**
+     * Log with debug attribute
+     *
+     * @param s is string log
+     */
     protected void logd(String s) {
         Log.d(mName, s);
     }
 
+    /**
+     * Log with verbose attribute
+     *
+     * @param s is string log
+     */
+    protected void logv(String s) {
+        Log.v(mName, s);
+    }
+
+    /**
+     * Log with info attribute
+     *
+     * @param s is string log
+     */
+    protected void logi(String s) {
+        Log.i(mName, s);
+    }
+
+    /**
+     * Log with warning attribute
+     *
+     * @param s is string log
+     */
     protected void logw(String s) {
         Log.w(mName, s);
     }
 
+    /**
+     * Log with error attribute
+     *
+     * @param s is string log
+     */
     protected void loge(String s) {
         Log.e(mName, s);
+    }
+
+    /**
+     * Log with error attribute
+     *
+     * @param s is string log
+     * @param e is a Throwable which logs additional information.
+     */
+    protected void loge(String s, Throwable e) {
+        Log.e(mName, s, e);
     }
 }
