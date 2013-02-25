@@ -178,7 +178,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 whichHeap = HEAP_APK;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".ttf") == 0) {
                 whichHeap = HEAP_TTF;
-            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".dex") == 0) {
+            } else if ((nameLen > 4 && strcmp(name+nameLen-4, ".dex") == 0) ||
+                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
                 whichHeap = HEAP_DEX;
             } else if (nameLen > 0) {
                 whichHeap = HEAP_UNKNOWN_MAP;
