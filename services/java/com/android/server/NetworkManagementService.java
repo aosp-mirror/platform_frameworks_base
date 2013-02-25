@@ -25,8 +25,6 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceGetCfgResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceRxThrottleResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceTxThrottleResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.IpFwdStatusResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetherDnsFwdTgtListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetherInterfaceListResult;
@@ -121,8 +119,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int SoftapStatusResult        = 214;
         public static final int InterfaceRxCounterResult  = 216;
         public static final int InterfaceTxCounterResult  = 217;
-        public static final int InterfaceRxThrottleResult = 218;
-        public static final int InterfaceTxThrottleResult = 219;
         public static final int QuotaCounterResult        = 220;
         public static final int TetheringStatsResult      = 221;
         public static final int DnsProxyQueryResult       = 222;
@@ -836,31 +832,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     // TODO(BT) Remove
-    public void startReverseTethering(String iface)
-             throws IllegalStateException {
-        if (DBG) Slog.d(TAG, "startReverseTethering in");
+    @Override
+    public void startReverseTethering(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         // cmd is "tether start first_start first_stop second_start second_stop ..."
         // an odd number of addrs will fail
-        String cmd = "tether start-reverse";
-        cmd += " " + iface;
-        if (DBG) Slog.d(TAG, "startReverseTethering cmd: " + cmd);
         try {
-            mConnector.doCommand(cmd);
+            mConnector.execute("tether", "start-reverse", iface);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Unable to communicate to native daemon");
+            throw e.rethrowAsParcelableException();
         }
         BluetoothTetheringDataTracker.getInstance().startReverseTether(iface);
 
     }
 
     // TODO(BT) Remove
-    public void stopReverseTethering() throws IllegalStateException {
+    @Override
+    public void stopReverseTethering() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.doCommand("tether stop-reverse");
+            mConnector.execute("tether", "stop-reverse");
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Unable to communicate to native daemon to stop tether");
+            throw e.rethrowAsParcelableException();
         }
         BluetoothTetheringDataTracker.getInstance().stopReverseTether();
     }
@@ -1506,6 +1499,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     /** {@inheritDoc} */
+    @Override
     public void monitor() {
         if (mConnector != null) {
             mConnector.monitor();
