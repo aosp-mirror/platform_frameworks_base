@@ -1368,6 +1368,12 @@ void OpenGLRenderer::setStencilFromClip() {
             drawRegionRects(*mSnapshot->clipRegion, 0xff000000, SkXfermode::kSrc_Mode, false);
 
             mCaches.stencil.enableTest();
+
+            // Draw the region used to generate the stencil if the appropriate debug
+            // mode is enabled
+            if (mCaches.debugStencilClip == Caches::kStencilShowRegion) {
+                drawRegionRects(*mSnapshot->clipRegion, 0x7f0000ff, SkXfermode::kSrcOver_Mode);
+            }
         } else {
             mCaches.stencil.disable();
         }
@@ -1515,12 +1521,20 @@ void OpenGLRenderer::setupDraw(bool clear) {
         }
         setStencilFromClip();
     }
+
     mDescription.reset();
+
     mSetShaderColor = false;
     mColorSet = false;
     mColorA = mColorR = mColorG = mColorB = 0.0f;
     mTextureUnit = 0;
     mTrackDirtyRegions = true;
+
+    // Enable debug highlight when what we're about to draw is tested against
+    // the stencil buffer and if stencil highlight debugging is on
+    mDescription.hasDebugHighlight = !mCaches.debugOverdraw &&
+            mCaches.debugStencilClip == Caches::kStencilShowHighlight &&
+            mCaches.stencil.isTestEnabled();
 }
 
 void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {

@@ -351,6 +351,8 @@ const char* gFS_Main_ApplyColorOp[4] = {
         // PorterDuff
         "    fragColor = blendColors(colorBlend, fragColor);\n"
 };
+const char* gFS_Main_DebugHighlight =
+        "    gl_FragColor.rgb = vec3(0.0, gl_FragColor.a, 0.0);\n";
 const char* gFS_Footer =
         "}\n\n";
 
@@ -604,7 +606,8 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
 
     // Optimization for common cases
     if (!description.isAA && !blendFramebuffer && !description.hasColors &&
-            description.colorOp == ProgramDescription::kColorNone && !description.isPoint) {
+            description.colorOp == ProgramDescription::kColorNone &&
+            !description.isPoint && !description.hasDebugHighlight) {
         bool fast = false;
 
         const bool noShader = !description.hasGradient && !description.hasBitmap;
@@ -751,6 +754,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         }
         if (description.hasColors) {
             shader.append(gFS_Main_FragColor_HasColors);
+        }
+        if (description.hasDebugHighlight) {
+            shader.append(gFS_Main_DebugHighlight);
         }
     }
     // End the shader

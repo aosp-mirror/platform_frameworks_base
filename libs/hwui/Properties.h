@@ -68,6 +68,20 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_OVERDRAW "debug.hwui.show_overdraw"
 
 /**
+ * Used to enable/disable non-rectangular clipping debugging.
+ *
+ * The accepted values are:
+ * "highlight", drawing commands clipped by the stencil will
+ *              be colored differently
+ * "region", renders the clipping region on screen whenever
+ *           the stencil is set
+ * "hide", don't show the clip
+ *
+ * The default value is "hide".
+ */
+#define PROPERTY_DEBUG_STENCIL_CLIP "debug.hwui.show_stencil_clip"
+
+/**
  * Used to enable/disable scissor optimization. The accepted values are
  * "true" and "false". The default value is "false".
  *

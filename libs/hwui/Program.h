@@ -83,6 +83,8 @@ namespace uirenderer {
 
 #define PROGRAM_HAS_COLORS 42
 
+#define PROGRAM_HAS_DEBUG_HIGHLIGHT 43
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,6 +161,8 @@ struct ProgramDescription {
     bool hasGammaCorrection;
     float gamma;
 
+    bool hasDebugHighlight;
+
     /**
      * Resets this description. All fields are reset back to the default
      * values they hold after building a new instance.
@@ -199,6 +203,8 @@ struct ProgramDescription {
 
         hasGammaCorrection = false;
         gamma = 2.2f;
+
+        hasDebugHighlight = false;
     }
 
     /**
@@ -267,6 +273,7 @@ struct ProgramDescription {
         if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
         if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
         if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
+        if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
         return key;
     }
 
