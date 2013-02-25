@@ -18,15 +18,6 @@ parent.link=index.html
           </ol>
         </li>
 
-        <li>
-          <a href="#format">Traceview File Format</a>
-          <ol>
-            <li><a href="#datafileformat">Data File Format</a></li>
-
-            <li><a href="#keyfileformat">Key File Format</a></li>
-          </ol>
-        </li>
-
         <li><a href="#creatingtracefiles">Creating Trace Files</a></li>
 
         <li><a href="#copyingfiles">Copying Trace Files to a Host Machine</a></li>
@@ -95,114 +86,6 @@ parent.link=index.html
        height="630" />
   <p class="img-caption"><strong>Figure 2.</strong> The Traceview Profile Panel</p>
 
-  <h2 id="format">Traceview File Format</h2>
-
-  <p>Tracing creates two distinct pieces of output: a <em>data</em> file, which holds the trace
-  data, and a <em>key</em> file, which provides a mapping from binary identifiers to thread and
-  method names. The files are concatenated when tracing completes, into a single <em>.trace</em>
-  file.</p>
-
-  <p class="note"><strong>Note:</strong> The previous version of Traceview did not concatenate
-  these files for you. If you have old key and data files that you'd still like to trace, you can
-  concatenate them yourself with <code>cat mytrace.key mytrace.data &gt;
-  mytrace.trace</code>.</p>
-
-  <h3 id="datafileformat">Data File Format</h3>
-
-  <p>The data file is binary, structured as follows (all values are stored in little-endian
-  order):</p>
-  <pre>
-* File format:
-* header
-* record 0
-* record 1
-* ...
-*
-* Header format:
-* u4 magic 0x574f4c53 ('SLOW')
-* u2 version
-* u2 offset to data
-* u8 start date/time in usec
-*
-* Record format:
-* u1 thread ID
-* u4 method ID | method action
-* u4 time delta since start, in usec
-</pre>
-
-  <p>The application is expected to parse all of the header fields, then seek to "offset to data"
-  from the start of the file. From there it just reads 9-byte records until EOF is reached.</p>
-
-  <p><em>u8 start date/time in usec</em> is the output from <code>gettimeofday()</code>. It's mainly there so
-  that you can tell if the output was generated yesterday or three months ago.</p>
-
-  <p><em>method action</em> sits in the two least-significant bits of the <em>method</em> word. The
-  currently defined meanings are:</p>
-
-  <ul>
-    <li>0 - method entry</li>
-
-    <li>1 - method exit</li>
-
-    <li>2 - method "exited" when unrolled by exception handling</li>
-
-    <li>3 - (reserved)</li>
-  </ul>
-
-  <p>An unsigned 32-bit integer can hold about 70 minutes of time in microseconds.</p>
-
-  <h3 id="keyfileformat">Key File Format</h3>
-
-  <p>The key file is a plain text file divided into three sections. Each section starts with a
-  keyword that begins with '*'. If you see a '*' at the start of a line, you have found the start
-  of a new section.</p>
-
-  <p>An example file might look like this:</p>
-  <pre>
-*version
-1
-clock=global
-*threads
-1 main
-6 JDWP Handler
-5 Async GC
-4 Reference Handler
-3 Finalizer
-2 Signal Handler
-*methods
-0x080f23f8 java/io/PrintStream write ([BII)V
-0x080f25d4 java/io/PrintStream print (Ljava/lang/String;)V
-0x080f27f4 java/io/PrintStream println (Ljava/lang/String;)V
-0x080da620 java/lang/RuntimeException   &lt;init&gt;    ()V
-[...]
-0x080f630c android/os/Debug startMethodTracing ()V
-0x080f6350 android/os/Debug startMethodTracing (Ljava/lang/String;Ljava/lang/String;I)V
-*end
-</pre>
-<p>The following list describes the major sections of a key file:</p>
-  <dl>
-    <dt><em>version section</em></dt>
-
-    <dd>The first line is the file version number, currently 1. The second line,
-    <code>clock=global</code>, indicates that we use a common clock across all threads. A future
-    version may use per-thread CPU time counters that are independent for every thread.</dd>
-
-    <dt><em>threads section</em></dt>
-
-    <dd>One line per thread. Each line consists of two parts: the thread ID, followed by a tab,
-    followed by the thread name. There are few restrictions on what a valid thread name is, so
-    include everything to the end of the line.</dd>
-
-    <dt><em>methods section</em></dt>
-
-    <dd>One line per method entry or exit. A line consists of four pieces, separated by tab marks:
-    <em>method-ID</em> [TAB] <em>class-name</em> [TAB] <em>method-name</em> [TAB]
-    <em>signature</em> . Only the methods that were actually entered or exited are included in the
-    list. Note that all three identifiers are required to uniquely identify a method.</dd>
-  </dl>
-
-  <p>Neither the threads nor methods sections are sorted.</p>
-
   <h2 id="creatingtracefiles">Creating Trace Files</h2>
 
   <p>To use Traceview, you need to generate log files containing the trace information you want to
@@ -269,9 +152,6 @@ clock=global
   <p>When using the Android emulator, you must specify an SD card when you create your AVD because the trace files
   are written to the SD card. Your application must have permission to write to the SD card as well.
 
-  <p>The format of the trace files is previously described <a href="#format">in this
-  document</a>.</p>
-
   <h2 id="copyingfiles">Copying Trace Files to a Host Machine</h2>
 
   <p>After your application has run and the system has created your trace files
@@ -297,7 +177,7 @@ traceview /tmp/calc
   You can use the Proguard <code>mapping.txt</code> file to figure out the original unobfuscated names. For more information
   on this file, see the <a href="{@docRoot}tools/help/proguard.html">Proguard</a> documentation.</p>
 
-      <h2 id="dmtracedump">Using dmtracdedump</h2>
+      <h2 id="dmtracedump">Using dmtracedump</h2>
 
       <p><code>dmtracedump</code> is a tool that gives you an alternate way of generating
       graphical call-stack diagrams from trace log files. The tool uses the Graphviz Dot utility to
