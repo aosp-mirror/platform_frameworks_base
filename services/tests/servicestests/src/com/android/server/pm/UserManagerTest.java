@@ -22,8 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
-import android.os.Debug;
-import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
@@ -67,6 +65,9 @@ public class UserManagerTest extends AndroidTestCase {
                     && !user.isAdmin()
                     && !user.isPrimary()) {
                 found = true;
+                Bundle restrictions = mUserManager.getUserRestrictions(user.getUserHandle());
+                assertTrue("New user should have ALLOW_CONFIG_WIFI =true by default",
+                        restrictions.getBoolean(UserManager.ALLOW_CONFIG_WIFI));
             }
         }
         assertTrue(found);

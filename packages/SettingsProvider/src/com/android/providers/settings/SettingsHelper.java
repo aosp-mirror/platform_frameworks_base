@@ -16,8 +16,6 @@
 
 package com.android.providers.settings;
 
-import java.util.Locale;
-
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.backup.IBackupManager;
@@ -28,8 +26,11 @@ import android.media.AudioManager;
 import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+
+import java.util.Locale;
 
 public class SettingsHelper {
     private Context mContext;
@@ -96,6 +97,10 @@ public class SettingsHelper {
     }
 
     private void setGpsLocation(String value) {
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        if (! um.isLocationSharingToggleAllowed()) {
+            return;
+        }
         final String GPS = LocationManager.GPS_PROVIDER;
         boolean enabled = 
                 GPS.equals(value) ||

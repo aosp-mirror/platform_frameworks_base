@@ -15,14 +15,14 @@
  */
 package android.os;
 
-import com.android.internal.R;
-
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.graphics.Bitmap;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.util.Log;
+
+import com.android.internal.R;
 
 import java.util.List;
 
@@ -71,6 +71,14 @@ public class UserManager {
      */
     public static final String ALLOW_UNINSTALL_APPS = "uninstall_apps";
 
+    /** @hide *
+     * Key for user restrictions. Specifies if a user is allowed to toggle location sharing.
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String ALLOW_CONFIG_LOCATION_ACCESS = "config_location_access";
+
     /** @hide */
     public UserManager(Context context, IUserManager service) {
         mService = service;
@@ -86,11 +94,11 @@ public class UserManager {
         return getMaxSupportedUsers() > 1;
     }
 
-    /** 
+    /**
      * Returns the user handle for the user that this application is running for.
      * @return the user handle of the user making this call.
      * @hide
-     * */
+     */
     public int getUserHandle() {
         return UserHandle.myUserId();
     }
@@ -195,6 +203,13 @@ public class UserManager {
         } catch (RemoteException re) {
             Log.w(TAG, "Could not set user restrictions", re);
         }
+    }
+
+    /** @hide */
+    public void setUserRestriction(String key, boolean value, UserHandle userHandle) {
+        Bundle bundle = getUserRestrictions(userHandle);
+        bundle.putBoolean(key, value);
+        setUserRestrictions(bundle, userHandle);
     }
 
     /**
@@ -432,5 +447,13 @@ public class UserManager {
             Log.w(TAG, "Could not get userHandle for user " + userSerialNumber);
         }
         return -1;
+    }
+
+    /**
+     * Returns whether the current user is allow to toggle location sharing settings.
+     * @hide
+     */
+    public boolean isLocationSharingToggleAllowed() {
+        return getUserRestrictions().getBoolean(ALLOW_CONFIG_LOCATION_ACCESS);
     }
 }
