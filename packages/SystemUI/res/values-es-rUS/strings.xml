@@ -133,7 +133,7 @@
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No hay tarjeta SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conexión mediante Bluetooth"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo de avión"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
@@ -154,7 +154,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Móvil <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batería <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo de avión <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo avión <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarma: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos de 2G-3G inhabilitados"</string>
