@@ -44,6 +44,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
+import android.content.pm.KeySet;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -58,6 +59,7 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -68,6 +70,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.PublicKey;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -177,6 +180,9 @@ final class Settings {
     private final Context mContext;
 
     private final File mSystemDir;
+
+    public final KeySetManager mKeySetManager = new KeySetManager(mPackages);
+
     Settings(Context context) {
         this(context, Environment.getDataDirectory());
     }
@@ -1325,6 +1331,8 @@ final class Settings {
                 }
             }
             
+            mKeySetManager.writeKeySetManagerLPr(serializer);
+
             serializer.endTag(null, "packages");
 
             serializer.endDocument();
@@ -1512,7 +1520,29 @@ final class Settings {
             serializer.endTag(null, "perms");
         }
 
+        writeSigningKeySetsLPr(serializer, pkg.keySetData);
+        writeKeySetAliasesLPr(serializer, pkg.keySetData);
+
         serializer.endTag(null, "package");
+    }
+
+    void writeSigningKeySetsLPr(XmlSerializer serializer,
+            PackageKeySetData data) throws IOException {
+        for (long id : data.getSigningKeySets()) {
+            serializer.startTag(null, "signing-keyset");
+            serializer.attribute(null, "identifier", Long.toString(id));
+            serializer.endTag(null, "signing-keyset");
+        }
+    }
+
+    void writeKeySetAliasesLPr(XmlSerializer serializer,
+            PackageKeySetData data) throws IOException {
+        for (Map.Entry<String, Long> e: data.getAliases().entrySet()) {
+            serializer.startTag(null, "defined-keyset");
+            serializer.attribute(null, "alias", e.getKey());
+            serializer.attribute(null, "identifier", Long.toString(e.getValue()));
+            serializer.endTag(null, "defined-keyset");
+        }
     }
 
     void writePermissionLPr(XmlSerializer serializer, BasePermission bp)
@@ -1692,6 +1722,8 @@ final class Settings {
                 } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                     final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
                     mReadExternalStorageEnforced = "1".equals(enforcement);
+                } else if (tagName.equals("keyset-settings")) {
+                    mKeySetManager.readKeySetsLPw(parser);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -2287,12 +2319,22 @@ final class Settings {
                 } else if (tagName.equals("perms")) {
                     readGrantedPermissionsLPw(parser, packageSetting.grantedPermissions);
                     packageSetting.permissionsFixed = true;
+                } else if (tagName.equals("signing-keyset")) {
+                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    packageSetting.keySetData.addSigningKeySet(id);
+                    Slog.e(TAG, "Adding signing keyset " + Long.toString(id) + " to " + name);
+                } else if (tagName.equals("defined-keyset")) {
+                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    String alias = parser.getAttributeValue(null, "alias");
+                    packageSetting.keySetData.addDefinedKeySet(id, alias);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
+
+
         } else {
             XmlUtils.skipCurrentTag(parser);
         }

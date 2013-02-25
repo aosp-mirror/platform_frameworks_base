@@ -46,14 +46,20 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertPath;
+import java.security.cert.X509Certificate;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -689,6 +695,13 @@ public class PackageParser {
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
                 return false;
             }
+
+            // Add the signing KeySet to the system
+            pkg.mSigningKeys = new HashSet<PublicKey>();
+            for (int i=0; i < certs.length; i++) {
+                pkg.mSigningKeys.add(certs[i].getPublicKey());
+            }
+
         } catch (CertificateEncodingException e) {
             Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
             mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
@@ -1000,6 +1013,10 @@ public class PackageParser {
 
                 foundApp = true;
                 if (!parseApplication(pkg, res, parser, attrs, flags, outError)) {
+                    return null;
+                }
+            } else if (tagName.equals("keys")) {
+                if (!parseKeys(pkg, res, parser, attrs, outError)) {
                     return null;
                 }
             } else if (tagName.equals("permission-group")) {
@@ -1464,7 +1481,71 @@ public class PackageParser {
         }
         return buildCompoundName(pkg, procSeq, "taskAffinity", outError);
     }
-    
+
+    private boolean parseKeys(Package owner, Resources res,
+            XmlPullParser parser, AttributeSet attrs, String[] outError)
+            throws XmlPullParserException, IOException {
+        // we've encountered the 'keys' tag
+        // all the keys and keysets that we want must be defined here
+        // so we're going to iterate over the parser and pull out the things we want
+        int outerDepth = parser.getDepth();
+
+        int type;
+        PublicKey currentKey = null;
+        Map<PublicKey, Set<String>> definedKeySets = new HashMap<PublicKey, Set<String>>();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG) {
+                continue;
+            }
+            String tagname = parser.getName();
+            if (tagname.equals("publicKey")) {
+                final TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.PublicKey);
+                final String encodedKey = sa.getNonResourceString(
+                    com.android.internal.R.styleable.PublicKey_value);
+                currentKey = parsePublicKey(encodedKey);
+                definedKeySets.put(currentKey, new HashSet<String>());
+                sa.recycle();
+             } else if (tagname.equals("keyset")) {
+                final TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.KeySet);
+                final String name = sa.getNonResourceString(
+                    com.android.internal.R.styleable.KeySet_name);
+                definedKeySets.get(currentKey).add(name);
+                sa.recycle();
+            } else if (RIGID_PARSER) {
+                Slog.w(TAG, "Bad element under <keys>: " + parser.getName()
+                        + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
+                return false;
+            } else {
+                Slog.w(TAG, "Unknown element under <keys>: " + parser.getName()
+                        + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+            }
+        }
+
+        owner.mKeySetMapping = new HashMap<String, Set<PublicKey>>();
+        for (Map.Entry<PublicKey, Set<String>> e : definedKeySets.entrySet()) {
+            PublicKey key = e.getKey();
+            Set<String> keySetNames = e.getValue();
+            for (String alias : keySetNames) {
+                if (owner.mKeySetMapping.containsKey(alias)) {
+                    owner.mKeySetMapping.get(alias).add(key);
+                } else {
+                    Set<PublicKey> keys = new HashSet<PublicKey>();
+                    keys.add(key);
+                    owner.mKeySetMapping.put(alias, keys);
+                }
+            }
+        }
+
+        return true;
+    }
+
     private PermissionGroup parsePermissionGroup(Package owner, int flags, Resources res,
             XmlPullParser parser, AttributeSet attrs, String[] outError)
         throws XmlPullParserException, IOException {
@@ -2988,20 +3069,28 @@ public class PackageParser {
             Slog.i(TAG, "verifier " + packageName + " public key was null; skipping");
         }
 
+        PublicKey publicKey = parsePublicKey(encodedPublicKey);
+        if (publicKey != null) {
+            return new VerifierInfo(packageName, publicKey);
+        }
+
+        return null;
+    }
+
+    public static final PublicKey parsePublicKey(String encodedPublicKey) {
         EncodedKeySpec keySpec;
         try {
             final byte[] encoded = Base64.decode(encodedPublicKey, Base64.DEFAULT);
             keySpec = new X509EncodedKeySpec(encoded);
         } catch (IllegalArgumentException e) {
-            Slog.i(TAG, "Could not parse verifier " + packageName + " public key; invalid Base64");
+            Slog.i(TAG, "Could not parse verifier public key; invalid Base64");
             return null;
         }
 
         /* First try the key as an RSA key. */
         try {
             final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            final PublicKey publicKey = keyFactory.generatePublic(keySpec);
-            return new VerifierInfo(packageName, publicKey);
+            return keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Could not parse public key because RSA isn't included in build");
             return null;
@@ -3012,8 +3101,7 @@ public class PackageParser {
         /* Now try it as a DSA key. */
         try {
             final KeyFactory keyFactory = KeyFactory.getInstance("DSA");
-            final PublicKey publicKey = keyFactory.generatePublic(keySpec);
-            return new VerifierInfo(packageName, publicKey);
+            return keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Could not parse public key because DSA isn't included in build");
             return null;
@@ -3253,6 +3341,12 @@ public class PackageParser {
          * same as another.
          */
         public ManifestDigest manifestDigest;
+
+        /**
+         * Data used to feed the KeySetManager
+         */
+        public Set<PublicKey> mSigningKeys;
+        public Map<String, Set<PublicKey>> mKeySetMapping;
 
         public Package(String _name) {
             packageName = _name;

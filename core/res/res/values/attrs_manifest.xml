@@ -1699,4 +1699,12 @@
         <!-- Concrete value to put for this named extra data. -->
         <attr name="value" />
     </declare-styleable>
+
+    <attr name="keyset" />
+    <declare-styleable name="PublicKey">
+        <attr name="value" />
+    </declare-styleable>
+    <declare-styleable name="KeySet">
+        <attr name="name" />
+    </declare-styleable>
 </resources>

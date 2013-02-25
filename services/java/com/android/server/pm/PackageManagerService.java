@@ -70,6 +70,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.KeySet;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -113,10 +114,12 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Environment.UserEnvironment;
 import android.security.SystemKeyStore;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -1022,6 +1025,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             mRestoredSettings = mSettings.readLPw(this, sUserManager.getUsers(false),
                     mSdkVersion, mOnlyCore);
+
             long startTime = SystemClock.uptimeMillis();
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START,
@@ -3262,10 +3266,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         pp.setOnlyCoreApps(mOnlyCore);
         final PackageParser.Package pkg = pp.parsePackage(scanFile,
                 scanPath, mMetrics, parseFlags);
+
         if (pkg == null) {
             mLastScanError = pp.getParseError();
             return null;
         }
+
         PackageSetting ps = null;
         PackageSetting updatedPkg;
         // reader
@@ -3408,6 +3414,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             resPath = pkg.mScanPath;
         }
+
         codePath = pkg.mScanPath;
         // Set application objects path explicitly.
         setApplicationInfoPaths(pkg, codePath, resPath);
@@ -4228,6 +4235,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // to be an update.
                     pkgSetting.lastUpdateTime = scanFileTime;
                 }
+            }
+
+            // Add the package's KeySets to the global KeySetManager
+            KeySetManager ksm = mSettings.mKeySetManager;
+            try {
+                ksm.addSigningKeySetToPackage(pkg.packageName, pkg.mSigningKeys);
+                if (pkg.mKeySetMapping != null) {
+                    for (Map.Entry<String, Set<PublicKey>> entry : pkg.mKeySetMapping.entrySet()) {
+                        if (entry.getValue() != null) {
+                            ksm.addDefinedKeySetToPackage(pkg.packageName,
+                                entry.getValue(), entry.getKey());
+                        }
+                    }
+                }
+            } catch (NullPointerException e) {
+                Slog.e(TAG, "Could not add KeySet to " + pkg.packageName, e);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Could not add KeySet to malformed package" + pkg.packageName, e);
             }
 
             int N = pkg.providers.size();
@@ -8420,7 +8445,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             removePackageDataLI(ps, outInfo, flags, writeSettings);
             return true;
         }
+
         boolean ret = false;
+        mSettings.mKeySetManager.removeAppKeySetData(packageName);
         if (isSystemApp(ps)) {
             Log.i(TAG, "Removing system package:" + ps.name);
             // When an updated system application is deleted we delete the existing resources as well and
@@ -8433,6 +8460,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags, outInfo,
                     writeSettings);
         }
+
         return ret;
     }
 
@@ -9234,6 +9262,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         public static final int DUMP_PREFERRED_XML = 1 << 10;
 
+        public static final int DUMP_KEYSETS = 1 << 11;
+
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
         private int mTypes;
@@ -9331,6 +9361,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    m[essages]: print collected runtime messages");
                 pw.println("    v[erifiers]: print package verifier info");
                 pw.println("    <package.name>: info about given package");
+                pw.println("    k[eysets]: print known keysets");
                 return;
             } else if ("-f".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
@@ -9372,6 +9403,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_MESSAGES);
             } else if ("v".equals(cmd) || "verifiers".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_VERIFIERS);
+            } else if ("k".equals(cmd) || "keysets".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_KEYSETS);
             }
         }
 
@@ -9507,7 +9540,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            
+
+            if (dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println(" ");
+                }
+                mSettings.mKeySetManager.dump(pw);
+            }
+
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
                 mSettings.dumpPackagesLPr(pw, packageName, dumpState);
             }
