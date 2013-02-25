@@ -785,10 +785,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
         final boolean needsToResetDefaultIme = TextUtils.isEmpty(defaultImiId);
+        // For secondary users, the list of enabled IMEs may not have been updated since the
+        // callbacks to PackageMonitor are ignored for the secondary user. Here, defaultImiId may
+        // not be empty even if the IME has been uninstalled by the primary user.
+        // Even in such cases, IMMS works fine because it will find the most applicable
+        // IME for that user.
         if (DEBUG) {
             Slog.d(TAG, "Switch user: " + newUserId + " current ime = " + defaultImiId);
         }
-        resetAllInternalStateLocked(false  /* updateOnlyWhenLocaleChanged */,
+        resetAllInternalStateLocked(false /* updateOnlyWhenLocaleChanged */,
                 needsToResetDefaultIme);
     }
 
