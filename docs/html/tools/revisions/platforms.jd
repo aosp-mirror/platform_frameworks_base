@@ -44,11 +44,28 @@ version.</p>
 SDK tools to revision 20 or later and restart the Android SDK Manager. If you do not,
 the Android 4.2 system components will not be available for download.</p>
 
-
 <div class="toggle-content opened">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(February 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Maintenance update. The system version is 4.2.2.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r21 or higher is required.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(November 2012)</em>
   </p>
 

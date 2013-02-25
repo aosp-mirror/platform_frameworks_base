@@ -69,7 +69,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
       <li>Java 1.6 or higher is required for ADT 21.1.0.</li>
       <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 21.1.0.</li>
       <li>ADT 21.1.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r21.1.0</a>. If you haven't already installed SDK Tools r21.1.0 into your SDK, use the
+      Tools r21.1</a>. If you haven't already installed SDK Tools r21.1 into your SDK, use the
       Android SDK Manager to do so.</li>
     </ul>
   </dd>

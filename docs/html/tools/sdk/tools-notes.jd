@@ -28,7 +28,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>SDK Tools, Revision 21.1.0</a> <em>(February 2013)</em>
+      alt=""/>SDK Tools, Revision 21.1</a> <em>(February 2013)</em>
   </p>
 
   <div class="toggle-content-toggleme">
@@ -38,7 +38,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     <dd>
       <ul>
         <li>Android SDK Platform-tools revision 16 or later.</li>
-        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r21.1.0 is
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r21.1 is
           designed for use with ADT 21.1.0 and later. If you haven't already, update your
         <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 21.1.0.</li>
         <li>If you are developing outside Eclipse, you must have
