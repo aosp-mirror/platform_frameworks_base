@@ -603,6 +603,7 @@ public class UserManagerService extends IUserManager.Stub {
                 writeBoolean(serializer, restrictions, UserManager.ALLOW_MODIFY_ACCOUNTS);
                 writeBoolean(serializer, restrictions, UserManager.ALLOW_INSTALL_APPS);
                 writeBoolean(serializer, restrictions, UserManager.ALLOW_UNINSTALL_APPS);
+                writeBoolean(serializer, restrictions, UserManager.ALLOW_CONFIG_LOCATION_ACCESS);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -719,6 +720,7 @@ public class UserManagerService extends IUserManager.Stub {
                         readBoolean(parser, restrictions, UserManager.ALLOW_MODIFY_ACCOUNTS);
                         readBoolean(parser, restrictions, UserManager.ALLOW_INSTALL_APPS);
                         readBoolean(parser, restrictions, UserManager.ALLOW_UNINSTALL_APPS);
+                        readBoolean(parser, restrictions, UserManager.ALLOW_CONFIG_LOCATION_ACCESS);
                     }
                 }
             }
@@ -763,6 +765,7 @@ public class UserManagerService extends IUserManager.Stub {
         restrictions.putBoolean(UserManager.ALLOW_MODIFY_ACCOUNTS, true);
         restrictions.putBoolean(UserManager.ALLOW_INSTALL_APPS, true);
         restrictions.putBoolean(UserManager.ALLOW_UNINSTALL_APPS, true);
+        restrictions.putBoolean(UserManager.ALLOW_CONFIG_LOCATION_ACCESS, true);
     }
 
     private int readIntAttribute(XmlPullParser parser, String attr, int defaultValue) {
