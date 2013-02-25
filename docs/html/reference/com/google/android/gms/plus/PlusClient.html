@@ -73,35 +73,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -148,7 +119,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
-  
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -163,7 +133,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           </div>
             <ul class="nav-x col-9">
                 <li class="design">
-                  <a href="/design/index.html" 
+                  <a href="/design/index.html"
                   zh-TW-lang="設計"
                   zh-CN-lang="设计"
                   ru-lang="Проектирование"
@@ -171,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
-                <li class="develop"><a href="/develop/index.html" class="selected"
+                <li class="develop"><a href="/develop/index.html"
                   zh-TW-lang="開發"
                   zh-CN-lang="开发"
                   ru-lang="Разработка"
@@ -179,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
-                <li class="distribute last"><a href="/distribute/index.html" 
+                <li class="distribute last"><a href="/distribute/index.html"
                   zh-TW-lang="發佈"
                   zh-CN-lang="分发"
                   ru-lang="Распространение"
@@ -348,7 +318,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
-                <li><a href="/training/index.html" 
+                <li class="training"><a href="/training/index.html"
                   zh-TW-lang="訓練課程"
                   zh-CN-lang="培训"
                   ru-lang="Курсы"
@@ -356,7 +326,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li><a href="/guide/components/index.html" 
+                <li class="guide"><a href="/guide/components/index.html"
                   zh-TW-lang="API 指南"
                   zh-CN-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -364,7 +334,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
-                <li><a href="/reference/packages.html" 
+                <li class="reference"><a href="/reference/packages.html"
                   zh-TW-lang="參考資源"
                   zh-CN-lang="参考"
                   ru-lang="Справочник"
@@ -372,7 +342,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
-                <li><a href="/tools/index.html" 
+                <li class="tools"><a href="/tools/index.html"
                   zh-TW-lang="相關工具"
                   zh-CN-lang="工具"
                   ru-lang="Инструменты"
@@ -380,7 +350,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="ツール"
                   es-lang="Herramientas"
                   >Tools</a></li>
-                <li><a href="/google/index.html" class="selected"
+                <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
             </ul>
@@ -390,9 +360,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <!-- /Sendondary x-nav -->
 
   
-  
 
-  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -467,6 +435,9 @@ onkeyup="return search_changed(event, false, '/')" />
               <li><a href="/google/play/billing/v2/billing_reference.html">
               <span class="en">Reference</span></a></li>
               </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
       </li>
       <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
@@ -579,7 +550,6 @@ onkeyup="return search_changed(event, false, '/')" />
        showGoogleRefTree();
     
       </script>
-
     </div> <!-- end side-nav -->
     <script>
       $(document).ready(function() {
@@ -587,8 +557,6 @@ onkeyup="return search_changed(event, false, '/')" />
         });
     </script>
 
-
-     
 
 
 
@@ -617,19 +585,19 @@ onkeyup="return search_changed(event, false, '/')" />
 
 Summary:
 
-
-
-
-
-  <a href="#constants">Constants</a>
+  <a href="#nestedclasses">Nested Classes</a>
   
 
 
 
 
 
-  &#124; <a href="#pubctors">Ctors</a>
+  &#124; <a href="#constants">Constants</a>
   
+
+
+
+
 
 
 
@@ -718,15 +686,14 @@ Summary:
 
  Use the PlusClient after the asynchronous <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> method
  has been called and your listener's
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected()">onConnected()</a></code> method is called.
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected()">onConnected()</a></code>
+ method is called.
  <p>
- When your app is done using PlusClient, call <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect()</a></code>,
- even if the async result from <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> has not yet been
- delivered.
+ When your app is done using PlusClient, call <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect()</a></code>, even if the async
+ result from <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> has not yet been delivered.
  <p>
- You should instantiate this object in your Activity's
- <code><a href="/reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate(Bundle)</a></code> method and then call <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> in
- <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> and <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect()</a></code> in
+ You should instantiate this object in your Activity's <code><a href="/reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate(Bundle)</a></code> method and then
+ call <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> in <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> and <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect()</a></code> in
  <code><a href="/reference/android/app/Activity.html#onStop()">onStop()</a></code>, regardless of the state.
 </p>
 
@@ -758,6 +725,75 @@ Summary:
 
 
 
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
+
+
+  
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        class</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></td>
+      <td class="jd-descrcol" width="100%">Builder to create a <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> to connect to Google Play services.&nbsp;</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a></td>
+      <td class="jd-descrcol" width="100%">Listener interface for when the token revocation request has completed.&nbsp;</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></td>
+      <td class="jd-descrcol" width="100%">Listener interface for when moments are loaded.&nbsp;</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></td>
+      <td class="jd-descrcol" width="100%">Listener interface for when a collection of people are loaded.&nbsp;</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html">PlusClient.OnPersonLoadedListener</a></td>
+      <td class="jd-descrcol" width="100%">Listener interface for when a <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> is
+ loaded&nbsp;</td>
+    </tr>
+    
+    
+
+
+
 
 
 
@@ -781,82 +817,25 @@ Summary:
     </tr>
     
     
-
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#PlusClient(android.content.Context, java.lang.String, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener, java.lang.String...)">PlusClient</a></span>(Context context, String accountName, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener, String... scopes)</nobr>
-        
-        <div class="jd-descrdiv">Creates a Google+ client to connect to Google Play services.</div>
-  
-  </td></tr>
-
-
-	 
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#PlusClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener, java.lang.String...)">PlusClient</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener, String... scopes)</nobr>
-        
-        <div class="jd-descrdiv">Creates a Google+ client to connect to Google Play services.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#PlusClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">PlusClient</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
-        
-        <div class="jd-descrdiv">Creates a Google+ client to connect to Google Play services with a
- <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#DEFAULT_ACCOUNT">DEFAULT_ACCOUNT</a></code> and without OAuth 2.0 scopes.</div>
-  
-  </td></tr>
-
-
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.html#KEY_REQUEST_VISIBLE_ACTIVITIES">KEY_REQUEST_VISIBLE_ACTIVITIES</a></td>
+        <td class="jd-descrcol" width="100%">Bundle key for specifying which user's app activity (moment) types can be written to Google.</td>
+    </tr>
+    
+    
 
 </table>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -948,6 +927,24 @@ Summary:
             
             
             
+            <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#getCurrentPerson()">getCurrentPerson</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns profile information for the current user.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -960,7 +957,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -979,7 +976,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -993,6 +990,96 @@ Summary:
         
         <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
  receive connection failed events.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener, int, java.lang.String, android.net.Uri, java.lang.String, java.lang.String)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, String pageToken, Uri targetUrl, String type, String userId)</nobr>
+        
+        <div class="jd-descrdiv">List all of the moments for a particular user.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">List all of the moments for the currently signed-in user.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, int, int, java.lang.String)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection, int orderBy, int maxResults, String pageToken)</nobr>
+        
+        <div class="jd-descrdiv">Loads a list of people in the specified collection.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection)</nobr>
+        
+        <div class="jd-descrdiv">Loads a list of people in the specified collection.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPerson(com.google.android.gms.plus.PlusClient.OnPersonLoadedListener, java.lang.String)">loadPerson</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html">PlusClient.OnPersonLoadedListener</a> listener, String userId)</nobr>
+        
+        <div class="jd-descrdiv">Loads profile information for a specified Google+ user.</div>
   
   </td></tr>
 
@@ -1045,6 +1132,42 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#removeMoment(java.lang.String)">removeMoment</a></span>(String momentId)</nobr>
+        
+        <div class="jd-descrdiv">Delete a moment.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#revokeAccessAndDisconnect(com.google.android.gms.plus.PlusClient.OnAccessRevokedListener)">revokeAccessAndDisconnect</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">Revokes access given to the current application.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
         <div class="jd-descrdiv">Removes a connection listener from this <code>GooglePlayServicesClient</code>.</div>
@@ -1066,6 +1189,24 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#writeMoment(com.google.android.gms.plus.model.moments.Moment)">writeMoment</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a> moment)</nobr>
+        
+        <div class="jd-descrdiv">Writes a moment.</div>
   
   </td></tr>
 
@@ -1546,177 +1687,65 @@ From interface
 
 
 
+<A NAME="KEY_REQUEST_VISIBLE_ACTIVITIES"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        KEY_REQUEST_VISIBLE_ACTIVITIES
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Bundle key for specifying which user's app activity (moment) types can be written to Google.
+ The list of activity types are represented as a space-separated string passed in the extras
+ Bundle when calling <code><a href="/">ERROR(/GoogleAuthUtil#getToken(Context, String, String, Bundle))</a></code>.
+
+ <p>
+ This bundle key should be included in the extras Bundle when calling
+ <code><a href="/">ERROR(/GoogleAuthUtil#getToken(Context, String, String, Bundle))</a></code> and should only be used when
+ requesting the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope.
+
+ See <a href="https://developers.google.com/+/api/moment-types">Types of moments</a>
+ for the full list of valid activity types. Example usage:
+ <pre>
+     Bundle bundle = new Bundle();
+     bundle.putString(PlusClient.KEY_REQUEST_VISIBLE_ACTIVITIES,
+              "http://schemas.google.com/AddActivity http://schemas.google.com/BuyActivity");
+     String token = GoogleAuthUtil.getToken(context, accountName, Scopes.PLUS_LOGIN, bundle);
+ </pre>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "request_visible_actions"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 
 <!-- Fields -->
 
 
 <!-- Public ctors -->
-
-
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<A NAME="PlusClient(android.content.Context, java.lang.String, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener, java.lang.String...)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">PlusClient</span>
-      <span class="normal">(Context context, String accountName, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener, String... scopes)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a Google+ client to connect to Google Play services.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context to use for the connection.</td>
-        </tr>
-        <tr>
-          <th>accountName</td>
-          <td>The name of the account to use.</td>
-        </tr>
-        <tr>
-          <th>connectionCallbacks</td>
-          <td>The callbacks invoked when the client is connected.</td>
-        </tr>
-        <tr>
-          <th>connectionFailedListener</td>
-          <td>The listener which will be notified if
-            the connection attempt fails.</td>
-        </tr>
-        <tr>
-          <th>scopes</td>
-          <td>The OAuth 2.0 scopes that your application is requesting access to (see
-            <code><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></code> for details).
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="PlusClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener, java.lang.String...)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">PlusClient</span>
-      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener, String... scopes)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a Google+ client to connect to Google Play services.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context to use for the connection.</td>
-        </tr>
-        <tr>
-          <th>connectionCallbacks</td>
-          <td>The callbacks invoked when the client is connected.</td>
-        </tr>
-        <tr>
-          <th>connectionFailedListener</td>
-          <td>The listener which will be notified if
-            the connection attempt fails.</td>
-        </tr>
-        <tr>
-          <th>scopes</td>
-          <td>The OAuth 2.0 scopes that your application is requesting access to (see
-            <code><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></code> for details).
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="PlusClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">PlusClient</span>
-      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a Google+ client to connect to Google Play services with a
- <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#DEFAULT_ACCOUNT">DEFAULT_ACCOUNT</a></code> and without OAuth 2.0 scopes.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context to use for the connection.</td>
-        </tr>
-        <tr>
-          <th>connectionCallbacks</td>
-          <td>The callbacks invoked when the client is connected.</td>
-        </tr>
-        <tr>
-          <th>connectionFailedListener</td>
-          <td>The listener which will be notified if
-            the connection attempt fails.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1791,12 +1820,10 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services.  This method returns immediately,
- and connects to the service in the background.  If the connection is
- successful, <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected()">onConnected()</a></code>
-       is called.  On a failure,
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code>
- is called.
+  <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. This method returns immediately, and connects to
+ the service in the background. If the connection is successful,
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected()">onConnected()</a></code> is called. On a failure,
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code> is called.
 </p></div>
 
     </div>
@@ -1873,6 +1900,49 @@ From interface
 </td>
         </tr>
       </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getCurrentPerson()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>
+      </span>
+      <span class="sympad">getCurrentPerson</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns profile information for the current user.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/get">
+ https://developers.google.com/+/api/latest/people/get</a>.
+ <p>
+ This method requires the OAuth 2.0 scope <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_PROFILE">PLUS_PROFILE</a></code> or
+ <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.
+ <p>
+ This method can return <code>null</code> if the required scopes weren't specified in the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor, or if there was a network error while connecting.
+ </p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Profile information for the current user, if available, or <code>null</code> otherwise.
+</li></ul>
   </div>
 
     </div>
@@ -2003,6 +2073,301 @@ From interface
 </div>
 
 
+<A NAME="loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener, int, java.lang.String, android.net.Uri, java.lang.String, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadMoments</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, String pageToken, Uri targetUrl, String type, String userId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>List all of the moments for a particular user.  For more information, see
+ <a href="https://developers.google.com/+/api/latest/moments/list">
+ https://developers.google.com/+/api/latest/moments/list</a>.
+ <p>
+ This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope specified in the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></code> to receive a callback when the moments
+             are loaded.</td>
+        </tr>
+        <tr>
+          <th>maxResults</td>
+          <td>The maximum number of moments to include in the response, which is used
+             for paging. For any response, the actual number returned might be less than the
+             specified maxResults.</td>
+        </tr>
+        <tr>
+          <th>pageToken</td>
+          <td>The continuation token, which is used to page through large result sets.
+             To get the next page of results, set this parameter to the value of
+             nextPageToken from the previous response.</td>
+        </tr>
+        <tr>
+          <th>targetUrl</td>
+          <td>Only moments containing this targetUrl will be returned.</td>
+        </tr>
+        <tr>
+          <th>type</td>
+          <td>Only moments of this type will be returned.</td>
+        </tr>
+        <tr>
+          <th>userId</td>
+          <td>The ID of the user to get moments for. The special value "me" can be used to
+             indicate the authenticated user.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadMoments</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>List all of the moments for the currently signed-in user.  For more information, see
+ <a href="https://developers.google.com/+/api/latest/moments/list">
+ https://developers.google.com/+/api/latest/moments/list</a>.
+ <p>
+ This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope specified in the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></code> to receive a callback when the moments
+             are loaded.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, int, int, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadPeople</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection, int orderBy, int maxResults, String pageToken)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Loads a list of people in the specified collection.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/list">
+ https://developers.google.com/+/api/latest/people/list</a>.
+
+ <p>Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
+ <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
+ To retrieve additional profile data, use the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPerson(com.google.android.gms.plus.PlusClient.OnPersonLoadedListener, java.lang.String)">loadPerson(OnPersonLoadedListener, String)</a></code> method.
+ <p>
+ This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope specified in the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></code> to receive a callback when the people
+             are loaded.</td>
+        </tr>
+        <tr>
+          <th>collection</td>
+          <td>The collection of people to list. Valid values include:
+             <code><a href="/reference/com/google/android/gms/plus/model/people/Person.Collection.html#VISIBLE">VISIBLE</a></code> - The list of people who this user has added
+             to one or more circles.</td>
+        </tr>
+        <tr>
+          <th>orderBy</td>
+          <td>The order to return people in.  Valid values are:<p>
+             <code><a href="/reference/com/google/android/gms/plus/model/people/Person.OrderBy.html#ALPHABETICAL">ALPHABETICAL</a></code> - Order the people by their display name.
+             <code><a href="/reference/com/google/android/gms/plus/model/people/Person.OrderBy.html#BEST">BEST</a></code> - Order people based on the relevance to the viewer.</td>
+        </tr>
+        <tr>
+          <th>maxResults</td>
+          <td>The maximum number of people to include in the response, which is used for
+             paging. For any response, the actual number returned might be less than the
+             specified maxResults.</td>
+        </tr>
+        <tr>
+          <th>pageToken</td>
+          <td>The continuation token, which is used to page through large result sets.
+             To get the next page of results, set this parameter to the value of
+             nextPageToken from the previous response.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadPeople</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Loads a list of people in the specified collection.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/list">
+ https://developers.google.com/+/api/latest/people/list</a>.
+
+ <p>Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
+ <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
+ To retrieve additional profile data, use the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPerson(com.google.android.gms.plus.PlusClient.OnPersonLoadedListener, java.lang.String)">loadPerson(OnPersonLoadedListener, String)</a></code> method.
+ <p>
+ This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope specified in the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></code> to receive a callback when the people
+             are loaded.</td>
+        </tr>
+        <tr>
+          <th>collection</td>
+          <td>The collection of people to list. Valid values include:<p>
+             <code><a href="/reference/com/google/android/gms/plus/model/people/Person.Collection.html#VISIBLE">VISIBLE</a></code> - The list of people who this user has added
+             to one or more circles.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadPerson(com.google.android.gms.plus.PlusClient.OnPersonLoadedListener, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadPerson</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html">PlusClient.OnPersonLoadedListener</a> listener, String userId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Loads profile information for a specified Google+ user.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/get">
+ https://developers.google.com/+/api/latest/people/get</a>.
+ <p>
+ This method requires the OAuth 2.0 scope <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_PROFILE">PLUS_PROFILE</a></code> or
+ <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html">PlusClient.OnPersonLoadedListener</a></code> to receive a callback when the person
+             is loaded.</td>
+        </tr>
+        <tr>
+          <th>userId</td>
+          <td>The ID of the person to get the profile for. The special value "me" can be
+             used to indicate the authenticated user.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2105,6 +2470,91 @@ From interface
 </div>
 
 
+<A NAME="removeMoment(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">removeMoment</span>
+      <span class="normal">(String momentId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Delete a moment.  For more information, see
+ <a href="https://developers.google.com/+/api/latest/moments/remove">
+ https://developers.google.com/+/api/latest/moments/remove</a>.
+ <p>
+ This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope specified in the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>momentId</td>
+          <td>The ID of the moment to delete.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="revokeAccessAndDisconnect(com.google.android.gms.plus.PlusClient.OnAccessRevokedListener)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">revokeAccessAndDisconnect</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Revokes access given to the current application.  The current <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> will be
+ disconnected when the <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a></code> receives a callback.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a></code> to receive a callback when the token
+            is revoked.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2128,8 +2578,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Removes a connection listener from this <code>GooglePlayServicesClient</code>. Note that removing a
- listener does not generate any callbacks.
+  <div class="jd-tagdata jd-tagdescr"><p>Removes a connection listener from this <code>GooglePlayServicesClient</code>. Note that removing
+ a listener does not generate any callbacks.
  <p>
  If the specified listener is not currently registered to receive connection events, this
  method will have no effect.</p></div>
@@ -2191,6 +2641,56 @@ From interface
 </div>
 
 
+<A NAME="writeMoment(com.google.android.gms.plus.model.moments.Moment)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">writeMoment</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a> moment)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Writes a moment.  For more information, see
+ <a href="https://developers.google.com/+/api/latest/moments/insert">
+ https://developers.google.com/+/api/latest/moments/insert</a>.
+ <p>
+ This is a fire-and-forget method that writes the user's moment asynchronously. If there is
+ a network error, Google Play services attempts to send the request again when the device
+ comes back online. Requests can fail if there are problems with the account or format of
+ specified in <code>moment</code>. To debug, run <code>adb logcat</code> in a terminal and find errors
+ related to moments in the output.
+ <p>
+ This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope specified in the
+ <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> constructor.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>moment</td>
+          <td>The moment description.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 
 
 
@@ -2200,7 +2700,6 @@ From interface
 
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
-
 
 <div id="footer" class="wrap" >
         
@@ -2230,7 +2729,6 @@ From interface
   </div>
 
 </div> <!-- end footer -->
-
 </div> <!-- jd-content -->
 
 </div><!-- end doc-content -->

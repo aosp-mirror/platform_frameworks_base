@@ -73,35 +73,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -148,7 +119,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
-  
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -163,7 +133,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           </div>
             <ul class="nav-x col-9">
                 <li class="design">
-                  <a href="/design/index.html" 
+                  <a href="/design/index.html"
                   zh-TW-lang="設計"
                   zh-CN-lang="设计"
                   ru-lang="Проектирование"
@@ -171,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
-                <li class="develop"><a href="/develop/index.html" class="selected"
+                <li class="develop"><a href="/develop/index.html"
                   zh-TW-lang="開發"
                   zh-CN-lang="开发"
                   ru-lang="Разработка"
@@ -179,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
-                <li class="distribute last"><a href="/distribute/index.html" 
+                <li class="distribute last"><a href="/distribute/index.html"
                   zh-TW-lang="發佈"
                   zh-CN-lang="分发"
                   ru-lang="Распространение"
@@ -348,7 +318,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
-                <li><a href="/training/index.html" 
+                <li class="training"><a href="/training/index.html"
                   zh-TW-lang="訓練課程"
                   zh-CN-lang="培训"
                   ru-lang="Курсы"
@@ -356,7 +326,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li><a href="/guide/components/index.html" 
+                <li class="guide"><a href="/guide/components/index.html"
                   zh-TW-lang="API 指南"
                   zh-CN-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -364,7 +334,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
-                <li><a href="/reference/packages.html" 
+                <li class="reference"><a href="/reference/packages.html"
                   zh-TW-lang="參考資源"
                   zh-CN-lang="参考"
                   ru-lang="Справочник"
@@ -372,7 +342,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
-                <li><a href="/tools/index.html" 
+                <li class="tools"><a href="/tools/index.html"
                   zh-TW-lang="相關工具"
                   zh-CN-lang="工具"
                   ru-lang="Инструменты"
@@ -380,7 +350,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="ツール"
                   es-lang="Herramientas"
                   >Tools</a></li>
-                <li><a href="/google/index.html" class="selected"
+                <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
             </ul>
@@ -390,9 +360,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <!-- /Sendondary x-nav -->
 
   
-  
 
-  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -467,6 +435,9 @@ onkeyup="return search_changed(event, false, '/')" />
               <li><a href="/google/play/billing/v2/billing_reference.html">
               <span class="en">Reference</span></a></li>
               </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
       </li>
       <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
@@ -579,7 +550,6 @@ onkeyup="return search_changed(event, false, '/')" />
        showGoogleRefTree();
     
       </script>
-
     </div> <!-- end side-nav -->
     <script>
       $(document).ready(function() {
@@ -587,8 +557,6 @@ onkeyup="return search_changed(event, false, '/')" />
         });
     </script>
 
-
-     
 
 
 
@@ -837,10 +805,16 @@ Summary:
  services APK.  If a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> is not available, <code><a href="/reference/com/google/android/gms/maps/MapView.html#getMap()">getMap()</a></code> will return
  <code>null</code>.
  <p>
- For a simpler method of displaying a Map use <code><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></code> (or <code><a href="/reference/com/google/android/gms/maps/SupportMapFragment.html">SupportMapFragment</a></code>
+ For a simpler method of displaying a Map use <code><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></code> (or <code><a href="/reference/com/google/android/gms/maps/SupportMapFragment.html">SupportMapFragment</a></code>)
  if you are looking to target earlier platforms.
  <p>
  Note: You are advised not to add children to this view.
+ <p>
+ <h3>Developer Guide</h3>
+ <p>
+ For more information, read the <a
+ href="https://developers.google.com/maps/documentation/android/">Google Maps Android API v2</a>
+ developer guide.
 </p>
 
 
@@ -1988,7 +1962,7 @@ android.view.View
         <td class="jd-typecol"><nobr>
             
             
-            
+            final
             
             
             <a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></nobr>
@@ -2014,6 +1988,8 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onCreate(android.os.Bundle)">onCreate</a></span>(Bundle savedInstanceState)</nobr>
         
+        <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
+  
   </td></tr>
 
 
@@ -2030,6 +2006,8 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onDestroy()">onDestroy</a></span>()</nobr>
         
+        <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
+  
   </td></tr>
 
 
@@ -2046,6 +2024,8 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onLowMemory()">onLowMemory</a></span>()</nobr>
         
+        <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
+  
   </td></tr>
 
 
@@ -2062,6 +2042,8 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onPause()">onPause</a></span>()</nobr>
         
+        <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
+  
   </td></tr>
 
 
@@ -2078,6 +2060,8 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onResume()">onResume</a></span>()</nobr>
         
+        <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
+  
   </td></tr>
 
 
@@ -2094,6 +2078,8 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onSaveInstanceState(android.os.Bundle)">onSaveInstanceState</a></span>(Bundle outState)</nobr>
         
+        <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
+  
   </td></tr>
 
 
@@ -12325,7 +12311,7 @@ From interface
       <span class="normal">
         public 
          
-         
+        final 
          
          
         <a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a>
@@ -12377,7 +12363,12 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>You must call this method from the parent Activity/Fragment's corresponding method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate(Bundle)</a></code></li><li><code><a href="/reference/android/app/Fragment.html#onCreate(android.os.Bundle)">onCreate(Bundle)</a></code></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -12406,7 +12397,12 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>You must call this method from the parent Activity/Fragment's corresponding method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/android/app/Activity.html#onDestroy()">onDestroy()</a></code></li><li><code><a href="/reference/android/app/Fragment.html#onDestroy()">onDestroy()</a></code></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -12435,7 +12431,12 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>You must call this method from the parent Activity/Fragment's corresponding method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/android/app/Activity.html#onLowMemory()">onLowMemory()</a></code></li><li><code><a href="/reference/android/app/Fragment.html#onLowMemory()">onLowMemory()</a></code></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -12464,7 +12465,12 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>You must call this method from the parent Activity/Fragment's corresponding method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/android/app/Activity.html#onPause()">onPause()</a></code></li><li><code><a href="/reference/android/app/Fragment.html#onPause()">onPause()</a></code></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -12493,7 +12499,12 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>You must call this method from the parent Activity/Fragment's corresponding method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/android/app/Activity.html#onResume()">onResume()</a></code></li><li><code><a href="/reference/android/app/Fragment.html#onResume()">onResume()</a></code></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -12522,7 +12533,12 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>You must call this method from the parent Activity/Fragment's corresponding method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/android/app/Activity.html#onSaveInstanceState(android.os.Bundle)">onSaveInstanceState(Bundle)</a></code></li><li><code><a href="/reference/android/app/Fragment.html#onSaveInstanceState(android.os.Bundle)">onSaveInstanceState(Bundle)</a></code></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -12537,7 +12553,6 @@ From interface
 
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
-
 
 <div id="footer" class="wrap" >
         
@@ -12567,7 +12582,6 @@ From interface
   </div>
 
 </div> <!-- end footer -->
-
 </div> <!-- jd-content -->
 
 </div><!-- end doc-content -->
