@@ -124,6 +124,17 @@ import static java.lang.Math.min;
  * GridLayout's algorithms favour rows and columns that are closer to its <em>right</em>
  * and <em>bottom</em> edges.
  *
+ * <h4>Interpretation of GONE</h4>
+ *
+ * For layout purposes, GridLayout treats views whose visibility status is
+ * {@link View#GONE GONE}, as having zero width and height. This is subtly different from
+ * the policy of ignoring views that are marked as GONE outright. If, for example, a gone-marked
+ * view was alone in a column, that column would itself collapse to zero width if and only if
+ * no gravity was defined on the view. If gravity was defined, then the gone-marked
+ * view has no effect on the layout and the container should be laid out as if the view
+ * had never been added to it.
+ * These statements apply equally to rows as well as columns, and to groups of rows or columns.
+ *
  * <h5>Limitations</h5>
  *
  * GridLayout does not provide support for the principle of <em>weight</em>, as defined in
@@ -915,7 +926,7 @@ public class GridLayout extends ViewGroup {
     protected void onChildVisibilityChanged(View child, int oldVisibility, int newVisibility) {
         super.onChildVisibilityChanged(child, oldVisibility, newVisibility);
         if (oldVisibility == GONE || newVisibility == GONE) {
-            invalidateStructure();
+        invalidateStructure();
         }
     }
 
@@ -1235,6 +1246,7 @@ public class GridLayout extends ViewGroup {
             Assoc<Spec, Bounds> assoc = Assoc.of(Spec.class, Bounds.class);
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
+                // we must include views that are GONE here, see introductory javadoc
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 Bounds bounds = getAlignment(spec.alignment, horizontal).getBounds();
@@ -1250,6 +1262,7 @@ public class GridLayout extends ViewGroup {
             }
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
+                // we must include views that are GONE here, see introductory javadoc
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 groupBounds.getValue(i).include(GridLayout.this, c, spec, this);
@@ -2655,6 +2668,9 @@ public class GridLayout extends ViewGroup {
 
         @Override
         public int getAlignmentValue(View view, int viewSize, int mode) {
+            if (view.getVisibility() == GONE) {
+                return 0;
+            }
             int baseline = view.getBaseline();
             return baseline == -1 ? UNDEFINED : baseline;
         }
