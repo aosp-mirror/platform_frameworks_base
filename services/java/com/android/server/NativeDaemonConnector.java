@@ -206,18 +206,19 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     /**
      * Make command for daemon, escaping arguments as needed.
      */
-    private void makeCommand(StringBuilder builder, String cmd, Object... args)
-            throws NativeDaemonConnectorException {
-        // TODO: eventually enforce that cmd doesn't contain arguments
+    private void makeCommand(StringBuilder builder, String cmd, Object... args) {
         if (cmd.indexOf('\0') >= 0) {
-            throw new IllegalArgumentException("unexpected command: " + cmd);
+            throw new IllegalArgumentException("Unexpected command: " + cmd);
+        }
+        if (cmd.indexOf(' ') >= 0) {
+            throw new IllegalArgumentException("Arguments must be separate from command");
         }
 
         builder.append(cmd);
         for (Object arg : args) {
             final String argString = String.valueOf(arg);
             if (argString.indexOf('\0') >= 0) {
-                throw new IllegalArgumentException("unexpected argument: " + arg);
+                throw new IllegalArgumentException("Unexpected argument: " + arg);
             }
 
             builder.append(' ');
@@ -240,7 +241,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     /**
      * Issue the given command to the native daemon and return a single expected
-     * response.
+     * response. Any arguments must be separated from base command so they can
+     * be properly escaped.
      *
      * @throws NativeDaemonConnectorException when problem communicating with
      *             native daemon, or if the response matches
@@ -274,7 +276,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     /**
      * Issue the given command to the native daemon and return any
      * {@link NativeDaemonEvent#isClassContinue()} responses, including the
-     * final terminal response.
+     * final terminal response. Any arguments must be separated from base
+     * command so they can be properly escaped.
      *
      * @throws NativeDaemonConnectorException when problem communicating with
      *             native daemon, or if the response matches
@@ -287,10 +290,11 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
-     * Issue the given command to the native daemon and return any
-     * {@linke NativeDaemonEvent@isClassContinue()} responses, including the
-     * final terminal response.  Note that the timeout does not count time in
-     * deep sleep.
+     * Issue the given command to the native daemon and return any {@linke
+     * NativeDaemonEvent@isClassContinue()} responses, including the final
+     * terminal response. Note that the timeout does not count time in deep
+     * sleep. Any arguments must be separated from base command so they can be
+     * properly escaped.
      *
      * @throws NativeDaemonConnectorException when problem communicating with
      *             native daemon, or if the response matches
@@ -353,51 +357,6 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
-     * Issue a command to the native daemon and return the raw responses.
-     *
-     * @deprecated callers should move to {@link #execute(String, Object...)}
-     *             which returns parsed {@link NativeDaemonEvent}.
-     */
-    @Deprecated
-    public ArrayList<String> doCommand(String cmd) throws NativeDaemonConnectorException {
-        final ArrayList<String> rawEvents = Lists.newArrayList();
-        final NativeDaemonEvent[] events = executeForList(cmd);
-        for (NativeDaemonEvent event : events) {
-            rawEvents.add(event.getRawEvent());
-        }
-        return rawEvents;
-    }
-
-    /**
-     * Issues a list command and returns the cooked list of all
-     * {@link NativeDaemonEvent#getMessage()} which match requested code.
-     */
-    @Deprecated
-    public String[] doListCommand(String cmd, int expectedCode)
-            throws NativeDaemonConnectorException {
-        final ArrayList<String> list = Lists.newArrayList();
-
-        final NativeDaemonEvent[] events = executeForList(cmd);
-        for (int i = 0; i < events.length - 1; i++) {
-            final NativeDaemonEvent event = events[i];
-            final int code = event.getCode();
-            if (code == expectedCode) {
-                list.add(event.getMessage());
-            } else {
-                throw new NativeDaemonConnectorException(
-                        "unexpected list response " + code + " instead of " + expectedCode);
-            }
-        }
-
-        final NativeDaemonEvent finalEvent = events[events.length - 1];
-        if (!finalEvent.isClassOk()) {
-            throw new NativeDaemonConnectorException("unexpected final event: " + finalEvent);
-        }
-
-        return list.toArray(new String[list.size()]);
-    }
-
-    /**
      * Append the given argument to {@link StringBuilder}, escaping as needed,
      * and surrounding with quotes when it contains spaces.
      */
@@ -444,7 +403,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
-     * Command builder that handles argument list building.
+     * Command builder that handles argument list building. Any arguments must
+     * be separated from base command so they can be properly escaped.
      */
     public static class Command {
         private String mCmd;
