@@ -362,7 +362,12 @@ public final class LoadedApk {
         try {
             pi = pm.getPackageInfo(mPackageName, 0, UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw new AssertionError(e);
+            throw new IllegalStateException("Unable to get package info for "
+                    + mPackageName + "; is system dying?", e);
+        }
+        if (pi == null) {
+            throw new IllegalStateException("Unable to get package info for "
+                    + mPackageName + "; is package not installed?");
         }
         /*
          * Two possible indications that this package could be
