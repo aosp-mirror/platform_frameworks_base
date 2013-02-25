@@ -601,7 +601,9 @@ public class WebView extends AbsoluteLayout
      * @param password the password for the given host
      * @see WebViewDatabase#clearUsernamePassword
      * @see WebViewDatabase#hasUsernamePassword
+     * @deprecated Saving passwords in WebView will not be supported in future versions.
      */
+    @Deprecated
     public void savePassword(String host, String username, String password) {
         checkThread();
         mProvider.savePassword(host, username, password);
@@ -998,7 +1000,10 @@ public class WebView extends AbsoluteLayout
     /**
      * Clears this WebView so that onDraw() will draw nothing but white background,
      * and onMeasure() will return 0 if MeasureSpec is not MeasureSpec.EXACTLY.
+     * @deprecated Use WebView.loadUrl("about:blank") to reliably reset the view state
+     *             and release page resources (including any running JavaScript).
      */
+    @Deprecated
     public void clearView() {
         checkThread();
         mProvider.clearView();
@@ -1388,7 +1393,11 @@ public class WebView extends AbsoluteLayout
      * @param showIme if true, show the IME, assuming the user will begin typing.
      *                If false and text is non-null, perform a find all.
      * @return true if the find dialog is shown, false otherwise
+     * @deprecated This method does not work reliably on all Android versions;
+     *             implementing a custom find dialog using WebView.findAllAsync()
+     *             provides a more robust solution.
      */
+    @Deprecated
     public boolean showFindDialog(String text, boolean showIme) {
         checkThread();
         return mProvider.showFindDialog(text, showIme);
