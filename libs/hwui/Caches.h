@@ -245,8 +245,17 @@ public:
 
     // Misc
     GLint maxTextureSize;
+
+    // Debugging
     bool debugLayersUpdates;
     bool debugOverdraw;
+
+    enum StencilClipDebug {
+        kStencilHide,
+        kStencilShowHighlight,
+        kStencilShowRegion
+    };
+    StencilClipDebug debugStencilClip;
 
     TextureCache textureCache;
     LayerCache layerCache;

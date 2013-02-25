@@ -87,6 +87,13 @@ public:
         return mState != kDisabled;
     }
 
+    /**
+     * Indicates whether testing only is enabled.
+     */
+    bool isTestEnabled() {
+        return mState == kTest;
+    }
+
 private:
     void enable();
 
