@@ -1283,7 +1283,7 @@ int doDump(Bundle* bundle)
                 // network location feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.location.network'\n");
                 printf("uses-implied-feature:'android.hardware.location.network'," \
-                        "'requested android.permission.ACCESS_COURSE_LOCATION permission'\n");
+                        "'requested android.permission.ACCESS_COARSE_LOCATION permission'\n");
             }
 
             // Bluetooth-related compatibility logic
