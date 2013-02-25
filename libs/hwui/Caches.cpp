@@ -91,6 +91,7 @@ void Caches::init() {
 
     debugLayersUpdates = false;
     debugOverdraw = false;
+    debugStencilClip = kStencilHide;
 
     mInitialized = true;
 }
@@ -132,6 +133,7 @@ void Caches::initConstraints() {
 bool Caches::initProperties() {
     bool prevDebugLayersUpdates = debugLayersUpdates;
     bool prevDebugOverdraw = debugOverdraw;
+    StencilClipDebug prevDebugStencilClip = debugStencilClip;
 
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_DEBUG_LAYERS_UPDATES, property, NULL) > 0) {
@@ -148,8 +150,23 @@ bool Caches::initProperties() {
         debugOverdraw = false;
     }
 
+    // See Properties.h for valid values
+    if (property_get(PROPERTY_DEBUG_STENCIL_CLIP, property, NULL) > 0) {
+        INIT_LOGD("  Stencil clip debug enabled: %s", property);
+        if (!strcmp(property, "hide")) {
+            debugStencilClip = kStencilHide;
+        } else if (!strcmp(property, "highlight")) {
+            debugStencilClip = kStencilShowHighlight;
+        } else if (!strcmp(property, "region")) {
+            debugStencilClip = kStencilShowRegion;
+        }
+    } else {
+        debugStencilClip = kStencilHide;
+    }
+
     return (prevDebugLayersUpdates != debugLayersUpdates) ||
-            (prevDebugOverdraw != debugOverdraw);
+            (prevDebugOverdraw != debugOverdraw) ||
+            (prevDebugStencilClip != debugStencilClip);
 }
 
 void Caches::terminate() {

@@ -48,6 +48,7 @@
 #define DEBUG_RENDER_BUFFERS 0
 
 // Turn on to make stencil operations easier to debug
+// (writes 255 instead of 1 in the buffer, forces 8 bit stencil)
 #define DEBUG_STENCIL 0
 
 // Turn on to display debug info about 9patch objects
