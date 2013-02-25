@@ -2068,11 +2068,8 @@ final class ActivityStack {
         }
         
         // Slot the activity into the history stack and proceed
-        if (DEBUG_ADD_REMOVE) {
-            RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
-            Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos, here);
-        }
+        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos,
+                new RuntimeException("here").fillInStackTrace());
         r.task.addActivityToTop(r);
         mHistory.add(addPos, r);
         r.putInHistory();
@@ -3002,55 +2999,40 @@ final class ActivityStack {
      * Find the activity in the history stack within the given task.  Returns
      * the index within the history at which it's found, or < 0 if not found.
      */
-    private final int findActivityInHistoryLocked(ActivityRecord r, int task) {
-        int i = mHistory.size();
-        while (i > 0) {
-            i--;
-            ActivityRecord candidate = mHistory.get(i);
+    private final ActivityRecord findActivityInHistoryLocked(ActivityRecord r, TaskRecord task) {
+        final ComponentName realActivity = r.realActivity;
+        ArrayList<ActivityRecord> activities = task.mActivities;
+        for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord candidate = activities.get(activityNdx);
             if (candidate.finishing) {
                 continue;
             }
-            if (candidate.task.taskId != task) {
-                break;
-            }
-            if (candidate.realActivity.equals(r.realActivity)) {
-                return i;
+            if (candidate.realActivity.equals(realActivity)) {
+                return candidate;
             }
         }
-
-        return -1;
+        return null;
     }
 
     /**
      * Reorder the history stack so that the activity at the given index is
      * brought to the front.
      */
-    private final ActivityRecord moveActivityToFrontLocked(int where) {
-        ActivityRecord newTop = mHistory.remove(where);
-        newMoveActivityToFrontLocked(newTop);
-        int top = mHistory.size();
-        ActivityRecord oldTop = mHistory.get(top-1);
-        if (DEBUG_ADD_REMOVE) {
-            RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
-            Slog.i(TAG, "Removing and adding activity " + newTop + " to stack at "
-                    + top, here);
-        }
-        mHistory.add(top, newTop);
+    private final void moveActivityToFrontLocked(ActivityRecord newTop) {
+        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + newTop
+            + " to stack at top", new RuntimeException("here").fillInStackTrace());
+
+        final TaskRecord task = newTop.task;
+        task.getTopActivity().frontOfTask = false;
+        task.mActivities.remove(newTop);
+        task.mActivities.add(newTop);
+        newTop.frontOfTask = true;
+
+        mHistory.remove(newTop);
+        mHistory.add(newTop);
         if (VALIDATE_TASK_REPLACE) {
             verifyActivityRecords(true);
         }
-        return newTop;
-    }
-
-    private final ActivityRecord newMoveActivityToFrontLocked(ActivityRecord newTop) {
-        final TaskRecord task = newTop.task;
-        ActivityRecord oldTop = task.getTopActivity();
-        task.mActivities.remove(newTop);
-        task.mActivities.add(newTop);
-        oldTop.frontOfTask = false;
-        newTop.frontOfTask = true;
-        return newTop;
     }
 
     final int startActivityLocked(IApplicationThread caller,
@@ -3085,11 +3067,10 @@ final class ActivityStack {
         ActivityRecord sourceRecord = null;
         ActivityRecord resultRecord = null;
         if (resultTo != null) {
-            int index = indexOfTokenLocked(resultTo);
+            sourceRecord = isInStackLocked(resultTo);
             if (DEBUG_RESULTS) Slog.v(
-                TAG, "Will send result to " + resultTo + " (index " + index + ")");
-            if (index >= 0) {
-                sourceRecord = mHistory.get(index);
+                TAG, "Will send result to " + resultTo + " " + sourceRecord);
+            if (sourceRecord != null) {
                 if (requestCode >= 0 && !sourceRecord.finishing) {
                     resultRecord = sourceRecord;
                 }
@@ -3577,9 +3558,9 @@ final class ActivityStack {
                 // In this case, we are launching an activity in our own task
                 // that may already be running somewhere in the history, and
                 // we want to shuffle it to the front of the stack if so.
-                int where = findActivityInHistoryLocked(r, sourceRecord.task.taskId);
-                if (where >= 0) {
-                    ActivityRecord top = moveActivityToFrontLocked(where);
+                final ActivityRecord top = findActivityInHistoryLocked(r, sourceRecord.task);
+                if (top != null) {
+                    moveActivityToFrontLocked(top);
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
                     top.updateOptionsLocked(options);
                     top.deliverNewIntentLocked(callingUid, r.intent);
@@ -5548,34 +5529,35 @@ final class ActivityStack {
     boolean forceStopPackageLocked(String name, boolean doit, boolean evenPersistent, int userId) {
         boolean didSomething = false;
         TaskRecord lastTask = null;
-        final int N = mHistory.size();
-        for (int i = 0; i < N; i++) {
-            ActivityRecord r = mHistory.get(i);
-            final boolean samePackage = r.packageName.equals(name)
-                    || (name == null && r.userId == userId);
-            if ((userId == UserHandle.USER_ALL || r.userId == userId)
-                    && (samePackage || r.task == lastTask)
-                    && (r.app == null || evenPersistent || !r.app.persistent)) {
-                if (!doit) {
-                    if (r.finishing) {
-                        // If this activity is just finishing, then it is not
-                        // interesting as far as something to stop.
-                        continue;
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            int numActivities = activities.size();
+            for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+                ActivityRecord r = activities.get(activityNdx);
+                final boolean samePackage = r.packageName.equals(name)
+                        || (name == null && r.userId == userId);
+                if ((userId == UserHandle.USER_ALL || r.userId == userId)
+                        && (samePackage || r.task == lastTask)
+                        && (r.app == null || evenPersistent || !r.app.persistent)) {
+                    if (!doit) {
+                        if (r.finishing) {
+                            // If this activity is just finishing, then it is not
+                            // interesting as far as something to stop.
+                            continue;
+                        }
+                        return true;
                     }
-                    return true;
-                }
-                didSomething = true;
-                Slog.i(TAG, "  Force finishing activity " + r);
-                if (samePackage) {
-                    if (r.app != null) {
-                        r.app.removed = true;
+                    didSomething = true;
+                    Slog.i(TAG, "  Force finishing activity " + r);
+                    if (samePackage) {
+                        if (r.app != null) {
+                            r.app.removed = true;
+                        }
+                        r.app = null;
                     }
-                    r.app = null;
-                }
-                lastTask = r.task;
-                if (r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null,
-                        "force-stop", true)) {
-                    i--;
+                    lastTask = r.task;
+                    r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
+                            true);
                 }
             }
         }
