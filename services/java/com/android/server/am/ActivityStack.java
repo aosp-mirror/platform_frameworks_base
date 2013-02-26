@@ -456,6 +456,14 @@ final class ActivityStack {
         }
     }
 
+    private int numActivities() {
+        int count = 0;
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            count += mTaskHistory.get(taskNdx).mActivities.size();
+        }
+        return count;
+    }
+
     ActivityStack(ActivityManagerService service, Context context, boolean mainStack, Looper looper) {
         mHandler = new ActivityStackHandler(looper);
         mService = service;
@@ -554,32 +562,6 @@ final class ActivityStack {
     }
 
     int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
-        int newTaskId = newGetTaskForActivityLocked(token, onlyRoot);
-
-        TaskRecord lastTask = null;
-        final int N = mHistory.size();
-        for (int i = 0; i < N; i++) {
-            ActivityRecord r = mHistory.get(i);
-            if (r.appToken == token) {
-                if (!onlyRoot || lastTask != r.task) {
-                    if (VALIDATE_TASK_REPLACE && newTaskId != r.task.taskId) Slog.w(TAG,
-                            "getTaskForActivityLocked: mismatch: new=" + newTaskId
-                            + " taskId=" + r.task.taskId);
-                    return r.task.taskId;
-                }
-                if (VALIDATE_TASK_REPLACE && newTaskId != -1) Slog.w(TAG,
-                    "getTaskForActivityLocked: mismatch: newTaskId=" + newTaskId + " not -1.");
-                return -1;
-            }
-            lastTask = r.task;
-        }
-
-        if (VALIDATE_TASK_REPLACE && newTaskId != -1) Slog.w(TAG,
-            "getTaskForActivityLocked: mismatch at end: newTaskId=" + newTaskId + " not -1.");
-        return -1;
-    }
-
-    int newGetTaskForActivityLocked(IBinder token, boolean onlyRoot) {
         final ActivityRecord r = ActivityRecord.forToken(token);
         if (r == null) {
             return -1;
@@ -607,37 +589,35 @@ final class ActivityStack {
         if (info.targetActivity != null) {
             cls = new ComponentName(info.packageName, info.targetActivity);
         }
-
-        TaskRecord cp = null;
-
         final int userId = UserHandle.getUserId(info.applicationInfo.uid);
-        final int N = mHistory.size();
-        for (int i=(N-1); i>=0; i--) {
-            ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && r.task != cp && r.userId == userId
-                    && r.launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
-                cp = r.task;
-                //Slog.i(TAG, "Comparing existing cls=" + r.task.intent.getComponent().flattenToShortString()
-                //        + "/aff=" + r.task.affinity + " to new cls="
-                //        + intent.getComponent().flattenToShortString() + "/aff=" + taskAffinity);
-                if (r.task.affinity != null) {
-                    if (r.task.affinity.equals(info.taskAffinity)) {
-                        //Slog.i(TAG, "Found matching affinity!");
-                        return r;
-                    }
-                } else if (r.task.intent != null
-                        && r.task.intent.getComponent().equals(cls)) {
-                    //Slog.i(TAG, "Found matching class!");
-                    //dump();
-                    //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
-                    return r;
-                } else if (r.task.affinityIntent != null
-                        && r.task.affinityIntent.getComponent().equals(cls)) {
-                    //Slog.i(TAG, "Found matching class!");
-                    //dump();
-                    //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            final ActivityRecord r = task.getTopActivity();
+            if (r == null || r.finishing || r.userId != userId ||
+                    r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+                continue;
+            }
+
+            //Slog.i(TAG, "Comparing existing cls=" + r.task.intent.getComponent().flattenToShortString()
+            //        + "/aff=" + r.task.affinity + " to new cls="
+            //        + intent.getComponent().flattenToShortString() + "/aff=" + taskAffinity);
+            if (task.affinity != null) {
+                if (task.affinity.equals(info.taskAffinity)) {
+                    //Slog.i(TAG, "Found matching affinity!");
                     return r;
                 }
+            } else if (task.intent != null && task.intent.getComponent().equals(cls)) {
+                //Slog.i(TAG, "Found matching class!");
+                //dump();
+                //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+                return r;
+            } else if (task.affinityIntent != null
+                    && task.affinityIntent.getComponent().equals(cls)) {
+                //Slog.i(TAG, "Found matching class!");
+                //dump();
+                //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+                return r;
             }
         }
 
@@ -656,11 +636,11 @@ final class ActivityStack {
         }
         final int userId = UserHandle.getUserId(info.applicationInfo.uid);
 
-        final int N = mHistory.size();
-        for (int i=(N-1); i>=0; i--) {
-            ActivityRecord r = mHistory.get(i);
-            if (!r.finishing) {
-                if (r.intent.getComponent().equals(cls) && r.userId == userId) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = activities.get(activityNdx);
+                if (!r.finishing && r.intent.getComponent().equals(cls) && r.userId == userId) {
                     //Slog.i(TAG, "Found matching class!");
                     //dump();
                     //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
@@ -687,56 +667,7 @@ final class ActivityStack {
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
-        final boolean newResult = newSwitchUserLocked(userId, uss);
-
-        mCurrentUser = userId;
         mStartingUsers.add(uss);
-
-        // Only one activity? Nothing to do...
-        if (mHistory.size() < 2) {
-            if (VALIDATE_TASK_REPLACE && newResult) Slog.w(TAG,
-                    "switchUserLocked: mismatch: " + newResult + " " + false);
-            return false;
-        }
-
-        boolean haveActivities = false;
-        // Check if the top activity is from the new user.
-        ActivityRecord top = mHistory.get(mHistory.size() - 1);
-        if (top.userId == userId) {
-            if (VALIDATE_TASK_REPLACE && !newResult) Slog.w(TAG,
-                    "switchUserLocked: mismatch: " + newResult + " " + true);
-            return true;
-        }
-        // Otherwise, move the user's activities to the top.
-        int N = mHistory.size();
-        int i = 0;
-        while (i < N) {
-            ActivityRecord r = mHistory.get(i);
-            if (r.userId == userId) {
-                ActivityRecord moveToTop = mHistory.remove(i);
-                mHistory.add(moveToTop);
-                // No need to check the top one now
-                N--;
-                haveActivities = true;
-            } else {
-                i++;
-            }
-        }
-        // Transition from the old top to the new top
-        if (VALIDATE_TASK_REPLACE) Slog.w(TAG,
-                "switchUserLocked: calling resumeTopActivity " + top);
-        resumeTopActivityLocked(top);
-        if (VALIDATE_TASK_REPLACE && (newResult != haveActivities)) Slog.w(TAG,
-                    "switchUserLocked: mismatch: " + newResult + " " + haveActivities);
-        return haveActivities;
-    }
-
-    /*
-     * Move the activities around in the stack to bring a user to the foreground.
-     * @return whether there are any activities for the specified user.
-     */
-    final boolean newSwitchUserLocked(int userId, UserStartedState uss) {
-//        mStartingUsers.add(uss);
         if (mCurrentUser == userId) {
             return true;
         }
@@ -756,11 +687,32 @@ final class ActivityStack {
             }
         }
 
+        { // TODO: Remove when mHistory order no longer matters.
+            // Otherwise, move the user's activities to the top.
+            int N = mHistory.size();
+            int i = 0;
+            while (i < N) {
+                ActivityRecord r = mHistory.get(i);
+                if (r.userId == userId) {
+                    ActivityRecord moveToTop = mHistory.remove(i);
+                    mHistory.add(moveToTop);
+                    // No need to check the top one now
+                    N--;
+                    haveActivities = true;
+                } else {
+                    i++;
+                }
+            }
+            if (VALIDATE_TASK_REPLACE) {
+                verifyActivityRecords(true);
+            }
+        }
+
         // task is now the original topmost TaskRecord. Transition from the old top to the new top.
         ActivityRecord top = task != null ? task.getTopActivity() : null;
         if (VALIDATE_TASK_REPLACE) Slog.w(TAG,
                 "newSwitchUserLocked: would call resumeTopActivity " + top);
-//        resumeTopActivityLocked(top);
+        resumeTopActivityLocked(top);
         return haveActivities;
     }
 
@@ -1771,7 +1723,7 @@ final class ActivityStack {
                 mService.mWindowManager.setAppWillBeHidden(prev.appToken);
                 mService.mWindowManager.setAppVisibility(prev.appToken, false);
             }
-        } else if (mHistory.size() > 1) {
+        } else if (numActivities() > 1) {
             if (DEBUG_TRANSITION) Slog.v(TAG,
                     "Prepare open transition: no previous");
             if (mNoAnimActivities.contains(next)) {
@@ -2104,19 +2056,24 @@ final class ActivityStack {
     }
 
     final void validateAppTokensLocked() {
+        verifyActivityRecords(true);
         mValidateAppTokens.clear();
-        mValidateAppTokens.ensureCapacity(mHistory.size());
-        int taskId = Integer.MIN_VALUE;
-        TaskGroup task = null;
-        for (int i=0; i<mHistory.size(); i++) {
-            final ActivityRecord r = mHistory.get(i);
-            if (taskId != r.task.taskId) {
-                taskId = r.task.taskId;
-                task = new TaskGroup();
-                task.taskId = taskId;
-                mValidateAppTokens.add(task);
+        mValidateAppTokens.ensureCapacity(numActivities());
+        final int numTasks = mTaskHistory.size();
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            TaskRecord task = mTaskHistory.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            if (activities.size() == 0) {
+                continue;
             }
-            task.tokens.add(r.appToken);
+            TaskGroup group = new TaskGroup();
+            group.taskId = task.taskId;
+            mValidateAppTokens.add(group);
+            final int numActivities = activities.size();
+            for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                group.tokens.add(r.appToken);
+            }
         }
         mService.mWindowManager.validateAppTokens(mValidateAppTokens);
     }
@@ -4581,6 +4538,7 @@ final class ActivityStack {
         }
         final TaskRecord task = r.task;
         if (task != null) {
+            // TODO: If this is the last ActivityRecord in task, remove from ActivityStack.
             task.removeActivity(r);
         }
         mHistory.remove(r);
