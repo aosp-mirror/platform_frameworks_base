@@ -101,6 +101,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     private String mWritePermission;
     private PathPermission[] mPathPermissions;
     private boolean mExported;
+    private boolean mNoPerms;
 
     private Transport mTransport = new Transport();
 
@@ -523,10 +524,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
     /** @hide */
     public final void setAppOps(int readOp, int writeOp) {
-        mTransport.mAppOpsManager = (AppOpsManager)mContext.getSystemService(
-                Context.APP_OPS_SERVICE);
-        mTransport.mReadOp = readOp;
-        mTransport.mWriteOp = writeOp;
+        if (!mNoPerms) {
+            mTransport.mAppOpsManager = (AppOpsManager)mContext.getSystemService(
+                    Context.APP_OPS_SERVICE);
+            mTransport.mReadOp = readOp;
+            mTransport.mWriteOp = writeOp;
+        }
     }
 
     /** @hide */
@@ -1191,6 +1194,16 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 setWritePermission(info.writePermission);
                 setPathPermissions(info.pathPermissions);
                 mExported = info.exported;
+                mNoPerms = false;
+            } else {
+                // We enter here because the content provider is being instantiated
+                // as a mock.  We don't have any information about the provider (such
+                // as its required permissions), and also want to avoid doing app op
+                // checks since these aren't real calls coming in and we may not be
+                // able to get the app ops service at all (if the test is using something
+                // like the IsolatedProvider).  So set this to true, to prevent us
+                // from enabling app ops on this object.
+                mNoPerms = true;
             }
             ContentProvider.this.onCreate();
         }
