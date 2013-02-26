@@ -320,8 +320,11 @@ static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
         jobject tokenObj, jint nativeSurfaceObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
+    sp<IGraphicBufferProducer> bufferProducer;
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeSurfaceObject));
-    sp<IGraphicBufferProducer> bufferProducer(sur->getIGraphicBufferProducer());
+    if (sur != NULL) {
+        bufferProducer = sur->getIGraphicBufferProducer();
+    }
     SurfaceComposerClient::setDisplaySurface(token, bufferProducer);
 }
 
