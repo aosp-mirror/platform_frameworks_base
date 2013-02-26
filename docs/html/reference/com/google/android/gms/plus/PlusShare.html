@@ -73,35 +73,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -148,7 +119,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
-  
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -163,7 +133,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           </div>
             <ul class="nav-x col-9">
                 <li class="design">
-                  <a href="/design/index.html" 
+                  <a href="/design/index.html"
                   zh-TW-lang="設計"
                   zh-CN-lang="设计"
                   ru-lang="Проектирование"
@@ -171,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
-                <li class="develop"><a href="/develop/index.html" class="selected"
+                <li class="develop"><a href="/develop/index.html"
                   zh-TW-lang="開發"
                   zh-CN-lang="开发"
                   ru-lang="Разработка"
@@ -179,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
-                <li class="distribute last"><a href="/distribute/index.html" 
+                <li class="distribute last"><a href="/distribute/index.html"
                   zh-TW-lang="發佈"
                   zh-CN-lang="分发"
                   ru-lang="Распространение"
@@ -348,7 +318,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
-                <li><a href="/training/index.html" 
+                <li class="training"><a href="/training/index.html"
                   zh-TW-lang="訓練課程"
                   zh-CN-lang="培训"
                   ru-lang="Курсы"
@@ -356,7 +326,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li><a href="/guide/components/index.html" 
+                <li class="guide"><a href="/guide/components/index.html"
                   zh-TW-lang="API 指南"
                   zh-CN-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -364,7 +334,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
-                <li><a href="/reference/packages.html" 
+                <li class="reference"><a href="/reference/packages.html"
                   zh-TW-lang="參考資源"
                   zh-CN-lang="参考"
                   ru-lang="Справочник"
@@ -372,7 +342,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
-                <li><a href="/tools/index.html" 
+                <li class="tools"><a href="/tools/index.html"
                   zh-TW-lang="相關工具"
                   zh-CN-lang="工具"
                   ru-lang="Инструменты"
@@ -380,7 +350,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="ツール"
                   es-lang="Herramientas"
                   >Tools</a></li>
-                <li><a href="/google/index.html" class="selected"
+                <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
             </ul>
@@ -390,9 +360,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <!-- /Sendondary x-nav -->
 
   
-  
 
-  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -467,6 +435,9 @@ onkeyup="return search_changed(event, false, '/')" />
               <li><a href="/google/play/billing/v2/billing_reference.html">
               <span class="en">Reference</span></a></li>
               </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
       </li>
       <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
@@ -579,7 +550,6 @@ onkeyup="return search_changed(event, false, '/')" />
        showGoogleRefTree();
     
       </script>
-
     </div> <!-- end side-nav -->
     <script>
       $(document).ready(function() {
@@ -587,8 +557,6 @@ onkeyup="return search_changed(event, false, '/')" />
         });
     </script>
 
-
-     
 
 
 
@@ -624,6 +592,9 @@ Summary:
 
 
 
+
+  &#124; <a href="#proctors">Protected Ctors</a>
+  
 
 
   &#124; <a href="#pubmethods">Methods</a>
@@ -771,13 +742,20 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CALL_TO_ACTION">EXTRA_CALL_TO_ACTION</a></td>
+        <td class="jd-descrcol" width="100%">Used as a bundle extra field to describe a call-to-action button for a post on Google+.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CONTENT_DEEP_LINK_ID">EXTRA_CONTENT_DEEP_LINK_ID</a></td>
         <td class="jd-descrcol" width="100%">Used as a string extra field in <code><a href="/reference/android/content/Intent.html#ACTION_SEND">ACTION_SEND</a></code> intents to
  specify a resource to be shared on Google+.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CONTENT_DEEP_LINK_METADATA">EXTRA_CONTENT_DEEP_LINK_METADATA</a></td>
         <td class="jd-descrcol" width="100%">Used as a bundle extra field in <code><a href="/reference/android/content/Intent.html#ACTION_SEND">ACTION_SEND</a></code> intents to
@@ -785,28 +763,70 @@ Summary:
     </tr>
     
     
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CONTENT_URL">EXTRA_CONTENT_URL</a></td>
+        <td class="jd-descrcol" width="100%">This is a URL for the content of the post.</td>
+    </tr>
+    
+    
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_IS_INTERACTIVE_POST">EXTRA_IS_INTERACTIVE_POST</a></td>
+        <td class="jd-descrcol" width="100%">Extra indicating that this is an interactive post.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_SENDER_ID">EXTRA_SENDER_ID</a></td>
+        <td class="jd-descrcol" width="100%">The ID of the sender on Google+.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CALL_TO_ACTION_DEEP_LINK_ID">KEY_CALL_TO_ACTION_DEEP_LINK_ID</a></td>
+        <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> deep-link ID of the call-to-action button.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CALL_TO_ACTION_LABEL">KEY_CALL_TO_ACTION_LABEL</a></td>
+        <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> label placeholder text of the call-to-action button.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CALL_TO_ACTION_URL">KEY_CALL_TO_ACTION_URL</a></td>
+        <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> URL of the call-to-action button.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CONTENT_DEEP_LINK_METADATA_DESCRIPTION">KEY_CONTENT_DEEP_LINK_METADATA_DESCRIPTION</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> description of the resource shared on Google+.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CONTENT_DEEP_LINK_METADATA_THUMBNAIL_URL">KEY_CONTENT_DEEP_LINK_METADATA_THUMBNAIL_URL</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> thumbnail URL of the resource shared on Google+.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CONTENT_DEEP_LINK_METADATA_TITLE">KEY_CONTENT_DEEP_LINK_METADATA_TITLE</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> title of the resource shared on Google+.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#PARAM_CONTENT_DEEP_LINK_ID">PARAM_CONTENT_DEEP_LINK_ID</a></td>
         <td class="jd-descrcol" width="100%">The query parameter containing the deep-link ID.</td>
@@ -829,6 +849,31 @@ Summary:
 
 
 
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="proctors" class="jd-sumtable"><tr><th colspan="12">Protected Constructors</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.html#PlusShare()">PlusShare</a></span>()</nobr>
+        
+  </td></tr>
+
+
+
+</table>
+
+
 
 
 <!-- ========== METHOD SUMMARY =========== -->
@@ -838,6 +883,24 @@ Summary:
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            
+            <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.html#createPerson(java.lang.String, java.lang.String)">createPerson</a></span>(String id, String displayName)</nobr>
+        
+        <div class="jd-descrdiv">Creates a person to use as a recipient with the given ID and display name.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1099,6 +1162,44 @@ From class
 
 
 
+<A NAME="EXTRA_CALL_TO_ACTION"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        EXTRA_CALL_TO_ACTION
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Used as a bundle extra field to describe a call-to-action button for a post on Google+.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "com.google.android.apps.plus.CALL_TO_ACTION"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 <A NAME="EXTRA_CONTENT_DEEP_LINK_ID"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1169,6 +1270,242 @@ From class
         <span>
             
                 "com.google.android.apps.plus.CONTENT_DEEP_LINK_METADATA"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="EXTRA_CONTENT_URL"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        EXTRA_CONTENT_URL
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This is a URL for the content of the post.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "com.google.android.apps.plus.CONTENT_URL"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="EXTRA_IS_INTERACTIVE_POST"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        EXTRA_IS_INTERACTIVE_POST
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Extra indicating that this is an interactive post.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "com.google.android.apps.plus.GOOGLE_INTERACTIVE_POST"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="EXTRA_SENDER_ID"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        EXTRA_SENDER_ID
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The ID of the sender on Google+. This value is used by the Google+ app to check if there
+ is a mismatch between the sender and the user authenticated in the Google+ app.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getId()">getId()</a></code></li><li><code><a href="/reference/com/google/android/gms/plus/PlusClient.html#getCurrentPerson()">getCurrentPerson()</a></code></li>
+      </ul>
+  </div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "com.google.android.apps.plus.SENDER_ID"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="KEY_CALL_TO_ACTION_DEEP_LINK_ID"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        KEY_CALL_TO_ACTION_DEEP_LINK_ID
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> deep-link ID of the call-to-action button.
+ This key is used in the <code><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CALL_TO_ACTION">EXTRA_CALL_TO_ACTION</a></code> bundle.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "deepLinkId"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="KEY_CALL_TO_ACTION_LABEL"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        KEY_CALL_TO_ACTION_LABEL
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> label placeholder text of the call-to-action button.
+ This key is used in the <code><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CALL_TO_ACTION">EXTRA_CALL_TO_ACTION</a></code> bundle.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "label"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="KEY_CALL_TO_ACTION_URL"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        KEY_CALL_TO_ACTION_URL
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> URL of the call-to-action button.
+ This key is used in the <code><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CALL_TO_ACTION">EXTRA_CALL_TO_ACTION</a></code> bundle.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "url"
             
         </span>
         </div>
@@ -1345,6 +1682,40 @@ From class
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
 
+<h2>Protected Constructors</h2>
+
+
+
+<A NAME="PlusShare()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">PlusShare</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
 
 
 <!-- ========= METHOD DETAIL ======== -->
@@ -1352,6 +1723,50 @@ From class
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="createPerson(java.lang.String, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>
+      </span>
+      <span class="sympad">createPerson</span>
+      <span class="normal">(String id, String displayName)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a person to use as a recipient with the given ID and display name.
+ See <code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setRecipients(java.util.List<com.google.android.gms.plus.model.people.Person>)">setRecipients(List<Person>)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>id</td>
+          <td>The recipient's ID, see <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getId()">getId()</a></code>.</td>
+        </tr>
+        <tr>
+          <th>displayName</td>
+          <td>The recipient's display name, see <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getDisplayName()">getDisplayName()</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
 
 
 <A NAME="getDeepLinkId(android.content.Intent)"></A>
@@ -1407,7 +1822,6 @@ From class
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
 
-
 <div id="footer" class="wrap" >
         
 
@@ -1436,7 +1850,6 @@ From class
   </div>
 
 </div> <!-- end footer -->
-
 </div> <!-- jd-content -->
 
 </div><!-- end doc-content -->
