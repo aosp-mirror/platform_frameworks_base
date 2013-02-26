@@ -170,7 +170,7 @@ final public class MediaCodec {
      * <li>"audio/3gpp" - AMR narrowband audio
      * <li>"audio/amr-wb" - AMR wideband audio
      * <li>"audio/mpeg" - MPEG1/2 audio layer III
-     * <li>"audio/mp4a-latm" - AAC audio
+     * <li>"audio/mp4a-latm" - AAC audio (note, this is raw AAC packets, not packaged in LATM!)
      * <li>"audio/vorbis" - vorbis audio
      * <li>"audio/g711-alaw" - G.711 alaw audio
      * <li>"audio/g711-mlaw" - G.711 ulaw audio
