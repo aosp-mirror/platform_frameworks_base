@@ -155,8 +155,8 @@ static jboolean
 android_eglInitialize
   (JNIEnv *_env, jobject _this, jobject dpy, jintArray major_ref, jint majorOffset, jintArray minor_ref, jint minorOffset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLBoolean _returnValue = (EGLBoolean) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLint *major_base = (EGLint *) 0;
@@ -261,8 +261,8 @@ static jboolean
 android_eglGetConfigs
   (JNIEnv *_env, jobject _this, jobject dpy, jobjectArray configs_ref, jint configsOffset, jint config_size, jintArray num_config_ref, jint num_configOffset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLBoolean _returnValue = (EGLBoolean) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     jint _configsRemaining;
@@ -339,8 +339,8 @@ static jboolean
 android_eglChooseConfig
   (JNIEnv *_env, jobject _this, jobject dpy, jintArray attrib_list_ref, jint attrib_listOffset, jobjectArray configs_ref, jint configsOffset, jint config_size, jintArray num_config_ref, jint num_configOffset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLBoolean _returnValue = (EGLBoolean) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     bool attrib_list_sentinel = false;
@@ -462,8 +462,8 @@ static jboolean
 android_eglGetConfigAttrib
   (JNIEnv *_env, jobject _this, jobject dpy, jobject config, jint attribute, jintArray value_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLBoolean _returnValue = (EGLBoolean) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLConfig config_native = (EGLConfig) fromEGLHandle(_env, eglconfigGetHandleID, config);
@@ -675,8 +675,8 @@ static jobject
 android_eglCreatePbufferSurface
   (JNIEnv *_env, jobject _this, jobject dpy, jobject config, jintArray attrib_list_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLConfig config_native = (EGLConfig) fromEGLHandle(_env, eglconfigGetHandleID, config);
@@ -761,8 +761,8 @@ static jboolean
 android_eglQuerySurface
   (JNIEnv *_env, jobject _this, jobject dpy, jobject surface, jint attribute, jintArray value_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLBoolean _returnValue = (EGLBoolean) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLSurface surface_native = (EGLSurface) fromEGLHandle(_env, eglsurfaceGetHandleID, surface);
@@ -854,8 +854,8 @@ static jobject
 android_eglCreatePbufferFromClientBuffer
   (JNIEnv *_env, jobject _this, jobject dpy, jint buftype, jint buffer, jobject config, jintArray attrib_list_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLConfig config_native = (EGLConfig) fromEGLHandle(_env, eglconfigGetHandleID, config);
@@ -981,8 +981,8 @@ static jobject
 android_eglCreateContext
   (JNIEnv *_env, jobject _this, jobject dpy, jobject config, jobject share_context, jintArray attrib_list_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLContext _returnValue = (EGLContext) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLConfig config_native = (EGLConfig) fromEGLHandle(_env, eglconfigGetHandleID, config);
@@ -1108,8 +1108,8 @@ static jboolean
 android_eglQueryContext
   (JNIEnv *_env, jobject _this, jobject dpy, jobject ctx, jint attribute, jintArray value_ref, jint offset) {
     jint _exception = 0;
-    const char * _exceptionType;
-    const char * _exceptionMessage;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     EGLBoolean _returnValue = (EGLBoolean) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLContext ctx_native = (EGLContext) fromEGLHandle(_env, eglcontextGetHandleID, ctx);
