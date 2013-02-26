@@ -40,6 +40,7 @@ public class ActionBarOverlayLayout extends FrameLayout {
     private ActionBarContainer mContainerView;
     private ActionBarView mActionView;
     private View mActionBarBottom;
+    private boolean mOverlayMode;
     private int mLastSystemUiVisibility;
     private final Rect mLocalInsets = new Rect();
 
@@ -63,8 +64,13 @@ public class ActionBarOverlayLayout extends FrameLayout {
         ta.recycle();
     }
 
-    public void setActionBar(ActionBarImpl impl) {
+    public void setOverlayMode(boolean mode) {
+        mOverlayMode = mode;
+    }
+
+    public void setActionBar(ActionBarImpl impl, boolean overlayMode) {
         mActionBar = impl;
+        mOverlayMode = overlayMode;
         if (getWindowToken() != null) {
             // This is being initialized after being added to a window;
             // make sure to update all state now.
@@ -105,8 +111,13 @@ public class ActionBarOverlayLayout extends FrameLayout {
         mLastSystemUiVisibility = visible;
         final boolean barVisible = (visible&SYSTEM_UI_FLAG_FULLSCREEN) == 0;
         final boolean wasVisible = mActionBar != null ? mActionBar.isSystemShowing() : true;
+        final boolean stable = (visible&SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
         if (mActionBar != null) {
-            if (barVisible) mActionBar.showForSystem();
+            // We want the bar to be visible if it is not being hidden,
+            // or the app has not turned on a stable UI mode (meaning they
+            // are performing explicit layout around the action bar).
+            mActionBar.enableContentAnimations(!stable);
+            if (barVisible || !stable) mActionBar.showForSystem();
             else mActionBar.hideForSystem();
         }
         if ((diff&SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
@@ -161,34 +172,41 @@ public class ActionBarOverlayLayout extends FrameLayout {
             changed |= applyInsets(mActionBarBottom, insets, true, false, true, true);
         }
 
+        int topSpace = 0;
+        if (stable || mActionBarTop.getVisibility() == VISIBLE) {
+            // This is the space needed on top of the window for the action bar.
+            topSpace = mActionBarHeight;
+        }
+        if (mActionBar != null && mActionBar.hasNonEmbeddedTabs()) {
+            View tabs = mContainerView.getTabContainer();
+            if (tabs != null && (stable || tabs.getVisibility() == VISIBLE)) {
+                // If tabs are not embedded, increase space on top to account for them.
+                topSpace += mActionBarHeight;
+            }
+        }
+
+        int bottomSpace = 0;
+        if (mActionView.isSplitActionBar()) {
+            if ((mActionBarBottom != null
+                    && (stable || mActionBarBottom.getVisibility() == VISIBLE))) {
+                // If action bar is split, adjust bottom insets for it.
+                bottomSpace = mActionBarHeight;
+            }
+        }
+
         // If the window has not requested system UI layout flags, we need to
         // make sure its content is not being covered by system UI...  though it
         // will still be covered by the action bar since they have requested it to
         // overlay.
         boolean res = computeFitSystemWindows(insets, mLocalInsets);
+        if (!mOverlayMode && !stable) {
+            mLocalInsets.top += topSpace;
+            mLocalInsets.bottom += bottomSpace;
+        } else {
+            insets.top += topSpace;
+            insets.bottom += bottomSpace;
+        }
         changed |= applyInsets(mContent, mLocalInsets, true, true, true, true);
-
-
-        if (stable || mActionBarTop.getVisibility() == VISIBLE) {
-            // The action bar creates additional insets for its content to use.
-            insets.top += mActionBarHeight;
-        }
-
-        if (mActionBar != null && mActionBar.hasNonEmbeddedTabs()) {
-            View tabs = mContainerView.getTabContainer();
-            if (stable || (tabs != null && tabs.getVisibility() == VISIBLE)) {
-                // If tabs are not embedded, adjust insets to account for them.
-                insets.top += mActionBarHeight;
-            }
-        }
-
-        if (mActionView.isSplitActionBar()) {
-            if (stable || (mActionBarBottom != null
-                    && mActionBarBottom.getVisibility() == VISIBLE)) {
-                // If action bar is split, adjust bottom insets for it.
-                insets.bottom += mActionBarHeight;
-            }
-        }
 
         if (changed) {
             requestLayout();

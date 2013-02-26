@@ -272,7 +272,7 @@ public class FrameworkPerfActivity extends Activity
                 args.bgOp = mCurOpIndex;
             } else {
                 args.fgOp = mCurOpIndex;
-                args.bgOp = mFgTestIndex;
+                args.bgOp = mBgTestIndex;
             }
         }
         Bundle bundle = new Bundle();
@@ -424,6 +424,8 @@ public class FrameworkPerfActivity extends Activity
             updateWakeLock();
             stopService(new Intent(this, SchedulerService.class));
             synchronized (mResults) {
+                Log.i("PerfRes", "\tTEST\tFgOps\tFgMsPerOp\tFgTime\tFgName\tBgOps\tBgMsPerOp\t"
+                        + "BgTime\tBgName");
                 for (int i=0; i<mResults.size(); i++) {
                     RunResult result = mResults.get(i);
                     float fgMsPerOp = result.getFgMsPerOp();
