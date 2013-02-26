@@ -7419,7 +7419,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         SystemProperties.set("ctl.start", "bugreport");
     }
 
-    public long inputDispatchingTimedOut(int pid, boolean aboveSystem) {
+    public long inputDispatchingTimedOut(int pid, final boolean aboveSystem) {
         if (checkCallingPermission(android.Manifest.permission.FILTER_EVENTS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -7455,7 +7455,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
 
         if (proc != null) {
-            appNotResponding(proc, null, null, aboveSystem, "keyDispatchingTimedOut");
+            final ProcessRecord pr = proc;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    appNotResponding(pr, null, null, aboveSystem, "keyDispatchingTimedOut");
+                }
+            });
             if (proc.instrumentationClass != null || proc.usingWrapper) {
                 return INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
             }
