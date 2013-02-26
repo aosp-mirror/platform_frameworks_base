@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.util.Objects;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.wm.AppTransition;
@@ -128,15 +129,15 @@ final class ActivityStack {
     // How long we wait until giving up on an activity telling us it has
     // finished destroying itself.
     static final int DESTROY_TIMEOUT = 10*1000;
-    
+
     // How long until we reset a task when the user returns to it.  Currently
     // disabled.
     static final long ACTIVITY_INACTIVE_RESET_TIME = 0;
-    
+
     // How long between activity launches that we consider safe to not warn
     // the user about an unexpected activity being launched on top.
     static final long START_WARN_TIME = 5*1000;
-    
+
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
     static final boolean SHOW_APP_STARTING_PREVIEW = true;
@@ -155,7 +156,7 @@ final class ActivityStack {
 
     final ActivityManagerService mService;
     final boolean mMainStack;
-    
+
     final Context mContext;
 
     /**
@@ -223,13 +224,13 @@ final class ActivityStack {
      */
     final ArrayList<ActivityRecord> mFinishingActivities
             = new ArrayList<ActivityRecord>();
-    
+
     /**
      * List of people waiting to find out about the next launched activity.
      */
     final ArrayList<IActivityManager.WaitResult> mWaitingActivityLaunched
             = new ArrayList<IActivityManager.WaitResult>();
-    
+
     /**
      * List of people waiting to find out about the next visible activity.
      */
@@ -271,14 +272,14 @@ final class ActivityStack {
      * Current activity that is resumed, or null if there is none.
      */
     ActivityRecord mResumedActivity = null;
-    
+
     /**
      * This is the last activity that has been started.  It is only used to
      * identify when multiple activities are started at once so that the user
      * can be warned they may not be in the activity they think they are.
      */
     ActivityRecord mLastStartedActivity = null;
-    
+
     /**
      * Set when we know we are going to be calling updateConfiguration()
      * soon, so want to skip intermediate config checks.
@@ -290,9 +291,9 @@ final class ActivityStack {
      * newly launched activity is being brought in front of us.
      */
     boolean mUserLeaving = false;
-    
+
     long mInitialStartTime = 0;
-    
+
     /**
      * Set when we have taken too long waiting to go to sleep.
      */
@@ -473,29 +474,11 @@ final class ActivityStack {
     }
 
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
-        ActivityRecord newAr = newTopRunningActivityLocked(notTop);
-
-        int i = mHistory.size()-1;
-        while (i >= 0) {
-            ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && r != notTop && okToShow(r)) {
-                if (VALIDATE_TASK_REPLACE && newAr != r) logHistories(
-                        "topRunningActivityLocked", true);
-                return r;
-            }
-            i--;
-        }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "topRunningActivityLocked: mismatch: newAr!=null");
-        return null;
-    }
-
-    final ActivityRecord newTopRunningActivityLocked(ActivityRecord notTop) {
-        for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
-            final TaskRecord task = mTaskHistory.get(i);
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                ActivityRecord r = activities.get(j);
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = activities.get(activityNdx);
                 if (!r.finishing && r != notTop && okToShow(r)) {
                     return r;
                 }
@@ -505,29 +488,11 @@ final class ActivityStack {
     }
 
     final ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
-        ActivityRecord newAr = newTopRunningNonDelayedActivityLocked(notTop);
-
-        int i = mHistory.size()-1;
-        while (i >= 0) {
-            ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && !r.delayedResume && r != notTop && okToShow(r)) {
-                if (VALIDATE_TASK_REPLACE && newAr != r) Slog.w(TAG,
-                    "topRunningNonDelayedActivityLocked: mismatch: newAr=" + newAr + " r=" + r);
-                return r;
-            }
-            i--;
-        }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "topRunningNonDelayedActivityLocked: mismatch: newAr!=null");
-        return null;
-    }
-
-    final ActivityRecord newTopRunningNonDelayedActivityLocked(ActivityRecord notTop) {
-        for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
-            final TaskRecord task = mTaskHistory.get(i);
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                ActivityRecord r = activities.get(j);
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = activities.get(activityNdx);
                 if (!r.finishing && !r.delayedResume && r != notTop && okToShow(r)) {
                     return r;
                 }
@@ -546,26 +511,6 @@ final class ActivityStack {
      * @return Returns the HistoryRecord of the next activity on the stack.
      */
     final ActivityRecord topRunningActivityLocked(IBinder token, int taskId) {
-        ActivityRecord newAr = newTopRunningActivityLocked(token, taskId);
-
-        int i = mHistory.size()-1;
-        while (i >= 0) {
-            ActivityRecord r = mHistory.get(i);
-            // Note: the taskId check depends on real taskId fields being non-zero
-            if (!r.finishing && (token != r.appToken) && (taskId != r.task.taskId)
-                    && okToShow(r)) {
-                if (VALIDATE_TASK_REPLACE && newAr != r) Slog.w(TAG,
-                        "topRunningActivityLocked(token): mismatch: newAr=" + newAr + " r=" + r);
-                return r;
-            }
-            i--;
-        }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "topRunningActivityLocked(token): mismatch: newAr!=null");
-        return null;
-    }
-
-    final ActivityRecord newTopRunningActivityLocked(IBinder token, int taskId) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.taskId == taskId) {
@@ -581,10 +526,6 @@ final class ActivityStack {
             }
         }
         return null;
-    }
-
-    private final int indexOfTokenLocked(IBinder token) {
-        return mHistory.indexOf(ActivityRecord.forToken(token));
     }
 
     final ActivityRecord isInStackLocked(IBinder token) {
@@ -4217,15 +4158,14 @@ final class ActivityStack {
      */
     final boolean requestFinishActivityLocked(IBinder token, int resultCode,
             Intent resultData, String reason, boolean oomAdj) {
-        int index = indexOfTokenLocked(token);
+        ActivityRecord r = isInStackLocked(token);
         if (DEBUG_RESULTS || DEBUG_STATES) Slog.v(
-                TAG, "Finishing activity @" + index + ": token=" + token
+                TAG, "Finishing activity token=" + token + " r="
                 + ", result=" + resultCode + ", data=" + resultData
                 + ", reason=" + reason);
-        if (index < 0) {
+        if (r == null) {
             return false;
         }
-        ActivityRecord r = mHistory.get(index);
 
         finishActivityLocked(r, resultCode, resultData, reason, oomAdj);
         return true;
@@ -4282,28 +4222,21 @@ final class ActivityStack {
     }
 
     final boolean finishActivityAffinityLocked(IBinder token) {
-        int index = indexOfTokenLocked(token);
+        ActivityRecord r = isInStackLocked(token);
         if (DEBUG_RESULTS) Slog.v(
-                TAG, "Finishing activity affinity @" + index + ": token=" + token);
-        if (index < 0) {
+                TAG, "Finishing activity affinity token=" + token + " r=" + r);
+        if (r == null) {
             return false;
         }
-        ActivityRecord r = mHistory.get(index);
 
-        while (index >= 0) {
-            ActivityRecord cur = mHistory.get(index);
-            if (cur.task != r.task) {
-                break;
-            }
-            if (cur.taskAffinity == null && r.taskAffinity != null) {
-                break;
-            }
-            if (cur.taskAffinity != null && !cur.taskAffinity.equals(r.taskAffinity)) {
+        ArrayList<ActivityRecord> activities = r.task.mActivities;
+        for (int index = activities.indexOf(r); index >= 0; --index) {
+            ActivityRecord cur = activities.get(index);
+            if (!Objects.equal(cur.taskAffinity, r.taskAffinity)) {
                 break;
             }
             finishActivityLocked(cur, Activity.RESULT_CANCELED, null, "request-affinity",
                     true);
-            index--;
         }
         return true;
     }
