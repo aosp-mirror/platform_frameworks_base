@@ -10,8 +10,6 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPA
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_ACTION_PENDING;
-import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
-import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
 
 import android.content.Context;
 import android.os.Debug;
@@ -23,12 +21,10 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
-import com.android.server.wm.DisplayContent.AppTokenIterator;
 import com.android.server.wm.WindowManagerService.DisplayContentsIterator;
 import com.android.server.wm.WindowManagerService.LayoutFields;
 
@@ -178,19 +174,24 @@ public class WindowAnimator {
     private void updateAppWindowsLocked(int displayId) {
         int i;
         final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(FORWARD_ITERATOR);
-        while (iterator.hasNext()) {
-            final AppWindowAnimator appAnimator = iterator.next().mAppAnimator;
-            final boolean wasAnimating = appAnimator.animation != null
-                    && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
-            if (appAnimator.stepAnimationLocked(mCurrentTime)) {
-                mAnimating = true;
-            } else if (wasAnimating) {
-                // stopped animating, do one more pass through the layout
-                setAppLayoutChanges(appAnimator, WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                        "appToken " + appAnimator.mAppToken + " done");
-                if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
-                        "updateWindowsApps...: done animating " + appAnimator.mAppToken);
+        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        final int numTasks = tasks.size();
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            final int numTokens = tokens.size();
+            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                final AppWindowAnimator appAnimator = tokens.get(tokenNdx).mAppAnimator;
+                final boolean wasAnimating = appAnimator.animation != null
+                        && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
+                if (appAnimator.stepAnimationLocked(mCurrentTime)) {
+                    mAnimating = true;
+                } else if (wasAnimating) {
+                    // stopped animating, do one more pass through the layout
+                    setAppLayoutChanges(appAnimator, WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
+                            "appToken " + appAnimator.mAppToken + " done");
+                    if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
+                            "updateWindowsApps...: done animating " + appAnimator.mAppToken);
+                }
             }
         }
 
@@ -461,36 +462,40 @@ public class WindowAnimator {
     private void testTokenMayBeDrawnLocked(int displayId) {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        AppTokenIterator iterator =
-                mService.getDisplayContentLocked(displayId).getTmpAppIterator(FORWARD_ITERATOR);
-        while (iterator.hasNext()) {
-            AppWindowToken wtoken = iterator.next();
-            AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-            final boolean allDrawn = wtoken.allDrawn;
-            if (allDrawn != appAnimator.allDrawn) {
-                appAnimator.allDrawn = allDrawn;
-                if (allDrawn) {
-                    // The token has now changed state to having all
-                    // windows shown...  what to do, what to do?
-                    if (appAnimator.freezingScreen) {
-                        appAnimator.showAllWindowsLocked();
-                        mService.unsetAppFreezingScreenLocked(wtoken, false, true);
-                        if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
-                                "Setting mOrientationChangeComplete=true because wtoken "
-                                + wtoken + " numInteresting=" + wtoken.numInterestingWindows
-                                + " numDrawn=" + wtoken.numDrawnWindows);
-                        // This will set mOrientationChangeComplete and cause a pass through layout.
-                        setAppLayoutChanges(appAnimator,
-                                WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                                "testTokenMayBeDrawnLocked: freezingScreen");
-                    } else {
-                        setAppLayoutChanges(appAnimator,
-                                WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
-                                "testTokenMayBeDrawnLocked");
-
-                        // We can now show all of the drawn windows!
-                        if (!mService.mOpeningApps.contains(wtoken)) {
-                            mAnimating |= appAnimator.showAllWindowsLocked();
+        final ArrayList<TaskList> tasks = mService.getDisplayContentLocked(displayId).mTaskLists;
+        final int numTasks = tasks.size();
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            final int numTokens = tokens.size();
+            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                final AppWindowToken wtoken = tokens.get(tokenNdx);
+                AppWindowAnimator appAnimator = wtoken.mAppAnimator;
+                final boolean allDrawn = wtoken.allDrawn;
+                if (allDrawn != appAnimator.allDrawn) {
+                    appAnimator.allDrawn = allDrawn;
+                    if (allDrawn) {
+                        // The token has now changed state to having all
+                        // windows shown...  what to do, what to do?
+                        if (appAnimator.freezingScreen) {
+                            appAnimator.showAllWindowsLocked();
+                            mService.unsetAppFreezingScreenLocked(wtoken, false, true);
+                            if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
+                                    "Setting mOrientationChangeComplete=true because wtoken "
+                                    + wtoken + " numInteresting=" + wtoken.numInterestingWindows
+                                    + " numDrawn=" + wtoken.numDrawnWindows);
+                            // This will set mOrientationChangeComplete and cause a pass through layout.
+                            setAppLayoutChanges(appAnimator,
+                                    WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
+                                    "testTokenMayBeDrawnLocked: freezingScreen");
+                        } else {
+                            setAppLayoutChanges(appAnimator,
+                                    WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
+                                    "testTokenMayBeDrawnLocked");
+    
+                            // We can now show all of the drawn windows!
+                            if (!mService.mOpeningApps.contains(wtoken)) {
+                                mAnimating |= appAnimator.showAllWindowsLocked();
+                            }
                         }
                     }
                 }

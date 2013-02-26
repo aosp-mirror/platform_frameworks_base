@@ -16,17 +16,12 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
-import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
-
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 class DisplayContentList extends ArrayList<DisplayContent> {
 }
@@ -90,8 +85,6 @@ class DisplayContent {
      */
     ArrayList<TaskList> mTaskLists = new ArrayList<TaskList>();
     SparseArray<TaskList> mTaskIdToTaskList = new SparseArray<TaskList>();
-
-    private final AppTokenIterator mTmpAppIterator = new AppTokenIterator();
 
     /**
      * @param display May not be null.
@@ -174,94 +167,12 @@ class DisplayContent {
         wtoken.groupId = newTaskId;
     }
 
-    /**
-     * Return the utility iterator so we don't have to construct new iterators every time we
-     * iterate.
-     * NOTE: Do not ever nest this call or you will have a bad time!
-     * @param reverse Direction of iterator.
-     * @return The utility iterator.
-     */
-    AppTokenIterator getTmpAppIterator(boolean reverse) {
-        mTmpAppIterator.reset(reverse);
-        return mTmpAppIterator;
-    }
-
-    class AppTokenIterator implements Iterator<AppWindowToken> {
-        boolean mReverse;
-        int mTasksNdx;
-        int mActivityNdx;
-        TaskList mTaskList;
-
-        public AppTokenIterator() {
-            this(FORWARD_ITERATOR);
+    int numTokens() {
+        int count = 0;
+        for (int taskNdx = mTaskLists.size() - 1; taskNdx >= 0; --taskNdx) {
+            count += mTaskLists.get(taskNdx).mAppTokens.size();
         }
-
-        public AppTokenIterator(boolean reverse) {
-            reset(reverse);
-        }
-
-        void reset(boolean reverse) {
-            mReverse = reverse;
-            mTasksNdx = reverse ? mTaskLists.size() - 1 : 0;
-            getNextTaskList();
-        }
-
-        private void getNextTaskList() {
-            if (mReverse) {
-                if (mTasksNdx >= 0) {
-                    mTaskList = mTaskLists.get(mTasksNdx);
-                    --mTasksNdx;
-                    mActivityNdx = mTaskList.mAppTokens.size() - 1;
-                }
-            } else {
-                if (mTasksNdx < mTaskLists.size()) {
-                    mTaskList = mTaskLists.get(mTasksNdx);
-                    ++mTasksNdx;
-                    mActivityNdx = 0;
-                }
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (mTaskList == null) {
-                return false;
-            }
-            if (mReverse) {
-                return mActivityNdx >= 0;
-            }
-            return mActivityNdx < mTaskList.mAppTokens.size();
-        }
-
-        @Override
-        public AppWindowToken next() {
-            if (hasNext()) {
-                AppWindowToken wtoken = mTaskList.mAppTokens.get(mActivityNdx);
-                mActivityNdx += mReverse ? -1 : 1;
-                if (!hasNext()) {
-                    getNextTaskList();
-                }
-                return wtoken;
-            }
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove() {
-            throw new IllegalArgumentException();
-        }
-
-        int size() {
-            int size = 0;
-            for (int i = mTaskLists.size() - 1; i >= 0; --i) {
-                size += mTaskLists.get(i).mAppTokens.size();
-            }
-            return size;
-        }
-
-        @Override public String toString() {
-            return mTaskLists.toString();
-        }
+        return count;
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -288,16 +199,18 @@ class DisplayContent {
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
             pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
-            AppTokenIterator iterator = getTmpAppIterator(REVERSE_ITERATOR);
-            int ndx = iterator.size() - 1;
-            if (ndx >= 0) {
+            int ndx = numTokens();
+            if (ndx > 0) {
                 pw.println();
                 pw.println("  Application tokens in Z order:");
-                while (iterator.hasNext()) {
-                    AppWindowToken wtoken = iterator.next();
-                    pw.print("  App #"); pw.print(ndx--);
-                            pw.print(' '); pw.print(wtoken); pw.println(":");
-                    wtoken.dump(pw, "    ");
+                for (int taskNdx = mTaskLists.size() - 1; taskNdx >= 0; --taskNdx) {
+                    AppTokenList tokens = mTaskLists.get(taskNdx).mAppTokens;
+                    for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                        final AppWindowToken wtoken = tokens.get(tokenNdx);
+                        pw.print("  App #"); pw.print(ndx--);
+                                pw.print(' '); pw.print(wtoken); pw.println(":");
+                        wtoken.dump(pw, "    ");
+                    }
                 }
             }
             if (mExitingTokens.size() > 0) {
