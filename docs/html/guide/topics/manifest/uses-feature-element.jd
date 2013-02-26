@@ -237,7 +237,7 @@ Package Manager for the list of features available on the device by calling
 Store application then passes the features list up to Google Play
 when establishing the session for the user.</p>
 
-<p>Each time you upload an application to the Google Play publisher site,
+<p>Each time you upload an application to the Google Play Developer Console,
 Google Play scans the application's manifest file. It looks for
 <code>&lt;uses-feature&gt;</code> elements and evaluates them in combination
 with other elements, in some cases, such as <code>&lt;uses-sdk&gt;</code> and

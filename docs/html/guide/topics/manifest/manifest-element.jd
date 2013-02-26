@@ -144,16 +144,10 @@ to either internal or external storage through the system settings.</td>
    <td>"{@code preferExternal}"</td>
    <td>The application prefers to be installed on the external storage (SD card). There is no
 guarantee that the system will honor this request. The application might be installed on internal
-storage if the external media is unavailable or full, or if the application uses the forward-locking
-mechanism (not supported on external storage). Once installed, the user can move the application to
+storage if the external media is unavailable or full. Once installed, the user can move the application to
 either internal or external storage through the system settings.</td>
 </tr>
 </table>
-
-<p class="caution"><strong>Caution:</strong> If your application uses Google Play's Copy 
-  Protection feature, it cannot be installed to a device's SD card. However, if you use Google 
-  Play's <a href="{@docRoot}google/play/licensing/index.html">Application Licensing</a> instead, 
-  your application <em>can</em> be installed to internal or external storage, including SD cards.</p>
 
 <p class="note"><strong>Note:</strong> By default, your application will be installed on the
   internal storage and cannot be installed on the external storage unless you define this attribute
