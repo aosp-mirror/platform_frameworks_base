@@ -173,6 +173,19 @@ public abstract class HardwareRenderer {
     public static final String DEBUG_SHOW_OVERDRAW_PROPERTY = "debug.hwui.show_overdraw";
 
     /**
+     * Turn on to debug non-rectangular clip operations.
+     *
+     * Possible values:
+     * "hide", to disable this debug mode
+     * "highlight", highlight drawing commands tested against a non-rectangular clip
+     * "stencil", renders the clip region on screen when set
+     *
+     * @hide
+     */
+    public static final String DEBUG_SHOW_NON_RECTANGULAR_CLIP_PROPERTY =
+            "debug.hwui.show_non_rect_clip";
+
+    /**
      * A process can set this flag to false to prevent the use of hardware
      * rendering.
      * 
