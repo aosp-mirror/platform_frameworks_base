@@ -15862,6 +15862,7 @@ package android.os {
     method public boolean containsKey(java.lang.String);
     method public int describeContents();
     method public java.lang.Object get(java.lang.String);
+    method public android.os.IBinder getBinder(java.lang.String);
     method public boolean getBoolean(java.lang.String);
     method public boolean getBoolean(java.lang.String, boolean);
     method public boolean[] getBooleanArray(java.lang.String);
@@ -15906,6 +15907,7 @@ package android.os {
     method public boolean isEmpty();
     method public java.util.Set<java.lang.String> keySet();
     method public void putAll(android.os.Bundle);
+    method public void putBinder(java.lang.String, android.os.IBinder);
     method public void putBoolean(java.lang.String, boolean);
     method public void putBooleanArray(java.lang.String, boolean[]);
     method public void putBundle(java.lang.String, android.os.Bundle);
