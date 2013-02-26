@@ -192,7 +192,7 @@ default.</li>
     Configuration: <br />
     keyboard, navigation, touch screen</td>
     <td valign="top"><p>An application can
-    request certain hardware features, and Google Play will  show the app only on devices that have the required hardware.</p>
+    request certain hardware features, and Google Play will show the app only on devices that have the required hardware.</p>
       <p><strong>Example 1<br />
       </strong>The manifest includes <code>&lt;uses-configuration android:reqFiveWayNav=&quot;true&quot; /&gt;</code>, and a user is searching for apps on a device that does not have a five-way navigational control. <strong>Result</strong>: Google Play will not show the app to the user. </p>
       <p><strong>Example 2<br />
@@ -399,12 +399,11 @@ country (as determined by SIM carrier) in which paid apps are available.</p></td
     visible only on devices that support that platform. For details about the NDK and using
     native libraries, see <a href="{@docRoot}tools/sdk/ndk/index.html#overview">What is the
       Android NDK?</a></p> </tr> <tr>
-        <td valign="top">Copy-Protected Applications</td> <td valign="top"><p>To
-          copy protect an application, set copy protection to "On" when you configure publishing
-options for your application. Google Play will not show copy-protected applications on
-developer devices or unreleased devices.</p></td> </tr> </table>
-
-
+  <td valign="top">Copy-Protected Applications</td> <td valign="top"><p class="caution">Google
+  Play no longer supports the Copy Protection feature in the Developer Console and no longer
+  filters apps based on it. To secure your app, please use <a href="{@docRoot}google/play/licensing/index.html">
+  Application Licensing</a> instead. See <a href="{@docRoot}google/play/licensing/overview.html#CopyProtection">
+  Replacement for Copy Protection</a> for more information.</p></td> </tr> </table>
 
 <h2 id="MultiApks">Publishing Multiple APKs with Different Filters</h2>
 

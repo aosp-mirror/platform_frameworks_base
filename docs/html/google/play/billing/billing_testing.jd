@@ -18,7 +18,7 @@ parent.link=index.html
 </div>
 </div>
 
-<p>The Google Play publisher site provides several tools that help you test your In-app Billing
+<p>The Google Play Developer Console provides several tools that help you test your In-app Billing
 implementation before it is published. You can use these tools to create test accounts and purchase
 special reserved items that send static billing responses to your application.</p>
 
@@ -53,7 +53,7 @@ product ID android.test.purchased.</p>
 
 <p>You do not need to list the reserved products in your application's product list. Google Play
 already knows about the reserved product IDs. Also, you do not need to upload your application to
-the publisher site to perform static response tests with the reserved product IDs. You can simply
+the Developer Console to perform static response tests with the reserved product IDs. You can simply
 install your application on a device, log into the device, and make billing requests using the
 reserved product IDs.</p>
 
@@ -199,7 +199,7 @@ testing. You only need to upload your application as a draft application to perf
 testing.</p>
 
 <p>To test your In-app Billing implementation with actual in-app purchases, you will need to
-register at least one test account on the Google Play publisher site. You cannot use your
+register at least one test account on the Google Play Developer Console. You cannot use your
 developer account to test the complete in-app purchase process because Google Checkout does not let
 you buy items from yourself. If you have not set up test accounts before, see <a
 href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">Setting up test
@@ -216,7 +216,7 @@ actual payouts to your merchant account.</p>
 <p>To test your In-app Billing implementation with actual purchases, follow these steps:</p>
 
 <ol>
-  <li><strong>Upload your application as a draft application to the publisher site.</strong>
+  <li><strong>Upload your application as a draft application to the Developer Console.</strong>
     <p>You do not need to publish your application to perform end-to-end testing with real product
     IDs; you only need to upload your application as a draft application. However, you must sign
     your application with your release key before you upload it as a draft application. Also, the

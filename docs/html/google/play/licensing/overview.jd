@@ -215,21 +215,15 @@ href="{@docRoot}google/play/expansion-files.html">APK expansion files</a>.</li>
 
 <p>Google Play Licensing is a flexible, secure mechanism for controlling
 access to your applications. It effectively replaces the Copy Protection
-mechanism offered on Google Play and gives you wider distribution
-potential for your applications. </p>
+mechanism (no longer supported) that was previously offered on Google Play and
+gives you wider distribution potential for your applications. </p>
 
-<ul>
-<li>A limitation of the legacy Copy Protection mechanism on Google Play is
-that applications using it can be installed only on compatible devices that
-provide a secure internal storage environment. For example, a copy-protected
-application cannot be downloaded from Google Play to a device that provides root
-access, and the application cannot be installed to a device's SD card. </li>
-<li>With Google Play licensing, you can move to a license-based model in
-which access is not bound to the characteristics of the host device, but to your
-publisher account on Google Play and the licensing policy that you define.
-Your application can be installed and controlled on any compatible device on
-any storage, including SD card.</li>
-</ul>
+<p>Licensing lets you move to a license-based model that is enforceable on
+all devices that have access to Google Play. Access is not bound to the
+characteristics of the host device, but to your
+publisher account on Google Play (through the app's public key) and the
+licensing policy that you define. Your application can be installed and
+managed on any device on any storage, including SD card.</p>
 
 <p>Although no license mechanism can completely prevent all unauthorized use,
 the licensing service lets you control access for most types of normal usage,
