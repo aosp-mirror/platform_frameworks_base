@@ -93,8 +93,10 @@ public class AppOpsManager {
     public static final int OP_CAMERA = 26;
     public static final int OP_RECORD_AUDIO = 27;
     public static final int OP_PLAY_AUDIO = 28;
+    public static final int OP_READ_CLIPBOARD = 29;
+    public static final int OP_WRITE_CLIPBOARD = 30;
     /** @hide */
-    public static final int _NUM_OP = 29;
+    public static final int _NUM_OP = 31;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -134,6 +136,8 @@ public class AppOpsManager {
             OP_CAMERA,
             OP_RECORD_AUDIO,
             OP_PLAY_AUDIO,
+            OP_READ_CLIPBOARD,
+            OP_WRITE_CLIPBOARD,
     };
 
     /**
@@ -170,6 +174,8 @@ public class AppOpsManager {
             "CAMERA",
             "RECORD_AUDIO",
             "PLAY_AUDIO",
+            "READ_CLIPBOARD",
+            "WRITE_CLIPBOARD",
     };
 
     /**
@@ -206,6 +212,8 @@ public class AppOpsManager {
             android.Manifest.permission.CAMERA,
             android.Manifest.permission.RECORD_AUDIO,
             null, // no permission for playing audio
+            null, // no permission for reading clipboard
+            null, // no permission for writing clipboard
     };
 
     /**
