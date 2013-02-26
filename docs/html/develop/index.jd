@@ -30,6 +30,24 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
        <a href="" class="slideshow-next">Next</a>
        <div class="frame">
            <ul>
+
+              <li class="item carousel-home">
+                 <div class="col-8">
+                   <img src="{@docRoot}images/google/gps-plus-signin-hero.jpg"
+class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;height:250px;
+                                           max-width:409px;width:409px" />
+                 </div>
+                <div class="content-right col-6" style="width:350px">
+                  <h2>Google+ Sign-in for your Android Apps</h2>
+                  <p>Google+ Sign-In is an easy, trusted way to sign a user into your app,
+                  and get more Android installs when people visit your website.
+                  When users sign in with Google on the web, they have the option to instantly
+                  install your Android app without ever leaving your website.</p>
+                  <p><a
+href="{@docRoot}google/play-services/plus.html" class="button">Read more</a></p>
+                </div>            
+              </li>
+
               <li class="item carousel-home">
                  <div class="col-8">
                    <img src="{@docRoot}images/google/maps-v2-trulia-n7.png"
@@ -87,24 +105,6 @@ href="http://android-developers.blogspot.com/2012/10/new-google-play-developer-c
 more</a></p>
                    </div>                
                 </li>
-               <li class="item carousel-home">
-                 <div class="col-8">
-                   <img
-src="//lh4.ggpht.com/-g05If_eKKRQ/UAcrVLI-OYI/AAAAAAAAAr8/AWvunVb5S-w/s320/nexus7.png"
-class="play no-shadow no-transform" />
-                 </div>
-                <div class="content-right col-6">
-                  <p class="title-intro">From the blog:</p>
-                  <h2>Getting Your App Ready for Jelly Bean and Nexus 7</h2>
-                  <p>For many people, their first taste of Jelly Bean will be on the beautiful 
-                    <strong>Nexus 7 tablet</strong>. Most applications will run just fine on Nexus 7, but who wants 
-                    their app to be just fine? Here are some tips for optimizing your app 
-                    to make the most of this device.</p>
-                  <p><a
-href="http://android-developers.blogspot.com/2012/07/getting-your-app-ready-for-jelly-bean.html" class="button">Read
-more</a></p>
-                </div>            
-              </li>
            </ul>
        </div>
    </div>
@@ -306,8 +306,6 @@ function renderDevelopersLivePlaylist(data) {
     ul.append(li);
   }
 }
-
-
 
 /* This 'playlist' object defines the playlist IDs for each tab.
  * Each name inside 'playlist' corresponds to class names for the tab that the playlists belong to (eg: "googleioTab" and "googleioBox" divs).

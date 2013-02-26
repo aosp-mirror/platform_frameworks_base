@@ -12,17 +12,14 @@ header.hide=1
 <div class="col-6">
 
   <h1 itemprop="name" style="margin-bottom:0;">Google+ Platform for Android</h1>
-  <p itemprop="description">Create an engaging social experience
-  by integrating Google+ features in your app. You can <b>authenticate users</b> and allow them to
-  <b>sign in</b>, add +1 buttons so users can <b>recommend your app content</b>,
-  and allow users to <b>share rich content</b> with Google+.</p>
+  <p itemprop="description">The Google+ platform for Android lets you authenticate a user
+  with the same credentials they use on Google every day. Once a user signs in with Google,
+  you can create more engaging experiences and drive usage of your app.</p>
   
-  <p>The <a
-href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html"
->Google+ Android API reference</a> is available here on developer.android.com, but for more
-information about integrating Google+, visit:</p>
-<p><a class="external-link"
-href="https://developers.google.com/+/mobile/android/">developers.google.com/+</a></p>
+  <p>Check out the <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html"
+>Google+ Android API reference</a> and visit <a class="external-link"
+href="https://developers.google.com/+/mobile/android/">developers.google.com/+</a> for more
+information about integrating Google+ into your app.</p>
 </div>
 </div>
 
@@ -30,22 +27,31 @@ href="https://developers.google.com/+/mobile/android/">developers.google.com/+</
   <div class="col-6 normal-links">
     <h3 style="clear:left">Key Developer Features</h3>
 
-      <h4>Sign in with Google+</h4>
-      <p>Allow users to easily and securely sign in to your app using their Google+ credentials.
-      This allows you to know who they are on Google+ and to build a more personalized experience in
-      your app. <a href="https://developers.google.com/+/mobile/android/sign-in"
-      class="external-link">Add sign in</a>.</p>
+      <h4>Trusted authentication</h4>
+      <p>Google+ Sign-In is a simple, trusted, and secure way to let people sign in
+      to your app with their Google credentials and bring along their Google+ info.
+      <br />
+      <a href="https://developers.google.com/+/mobile/android/sign-in"
+      class="external-link">Add sign-in</a>.</p>
 
-      <h4>Share to Google+</h4>
-      <p>Display a Share dialog that lets your users share rich content from your app,
-      including text, photos, URL attachments, and location, into the Google+ stream.
-      <a href="https://developers.google.com/+/mobile/android/share"
-      class="external-link">Add sharing with Google+</a>.</p>
+      <h4>Access the profile and social graph</h4>
+      <p>Once users have signed in with Google, your app can welcome them by name,
+      display their picture, connect them with friends, and lots more.
+      <br />
+      <a href="https://developers.google.com/+/mobile/android/people"
+      class="external-link">Access the social graph</a>.</p>
        
+      <h4>Stand out in the stream</h4>
+      <p>Interactive posts is a rich way of sharing to Google+. It lets users prompt friends
+      to take specific actions in your app from a Google+ post, like "listen," "RSVP," "check-in,"
+      and over 100 more actions. <br />
+      <a class="external-link"
+      href="https://developers.google.com/+/mobile/android/share">Post interactive content</a>.</p>
+
       <h4>Recommend content</h4>
-      <p>Add a native +1 button so users can recommend content from your app. When users +1, they
-      can also share content with their circles. These endorsements can give your app more
-      credibility and help it grow faster. <a class="external-link"
+      <p>Add a native +1 button so users can recommend content from your app. These endorsements
+      can give your app more credibility and help it grow faster.  <br />
+      <a class="external-link"
       href="https://developers.google.com/+/mobile/android/recommend">Add the +1 button</a>.</p>
   </div>
 
@@ -59,9 +65,13 @@ href="https://developers.google.com/+/mobile/android/">developers.google.com/+</
     </p>
             
     <h4>2. Run the sample</h4>
-    <p>Once you've installed the Google Play services package, the Google+ sample is located in
-    <code>&lt;android-sdk&gt;/extras/google-play-services/samples/plus</code> and shows you
-      how to use the major components of the Google+ Android APIs.
+    <p>Once you've installed the Google Play services package, you can run the Google+ sample located in
+    <code>&lt;android-sdk&gt;/extras/google-play-services/samples/plus</code>. However, before
+    you can run the sample, you need to register your app in the Google APIs Console.</p>
+    <p>See <a class="external-link"
+      href="https://developers.google.com/+/mobile/android/getting-started">Getting Started with
+      the Google+ Platform for Android</a> for more information about how to get the sample up and 
+      running.
     </p>
     
     <h4>3. Read the documentation</h4>
