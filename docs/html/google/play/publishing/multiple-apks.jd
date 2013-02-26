@@ -103,7 +103,7 @@ consider your options before publishing multiple APKs.</p>
 <h2 id="Concepts">Publishing Concepts</h2>
 
 <p>Before you start publishing multiple APKs on Google Play, you must understand a few
-concepts regarding how the Google Play publisher site works.</p>
+concepts regarding how the Google Play Developer Console works.</p>
 
 <h3 id="Active">Active APKs</h3>
 
@@ -118,7 +118,7 @@ button says <strong>Publish</strong>. Clicking it will publish any APKs listed a
 Active, making them available on Google Play. Also while your application is new
 or unpublished, clicking <strong>Save</strong> will save any changes you've made, such
 as information added to the Product details and APKs you've uploaded, but nothing is made visible on
-Google Play&mdash;this allows you to save your changes and sign out of the publisher site before
+Google Play&mdash;this allows you to save your changes and sign out of the Developer Console before
 deciding to publish.</p>
  <p>Once you've published your application, the first button changes to
 <strong>Unpublish</strong>. Clicking it in this state unpublishes your application so that none
@@ -144,7 +144,7 @@ already published).</p>
 
 <h3 id="SimpleAndAdvanced">Simple mode and advanced mode</h3>
 
-<p>The Google Play publisher site provides two modes for managing the APKs associated with
+<p>The Google Play Developer Console provides two modes for managing the APKs associated with
 your application: <em>simple mode</em> and <em>advanced mode</em>. You can switch between these by
 clicking the
 link at the top-right corner of the <strong>APK files</strong> tab.</p>
@@ -388,7 +388,7 @@ ARMv7 libraries, and not when comparing other native libraries.</li>
 
 </ul>
 
-<p>Failure to abide by the above rules results in an error on the Google Play publisher site
+<p>Failure to abide by the above rules results in an error on the Google Play Developer Console
 when you activate your APKs&mdash;you will be unable to publish your application until you
 resolve the error.</p>
 

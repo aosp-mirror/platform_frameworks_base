@@ -204,7 +204,7 @@ following:</p>
 <h3>Uploading the sample application</h3>
 
 <p>After you build a release version of the sample application and sign it, you need to upload it as
-a draft to the Google Play publisher site. You also need to create a product list for the in-app
+a draft to the Google Play Developer Console. You also need to create a product list for the in-app
 items that are available for purchase in the sample application. The following instructions show you
 how to do this.</p>
 <ol>
@@ -263,7 +263,7 @@ onto a device to run it. To run the sample application, do the following:</p>
  <li><strong>Make one of your test accounts the primary account on your device.</strong>
     <p>The primary account on your device must be one of the <a
     href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">test accounts</a>
-    that you registered on the Google Play publisher site. If the primary account on your device is not a
+    that you registered on the Google Play Developer Console. If the primary account on your device is not a
     test account, you must do a factory reset of the device and then sign in with one of your test
     accounts. To perform a factory reset, do the following:</p>
     <ol>
@@ -979,7 +979,7 @@ href="{@docRoot}google/play/billing/billing_best_practices.html">Security and De
 <p>To help ensure the integrity of the transaction information that is sent to your application,
 Google Play signs the JSON string that is contained in the <code>PURCHASE_STATE_CHANGED</code>
 broadcast intent. Google Play uses the private key that is associated with your publisher account
-to create this signature. The publisher site generates an RSA key pair for each publisher account.
+to create this signature. The Developer Console generates an RSA key pair for each publisher account.
 You can find the public key portion of this key pair on your account's profile page. It is the same
 public key that is used with Google Play licensing.</p>
 
