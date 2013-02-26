@@ -162,7 +162,7 @@ an application declares its supported texture compression formats in
 a device reports the formats it supports as read-only system properties.</li>
 </ul>
 
-<p>Each time you upload an application to the Google Play publisher site,
+<p>Each time you upload an application to the Google Play Developer Console,
 Google Play scans the application's manifest file and looks for any
 <code>&lt;supports-gl-texture&gt;</code> elements. It extracts the
 format descriptors from the elements and stores them internally as
