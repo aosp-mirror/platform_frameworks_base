@@ -79,7 +79,7 @@ enum DebugLevel {
  *
  * The default value is "hide".
  */
-#define PROPERTY_DEBUG_STENCIL_CLIP "debug.hwui.show_stencil_clip"
+#define PROPERTY_DEBUG_STENCIL_CLIP "debug.hwui.show_non_rect_clip"
 
 /**
  * Used to enable/disable scissor optimization. The accepted values are
