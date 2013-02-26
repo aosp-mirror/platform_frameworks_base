@@ -1197,14 +1197,14 @@ public class Paint {
             return 0f;
         }
         if (!mHasCompatScaling) {
-            return native_measureText(text, index, count);
+            return (float) Math.ceil(native_measureText(text, index, count));
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         float w = native_measureText(text, index, count);
         setTextSize(oldSize);
-        return w*mInvCompatScaling;
+        return (float) Math.ceil(w*mInvCompatScaling);
     }
 
     private native float native_measureText(char[] text, int index, int count);
@@ -1229,14 +1229,14 @@ public class Paint {
             return 0f;
         }
         if (!mHasCompatScaling) {
-            return native_measureText(text, start, end);
+            return (float) Math.ceil(native_measureText(text, start, end));
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         float w = native_measureText(text, start, end);
         setTextSize(oldSize);
-        return w*mInvCompatScaling;
+        return (float) Math.ceil(w*mInvCompatScaling);
     }
 
     private native float native_measureText(String text, int start, int end);
@@ -1256,12 +1256,14 @@ public class Paint {
             return 0f;
         }
 
-        if (!mHasCompatScaling) return native_measureText(text);
+        if (!mHasCompatScaling) {
+            return (float) Math.ceil(native_measureText(text));
+        }
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         float w = native_measureText(text);
         setTextSize(oldSize);
-        return w*mInvCompatScaling;
+        return (float) Math.ceil(w*mInvCompatScaling);
     }
 
     private native float native_measureText(String text);
