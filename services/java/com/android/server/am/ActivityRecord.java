@@ -945,21 +945,20 @@ final class ActivityRecord {
             }
         }
     }
-    
+
+    @Override
     public String toString() {
         if (stringName != null) {
-            return stringName;
+            return stringName + " t" + task.taskId + "}";
         }
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(" t");
-        sb.append(task.taskId);
         sb.append(" u");
         sb.append(userId);
         sb.append(' ');
         sb.append(intent.getComponent().flattenToShortString());
-        sb.append('}');
-        return stringName = sb.toString();
+        stringName = sb.toString();
+        return toString();
     }
 }

@@ -58,7 +58,6 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
-import com.android.server.wm.DisplayContent.AppTokenIterator;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
@@ -833,10 +832,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void placeWindowBefore(WindowState pos, WindowState window) {
         final WindowList windows = pos.getWindowList();
-        final int i = windows.indexOf(pos);
+        int i = windows.indexOf(pos);
         if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
             TAG, "Adding window " + window + " at "
             + i + " of " + windows.size() + " (before " + pos + ")");
+        if (i < 0) {
+            Slog.w(TAG, "placeWindowBefore: Unable to find " + pos + " in " + windows);
+            i = 0;
+        }
         windows.add(i, window);
         mWindowsChanged = true;
     }
@@ -951,19 +954,36 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Figure out where the window should go, based on the
                     // order of applications.
                     WindowState pos = null;
-                    AppTokenIterator iterator = displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-                    while (iterator.hasNext()) {
-                        AppWindowToken t = iterator.next();
-                        if (t == token) {
-                            break;
-                        }
 
-                        // We haven't reached the token yet; if this token
-                        // is not going to the bottom and has windows on this display, we can
-                        // use it as an anchor for when we do reach the token.
-                        tokenWindowList = getTokenWindowsOnDisplay(t, win.mDisplayContent);
-                        if (!t.sendingToBottom && tokenWindowList.size() > 0) {
-                            pos = tokenWindowList.get(0);
+                    final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+                    int taskNdx;
+                    int tokenNdx = -1;
+                    for (taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                        AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+                        for (tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                            final AppWindowToken t = tokens.get(tokenNdx);
+                            if (t == token) {
+                                --tokenNdx;
+                                if (tokenNdx < 0) {
+                                    --taskNdx;
+                                    if (taskNdx >= 0) {
+                                        tokenNdx = tasks.get(taskNdx).mAppTokens.size() - 1;
+                                    }
+                                }
+                                break;
+                            }
+
+                            // We haven't reached the token yet; if this token
+                            // is not going to the bottom and has windows on this display, we can
+                            // use it as an anchor for when we do reach the token.
+                            tokenWindowList = getTokenWindowsOnDisplay(t, win.mDisplayContent);
+                            if (!t.sendingToBottom && tokenWindowList.size() > 0) {
+                                pos = tokenWindowList.get(0);
+                            }
+                        }
+                        if (tokenNdx >= 0) {
+                            // early exit
+                            break;
                         }
                     }
                     // We now know the index into the apps.  If we found
@@ -987,12 +1007,19 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else {
                         // Continue looking down until we find the first
                         // token that has windows on this display.
-                        while (iterator.hasNext()) {
-                            AppWindowToken t = iterator.next();
-                            tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
-                            final int NW = tokenWindowList.size();
-                            if (NW > 0) {
-                                pos = tokenWindowList.get(NW-1);
+                        for ( ; taskNdx >= 0; --taskNdx) {
+                            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+                            for ( ; tokenNdx >= 0; --tokenNdx) {
+                                final AppWindowToken t = tokens.get(tokenNdx);
+                                tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
+                                final int NW = tokenWindowList.size();
+                                if (NW > 0) {
+                                    pos = tokenWindowList.get(NW-1);
+                                    break;
+                                }
+                            }
+                            if (tokenNdx >= 0) {
+                                // found
                                 break;
                             }
                         }
@@ -3128,12 +3155,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            boolean mismatch = false;
-            AppTokenIterator iterator = displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-            for ( ; t >= 0 && !mismatch; --t) {
+            final ArrayList<TaskList> localTasks = displayContent.mTaskLists;
+            int taskNdx;
+            for (taskNdx = localTasks.size() - 1; taskNdx >= 0 && t >= 0; --taskNdx, --t) {
+                AppTokenList localTokens = localTasks.get(taskNdx).mAppTokens;
                 task = tasks.get(t);
                 List<IApplicationToken> tokens = task.tokens;
-                int v = task.tokens.size() - 1;
 
                 DisplayContent lastDisplayContent = displayContent;
                 displayContent = mTaskIdToDisplayContents.get(taskId);
@@ -3142,26 +3169,31 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
 
-                while (v >= 0) {
-                    if (!iterator.hasNext()) {
-                        mismatch = true;
-                        break;
-                    }
-                    AppWindowToken atoken = iterator.next();
+                int tokenNdx;
+                int v;
+                for (tokenNdx = localTokens.size() - 1, v = task.tokens.size() - 1;
+                        tokenNdx >= 0 && v >= 0; ) {
+                    final AppWindowToken atoken = localTokens.get(tokenNdx);
                     if (atoken.removed) {
+                        --tokenNdx;
                         continue;
                     }
                     if (tokens.get(v) != atoken.token) {
-                        mismatch = true;
                         break;
                     }
+                    --tokenNdx;
                     v--;
+                }
+
+                if (tokenNdx >= 0 || v >= 0) {
+                    break;
                 }
             }
 
-            if (mismatch || iterator.hasNext()) {
+            if (taskNdx >= 0 || t >= 0) {
                 Slog.w(TAG, "validateAppTokens: Mismatch! ActivityManager=" + tasks);
-                Slog.w(TAG, "validateAppTokens: Mismatch! WindowManager=" + iterator);
+                Slog.w(TAG, "validateAppTokens: Mismatch! WindowManager="
+                        + displayContent.mTaskLists);
                 Slog.w(TAG, "validateAppTokens: Mismatch! Callers=" + Debug.getCallers(4));
             }
         }
@@ -3399,68 +3431,71 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean lastFullscreen = false;
         // TODO: Multi window.
         DisplayContent displayContent = getDefaultDisplayContentLocked();
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-        while (iterator.hasNext()) {
-            AppWindowToken atoken = iterator.next();
-
-            if (DEBUG_APP_ORIENTATION) Slog.v(TAG, "Checking app orientation: " + atoken);
-
-            // if we're about to tear down this window and not seek for
-            // the behind activity, don't use it for orientation
-            if (!findingBehind
-                    && (!atoken.hidden && atoken.hiddenRequested)) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
-                        + " -- going to hide");
-                continue;
-            }
-
-            if (haveGroup == true && curGroup != atoken.groupId) {
-                // If we have hit a new application group, and the bottom
-                // of the previous group didn't explicitly say to use
-                // the orientation behind it, and the last app was
-                // full screen, then we'll stick with the
-                // user's orientation.
-                if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND
-                        && lastFullscreen) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
-                            + " -- end of group, return " + lastOrientation);
-                    return lastOrientation;
+        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                final AppWindowToken atoken = tokens.get(tokenNdx);
+    
+                if (DEBUG_APP_ORIENTATION) Slog.v(TAG, "Checking app orientation: " + atoken);
+    
+                // if we're about to tear down this window and not seek for
+                // the behind activity, don't use it for orientation
+                if (!findingBehind
+                        && (!atoken.hidden && atoken.hiddenRequested)) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
+                            + " -- going to hide");
+                    continue;
                 }
+    
+                if (haveGroup == true && curGroup != atoken.groupId) {
+                    // If we have hit a new application group, and the bottom
+                    // of the previous group didn't explicitly say to use
+                    // the orientation behind it, and the last app was
+                    // full screen, then we'll stick with the
+                    // user's orientation.
+                    if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND
+                            && lastFullscreen) {
+                        if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
+                                + " -- end of group, return " + lastOrientation);
+                        return lastOrientation;
+                    }
+                }
+    
+                // We ignore any hidden applications on the top.
+                if (atoken.hiddenRequested || atoken.willBeHidden) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
+                            + " -- hidden on top");
+                    continue;
+                }
+    
+                if (!haveGroup) {
+                    haveGroup = true;
+                    curGroup = atoken.groupId;
+                    lastOrientation = atoken.requestedOrientation;
+                }
+    
+                int or = atoken.requestedOrientation;
+                // If this application is fullscreen, and didn't explicitly say
+                // to use the orientation behind it, then just take whatever
+                // orientation it has and ignores whatever is under it.
+                lastFullscreen = atoken.appFullscreen;
+                if (lastFullscreen
+                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
+                            + " -- full screen, return " + or);
+                    return or;
+                }
+                // If this application has requested an explicit orientation,
+                // then use it.
+                if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
+                            + " -- explicitly set, return " + or);
+                    return or;
+                }
+                findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
             }
-
-            // We ignore any hidden applications on the top.
-            if (atoken.hiddenRequested || atoken.willBeHidden) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
-                        + " -- hidden on top");
-                continue;
-            }
-
-            if (!haveGroup) {
-                haveGroup = true;
-                curGroup = atoken.groupId;
-                lastOrientation = atoken.requestedOrientation;
-            }
-
-            int or = atoken.requestedOrientation;
-            // If this application is fullscreen, and didn't explicitly say
-            // to use the orientation behind it, then just take whatever
-            // orientation it has and ignores whatever is under it.
-            lastFullscreen = atoken.appFullscreen;
-            if (lastFullscreen
-                    && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
-                        + " -- full screen, return " + or);
-                return or;
-            }
-            // If this application has requested an explicit orientation,
-            // then use it.
-            if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                    && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
-                        + " -- explicitly set, return " + or);
-                return or;
-            }
-            findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
         }
         if (DEBUG_ORIENTATION) Slog.v(TAG, "No app is requesting an orientation");
         return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -4387,10 +4422,14 @@ public class WindowManagerService extends IWindowManager.Stub
         while (iterator.hasNext()) {
             DisplayContent displayContent = iterator.next();
             Slog.v(TAG, "  Display " + displayContent.getDisplayId());
-            AppTokenIterator appIterator = displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-            int i = appIterator.size();
-            while (appIterator.hasNext()) {
-                Slog.v(TAG, "  #" + --i + ": " + appIterator.next().token);
+            final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+            int i = displayContent.numTokens();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                    final AppWindowToken wtoken = tokens.get(tokenNdx);
+                    Slog.v(TAG, "  #" + --i + ": " + wtoken.token);
+                }
             }
         }
     }
@@ -4414,40 +4453,47 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowList windows = displayContent.getWindowList();
         final int NW = windows.size();
 
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-        while (iterator.hasNext()) {
-            if (iterator.next() == target) {
-                break;
-            }
-        }
-
-        while (iterator.hasNext()) {
-            // Find the first app token below the new position that has
-            // a window displayed.
-            final AppWindowToken wtoken = iterator.next();
-            if (DEBUG_REORDER) Slog.v(TAG, "Looking for lower windows in " + wtoken.token);
-            if (wtoken.sendingToBottom) {
-                if (DEBUG_REORDER) Slog.v(TAG, "Skipping token -- currently sending to bottom");
+        boolean found = false;
+        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskList task = tasks.get(taskNdx);
+            if (!found && task.taskId != taskId) {
                 continue;
             }
-            for (int i = wtoken.windows.size() - 1; i >= 0; --i) {
-                WindowState win = wtoken.windows.get(i);
-                for (int j = win.mChildWindows.size() - 1; j >= 0; --j) {
-                    WindowState cwin = win.mChildWindows.get(j);
-                    if (cwin.mSubLayer >= 0) {
+            AppTokenList tokens = task.mAppTokens;
+            for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                final AppWindowToken wtoken = tokens.get(tokenNdx);
+                if (!found && wtoken == target) {
+                    found = true;
+                }
+                if (found) {
+                    // Find the first app token below the new position that has
+                    // a window displayed.
+                    if (DEBUG_REORDER) Slog.v(TAG, "Looking for lower windows in " + wtoken.token);
+                    if (wtoken.sendingToBottom) {
+                        if (DEBUG_REORDER) Slog.v(TAG, "Skipping token -- currently sending to bottom");
+                        continue;
+                    }
+                    for (int i = wtoken.windows.size() - 1; i >= 0; --i) {
+                        WindowState win = wtoken.windows.get(i);
+                        for (int j = win.mChildWindows.size() - 1; j >= 0; --j) {
+                            WindowState cwin = win.mChildWindows.get(j);
+                            if (cwin.mSubLayer >= 0) {
+                                for (int pos = NW - 1; pos >= 0; pos--) {
+                                    if (windows.get(pos) == cwin) {
+                                        if (DEBUG_REORDER) Slog.v(TAG,
+                                                "Found child win @" + (pos + 1));
+                                        return pos + 1;
+                                    }
+                                }
+                            }
+                        }
                         for (int pos = NW - 1; pos >= 0; pos--) {
-                            if (windows.get(pos) == cwin) {
-                                if (DEBUG_REORDER) Slog.v(TAG,
-                                        "Found child win @" + (pos + 1));
+                            if (windows.get(pos) == win) {
+                                if (DEBUG_REORDER) Slog.v(TAG, "Found win @" + (pos + 1));
                                 return pos + 1;
                             }
                         }
-                    }
-                }
-                for (int pos = NW - 1; pos >= 0; pos--) {
-                    if (windows.get(pos) == win) {
-                        if (DEBUG_REORDER) Slog.v(TAG, "Found win @" + (pos + 1));
-                        return pos + 1;
                     }
                 }
             }
@@ -6905,13 +6951,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         Slog.w(TAG, "App freeze timeout expired.");
                         DisplayContent displayContent = getDefaultDisplayContentLocked();
-                        AppTokenIterator iterator =
-                                displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-                        while (iterator.hasNext()) {
-                            AppWindowToken tok = iterator.next();
-                            if (tok.mAppAnimator.freezingScreen) {
-                                Slog.w(TAG, "Force clearing freeze: " + tok);
-                                unsetAppFreezingScreenLocked(tok, true, true);
+                        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+                        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+                            for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                                AppWindowToken tok = tokens.get(tokenNdx);
+                                if (tok.mAppAnimator.freezingScreen) {
+                                    Slog.w(TAG, "Force clearing freeze: " + tok);
+                                    unsetAppFreezingScreenLocked(tok, true, true);
+                                }
                             }
                         }
                     }
@@ -7433,9 +7481,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // And add in the still active app tokens in Z order.
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(FORWARD_ITERATOR);
-        while (iterator.hasNext()) {
-            i = reAddAppWindowsLocked(displayContent, i, iterator.next());
+        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        final int numTasks = tasks.size();
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            final int numTokens = tokens.size();
+            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                final AppWindowToken wtoken = tokens.get(tokenNdx);
+                i = reAddAppWindowsLocked(displayContent, i, wtoken);
+            }
         }
 
         i -= lastBelow;
@@ -8106,9 +8160,15 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.setIdle();
         // Restore window app tokens to the ActivityManager views
         final DisplayContent displayContent = getDefaultDisplayContentLocked();
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(FORWARD_ITERATOR);
-        while (iterator.hasNext()) {
-            iterator.next().sendingToBottom = false;
+        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        final int numTasks = tasks.size();
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            final int numTokens = tokens.size();
+            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                final AppWindowToken wtoken = tokens.get(tokenNdx);
+                wtoken.sendingToBottom = false;
+            }
         }
         rebuildAppWindowListLocked();
 
@@ -8269,17 +8329,22 @@ public class WindowManagerService extends IWindowManager.Stub
     private void updateAllDrawnLocked(DisplayContent displayContent) {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(FORWARD_ITERATOR);
-        while (iterator.hasNext()) {
-            AppWindowToken wtoken = iterator.next();
-            if (!wtoken.allDrawn) {
-                int numInteresting = wtoken.numInterestingWindows;
-                if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
-                    if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                            "allDrawn: " + wtoken
-                            + " interesting=" + numInteresting
-                            + " drawn=" + wtoken.numDrawnWindows);
-                    wtoken.allDrawn = true;
+        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        final int numTasks = tasks.size();
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            final int numTokens = tokens.size();
+            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                final AppWindowToken wtoken = tokens.get(tokenNdx);
+                if (!wtoken.allDrawn) {
+                    int numInteresting = wtoken.numInterestingWindows;
+                    if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
+                        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                                "allDrawn: " + wtoken
+                                + " interesting=" + numInteresting
+                                + " drawn=" + wtoken.numDrawnWindows);
+                        wtoken.allDrawn = true;
+                    }
                 }
             }
         }
@@ -9202,8 +9267,19 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowState findFocusedWindowLocked(DisplayContent displayContent) {
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(REVERSE_ITERATOR);
-        WindowToken nextApp = iterator.hasNext() ? iterator.next() : null;
+        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        int taskNdx = tasks.size() - 1;
+        AppTokenList tokens = taskNdx >= 0 ? tasks.get(taskNdx).mAppTokens : null;
+        int tokenNdx = tokens != null ? tokens.size() - 1 : -1;
+        WindowToken nextApp = tokenNdx >= 0 ? tokens.get(tokenNdx) : null;
+        --tokenNdx;
+        if (tokenNdx < 0) {
+            --taskNdx;
+            if (taskNdx >= 0) {
+                tokens = tasks.get(taskNdx).mAppTokens;
+                tokenNdx = tokens.size() - 1;
+            }
+        }
 
         final WindowList windows = displayContent.getWindowList();
         for (int i = windows.size() - 1; i >= 0; i--) {
@@ -9230,16 +9306,24 @@ public class WindowManagerService extends IWindowManager.Stub
             if (thisApp != null && nextApp != null && thisApp != nextApp
                     && win.mAttrs.type != TYPE_APPLICATION_STARTING) {
                 final WindowToken origAppToken = nextApp;
-                while (iterator.hasNext()) {
-                    if (nextApp == mFocusedApp) {
-                        // Whoops, we are below the focused app...  no focus
-                        // for you!
-                        if (localLOGV || DEBUG_FOCUS) Slog.v(
-                            TAG, "Reached focused app: " + mFocusedApp);
-                        return null;
+                final int origTaskNdx = taskNdx;
+                final int origTokenNdx = tokenNdx;
+                for ( ; taskNdx >= 0; --taskNdx) {
+                    tokens = tasks.get(taskNdx).mAppTokens;
+                    for ( ; tokenNdx >= 0; --tokenNdx) {
+                        if (nextApp == mFocusedApp) {
+                            // Whoops, we are below the focused app...  no focus
+                            // for you!
+                            if (localLOGV || DEBUG_FOCUS) Slog.v(
+                                TAG, "Reached focused app: " + mFocusedApp);
+                            return null;
+                        }
+                        nextApp = tokens.get(tokenNdx);
+                        if (nextApp == thisApp) {
+                            break;
+                        }
                     }
-                    nextApp = iterator.next();
-                    if (nextApp == thisApp) {
+                    if (thisApp == nextApp) {
                         break;
                     }
                 }
@@ -9248,13 +9332,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     // happen, but if it does we can get totally hosed...
                     // so restart at the original app.
                     nextApp = origAppToken;
-                    iterator = displayContent.new AppTokenIterator(true);
-                    while (iterator.hasNext()) {
-                        // return iterator to same place.
-                        if (iterator.next() == origAppToken) {
-                            break;
-                        }
-                    } 
+                    // return indices to same place.
+                    taskNdx = origTaskNdx;
+                    tokenNdx = origTokenNdx;
                 }
             }
 
