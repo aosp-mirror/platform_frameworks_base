@@ -24,6 +24,9 @@ import android.net.NetworkInfo;
 import static android.net.NetworkInfo.DetailedState.CONNECTED;
 import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
+import android.os.Messenger;
+import android.os.RemoteException;
+import android.util.Log;
 import android.os.Handler;
 import android.os.Message;
 
@@ -49,7 +52,7 @@ final class WifiTrafficPoller {
     /* Tracks last reported data activity */
     private int mDataActivity;
 
-    private final List<AsyncChannel> mClients;
+    private final List<Messenger> mClients;
     // err on the side of updating at boot since screen on broadcast may be missed
     // the first time
     private AtomicBoolean mScreenOn = new AtomicBoolean(true);
@@ -57,7 +60,7 @@ final class WifiTrafficPoller {
     private NetworkInfo mNetworkInfo;
     private final String mInterface;
 
-    WifiTrafficPoller(Context context, List<AsyncChannel> clients, String iface) {
+    WifiTrafficPoller(Context context, List<Messenger> clients, String iface) {
         mClients = clients;
         mInterface = iface;
         mTrafficHandler = new TrafficHandler();
@@ -145,8 +148,16 @@ final class WifiTrafficPoller {
 
             if (dataActivity != mDataActivity && mScreenOn.get()) {
                 mDataActivity = dataActivity;
-                for (AsyncChannel client : mClients) {
-                    client.sendMessage(WifiManager.DATA_ACTIVITY_NOTIFICATION, mDataActivity);
+                for (Messenger client : mClients) {
+                    Message msg = Message.obtain();
+                    msg.what = WifiManager.DATA_ACTIVITY_NOTIFICATION;
+                    msg.arg1 = mDataActivity;
+                    try {
+                        client.send(msg);
+                    } catch (RemoteException e) {
+                        // Failed to reach, skip
+                        // Client removal is handled in WifiService
+                    }
                 }
             }
         }
