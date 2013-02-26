@@ -10,8 +10,6 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPA
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_ACTION_PENDING;
-import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
-import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
 
 import android.content.Context;
 import android.os.Debug;
@@ -28,7 +26,6 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
-import com.android.server.wm.DisplayContent.AppTokenIterator;
 import com.android.server.wm.WindowManagerService.DisplayContentsIterator;
 import com.android.server.wm.WindowManagerService.LayoutFields;
 
@@ -175,12 +172,12 @@ public class WindowAnimator {
         }
     }
 
-    private void updateAppWindowsLocked(int displayId) {
+    private void updateAppWindowsLocked() {
         int i;
-        final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
-        AppTokenIterator iterator = displayContent.getTmpAppIterator(FORWARD_ITERATOR);
-        while (iterator.hasNext()) {
-            final AppWindowAnimator appAnimator = iterator.next().mAppAnimator;
+        final ArrayList<AppWindowToken> appTokens = mService.mAnimatingAppTokens;
+        final int NAT = appTokens.size();
+        for (i=0; i<NAT; i++) {
+            final AppWindowAnimator appAnimator = appTokens.get(i).mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime)) {
@@ -194,10 +191,9 @@ public class WindowAnimator {
             }
         }
 
-        final AppTokenList exitingAppTokens = displayContent.mExitingAppTokens;
-        final int NEAT = exitingAppTokens.size();
+        final int NEAT = mService.mExitingAppTokens.size();
         for (i=0; i<NEAT; i++) {
-            final AppWindowAnimator appAnimator = exitingAppTokens.get(i).mAppAnimator;
+            final AppWindowAnimator appAnimator = mService.mExitingAppTokens.get(i).mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime)) {
@@ -458,13 +454,13 @@ public class WindowAnimator {
 
     /** See if any windows have been drawn, so they (and others associated with them) can now be
      *  shown. */
-    private void testTokenMayBeDrawnLocked(int displayId) {
+    private void testTokenMayBeDrawnLocked() {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        AppTokenIterator iterator =
-                mService.getDisplayContentLocked(displayId).getTmpAppIterator(FORWARD_ITERATOR);
-        while (iterator.hasNext()) {
-            AppWindowToken wtoken = iterator.next();
+        final ArrayList<AppWindowToken> appTokens = mService.mAnimatingAppTokens;
+        final int NT = appTokens.size();
+        for (int i=0; i<NT; i++) {
+            AppWindowToken wtoken = appTokens.get(i);
             AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             final boolean allDrawn = wtoken.allDrawn;
             if (allDrawn != appAnimator.allDrawn) {
@@ -534,10 +530,11 @@ public class WindowAnimator {
         SurfaceControl.openTransaction();
         SurfaceControl.setAnimationTransaction();
         try {
+            updateAppWindowsLocked();
+
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                updateAppWindowsLocked(displayId);
                 DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
                 final ScreenRotationAnimation screenRotationAnimation =
@@ -563,11 +560,10 @@ public class WindowAnimator {
                 }
             }
 
+            testTokenMayBeDrawnLocked();
+
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-
-                testTokenMayBeDrawnLocked(displayId);
-
                 DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
                 final ScreenRotationAnimation screenRotationAnimation =

@@ -22,7 +22,6 @@ import com.android.server.am.ActivityStack.ActivityState;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -96,9 +95,9 @@ final class ActivityRecord {
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
-    ArrayList<ResultInfo> results; // pending ActivityResult objs we have received
+    ArrayList results;      // pending ActivityResult objs we have received
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
-    ArrayList<Intent> newIntents; // any pending new intents for single-top mode
+    ArrayList newIntents;   // any pending new intents for single-top mode
     ActivityOptions pendingOptions; // most recently given options
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
     UriPermissionOwner uriPermissions; // current special URI access perms.
@@ -471,8 +470,6 @@ final class ActivityRecord {
     void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
         if (inHistory && !finishing) {
             if (task != null) {
-                // TODO: If this is the last ActivityRecord in task, remove from ActivityStack.
-                task.removeActivity(this);
                 task.numActivities--;
             }
             if (newTask != null) {
@@ -507,7 +504,6 @@ final class ActivityRecord {
             inHistory = false;
             if (task != null && !finishing) {
                 task.numActivities--;
-                task = null;
             }
             clearOptionsLocked();
         }
@@ -542,7 +538,7 @@ final class ActivityRecord {
         ActivityResult r = new ActivityResult(from, resultWho,
         		requestCode, resultCode, resultData);
         if (results == null) {
-            results = new ArrayList<ResultInfo>();
+            results = new ArrayList();
         }
         results.add(r);
     }
@@ -953,8 +949,6 @@ final class ActivityRecord {
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(" t");
-        sb.append(task.taskId);
         sb.append(" u");
         sb.append(userId);
         sb.append(' ');
