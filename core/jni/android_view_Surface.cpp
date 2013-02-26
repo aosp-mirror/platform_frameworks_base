@@ -388,7 +388,7 @@ int register_android_view_Surface(JNIEnv* env)
             env->GetFieldID(gSurfaceClassInfo.clazz, "mGenerationId", "I");
     gSurfaceClassInfo.mCanvas =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvas", "Landroid/graphics/Canvas;");
-    gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "()V");
+    gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");
 
     clazz = env->FindClass("android/graphics/Canvas");
     gCanvasClassInfo.mFinalizer = env->GetFieldID(clazz, "mFinalizer", "Landroid/graphics/Canvas$CanvasFinalizer;");
