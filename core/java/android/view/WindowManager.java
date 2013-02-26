@@ -612,10 +612,23 @@ public interface WindowManager extends ViewManager {
         /** Window flag: allow window to extend outside of the screen. */
         public static final int FLAG_LAYOUT_NO_LIMITS   = 0x00000200;
         
-        /** Window flag: Hide all screen decorations (e.g. status bar) while
+        /**
+         * Window flag: Hide all screen decorations (e.g. status bar) while
          * this window is displayed.  This allows the window to use the entire
          * display space for itself -- the status bar will be hidden when
-         * an app window with this flag set is on the top layer. */
+         * an app window with this flag set is on the top layer.
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowFullscreen} attribute; this attribute
+         * is automatically set for you in the standard fullscreen themes
+         * such as {@link android.R.style#Theme_NoTitleBar_Fullscreen},
+         * {@link android.R.style#Theme_Black_NoTitleBar_Fullscreen},
+         * {@link android.R.style#Theme_Light_NoTitleBar_Fullscreen},
+         * {@link android.R.style#Theme_Holo_NoActionBar_Fullscreen},
+         * {@link android.R.style#Theme_Holo_Light_NoActionBar_Fullscreen},
+         * {@link android.R.style#Theme_DeviceDefault_NoActionBar_Fullscreen}, and
+         * {@link android.R.style#Theme_DeviceDefault_Light_NoActionBar_Fullscreen}.</p>
+         */
         public static final int FLAG_FULLSCREEN      = 0x00000400;
         
         /** Window flag: Override {@link #FLAG_FULLSCREEN and force the
@@ -697,6 +710,17 @@ public interface WindowManager extends ViewManager {
          * to actually see the wallpaper behind it; this flag just ensures
          * that the wallpaper surface will be there if this window actually
          * has translucent regions.
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowShowWallpaper} attribute; this attribute
+         * is automatically set for you in the standard wallpaper themes
+         * such as {@link android.R.style#Theme_Wallpaper},
+         * {@link android.R.style#Theme_Wallpaper_NoTitleBar},
+         * {@link android.R.style#Theme_Wallpaper_NoTitleBar_Fullscreen},
+         * {@link android.R.style#Theme_Holo_Wallpaper},
+         * {@link android.R.style#Theme_Holo_Wallpaper_NoTitleBar},
+         * {@link android.R.style#Theme_DeviceDefault_Wallpaper}, and
+         * {@link android.R.style#Theme_DeviceDefault_Wallpaper_NoTitleBar}.</p>
          */
         public static final int FLAG_SHOW_WALLPAPER = 0x00100000;
         
@@ -763,9 +787,38 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
 
-        /** Window flag: allow window contents to extend in to the screen's
+        /**
+         * Window flag: allow window contents to extend in to the screen's
          * overscan area, if there is one.  The window should still correctly
          * position its contents to take the overscan area into account.
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowOverscan} attribute; this attribute
+         * is automatically set for you in the standard overscan themes
+         * such as {@link android.R.style#Theme_NoTitleBar_Overscan},
+         * {@link android.R.style#Theme_Black_NoTitleBar_Overscan},
+         * {@link android.R.style#Theme_Light_NoTitleBar_Overscan},
+         * {@link android.R.style#Theme_Holo_NoActionBar_Overscan},
+         * {@link android.R.style#Theme_Holo_Light_NoActionBar_Overscan},
+         * {@link android.R.style#Theme_DeviceDefault_NoActionBar_Overscan}, and
+         * {@link android.R.style#Theme_DeviceDefault_Light_NoActionBar_Overscan}.</p>
+         *
+         * <p>When this flag is enabled for a window, its normal content may be obscured
+         * to some degree by the overscan region of the display.  To ensure key parts of
+         * that content are visible to the user, you can use
+         * {@link View#setFitsSystemWindows(boolean) View.setFitsSystemWindows(boolean)}
+         * to set the point in the view hierarchy where the appropriate offsets should
+         * be applied.  (This can be done either by directly calling this function, using
+         * the {@link android.R.attr#fitsSystemWindows} attribute in your view hierarchy,
+         * or implementing you own {@link View#fitSystemWindows(android.graphics.Rect)
+         * View.fitSystemWindows(Rect)} method).</p>
+         *
+         * <p>This mechanism for positioning content elements is identical to its equivalent
+         * use with layout and {@link View#setSystemUiVisibility(int)
+         * View.setSystemUiVisibility(int)}; here is an example layout that will correctly
+         * position its UI elements with this overscan flag is set:</p>
+         *
+         * {@sample development/samples/ApiDemos/res/layout/overscan_activity.xml complete}
          */
         public static final int FLAG_LAYOUT_IN_OVERSCAN = 0x02000000;
 
@@ -1091,6 +1144,11 @@ public interface WindowManager extends ViewManager {
          * {@link #SOFT_INPUT_ADJUST_UNSPECIFIED},
          * {@link #SOFT_INPUT_ADJUST_RESIZE}, or
          * {@link #SOFT_INPUT_ADJUST_PAN}.
+         * </ul>
+         *
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowSoftInputMode} attribute.</p>
          */
         public int softInputMode;
         
