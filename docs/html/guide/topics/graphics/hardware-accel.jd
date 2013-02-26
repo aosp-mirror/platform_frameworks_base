@@ -270,110 +270,250 @@ changed.</li>
   android.graphics.Canvas} drawing operations as well as many less-used operations. All of the
   drawing operations that are used to render applications that ship with Android, default widgets
   and layouts, and common advanced visual effects such as reflections and tiled textures are
-  supported. The following list describes known operations that are <strong>not supported</strong>
-  with hardware acceleration:</p>
+  supported.</p>
 
-  <ul>
-    <li>
-      <strong>Canvas</strong>
+  <p>The following table describes the support level of various operations across API levels:</p>
 
-      <ul>
-        <li>{@link android.graphics.Canvas#clipPath clipPath()}</li>
-
-        <li>{@link android.graphics.Canvas#clipRegion clipRegion()}</li>
-
-        <li>{@link android.graphics.Canvas#drawPicture drawPicture()}</li>
-
-        <li>{@link android.graphics.Canvas#drawTextOnPath drawTextOnPath()}</li>
-
-        <li>{@link android.graphics.Canvas#drawVertices drawVertices()}</li>
-      </ul>
-    </li>
-
-    <li>
-      <strong>Paint</strong>
-
-      <ul>
-        <li>{@link android.graphics.Paint#setLinearText setLinearText()}</li>
-
-        <li>{@link android.graphics.Paint#setMaskFilter setMaskFilter()}</li>
-
-        <li>{@link android.graphics.Paint#setRasterizer setRasterizer()}</li>
-      </ul>
-    </li>
-
-    <li>
-      <strong>Xfermodes</strong>
-
-      <ul>
-        <li>{@link android.graphics.AvoidXfermode AvoidXfermode}</li>
-
-        <li>{@link android.graphics.PixelXorXfermode PixelXorXfermode}</li>
-      </ul>
-    </li>
-  </ul>
-
-  <p>In addition, some operations behave differently with hardware acceleration enabled:</p>
-
-  <ul>
-    <li>
-      <strong>Canvas</strong>
-
-      <ul>
-        <li>{@link android.graphics.Canvas#clipRect clipRect()}: <code>XOR</code>,
-        <code>Difference</code> and <code>ReverseDifference</code> clip modes are ignored. 3D
-        transforms do not apply to the clip rectangle</li>
-
-        <li>{@link android.graphics.Canvas#drawBitmapMesh drawBitmapMesh()}: colors array is
-        ignored</li>
-      </ul>
-    </li>
-
-    <li>
-      <strong>Paint</strong>
-
-      <ul>
-        <li>{@link android.graphics.Paint#setDither setDither()}: ignored</li>
-
-        <li>{@link android.graphics.Paint#setFilterBitmap setFilterBitmap()}: filtering is always
-        on</li>
-
-        <li>{@link android.graphics.Paint#setShadowLayer setShadowLayer()}: works with text
-        only</li>
-      </ul>
-    </li>
-
-    <li>
-      <strong>PorterDuffXfermode</strong>
-
-      <ul>
-        <li>{@link android.graphics.PorterDuff.Mode#DARKEN PorterDuff.Mode.DARKEN} will
-        be equivalent to {@link android.graphics.PorterDuff.Mode#SRC_OVER} when blending
-        against the framebuffer.</li>
-
-        <li>{@link android.graphics.PorterDuff.Mode#LIGHTEN PorterDuff.Mode.LIGHTEN} will
-        be equivalent to {@link android.graphics.PorterDuff.Mode#SRC_OVER} when blending
-        against the framebuffer.</li>
-
-        <li>{@link android.graphics.PorterDuff.Mode#OVERLAY PorterDuff.Mode.OVERLAY} will
-        be equivalent to {@link android.graphics.PorterDuff.Mode#SRC_OVER} when blending
-        against the framebuffer.</li>
-      </ul>
-    </li>
-
-    <li>
-      <strong>ComposeShader</strong>
-
-      <ul>
-        <li>{@link android.graphics.ComposeShader} can only contain shaders of different types (a
-        {@link android.graphics.BitmapShader} and a {@link android.graphics.LinearGradient} for
-        instance, but not two instances of {@link android.graphics.BitmapShader} )</li>
-
-        <li>{@link android.graphics.ComposeShader} cannot contain a {@link
-        android.graphics.ComposeShader}</li>
-      </ul>
-    </li>
-  </ul>
+  <style type="text/css">
+  .tblGenFixed,.tblGeneric{font-size:15px}.tblGenFixed td {padding:0 3px;letter-spacing:0;word-spacing:0;background-color:#fff;z-index:1;border-top:0px none;border-left:0px none;border-bottom:1px solid #CCC;border-right:1px solid #CCC;} .dn {display:none} .tblGenFixed td.s0 {background-color:white;border-top:1px solid #CCC;border-left:1px solid #CCC;} .tblGenFixed td.s2 {background-color:#d9d9d9;color:#000000;text-align:center;} .tblGenFixed td.s1 {background-color:#434343;color:#ffffff;text-align:center;border-top:1px solid #CCC;} .tblGenFixed td.s9 {background-color:;color:#6aa84f;text-align:center;} .tblGenFixed td.s12 {background-color:white;color:#6aa84f;text-align:center;} .tblGenFixed td.s13 {background-color:#d9d9d9;color:#6aa84f;text-align:center;} .tblGenFixed td.s7 {background-color:#d9d9d9;color:#980000;text-align:center;} .tblGenFixed td.s8 {background-color:;color:#980000;text-align:center;} .tblGenFixed td.s5 {background-color:#434343;color:#ffffff;text-align:left;border-left:1px solid #CCC;} .tblGenFixed td.s6 {background-color:;font-family:courier new,monospace;color:;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.s10 {background-color:white;font-family:courier new,monospace;color:#000000;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.s3 {background-color:white;color:#000000;text-align:center;} .tblGenFixed td.s11 {background-color:white;color:#980000;text-align:center;} .tblGenFixed td.s4 {background-color:#d9d9d9;color:#000000;text-align:center;}
+  </style>
+  <table border="0" cellpadding="0" cellspacing="0" class="tblGenFixed" id="tblMain">
+    <tbody>
+    <tr class="rShim">
+        <td class="rShim" style="width:380px;"></td>
+        <td class="rShim" style="width:120px;"></td>
+        <td class="rShim" style="width:120px;"></td>
+        <td class="rShim" style="width:120px;"></td>
+        <td class="rShim" style="width:120px;"></td>
+    </tr>
+    <tr>
+        <td rowspan="2" class="s0"></td>
+        <td colspan="4" class="s1">API level</td>
+    </tr>
+    <tr>
+        <td style="display:none;"></td>
+        <td class="s2">&lt; 16</td>
+        <td class="s3">16</td>
+        <td class="s4">17</td>
+        <td class="s3">18</td>
+    </tr>
+    <tr>
+        <td colspan="5" class="s5">Canvas</td>
+    </tr>
+    <tr>
+        <td class="s6">clipPath()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s8">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s9">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRegion()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRect(Region.Op.XOR)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRect(Region.Op.Difference)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRect(Region.Op.ReverseDifference)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawBitmapMesh() (colors array)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawPicture()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawPosText()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+        <td class="s13">&#10003;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawTextOnPath()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+        <td class="s13">&#10003;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawVertices()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">setDrawFilter()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+        <td class="s13">&#10003;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td colspan="5" class="s5">Paint</td>
+    </tr>
+    <tr>
+        <td class="s6">setAntiAlias() (for text)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s6">setAntiAlias() (for lines)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+        <td class="s13">&#10003;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s6">setFilterBitmap()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s13">&#10003;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s6">setLinearText()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s8">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s8">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">setMaskFilter()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">setPathEffect() (for lines)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">setRasterizer()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">setShadowLayer() (other than text)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">setStrokeCap() (for lines)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s12">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">setStrokeCap() (for points)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">setSubpixelText()</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td colspan="5" class="s5">Xfermode</td>
+    </tr>
+    <tr>
+        <td class="s6">AvoidXfermode</td>
+        <td class="s7">&#10007;</td>
+        <td class="s8">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s8">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">PixelXorXfermode</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">PorterDuff.Mode.DARKEN (framebuffer)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s8">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s8">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">PorterDuff.Mode.LIGHTEN (framebuffer)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">PorterDuff.Mode.OVERLAY (framebuffer)</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td colspan="5" class="s5">Shader</td>
+    </tr>
+    <tr>
+        <td class="s10">ComposeShader inside ComposeShader</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">Same type shaders inside ComposeShader</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+    </tr>
+    </tbody>
+  </table>
 
   <p>If your application is affected by any of these missing features or limitations, you can turn
   off hardware acceleration for just the affected portion of your application by calling
