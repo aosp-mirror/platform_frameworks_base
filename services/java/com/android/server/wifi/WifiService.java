@@ -149,7 +149,7 @@ public final class WifiService extends IWifiManager.Stub {
     /**
      * Clients receiving asynchronous messages
      */
-    private List<AsyncChannel> mClients = new ArrayList<AsyncChannel>();
+    private List<Messenger> mClients = new ArrayList<Messenger>();
 
     /**
      * Handles client connections
@@ -166,7 +166,9 @@ public final class WifiService extends IWifiManager.Stub {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
                     if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
                         if (DBG) Slog.d(TAG, "New client listening to asynchronous messages");
-                        mClients.add((AsyncChannel) msg.obj);
+                        // We track the clients by the Messenger
+                        // since it is expected to be always available
+                        mClients.add(msg.replyTo);
                     } else {
                         Slog.e(TAG, "Client connection failure, error=" + msg.arg1);
                     }
@@ -178,7 +180,7 @@ public final class WifiService extends IWifiManager.Stub {
                     } else {
                         if (DBG) Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
                     }
-                    mClients.remove((AsyncChannel) msg.obj);
+                    mClients.remove(msg.replyTo);
                     break;
                 }
                 case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
