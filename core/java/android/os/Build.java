@@ -433,9 +433,9 @@ public class Build {
         public static final int JELLY_BEAN_MR1 = 17;
 
         /**
-         * Android X.X: "K".  Just "K"
+         * Android 4.X: Jelly Bean MR2, the revenge of the beans.
          */
-        public static final int K = CUR_DEVELOPMENT;
+        public static final int JELLY_BEAN_MR2 = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */

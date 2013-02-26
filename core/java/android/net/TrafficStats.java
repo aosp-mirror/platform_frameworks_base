@@ -429,7 +429,7 @@ public class TrafficStats {
      * monotonically since device boot. Statistics are measured at the network
      * layer, so they include both TCP and UDP usage.
      * <p>
-     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
      * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
      * @see android.os.Process#myUid()
@@ -445,7 +445,7 @@ public class TrafficStats {
      * monotonically since device boot. Statistics are measured at the network
      * layer, so they include both TCP and UDP usage.
      * <p>
-     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
      * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
      * @see android.os.Process#myUid()
@@ -461,7 +461,7 @@ public class TrafficStats {
      * monotonically since device boot. Statistics are measured at the network
      * layer, so they include both TCP and UDP usage.
      * <p>
-     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
      * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
      * @see android.os.Process#myUid()
@@ -477,7 +477,7 @@ public class TrafficStats {
      * monotonically since device boot. Statistics are measured at the network
      * layer, so they include both TCP and UDP usage.
      * <p>
-     * Before {@link android.os.Build.VERSION_CODES#K}, this may return
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
      * {@link #UNSUPPORTED} on devices where statistics aren't available.
      *
      * @see android.os.Process#myUid()
@@ -488,7 +488,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidTxBytes(int)
@@ -499,7 +499,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidRxBytes(int)
@@ -510,7 +510,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidTxBytes(int)
@@ -521,7 +521,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidRxBytes(int)
@@ -532,7 +532,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidTxPackets(int)
@@ -543,7 +543,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidRxPackets(int)
@@ -554,7 +554,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidTxPackets(int)
@@ -565,7 +565,7 @@ public class TrafficStats {
     }
 
     /**
-     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#K},
+     * @deprecated Starting in {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
      *             transport layer statistics are no longer available, and will
      *             always return {@link #UNSUPPORTED}.
      * @see #getUidRxPackets(int)
