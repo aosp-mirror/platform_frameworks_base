@@ -1593,7 +1593,7 @@ public class AudioManager {
     }
 
     /**
-     * Sets a varaible number of parameter values to audio hardware.
+     * Gets a variable number of parameter values from audio hardware.
      *
      * @param keys list of parameters
      * @return list of parameters key value pairs in the form:
