@@ -18905,6 +18905,7 @@ package android.provider {
     field public static final java.lang.String ACTION_WIFI_SETTINGS = "android.settings.WIFI_SETTINGS";
     field public static final java.lang.String ACTION_WIRELESS_SETTINGS = "android.settings.WIRELESS_SETTINGS";
     field public static final java.lang.String AUTHORITY = "settings";
+    field public static final java.lang.String EXTRA_ACCOUNT_TYPES = "account_types";
     field public static final java.lang.String EXTRA_AUTHORITIES = "authorities";
     field public static final java.lang.String EXTRA_INPUT_METHOD_ID = "input_method_id";
   }
