@@ -56,12 +56,14 @@ cloud messaging.</p>
 
 <div class="landing-cell">
   <div class="cell-icon">
-  <img src="{@docRoot}images/google/plus-one.png" width="40" >
+  <img src="{@docRoot}images/google/plus-logo.png" width="40" >
   </div>
     <h4><a href="{@docRoot}google/play-services/plus.html"
     >Google+</a></h4>
-    <p>Authenticate users and allow them to sign in, add +1 buttons so users can
-    recommend your app content, and allow them to share your content on Google+.</p>
+    <p>Allow users to sign in with their Google account,
+    customize the user experience with Google+ info,
+    pull people into your app with interactive posts,
+    and add +1 buttons so users can recommend your content.</p>
 </div>
 
 <div class="landing-cell">
