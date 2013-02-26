@@ -310,16 +310,19 @@
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
         <attr name="windowNoTitle" format="boolean" />
-        <!-- Flag indicating whether this window should fill the entire screen. -->
+        <!-- Flag indicating whether this window should fill the entire screen.  Corresponds
+             to {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN}. -->
         <attr name="windowFullscreen" format="boolean" />
-        <!-- Flag indicating whether this window should extend into overscan region. -->
+        <!-- Flag indicating whether this window should extend into overscan region.  Corresponds
+             to {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_OVERSCAN}. -->
         <attr name="windowOverscan" format="boolean" />
         <!-- Flag indicating whether this is a floating window. -->
         <attr name="windowIsFloating" format="boolean" />
         <!-- Flag indicating whether this is a translucent window. -->
         <attr name="windowIsTranslucent" format="boolean" />
         <!-- Flag indicating that this window's background should be the
-           user's current wallpaper. -->
+             user's current wallpaper.  Corresponds
+             to {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WALLPAPER}. -->
         <attr name="windowShowWallpaper" format="boolean" />
         <!-- This Drawable is overlaid over the foreground of the Window's content area, usually
              to place a shadow below the title.  -->
@@ -355,7 +358,8 @@
         <attr name="windowSplitActionBar" format="boolean" />
 
         <!-- Defines the default soft input state that this window would
-             like when it is displayed. -->
+             like when it is displayed.  Corresponds
+             to {@link android.view.WindowManager.LayoutParams#softInputMode}. -->
         <attr name="windowSoftInputMode">
             <!-- Not specified, use what the system thinks is best.  This
                  is the default. -->

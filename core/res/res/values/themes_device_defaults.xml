@@ -204,12 +204,15 @@ easier.
     <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Holo.NoActionBar" >
     </style>
 
-    <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar -->
+    <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
+         sets {@link android.R.attr#windowFullscreen} to true.  -->
     <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Holo.NoActionBar.Fullscreen" >
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar and
-    extending in to overscan region. -->
+    extending in to overscan region.  This theme
+    sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
+    to true. -->
     <style name="Theme.DeviceDefault.NoActionBar.Overscan" parent="Theme.Holo.NoActionBar.Overscan" >
     </style>
 
@@ -362,11 +365,14 @@ easier.
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
     <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Holo.Light.NoActionBar" >
     </style>
-    <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar -->
+    <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar.
+         This theme sets {@link android.R.attr#windowFullscreen} to true.  -->
     <style name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" parent="Theme.Holo.Light.NoActionBar.Fullscreen" >
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar
-    and extending in to overscan region-->
+    and extending in to overscan region.  This theme
+    sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
+    to true. -->
     <style name="Theme.DeviceDefault.Light.NoActionBar.Overscan"
            parent="Theme.Holo.Light.NoActionBar.Overscan" >
     </style>
