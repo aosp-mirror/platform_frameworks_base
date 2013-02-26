@@ -96,7 +96,7 @@ public class Content {
                 + " [--projection <PROJECTION>] [--where <WHERE>] [--sort <SORT_ORDER>]\n"
         + "  <PROJECTION> is a list of colon separated column names and is formatted:\n"
         + "  <COLUMN_NAME>[:<COLUMN_NAME>...]\n"
-        + "  <SORT_OREDER> is the order in which rows in the result should be sorted.\n"
+        + "  <SORT_ORDER> is the order in which rows in the result should be sorted.\n"
         + "  Example:\n"
         + "  # Select \"name\" and \"value\" columns from secure settings where \"name\" is "
                 + "equal to \"new_setting\" and sort the result by name in ascending order.\n"
