@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.app.ActivityThread;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Looper;
@@ -105,10 +106,11 @@ public class MediaRecorder
             mEventHandler = null;
         }
 
+        String packageName = ActivityThread.currentPackageName();
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaRecorder>(this));
+        native_setup(new WeakReference<MediaRecorder>(this), packageName);
     }
 
     /**
@@ -977,7 +979,8 @@ public class MediaRecorder
 
     private static native final void native_init();
 
-    private native final void native_setup(Object mediarecorder_this) throws IllegalStateException;
+    private native final void native_setup(Object mediarecorder_this,
+            String clientName) throws IllegalStateException;
 
     private native final void native_finalize();
 
