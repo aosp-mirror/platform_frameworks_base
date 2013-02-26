@@ -233,7 +233,7 @@ implementation.</p>
 href="{@docRoot}google/play/licensing/setting-up.html#test-env">
 Setting Up The Testing Environment</a>, the response code can be manually
 overridden for the application developer and any registered test users via the
-Google Play publisher site.
+Google Play Developer Console.
 <br/><br/>
 Additionally, as noted above, applications that are in draft mode (in other
 words, applications that have been uploaded but have <em>never</em> been

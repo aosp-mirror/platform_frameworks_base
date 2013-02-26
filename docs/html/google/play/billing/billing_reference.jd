@@ -166,7 +166,7 @@ does not include tax.</td>
   </tr>
   <tr>
     <td>{@code productId}</td>
-    <td>The item's product identifier. Every item has a product ID, which you must specify in the application's product list on the Google Play publisher site.</td>
+    <td>The item's product identifier. Every item has a product ID, which you must specify in the application's product list on the Google Play Developer Console.</td>
   </tr>
   <tr>
     <td>{@code purchaseTime}</td>

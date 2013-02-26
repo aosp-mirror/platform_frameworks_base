@@ -143,7 +143,7 @@ pairs, which are summarized in table 7.</p>
   <td>Required for <code>REQUEST_PURCHASE</code> requests.</td>
   <td>The product ID of the item you are making a billing request for. Every in-app item that you
   sell using Google Play's In-app Billing service must have a unique product ID, which you
-  specify on the Google Play publisher site.</td>
+  specify on the Google Play Developer Console.</td>
 </tr>
 <tr>
   <td><code>NONCE</code></td>
@@ -380,7 +380,7 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
 <tr>
   <td>productId</td>
   <td>The item's product identifier. Every item has a product ID, which you must specify in the
-  application's product list on the Google Play publisher site.</td>
+  application's product list on the Google Play Developer Console.</td>
 </tr>
 <tr>
   <td>purchaseTime</td>
