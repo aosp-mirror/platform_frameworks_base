@@ -39,11 +39,7 @@ to close IPC connections</a></li>
   </li>
   <li><a href="#impl-DeviceLimiter">Implementing a DeviceLimiter</a></li>
   <li><a href="#app-obfuscation">Obfuscating Your Code</a></li>
-  <li><a href="#app-publishing">Publishing a Licensed Application</a>
-    <ol>
-      <li><a href="#">Removing Copy Protection</a></li>
-    </ol>
-  </li>
+  <li><a href="#app-publishing">Publishing a Licensed Application</a></li>
   <li><a href="#support">Where to Get Support</a></li>
 </ol>
   
@@ -864,7 +860,7 @@ shared across all applications that are published through the account. Although
 associated with a publisher account, the key pair is <em>not</em> the same as
 the key that you use to sign your applications (or derived from it).</p>
 
-<p>The Google Play publisher site exposes the public key for licensing to any
+<p>The Google Play Developer Console exposes the public key for licensing to any
 developer signed in to the publisher account, but it keeps the private key
 hidden from all users in a secure location. When an application requests a
 license check for an application published in your account, the licensing server
@@ -878,7 +874,7 @@ your account's public key for licensing:</p>
 
 <ol>
 <li>Go to the Google Play <a
-href="http://play.google.com/apps/publish">publisher site</a> and sign in.
+href="http://play.google.com/apps/publish">Developer Console</a> and sign in.
 Make sure that you sign in to the account from which the application you are
 licensing is published (or will be published). </li>
 <li>In the account home page, locate the "Edit profile" link and click it. </li>
@@ -1002,14 +998,6 @@ href="{@docRoot}tools/publishing/preparing.html">prepare</a>, <a
 href="{@docRoot}tools/publishing/app-signing.html">sign</a>, and then <a
 href="{@docRoot}distribute/googleplay/publish/preparing.html">publish the application</a>.
 </p>
-
-<h3>Removing Copy Protection</h3>
-
-<p>After uploading your licensed application, remember to remove copy protection
-from the application, if it is currently used. To check and remove copy
-protection, sign in to the publisher site and go the application's upload
-details page. In the Publishing options section, make sure that the Copy
-Protection radio button selection is "Off".</p>
 
 
 <h2 id="support">Where to Get Support</h2>
