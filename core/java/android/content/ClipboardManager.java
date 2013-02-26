@@ -118,7 +118,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public void setPrimaryClip(ClipData clip) {
         try {
-            getService().setPrimaryClip(clip);
+            getService().setPrimaryClip(clip, mContext.getBasePackageName());
         } catch (RemoteException e) {
         }
     }
@@ -128,7 +128,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public ClipData getPrimaryClip() {
         try {
-            return getService().getPrimaryClip(mContext.getPackageName());
+            return getService().getPrimaryClip(mContext.getBasePackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -140,7 +140,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public ClipDescription getPrimaryClipDescription() {
         try {
-            return getService().getPrimaryClipDescription();
+            return getService().getPrimaryClipDescription(mContext.getBasePackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -151,7 +151,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public boolean hasPrimaryClip() {
         try {
-            return getService().hasPrimaryClip();
+            return getService().hasPrimaryClip(mContext.getBasePackageName());
         } catch (RemoteException e) {
             return false;
         }
@@ -162,7 +162,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
             if (mPrimaryClipChangedListeners.size() == 0) {
                 try {
                     getService().addPrimaryClipChangedListener(
-                            mPrimaryClipChangedServiceListener);
+                            mPrimaryClipChangedServiceListener, mContext.getBasePackageName());
                 } catch (RemoteException e) {
                 }
             }
@@ -209,7 +209,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public boolean hasText() {
         try {
-            return getService().hasClipboardText();
+            return getService().hasClipboardText(mContext.getBasePackageName());
         } catch (RemoteException e) {
             return false;
         }
