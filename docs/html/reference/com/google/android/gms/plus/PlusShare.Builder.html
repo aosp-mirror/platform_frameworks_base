@@ -73,35 +73,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -148,7 +119,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
-  
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -163,7 +133,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           </div>
             <ul class="nav-x col-9">
                 <li class="design">
-                  <a href="/design/index.html" 
+                  <a href="/design/index.html"
                   zh-TW-lang="設計"
                   zh-CN-lang="设计"
                   ru-lang="Проектирование"
@@ -171,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
-                <li class="develop"><a href="/develop/index.html" class="selected"
+                <li class="develop"><a href="/develop/index.html"
                   zh-TW-lang="開發"
                   zh-CN-lang="开发"
                   ru-lang="Разработка"
@@ -179,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
-                <li class="distribute last"><a href="/distribute/index.html" 
+                <li class="distribute last"><a href="/distribute/index.html"
                   zh-TW-lang="發佈"
                   zh-CN-lang="分发"
                   ru-lang="Распространение"
@@ -348,7 +318,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
-                <li><a href="/training/index.html" 
+                <li class="training"><a href="/training/index.html"
                   zh-TW-lang="訓練課程"
                   zh-CN-lang="培训"
                   ru-lang="Курсы"
@@ -356,7 +326,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li><a href="/guide/components/index.html" 
+                <li class="guide"><a href="/guide/components/index.html"
                   zh-TW-lang="API 指南"
                   zh-CN-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -364,7 +334,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
-                <li><a href="/reference/packages.html" 
+                <li class="reference"><a href="/reference/packages.html"
                   zh-TW-lang="參考資源"
                   zh-CN-lang="参考"
                   ru-lang="Справочник"
@@ -372,7 +342,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
-                <li><a href="/tools/index.html" 
+                <li class="tools"><a href="/tools/index.html"
                   zh-TW-lang="相關工具"
                   zh-CN-lang="工具"
                   ru-lang="Инструменты"
@@ -380,7 +350,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="ツール"
                   es-lang="Herramientas"
                   >Tools</a></li>
-                <li><a href="/google/index.html" class="selected"
+                <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
             </ul>
@@ -390,9 +360,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <!-- /Sendondary x-nav -->
 
   
-  
 
-  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -467,6 +435,9 @@ onkeyup="return search_changed(event, false, '/')" />
               <li><a href="/google/play/billing/v2/billing_reference.html">
               <span class="en">Reference</span></a></li>
               </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
       </li>
       <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
@@ -579,7 +550,6 @@ onkeyup="return search_changed(event, false, '/')" />
        showGoogleRefTree();
     
       </script>
-
     </div> <!-- end side-nav -->
     <script>
       $(document).ready(function() {
@@ -587,8 +557,6 @@ onkeyup="return search_changed(event, false, '/')" />
         });
     </script>
 
-
-     
 
 
 
@@ -621,6 +589,9 @@ Summary:
   <a href="#pubctors">Ctors</a>
   
 
+
+  &#124; <a href="#proctors">Protected Ctors</a>
+  
 
 
   &#124; <a href="#pubmethods">Methods</a>
@@ -764,7 +735,41 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder()">PlusShare.Builder</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Create a new Builder for launching a sharing action.</div>
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(android.app.Activity)">PlusShare.Builder</a></span>(Activity launchingActivity)</nobr>
+        
+        <div class="jd-descrdiv">Create a new Builder for launching a sharing action from launchingActivity.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(android.app.Activity, com.google.android.gms.plus.PlusClient)">PlusShare.Builder</a></span>(Activity launchingActivity, <a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a> plusClient)</nobr>
+        
+        <div class="jd-descrdiv">Create a new Builder for launching a sharing action from launchingActivity.</div>
   
   </td></tr>
 
@@ -773,6 +778,51 @@ Summary:
 </table>
 
 
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="proctors" class="jd-sumtable"><tr><th colspan="12">Protected Constructors</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(java.lang.String)">PlusShare.Builder</a></span>(String intentAction)</nobr>
+        
+        <div class="jd-descrdiv">Create a new Builder for launching a sharing action.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(java.lang.String, java.lang.String, android.content.ComponentName)">PlusShare.Builder</a></span>(String intentAction, String activityPackageName, ComponentName activityComponentName)</nobr>
+        
+        <div class="jd-descrdiv">Create a new Builder for launching a sharing action from launchingActivity.</div>
+  
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -793,9 +843,9 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#addStream(android.net.Uri)">addStream</a></span>(Uri streamUri)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#addCallToAction(java.lang.String, android.net.Uri, java.lang.String)">addCallToAction</a></span>(String label, Uri uri, String deepLinkId)</nobr>
         
-        <div class="jd-descrdiv">Add a stream URI to the data that should be shared.</div>
+        <div class="jd-descrdiv">Adds a call-to-action button for an interactive post.</div>
   
   </td></tr>
 
@@ -806,14 +856,14 @@ Summary:
             
             
             
-            static
+            
             
             <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#from(android.app.Activity)">from</a></span>(Activity launchingActivity)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#addStream(android.net.Uri)">addStream</a></span>(Uri streamUri)</nobr>
         
-        <div class="jd-descrdiv">Create a new Builder for launching a sharing action from launchingActivity.</div>
+        <div class="jd-descrdiv">Add a stream URI to the data that should be shared.</div>
   
   </td></tr>
 
@@ -847,9 +897,9 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setContent(android.net.Uri)">setContent</a></span>(Uri deepLinkUri)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setContentDeepLinkId(java.lang.String, java.lang.String, java.lang.String, android.net.Uri)">setContentDeepLinkId</a></span>(String deepLinkId, String title, String description, Uri thumbnailUri)</nobr>
         
-        <div class="jd-descrdiv">Include a deep-link URI to a resource to share on Google+</div>
+        <div class="jd-descrdiv">Include a deep-link ID to a resource to share on Google+.</div>
   
   </td></tr>
 
@@ -865,9 +915,45 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setContent(java.lang.String, java.lang.String, java.lang.String, android.net.Uri)">setContent</a></span>(String deepLinkId, String title, String description, Uri thumbnailUri)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setContentDeepLinkId(java.lang.String)">setContentDeepLinkId</a></span>(String deepLinkId)</nobr>
         
-        <div class="jd-descrdiv">Include a deep-link identifier to a resource to share on Google+</div>
+        <div class="jd-descrdiv">Include a deep-link URI of a resource to share on Google+.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setContentUrl(android.net.Uri)">setContentUrl</a></span>(Uri uri)</nobr>
+        
+        <div class="jd-descrdiv">Sets a URL to link to from the content on the web.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setRecipients(java.util.List<com.google.android.gms.plus.model.people.Person>)">setRecipients</a></span>(List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>&gt; recipientList)</nobr>
+        
+        <div class="jd-descrdiv">Sets a list of people to send the interactive post to.</div>
   
   </td></tr>
 
@@ -903,7 +989,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setText(java.lang.CharSequence)">setText</a></span>(CharSequence text)</nobr>
         
-        <div class="jd-descrdiv">Set the literal text data to be sent as part of the share.</div>
+        <div class="jd-descrdiv">Set a pre-filled message to be sent as part of the share.</div>
   
   </td></tr>
 
@@ -1199,8 +1285,91 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="PlusShare.Builder(android.app.Activity)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">PlusShare.Builder</span>
+      <span class="normal">(Activity launchingActivity)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action from launchingActivity.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>launchingActivity</td>
+          <td>Activity that the share will be launched from
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="PlusShare.Builder(android.app.Activity, com.google.android.gms.plus.PlusClient)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">PlusShare.Builder</span>
+      <span class="normal">(Activity launchingActivity, <a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a> plusClient)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action from launchingActivity.  You
+ must provide a connected <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> that has the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> scope
+ when creating an interactive post with a call-to-action button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>launchingActivity</td>
+          <td>Activity that the share will be launched from</td>
+        </tr>
+        <tr>
+          <th>plusClient</td>
+          <td>A connected PlusClient.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1212,6 +1381,81 @@ From class
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
 
+<h2>Protected Constructors</h2>
+
+
+
+<A NAME="PlusShare.Builder(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">PlusShare.Builder</span>
+      <span class="normal">(String intentAction)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="PlusShare.Builder(java.lang.String, java.lang.String, android.content.ComponentName)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">PlusShare.Builder</span>
+      <span class="normal">(String intentAction, String activityPackageName, ComponentName activityComponentName)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action from launchingActivity.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>activityPackageName</td>
+          <td>Activity.getPackageName() from the Activity that the share
+        will be launched from.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+
 
 
 <!-- ========= METHOD DETAIL ======== -->
@@ -1219,6 +1463,61 @@ From class
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="addCallToAction(java.lang.String, android.net.Uri, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
+      </span>
+      <span class="sympad">addCallToAction</span>
+      <span class="normal">(String label, Uri uri, String deepLinkId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a call-to-action button for an interactive post.  To use this method, you must have
+ passed a signed-in PlusClient to the
+ <code><a href="/">ERROR(/PlusShare.Builder#Builder(Activity, PlusClient))</a></code> constructor or an
+ <code><a href="/reference/java/lang/IllegalStateException.html">IllegalStateException</a></code> will be thrown.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>label</td>
+          <td>The call-to-action label.  Choose a value from the list of
+              <a href="//developers.google.com/+/features/call-to-action-labels">
+                  list</a></td>
+        </tr>
+        <tr>
+          <th>uri</td>
+          <td>The URL to link to when the user clicks the call-to-action.  This parameter
+        or <code>deepLinkId</code> (or both) is required.</td>
+        </tr>
+        <tr>
+          <th>deepLinkId</td>
+          <td>A deep-link ID to send to mobile clients when the user
+            clicks the call-to-action.  This parameter or <code>uri</code> (or both) is
+            required.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
 
 
 <A NAME="addStream(android.net.Uri)"></A>
@@ -1270,49 +1569,6 @@ From class
 </div>
 
 
-<A NAME="from(android.app.Activity)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-         
-         
-        <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
-      </span>
-      <span class="sympad">from</span>
-      <span class="normal">(Activity launchingActivity)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action from launchingActivity.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>launchingActivity</td>
-          <td>Activity that the share will be launched from</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a new Builder instance
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
 <A NAME="getIntent()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1336,8 +1592,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the Intent as configured so far by the Builder.
- This method will include the package</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the Intent as configured so far by the Builder.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>The current Intent being configured by this builder
@@ -1348,7 +1603,7 @@ From class
 </div>
 
 
-<A NAME="setContent(android.net.Uri)"></A>
+<A NAME="setContentDeepLinkId(java.lang.String, java.lang.String, java.lang.String, android.net.Uri)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1360,54 +1615,7 @@ From class
          
         <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
       </span>
-      <span class="sympad">setContent</span>
-      <span class="normal">(Uri deepLinkUri)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Include a deep-link URI to a resource to share on Google+</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>deepLinkUri</td>
-          <td>The deep-link URI to a resource to share on Google+.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>This Builder for method chaining.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#from(android.app.Activity)">from(android.app.Activity)</a></code></li>
-      </ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="setContent(java.lang.String, java.lang.String, java.lang.String, android.net.Uri)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
-      </span>
-      <span class="sympad">setContent</span>
+      <span class="sympad">setContentDeepLinkId</span>
       <span class="normal">(String deepLinkId, String title, String description, Uri thumbnailUri)</span>
     </h4>
       <div class="api-level">
@@ -1418,37 +1626,170 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Include a deep-link identifier to a resource to share on Google+</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Include a deep-link ID to a resource to share on Google+.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>deepLinkId</td>
-          <td>The deep-link identifier to a resource to share on Google+.
+          <td>The deep-link ID to a resource to share on Google+.
             This parameter is required.</td>
         </tr>
         <tr>
           <th>title</td>
-          <td>The title of the resource. This parameter is required.</td>
+          <td>The title of the resource. Used if there is no content URL to display.
+        This parameter is optional.</td>
         </tr>
         <tr>
           <th>description</td>
-          <td>The description of a resource. This parameter is required.</td>
+          <td>The description of a resource. Used if there is no content URL to
+        display. This parameter is optional.</td>
         </tr>
         <tr>
           <th>thumbnailUri</td>
-          <td>The thumbnailUri for a resource. This parameter is optional.</td>
+          <td>The thumbnailUri for a resource. Used if there is no content URL to
+        display. This parameter is optional.</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>This Builder for method chaining.</li></ul>
+      <ul class="nolist"><li>This Builder for method chaining.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setContentDeepLinkId(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
+      </span>
+      <span class="sympad">setContentDeepLinkId</span>
+      <span class="normal">(String deepLinkId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Include a deep-link URI of a resource to share on Google+.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>deepLinkId</td>
+          <td>The deep-link ID to a resource to share on Google+.
+            This parameter is required.</td>
+        </tr>
+      </table>
   </div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#from(android.app.Activity)">from(android.app.Activity)</a></code></li>
-      </ul>
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>This Builder for method chaining.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setContentUrl(android.net.Uri)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
+      </span>
+      <span class="sympad">setContentUrl</span>
+      <span class="normal">(Uri uri)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a URL to link to from the content on the web.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>uri</td>
+          <td>the URL to link to on the web.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>This Builder for method chaining.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setRecipients(java.util.List<com.google.android.gms.plus.model.people.Person>)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
+      </span>
+      <span class="sympad">setRecipients</span>
+      <span class="normal">(List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>&gt; recipientList)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a list of people to send the interactive post to.
+
+ <p>This sets the initial people to share with, but the user can change who the post
+ is shared with before posting.  A maximum of ten recipients are allowed.</p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>recipientList</td>
+          <td>A list of recipients.  See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(PlusClient.OnPeopleLoadedListener, int)</a></code> and
+         <code><a href="/reference/com/google/android/gms/plus/PlusShare.html#createPerson(java.lang.String, java.lang.String)">createPerson(String, String)</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>This Builder for method chaining.
+</li></ul>
   </div>
 
     </div>
@@ -1528,7 +1869,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Set the literal text data to be sent as part of the share.
+  <div class="jd-tagdata jd-tagdescr"><p>Set a pre-filled message to be sent as part of the share.
  This may be a styled CharSequence.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1610,7 +1951,6 @@ From class
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
 
-
 <div id="footer" class="wrap" >
         
 
@@ -1639,7 +1979,6 @@ From class
   </div>
 
 </div> <!-- end footer -->
-
 </div> <!-- jd-content -->
 
 </div><!-- end doc-content -->
