@@ -52,12 +52,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class WindowList extends ArrayList<WindowState> {
-    WindowList() {
-        super();
-    }
-    WindowList(WindowList windows) {
-        super(windows);
-    }
 }
 
 /**
@@ -1092,7 +1086,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return true;
     }
 
-    public void setAppOpVisibilityLw(boolean state) {
+    public boolean setAppOpVisibilityLw(boolean state) {
         if (mAppOpVisibility != state) {
             mAppOpVisibility = state;
             if (state) {
@@ -1102,11 +1096,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 // ops modifies they should only be hidden by policy due to the
                 // lock screen, and the user won't be changing this if locked.
                 // Plus it will quickly be fixed the next time we do a layout.
-                showLw(true, true);
+                showLw(true, false);
             } else {
-                hideLw(true, true);
+                hideLw(true, false);
             }
+            return true;
         }
+        return false;
     }
 
     @Override

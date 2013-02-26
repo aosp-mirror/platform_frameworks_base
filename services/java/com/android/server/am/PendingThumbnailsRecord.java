@@ -27,13 +27,13 @@ import java.util.HashSet;
 class PendingThumbnailsRecord
 {
     final IThumbnailReceiver receiver;   // who is waiting.
-    final HashSet<ActivityRecord> pendingRecords; // HistoryRecord objects we still wait for.
+    HashSet pendingRecords; // HistoryRecord objects we still wait for.
     boolean finished;       // Is pendingRecords empty?
 
     PendingThumbnailsRecord(IThumbnailReceiver _receiver)
     {
         receiver = _receiver;
-        pendingRecords = new HashSet<ActivityRecord>();
+        pendingRecords = new HashSet();
         finished = false;
     }
 }

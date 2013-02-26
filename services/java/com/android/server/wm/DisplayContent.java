@@ -16,17 +16,11 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.FORWARD_ITERATOR;
-import static com.android.server.wm.WindowManagerService.REVERSE_ITERATOR;
-
-import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 class DisplayContentList extends ArrayList<DisplayContent> {
 }
@@ -39,7 +33,6 @@ class DisplayContentList extends ArrayList<DisplayContent> {
  * WindowManagerService.mWindowMap.
  */
 class DisplayContent {
-//    private final static String TAG = "DisplayContent";
 
     /** Unique identifier of this stack. */
     private final int mDisplayId;
@@ -74,26 +67,6 @@ class DisplayContent {
     final boolean isDefaultDisplay;
 
     /**
-     * Window tokens that are in the process of exiting, but still
-     * on screen for animations.
-     */
-    final ArrayList<WindowToken> mExitingTokens = new ArrayList<WindowToken>();
-
-    /**
-     * Application tokens that are in the process of exiting, but still
-     * on screen for animations.
-     */
-    final AppTokenList mExitingAppTokens = new AppTokenList();
-
-    /**
-     * Sorted most recent at top, oldest at [0].
-     */
-    ArrayList<TaskList> mTaskLists = new ArrayList<TaskList>();
-    SparseArray<TaskList> mTaskIdToTaskList = new SparseArray<TaskList>();
-
-    private final AppTokenIterator mTmpAppIterator = new AppTokenIterator();
-
-    /**
      * @param display May not be null.
      */
     DisplayContent(Display display) {
@@ -123,147 +96,6 @@ class DisplayContent {
         mDisplay.getDisplayInfo(mDisplayInfo);
     }
 
-    /**
-     *  Find the location to insert a new AppWindowToken into the window-ordered app token list.
-     * @param addPos The location the token was inserted into in mAppTokens.
-     * @param wtoken The token to insert.
-     */
-    void addAppToken(final int addPos, final AppWindowToken wtoken) {
-        TaskList task = mTaskIdToTaskList.get(wtoken.groupId);
-        if (task == null) {
-            task = new TaskList(wtoken, this);
-            mTaskIdToTaskList.put(wtoken.groupId, task);
-            mTaskLists.add(task);
-        } else {
-            task.mAppTokens.add(addPos, wtoken);
-        }
-    }
-
-    void removeAppToken(final AppWindowToken wtoken) {
-        final int taskId = wtoken.groupId;
-        final TaskList task = mTaskIdToTaskList.get(taskId);
-        if (task != null) {
-            AppTokenList appTokens = task.mAppTokens;
-            appTokens.remove(wtoken);
-            if (appTokens.size() == 0) {
-                mTaskLists.remove(task);
-                mTaskIdToTaskList.delete(taskId);
-            }
-        }
-    }
-
-    void setAppTaskId(AppWindowToken wtoken, int newTaskId) {
-        final int taskId = wtoken.groupId;
-        TaskList task = mTaskIdToTaskList.get(taskId);
-        if (task != null) {
-            AppTokenList appTokens = task.mAppTokens;
-            appTokens.remove(wtoken);
-            if (appTokens.size() == 0) {
-                mTaskIdToTaskList.delete(taskId);
-            }
-        }
-
-        task = mTaskIdToTaskList.get(newTaskId);
-        if (task == null) {
-            task = new TaskList(wtoken, this);
-            mTaskIdToTaskList.put(newTaskId, task);
-        } else {
-            task.mAppTokens.add(wtoken);
-        }
-
-        wtoken.groupId = newTaskId;
-    }
-
-    /**
-     * Return the utility iterator so we don't have to construct new iterators every time we
-     * iterate.
-     * NOTE: Do not ever nest this call or you will have a bad time!
-     * @param reverse Direction of iterator.
-     * @return The utility iterator.
-     */
-    AppTokenIterator getTmpAppIterator(boolean reverse) {
-        mTmpAppIterator.reset(reverse);
-        return mTmpAppIterator;
-    }
-
-    class AppTokenIterator implements Iterator<AppWindowToken> {
-        boolean mReverse;
-        int mTasksNdx;
-        int mActivityNdx;
-        TaskList mTaskList;
-
-        public AppTokenIterator() {
-            this(FORWARD_ITERATOR);
-        }
-
-        public AppTokenIterator(boolean reverse) {
-            reset(reverse);
-        }
-
-        void reset(boolean reverse) {
-            mReverse = reverse;
-            mTasksNdx = reverse ? mTaskLists.size() - 1 : 0;
-            getNextTaskList();
-        }
-
-        private void getNextTaskList() {
-            if (mReverse) {
-                if (mTasksNdx >= 0) {
-                    mTaskList = mTaskLists.get(mTasksNdx);
-                    --mTasksNdx;
-                    mActivityNdx = mTaskList.mAppTokens.size() - 1;
-                }
-            } else {
-                if (mTasksNdx < mTaskLists.size()) {
-                    mTaskList = mTaskLists.get(mTasksNdx);
-                    ++mTasksNdx;
-                    mActivityNdx = 0;
-                }
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (mTaskList == null) {
-                return false;
-            }
-            if (mReverse) {
-                return mActivityNdx >= 0;
-            }
-            return mActivityNdx < mTaskList.mAppTokens.size();
-        }
-
-        @Override
-        public AppWindowToken next() {
-            if (hasNext()) {
-                AppWindowToken wtoken = mTaskList.mAppTokens.get(mActivityNdx);
-                mActivityNdx += mReverse ? -1 : 1;
-                if (!hasNext()) {
-                    getNextTaskList();
-                }
-                return wtoken;
-            }
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove() {
-            throw new IllegalArgumentException();
-        }
-
-        int size() {
-            int size = 0;
-            for (int i = mTaskLists.size() - 1; i >= 0; --i) {
-                size += mTaskLists.get(i).mAppTokens.size();
-            }
-            return size;
-        }
-
-        @Override public String toString() {
-            return mTaskLists.toString();
-        }
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
@@ -287,51 +119,7 @@ class DisplayContent {
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-            pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
-            AppTokenIterator iterator = getTmpAppIterator(REVERSE_ITERATOR);
-            int ndx = iterator.size() - 1;
-            if (ndx >= 0) {
-                pw.println();
-                pw.println("  Application tokens in Z order:");
-                while (iterator.hasNext()) {
-                    AppWindowToken wtoken = iterator.next();
-                    pw.print("  App #"); pw.print(ndx--);
-                            pw.print(' '); pw.print(wtoken); pw.println(":");
-                    wtoken.dump(pw, "    ");
-                }
-            }
-            if (mExitingTokens.size() > 0) {
-                pw.println();
-                pw.println("  Exiting tokens:");
-                for (int i=mExitingTokens.size()-1; i>=0; i--) {
-                    WindowToken token = mExitingTokens.get(i);
-                    pw.print("  Exiting #"); pw.print(i);
-                    pw.print(' '); pw.print(token);
-                    pw.println(':');
-                    token.dump(pw, "    ");
-                }
-            }
-            if (mExitingAppTokens.size() > 0) {
-                pw.println();
-                pw.println("  Exiting application tokens:");
-                for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
-                    WindowToken token = mExitingAppTokens.get(i);
-                    pw.print("  Exiting App #"); pw.print(i);
-                      pw.print(' '); pw.print(token);
-                      pw.println(':');
-                      token.dump(pw, "    ");
-                }
-            }
-            if (mTaskIdToTaskList.size() > 0) {
-                pw.println();
-                for (int i = 0; i < mTaskIdToTaskList.size(); ++i) {
-                    pw.print("  TaskList #"); pw.print(i);
-                      pw.print(" taskId="); pw.println(mTaskIdToTaskList.keyAt(i));
-                    pw.print("    mAppTokens=");
-                      pw.println(mTaskIdToTaskList.valueAt(i).mAppTokens);
-                    pw.println();
-                }
-            }
+        pw.print(subPrefix); pw.print("layoutNeeded="); pw.print(layoutNeeded);
         pw.println();
     }
 }

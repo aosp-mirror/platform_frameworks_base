@@ -21,23 +21,18 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.wm.AppTransition;
-import com.android.server.wm.TaskGroup;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
-import android.app.IActivityController;
 import android.app.IActivityManager;
-import android.app.IThumbnailReceiver;
 import android.app.IThumbnailRetriever;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
 import android.content.ComponentName;
 import android.content.Context;
@@ -54,7 +49,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -67,12 +61,9 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.Display;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -100,8 +91,7 @@ final class ActivityStack {
     static final boolean DEBUG_APP = false;
 
     static final boolean VALIDATE_TOKENS = ActivityManagerService.VALIDATE_TOKENS;
-    static final boolean VALIDATE_TASK_REPLACE = true;
-
+    
     // How long we wait until giving up on the last activity telling us it
     // is idle.
     static final int IDLE_TIMEOUT = 10*1000;
@@ -140,7 +130,7 @@ final class ActivityStack {
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
     static final boolean SHOW_APP_STARTING_PREVIEW = true;
-
+    
     enum ActivityState {
         INITIALIZING,
         RESUMED,
@@ -157,28 +147,17 @@ final class ActivityStack {
     final boolean mMainStack;
     
     final Context mContext;
-
+    
     /**
      * The back history of all previous (and possibly still
-     * running) activities.  It contains #ActivityRecord objects.
+     * running) activities.  It contains HistoryRecord objects.
      */
-    private final ArrayList<ActivityRecord> mHistory = new ArrayList<ActivityRecord>();
-
-    /**
-     * The back history of all previous (and possibly still
-     * running) activities.  It contains #TaskRecord objects.
-     */
-    private ArrayList<TaskRecord> mTaskHistory = new ArrayList<TaskRecord>();
-
-    /**
-     * Mapping from taskId to TaskRecord
-     */
-    private SparseArray<TaskRecord> mTaskIdToTaskRecord = new SparseArray<TaskRecord>();
+    final ArrayList<ActivityRecord> mHistory = new ArrayList<ActivityRecord>();
 
     /**
      * Used for validating app tokens with window manager.
      */
-    final ArrayList<TaskGroup> mValidateAppTokens = new ArrayList<TaskGroup>();
+    final ArrayList<IBinder> mValidateAppTokens = new ArrayList<IBinder>();
 
     /**
      * List of running activities, sorted by recent usage.
@@ -310,12 +289,6 @@ final class ActivityStack {
     private ActivityRecord mLastScreenshotActivity = null;
     private Bitmap mLastScreenshotBitmap = null;
 
-    /**
-     * List of ActivityRecord objects that have been finished and must
-     * still report back to a pending thumbnail receiver.
-     */
-    private final ArrayList<ActivityRecord> mCancelledThumbnails = new ArrayList<ActivityRecord>();
-
     int mThumbnailWidth = -1;
     int mThumbnailHeight = -1;
 
@@ -344,8 +317,6 @@ final class ActivityStack {
     }
 
     final Handler mHandler;
-
-    String mLastHistoryModifier;
 
     final class ActivityStackHandler extends Handler {
         //public Handler() {
@@ -473,65 +444,25 @@ final class ActivityStack {
     }
 
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
-        ActivityRecord newAr = newTopRunningActivityLocked(notTop);
-
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
             if (!r.finishing && r != notTop && okToShow(r)) {
-                if (VALIDATE_TASK_REPLACE && newAr != r) logHistories(
-                        "topRunningActivityLocked", true);
                 return r;
             }
             i--;
-        }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "topRunningActivityLocked: mismatch: newAr!=null");
-        return null;
-    }
-
-    final ActivityRecord newTopRunningActivityLocked(ActivityRecord notTop) {
-        for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
-            final TaskRecord task = mTaskHistory.get(i);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                ActivityRecord r = activities.get(j);
-                if (!r.finishing && r != notTop && okToShow(r)) {
-                    return r;
-                }
-            }
         }
         return null;
     }
 
     final ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
-        ActivityRecord newAr = newTopRunningNonDelayedActivityLocked(notTop);
-
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
             if (!r.finishing && !r.delayedResume && r != notTop && okToShow(r)) {
-                if (VALIDATE_TASK_REPLACE && newAr != r) Slog.w(TAG,
-                    "topRunningNonDelayedActivityLocked: mismatch: newAr=" + newAr + " r=" + r);
                 return r;
             }
             i--;
-        }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "topRunningNonDelayedActivityLocked: mismatch: newAr!=null");
-        return null;
-    }
-
-    final ActivityRecord newTopRunningNonDelayedActivityLocked(ActivityRecord notTop) {
-        for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
-            final TaskRecord task = mTaskHistory.get(i);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                ActivityRecord r = activities.get(j);
-                if (!r.finishing && !r.delayedResume && r != notTop && okToShow(r)) {
-                    return r;
-                }
-            }
         }
         return null;
     }
@@ -546,109 +477,33 @@ final class ActivityStack {
      * @return Returns the HistoryRecord of the next activity on the stack.
      */
     final ActivityRecord topRunningActivityLocked(IBinder token, int taskId) {
-        ActivityRecord newAr = newTopRunningActivityLocked(token, taskId);
-
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
             // Note: the taskId check depends on real taskId fields being non-zero
             if (!r.finishing && (token != r.appToken) && (taskId != r.task.taskId)
                     && okToShow(r)) {
-                if (VALIDATE_TASK_REPLACE && newAr != r) Slog.w(TAG,
-                        "topRunningActivityLocked(token): mismatch: newAr=" + newAr + " r=" + r);
                 return r;
             }
             i--;
         }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "topRunningActivityLocked(token): mismatch: newAr!=null");
         return null;
     }
 
-    final ActivityRecord newTopRunningActivityLocked(IBinder token, int taskId) {
-        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            TaskRecord task = mTaskHistory.get(taskNdx);
-            if (task.taskId == taskId) {
-                continue;
-            }
-            ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int i = activities.size() - 1; i >= 0; --i) {
-                final ActivityRecord r = activities.get(i);
-                // Note: the taskId check depends on real taskId fields being non-zero
-                if (!r.finishing && (token != r.appToken) && okToShow(r)) {
-                    return r;
-                }
-            }
-        }
-        return null;
-    }
-
-    private final int indexOfTokenLocked(IBinder token) {
+    final int indexOfTokenLocked(IBinder token) {
         return mHistory.indexOf(ActivityRecord.forToken(token));
     }
 
-    final ActivityRecord isInStackLocked(IBinder token) {
-        ActivityRecord newAr = newIsInStackLocked(token);
+    final int indexOfActivityLocked(ActivityRecord r) {
+        return mHistory.indexOf(r);
+    }
 
+    final ActivityRecord isInStackLocked(IBinder token) {
         ActivityRecord r = ActivityRecord.forToken(token);
         if (mHistory.contains(r)) {
-            if (VALIDATE_TASK_REPLACE && newAr != r) Slog.w(TAG,
-                    "isInStackLocked: mismatch: newAr=" + newAr + " r=" + r);
             return r;
         }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "isInStackLocked: mismatch: newAr!=null");
         return null;
-    }
-
-    final ActivityRecord newIsInStackLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forToken(token);
-        if (r != null) {
-            final TaskRecord task = r.task;
-            if (mTaskHistory.contains(task) && task.mActivities.contains(r)) {
-                return r;
-            }
-        }
-        return null;
-    }
-
-    int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
-        int newTaskId = newGetTaskForActivityLocked(token, onlyRoot);
-
-        TaskRecord lastTask = null;
-        final int N = mHistory.size();
-        for (int i = 0; i < N; i++) {
-            ActivityRecord r = mHistory.get(i);
-            if (r.appToken == token) {
-                if (!onlyRoot || lastTask != r.task) {
-                    if (VALIDATE_TASK_REPLACE && newTaskId != r.task.taskId) Slog.w(TAG,
-                            "getTaskForActivityLocked: mismatch: new=" + newTaskId
-                            + " taskId=" + r.task.taskId);
-                    return r.task.taskId;
-                }
-                if (VALIDATE_TASK_REPLACE && newTaskId != -1) Slog.w(TAG,
-                    "getTaskForActivityLocked: mismatch: newTaskId=" + newTaskId + " not -1.");
-                return -1;
-            }
-            lastTask = r.task;
-        }
-
-        if (VALIDATE_TASK_REPLACE && newTaskId != -1) Slog.w(TAG,
-            "getTaskForActivityLocked: mismatch at end: newTaskId=" + newTaskId + " not -1.");
-        return -1;
-    }
-
-    int newGetTaskForActivityLocked(IBinder token, boolean onlyRoot) {
-        final ActivityRecord r = ActivityRecord.forToken(token);
-        if (r == null) {
-            return -1;
-        }
-        final TaskRecord task = r.task;
-        switch (task.mActivities.indexOf(r)) {
-            case -1: return -1;
-            case 0: return task.taskId;
-            default: return onlyRoot ? -1 : task.taskId;
-        }
     }
 
     private final boolean updateLRUListLocked(ActivityRecord r) {
@@ -743,29 +598,17 @@ final class ActivityStack {
      * @return whether there are any activities for the specified user.
      */
     final boolean switchUserLocked(int userId, UserStartedState uss) {
-        if (VALIDATE_TOKENS) {
-            validateAppTokensLocked();
-        }
-        final boolean newResult = newSwitchUserLocked(userId, uss);
-
         mCurrentUser = userId;
         mStartingUsers.add(uss);
 
         // Only one activity? Nothing to do...
-        if (mHistory.size() < 2) {
-            if (VALIDATE_TASK_REPLACE && newResult) Slog.w(TAG,
-                    "switchUserLocked: mismatch: " + newResult + " " + false);
+        if (mHistory.size() < 2)
             return false;
-        }
 
         boolean haveActivities = false;
         // Check if the top activity is from the new user.
         ActivityRecord top = mHistory.get(mHistory.size() - 1);
-        if (top.userId == userId) {
-            if (VALIDATE_TASK_REPLACE && !newResult) Slog.w(TAG,
-                    "switchUserLocked: mismatch: " + newResult + " " + true);
-            return true;
-        }
+        if (top.userId == userId) return true;
         // Otherwise, move the user's activities to the top.
         int N = mHistory.size();
         int i = 0;
@@ -782,44 +625,7 @@ final class ActivityStack {
             }
         }
         // Transition from the old top to the new top
-        if (VALIDATE_TASK_REPLACE) Slog.w(TAG,
-                "switchUserLocked: calling resumeTopActivity " + top);
         resumeTopActivityLocked(top);
-        if (VALIDATE_TASK_REPLACE && (newResult != haveActivities)) Slog.w(TAG,
-                    "switchUserLocked: mismatch: " + newResult + " " + haveActivities);
-        return haveActivities;
-    }
-
-    /*
-     * Move the activities around in the stack to bring a user to the foreground.
-     * @return whether there are any activities for the specified user.
-     */
-    final boolean newSwitchUserLocked(int userId, UserStartedState uss) {
-//        mStartingUsers.add(uss);
-        if (mCurrentUser == userId) {
-            return true;
-        }
-        mCurrentUser = userId;
-
-        // Move userId's tasks to the top.
-        boolean haveActivities = false;
-        TaskRecord task = null;
-        int index = mTaskHistory.size();
-        for (int i = 0; i < index; ++i) {
-            task = mTaskHistory.get(i);
-            if (task.userId == userId) {
-                haveActivities = true;
-                mTaskHistory.remove(i);
-                mTaskHistory.add(task);
-                --index;
-            }
-        }
-
-        // task is now the original topmost TaskRecord. Transition from the old top to the new top.
-        ActivityRecord top = task != null ? task.getTopActivity() : null;
-        if (VALIDATE_TASK_REPLACE) Slog.w(TAG,
-                "newSwitchUserLocked: would call resumeTopActivity " + top);
-//        resumeTopActivityLocked(top);
         return haveActivities;
     }
 
@@ -903,13 +709,7 @@ final class ActivityStack {
                 try {
                     profileFd = profileFd.dup();
                 } catch (IOException e) {
-                    if (profileFd != null) {
-                        try {
-                            profileFd.close();
-                        } catch (IOException o) {
-                        }
-                        profileFd = null;
-                    }
+                    profileFd = null;
                 }
             }
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
@@ -1057,9 +857,6 @@ final class ActivityStack {
             mGoingToSleep.release();
         }
         // Ensure activities are no longer sleeping.
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
         for (int i=mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = mHistory.get(i);
             r.setSleeping(false);
@@ -1104,9 +901,6 @@ final class ActivityStack {
 
             // Make sure any stopped but visible activities are now sleeping.
             // This ensures that the activity's onStop() is called.
-            if (VALIDATE_TASK_REPLACE) {
-                verifyActivityRecords(true);
-            }
             for (int i=mHistory.size()-1; i>=0; i--) {
                 ActivityRecord r = mHistory.get(i);
                 if (r.state == ActivityState.STOPPING || r.state == ActivityState.STOPPED) {
@@ -1251,9 +1045,6 @@ final class ActivityStack {
         ActivityRecord r = null;
 
         synchronized (mService) {
-            if (VALIDATE_TASK_REPLACE) {
-                verifyActivityRecords(true);
-            }
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = mHistory.get(index);
@@ -1271,9 +1062,6 @@ final class ActivityStack {
         ActivityRecord r = null;
 
         synchronized (mService) {
-            if (VALIDATE_TASK_REPLACE) {
-                verifyActivityRecords(true);
-            }
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = mHistory.get(index);
@@ -1486,9 +1274,6 @@ final class ActivityStack {
 
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
         final int count = mHistory.size();
         int i = count-1;
         while (mHistory.get(i) != top) {
@@ -1937,7 +1722,7 @@ final class ActivityStack {
             
             try {
                 // Deliver all pending results.
-                ArrayList<ResultInfo> a = next.results;
+                ArrayList a = next.results;
                 if (a != null) {
                     final int N = a.size();
                     if (!next.finishing && N > 0) {
@@ -2025,21 +1810,8 @@ final class ActivityStack {
         return true;
     }
 
-    /** Temporary until startActivityLocked is rewritten for tasks. */
-    private int convertAddPos(int addPos) {
-        final int taskId = mHistory.get(addPos).task.taskId;
-        addPos--;
-        int taskOffset = 0;
-        while (addPos >= 0 && taskId == mHistory.get(addPos).task.taskId) {
-            ++taskOffset;
-            --addPos;
-        }
-        return taskOffset;
-    }
-
     private final void startActivityLocked(ActivityRecord r, boolean newTask,
             boolean doResume, boolean keepCurTransition, Bundle options) {
-        mLastHistoryModifier = "startActivityLocked";
         final int NH = mHistory.size();
 
         int addPos = -1;
@@ -2064,15 +1836,13 @@ final class ActivityStack {
                             Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos,
                                     here);
                         }
-                        r.task.addActivityToTop(r);
                         mHistory.add(addPos, r);
                         r.putInHistory();
-                        mService.mWindowManager.addAppToken(convertAddPos(addPos), r.appToken,
-                                r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                        mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
+                                r.info.screenOrientation, r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
-                            verifyActivityRecords(true);
                         }
                         ActivityOptions.abort(options);
                         return;
@@ -2105,15 +1875,9 @@ final class ActivityStack {
             here.fillInStackTrace();
             Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos, here);
         }
-        r.task.addActivityToTop(r);
         mHistory.add(addPos, r);
         r.putInHistory();
         r.frontOfTask = newTask;
-        if (VALIDATE_TASK_REPLACE) {
-            if (verifyActivityRecords(false)) {
-                Slog.w(TAG, "startActivityLocked: addPos=" + addPos);
-            }
-        }
         if (NH > 0) {
             // We want to show the starting preview window if we are
             // switching to a new task, or the next activity's process is
@@ -2139,8 +1903,8 @@ final class ActivityStack {
                 mNoAnimActivities.remove(r);
             }
             r.updateOptionsLocked(options);
-            mService.mWindowManager.addAppToken(convertAddPos(addPos),
-                    r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
+            mService.mWindowManager.addAppToken(
+                    addPos, r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             boolean doShow = true;
             if (newTask) {
@@ -2178,7 +1942,7 @@ final class ActivityStack {
         } else {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
-            mService.mWindowManager.addAppToken(convertAddPos(addPos), r.appToken, r.task.taskId,
+            mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
                     r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             ActivityOptions.abort(options);
@@ -2190,27 +1954,13 @@ final class ActivityStack {
         if (doResume) {
             resumeTopActivityLocked(null);
         }
-        if (VALIDATE_TASK_REPLACE) {
-            if (verifyActivityRecords(true)) {
-                Slog.w(TAG, "startActivityLocked: addPos=" + addPos);
-            }
-        }
     }
 
     final void validateAppTokensLocked() {
         mValidateAppTokens.clear();
         mValidateAppTokens.ensureCapacity(mHistory.size());
-        int taskId = Integer.MIN_VALUE;
-        TaskGroup task = null;
         for (int i=0; i<mHistory.size(); i++) {
-            final ActivityRecord r = mHistory.get(i);
-            if (taskId != r.task.taskId) {
-                taskId = r.task.taskId;
-                task = new TaskGroup();
-                task.taskId = taskId;
-                mValidateAppTokens.add(task);
-            }
-            task.tokens.add(r.appToken);
+            mValidateAppTokens.add(mHistory.get(i).appToken);
         }
         mService.mWindowManager.validateAppTokens(mValidateAppTokens);
     }
@@ -2221,8 +1971,6 @@ final class ActivityStack {
      */
     private final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
             ActivityRecord newActivity) {
-        mLastHistoryModifier = "resetTaskIfNeededLocked";
-
         boolean forceReset = (newActivity.info.flags
                 &ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
         if (ACTIVITY_INACTIVE_RESET_TIME > 0
@@ -2318,20 +2066,19 @@ final class ActivityStack {
                             if (mService.mCurTask <= 0) {
                                 mService.mCurTask = 1;
                             }
-                            target.setTask(createTaskRecord(mService.mCurTask, target.info, null,
-                                    false), null, false);
+                            target.setTask(new TaskRecord(mService.mCurTask, target.info, null),
+                                    null, false);
                             target.task.affinityIntent = target.intent;
                             if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                                     + " out to new task " + target.task);
                         }
-                        mService.mWindowManager.setAppGroupId(target.appToken, target.task.taskId);
+                        mService.mWindowManager.setAppGroupId(target.appToken, task.taskId);
                         if (replyChainEnd < 0) {
                             replyChainEnd = targetI;
                         }
                         int dstPos = 0;
                         ThumbnailHolder curThumbHolder = target.thumbHolder;
                         boolean gotOptions = !canMoveOptions;
-                        final int taskId = target.task.taskId;
                         for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
                             p = mHistory.get(srcPos);
                             if (p.finishing) {
@@ -2356,14 +2103,13 @@ final class ActivityStack {
                             }
                             mHistory.remove(srcPos);
                             mHistory.add(dstPos, p);
-                            mService.mWindowManager.setAppGroupId(p.appToken, taskId);
+                            mService.mWindowManager.moveAppToken(dstPos, p.appToken);
+                            mService.mWindowManager.setAppGroupId(p.appToken, p.task.taskId);
                             dstPos++;
+                            if (VALIDATE_TOKENS) {
+                                validateAppTokensLocked();
+                            }
                             i++;
-                        }
-                        rebuildTaskHistory();
-                        mService.mWindowManager.moveTaskToBottom(taskId);
-                        if (VALIDATE_TOKENS) {
-                            validateAppTokensLocked();
                         }
                         if (taskTop == p) {
                             taskTop = below;
@@ -2384,7 +2130,8 @@ final class ActivityStack {
                             // like these are all in the reply chain.
                             replyChainEnd = targetI+1;
                             while (replyChainEnd < mHistory.size() &&
-                                    (mHistory.get(replyChainEnd)).task == task) {
+                                    (mHistory.get(
+                                                replyChainEnd)).task == task) {
                                 replyChainEnd++;
                             }
                             replyChainEnd--;
@@ -2481,7 +2228,6 @@ final class ActivityStack {
                     if (replyChainEnd < 0) {
                         replyChainEnd = targetI;
                     }
-                    final int taskId = task.taskId;
                     if (DEBUG_TASKS) Slog.v(TAG, "Reparenting task at index "
                             + targetI + " to " + replyChainEnd);
                     for (int srcPos=replyChainEnd; srcPos>=targetI; srcPos--) {
@@ -2507,13 +2253,11 @@ final class ActivityStack {
                         if (DEBUG_TASKS) Slog.v(TAG, "Pulling activity " + p
                                 + " from " + srcPos + " to " + lastReparentPos
                                 + " in to resetting task " + task);
-                        mService.mWindowManager.setAppGroupId(p.appToken, taskId);
-                    }
-                    rebuildTaskHistory();
-                    // TODO: This is wrong because it doesn't take lastReparentPos into account.
-                    mService.mWindowManager.moveTaskToTop(taskId);
-                    if (VALIDATE_TOKENS) {
-                        validateAppTokensLocked();
+                        mService.mWindowManager.moveAppToken(lastReparentPos, p.appToken);
+                        mService.mWindowManager.setAppGroupId(p.appToken, p.task.taskId);
+                        if (VALIDATE_TOKENS) {
+                            validateAppTokensLocked();
+                        }
                     }
                     replyChainEnd = -1;
                     
@@ -2558,9 +2302,6 @@ final class ActivityStack {
             }
         }
 
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
         return taskTop;
     }
     
@@ -2627,7 +2368,7 @@ final class ActivityStack {
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
                         && (launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
                     if (!ret.finishing) {
-                        int index = mHistory.indexOf(ret);
+                        int index = indexOfTokenLocked(ret.appToken);
                         if (index >= 0) {
                             finishActivityLocked(ret, index, Activity.RESULT_CANCELED,
                                     null, "clear", false);
@@ -2725,7 +2466,6 @@ final class ActivityStack {
      */
     private final ActivityRecord moveActivityToFrontLocked(int where) {
         ActivityRecord newTop = mHistory.remove(where);
-        newMoveActivityToFrontLocked(newTop);
         int top = mHistory.size();
         ActivityRecord oldTop = mHistory.get(top-1);
         if (DEBUG_ADD_REMOVE) {
@@ -2735,17 +2475,6 @@ final class ActivityStack {
                     + top, here);
         }
         mHistory.add(top, newTop);
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
-        return newTop;
-    }
-
-    private final ActivityRecord newMoveActivityToFrontLocked(ActivityRecord newTop) {
-        final TaskRecord task = newTop.task;
-        ActivityRecord oldTop = task.getTopActivity();
-        task.mActivities.remove(newTop);
-        task.mActivities.add(newTop);
         oldTop.frontOfTask = false;
         newTop.frontOfTask = true;
         return newTop;
@@ -2756,7 +2485,6 @@ final class ActivityStack {
             String resultWho, int requestCode,
             int callingPid, int callingUid, String callingPackage, int startFlags, Bundle options,
             boolean componentSpecified, ActivityRecord[] outActivity) {
-        mLastHistoryModifier = "startActivityLocked(IApplicationThread)";
 
         int err = ActivityManager.START_SUCCESS;
 
@@ -3239,7 +2967,7 @@ final class ActivityStack {
                 if (mService.mCurTask <= 0) {
                     mService.mCurTask = 1;
                 }
-                r.setTask(createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
+                r.setTask(new TaskRecord(mService.mCurTask, r.info, intent), null, true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                         + " in new task " + r.task);
             } else {
@@ -3303,7 +3031,7 @@ final class ActivityStack {
                 N > 0 ? mHistory.get(N-1) : null;
             r.setTask(prev != null
                     ? prev.task
-                    : createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
+                    : new TaskRecord(mService.mCurTask, r.info, intent), null, true);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
@@ -3795,7 +3523,7 @@ final class ActivityStack {
             }
 
             // Get the activity record.
-            int index = mHistory.indexOf(r);
+            int index = indexOfActivityLocked(r);
             if (index >= 0) {
                 res = r;
 
@@ -3851,9 +3579,9 @@ final class ActivityStack {
                 finishes = new ArrayList<ActivityRecord>(mFinishingActivities);
                 mFinishingActivities.clear();
             }
-            if ((NT=mCancelledThumbnails.size()) > 0) {
-                thumbnails = new ArrayList<ActivityRecord>(mCancelledThumbnails);
-                mCancelledThumbnails.clear();
+            if ((NT=mService.mCancelledThumbnails.size()) > 0) {
+                thumbnails = new ArrayList<ActivityRecord>(mService.mCancelledThumbnails);
+                mService.mCancelledThumbnails.clear();
             }
 
             if (mMainStack) {
@@ -3881,7 +3609,7 @@ final class ActivityStack {
         // Stop any activities that are scheduled to do so but have been
         // waiting for the next one to start.
         for (i=0; i<NS; i++) {
-            ActivityRecord r = stops.get(i);
+            ActivityRecord r = (ActivityRecord)stops.get(i);
             synchronized (mService) {
                 if (r.finishing) {
                     finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
@@ -3894,7 +3622,7 @@ final class ActivityStack {
         // Finish any activities that are scheduled to do so but have been
         // waiting for the next one to start.
         for (i=0; i<NF; i++) {
-            ActivityRecord r = finishes.get(i);
+            ActivityRecord r = (ActivityRecord)finishes.get(i);
             synchronized (mService) {
                 activityRemoved = destroyActivityLocked(r, true, false, "finish-idle");
             }
@@ -3902,7 +3630,7 @@ final class ActivityStack {
 
         // Report back to any thumbnail receivers.
         for (i=0; i<NT; i++) {
-            ActivityRecord r = thumbnails.get(i);
+            ActivityRecord r = (ActivityRecord)thumbnails.get(i);
             mService.sendPendingThumbnail(r, null, null, null, true);
         }
 
@@ -3957,7 +3685,7 @@ final class ActivityStack {
 
         int i;
         for (i=mHistory.size()-1; i>=0; i--) {
-            ActivityRecord r = mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (r.resultTo == self && r.requestCode == requestCode) {
                 if ((r.resultWho == null && resultWho == null) ||
                     (r.resultWho != null && r.resultWho.equals(resultWho))) {
@@ -3967,36 +3695,6 @@ final class ActivityStack {
             }
         }
         mService.updateOomAdjLocked();
-    }
-
-    final void finishTopRunningActivityLocked(ProcessRecord app) {
-        ActivityRecord r = topRunningActivityLocked(null);
-        if (r != null && r.app == app) {
-            // If the top running activity is from this crashing
-            // process, then terminate it to avoid getting in a loop.
-            Slog.w(TAG, "  Force finishing activity "
-                    + r.intent.getComponent().flattenToShortString());
-            int index = mHistory.indexOf(r);
-            r.stack.finishActivityLocked(r, index,
-                    Activity.RESULT_CANCELED, null, "crashed", false);
-            // Also terminate any activities below it that aren't yet
-            // stopped, to avoid a situation where one will get
-            // re-start our crashing activity once it gets resumed again.
-            index--;
-            if (index >= 0) {
-                r = mHistory.get(index);
-                if (r.state == ActivityState.RESUMED
-                        || r.state == ActivityState.PAUSING
-                        || r.state == ActivityState.PAUSED) {
-                    if (!r.isHomeActivity || mService.mHomeProcess != r.app) {
-                        Slog.w(TAG, "  Force finishing activity "
-                                + r.intent.getComponent().flattenToShortString());
-                        r.stack.finishActivityLocked(r, index,
-                                Activity.RESULT_CANCELED, null, "crashed", false);
-                    }
-                }
-            }
-        }
     }
 
     final boolean finishActivityAffinityLocked(IBinder token) {
@@ -4057,19 +3755,6 @@ final class ActivityStack {
      * @return Returns true if this activity has been removed from the history
      * list, or false if it is still in the list and will be removed later.
      */
-    final boolean finishActivityLocked(ActivityRecord r,
-            int resultCode, Intent resultData, String reason, boolean oomAdj) {
-        int index = mHistory.indexOf(r);
-        if (index >= 0) {
-            return finishActivityLocked(r, index, resultCode, resultData, reason, false, oomAdj);
-        }
-        return false;
-    }
-
-    /**
-     * @return Returns true if this activity has been removed from the history
-     * list, or false if it is still in the list and will be removed later.
-     */
     final boolean finishActivityLocked(ActivityRecord r, int index,
             int resultCode, Intent resultData, String reason, boolean oomAdj) {
         return finishActivityLocked(r, index, resultCode, resultData, reason, false, oomAdj);
@@ -4119,7 +3804,7 @@ final class ActivityStack {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
-            mCancelledThumbnails.add(r);
+            mService.mCancelledThumbnails.add(r);
         }
 
         if (immediate) {
@@ -4162,7 +3847,7 @@ final class ActivityStack {
 
     private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
             int mode, boolean oomAdj) {
-        final int index = mHistory.indexOf(r);
+        final int index = indexOfActivityLocked(r);
         if (index < 0) {
             return null;
         }
@@ -4218,102 +3903,16 @@ final class ActivityStack {
                 resumeTopActivityLocked(null);
             }
             return activityRemoved ? null : r;
+        } else {
+            // Need to go through the full pause cycle to get this
+            // activity into the stopped state and then finish it.
+            if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
+            mFinishingActivities.add(r);
+            resumeTopActivityLocked(null);
         }
-
-        // Need to go through the full pause cycle to get this
-        // activity into the stopped state and then finish it.
-        if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
-        mFinishingActivities.add(r);
-        resumeTopActivityLocked(null);
         return r;
     }
 
-    final boolean navigateUpToLocked(ActivityRecord srec, Intent destIntent, int resultCode,
-            Intent resultData) {
-        final int start = mHistory.indexOf(srec);
-        if (start < 0) {
-            // Current activity is not in history stack; do nothing.
-            return false;
-        }
-        int finishTo = start - 1;
-        ActivityRecord parent = null;
-        boolean foundParentInTask = false;
-        ComponentName dest = destIntent.getComponent();
-        if (dest != null) {
-            TaskRecord tr = srec.task;
-            for (int i = start - 1; i >= 0; i--) {
-                ActivityRecord r = mHistory.get(i);
-                if (tr != r.task) {
-                    // Couldn't find parent in the same task; stop at the one above this.
-                    // (Root of current task; in-app "home" behavior)
-                    // Always at least finish the current activity.
-                    finishTo = Math.min(start - 1, i + 1);
-                    parent = mHistory.get(finishTo);
-                    break;
-                } else if (r.info.packageName.equals(dest.getPackageName()) &&
-                        r.info.name.equals(dest.getClassName())) {
-                    finishTo = i;
-                    parent = r;
-                    foundParentInTask = true;
-                    break;
-                }
-            }
-        }
-
-        IActivityController controller = mService.mController;
-        if (controller != null) {
-            ActivityRecord next = topRunningActivityLocked(srec.appToken, 0);
-            if (next != null) {
-                // ask watcher if this is allowed
-                boolean resumeOK = true;
-                try {
-                    resumeOK = controller.activityResuming(next.packageName);
-                } catch (RemoteException e) {
-                    mService.mController = null;
-                }
-
-                if (!resumeOK) {
-                    return false;
-                }
-            }
-        }
-        final long origId = Binder.clearCallingIdentity();
-        for (int i = start; i > finishTo; i--) {
-            ActivityRecord r = mHistory.get(i);
-            requestFinishActivityLocked(r.appToken, resultCode, resultData,
-                    "navigate-up", true);
-            // Only return the supplied result for the first activity finished
-            resultCode = Activity.RESULT_CANCELED;
-            resultData = null;
-        }
-
-        if (parent != null && foundParentInTask) {
-            final int parentLaunchMode = parent.info.launchMode;
-            final int destIntentFlags = destIntent.getFlags();
-            if (parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
-                    parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
-                    parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
-                    (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent);
-            } else {
-                try {
-                    ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                            destIntent.getComponent(), 0, srec.userId);
-                    int res = startActivityLocked(srec.app.thread, destIntent,
-                            null, aInfo, parent.appToken, null,
-                            0, -1, parent.launchedFromUid, parent.launchedFromPackage,
-                            0, null, true, null);
-                    foundParentInTask = res == ActivityManager.START_SUCCESS;
-                } catch (RemoteException e) {
-                    foundParentInTask = false;
-                }
-                requestFinishActivityLocked(parent.appToken, resultCode,
-                        resultData, "navigate-up", true);
-            }
-        }
-        Binder.restoreCallingIdentity(origId);
-        return foundParentInTask;
-    }
     /**
      * Perform the common clean-up of an activity record.  This is called both
      * as part of destroyActivityLocked() (when destroying the client-side
@@ -4365,7 +3964,7 @@ final class ActivityStack {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
-            mCancelledThumbnails.add(r);
+            mService.mCancelledThumbnails.add(r);
         }
 
         // Get rid of any pending idle timeouts.
@@ -4387,10 +3986,6 @@ final class ActivityStack {
             RuntimeException here = new RuntimeException("here");
             here.fillInStackTrace();
             Slog.i(TAG, "Removing activity " + r + " from stack");
-        }
-        final TaskRecord task = r.task;
-        if (task != null) {
-            task.removeActivity(r);
         }
         mHistory.remove(r);
         r.takeFromHistory();
@@ -4576,7 +4171,7 @@ final class ActivityStack {
                     mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
                 }
 
-                int index = mHistory.indexOf(r);
+                int index = indexOfActivityLocked(r);
                 if (index >= 0) {
                     if (r.state == ActivityState.DESTROYING) {
                         cleanUpActivityLocked(r, true, false);
@@ -4590,15 +4185,15 @@ final class ActivityStack {
         }
     }
     
-    private void removeHistoryRecordsForAppLocked(ArrayList<ActivityRecord> list,
-            ProcessRecord app, String listName) {
+    private void removeHistoryRecordsForAppLocked(ArrayList list, ProcessRecord app,
+            String listName) {
         int i = list.size();
         if (DEBUG_CLEANUP) Slog.v(
             TAG, "Removing app " + app + " from list " + listName
             + " with " + i + " entries");
         while (i > 0) {
             i--;
-            ActivityRecord r = list.get(i);
+            ActivityRecord r = (ActivityRecord)list.get(i);
             if (DEBUG_CLEANUP) Slog.v(TAG, "Record #" + i + " " + r);
             if (r.app == app) {
                 if (DEBUG_CLEANUP) Slog.v(TAG, "---> REMOVING this entry!");
@@ -4624,7 +4219,7 @@ final class ActivityStack {
             TAG, "Removing app " + app + " from history with " + i + " entries");
         while (i > 0) {
             i--;
-            ActivityRecord r = mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (DEBUG_CLEANUP) Slog.v(
                 TAG, "Record #" + i + " " + r + ": app=" + r.app);
             if (r.app == app) {
@@ -4692,30 +4287,12 @@ final class ActivityStack {
      * of the stack.
      */
     final void moveHomeToFrontLocked() {
-        newMoveHomeToFrontLocked();
         TaskRecord homeTask = null;
         for (int i=mHistory.size()-1; i>=0; i--) {
             ActivityRecord hr = mHistory.get(i);
             if (hr.isHomeActivity) {
                 homeTask = hr.task;
                 break;
-            }
-        }
-        if (homeTask != null) {
-//            moveTaskToFrontLocked(homeTask, null, null);
-        }
-    }
-
-    final void newMoveHomeToFrontLocked() {
-        TaskRecord homeTask = null;
-        for (int taskNdx = mTaskHistory.size() - 1; homeTask == null && taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                if (r.isHomeActivity) {
-                    homeTask = r.task;
-                    break;
-                }
             }
         }
         if (homeTask != null) {
@@ -4735,39 +4312,32 @@ final class ActivityStack {
         mService.mWindowManager.prepareAppTransition(transit, false);
     }
 
-    final boolean findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
-        for (int i = mHistory.size() - 1; i >= 0; i--) {
-            ActivityRecord hr = mHistory.get(i);
-            if (hr.task.taskId == taskId) {
-                if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
-                    mUserLeaving = true;
-                }
-                if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
-                    // Caller wants the home activity moved with it.  To accomplish this,
-                    // we'll just move the home task to the top first.
-                    moveHomeToFrontLocked();
-                }
-                moveTaskToFrontLocked(hr.task, null, options);
-                return true;
-            }
-        }
-        return false;
-    }
-
     final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason, Bundle options) {
+        if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
 
         final int task = tr.taskId;
         int top = mHistory.size()-1;
 
         if (top < 0 || (mHistory.get(top)).task.taskId == task) {
             // nothing to do!
+            if (reason != null &&
+                    (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
+                ActivityOptions.abort(options);
+            } else {
+                updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
+            }
             return;
         }
 
+        ArrayList<IBinder> moved = new ArrayList<IBinder>();
+
+        // Applying the affinities may have removed entries from the history,
+        // so get the size again.
+        top = mHistory.size()-1;
+        int pos = top;
 
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
-        int pos = top;
         while (pos >= 0) {
             ActivityRecord r = mHistory.get(pos);
             if (localLOGV) Slog.v(
@@ -4781,37 +4351,18 @@ final class ActivityStack {
                 }
                 mHistory.remove(pos);
                 mHistory.add(top, r);
+                moved.add(0, r.appToken);
                 top--;
             }
             pos--;
         }
-        //
-        // Start new code here! Delete everything above.
-        //
-        if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
 
-        final int numTasks = mTaskHistory.size();
-        final int index = mTaskHistory.indexOf(tr);
-        if (numTasks == 0 || index < 0 || index == numTasks - 1)  {
-            // nothing to do!
-            if (reason != null &&
-                    (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-                ActivityOptions.abort(options);
-            } else {
-                updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
-            }
-            return;
-        }
-
-        // Shift all activities with this task up to the top
-        // of the stack, keeping them in the same internal order.
-        mTaskHistory.remove(tr);
-        mTaskHistory.add(tr);
-
-        if (DEBUG_TRANSITION) Slog.v(TAG, "Prepare to front transition: task=" + tr);
+        if (DEBUG_TRANSITION) Slog.v(TAG,
+                "Prepare to front transition: task=" + tr);
         if (reason != null &&
                 (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-            mService.mWindowManager.prepareAppTransition(AppTransition.TRANSIT_NONE, false);
+            mService.mWindowManager.prepareAppTransition(
+                    AppTransition.TRANSIT_NONE, false);
             ActivityRecord r = topRunningActivityLocked(null);
             if (r != null) {
                 mNoAnimActivities.add(r);
@@ -4820,18 +4371,14 @@ final class ActivityStack {
         } else {
             updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
         }
-
-        mService.mWindowManager.moveTaskToTop(task);
-
-        finishTaskMoveLocked(task);
-        EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, task);
-
+        
+        mService.mWindowManager.moveAppTokensToTop(moved);
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
+
+        finishTaskMoveLocked(task);
+        EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, task);
     }
 
     private final void finishTaskMoveLocked(int task) {
@@ -4851,7 +4398,7 @@ final class ActivityStack {
      */
     final boolean moveTaskToBackLocked(int task, ActivityRecord reason) {
         Slog.i(TAG, "moveTaskToBack: " + task);
-
+        
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
@@ -4874,14 +4421,11 @@ final class ActivityStack {
             }
         }
 
+        ArrayList<IBinder> moved = new ArrayList<IBinder>();
+
         if (DEBUG_TRANSITION) Slog.v(TAG,
                 "Prepare to back transition: task=" + task);
-
-        final TaskRecord tr = mTaskIdToTaskRecord.get(task);
-        mTaskHistory.remove(tr);
-        mTaskHistory.add(0, tr);
-
-        // BEGIN REGION TO REMOVE.
+        
         final int N = mHistory.size();
         int bottom = 0;
         int pos = 0;
@@ -4902,18 +4446,16 @@ final class ActivityStack {
                 }
                 mHistory.remove(pos);
                 mHistory.add(bottom, r);
+                moved.add(r.appToken);
                 bottom++;
             }
             pos++;
         }
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
-        // END REGION TO REMOVE
 
         if (reason != null &&
                 (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-            mService.mWindowManager.prepareAppTransition(AppTransition.TRANSIT_NONE, false);
+            mService.mWindowManager.prepareAppTransition(
+                    AppTransition.TRANSIT_NONE, false);
             ActivityRecord r = topRunningActivityLocked(null);
             if (r != null) {
                 mNoAnimActivities.add(r);
@@ -4922,8 +4464,7 @@ final class ActivityStack {
             mService.mWindowManager.prepareAppTransition(
                     AppTransition.TRANSIT_TASK_TO_BACK, false);
         }
-        mService.mWindowManager.moveTaskToBottom(task);
-
+        mService.mWindowManager.moveAppTokensToBottom(moved);
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
@@ -4956,8 +4497,9 @@ final class ActivityStack {
         TaskAccessInfo info = getTaskAccessInfoLocked(tr.taskId, true);
         if (info.numSubThumbbails <= 0) {
             return info.mainThumbnail != null ? info.mainThumbnail : tr.lastThumbnail;
+        } else {
+            return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
         }
-        return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
     }
 
     public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex,
@@ -5037,7 +4579,6 @@ final class ActivityStack {
         }
         if (thumbs.numSubThumbbails > 0) {
             thumbs.retriever = new IThumbnailRetriever.Stub() {
-                @Override
                 public Bitmap getThumbnail(int index) {
                     if (index < 0 || index >= thumbs.subtasks.size()) {
                         return null;
@@ -5235,284 +4776,5 @@ final class ActivityStack {
     
     public void dismissKeyguardOnNextActivityLocked() {
         mDismissKeyguardOnNextActivity = true;
-    }
-
-    boolean willActivityBeVisibleLocked(IBinder token) {
-        int i;
-        for (i = mHistory.size() - 1; i >= 0; i--) {
-            ActivityRecord r = mHistory.get(i);
-            if (r.appToken == token) {
-                    return true;
-            }
-            if (r.fullscreen && !r.finishing) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void closeSystemDialogsLocked() {
-        for (int i = mHistory.size() - 1; i >= 0; i--) {
-            ActivityRecord r = mHistory.get(i);
-            if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                r.stack.finishActivityLocked(r, i,
-                        Activity.RESULT_CANCELED, null, "close-sys", true);
-            }
-        }
-    }
-
-    boolean forceStopPackageLocked(String name, boolean doit, boolean evenPersistent, int userId) {
-        boolean didSomething = false;
-        TaskRecord lastTask = null;
-        final int N = mHistory.size();
-        for (int i = 0; i < N; i++) {
-            ActivityRecord r = mHistory.get(i);
-            final boolean samePackage = r.packageName.equals(name)
-                    || (name == null && r.userId == userId);
-            if ((userId == UserHandle.USER_ALL || r.userId == userId)
-                    && (samePackage || r.task == lastTask)
-                    && (r.app == null || evenPersistent || !r.app.persistent)) {
-                if (!doit) {
-                    if (r.finishing) {
-                        // If this activity is just finishing, then it is not
-                        // interesting as far as something to stop.
-                        continue;
-                    }
-                    return true;
-                }
-                didSomething = true;
-                Slog.i(TAG, "  Force finishing activity " + r);
-                if (samePackage) {
-                    if (r.app != null) {
-                        r.app.removed = true;
-                    }
-                    r.app = null;
-                }
-                lastTask = r.task;
-                if (r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
-                        null, "force-stop", true)) {
-                    i--;
-                }
-            }
-        }
-        return didSomething;
-    }
-
-    ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
-        PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
-        ActivityRecord topRecord = null;
-        int pos = mHistory.size() - 1;
-        ActivityRecord next = pos >= 0 ? mHistory.get(pos) : null;
-        ActivityRecord top = null;
-        TaskRecord curTask = null;
-        int numActivities = 0;
-        int numRunning = 0;
-        while (pos >= 0 && maxNum > 0) {
-            final ActivityRecord r = next;
-            pos--;
-            next = pos >= 0 ? mHistory.get(pos) : null;
-
-            // Initialize state for next task if needed.
-            if (top == null || (top.state == ActivityState.INITIALIZING && top.task == r.task)) {
-                top = r;
-                curTask = r.task;
-                numActivities = numRunning = 0;
-            }
-
-            // Add 'r' into the current task.
-            numActivities++;
-            if (r.app != null && r.app.thread != null) {
-                numRunning++;
-            }
-
-            if (localLOGV) Slog.v(
-                TAG, r.intent.getComponent().flattenToShortString()
-                + ": task=" + r.task);
-
-            // If the next one is a different task, generate a new
-            // TaskInfo entry for what we have.
-            if (next == null || next.task != curTask) {
-                RunningTaskInfo ci = new RunningTaskInfo();
-                ci.id = curTask.taskId;
-                ci.baseActivity = r.intent.getComponent();
-                ci.topActivity = top.intent.getComponent();
-                if (top.thumbHolder != null) {
-                    ci.description = top.thumbHolder.lastDescription;
-                }
-                ci.numActivities = numActivities;
-                ci.numRunning = numRunning;
-                //System.out.println(
-                //    "#" + maxNum + ": " + " descr=" + ci.description);
-                if (receiver != null) {
-                    if (localLOGV) Slog.v(
-                        TAG, "State=" + top.state + "Idle=" + top.idle
-                        + " app=" + top.app
-                        + " thr=" + (top.app != null ? top.app.thread : null));
-                    if (top.state == ActivityState.RESUMED || top.state == ActivityState.PAUSING) {
-                        if (top.idle && top.app != null && top.app.thread != null) {
-                            topRecord = top;
-                        } else {
-                            top.thumbnailNeeded = true;
-                        }
-                    }
-                    pending.pendingRecords.add(top);
-                }
-                list.add(ci);
-                maxNum--;
-                top = null;
-            }
-        }
-        return topRecord;
-    }
-
-    public void unhandledBackLocked() {
-        int top = mHistory.size() - 1;
-        if (DEBUG_SWITCH) Slog.d(
-            TAG, "Performing unhandledBack(): top activity at " + top);
-        if (top > 0) {
-            finishActivityLocked(mHistory.get(top),
-                        top, Activity.RESULT_CANCELED, null, "unhandled-back", true);
-        }
-    }
-
-    void handleAppCrashLocked(ProcessRecord app) {
-        for (int i = mHistory.size() - 1; i >= 0; i--) {
-            ActivityRecord r = mHistory.get(i);
-            if (r.app == app) {
-                Slog.w(TAG, "  Force finishing activity "
-                    + r.intent.getComponent().flattenToShortString());
-                r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
-                        null, "crashed", false);
-            }
-        }
-    }
-
-    void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
-            boolean dumpClient, String dumpPackage) {
-        ActivityManagerService.dumpHistoryList(fd, pw, mHistory, "  ", "Hist", true, !dumpAll,
-            dumpClient, dumpPackage);
-    }
-
-    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
-        ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
-
-        if ("all".equals(name)) {
-            for (ActivityRecord r1 : mHistory) {
-                activities.add(r1);
-            }
-        } else if ("top".equals(name)) {
-            final int N = mHistory.size();
-            if (N > 0) {
-                activities.add(mHistory.get(N-1));
-            }
-        } else {
-            ItemMatcher matcher = new ItemMatcher();
-            matcher.build(name);
-
-            for (ActivityRecord r1 : mHistory) {
-                if (matcher.match(r1, r1.intent.getComponent())) {
-                    activities.add(r1);
-                }
-            }
-        }
-
-        return activities;
-    }
-
-    ActivityRecord restartPackage(String packageName) {
-        ActivityRecord starting = topRunningActivityLocked(null);
-
-        // All activities that came from the package must be
-        // restarted as if there was a config change.
-        for (int i = mHistory.size() - 1; i >= 0; i--) {
-            ActivityRecord a = mHistory.get(i);
-            if (a.info.packageName.equals(packageName)) {
-                a.forceNewConfig = true;
-                if (starting != null && a == starting && a.visible) {
-                    a.startFreezingScreenLocked(starting.app, ActivityInfo.CONFIG_SCREEN_LAYOUT);
-                }
-            }
-        }
-
-        return starting;
-    }
-
-    void rebuildTaskHistory() {
-        mTaskHistory.clear();
-        final int numActivities = mHistory.size();
-        TaskRecord task = null;
-        for (int i = 0; i < numActivities; ++i) {
-            final ActivityRecord r = mHistory.get(i);
-            if (r.task != task) {
-                task = r.task;
-                task.mActivities.clear();
-                mTaskHistory.add(task);
-            }
-            task.mActivities.add(r);
-        }
-    }
-
-    boolean verifyActivityRecords(boolean rebuild) {
-        final int numHistory = mHistory.size();
-        int historyNdx = 0;
-
-        final int numTasks = mTaskHistory.size();
-        int taskNdx;
-        for (taskNdx = historyNdx = 0; taskNdx < numTasks; ++taskNdx) {
-            final TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            final int numActivities = activities.size();
-            int activityNdx;
-            for (activityNdx = 0;
-                    activityNdx < numActivities && historyNdx < numHistory;
-                    ++activityNdx, ++historyNdx) {
-                ActivityRecord r1 = mHistory.get(historyNdx);
-                ActivityRecord r2 = activities.get(activityNdx);
-                if (r1 != r2) {
-                    break;
-                }
-            }
-            if (activityNdx != numActivities) {
-                // either a mismatch or mHistory ran out before mTaskHistory.
-                break;
-            }
-        }
-        if (taskNdx != numTasks || historyNdx != numHistory) {
-            logHistories("verifyActivityRecords", rebuild);
-            return true;
-        }
-        return false;
-    }
-
-    private void logHistories(String caller, boolean rebuild) {
-        Slog.w(TAG, "Mismatch! " + caller + "  mHistory=" + mHistory);
-        ArrayList<ArrayList<ActivityRecord>> nestedRecords =
-                new ArrayList<ArrayList<ActivityRecord>>();
-        for (TaskRecord task : mTaskHistory) {
-            nestedRecords.add(task.mActivities);
-        }
-        Slog.w(TAG, "Mismatch! " + caller + " mTaskHistory" + nestedRecords);
-        Slog.w(TAG, "Mismatch! " + caller + " lastHistoryModifier=" + mLastHistoryModifier
-                + " Caller=" + Debug.getCallers(4));
-        if (rebuild) {
-            rebuildTaskHistory();
-        }
-    }
-
-    private TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
-            boolean toTop) {
-        TaskRecord oldTask = mTaskIdToTaskRecord.get(taskId);
-        if (oldTask != null) {
-            Slog.w(TAG, "createTaskRecord: Reusing taskId=" + taskId + " without removing");
-            mTaskHistory.remove(oldTask);
-        }
-        TaskRecord task = new TaskRecord(taskId, info, intent);
-        mTaskIdToTaskRecord.put(taskId, task);
-        if (toTop) {
-            mTaskHistory.add(task);
-        } else {
-            mTaskHistory.add(0, task);
-        }
-        return task;
     }
 }

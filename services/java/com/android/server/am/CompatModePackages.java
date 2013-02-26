@@ -295,8 +295,20 @@ public class CompatModePackages {
             Message msg = mHandler.obtainMessage(MSG_WRITE);
             mHandler.sendMessageDelayed(msg, 10000);
 
-            
-            ActivityRecord starting = mService.mMainStack.restartPackage(packageName);
+            ActivityRecord starting = mService.mMainStack.topRunningActivityLocked(null);
+
+            // All activities that came from the package must be
+            // restarted as if there was a config change.
+            for (int i=mService.mMainStack.mHistory.size()-1; i>=0; i--) {
+                ActivityRecord a = (ActivityRecord)mService.mMainStack.mHistory.get(i);
+                if (a.info.packageName.equals(packageName)) {
+                    a.forceNewConfig = true;
+                    if (starting != null && a == starting && a.visible) {
+                        a.startFreezingScreenLocked(starting.app,
+                                ActivityInfo.CONFIG_SCREEN_LAYOUT);
+                    }
+                }
+            }
 
             // Tell all processes that loaded this package about the change.
             for (int i=mService.mLruProcesses.size()-1; i>=0; i--) {

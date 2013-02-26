@@ -210,6 +210,24 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void moveAppToken(int arg0, IBinder arg1) throws RemoteException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void moveAppTokensToBottom(List<IBinder> arg0) throws RemoteException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void moveAppTokensToTop(List<IBinder> arg0) throws RemoteException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
     public IWindowSession openSession(IInputMethodClient arg0, IInputContext arg1)
             throws RemoteException {
         // TODO Auto-generated method stub
