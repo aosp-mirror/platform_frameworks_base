@@ -10,7 +10,9 @@ var GCM_DATA = [
       { id:8, label:"com.google.android.gcm.server.Message", link:"reference/com/google/android/gcm/server/Message.html", type:"class" },
       { id:9, label:"com.google.android.gcm.server.Message.Builder", link:"reference/com/google/android/gcm/server/Message.Builder.html", type:"class" },
       { id:10, label:"com.google.android.gcm.server.MulticastResult", link:"reference/com/google/android/gcm/server/MulticastResult.html", type:"class" },
-      { id:11, label:"com.google.android.gcm.server.Result", link:"reference/com/google/android/gcm/server/Result.html", type:"class" },
-      { id:12, label:"com.google.android.gcm.server.Sender", link:"reference/com/google/android/gcm/server/Sender.html", type:"class" }
+      { id:11, label:"com.google.android.gcm.server.MulticastResult.Builder", link:"reference/com/google/android/gcm/server/MulticastResult.Builder.html", type:"class" },
+      { id:12, label:"com.google.android.gcm.server.Result", link:"reference/com/google/android/gcm/server/Result.html", type:"class" },
+      { id:13, label:"com.google.android.gcm.server.Result.Builder", link:"reference/com/google/android/gcm/server/Result.Builder.html", type:"class" },
+      { id:14, label:"com.google.android.gcm.server.Sender", link:"reference/com/google/android/gcm/server/Sender.html", type:"class" }
 
     ];
