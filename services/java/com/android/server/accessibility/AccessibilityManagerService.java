@@ -1741,24 +1741,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
-            final int connectionId;
             synchronized (mLock) {
-                connectionId = mId;
                 mService = service;
                 mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
                 UserState userState = getUserStateLocked(mUserId);
                 addServiceLocked(this, userState);
-                if (!userState.mBindingServices.contains(mComponentName)) {
-                    binderDied();
-                } else {
+                if (userState.mBindingServices.contains(mComponentName)) {
                     userState.mBindingServices.remove(mComponentName);
                     onUserStateChangedLocked(userState);
+                    try {
+                        mServiceInterface.setConnection(this, mId);
+                    } catch (RemoteException re) {
+                        Slog.w(LOG_TAG, "Error while setting connection for service: " + service, re);
+                    }
+                } else {
+                    binderDied();
                 }
-            }
-            try {
-                mServiceInterface.setConnection(this, connectionId);
-            } catch (RemoteException re) {
-                Slog.w(LOG_TAG, "Error while setting connection for service: " + service, re);
             }
         }
 
