@@ -259,7 +259,7 @@ public:
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 
-    SkPaint* filterPaint(SkPaint* paint);
+    SkPaint* filterPaint(SkPaint* paint, bool alwaysCopy = false);
 
     bool disallowDeferral() {
         // returns true if the OpenGLRenderer's state can be completely represented by
