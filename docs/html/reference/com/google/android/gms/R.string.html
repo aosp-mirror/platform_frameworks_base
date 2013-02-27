@@ -73,35 +73,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -148,7 +119,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
-  
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -163,7 +133,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           </div>
             <ul class="nav-x col-9">
                 <li class="design">
-                  <a href="/design/index.html" 
+                  <a href="/design/index.html"
                   zh-TW-lang="設計"
                   zh-CN-lang="设计"
                   ru-lang="Проектирование"
@@ -171,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
-                <li class="develop"><a href="/develop/index.html" class="selected"
+                <li class="develop"><a href="/develop/index.html"
                   zh-TW-lang="開發"
                   zh-CN-lang="开发"
                   ru-lang="Разработка"
@@ -179,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
-                <li class="distribute last"><a href="/distribute/index.html" 
+                <li class="distribute last"><a href="/distribute/index.html"
                   zh-TW-lang="發佈"
                   zh-CN-lang="分发"
                   ru-lang="Распространение"
@@ -348,7 +318,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
-                <li><a href="/training/index.html" 
+                <li class="training"><a href="/training/index.html"
                   zh-TW-lang="訓練課程"
                   zh-CN-lang="培训"
                   ru-lang="Курсы"
@@ -356,7 +326,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li><a href="/guide/components/index.html" 
+                <li class="guide"><a href="/guide/components/index.html"
                   zh-TW-lang="API 指南"
                   zh-CN-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -364,7 +334,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
-                <li><a href="/reference/packages.html" 
+                <li class="reference"><a href="/reference/packages.html"
                   zh-TW-lang="參考資源"
                   zh-CN-lang="参考"
                   ru-lang="Справочник"
@@ -372,7 +342,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
-                <li><a href="/tools/index.html" 
+                <li class="tools"><a href="/tools/index.html"
                   zh-TW-lang="相關工具"
                   zh-CN-lang="工具"
                   ru-lang="Инструменты"
@@ -380,7 +350,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="ツール"
                   es-lang="Herramientas"
                   >Tools</a></li>
-                <li><a href="/google/index.html" class="selected"
+                <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
             </ul>
@@ -390,9 +360,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <!-- /Sendondary x-nav -->
 
   
-  
 
-  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -467,6 +435,9 @@ onkeyup="return search_changed(event, false, '/')" />
               <li><a href="/google/play/billing/v2/billing_reference.html">
               <span class="en">Reference</span></a></li>
               </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
       </li>
       <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
@@ -579,7 +550,6 @@ onkeyup="return search_changed(event, false, '/')" />
        showGoogleRefTree();
     
       </script>
-
     </div> <!-- end side-nav -->
     <script>
       $(document).ready(function() {
@@ -587,8 +557,6 @@ onkeyup="return search_changed(event, false, '/')" />
         });
     </script>
 
-
-     
 
 
 
@@ -752,12 +720,47 @@ Summary:
           static
           
           int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_availability_notification_title">auth_client_availability_notification_title</a></td>
+          <td class="jd-descrcol" width="100%">Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=70] 
+</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_play_services_err_notification_msg">auth_client_play_services_err_notification_msg</a></td>
+          <td class="jd-descrcol" width="100%">Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=42] 
+</td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#auth_client_requested_by_msg">auth_client_requested_by_msg</a></td>
+          <td class="jd-descrcol" width="100%">Requested by string saying which app requested the notification.</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_enable_button">common_google_play_services_enable_button</a></td>
           <td class="jd-descrcol" width="100%">Button in confirmation dialog to enable Google Play services.</td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -770,7 +773,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -783,19 +786,19 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_install_button">common_google_play_services_install_button</a></td>
-          <td class="jd-descrcol" width="100%">Button in confirmation dialog for installing Google Play services [CHAR LIMIT=30] 
+          <td class="jd-descrcol" width="100%">Button in confirmation dialog for installing Google Play services [CHAR LIMIT=40] 
 </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -808,7 +811,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -821,7 +824,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -834,15 +837,27 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unknown_issue">common_google_play_services_unknown_issue</a></td>
-          <td class="jd-descrcol" width="100%">Message in confirmation dialog informing user there is an unknow issue in Google Player
+          <td class="jd-descrcol" width="100%">Message in confirmation dialog informing user there is an unknown issue in Google Play
         services [CHAR LIMIT=NONE] 
+</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unsupported_text">common_google_play_services_unsupported_text</a></td>
+          <td class="jd-descrcol" width="100%">Message in confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=NONE] 
 </td>
       </tr>
       
@@ -853,13 +868,25 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_update_button">common_google_play_services_update_button</a></td>
-          <td class="jd-descrcol" width="100%">Button in confirmation dialog for updating Google Play services [CHAR LIMIT=20] 
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unsupported_title">common_google_play_services_unsupported_title</a></td>
+          <td class="jd-descrcol" width="100%">Title of confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=40] 
 </td>
       </tr>
       
     
       <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_update_button">common_google_play_services_update_button</a></td>
+          <td class="jd-descrcol" width="100%">Button in confirmation dialog for updating Google Play services [CHAR LIMIT=40] 
+</td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -872,7 +899,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -882,6 +909,17 @@ Summary:
           <td class="jd-descrcol" width="100%">Title of confirmation dialog informing user that they need to update
         Google Play services (from Play Store) [CHAR LIMIT=40] 
 </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_signin_button_text_long">common_signin_button_text_long</a></td>
+          <td class="jd-descrcol" width="100%">Long form sign-in button text.</td>
       </tr>
       
     
@@ -1167,6 +1205,93 @@ From class
 
 
 
+<A NAME="auth_client_availability_notification_title"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        auth_client_availability_notification_title
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=70] 
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="auth_client_play_services_err_notification_msg"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        auth_client_play_services_err_notification_msg
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=42] 
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="auth_client_requested_by_msg"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        auth_client_requested_by_msg
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Requested by string saying which app requested the notification. [CHAR LIMIT=42] 
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
 <A NAME="common_google_play_services_enable_button"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1189,7 +1314,7 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
-        can enable it [CHAR LIMIT=30] 
+        can enable it [CHAR LIMIT=40] 
 </p></div>
 
     
@@ -1278,7 +1403,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Button in confirmation dialog for installing Google Play services [CHAR LIMIT=30] 
+  <div class="jd-tagdata jd-tagdescr"><p>Button in confirmation dialog for installing Google Play services [CHAR LIMIT=40] 
 </p></div>
 
     
@@ -1397,8 +1522,66 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Message in confirmation dialog informing user there is an unknow issue in Google Player
+  <div class="jd-tagdata jd-tagdescr"><p>Message in confirmation dialog informing user there is an unknown issue in Google Play
         services [CHAR LIMIT=NONE] 
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="common_google_play_services_unsupported_text"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        common_google_play_services_unsupported_text
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Message in confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=NONE] 
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="common_google_play_services_unsupported_title"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        common_google_play_services_unsupported_title
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Title of confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=40] 
 </p></div>
 
     
@@ -1427,7 +1610,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Button in confirmation dialog for updating Google Play services [CHAR LIMIT=20] 
+  <div class="jd-tagdata jd-tagdescr"><p>Button in confirmation dialog for updating Google Play services [CHAR LIMIT=40] 
 </p></div>
 
     
@@ -1496,6 +1679,36 @@ From class
 
 
 
+<A NAME="common_signin_button_text_long"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        common_signin_button_text_long
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Long form sign-in button text. This is the placeholder text, used if we can't
+        find the service-side assets. [CHAR LIMIT=25] 
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
 
 <!-- Public ctors -->
 
@@ -1554,7 +1767,6 @@ From class
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
 
-
 <div id="footer" class="wrap" >
         
 
@@ -1583,7 +1795,6 @@ From class
   </div>
 
 </div> <!-- end footer -->
-
 </div> <!-- jd-content -->
 
 </div><!-- end doc-content -->

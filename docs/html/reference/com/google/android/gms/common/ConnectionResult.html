@@ -73,35 +73,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -148,7 +119,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
-  
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -163,7 +133,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           </div>
             <ul class="nav-x col-9">
                 <li class="design">
-                  <a href="/design/index.html" 
+                  <a href="/design/index.html"
                   zh-TW-lang="設計"
                   zh-CN-lang="设计"
                   ru-lang="Проектирование"
@@ -171,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
-                <li class="develop"><a href="/develop/index.html" class="selected"
+                <li class="develop"><a href="/develop/index.html"
                   zh-TW-lang="開發"
                   zh-CN-lang="开发"
                   ru-lang="Разработка"
@@ -179,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
-                <li class="distribute last"><a href="/distribute/index.html" 
+                <li class="distribute last"><a href="/distribute/index.html"
                   zh-TW-lang="發佈"
                   zh-CN-lang="分发"
                   ru-lang="Распространение"
@@ -348,7 +318,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
-                <li><a href="/training/index.html" 
+                <li class="training"><a href="/training/index.html"
                   zh-TW-lang="訓練課程"
                   zh-CN-lang="培训"
                   ru-lang="Курсы"
@@ -356,7 +326,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li><a href="/guide/components/index.html" 
+                <li class="guide"><a href="/guide/components/index.html"
                   zh-TW-lang="API 指南"
                   zh-CN-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -364,7 +334,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
-                <li><a href="/reference/packages.html" 
+                <li class="reference"><a href="/reference/packages.html"
                   zh-TW-lang="參考資源"
                   zh-CN-lang="参考"
                   ru-lang="Справочник"
@@ -372,7 +342,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
-                <li><a href="/tools/index.html" 
+                <li class="tools"><a href="/tools/index.html"
                   zh-TW-lang="相關工具"
                   zh-CN-lang="工具"
                   ru-lang="Инструменты"
@@ -380,7 +350,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="ツール"
                   es-lang="Herramientas"
                   >Tools</a></li>
-                <li><a href="/google/index.html" class="selected"
+                <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
             </ul>
@@ -390,9 +360,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <!-- /Sendondary x-nav -->
 
   
-  
 
-  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -467,6 +435,9 @@ onkeyup="return search_changed(event, false, '/')" />
               <li><a href="/google/play/billing/v2/billing_reference.html">
               <span class="en">Reference</span></a></li>
               </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
       </li>
       <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
@@ -579,7 +550,6 @@ onkeyup="return search_changed(event, false, '/')" />
        showGoogleRefTree();
     
       </script>
-
     </div> <!-- end side-nav -->
     <script>
       $(document).ready(function() {
@@ -587,8 +557,6 @@ onkeyup="return search_changed(event, false, '/')" />
         });
     </script>
 
-
-     
 
 
 
@@ -773,47 +741,54 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#LICENSE_CHECK_FAILED">LICENSE_CHECK_FAILED</a></td>
+        <td class="jd-descrcol" width="100%">The application is not licensed to the user.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#NETWORK_ERROR">NETWORK_ERROR</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#RESOLUTION_REQUIRED">RESOLUTION_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">Completing the connection requires some form of resolution.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SERVICE_DISABLED">SERVICE_DISABLED</a></td>
         <td class="jd-descrcol" width="100%">The installed version of Google Play services has been disabled on this device.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SERVICE_INVALID">SERVICE_INVALID</a></td>
         <td class="jd-descrcol" width="100%">The version of the Google Play services installed on this device is not authentic.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SERVICE_MISSING">SERVICE_MISSING</a></td>
         <td class="jd-descrcol" width="100%">Google Play services is missing on this device.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SERVICE_VERSION_UPDATE_REQUIRED">SERVICE_VERSION_UPDATE_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">The installed version of Google Play services is out of date.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SIGN_IN_REQUIRED">SIGN_IN_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">The client attempted to connect to the service but the user is not
@@ -821,7 +796,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SUCCESS">SUCCESS</a></td>
         <td class="jd-descrcol" width="100%">The connection was successful.</td>
@@ -967,6 +942,22 @@ Summary:
         <div class="jd-descrdiv">Resolves an error by starting any intents requiring user
  interaction.</div>
   
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#toString()">toString</a></span>()</nobr>
+        
   </td></tr>
 
 
@@ -1325,6 +1316,46 @@ From class
             
                 5
                 (0x00000005)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="LICENSE_CHECK_FAILED"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        LICENSE_CHECK_FAILED
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The application is not licensed to the user. This error is not recoverable and will be
+ treated as fatal.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                11
+                (0x0000000b)
             
         </span>
         </div>
@@ -1930,6 +1961,35 @@ From class
 </div>
 
 
+<A NAME="toString()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">toString</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 
 
 
@@ -1939,7 +1999,6 @@ From class
 
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
-
 
 <div id="footer" class="wrap" >
         
@@ -1969,7 +2028,6 @@ From class
   </div>
 
 </div> <!-- end footer -->
-
 </div> <!-- jd-content -->
 
 </div><!-- end doc-content -->
