@@ -43,6 +43,7 @@ enum {
     HEAP_UNKNOWN,
     HEAP_DALVIK,
     HEAP_NATIVE,
+    HEAP_STACK,
     HEAP_CURSOR,
     HEAP_ASHMEM,
     HEAP_UNKNOWN_DEV,
@@ -109,7 +110,7 @@ static jlong android_os_Debug_getNativeHeapAllocatedSize(JNIEnv *env, jobject cl
 
 static jlong android_os_Debug_getNativeHeapFreeSize(JNIEnv *env, jobject clazz)
 {
-#ifdef HAVE_MALLOC_H    
+#ifdef HAVE_MALLOC_H
     struct mallinfo info = mallinfo();
     return (jlong) info.fordblks;
 #else
@@ -164,6 +165,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 whichHeap = HEAP_NATIVE;
             } else if (strstr(name, "/dev/ashmem/dalvik-") == name) {
                 whichHeap = HEAP_DALVIK;
+            } else if (strstr(name, "[stack") == name) {
+                whichHeap = HEAP_STACK;
             } else if (strstr(name, "/dev/ashmem/CursorWindow") == name) {
                 whichHeap = HEAP_CURSOR;
             } else if (strstr(name, "/dev/ashmem/") == name) {
@@ -191,7 +194,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
 
         //ALOGI("native=%d dalvik=%d sqlite=%d: %s\n", isNativeHeap, isDalvikHeap,
         //    isSqliteHeap, line);
-            
+
         while (true) {
             if (fgets(line, 1024, fp) == 0) {
                 done = true;
@@ -233,7 +236,7 @@ static void load_maps(int pid, stats_t* stats)
 {
     char tmp[128];
     FILE *fp;
-    
+
     sprintf(tmp, "/proc/%d/smaps", pid);
     fp = fopen(tmp, "r");
     if (fp == 0) return;
@@ -247,7 +250,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
 {
     stats_t stats[_NUM_HEAP];
     memset(&stats, 0, sizeof(stats));
-    
+
     load_maps(pid, stats);
 
     for (int i=_NUM_CORE_HEAP; i<_NUM_HEAP; i++) {
@@ -261,9 +264,9 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         env->SetIntField(object, stat_fields[i].privateDirty_field, stats[i].privateDirty);
         env->SetIntField(object, stat_fields[i].sharedDirty_field, stats[i].sharedDirty);
     }
-    
+
     jintArray otherIntArray = (jintArray)env->GetObjectField(object, otherStats_field);
-    
+
     jint* otherArray = (jint*)env->GetPrimitiveArrayCritical(otherIntArray, 0);
     if (otherArray == NULL) {
         return;
@@ -328,7 +331,7 @@ static jint read_binder_stat(const char* stat)
 
     char compare[128];
     int len = snprintf(compare, 128, "proc %d", getpid());
-    
+
     // loop until we have the block that represents this process
     do {
         if (fgets(line, 1024, fp) == 0) {
@@ -336,15 +339,15 @@ static jint read_binder_stat(const char* stat)
         }
     } while (strncmp(compare, line, len));
 
-    // now that we have this process, read until we find the stat that we are looking for 
+    // now that we have this process, read until we find the stat that we are looking for
     len = snprintf(compare, 128, "  %s: ", stat);
-    
+
     do {
         if (fgets(line, 1024, fp) == 0) {
             return -1;
         }
     } while (strncmp(compare, line, len));
-    
+
     // we have the line, now increment the line ptr to the value
     char* ptr = line + len;
     return atoi(ptr);
@@ -510,7 +513,7 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
     jobject fileDescriptor)
 {
     if (fileDescriptor == NULL) {
-        jniThrowNullPointerException(env, NULL);
+        jniThrowNullPointerException(env, "fd == null");
         return;
     }
     int origFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
@@ -547,7 +550,7 @@ static void android_os_Debug_dumpNativeBacktraceToFile(JNIEnv* env, jobject claz
     jint pid, jstring fileName)
 {
     if (fileName == NULL) {
-        jniThrowNullPointerException(env, NULL);
+        jniThrowNullPointerException(env, "file == null");
         return;
     }
     const jchar* str = env->GetStringCritical(fileName, 0);
@@ -611,6 +614,19 @@ int register_android_os_Debug(JNIEnv *env)
 {
     jclass clazz = env->FindClass("android/os/Debug$MemoryInfo");
 
+    // Sanity check the number of other statistics expected in Java matches here.
+    jfieldID numOtherStats_field = env->GetStaticFieldID(clazz, "NUM_OTHER_STATS", "I");
+    jint numOtherStats = env->GetStaticIntField(clazz, numOtherStats_field);
+    int expectedNumOtherStats = _NUM_HEAP - _NUM_CORE_HEAP;
+    if (numOtherStats != expectedNumOtherStats) {
+        jniThrowExceptionFmt(env, "java/lang/RuntimeException",
+                             "android.os.Debug.Meminfo.NUM_OTHER_STATS=%d expected %d",
+                             numOtherStats, expectedNumOtherStats);
+        return JNI_ERR;
+    }
+
+    otherStats_field = env->GetFieldID(clazz, "otherStats", "[I");
+
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         stat_fields[i].pss_field =
                 env->GetFieldID(clazz, stat_field_names[i].pss_name, "I");
@@ -619,8 +635,6 @@ int register_android_os_Debug(JNIEnv *env)
         stat_fields[i].sharedDirty_field =
                 env->GetFieldID(clazz, stat_field_names[i].sharedDirty_name, "I");
     }
-
-    otherStats_field = env->GetFieldID(clazz, "otherStats", "[I");
 
     return jniRegisterNativeMethods(env, "android/os/Debug", gMethods, NELEM(gMethods));
 }
