@@ -109,7 +109,7 @@ public:
         }
 
         if (isAA && halfStrokeWidth != 0 && inverseScaleX == inverseScaleY &&
-                halfStrokeWidth * inverseScaleX < 0.5f) {
+                2 * halfStrokeWidth < inverseScaleX) {
             maxAlpha *= (2 * halfStrokeWidth) / inverseScaleX;
             halfStrokeWidth = 0.0f;
         }
