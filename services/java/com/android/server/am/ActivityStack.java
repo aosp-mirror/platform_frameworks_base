@@ -2082,351 +2082,6 @@ final class ActivityStack {
      * Perform a reset of the given task, if needed as part of launching it.
      * Returns the new HistoryRecord at the top of the task.
      */
-/*    private final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
-            ActivityRecord newActivity) {
-        mLastHistoryModifier = "resetTaskIfNeededLocked";
-
-        boolean forceReset = (newActivity.info.flags
-                &ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
-        if (ACTIVITY_INACTIVE_RESET_TIME > 0
-                && taskTop.task.getInactiveDuration() > ACTIVITY_INACTIVE_RESET_TIME) {
-            if ((newActivity.info.flags
-                    &ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE) == 0) {
-                forceReset = true;
-            }
-        }
-        
-        final TaskRecord task = taskTop.task;
-        
-        // We are going to move through the history list so that we can look
-        // at each activity 'target' with 'below' either the interesting
-        // activity immediately below it in the stack or null.
-        ActivityRecord target = null;
-        int targetI = 0;
-        int taskTopI = -1;
-        int replyChainEnd = -1;
-        int lastReparentPos = -1;
-        ActivityOptions topOptions = null;
-        boolean canMoveOptions = true;
-        for (int i=mHistory.size()-1; i>=-1; i--) {
-            ActivityRecord below = i >= 0 ? mHistory.get(i) : null;
-            
-            if (below != null && below.finishing) {
-                continue;
-            }
-            // Don't check any lower in the stack if we're crossing a user boundary.
-            if (below != null && below.userId != taskTop.userId) {
-                break;
-            }
-            if (target == null) {
-                target = below;
-                targetI = i;
-                // If we were in the middle of a reply chain before this
-                // task, it doesn't appear like the root of the chain wants
-                // anything interesting, so drop it.
-                replyChainEnd = -1;
-                continue;
-            }
-        
-            final int flags = target.info.flags;
-            
-            final boolean finishOnTaskLaunch =
-                (flags&ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
-            final boolean allowTaskReparenting =
-                (flags&ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0;
-            
-            if (target.task == task) {
-                // We are inside of the task being reset...  we'll either
-                // finish this activity, push it out for another task,
-                // or leave it as-is.  We only do this
-                // for activities that are not the root of the task (since
-                // if we finish the root, we may no longer have the task!).
-                if (taskTopI < 0) {
-                    taskTopI = targetI;
-                }
-                if (below != null && below.task == task) {
-                    final boolean clearWhenTaskReset =
-                            (target.intent.getFlags()
-                                    &Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0;
-                    if (!finishOnTaskLaunch && !clearWhenTaskReset && target.resultTo != null) {
-                        // If this activity is sending a reply to a previous
-                        // activity, we can't do anything with it now until
-                        // we reach the start of the reply chain.
-                        // XXX note that we are assuming the result is always
-                        // to the previous activity, which is almost always
-                        // the case but we really shouldn't count on.
-                        if (replyChainEnd < 0) {
-                            replyChainEnd = targetI;
-                        }
-                    } else if (!finishOnTaskLaunch && !clearWhenTaskReset && allowTaskReparenting
-                            && target.taskAffinity != null
-                            && !target.taskAffinity.equals(task.affinity)) {
-                        // If this activity has an affinity for another
-                        // task, then we need to move it out of here.  We will
-                        // move it as far out of the way as possible, to the
-                        // bottom of the activity stack.  This also keeps it
-                        // correctly ordered with any activities we previously
-                        // moved.
-                        ActivityRecord p = mHistory.get(0);
-                        if (target.taskAffinity != null
-                                && target.taskAffinity.equals(p.task.affinity)) {
-                            // If the activity currently at the bottom has the
-                            // same task affinity as the one we are moving,
-                            // then merge it into the same task.
-                            target.setTask(p.task, p.thumbHolder, false);
-                            if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
-                                    + " out to bottom task " + p.task);
-                        } else {
-                            mService.mCurTask++;
-                            if (mService.mCurTask <= 0) {
-                                mService.mCurTask = 1;
-                            }
-                            target.setTask(createTaskRecord(mService.mCurTask, target.info, null,
-                                    false), null, false);
-                            target.task.affinityIntent = target.intent;
-                            if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
-                                    + " out to new task " + target.task);
-                        }
-                        mService.mWindowManager.setAppGroupId(target.appToken, target.task.taskId);
-                        if (replyChainEnd < 0) {
-                            replyChainEnd = targetI;
-                        }
-                        int dstPos = 0;
-                        ThumbnailHolder curThumbHolder = target.thumbHolder;
-                        boolean gotOptions = !canMoveOptions;
-                        final int taskId = target.task.taskId;
-                        for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
-                            p = mHistory.get(srcPos);
-                            if (p.finishing) {
-                                continue;
-                            }
-                            if (DEBUG_TASKS) Slog.v(TAG, "Pushing next activity " + p
-                                    + " out to target's task " + target.task);
-                            p.setTask(target.task, curThumbHolder, false);
-                            curThumbHolder = p.thumbHolder;
-                            canMoveOptions = false;
-                            if (!gotOptions && topOptions == null) {
-                                topOptions = p.takeOptionsLocked();
-                                if (topOptions != null) {
-                                    gotOptions = true;
-                                }
-                            }
-                            if (DEBUG_ADD_REMOVE) {
-                                RuntimeException here = new RuntimeException("here");
-                                here.fillInStackTrace();
-                                Slog.i(TAG, "Removing and adding activity " + p + " to stack at "
-                                        + dstPos, here);
-                            }
-                            mHistory.remove(srcPos);
-                            mHistory.add(dstPos, p);
-                            mService.mWindowManager.setAppGroupId(p.appToken, taskId);
-                            dstPos++;
-                            i++;
-                        }
-                        rebuildTaskHistory();
-                        mService.mWindowManager.moveTaskToBottom(taskId);
-                        if (VALIDATE_TOKENS) {
-                            validateAppTokensLocked();
-                        }
-                        if (taskTop == p) {
-                            taskTop = below;
-                        }
-                        if (taskTopI == replyChainEnd) {
-                            taskTopI = -1;
-                        }
-                        replyChainEnd = -1;
-                    } else if (forceReset || finishOnTaskLaunch
-                            || clearWhenTaskReset) {
-                        // If the activity should just be removed -- either
-                        // because it asks for it, or the task should be
-                        // cleared -- then finish it and anything that is
-                        // part of its reply chain.
-                        if (clearWhenTaskReset) {
-                            // In this case, we want to finish this activity
-                            // and everything above it, so be sneaky and pretend
-                            // like these are all in the reply chain.
-                            replyChainEnd = targetI+1;
-                            while (replyChainEnd < mHistory.size() &&
-                                    (mHistory.get(replyChainEnd)).task == task) {
-                                replyChainEnd++;
-                            }
-                            replyChainEnd--;
-                        } else if (replyChainEnd < 0) {
-                            replyChainEnd = targetI;
-                        }
-                        ActivityRecord p = null;
-                        boolean gotOptions = !canMoveOptions;
-                        for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
-                            p = mHistory.get(srcPos);
-                            if (p.finishing) {
-                                continue;
-                            }
-                            canMoveOptions = false;
-                            if (!gotOptions && topOptions == null) {
-                                topOptions = p.takeOptionsLocked();
-                                if (topOptions != null) {
-                                    gotOptions = true;
-                                }
-                            }
-                            if (finishActivityLocked(p, srcPos,
-                                    Activity.RESULT_CANCELED, null, "reset", false)) {
-                                replyChainEnd--;
-                                srcPos--;
-                            }
-                        }
-                        if (taskTop == p) {
-                            taskTop = below;
-                        }
-                        if (taskTopI == replyChainEnd) {
-                            taskTopI = -1;
-                        }
-                        replyChainEnd = -1;
-                    } else {
-                        // If we were in the middle of a chain, well the
-                        // activity that started it all doesn't want anything
-                        // special, so leave it all as-is.
-                        replyChainEnd = -1;
-                    }
-                } else {
-                    // Reached the bottom of the task -- any reply chain
-                    // should be left as-is.
-                    replyChainEnd = -1;
-                }
-
-            } else if (target.resultTo != null && (below == null
-                    || below.task == target.task)) {
-                // If this activity is sending a reply to a previous
-                // activity, we can't do anything with it now until
-                // we reach the start of the reply chain.
-                // XXX note that we are assuming the result is always
-                // to the previous activity, which is almost always
-                // the case but we really shouldn't count on.
-                if (replyChainEnd < 0) {
-                    replyChainEnd = targetI;
-                }
-
-            } else if (taskTopI >= 0 && allowTaskReparenting
-                    && task.affinity != null
-                    && task.affinity.equals(target.taskAffinity)) {
-                // We are inside of another task...  if this activity has
-                // an affinity for our task, then either remove it if we are
-                // clearing or move it over to our task.  Note that
-                // we currently punt on the case where we are resetting a
-                // task that is not at the top but who has activities above
-                // with an affinity to it...  this is really not a normal
-                // case, and we will need to later pull that task to the front
-                // and usually at that point we will do the reset and pick
-                // up those remaining activities.  (This only happens if
-                // someone starts an activity in a new task from an activity
-                // in a task that is not currently on top.)
-                if (forceReset || finishOnTaskLaunch) {
-                    if (replyChainEnd < 0) {
-                        replyChainEnd = targetI;
-                    }
-                    ActivityRecord p = null;
-                    if (DEBUG_TASKS) Slog.v(TAG, "Finishing task at index "
-                            + targetI + " to " + replyChainEnd);
-                    for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
-                        p = mHistory.get(srcPos);
-                        if (p.finishing) {
-                            continue;
-                        }
-                        if (finishActivityLocked(p, srcPos,
-                                Activity.RESULT_CANCELED, null, "reset", false)) {
-                            taskTopI--;
-                            lastReparentPos--;
-                            replyChainEnd--;
-                            srcPos--;
-                        }
-                    }
-                    replyChainEnd = -1;
-                } else {
-                    if (replyChainEnd < 0) {
-                        replyChainEnd = targetI;
-                    }
-                    final int taskId = task.taskId;
-                    if (DEBUG_TASKS) Slog.v(TAG, "Reparenting task at index "
-                            + targetI + " to " + replyChainEnd);
-                    for (int srcPos=replyChainEnd; srcPos>=targetI; srcPos--) {
-                        ActivityRecord p = mHistory.get(srcPos);
-                        if (p.finishing) {
-                            continue;
-                        }
-                        if (lastReparentPos < 0) {
-                            lastReparentPos = taskTopI;
-                            taskTop = p;
-                        } else {
-                            lastReparentPos--;
-                        }
-                        if (DEBUG_ADD_REMOVE) {
-                            RuntimeException here = new RuntimeException("here");
-                            here.fillInStackTrace();
-                            Slog.i(TAG, "Removing and adding activity " + p + " to stack at "
-                                    + lastReparentPos, here);
-                        }
-                        mHistory.remove(srcPos);
-                        p.setTask(task, null, false);
-                        mHistory.add(lastReparentPos, p);
-                        if (DEBUG_TASKS) Slog.v(TAG, "Pulling activity " + p
-                                + " from " + srcPos + " to " + lastReparentPos
-                                + " in to resetting task " + task);
-                        mService.mWindowManager.setAppGroupId(p.appToken, taskId);
-                    }
-                    rebuildTaskHistory();
-                    // TODO: This is wrong because it doesn't take lastReparentPos into account.
-                    mService.mWindowManager.moveTaskToTop(taskId);
-                    if (VALIDATE_TOKENS) {
-                        validateAppTokensLocked();
-                    }
-                    replyChainEnd = -1;
-                    
-                    // Now we've moved it in to place...  but what if this is
-                    // a singleTop activity and we have put it on top of another
-                    // instance of the same activity?  Then we drop the instance
-                    // below so it remains singleTop.
-                    if (target.info.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
-                        for (int j=lastReparentPos-1; j>=0; j--) {
-                            ActivityRecord p = mHistory.get(j);
-                            if (p.finishing) {
-                                continue;
-                            }
-                            if (p.intent.getComponent().equals(target.intent.getComponent())) {
-                                if (finishActivityLocked(p, j,
-                                        Activity.RESULT_CANCELED, null, "replace", false)) {
-                                    taskTopI--;
-                                    lastReparentPos--;
-                                }
-                            }
-                        }
-                    }
-                }
-
-            } else if (below != null && below.task != target.task) {
-                // We hit the botton of a task; the reply chain can't
-                // pass through it.
-                replyChainEnd = -1;
-            }
-            
-            target = below;
-            targetI = i;
-        }
-
-        if (topOptions != null) {
-            // If we got some ActivityOptions from an activity on top that
-            // was removed from the task, propagate them to the new real top.
-            if (taskTop != null) {
-                taskTop.updateOptionsLocked(topOptions);
-            } else {
-                topOptions.abort();
-            }
-        }
-
-        if (VALIDATE_TASK_REPLACE) {
-            verifyActivityRecords(true);
-        }
-        return taskTop;
-    }
-*/
     /**
      * Helper method for #resetTaskIfNeededLocked.
      * We are inside of the task being reset...  we'll either finish this activity, push it out
@@ -2772,39 +2427,22 @@ final class ActivityStack {
      * @return Returns the old activity that should be continued to be used,
      * or null if none was found.
      */
-    private final ActivityRecord performClearTaskLocked(int taskId,
+    private final ActivityRecord performClearTaskLocked(TaskRecord task,
             ActivityRecord newR, int launchFlags) {
-        int i = mHistory.size();
-        
-        // First find the requested task.
-        while (i > 0) {
-            i--;
-            ActivityRecord r = mHistory.get(i);
-            if (r.task.taskId == taskId) {
-                i++;
-                break;
-            }
-        }
-        
-        // Now clear it.
-        while (i > 0) {
-            i--;
-            ActivityRecord r = mHistory.get(i);
+
+        final ArrayList<ActivityRecord> activities = task.mActivities;
+        int numActivities = activities.size();
+        for (int activityNdx = numActivities - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord r = activities.get(activityNdx);
             if (r.finishing) {
                 continue;
-            }
-            if (r.task.taskId != taskId) {
-                return null;
             }
             if (r.realActivity.equals(newR.realActivity)) {
                 // Here it is!  Now finish everything in front...
                 ActivityRecord ret = r;
-                while (i < (mHistory.size()-1)) {
-                    i++;
-                    r = mHistory.get(i);
-                    if (r.task.taskId != taskId) {
-                        break;
-                    }
+
+                for (++activityNdx; activityNdx < numActivities; ++activityNdx) {
+                    r = activities.get(activityNdx);
                     if (r.finishing) {
                         continue;
                     }
@@ -2812,27 +2450,26 @@ final class ActivityStack {
                     if (opts != null) {
                         ret.updateOptionsLocked(opts);
                     }
-                    if (finishActivityLocked(r, Activity.RESULT_CANCELED, null,
-                            "clear", false)) {
-                        i--;
+                    if (finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear", false)) {
+                        --activityNdx;    
+                        --numActivities;
                     }
                 }
-                
+
                 // Finally, if this is a normal launch mode (that is, not
                 // expecting onNewIntent()), then we will finish the current
                 // instance of the activity so a new fresh one can be started.
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
-                        && (launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
+                        && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
                     if (!ret.finishing) {
-                        int index = mHistory.indexOf(ret);
-                        if (index >= 0) {
+                        if (activities.contains(ret)) {
                             finishActivityLocked(ret, Activity.RESULT_CANCELED, null,
                                     "clear", false);
                         }
                         return null;
                     }
                 }
-                
+
                 return ret;
             }
         }
@@ -2844,20 +2481,17 @@ final class ActivityStack {
      * Completely remove all activities associated with an existing
      * task starting at a specified index.
      */
-    private final void performClearTaskAtIndexLocked(int taskId, int i) {
-        while (i < mHistory.size()) {
-            ActivityRecord r = mHistory.get(i);
-            if (r.task.taskId != taskId) {
-                // Whoops hit the end.
-                return;
-            }
+    private final void performClearTaskAtIndexLocked(TaskRecord task, int activityNdx) {
+        final ArrayList<ActivityRecord> activities = task.mActivities;
+        int numActivities = activities.size();
+        for ( ; activityNdx < numActivities; ++activityNdx) {
+            final ActivityRecord r = activities.get(activityNdx);
             if (r.finishing) {
-                i++;
                 continue;
             }
-            if (!finishActivityLocked(r, Activity.RESULT_CANCELED, null,
-                    "clear", false)) {
-                i++;
+            if (finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear", false)) {
+                --activityNdx;
+                --numActivities;
             }
         }
     }
@@ -2865,32 +2499,8 @@ final class ActivityStack {
     /**
      * Completely remove all activities associated with an existing task.
      */
-    private final void performClearTaskLocked(int taskId) {
-        int i = mHistory.size();
-
-        // First find the requested task.
-        while (i > 0) {
-            i--;
-            ActivityRecord r = mHistory.get(i);
-            if (r.task.taskId == taskId) {
-                i++;
-                break;
-            }
-        }
-
-        // Now find the start and clear it.
-        while (i > 0) {
-            i--;
-            ActivityRecord r = mHistory.get(i);
-            if (r.finishing) {
-                continue;
-            }
-            if (r.task.taskId != taskId) {
-                // We hit the bottom.  Now finish it all...
-                performClearTaskAtIndexLocked(taskId, i+1);
-                return;
-            }
-        }
+    private final void performClearTaskLocked(TaskRecord task) {
+        performClearTaskAtIndexLocked(task, 0);
     }
 
     /**
@@ -3274,7 +2884,7 @@ final class ActivityStack {
                         // existing task with its new activity.  Well that should
                         // not be too hard...
                         reuseTask = taskTop.task;
-                        performClearTaskLocked(taskTop.task.taskId);
+                        performClearTaskLocked(taskTop.task);
                         reuseTask.setIntent(r.intent, r.info);
                     } else if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK
@@ -3283,8 +2893,7 @@ final class ActivityStack {
                         // from the task up to the one being started.  In most
                         // cases this means we are resetting the task to its
                         // initial state.
-                        ActivityRecord top = performClearTaskLocked(
-                                taskTop.task.taskId, r, launchFlags);
+                        ActivityRecord top = performClearTaskLocked(taskTop.task, r, launchFlags);
                         if (top != null) {
                             if (top.frontOfTask) {
                                 // Activity aliases may mean we use different
@@ -3437,8 +3046,7 @@ final class ActivityStack {
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
-                ActivityRecord top = performClearTaskLocked(
-                        sourceRecord.task.taskId, r, launchFlags);
+                ActivityRecord top = performClearTaskLocked(sourceRecord.task, r, launchFlags);
                 keepCurTransition = true;
                 if (top != null) {
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
@@ -5084,7 +4692,7 @@ final class ActivityStack {
     }
 
     public ActivityManager.TaskThumbnails getTaskThumbnailsLocked(TaskRecord tr) {
-        TaskAccessInfo info = getTaskAccessInfoLocked(tr.taskId, true);
+        TaskAccessInfo info = getTaskAccessInfoLocked(tr, true);
         ActivityRecord resumed = mResumedActivity;
         if (resumed != null && resumed.thumbHolder == tr) {
             info.mainThumbnail = resumed.stack.screenshotActivities(resumed);
@@ -5104,7 +4712,7 @@ final class ActivityStack {
         }
         // Return the information about the task, to figure out the top
         // thumbnail to return.
-        TaskAccessInfo info = getTaskAccessInfoLocked(tr.taskId, true);
+        TaskAccessInfo info = getTaskAccessInfoLocked(tr, true);
         if (info.numSubThumbbails <= 0) {
             return info.mainThumbnail != null ? info.mainThumbnail : tr.lastThumbnail;
         }
@@ -5113,7 +4721,8 @@ final class ActivityStack {
 
     public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex,
             boolean taskRequired) {
-        TaskAccessInfo info = getTaskAccessInfoLocked(taskId, false);
+        final TaskRecord task = mTaskIdToTaskRecord.get(taskId);
+        TaskAccessInfo info = getTaskAccessInfoLocked(task, false);
         if (info.root == null) {
             if (taskRequired) {
                 Slog.w(TAG, "removeTaskLocked: unknown taskId " + taskId);
@@ -5123,7 +4732,7 @@ final class ActivityStack {
 
         if (subTaskIndex < 0) {
             // Just remove the entire task.
-            performClearTaskAtIndexLocked(taskId, info.rootIndex);
+            performClearTaskAtIndexLocked(task, info.rootIndex);
             return info.root;
         }
 
@@ -5136,19 +4745,20 @@ final class ActivityStack {
 
         // Remove all of this task's activities starting at the sub task.
         TaskAccessInfo.SubTask subtask = info.subtasks.get(subTaskIndex);
-        performClearTaskAtIndexLocked(taskId, subtask.index);
+        performClearTaskAtIndexLocked(task, subtask.index);
         return subtask.activity;
     }
 
-    public TaskAccessInfo getTaskAccessInfoLocked(int taskId, boolean inclThumbs) {
+    public TaskAccessInfo getTaskAccessInfoLocked(TaskRecord task, boolean inclThumbs) {
         final TaskAccessInfo thumbs = new TaskAccessInfo();
         // How many different sub-thumbnails?
-        final int NA = mHistory.size();
+        final ArrayList<ActivityRecord> activities = task.mActivities;
+        final int NA = activities.size();
         int j = 0;
         ThumbnailHolder holder = null;
         while (j < NA) {
-            ActivityRecord ar = mHistory.get(j);
-            if (!ar.finishing && ar.task.taskId == taskId) {
+            ActivityRecord ar = activities.get(j);
+            if (!ar.finishing) {
                 thumbs.root = ar;
                 thumbs.rootIndex = j;
                 holder = ar.thumbHolder;
@@ -5168,13 +4778,10 @@ final class ActivityStack {
         ArrayList<TaskAccessInfo.SubTask> subtasks = new ArrayList<TaskAccessInfo.SubTask>();
         thumbs.subtasks = subtasks;
         while (j < NA) {
-            ActivityRecord ar = mHistory.get(j);
+            ActivityRecord ar = activities.get(j);
             j++;
             if (ar.finishing) {
                 continue;
-            }
-            if (ar.task.taskId != taskId) {
-                break;
             }
             if (ar.thumbHolder != holder && holder != null) {
                 thumbs.numSubThumbbails++;
