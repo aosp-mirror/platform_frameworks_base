@@ -779,6 +779,11 @@ private:
     void resetDrawTextureTexCoords(float u1, float v1, float u2, float v2);
 
     /**
+     * Returns true if the specified paint will draw invisible text.
+     */
+    bool canSkipText(const SkPaint* paint) const;
+
+    /**
      * Binds the specified texture. The texture unit must have been selected
      * prior to calling this method.
      */

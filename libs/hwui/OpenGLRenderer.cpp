@@ -2555,10 +2555,14 @@ void OpenGLRenderer::drawTextShadow(SkPaint* paint, const char* text, int bytesC
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
 
+bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
+    float alpha = (mDrawModifiers.mHasShadow ? 1.0f : paint->getAlpha()) * mSnapshot->alpha;
+    return alpha == 0.0f && getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
+}
+
 status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
-    if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
-            (paint->getAlpha() * mSnapshot->alpha == 0 && paint->getXfermode() == NULL)) {
+    if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2630,8 +2634,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
 
 status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, SkPaint* paint, float length) {
-    if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
-            (paint->getAlpha() * mSnapshot->alpha == 0 && paint->getXfermode() == NULL)) {
+    if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2735,8 +2738,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
 status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
         float hOffset, float vOffset, SkPaint* paint) {
-    if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
-            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+    if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
         return DrawGlInfo::kStatusDone;
     }
 
