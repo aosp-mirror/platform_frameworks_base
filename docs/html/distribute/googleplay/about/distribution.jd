@@ -125,7 +125,20 @@ download of the files as part of the normal APK installation.</p>
 
 <h2 id="licensing">Protecting your App</h2>
 
-<p>To help you protect your application against piracy, Google Play offers a
-licensing service that you can implement in your app. It’s a network-based
-service that lets an application query a trusted Google Play licensing server to
-determine whether the application is licensed to the current device user.</p>
+<p>Google Play provides two key features to help you protect your application
+against piracy &mdash; Google Play Licensing and app encryption.</p>
+
+<p> Google Play Licensing is a network-based service that you implement in your
+app. The service lets your app query a trusted licensing server at runtime, to
+determine whether the app is licensed to the current device user. You can use
+the licensing service to protect any app, even apps that you distribute for
+free. For an overview of the service, see <a
+href="{@docRoot}google/play/licensing/index.html">Application
+Licensing</a>.</p>
+
+<p>Additionally, Google Play offers app encryption to help protect your priced
+apps. When delivering your priced apps to devices running Android 4.1 or higher,
+Google encrypts the app binary so that it can be run only by the user who
+downloaded it, on the device to which it was originally downloaded. Your priced
+apps benefit from app encryption automatically &mdash; there's no extra
+development work or configuration needed.</p>
