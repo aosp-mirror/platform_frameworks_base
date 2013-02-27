@@ -196,6 +196,9 @@ public final class NfcAdapter {
     public static final int STATE_TURNING_OFF = 4;
 
     /** @hide */
+    public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 0x1;
+
+    /** @hide */
     public static final String ACTION_HANDOVER_TRANSFER_STARTED =
             "android.nfc.action.HANDOVER_TRANSFER_STARTED";
 
@@ -796,12 +799,12 @@ public final class NfcAdapter {
             if (activity == null) {
                 throw new NullPointerException("activity cannot be null");
             }
-            mNfcActivityManager.setNdefPushMessage(activity, message);
+            mNfcActivityManager.setNdefPushMessage(activity, message, 0);
             for (Activity a : activities) {
                 if (a == null) {
                     throw new NullPointerException("activities cannot contain null");
                 }
-                mNfcActivityManager.setNdefPushMessage(a, message);
+                mNfcActivityManager.setNdefPushMessage(a, message, 0);
             }
         } catch (IllegalStateException e) {
             if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
@@ -813,6 +816,16 @@ public final class NfcAdapter {
                 throw(e);
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void setNdefPushMessage(NdefMessage message, Activity activity, int flags) {
+        if (activity == null) {
+            throw new NullPointerException("activity cannot be null");
+        }
+        mNfcActivityManager.setNdefPushMessage(activity, message, flags);
     }
 
     /**
@@ -887,12 +900,12 @@ public final class NfcAdapter {
             if (activity == null) {
                 throw new NullPointerException("activity cannot be null");
             }
-            mNfcActivityManager.setNdefPushMessageCallback(activity, callback);
+            mNfcActivityManager.setNdefPushMessageCallback(activity, callback, 0);
             for (Activity a : activities) {
                 if (a == null) {
                     throw new NullPointerException("activities cannot contain null");
                 }
-                mNfcActivityManager.setNdefPushMessageCallback(a, callback);
+                mNfcActivityManager.setNdefPushMessageCallback(a, callback, 0);
             }
         } catch (IllegalStateException e) {
             if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
@@ -904,6 +917,17 @@ public final class NfcAdapter {
                 throw(e);
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
+            int flags) {
+        if (activity == null) {
+            throw new NullPointerException("activity cannot be null");
+        }
+        mNfcActivityManager.setNdefPushMessageCallback(activity, callback, flags);
     }
 
     /**
@@ -1095,7 +1119,7 @@ public final class NfcAdapter {
             throw new NullPointerException();
         }
         enforceResumed(activity);
-        mNfcActivityManager.setNdefPushMessage(activity, message);
+        mNfcActivityManager.setNdefPushMessage(activity, message, 0);
     }
 
     /**
@@ -1123,8 +1147,8 @@ public final class NfcAdapter {
             throw new NullPointerException();
         }
         enforceResumed(activity);
-        mNfcActivityManager.setNdefPushMessage(activity, null);
-        mNfcActivityManager.setNdefPushMessageCallback(activity, null);
+        mNfcActivityManager.setNdefPushMessage(activity, null, 0);
+        mNfcActivityManager.setNdefPushMessageCallback(activity, null, 0);
         mNfcActivityManager.setOnNdefPushCompleteCallback(activity, null);
     }
 
