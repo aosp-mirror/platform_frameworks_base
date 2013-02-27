@@ -355,7 +355,7 @@ NotificationCompat.InboxStyle inboxStyle =
         new NotificationCompat.InboxStyle();
 String[] events = new String[6];
 // Sets a title for the Inbox style big view
-inboxStyle.SetBigContentTitle("Event tracker details:");
+inboxStyle.setBigContentTitle("Event tracker details:");
 ...
 // Moves events into the big view
 for (int i=0; i &lt; events.length; i++) {
