@@ -39,6 +39,11 @@ static const float EPSILON = 0.0000001f;
 // Matrix
 ///////////////////////////////////////////////////////////////////////////////
 
+const Matrix4& Matrix4::identity() {
+    static Matrix4 sIdentity;
+    return sIdentity;
+}
+
 void Matrix4::loadIdentity() {
     data[kScaleX]       = 1.0f;
     data[kSkewY]        = 0.0f;
