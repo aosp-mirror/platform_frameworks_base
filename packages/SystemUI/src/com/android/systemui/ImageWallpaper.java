@@ -378,6 +378,7 @@ public class ImageWallpaper extends WallpaperService {
             if (DEBUG) {
                 Log.d(TAG, "Redrawing wallpaper");
             }
+
             if (mIsHwAccelerated) {
                 if (!drawWallpaperWithOpenGL(sh, availw, availh, xPixels, yPixels)) {
                     drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
@@ -640,13 +641,26 @@ public class ImageWallpaper extends WallpaperService {
             }
             
             mEglContext = createContext(mEgl, mEglDisplay, mEglConfig);
+
+            int[] maxSize = new int[1];
+            Rect frame = surfaceHolder.getSurfaceFrame();
+            glGetIntegerv(GL_MAX_TEXTURE_SIZE, maxSize, 0);
+            if(frame.width() > maxSize[0] || frame.height() > maxSize[0]) {
+                mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+                mEgl.eglTerminate(mEglDisplay);
+                Log.e(GL_LOG_TAG, "requested  texture size " +
+                    frame.width() + "x" + frame.height() + " exceeds the support maximum of " +
+                    maxSize[0] + "x" + maxSize[0]);
+                return false;
+            }
     
             mEglSurface = mEgl.eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, null);
     
             if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
                 int error = mEgl.eglGetError();
-                if (error == EGL_BAD_NATIVE_WINDOW) {
-                    Log.e(GL_LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
+                if (error == EGL_BAD_NATIVE_WINDOW || error == EGL_BAD_ALLOC) {
+                    Log.e(GL_LOG_TAG, "createWindowSurface returned " +
+                                         GLUtils.getEGLErrorString(error) + ".");
                     return false;
                 }
                 throw new RuntimeException("createWindowSurface failed " +
