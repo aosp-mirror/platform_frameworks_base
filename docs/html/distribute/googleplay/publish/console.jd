@@ -4,7 +4,7 @@ page.title=Developer Console
 
 <p>Once you've <a
 href="{@docRoot}distribute/googleplay/publish/register.html">registered</a> and
-received verification by email, you can sign in to your Google Play Android
+received verification by email, you can sign in to your Google Play
 Developer Console, which will be the home for your app publishing operations and
 tools on Google Play. This sections below introduce a few of the key areas
 you'll find in the Developer Console.</p>
