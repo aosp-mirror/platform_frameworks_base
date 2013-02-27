@@ -203,11 +203,19 @@ distributing large apps. However, the use of APK Expansion Files requires some
 changes in your app binary, so you will need to make those changes before
 creating your release-ready APK.</p>
 
+<p>To minimize the size of your app binary, make sure that you run the
+<a href="{@docRoot}tools/help/proguard.html">Proguard</a> tool on your code when
+building your release-ready APK.</p>
+
 <table>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a></strong> &mdash; Developer documentation describing APK Expansion Files and how to support them in your app.</li>
+<li><strong><a href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a></strong>
+&mdash; Developer documentation describing APK Expansion Files and how to support them in your app.</li>
+<li><strong><a href="{@docRoot}tools/help/proguard.html">ProGuard</a></strong> &mdash; Developer
+documentation describing how to use ProGuard to shrink, optimize, and obfuscate your code prior
+to release.</li>
 </ul>
 </td>
 </tr>
