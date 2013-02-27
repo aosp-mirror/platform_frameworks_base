@@ -24,16 +24,17 @@ the rollout across your customer base, Google Play also lets users accept
 automatic updates of your app, so that your updates are delivered and installed
 as soon as you publish them.</p>
 
+
 <h2 id="targeting">Reaching the customers you want</h2>
+
+<div class="figure-right" style="width:400px;">
+<img src="{@docRoot}images/gp-dc-countries.png" class="frame">
+</div>
 
 <p>Google Play does more than connect your app with users&mdash;it helps you
 reach the broadest possible distribution across the Android ecosystem, while
 making sure that your app is only available to the audience that you want to
 reach.</p>
-
-<div style="float:right;margin-left:18px;border:1px solid #DDD;margin:1.5em;">
-<img src="{@docRoot}images/gp-dc-countries.png" style="width:400px;padding:4px;margin-bottom:0;">
-</div>
 
 <h3 id="geotargeting">Geographic targeting</h3>
 
@@ -47,15 +48,14 @@ your targeted countries before downloading your app. You can change your country
 and carrier targeting at any time just by saving changes in the Google Play
 Developer Console.</p>
 
+<div class="figure-right" style="width:400px;">
+<img src="{@docRoot}images/gp-supported-dev-requirements.png" class="frame">
+</div>
+
 <p>To help you market to users around the world, you
 can <a href="{@docRoot}distribute/googleplay/publish/preparing.html#localize">localize
 your store listing</a>, including app details and description,
 promotional graphics, screenshots, and more.</p>
-
-<div style="float:right;margin-left:18px;border:1px solid #DDD;margin:1.5em;">
-<img src="{@docRoot}images/gp-supported-dev-requirements.png"
-style="width:400px;padding:4px;margin-bottom:0;">
-</div>
 
 <h3 id="captargeting">Capabilities targeting</h3>
 

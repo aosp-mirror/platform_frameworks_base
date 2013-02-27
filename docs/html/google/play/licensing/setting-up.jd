@@ -32,29 +32,25 @@ environment</a></li>
 </div>
 
 <p>Before you start adding license verification to your application, you need to set up your Google
-Play publishing account, your development environment, and test accounts required to verify
+Play publishing account, your development environment, and any test accounts required to verify
 your implementation.</p>
 
 
 <h2 id="account">Setting Up a Publisher Account</h2>
 
 <p>If you don't already have a publisher account for Google Play, you need to register for one
-using your Google account and agree to the terms of service on the Google Play publisher site:</p>
-
-<p style="margin-left:2em;"><a
-href="http://play.google.com/apps/publish">http://play.google.com/apps/publish</a>
-</p>
+using your Google account and agree to the Google Play terms of service.</p>
 
 <p>For more information, see <a
 href="{@docRoot}distribute/googleplay/publish/register.html">Get Started with Publishing</a>.</p>
 
-<p>If you already have a publisher account on Google Play, use your existing
-account to set up licensing.</p>
+<p>If you already have a publisher account on Google Play, use your
+Developer Console to set up licensing.</p>
 
-<p>Using your publisher account on Google Play, you can:</p>
+<p>Using the Google Play Developer Console, you can:</p>
 
 <ul>
-<li>Obtain a public key for licensing</li>
+<li>Obtain an app-specific public key for licensing</li>
 <li>Debug and test an application's licensing implementation, prior to
 publishing the application</li>
 <li>Publish the applications to which you have added licensing support</li>
@@ -63,31 +59,33 @@ publishing the application</li>
 <h4>Administrative settings for licensing</h4>
 
 <p>You can manage several
-administrative controls for Google Play licensing on the publisher site. The controls are available
-in the Edit Profile page, in the "Licensing" panel, shown in figure 1. The controls
+administrative controls for Google Play licensing in the Developer Console. The controls
 let you: </p>
 
 <ul>
 <li>Set up multiple "test accounts," identified by email address. The licensing
 server allows users signed in to test accounts on a device or emulator to send
-license checks and receive static test responses.</li>
-<li>Obtain the account's public key for licensing. When you are implementing
-licensing in an application, you must copy the public key string into the
-application.</li>
+license checks and receive static test responses. You can set up accounts in the
+Account Details page of the Developer Console.</li>
 <li>Configure static test responses that the server sends, when it receives a
 license check for an application uploaded to the publisher account, from a user
-signed in to the publisher account or a test account.</li>
+signed in to the publisher account or a test account. You can set test responses
+in the Account Details page of the Developer Console.</li>
+<li>Obtain the app's public key for licensing. When you are implementing
+licensing in an application, you must copy the public key string into the
+application. You can obtain the app's public key for licensing in the Services
+& APIs page (under All Applications).</li>
 </ul>
 
-
-<img src="{@docRoot}images/licensing_public_key.png" alt=""/>
-<p class="img-caption"><strong>Figure 1.</strong> The Licensing
-panel of your account's Edit Profile page lets you manage administrative
-settings for licensing.</p>
+<div style="width:640px;">
+<img src="{@docRoot}images/licensing_public_key.png" class="frame">
+<p class="img-caption"><strong>Figure
+2.</strong> An app's license key is available from the Services &amp; APIs page in
+the Developer Console.</p>
+</div>
 
 <p>For more information about how to work with test accounts and static test
 responses, see <a href="#test-env">Setting Up a Testing Environment</a>, below.
-
 
 
 <h2 id="dev-setup">Setting Up the Development Environment</h2>
@@ -432,9 +430,9 @@ Setting up a Library Project</a>.</p>
 
 <h2 id="test-env">Setting Up the Testing Environment</h2>
 
-<p>The Google Play publisher site provides configuration tools that let you
+<p>The Google Play Developer Console provides configuration tools that let you
 and others test licensing on your application before it is published. As you are
-implementing licensing, you can make use of the publisher site tools to test
+implementing licensing, you can make use of the Developer Console tools to test
 your application's Policy and handling of different licensing responses and
 error conditions.</p>
 
@@ -487,10 +485,12 @@ href="{@docRoot}google/play/licensing/licensing-reference.html#server-response-c
 Response Codes</a> in the <a
 href="{@docRoot}google/play/licensing/licensing-reference.html">Licensing Reference</a>.</p>
 
-<img src="{@docRoot}images/licensing_test_response.png" alt=""/>
-<p class="img-caption"><strong>Figure 4.</strong> The Licensing
-panel of your account's Edit Profile page, showing the Test Accounts field and the
-Test Response menu.</p>
+<div style="width:640px;">
+<img src="{@docRoot}images/licensing_test_response.png" class="frame">
+<p class="img-caption"><strong>Figure 4.</strong> The License Testing
+panel of your Account details page lets you set up test accounts and
+manage test responses.</p>
+</div>
 
 <p>Note that the test response that you configure applies account-wide &mdash;
 that is, it applies not to a single application, but to <em>all</em>
@@ -516,7 +516,7 @@ test responses available and their meanings. </p>
 <p>In some cases, you might want to let multiple teams of developers test
 licensing on applications that will ultimately be published through your
 publisher account, but without giving them access to your publisher account's
-sign-in credentials. To meet that need, the Google Play publisher site lets
+sign-in credentials. To meet that need, the Google Play Developer Console lets
 you set up one or more optional <em>test accounts</em> &mdash; accounts that are
 authorized to query the licensing server and receive static test responses from
 your publisher account.</p>
@@ -609,13 +609,13 @@ upload a new version if the local application increments the
 
 <p>The licensing server handles static test responses in the normal way,
 including signing the license response data, adding extras parameters, and so
-on. To support developers who are implementing licensing using test accounts,
+on. To support developers who are implementing licensing using test accounts
 rather than the publisher account, you will need to distribute
-your public key to them. Developers without access to the publisher site do not
-have access to your public key, and without the key they won't be able to
-verify license responses. </p>
+the app's public key for licensing to them. Developers without access to the
+Developer Console do not have access to the app's public key, and without
+the key they won't be able to verify license responses. </p>
 
-<p>Note that if you decide to generate a new licensing key pair for your account
+<p>Note that if you decide to generate a new licensing key pair for the app
 for some reason, you need to notify all users of test accounts. For
 testers, you can embed the new key in the application package and distribute it
 to users. For developers, you will need to distribute the new key to them
@@ -661,7 +661,7 @@ href="#runtime-setup">Setting up the runtime environment</a>, above.</p>
 
 <p>Signing in using a publisher account offers the advantage of letting your
 applications receive static test responses even before the applications are
-uploaded to the publisher site.</p>
+uploaded to the Developer Console.</p>
 
 <p>If you are part of a larger organization or are working with external groups
 on applications that will be published through your site, you will more likely
