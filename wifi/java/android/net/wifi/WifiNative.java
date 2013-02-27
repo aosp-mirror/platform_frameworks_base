@@ -202,6 +202,7 @@ public class WifiNative {
     /**
      * Format of results:
      * =================
+     * id=1
      * bssid=68:7f:74:d7:1b:6e
      * freq=2412
      * level=-43
@@ -211,10 +212,11 @@ public class WifiNative {
      * ssid=zubyb
      *
      * RANGE=ALL gets all scan results
+     * RANGE=ID- gets results from ID
      * MASK=<N> see wpa_supplicant/src/common/wpa_ctrl.h for details
      */
-    public String scanResults() {
-        return doStringCommand("BSS RANGE=ALL MASK=0x1986");
+    public String scanResults(int sid) {
+        return doStringCommand("BSS RANGE=" + sid + "- MASK=0x1987");
     }
 
     public boolean startDriver() {
