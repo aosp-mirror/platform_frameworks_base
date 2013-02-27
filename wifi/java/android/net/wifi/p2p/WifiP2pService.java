@@ -1839,7 +1839,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private void sendPeersChangedBroadcast() {
         final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        intent.putExtra(WifiP2pManager.EXTRA_P2P_DEVICE_LIST, mPeers);
+        intent.putExtra(WifiP2pManager.EXTRA_P2P_DEVICE_LIST, new WifiP2pDeviceList(mPeers));
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
