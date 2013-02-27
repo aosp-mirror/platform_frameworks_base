@@ -130,7 +130,7 @@ public final class Debug
         public int otherSharedDirty;
 
         /** @hide */
-        public static final int NUM_OTHER_STATS = 9;
+        public static final int NUM_OTHER_STATS = 10;
 
         private int[] otherStats = new int[NUM_OTHER_STATS*3];
 
@@ -177,15 +177,16 @@ public final class Debug
         /* @hide */
         public static String getOtherLabel(int which) {
             switch (which) {
-                case 0: return "Cursor";
-                case 1: return "Ashmem";
-                case 2: return "Other dev";
-                case 3: return ".so mmap";
-                case 4: return ".jar mmap";
-                case 5: return ".apk mmap";
-                case 6: return ".ttf mmap";
-                case 7: return ".dex mmap";
-                case 8: return "Other mmap";
+                case 0: return "Stack";
+                case 1: return "Cursor";
+                case 2: return "Ashmem";
+                case 3: return "Other dev";
+                case 4: return ".so mmap";
+                case 5: return ".jar mmap";
+                case 6: return ".apk mmap";
+                case 7: return ".ttf mmap";
+                case 8: return ".dex mmap";
+                case 9: return "Other mmap";
                 default: return "????";
             }
         }
