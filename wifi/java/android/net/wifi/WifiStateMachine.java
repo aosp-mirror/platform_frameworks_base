@@ -1416,6 +1416,7 @@ public class WifiStateMachine extends StateMachine {
             tmpResults = mWifiNative.scanResults(sid);
             if (TextUtils.isEmpty(tmpResults)) break;
             scanResultsBuf.append(tmpResults);
+            scanResultsBuf.append("\n");
             if (tmpResults.length() < SCAN_BUF_RANGE) break;
             String[] lines = tmpResults.split("\n");
             sid = -1;
