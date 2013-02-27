@@ -2942,8 +2942,14 @@ void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
     mDrawModifiers.mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
 }
 
-SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
-    if (CC_LIKELY(!mDrawModifiers.mHasDrawFilter || !paint)) return paint;
+SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint, bool alwaysCopy) {
+    if (CC_LIKELY(!mDrawModifiers.mHasDrawFilter || !paint)) {
+        if (CC_UNLIKELY(alwaysCopy)) {
+            mFilteredPaint = *paint;
+            return &mFilteredPaint;
+        }
+        return paint;
+    }
 
     uint32_t flags = paint->getFlags();
 
