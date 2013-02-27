@@ -63,7 +63,7 @@ public class RenamingDelegatingContext extends ContextWrapper {
         if (allowAccessToExistingFilesAndDbs) {
             mContext.makeExistingFilesAndDbsAccessible();
         }
-        mProvider.attachInfo(mContext, null);
+        mProvider.attachInfoForTesting(mContext, null);
         return mProvider;
     }
 
