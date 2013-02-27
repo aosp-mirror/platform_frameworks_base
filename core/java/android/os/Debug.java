@@ -45,7 +45,7 @@ import dalvik.system.VMDebug;
 
 
 /**
- * Provides various debugging functions for Android applications, including
+ * Provides various debugging methods for Android applications, including
  * tracing and allocation counts.
  * <p><strong>Logging Trace Files</strong></p>
  * <p>Debug can create log files that give details about an application, such as
@@ -554,16 +554,19 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Start counting the number and aggregate size of memory allocations.
      *
-     * <p>The {@link #startAllocCounting() start} function resets the counts and enables counting.
-     * The {@link #stopAllocCounting() stop} function disables the counting so that the analysis
-     * code doesn't cause additional allocations.  The various <code>get</code> functions return
-     * the specified value. And the various <code>reset</code> functions reset the specified
+     * <p>The {@link #startAllocCounting() start} method resets the counts and enables counting.
+     * The {@link #stopAllocCounting() stop} method disables the counting so that the analysis
+     * code doesn't cause additional allocations.  The various <code>get</code> methods return
+     * the specified value. And the various <code>reset</code> methods reset the specified
      * count.</p>
      *
-     * <p>Counts are kept for the system as a whole and for each thread.
+     * <p>Counts are kept for the system as a whole (global) and for each thread.
      * The per-thread counts for threads other than the current thread
      * are not cleared by the "reset" or "start" calls.</p>
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void startAllocCounting() {
         VMDebug.startAllocCounting();
     }
@@ -577,32 +580,122 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
         VMDebug.stopAllocCounting();
     }
 
+    /**
+     * Returns the global count of objects allocated by the runtime between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
     public static int getGlobalAllocCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_OBJECTS);
     }
+
+    /**
+     * Clears the global count of objects allocated.
+     * @see #getGlobalAllocCount()
+     */
+    public static void resetGlobalAllocCount() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_OBJECTS);
+    }
+
+    /**
+     * Returns the global size, in bytes, of objects allocated by the runtime between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
     public static int getGlobalAllocSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
     }
+
+    /**
+     * Clears the global size of objects allocated.
+     * @see #getGlobalAllocCountSize()
+     */
+    public static void resetGlobalAllocSize() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
+    }
+
+    /**
+     * Returns the global count of objects freed by the runtime between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
     public static int getGlobalFreedCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_FREED_OBJECTS);
     }
+
+    /**
+     * Clears the global count of objects freed.
+     * @see #getGlobalFreedCount()
+     */
+    public static void resetGlobalFreedCount() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_OBJECTS);
+    }
+
+    /**
+     * Returns the global size, in bytes, of objects freed by the runtime between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
     public static int getGlobalFreedSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
     }
+
+    /**
+     * Clears the global size of objects freed.
+     * @see #getGlobalFreedSize()
+     */
+    public static void resetGlobalFreedSize() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
+    }
+
+    /**
+     * Returns the number of non-concurrent GC invocations between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
+    public static int getGlobalGcInvocationCount() {
+        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
+    }
+
+    /**
+     * Clears the count of non-concurrent GC invocations.
+     * @see #getGlobalGcInvocationCount()
+     */
+    public static void resetGlobalGcInvocationCount() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
+    }
+
+    /**
+     * Returns the number of classes successfully initialized (ie those that executed without
+     * throwing an exception) between a {@link #startAllocCounting() start} and
+     * {@link #stopAllocCounting() stop}.
+     */
     public static int getGlobalClassInitCount() {
-        /* number of classes that have been successfully initialized */
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
     }
+
+    /**
+     * Clears the count of classes initialized.
+     * @see #getGlobalClassInitCount()
+     */
+    public static void resetGlobalClassInitCount() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
+    }
+
+    /**
+     * Returns the time spent successfully initializing classes between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
     public static int getGlobalClassInitTime() {
         /* cumulative elapsed time for class initialization, in usec */
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
     }
 
     /**
-     * Returns the global count of external allocation requests.  The
-     * external allocation tracking feature was removed in Honeycomb.
+     * Clears the count of time spent initializing classes.
+     * @see #getGlobalClassInitTime()
+     */
+    public static void resetGlobalClassInitTime() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
+    }
+
+    /**
      * This method exists for compatibility and always returns 0.
-     *
      * @deprecated This method is now obsolete.
      */
     @Deprecated
@@ -611,10 +704,21 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Returns the global count of bytes externally allocated.  The
-     * external allocation tracking feature was removed in Honeycomb.
+     * This method exists for compatibility and has no effect.
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalAllocSize() {}
+
+    /**
+     * This method exists for compatibility and has no effect.
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalAllocCount() {}
+
+    /**
      * This method exists for compatibility and always returns 0.
-     *
      * @deprecated This method is now obsolete.
      */
     @Deprecated
@@ -623,11 +727,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Returns the global count of freed external allocation requests.
-     * The external allocation tracking feature was removed in
-     * Honeycomb.  This method exists for compatibility and always
-     * returns 0.
-     *
+     * This method exists for compatibility and always returns 0.
      * @deprecated This method is now obsolete.
      */
     @Deprecated
@@ -636,11 +736,14 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Returns the global count of freed bytes from external
-     * allocation requests.  The external allocation tracking feature
-     * was removed in Honeycomb.  This method exists for compatibility
-     * and always returns 0.
-     *
+     * This method exists for compatibility and has no effect.
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalFreedCount() {}
+
+    /**
+     * This method exists for compatibility and has no effect.
      * @deprecated This method is now obsolete.
      */
     @Deprecated
@@ -648,22 +751,48 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
         return 0;
     }
 
-    public static int getGlobalGcInvocationCount() {
-        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
-    }
+    /**
+     * This method exists for compatibility and has no effect.
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalFreedSize() {}
+
+    /**
+     * Returns the thread-local count of objects allocated by the runtime between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
     public static int getThreadAllocCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_ALLOCATED_OBJECTS);
     }
+
+    /**
+     * Clears the thread-local count of objects allocated.
+     * @see #getThreadAllocCount()
+     */
+    public static void resetThreadAllocCount() {
+        VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_OBJECTS);
+    }
+
+    /**
+     * Returns the thread-local size of objects allocated by the runtime between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     * @return The allocated size in bytes.
+     */
     public static int getThreadAllocSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
     }
 
     /**
-     * Returns the count of external allocation requests made by the
-     * current thread.  The external allocation tracking feature was
-     * removed in Honeycomb.  This method exists for compatibility and
-     * always returns 0.
-     *
+     * Clears the thread-local count of objects allocated.
+     * @see #getThreadAllocSize()
+     */
+    public static void resetThreadAllocSize() {
+        VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
+    }
+
+    /**
+     * This method exists for compatibility and has no effect.
      * @deprecated This method is now obsolete.
      */
     @Deprecated
@@ -672,10 +801,14 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Returns the global count of bytes externally allocated.  The
-     * external allocation tracking feature was removed in Honeycomb.
-     * This method exists for compatibility and always returns 0.
-     *
+     * This method exists for compatibility and has no effect.
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetThreadExternalAllocCount() {}
+
+    /**
+     * This method exists for compatibility and has no effect.
      * @deprecated This method is now obsolete.
      */
     @Deprecated
@@ -683,105 +816,33 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
         return 0;
     }
 
-    public static int getThreadGcInvocationCount() {
-        return VMDebug.getAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
-    }
-
-    public static void resetGlobalAllocCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_OBJECTS);
-    }
-    public static void resetGlobalAllocSize() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
-    }
-    public static void resetGlobalFreedCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_OBJECTS);
-    }
-    public static void resetGlobalFreedSize() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
-    }
-    public static void resetGlobalClassInitCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
-    }
-    public static void resetGlobalClassInitTime() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
-    }
-
     /**
-     * Resets the global count of external allocation requests.  The
-     * external allocation tracking feature was removed in Honeycomb.
      * This method exists for compatibility and has no effect.
-     *
-     * @deprecated This method is now obsolete.
-     */
-    @Deprecated
-    public static void resetGlobalExternalAllocCount() {}
-
-    /**
-     * Resets the global count of bytes externally allocated.  The
-     * external allocation tracking feature was removed in Honeycomb.
-     * This method exists for compatibility and has no effect.
-     *
-     * @deprecated This method is now obsolete.
-     */
-    @Deprecated
-    public static void resetGlobalExternalAllocSize() {}
-
-    /**
-     * Resets the global count of freed external allocations.  The
-     * external allocation tracking feature was removed in Honeycomb.
-     * This method exists for compatibility and has no effect.
-     *
-     * @deprecated This method is now obsolete.
-     */
-    @Deprecated
-    public static void resetGlobalExternalFreedCount() {}
-
-    /**
-     * Resets the global count counter of freed bytes from external
-     * allocations.  The external allocation tracking feature was
-     * removed in Honeycomb.  This method exists for compatibility and
-     * has no effect.
-     *
-     * @deprecated This method is now obsolete.
-     */
-    @Deprecated
-    public static void resetGlobalExternalFreedSize() {}
-
-    public static void resetGlobalGcInvocationCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
-    }
-    public static void resetThreadAllocCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_OBJECTS);
-    }
-    public static void resetThreadAllocSize() {
-        VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
-    }
-
-    /**
-     * Resets the count of external allocation requests made by the
-     * current thread.  The external allocation tracking feature was
-     * removed in Honeycomb.  This method exists for compatibility and
-     * has no effect.
-     *
-     * @deprecated This method is now obsolete.
-     */
-    @Deprecated
-    public static void resetThreadExternalAllocCount() {}
-
-    /**
-     * Resets the count of bytes externally allocated by the current
-     * thread.  The external allocation tracking feature was removed
-     * in Honeycomb.  This method exists for compatibility and has no
-     * effect.
-     *
      * @deprecated This method is now obsolete.
      */
     @Deprecated
     public static void resetThreadExternalAllocSize() {}
 
+    /**
+     * Returns the number of thread-local non-concurrent GC invocations between a
+     * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     */
+    public static int getThreadGcInvocationCount() {
+        return VMDebug.getAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
+    }
+
+    /**
+     * Clears the thread-local count of non-concurrent GC invocations.
+     * @see #getThreadGcInvocationCount()
+     */
     public static void resetThreadGcInvocationCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
     }
+
+    /**
+     * Clears all the global and thread-local memory allocation counters.
+     * @see #startAllocCounting()
+     */
     public static void resetAllCounts() {
         VMDebug.resetAllocCount(VMDebug.KIND_ALL_COUNTS);
     }
@@ -1380,7 +1441,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * @return a String describing the immediate caller of the calling function.
+     * @return a String describing the immediate caller of the calling method.
      * {@hide}
      */
     public static String getCaller() {

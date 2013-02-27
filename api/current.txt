@@ -15910,7 +15910,7 @@ package android.os {
     method public static void resetThreadGcInvocationCount();
     method public static deprecated int setAllocationLimit(int);
     method public static deprecated int setGlobalAllocationLimit(int);
-    method public static void startAllocCounting();
+    method public static deprecated void startAllocCounting();
     method public static void startMethodTracing();
     method public static void startMethodTracing(java.lang.String);
     method public static void startMethodTracing(java.lang.String, int);
@@ -41332,8 +41332,8 @@ package java.util.zip {
 
   public class ZipFile {
     ctor public ZipFile(java.io.File) throws java.io.IOException, java.util.zip.ZipException;
-    ctor public ZipFile(java.io.File, int) throws java.io.IOException;
     ctor public ZipFile(java.lang.String) throws java.io.IOException;
+    ctor public ZipFile(java.io.File, int) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public java.util.Enumeration<? extends java.util.zip.ZipEntry> entries();
     method public java.util.zip.ZipEntry getEntry(java.lang.String);
