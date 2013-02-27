@@ -40,31 +40,63 @@ parent.link=index.html
 
 <p class="note"><strong>Note:</strong> To see a complete implementation and learn how to test your application, see the <a href="{@docRoot}training/in-app-billing/index.html">Selling In-app Products</a> training class. The training class provides a complete sample In-app Billing application, including convenience classes to handle key tasks related to setting up your connection, sending billing requests and processing responses from Google Play, and managing background threading so that you can make In-app Billing calls from your main activity.</p>
 
-<p>Before you start, be sure that you read the <a href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing Overview</a> to familiarize yourself with concepts that will make it easier for you to implement In-app Billing.</p>
+<p>Before you start, be sure that you read the <a href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing Overview</a> to familiarize yourself with 
+concepts that will make it easier for you to implement In-app Billing.</p>
 
-<p>To implement In-app Billing in your application, you need to do the following:</p>
+<p>To implement In-app Billing in your application, you need to do the 
+following:</p>
 <ol>
   <li>Add the In-app Billing library to your project.</li>
   <li>Update your {@code AndroidManifest.xml} file.</li>
-  <li>Create a {@code ServiceConnection} and bind it to {@code IInAppBillingService}.</li>
-  <li>Send In-app Billing requests from your application to {@code IInAppBillingService}.</li>
+  <li>Create a {@code ServiceConnection} and bind it to 
+{@code IInAppBillingService}.</li>
+  <li>Send In-app Billing requests from your application to 
+{@code IInAppBillingService}.</li>
   <li>Handle In-app Billing responses from Google Play.</li>
 </ol>
 
 <h2 id="billing-add-aidl">Adding the AIDL file to your project</h2>
 
-<p>The {@code TriviaDriva} sample application contains an Android Interface Definition Language (AIDL) file which defines the interface to Google Play's In-app Billing service. When you add this file to your project, the Android build environment creates an interface file (<code>IIAppBillingService.java</code>). You can then use this interface to make billing requests by invoking IPC method calls.</p>
+<p>{@code IInAppBillingService.aidl} is an Android Interface Definition 
+Language (AIDL) file that defines the interface to the In-app Billing Version 
+3 service. You will use this interface to make billing requests by invoking IPC 
+method calls.</p>
+<p>To get the AIDL file:</p>
+<ol>
+<li>Open the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.</li>
+<li>In the SDK Manager, expand the {@code Extras} section.</li>
+<li>Select <strong>Google Play Billing Library</strong>.</li>
+<li>Click <strong>Install packages</strong> to complete the download.</li>
+</ol>
+<p>The {@code IInAppBillingService.aidl} file will be installed to {@code &lt;sdk&gt;/extras/google/play_billing/}.</p>
 
-<p>To add the In-app Billing Version 3 library to your project:</p>
+<p>To add the AIDL to your project:</p>
 <ol>
 <li>Copy the {@code IInAppBillingService.aidl} file to your Android project.
   <ul>
-  <li>If you are using Eclipse: Import the {@code IInAppBillingService.aidl} file into your {@code /src} directory. Eclipse automatically generates the interface file when you build your project.</li>
-  <li>If you are developing in a non-Eclipse environment: Create the following directory {@code /src/com/android/vending/billing} and copy the {@code IInAppBillingService.aidl} file into this directory. Put the AIDL file into your project and use the Ant tool to build your project so that the
+  <li>If you are using Eclipse: 
+     <ol type="a">
+        <li>If you are starting from an existing Android project, open the project 
+in Eclipse. If you are creating a new Android project from scratch, click 
+<strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Android Application 
+Project</strong>, then follow the instructions in the <strong>New Android 
+Application</strong> wizard to create a new project in your workspace.</li>
+	<li>In the {@code /src} directory, click <strong>File</strong> &gt; 
+<strong>New</strong> &gt; <strong>Package</strong>, then create a package named {@code com.android.vending.billing}.</li>
+	<li>Copy the {@code IInAppBillingService.aidl} file from {@code &lt;sdk&gt;/extras/google/play_billing/} and paste it into the {@code src/com.android.vending.billing/} 
+folder in your workspace.</li>
+     </ol>
+  </li>
+  <li>If you are developing in a non-Eclipse environment: Create the following 
+directory {@code /src/com/android/vending/billing} and copy the 
+{@code IInAppBillingService.aidl} file into this directory. Put the AIDL file 
+into your project and use the Ant tool to build your project so that the
 <code>IInAppBillingService.java</code> file gets generated.</li>
   </ul>
 </li>
-<li>Build your application. You should see a generated file named {@code IInAppBillingService.java} in the {@code /gen} directory of your project.</li>
+<li>Build your application. You should see a generated file named 
+{@code IInAppBillingService.java} in the {@code /gen} directory of your 
+project.</li>
 </ol>
 
 
