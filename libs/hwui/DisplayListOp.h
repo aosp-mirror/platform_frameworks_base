@@ -176,8 +176,8 @@ public:
      */
     DeferredDisplayState state;
 protected:
-    SkPaint* getPaint(OpenGLRenderer& renderer) {
-        return renderer.filterPaint(mPaint);
+    SkPaint* getPaint(OpenGLRenderer& renderer, bool alwaysCopy = false) {
+        return renderer.filterPaint(mPaint, alwaysCopy);
     }
 
     SkPaint* mPaint; // should be accessed via getPaint() when applying
@@ -643,16 +643,13 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
             bool caching, int multipliedAlpha) {
-        SkPaint* paint = getPaint(renderer);
-        int oldAlpha = -1;
-        if (caching && multipliedAlpha < 255) {
-            oldAlpha = paint->getAlpha();
+        bool makeCopy = caching && multipliedAlpha < 255;
+        SkPaint* paint = getPaint(renderer, makeCopy);
+        if (makeCopy) {
+            // The paint is safe to modify since we're working on a copy
             paint->setAlpha(multipliedAlpha);
         }
         status_t ret = renderer.drawBitmap(mBitmap, mLocalBounds.left, mLocalBounds.top, paint);
-        if (oldAlpha >= 0) {
-            paint->setAlpha(oldAlpha);
-        }
         return ret;
     }
 
