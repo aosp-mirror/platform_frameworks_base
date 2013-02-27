@@ -335,7 +335,7 @@ public class WifiP2pDevice implements Parcelable {
             deviceCapability = source.deviceCapability;
             groupCapability = source.groupCapability;
             status = source.status;
-            wfdInfo = source.wfdInfo;
+            wfdInfo = new WifiP2pWfdInfo(source.wfdInfo);
         }
     }
 

@@ -44,7 +44,7 @@ public class WifiP2pDeviceList implements Parcelable {
     public WifiP2pDeviceList(WifiP2pDeviceList source) {
         if (source != null) {
             for (WifiP2pDevice d : source.getDeviceList()) {
-                mDevices.put(d.deviceAddress, d);
+                mDevices.put(d.deviceAddress, new WifiP2pDevice(d));
             }
         }
     }
@@ -53,7 +53,7 @@ public class WifiP2pDeviceList implements Parcelable {
     public WifiP2pDeviceList(ArrayList<WifiP2pDevice> devices) {
         for (WifiP2pDevice device : devices) {
             if (device.deviceAddress != null) {
-                mDevices.put(device.deviceAddress, device);
+                mDevices.put(device.deviceAddress, new WifiP2pDevice(device));
             }
         }
     }
