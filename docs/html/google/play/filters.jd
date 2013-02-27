@@ -386,13 +386,10 @@ characteristics that affect filtering on Google Play.</p>
 must have a SIM card and be running Android 1.1 or later, and it must be in a
 country (as determined by SIM carrier) in which paid apps are available.</p></td>
 </tr> <tr>
-  <td valign="top">Country / Carrier Targeting</td> <td valign="top"> <p>When you upload your app to
-    Google Play, you can select specific countries to target. The app will only
-    be visible to the countries (carriers) that you select, as follows:</p>
-    <ul><li><p>A device's country is determined based on the carrier, if a carrier is
-      available. If no carrier can be determined, Google Play tries to
-      determine the country based on IP.</p></li> <li><p>Carrier is determined based on
-      the device's SIM (for GSM devices), not the current roaming carrier.</p></li></ul>
+  <td valign="top">Country Targeting</td> <td valign="top"> <p>When you upload your app to
+    Google Play, you can select the countries in which to distribute your app
+    under <strong>Pricing and Distribution</strong>. The app will then
+    be available to users in only the countries you select.</p>
 </td> </tr> <tr>
   <td valign="top" style="white-space:nowrap;">CPU Architecture (ABI)</td>
   <td valign="top"><p>An application that includes native
