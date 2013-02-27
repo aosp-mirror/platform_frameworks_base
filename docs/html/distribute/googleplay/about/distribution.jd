@@ -75,24 +75,29 @@ devices your app is available to based on its dependencies (if any). From the
 Google Play Developer Console, you can list the supported devices and
 even exclude specific devices if needed.</p>
 
-<h2 id="stats">Statistics for analyzing installs</h2>
+<h2 id="stats">Statistics for analyzing installs and ratings</h2>
 
 <p>Once you’ve published your app, Google Play makes it easy to see how it’s
 doing. The Google Play Developer Console gives you access to a variety
-of anonymized metrics that show your app’s installation performance measured by
-unique users and unique devices, across a variety of different dimensions such
-as country, Android version, device, country, carrier, and app version.</p>
+of anonymized statistics and custom charts that show you the app's installation
+performance and ratings.</p>
 
-<div style="border:1px solid #DDD;margin:1.5em;margin-left:8%;width:608px">
-<img src="{@docRoot}images/gp-dc-stats-mini.png"
-style="width:600px;padding:4px;margin-bottom:0;">
+<p>You can view data and charts for active, daily, and total installs 
+per unique devices or users, as well as upgrades and uninstalls.
+You can also view the app's daily average user rating and its cumulative
+user rating. To help you analyze the data, you can view install
+and ratings statistics across a variety of different dimensions such as Android 
+version, device, country, app version, and carrier.</p>
+
+<div class="figure-left">
+  <img src="{@docRoot}images/gp-dc-stats-mini.png" class="frame">
 </div>
-<p>You can also view your installation data on timeline charts, for all metrics and
-dimensions. At a glance, these charts highlight your app’s installation peaks
-and longer-term trends, which you can correlate to promotions, app improvements,
-or other factors. You can even focus in on data inside a dimension by
-highlighting specific data points (such as individual platform versions or
-languages) on the timeline.</p>
+<p>You can see your app statistics on timeline charts, for
+all metrics and dimensions. At a glance, the charts highlight your app’s
+installation and ratings peaks and longer-term trends, which you can correlate
+to promotions, app improvements, or other factors. You can even focus in on
+data inside a dimension by highlighting specific data points (such as
+individual platform versions or languages) on the timeline.</p>
 
 <p>So that you can “take your data with you”, you can download all of your
 installation data as a CSV file for viewing in the business program of your
@@ -123,7 +128,7 @@ can be up to 2GB each and can contain any type of code or assets. When you
 upload the expansion files, Google Play hosts them for free and handles the
 download of the files as part of the normal APK installation.</p>
 
-<h2 id="licensing">Protecting your App</h2>
+<h2 id="licensing">Protecting your app</h2>
 
 <p>Google Play provides two key features to help you protect your application
 against piracy &mdash; Google Play Licensing and app encryption.</p>
