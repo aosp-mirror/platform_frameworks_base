@@ -1137,8 +1137,7 @@ public final class BluetoothAdapter {
      * Get the profile proxy object associated with the profile.
      *
      * <p>Profile can be one of {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET},
-     * {@link BluetoothProfile#A2DP}, {@link BluetoothProfile#GATT},
-     * or {@link BluetoothProfile#GATT_SERVER}. Clients must implements
+     * or {@link BluetoothProfile#A2DP}. Clients must implement
      * {@link BluetoothProfile.ServiceListener} to get notified of
      * the connection status and to get the proxy object.
      *
