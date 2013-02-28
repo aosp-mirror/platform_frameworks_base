@@ -30,448 +30,456 @@
         android:label="HwUi"
         android:hardwareAccelerated="true">
 
-        <meta-data android:name="android.graphics.renderThread" android:value="true" />
+        <activity
+                android:name="HwTests"
+                android:label="OpenGL Renderer Tests">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
                 android:name="ScaledTextActivity"
-                android:label="_ScaledText"
+                android:label="Text/Scaled"
                 android:theme="@android:style/Theme.Holo.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="NoAATextActivity"
-                android:label="_NoAAText">
+                android:label="Text/Aliased">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ScaledPathsActivity"
-                android:label="_ScaledPaths">
+                android:label="Path/Scaled">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="Alpha8BitmapActivity"
-                android:label="_Alpha8Bitmap">
+                android:label="Bitmaps/Alpha8">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="MipMapActivity"
-                android:label="_MipMap">
+                android:label="Bitmaps/MipMap">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="PathOffsetActivity"
-                android:label="_PathOffset">
+                android:label="Path/Offset">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="MultiLayersActivity"
-                android:label="_MultiLayers">
+                android:label="Layers/Multiple">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="TJunctionActivity"
-                android:label="_T-Junction">
+                android:label="Layers/T-Junction">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="TextPathActivity"
-                android:label="_TextPath">
+                android:label="Text/As Path">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="GradientStopsActivity"
-                android:label="_GradientStops">
+                android:label="Gradients/Multi-stops">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="PaintDrawFilterActivity"
-                android:label="_DrawFilter">
+                android:label="Paint/Draw Filter">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="BigGradientActivity"
-                android:label="_BigGradient">
+                android:label="Gradients/Large">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="DatePickerActivity"
-                android:label="_DatePicker">
+                android:label="View/DatePicker">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ClipRegionActivity"
-                android:label="_ClipRegion">
+                android:label="Clip/Region 1">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ClipRegion2Activity"
-                android:label="_ClipRegion2">
+                android:label="Clip/Region 2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ClipRegion3Activity"
-                android:label="_ClipRegion3">
+                android:label="Clip/Region 3">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="DisplayListLayersActivity"
-                android:label="__DisplayListLayers">
+                android:label="Layers/Display Lists">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="MatrixActivity"
-                android:label="_Matrix">
+                android:label="Misc/Matrix">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="TextFadeActivity"
-                android:label="_TextFade">
+                android:label="Text/Fade">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="MaxBitmapSizeActivity"
-                android:label="_MaxBitmapSize">
+                android:label="Bitmaps/Max Size">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="TimeDialogActivity"
-                android:label="_TimeDialog">
+                android:label="View/TimeDialog">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="OpaqueActivity"
-                android:label="_Opaque">
+                android:label="Window/Opaque">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="GetBitmapActivity"
-                android:label="_GetBitmap">
+                android:label="TextureView/Get Bitmap">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="SmallCircleActivity"
-                android:label="_SmallCircle">
+                android:label="Draw/Small Circle">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ClearActivity"
-                android:label="_Clear">
+                android:label="Window/Clear">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="TextureViewActivity"
-                android:label="_TextureView">
+                android:label="TextureView/Camera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="GlyphCacheActivity"
-                android:label="_GlyphCache">
+                android:label="Text/Glyph Cache">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="CanvasTextureViewActivity"
-                android:label="_CanvasTextureView">
+                android:label="TextureView/Canvas">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="GLTextureViewActivity"
-                android:label="_TextureViewGL">
+                android:label="TextureView/OpenGL">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="BitmapMeshActivity"
-                android:label="_BitmapMesh">
+                android:label="Bitmaps/Mesh">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="BitmapMutateActivity"
-                android:label="_BitmapMutate">
+                android:label="Bitmaps/Mutate">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="BitmapMeshLayerActivity"
-                android:label="_BitmapMeshLayer">
+                android:label="Bitmaps/Mesh in Layer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
                 
         <activity
                 android:name="MarqueeActivity"
-                android:label="_Marquee">
+                android:label="Text/Marquee">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ShapesActivity"
-                android:label="_Shapes">
+                android:label="Path/Shapes">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="ColoredRectsActivity"
-                android:label="_Rects">
+                android:label="Draw/Rects">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="SimplePatchActivity"
-                android:label="_SimplePatch"
+                android:label="Draw/9-Patch"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ViewLayersActivity"
-                android:label="_ViewLayers">
+                android:label="Layers/Views 1">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="ViewLayersActivity2"
-                android:label="_ViewLayers2">
+                android:label="Layers/Views 2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="ViewLayersActivity3"
-                android:label="_ViewLayers3">
+                android:label="Layers/Views 3">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ViewLayersActivity4"
-                android:label="_ViewLayers4">
+                android:label="Layers/Views 4">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="ViewLayersActivity5"
-                android:label="_ViewLayers5">
+                android:label="Layers/Views 5">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="AlphaLayersActivity"
-                android:label="_αLayers">
+                android:label="Layers/Alpha">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="AdvancedGradientsActivity"
-                android:label="_Advanced Gradients">
+                android:label="Gradients/Advanced">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="Bitmaps3dActivity"
-                android:label="_Bitmaps3d">
+                android:label="Bitmaps/3D Rotation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="LabelsActivity"
-                android:label="_Labels">
+                android:label="View/TextView">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
             <activity
                 android:name="ViewFlipperActivity"
-                android:label="_ViewFlipper"
+                android:label="View/ViewFlipper"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ResizeActivity"
-                android:label="_Resize"
+                android:label="Window/Resize"
                 android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="TextGammaActivity"
-                android:label="_Gamma"
+                android:label="Text/Gamma"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
             <activity
                 android:name="TextGammaActivity$SubGammaActivity"
-                android:label="_Sub Gamma"
+                android:label="Text/Sub Gamma"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:hardwareAccelerated="false">
             <intent-filter>
@@ -481,333 +489,333 @@
         
         <activity
                 android:name="LayersActivity"
-                android:label="_Layers"
+                android:label="Layers/Canvas Layers"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="NewLayersActivity"
-                android:label="_NewLayers">
+                android:label="Layers/Overlapping Layers">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="XfermodeActivity"
-                android:label="_Xfermodes"
+                android:label="Draw/Xfermodes"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="BitmapsActivity"
-                android:label="_Bitmaps"
+                android:label="Bitmaps/Draw Bitmaps"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="BitmapsSkewActivity"
-                android:label="_BitmapsSkew">
+                android:label="Bitmaps/Skew">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="BitmapsAlphaActivity"
-                android:label="_BitmapsAlpha"
+                android:label="Bitmaps/Alpha"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="BitmapsRectActivity"
-                android:label="_BitmapsRect"
+                android:label="Bitmaps/Rect"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ThinPatchesActivity"
-                android:label="_9patchThin"
+                android:label="Draw/9-Patch Thin Drawable"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="NinePatchesActivity"
-                android:label="_9patch">
+                android:label="Draw/9-Patch Drawable">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="MoreNinePatchesActivity"
-                android:label="_9patch2">
+                android:label="Draw/9-Patch Vertical Drawable">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="QuickRejectActivity"
-                android:label="_QuickReject">
+                android:label="Clip/QuickReject">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="RotationActivity"
-                android:label="_Rotation">
+                android:label="View/Rotation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="GradientsActivity"
-                android:label="_Gradients">
+                android:label="Gradients/Gradients">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ShadersActivity"
-                android:label="_Shaders">
+                android:label="Shaders/Shaders">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="TextActivity"
-                android:label="_Text"
+                android:label="Text/Simple Text"
                 android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="PosTextActivity"
-                android:label="_PosText"
+                android:label="Text/Pos Text"
                 android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ListActivity"
-                android:label="__List">
+                android:label="View/List">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="TransparentListActivity"
-                android:label="_TransparentList">
+                android:label="View/Transparent List">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
         
         <activity
                 android:name="MoreShadersActivity"
-                android:label="_Shaders2">
+                android:label="Shaders/Compose Shaders">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ColorFiltersActivity"
-                android:label="_ColorFilters">
+                android:label="ColorFilters/Filters">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="LinesActivity"
-                android:label="_Lines">
+                android:label="Draw/Lines">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="Lines2Activity"
-                android:label="_Lines2">
+                android:label="Draw/Lines 2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="PathsActivity"
-                android:label="_Paths">
+                android:label="Path/Paths">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="TextOnPathActivity"
-                android:label="_TextOnPath">
+                android:label="Text/Text on Path">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="PathsCacheActivity"
-                android:label="_PathsCache">
+                android:label="Path/Cache">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="PointsActivity"
-                android:label="_Points">
+                android:label="Draw/Points">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="Transform3dActivity"
-                android:label="_3d">
+                android:label="Draw/3D Transform">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="Animated3dActivity"
-                android:label="_Animated 3d">
+                android:label="Draw/Animated 3D Transform">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="SimplePathsActivity"
-                android:label="_SimplePaths">
+                android:label="Path/Simple Paths">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="AdvancedBlendActivity"
-                android:label="_Advanced Blend">
+                android:label="Draw/Advanced Blend">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="FramebufferBlendActivity"
-                android:label="_FramebufferBlend">
+                android:label="Draw/Framebuffer Blend">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="StackActivity"
-                android:label="_Stacks">
+                android:label="View/Stacks">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="PathDestructionActivity"
-                android:label="_PathDestruction">
+                android:label="Path/Path Destruction">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="TransformsAndAnimationsActivity"
-                android:label="_TransformAnim">
+                android:label="Draw/Transforms and Animations">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ViewPropertyAlphaActivity"
-                android:label="_ViewPropAlpha">
+                android:label="View/Alpha Property">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
         <activity
                 android:name="ViewLayerInvalidationActivity"
-                android:label="_ViewLayerInvalidation">
+                android:label="Layers/Invalidation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
 
