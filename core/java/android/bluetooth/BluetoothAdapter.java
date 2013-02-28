@@ -1136,8 +1136,9 @@ public final class BluetoothAdapter {
     /**
      * Get the profile proxy object associated with the profile.
      *
-     * <p>Profile can be one of {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET} or
-     * {@link BluetoothProfile#A2DP}. Clients must implements
+     * <p>Profile can be one of {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET},
+     * {@link BluetoothProfile#A2DP}, {@link BluetoothProfile#GATT},
+     * or {@link BluetoothProfile#GATT_SERVER}. Clients must implements
      * {@link BluetoothProfile.ServiceListener} to get notified of
      * the connection status and to get the proxy object.
      *
@@ -1165,6 +1166,12 @@ public final class BluetoothAdapter {
             return true;
         } else if (profile == BluetoothProfile.HEALTH) {
             BluetoothHealth health = new BluetoothHealth(context, listener);
+            return true;
+        } else if (profile == BluetoothProfile.GATT) {
+            BluetoothGatt gatt = new BluetoothGatt(context, listener);
+            return true;
+        } else if (profile == BluetoothProfile.GATT_SERVER) {
+            BluetoothGattServer gattServer = new BluetoothGattServer(context, listener);
             return true;
         } else {
             return false;
@@ -1205,6 +1212,14 @@ public final class BluetoothAdapter {
             case BluetoothProfile.HEALTH:
                 BluetoothHealth health = (BluetoothHealth)proxy;
                 health.close();
+                break;
+           case BluetoothProfile.GATT:
+                BluetoothGatt gatt = (BluetoothGatt)proxy;
+                gatt.close();
+                break;
+            case BluetoothProfile.GATT_SERVER:
+                BluetoothGattServer gattServer = (BluetoothGattServer)proxy;
+                gattServer.close();
                 break;
         }
     }
