@@ -52,6 +52,10 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mStyle = paint->getStyle();
     mStrokeWidth = paint->getStrokeWidth();
     mAntiAliasing = paint->isAntiAlias();
+    mLookupTransform[SkMatrix::kMScaleX] = matrix.data[mat4::kScaleX];
+    mLookupTransform[SkMatrix::kMScaleY] = matrix.data[mat4::kScaleY];
+    mLookupTransform[SkMatrix::kMSkewX] = matrix.data[mat4::kSkewX];
+    mLookupTransform[SkMatrix::kMSkewY] = matrix.data[mat4::kSkewY];
 }
 
 Font::~Font() {
@@ -71,6 +75,10 @@ hash_t Font::FontDescription::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(mStyle));
     hash = JenkinsHashMix(hash, android::hash_type(mStrokeWidth));
     hash = JenkinsHashMix(hash, int(mAntiAliasing));
+    hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMScaleX]));
+    hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMScaleY]));
+    hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMSkewX]));
+    hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMSkewY]));
     return JenkinsHashWhiten(hash);
 }
 
@@ -99,6 +107,26 @@ int Font::FontDescription::compare(const Font::FontDescription& lhs,
 
     deltaInt = int(lhs.mAntiAliasing) - int(rhs.mAntiAliasing);
     if (deltaInt != 0) return deltaInt;
+
+    if (lhs.mLookupTransform[SkMatrix::kMScaleX] <
+            rhs.mLookupTransform[SkMatrix::kMScaleX]) return -1;
+    if (lhs.mLookupTransform[SkMatrix::kMScaleX] >
+            rhs.mLookupTransform[SkMatrix::kMScaleX]) return +1;
+
+    if (lhs.mLookupTransform[SkMatrix::kMScaleY] <
+            rhs.mLookupTransform[SkMatrix::kMScaleY]) return -1;
+    if (lhs.mLookupTransform[SkMatrix::kMScaleY] >
+            rhs.mLookupTransform[SkMatrix::kMScaleY]) return +1;
+
+    if (lhs.mLookupTransform[SkMatrix::kMSkewX] <
+            rhs.mLookupTransform[SkMatrix::kMSkewX]) return -1;
+    if (lhs.mLookupTransform[SkMatrix::kMSkewX] >
+            rhs.mLookupTransform[SkMatrix::kMSkewX]) return +1;
+
+    if (lhs.mLookupTransform[SkMatrix::kMSkewY] <
+            rhs.mLookupTransform[SkMatrix::kMSkewY]) return -1;
+    if (lhs.mLookupTransform[SkMatrix::kMSkewY] >
+            rhs.mLookupTransform[SkMatrix::kMSkewY]) return +1;
 
     return 0;
 }
@@ -169,12 +197,6 @@ void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
     int32_t bX = 0, bY = 0;
     for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
         for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
-#if DEBUG_FONT_RENDERER
-            if (bX < 0 || bY < 0 || bX >= (int32_t) bitmapW || bY >= (int32_t) bitmapH) {
-                ALOGE("Skipping invalid index");
-                continue;
-            }
-#endif
             uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
             bitmap[bY * bitmapW + bX] = tempCol;
         }
@@ -226,14 +248,14 @@ CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool pre
     ssize_t index = mCachedGlyphs.indexOfKey(textUnit);
     if (index >= 0) {
         cachedGlyph = mCachedGlyphs.valueAt(index);
+
+        // Is the glyph still in texture cache?
+        if (!cachedGlyph->mIsValid) {
+            const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit, &mDescription.mLookupTransform);
+            updateGlyphCache(paint, skiaGlyph, cachedGlyph, precaching);
+        }
     } else {
         cachedGlyph = cacheGlyph(paint, textUnit, precaching);
-    }
-
-    // Is the glyph still in texture cache?
-    if (!cachedGlyph->mIsValid) {
-        const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit, NULL);
-        updateGlyphCache(paint, skiaGlyph, cachedGlyph, precaching);
     }
 
     return cachedGlyph;
@@ -357,22 +379,14 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
         if (cachedGlyph->mIsValid) {
-            int penX = x + positions[(glyphsCount << 1)];
-            int penY = y + positions[(glyphsCount << 1) + 1];
+            float penX = x + positions[(glyphsCount << 1)];
+            float penY = y + positions[(glyphsCount << 1) + 1];
 
-            switch (align) {
-                case SkPaint::kRight_Align:
-                    penX -= SkFixedToFloat(cachedGlyph->mAdvanceX);
-                    penY -= SkFixedToFloat(cachedGlyph->mAdvanceY);
-                    break;
-                case SkPaint::kCenter_Align:
-                    penX -= SkFixedToFloat(cachedGlyph->mAdvanceX >> 1);
-                    penY -= SkFixedToFloat(cachedGlyph->mAdvanceY >> 1);
-                default:
-                    break;
+            if (!mTransform.isIdentity()) {
+                mTransform.mapPoint(penX, penY);
             }
 
-            (*this.*render)(cachedGlyph, penX, penY,
+            (*this.*render)(cachedGlyph, roundf(penX), roundf(penY),
                     bitmap, bitmapW, bitmapH, bounds, positions);
         }
 
@@ -394,7 +408,7 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
 
     // Get the bitmap for the glyph
     if (!skiaGlyph.fImage) {
-        paint->findImage(skiaGlyph, NULL);
+        paint->findImage(skiaGlyph, &mDescription.mLookupTransform);
     }
     mState->cacheBitmap(skiaGlyph, glyph, &startX, &startY, precaching);
 
@@ -425,7 +439,7 @@ CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
-    const SkGlyph& skiaGlyph = GET_METRICS(paint, glyph, NULL);
+    const SkGlyph& skiaGlyph = GET_METRICS(paint, glyph, &mDescription.mLookupTransform);
     newGlyph->mGlyphIndex = skiaGlyph.fID;
     newGlyph->mIsValid = false;
 
@@ -439,6 +453,7 @@ Font* Font::create(FontRenderer* state, const SkPaint* paint, const mat4& matrix
     Font* font = state->mActiveFonts.get(description);
 
     if (font) {
+        font->mTransform.load(matrix);
         return font;
     }
 

@@ -1657,13 +1657,13 @@ void OpenGLRenderer::setupDrawModelViewTranslate(float left, float top, float ri
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
         if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     } else {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mIdentity);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity());
         if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
     }
 }
 
 void OpenGLRenderer::setupDrawModelViewIdentity(bool offset) {
-    mCaches.currentProgram->set(mOrthoMatrix, mIdentity, *mSnapshot->transform, offset);
+    mCaches.currentProgram->set(mOrthoMatrix, mat4::identity(), *mSnapshot->transform, offset);
 }
 
 void OpenGLRenderer::setupDrawModelView(float left, float top, float right, float bottom,
@@ -1681,7 +1681,7 @@ void OpenGLRenderer::setupDrawModelView(float left, float top, float right, floa
             dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
         }
     } else {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mIdentity);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity());
         if (mTrackDirtyRegions && dirty) dirtyLayer(left, top, right, bottom);
     }
 }
@@ -1716,7 +1716,7 @@ void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
 void OpenGLRenderer::setupDrawShaderIdentityUniforms() {
     if (mDrawModifiers.mShader) {
         mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
-                mIdentity, *mSnapshot, &mTextureUnit);
+                mat4::identity(), *mSnapshot, &mTextureUnit);
     }
 }
 
@@ -2587,7 +2587,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, *mSnapshot->transform);
+    fontRenderer.setFont(paint, mat4::identity());
 
     int alpha;
     SkXfermode::Mode mode;
@@ -2663,17 +2663,10 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         return DrawGlInfo::kStatusDone;
     }
 
-#if DEBUG_GLYPHS
-    ALOGD("OpenGLRenderer drawText() with FontID=%d",
-            SkTypeface::UniqueID(paint->getTypeface()));
-#endif
-
-    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, *mSnapshot->transform);
-
     const float oldX = x;
     const float oldY = y;
     const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+
     if (CC_LIKELY(pureTranslate)) {
         x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
         y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
@@ -2683,16 +2676,19 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
+    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
+
     if (CC_UNLIKELY(mDrawModifiers.mHasShadow)) {
-        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer, alpha, mode,
-                oldX, oldY);
+        fontRenderer.setFont(paint, mat4::identity());
+        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
+                alpha, mode, oldX, oldY);
     }
 
+    fontRenderer.setFont(paint, pureTranslate ? mat4::identity() : *mSnapshot->transform);
+
     // Pick the appropriate texture filtering
-    bool linearFilter = mSnapshot->transform->changesBounds();
-    if (pureTranslate && !linearFilter) {
-        linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
-    }
+    bool linearFilter = !mSnapshot->transform->isPureTranslate() ||
+            fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
 
     // The font renderer will always use texture unit 0
     mCaches.activeTexture(0);
@@ -2705,17 +2701,16 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     setupDrawShader();
     setupDrawBlending(true, mode);
     setupDrawProgram();
-    setupDrawModelView(x, y, x, y, pureTranslate, true);
+    setupDrawModelView(x, y, x, y, true, true);
     // See comment above; the font renderer must use texture unit 0
     // assert(mTextureUnit == 0)
     setupDrawTexture(fontRenderer.getTexture(linearFilter));
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms(pureTranslate);
+    setupDrawShaderUniforms(true);
     setupDrawTextGammaUniforms();
 
-    const Rect* clip = pureTranslate ? mSnapshot->clipRect :
-            (mSnapshot->hasPerspectiveTransform() ? NULL : &mSnapshot->getLocalClip());
+    const Rect* clip = mSnapshot->hasPerspectiveTransform() ? NULL : mSnapshot->clipRect;
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     const bool hasActiveLayer = hasLayer();
@@ -2732,9 +2727,6 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
     if (status && hasActiveLayer) {
-        if (!pureTranslate) {
-            mSnapshot->transform->mapRect(bounds);
-        }
         dirtyLayerUnchecked(bounds, getRegion());
     }
 
@@ -2750,7 +2742,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, *mSnapshot->transform);
+    fontRenderer.setFont(paint, mat4::identity());
 
     int alpha;
     SkXfermode::Mode mode;
