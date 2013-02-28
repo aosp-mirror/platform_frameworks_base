@@ -471,8 +471,6 @@ final class ActivityRecord {
     void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
         if (inHistory && !finishing) {
             if (task != null) {
-                // TODO: If this is the last ActivityRecord in task, remove from ActivityStack.
-                task.removeActivity(this);
                 task.numActivities--;
             }
             if (newTask != null) {

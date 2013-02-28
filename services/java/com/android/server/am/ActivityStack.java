@@ -982,9 +982,6 @@ final class ActivityStack {
 
             // Make sure any stopped but visible activities are now sleeping.
             // This ensures that the activity's onStop() is called.
-            if (VALIDATE_TASK_REPLACE) {
-                verifyActivityRecords(true);
-            }
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
                 for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
@@ -1890,7 +1887,9 @@ final class ActivityStack {
         final int NH = mHistory.size();
 
         int addPos = -1;
-        
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
+        }
         if (!newTask) {
             // If starting in an existing task, find where that is...
             boolean startIt = true;
@@ -1914,9 +1913,11 @@ final class ActivityStack {
                         mService.mWindowManager.addAppToken(convertAddPos(addPos), r.appToken,
                                 r.task.taskId, r.info.screenOrientation, r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
+                        if (VALIDATE_TASK_REPLACE) {
+                            verifyActivityRecords(true);
+                        }
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
-                            verifyActivityRecords(true);
                         }
                         ActivityOptions.abort(options);
                         return;
@@ -2079,6 +2080,9 @@ final class ActivityStack {
 
         int replyChainEnd = -1;
         boolean canMoveOptions = true;
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
+        }
 
         // We only do this for activities that are not the root of the task (since if we finish
         // the root, we may no longer have the task!).
@@ -2127,7 +2131,7 @@ final class ActivityStack {
                     // then merge it into the same task.
                     if (VALIDATE_TASK_REPLACE) Slog.w(TAG,
                         "resetTaskFoundIntended: would reparenting " + target + " to bottom " + p.task);
-                    target.setTask(p.task, p.thumbHolder, false);
+                    setTask(target, p.task, p.thumbHolder, false);
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to bottom task " + p.task);
                 } else {
@@ -2137,7 +2141,7 @@ final class ActivityStack {
                             mService.mCurTask = 1;
                         }
                     } while (mTaskIdToTaskRecord.get(mService.mCurTask) != null);
-                    target.setTask(createTaskRecord(mService.mCurTask, target.info, null, false),
+                    setTask(target, createTaskRecord(mService.mCurTask, target.info, null, false),
                             null, false);
                     target.task.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
@@ -2171,11 +2175,18 @@ final class ActivityStack {
                             new RuntimeException("here").fillInStackTrace());
                     if (DEBUG_TASKS) Slog.v(TAG, "Pushing next activity " + p
                             + " out to target's task " + target.task);
-                    p.setTask(targetTask, curThumbHolder, false);
+                    setTask(p, targetTask, curThumbHolder, false);
                     targetTask.addActivityAtBottom(p);
-                    mHistory.remove(p);
-                    mHistory.add(0, p);
+
+                    { // TODO: remove when mHistory no longer used.
+                        mHistory.remove(p);
+                        mHistory.add(0, p);
+                    }
+
                     mService.mWindowManager.setAppGroupId(p.appToken, targetTaskId);
+                }
+                if (VALIDATE_TASK_REPLACE) {
+                    verifyActivityRecords(true);
                 }
 
                 mService.mWindowManager.moveTaskToBottom(targetTaskId);
@@ -2301,11 +2312,13 @@ final class ActivityStack {
                     if (DEBUG_TASKS) Slog.v(TAG, "Reparenting task at index " + i + " to " + end);
                     for (int srcPos = i; srcPos <= end; ++srcPos) {
                         final ActivityRecord p = activities.get(srcPos);
-                        p.setTask(task, null, false);
+                        setTask(p, task, null, false);
                         task.addActivityToTop(p);
 
-                        mHistory.remove(p);
-                        mHistory.add(taskTopI, p);
+                        { // TODO: remove when mHistory no longer used.
+                            mHistory.remove(p);
+                            mHistory.add(taskTopI, p);
+                        }
 
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + p
                                 + " to stack at " + task,
@@ -2509,6 +2522,9 @@ final class ActivityStack {
     private final void moveActivityToFrontLocked(ActivityRecord newTop) {
         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + newTop
             + " to stack at top", new RuntimeException("here").fillInStackTrace());
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
+        }
 
         final TaskRecord task = newTop.task;
         task.getTopActivity().frontOfTask = false;
@@ -2516,8 +2532,11 @@ final class ActivityStack {
         task.mActivities.add(newTop);
         newTop.frontOfTask = true;
 
-        mHistory.remove(newTop);
-        mHistory.add(newTop);
+        { // TODO: remove when mHistory no longer used.
+            mHistory.remove(newTop);
+            mHistory.add(newTop);
+        }
+
         if (VALIDATE_TASK_REPLACE) {
             verifyActivityRecords(true);
         }
@@ -3009,11 +3028,11 @@ final class ActivityStack {
                 if (mService.mCurTask <= 0) {
                     mService.mCurTask = 1;
                 }
-                r.setTask(createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
+                setTask(r, createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                         + " in new task " + r.task);
             } else {
-                r.setTask(reuseTask, reuseTask, true);
+                setTask(r, reuseTask, reuseTask, true);
             }
             newTask = true;
             if (!movedHome) {
@@ -3059,7 +3078,7 @@ final class ActivityStack {
             // An existing activity is starting this new activity, so we want
             // to keep the new one in the same task as the one that is starting
             // it.
-            r.setTask(sourceRecord.task, sourceRecord.thumbHolder, false);
+            setTask(r, sourceRecord.task, sourceRecord.thumbHolder, false);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task);
 
@@ -3077,7 +3096,7 @@ final class ActivityStack {
                     break;
                 }
             }
-            r.setTask(prev != null
+            setTask(r, prev != null
                     ? prev.task
                     : createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
@@ -3891,14 +3910,13 @@ final class ActivityStack {
         if (immediate) {
             return finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, oomAdj) == null;
         } else if (mResumedActivity == r) {
-            boolean endTask = index <= 0
-                    || (mHistory.get(index-1)).task != r.task;
+            boolean endTask = index <= 0;
             if (DEBUG_TRANSITION) Slog.v(TAG,
                     "Prepare close transition: finishing " + r);
             mService.mWindowManager.prepareAppTransition(endTask
                     ? AppTransition.TRANSIT_TASK_CLOSE
                     : AppTransition.TRANSIT_ACTIVITY_CLOSE, false);
-    
+
             // Tell window manager to prepare for this one to be removed.
             mService.mWindowManager.setAppVisibility(r.appToken, false);
                 
@@ -3985,27 +4003,20 @@ final class ActivityStack {
 
     final boolean navigateUpToLocked(ActivityRecord srec, Intent destIntent, int resultCode,
             Intent resultData) {
-        final int start = mHistory.indexOf(srec);
-        if (start < 0) {
-            // Current activity is not in history stack; do nothing.
+        final TaskRecord task = srec.task;
+        final ArrayList<ActivityRecord> activities = task.mActivities;
+        final int start = activities.indexOf(srec);
+        if (!mTaskHistory.contains(task) || (start < 0)) {
             return false;
         }
         int finishTo = start - 1;
-        ActivityRecord parent = null;
+        ActivityRecord parent = finishTo < 0 ? null : activities.get(finishTo);
         boolean foundParentInTask = false;
-        ComponentName dest = destIntent.getComponent();
-        if (dest != null) {
-            TaskRecord tr = srec.task;
-            for (int i = start - 1; i >= 0; i--) {
-                ActivityRecord r = mHistory.get(i);
-                if (tr != r.task) {
-                    // Couldn't find parent in the same task; stop at the one above this.
-                    // (Root of current task; in-app "home" behavior)
-                    // Always at least finish the current activity.
-                    finishTo = Math.min(start - 1, i + 1);
-                    parent = mHistory.get(finishTo);
-                    break;
-                } else if (r.info.packageName.equals(dest.getPackageName()) &&
+        final ComponentName dest = destIntent.getComponent();
+        if (start > 0 && dest != null) {
+            for (int i = finishTo; i >= 0; i--) {
+                ActivityRecord r = activities.get(i);
+                if (r.info.packageName.equals(dest.getPackageName()) &&
                         r.info.name.equals(dest.getClassName())) {
                     finishTo = i;
                     parent = r;
@@ -4034,9 +4045,8 @@ final class ActivityStack {
         }
         final long origId = Binder.clearCallingIdentity();
         for (int i = start; i > finishTo; i--) {
-            ActivityRecord r = mHistory.get(i);
-            requestFinishActivityLocked(r.appToken, resultCode, resultData,
-                    "navigate-up", true);
+            ActivityRecord r = activities.get(i);
+            requestFinishActivityLocked(r.appToken, resultCode, resultData, "navigate-up", true);
             // Only return the supplied result for the first activity finished
             resultCode = Activity.RESULT_CANCELED;
             resultData = null;
@@ -4136,6 +4146,9 @@ final class ActivityStack {
     }
 
     final void removeActivityFromHistoryLocked(ActivityRecord r) {
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
+        }
         finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
         r.makeFinishing();
         if (DEBUG_ADD_REMOVE) {
@@ -4143,16 +4156,19 @@ final class ActivityStack {
             here.fillInStackTrace();
             Slog.i(TAG, "Removing activity " + r + " from stack");
         }
-        final TaskRecord task = r.task;
-        if (task != null) {
-            // TODO: If this is the last ActivityRecord in task, remove from ActivityStack.
-            task.removeActivity(r);
+        if (r.task != null) {
+            removeActivity(r);
         }
-        mHistory.remove(r);
+
+        { // TODO: Remove when mHistory no longer used.
+            mHistory.remove(r);
+        }
         r.takeFromHistory();
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
+        }
         removeTimeoutsForActivityLocked(r);
-        if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
-                + " (removed from history)");
+        if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r + " (removed from history)");
         r.state = ActivityState.DESTROYED;
         if (DEBUG_APP) Slog.v(TAG, "Clearing app during remove for activity " + r);
         r.app = null;
@@ -4377,107 +4393,92 @@ final class ActivityStack {
         boolean hasVisibleActivities = false;
 
         // Clean out the history list.
-        int i = mHistory.size();
+        int i = numActivities();
         if (DEBUG_CLEANUP) Slog.v(
             TAG, "Removing app " + app + " from history with " + i + " entries");
-        while (i > 0) {
-            i--;
-            ActivityRecord r = mHistory.get(i);
-            if (DEBUG_CLEANUP) Slog.v(
-                TAG, "Record #" + i + " " + r + ": app=" + r.app);
-            if (r.app == app) {
-                boolean remove;
-                if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
-                    // Don't currently have state for the activity, or
-                    // it is finishing -- always remove it.
-                    remove = true;
-                } else if (r.launchCount > 2 &&
-                        r.lastLaunchTime > (SystemClock.uptimeMillis()-60000)) {
-                    // We have launched this activity too many times since it was
-                    // able to run, so give up and remove it.
-                    remove = true;
-                } else {
-                    // The process may be gone, but the activity lives on!
-                    remove = false;
-                }
-                if (remove) {
-                    if (ActivityStack.DEBUG_ADD_REMOVE || DEBUG_CLEANUP) {
-                        RuntimeException here = new RuntimeException("here");
-                        here.fillInStackTrace();
-                        Slog.i(TAG, "Removing activity " + r + " from stack at " + i
-                                + ": haveState=" + r.haveState
-                                + " stateNotNeeded=" + r.stateNotNeeded
-                                + " finishing=" + r.finishing
-                                + " state=" + r.state, here);
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                --i;
+                if (DEBUG_CLEANUP) Slog.v(
+                    TAG, "Record #" + i + " " + r + ": app=" + r.app);
+                if (r.app == app) {
+                    boolean remove;
+                    if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
+                        // Don't currently have state for the activity, or
+                        // it is finishing -- always remove it.
+                        remove = true;
+                    } else if (r.launchCount > 2 &&
+                            r.lastLaunchTime > (SystemClock.uptimeMillis()-60000)) {
+                        // We have launched this activity too many times since it was
+                        // able to run, so give up and remove it.
+                        remove = true;
+                    } else {
+                        // The process may be gone, but the activity lives on!
+                        remove = false;
                     }
-                    if (!r.finishing) {
-                        Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
-                        EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
-                                r.userId, System.identityHashCode(r),
-                                r.task.taskId, r.shortComponentName,
-                                "proc died without state saved");
-                    }
-                    removeActivityFromHistoryLocked(r);
+                    if (remove) {
+                        if (ActivityStack.DEBUG_ADD_REMOVE || DEBUG_CLEANUP) {
+                            RuntimeException here = new RuntimeException("here");
+                            here.fillInStackTrace();
+                            Slog.i(TAG, "Removing activity " + r + " from stack at " + i
+                                    + ": haveState=" + r.haveState
+                                    + " stateNotNeeded=" + r.stateNotNeeded
+                                    + " finishing=" + r.finishing
+                                    + " state=" + r.state, here);
+                        }
+                        if (!r.finishing) {
+                            Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
+                            EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
+                                    r.userId, System.identityHashCode(r),
+                                    r.task.taskId, r.shortComponentName,
+                                    "proc died without state saved");
+                        }
+                        removeActivityFromHistoryLocked(r);
 
-                } else {
-                    // We have the current state for this activity, so
-                    // it can be restarted later when needed.
-                    if (localLOGV) Slog.v(
-                        TAG, "Keeping entry, setting app to null");
-                    if (r.visible) {
-                        hasVisibleActivities = true;
+                    } else {
+                        // We have the current state for this activity, so
+                        // it can be restarted later when needed.
+                        if (localLOGV) Slog.v(
+                            TAG, "Keeping entry, setting app to null");
+                        if (r.visible) {
+                            hasVisibleActivities = true;
+                        }
+                        if (DEBUG_APP) Slog.v(TAG, "Clearing app during removeHistory for activity "
+                                + r);
+                        r.app = null;
+                        r.nowVisible = false;
+                        if (!r.haveState) {
+                            if (ActivityStack.DEBUG_SAVED_STATE) Slog.i(TAG,
+                                    "App died, clearing saved state of " + r);
+                            r.icicle = null;
+                        }
                     }
-                    if (DEBUG_APP) Slog.v(TAG, "Clearing app during removeHistory for activity "
-                            + r);
-                    r.app = null;
-                    r.nowVisible = false;
-                    if (!r.haveState) {
-                        if (ActivityStack.DEBUG_SAVED_STATE) Slog.i(TAG,
-                                "App died, clearing saved state of " + r);
-                        r.icicle = null;
-                    }
-                }
 
-                r.stack.cleanUpActivityLocked(r, true, true);
+                    r.stack.cleanUpActivityLocked(r, true, true);
+                }
             }
         }
 
         return hasVisibleActivities;
     }
-    
+
     /**
      * Move the current home activity's task (if one exists) to the front
      * of the stack.
      */
     final void moveHomeToFrontLocked() {
-        newMoveHomeToFrontLocked();
-        TaskRecord homeTask = null;
-        for (int i=mHistory.size()-1; i>=0; i--) {
-            ActivityRecord hr = mHistory.get(i);
-            if (hr.isHomeActivity) {
-                homeTask = hr.task;
-                break;
-            }
-        }
-        if (homeTask != null) {
-//            moveTaskToFrontLocked(homeTask, null, null);
-        }
-    }
-
-    final void newMoveHomeToFrontLocked() {
-        TaskRecord homeTask = null;
-        for (int taskNdx = mTaskHistory.size() - 1; homeTask == null && taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.isHomeActivity) {
-                    homeTask = r.task;
-                    break;
+                    moveTaskToFrontLocked(task, null, null);
+                    return;
                 }
             }
-        }
-        if (homeTask != null) {
-            moveTaskToFrontLocked(homeTask, null, null);
         }
     }
 
@@ -4513,6 +4514,9 @@ final class ActivityStack {
     }
 
     final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason, Bundle options) {
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
+        }
 
         final int task = tr.taskId;
         int top = mHistory.size()-1;
@@ -4557,6 +4561,9 @@ final class ActivityStack {
                 ActivityOptions.abort(options);
             } else {
                 updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
+            }
+            if (VALIDATE_TASK_REPLACE) {
+                verifyActivityRecords(true);
             }
             return;
         }
@@ -4630,6 +4637,9 @@ final class ActivityStack {
                     return false;
                 }
             }
+        }
+        if (VALIDATE_TASK_REPLACE) {
+            verifyActivityRecords(true);
         }
 
         if (DEBUG_TRANSITION) Slog.v(TAG,
@@ -5263,6 +5273,24 @@ final class ActivityStack {
         if (rebuild) {
             rebuildTaskHistory();
         }
+    }
+
+    private void removeActivity(ActivityRecord r) {
+        final TaskRecord task = r.task;
+        if (task.removeActivity(r)) {
+            if (DEBUG_ADD_REMOVE) Slog.i(TAG, "removeActivity: Removing from history, task="
+                    + task);
+            mTaskHistory.remove(task);
+            mTaskIdToTaskRecord.delete(task.taskId);
+        }
+    }
+
+    private void setTask(ActivityRecord r, TaskRecord newTask, ThumbnailHolder newThumbHolder,
+            boolean isRoot) {
+        if (r.task != null) {
+            removeActivity(r);
+        }
+        r.setTask(newTask, newThumbHolder, isRoot);
     }
 
     private TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
