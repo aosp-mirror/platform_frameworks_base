@@ -33,6 +33,7 @@ import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
+import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
 
 import android.app.KeyguardManager;
@@ -2788,11 +2789,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         com.android.internal.R.attr.dialogTitleDecorLayout, res, true);
                 layoutResource = res.resourceId;
             } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
-                if ((features & (1 << FEATURE_ACTION_BAR_OVERLAY)) != 0) {
-                    layoutResource = com.android.internal.R.layout.screen_action_bar_overlay;
-                } else {
-                    layoutResource = com.android.internal.R.layout.screen_action_bar;
-                }
+                layoutResource = com.android.internal.R.layout.screen_action_bar;
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }
