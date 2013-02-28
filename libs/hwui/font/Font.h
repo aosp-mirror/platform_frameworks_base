@@ -69,6 +69,7 @@ public:
         uint8_t mStyle;
         float mStrokeWidth;
         bool mAntiAliasing;
+        SkMatrix mLookupTransform;
     };
 
     ~Font();
@@ -136,6 +137,8 @@ private:
 
     // Cache of glyphs
     DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
+
+    mat4 mTransform;
 };
 
 inline int strictly_order_type(const Font::FontDescription& lhs,

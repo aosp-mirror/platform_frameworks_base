@@ -152,6 +152,8 @@ public:
 
     void dump() const;
 
+    static const Matrix4& identity();
+
 private:
     mutable uint32_t mType;
 

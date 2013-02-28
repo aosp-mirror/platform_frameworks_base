@@ -936,9 +936,6 @@ private:
     // List of layers to update at the beginning of a frame
     Vector<Layer*> mLayerUpdates;
 
-    // Indentity matrix
-    const mat4 mIdentity;
-
     // Indicates whether the clip must be restored
     bool mDirtyClip;
 

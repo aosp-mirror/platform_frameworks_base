@@ -54,6 +54,7 @@ public class ScaledTextActivity extends Activity {
 
         public ScaledTextView(Context c) {
             super(c);
+            setLayerType(LAYER_TYPE_HARDWARE, null);
 
             mPath = makePath();
 
@@ -92,11 +93,28 @@ public class ScaledTextActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            canvas.drawARGB(255, 255, 255, 255);
 
             canvas.drawText(TEXT, 30.0f, 30.0f, mPaint);
+            mPaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText(TEXT, 30.0f, 50.0f, mPaint);
+            mPaint.setTextAlign(Paint.Align.RIGHT);
+            canvas.drawText(TEXT, 30.0f, 70.0f, mPaint);
 
-            canvas.translate(0.0f, 50.0f);
+            canvas.save();
+            canvas.translate(400.0f, 0.0f);
+            canvas.scale(3.0f, 3.0f);
+            mPaint.setTextAlign(Paint.Align.LEFT);
+            mPaint.setStrikeThruText(true);
+            canvas.drawText(TEXT, 30.0f, 30.0f, mPaint);
+            mPaint.setStrikeThruText(false);
+            mPaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText(TEXT, 30.0f, 50.0f, mPaint);
+            mPaint.setTextAlign(Paint.Align.RIGHT);
+            canvas.drawText(TEXT, 30.0f, 70.0f, mPaint);
+            canvas.restore();
+
+            mPaint.setTextAlign(Paint.Align.LEFT);
+            canvas.translate(0.0f, 100.0f);
 
             canvas.save();
             canvas.scale(mScale, mScale);
