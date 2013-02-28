@@ -1022,7 +1022,14 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     //       information about this implementation
     if (CC_LIKELY(!layer->region.isEmpty())) {
         size_t count;
-        const android::Rect* rects = layer->region.getArray(&count);
+        const android::Rect* rects;
+        Region safeRegion;
+        if (CC_LIKELY(hasRectToRectTransform())) {
+            rects = layer->region.getArray(&count);
+        } else {
+            safeRegion = Region::createTJunctionFreeRegion(layer->region);
+            rects = safeRegion.getArray(&count);
+        }
 
         const float alpha = layer->getAlpha() / 255.0f;
         const float texX = 1.0f / float(layer->getWidth());

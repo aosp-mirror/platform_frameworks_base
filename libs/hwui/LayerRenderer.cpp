@@ -123,13 +123,9 @@ Region* LayerRenderer::getRegion() {
     return &mLayer->region;
 }
 
-// TODO: This implementation is flawed and can generate T-junctions
-//       in the mesh, which will in turn produce cracks when the
-//       mesh is rotated/skewed. The easiest way to fix this would
-//       be, for each row, to add new vertices shared with the previous
-//       row when the two rows share an edge.
-//       In practice, T-junctions do not appear often so this has yet
-//       to be fixed.
+// TODO: This implementation uses a very simple approach to fixing T-junctions which keeps the
+//       results as rectangles, and is thus not necessarily efficient in the geometry
+//       produced. Eventually, it may be better to develop triangle-based mechanism.
 void LayerRenderer::generateMesh() {
     if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
         if (mLayer->mesh) {
@@ -145,8 +141,14 @@ void LayerRenderer::generateMesh() {
         return;
     }
 
+    // avoid T-junctions as they cause artifacts in between the resultant
+    // geometry when complex transforms occur.
+    // TODO: generate the safeRegion only if necessary based on drawing transform (see
+    // OpenGLRenderer::composeLayerRegion())
+    Region safeRegion = Region::createTJunctionFreeRegion(mLayer->region);
+
     size_t count;
-    const android::Rect* rects = mLayer->region.getArray(&count);
+    const android::Rect* rects = safeRegion.getArray(&count);
 
     GLsizei elementCount = count * 6;
 
