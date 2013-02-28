@@ -300,7 +300,7 @@ public class TestService extends Service {
                     threadFinished(false);
                 }
             }, Process.THREAD_PRIORITY_BACKGROUND);
-            mForegroundThread = new RunnerThread("background", new Runnable() {
+            mForegroundThread = new RunnerThread("foreground", new Runnable() {
                 @Override public void run() {
                     boolean running;
                     int ops = 0;

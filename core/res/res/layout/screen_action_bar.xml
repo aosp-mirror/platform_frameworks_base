@@ -18,38 +18,47 @@
 This is an optimized layout for a screen with the Action Bar enabled.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.ActionBarOverlayLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/action_bar_overlay_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:fitsSystemWindows="true"
     android:splitMotionEvents="false">
-    <com.android.internal.widget.ActionBarContainer android:id="@+id/action_bar_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/actionBarStyle">
-        <com.android.internal.widget.ActionBarView
-            android:id="@+id/action_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="?android:attr/actionBarStyle" />
-        <com.android.internal.widget.ActionBarContextView
-            android:id="@+id/action_context_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            style="?android:attr/actionModeStyle" />
-    </com.android.internal.widget.ActionBarContainer>
     <FrameLayout android:id="@android:id/content"
-        android:layout_width="match_parent" 
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        android:foregroundGravity="fill_horizontal|top"
-        android:foreground="?android:attr/windowContentOverlay" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <LinearLayout android:id="@+id/top_action_bar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="top">
+        <com.android.internal.widget.ActionBarContainer android:id="@+id/action_bar_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            style="?android:attr/actionBarStyle"
+            android:gravity="top">
+            <com.android.internal.widget.ActionBarView
+                android:id="@+id/action_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="?android:attr/actionBarStyle" />
+            <com.android.internal.widget.ActionBarContextView
+                android:id="@+id/action_context_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                style="?android:attr/actionModeStyle" />
+        </com.android.internal.widget.ActionBarContainer>
+        <ImageView android:src="?android:attr/windowContentOverlay"
+                   android:scaleType="fitXY"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content" />
+    </LinearLayout>
     <com.android.internal.widget.ActionBarContainer android:id="@+id/split_action_bar"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
+                  android:layout_gravity="bottom"
                   style="?android:attr/actionBarSplitStyle"
                   android:visibility="gone"
                   android:gravity="center"/>
-</LinearLayout>
+</com.android.internal.widget.ActionBarOverlayLayout>

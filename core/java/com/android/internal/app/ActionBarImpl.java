@@ -110,6 +110,7 @@ public class ActionBarImpl extends ActionBar {
 
     private int mCurWindowVisibility = View.VISIBLE;
 
+    private boolean mContentAnimations = true;
     private boolean mHiddenByApp;
     private boolean mHiddenBySystem;
     private boolean mShowingForMode;
@@ -122,7 +123,7 @@ public class ActionBarImpl extends ActionBar {
     final AnimatorListener mHideListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
-            if (mContentView != null) {
+            if (mContentAnimations && mContentView != null) {
                 mContentView.setTranslationY(0);
                 mTopVisibilityView.setTranslationY(0);
             }
@@ -151,23 +152,24 @@ public class ActionBarImpl extends ActionBar {
         mActivity = activity;
         Window window = activity.getWindow();
         View decor = window.getDecorView();
-        init(decor);
-        if (!mActivity.getWindow().hasFeature(Window.FEATURE_ACTION_BAR_OVERLAY)) {
+        boolean overlayMode = mActivity.getWindow().hasFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        init(decor, overlayMode);
+        if (!overlayMode) {
             mContentView = decor.findViewById(android.R.id.content);
         }
     }
 
     public ActionBarImpl(Dialog dialog) {
         mDialog = dialog;
-        init(dialog.getWindow().getDecorView());
+        init(dialog.getWindow().getDecorView(), false);
     }
 
-    private void init(View decor) {
+    private void init(View decor, boolean overlayMode) {
         mContext = decor.getContext();
         mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
                 com.android.internal.R.id.action_bar_overlay_layout);
         if (mOverlayLayout != null) {
-            mOverlayLayout.setActionBar(this);
+            mOverlayLayout.setActionBar(this, overlayMode);
         }
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mContextView = (ActionBarContextView) decor.findViewById(
@@ -586,6 +588,10 @@ public class ActionBarImpl extends ActionBar {
         return mContainerView.getHeight();
     }
 
+    public void enableContentAnimations(boolean enabled) {
+        mContentAnimations = enabled;
+    }
+
     @Override
     public void show() {
         if (mHiddenByApp) {
@@ -684,7 +690,7 @@ public class ActionBarImpl extends ActionBar {
             AnimatorSet anim = new AnimatorSet();
             AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView,
                     "translationY", 0));
-            if (mContentView != null) {
+            if (mContentAnimations && mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
                         startingY, 0));
             }
@@ -709,7 +715,7 @@ public class ActionBarImpl extends ActionBar {
         } else {
             mTopVisibilityView.setAlpha(1);
             mTopVisibilityView.setTranslationY(0);
-            if (mContentView != null) {
+            if (mContentAnimations && mContentView != null) {
                 mContentView.setTranslationY(0);
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
@@ -742,7 +748,7 @@ public class ActionBarImpl extends ActionBar {
             }
             AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView,
                     "translationY", endingY));
-            if (mContentView != null) {
+            if (mContentAnimations && mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
                         0, endingY));
             }
