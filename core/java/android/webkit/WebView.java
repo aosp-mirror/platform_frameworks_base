@@ -208,8 +208,7 @@ import java.util.Map;
  * and default scaling is not applied to the web page; if the value is "1.5", then the device is
  * considered a high density device (hdpi) and the page content is scaled 1.5x; if the
  * value is "0.75", then the device is considered a low density device (ldpi) and the content is
- * scaled 0.75x. However, if you specify the {@code "target-densitydpi"} meta property
- * (discussed below), then you can stop this default scaling behavior.</li>
+ * scaled 0.75x.</li>
  * <li>The {@code -webkit-device-pixel-ratio} CSS media query. Use this to specify the screen
  * densities for which this style sheet is to be used. The corresponding value should be either
  * "0.75", "1", or "1.5", to indicate that the styles are for devices with low density, medium
@@ -219,29 +218,6 @@ import java.util.Map;
  * <p>The {@code hdpi.css} stylesheet is only used for devices with a screen pixel ration of 1.5,
  * which is the high density pixel ratio.</p>
  * </li>
- * <li>The {@code target-densitydpi} property for the {@code viewport} meta tag. You can use
- * this to specify the target density for which the web page is designed, using the following
- * values:
- * <ul>
- * <li>{@code device-dpi} - Use the device's native dpi as the target dpi. Default scaling never
- * occurs.</li>
- * <li>{@code high-dpi} - Use hdpi as the target dpi. Medium and low density screens scale down
- * as appropriate.</li>
- * <li>{@code medium-dpi} - Use mdpi as the target dpi. High density screens scale up and
- * low density screens scale down. This is also the default behavior.</li>
- * <li>{@code low-dpi} - Use ldpi as the target dpi. Medium and high density screens scale up
- * as appropriate.</li>
- * <li><em>{@code <value>}</em> - Specify a dpi value to use as the target dpi (accepted
- * values are 70-400).</li>
- * </ul>
- * <p>Here's an example meta tag to specify the target density:</p>
- * <pre>&lt;meta name="viewport" content="target-densitydpi=device-dpi" /&gt;</pre></li>
- * </ul>
- * <p>If you want to modify your web page for different densities, by using the {@code
- * -webkit-device-pixel-ratio} CSS media query and/or the {@code
- * window.devicePixelRatio} DOM property, then you should set the {@code target-densitydpi} meta
- * property to {@code device-dpi}. This stops Android from performing scaling in your web page and
- * allows you to make the necessary adjustments for each density via CSS and JavaScript.</p>
  *
  * <h3>HTML5 Video support</h3>
  *
