@@ -20,7 +20,9 @@ package android.widget;
  * Interface that should be implemented on Adapters to enable fast scrolling 
  * in an {@link AbsListView} between sections of the list. A section is a group of list items
  * to jump to that have something in common. For example, they may begin with the
- * same letter or they may be songs from the same artist. 
+ * same letter or they may be songs from the same artist. ExpandableListAdapters that
+ * consider groups and sections as synonymous should account for collapsed groups and return
+ * an appropriate section/position.
  */
 public interface SectionIndexer {
     /**
