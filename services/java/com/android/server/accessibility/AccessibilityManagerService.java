@@ -528,7 +528,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return -1;
     }
 
-    public void registerUiTestAutomationService(IAccessibilityServiceClient serviceClient,
+    public void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
@@ -543,6 +543,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         + "already registered!");
             }
 
+            try {
+                owner.linkToDeath(userState.mUiAutomationSerivceOnwerDeathRecipient, 0);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Couldn't register for the death of a"
+                        + " UiTestAutomationService!", re);
+                return;
+            }
+
+            userState.mUiAutomationServiceOwner = owner;
             userState.mUiAutomationServiceClient = serviceClient;
 
             // Set the temporary state.
@@ -1697,8 +1706,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (!mIsAutomation) {
                 mContext.unbindService(this);
             } else {
-                userState.mUiAutomationService = null;
-                userState.mUiAutomationServiceClient = null;
+                userState.destroyUiAutomationService();
             }
             removeServiceLocked(this, userState);
             dispose();
@@ -2112,8 +2120,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     // the state based on values in the settings database.
                     userState.mInstalledServices.remove(mAccessibilityServiceInfo);
                     userState.mEnabledServices.remove(mComponentName);
-                    userState.mUiAutomationService = null;
-                    userState.mUiAutomationServiceClient = null;
+                    userState.destroyUiAutomationService();
                 }
                 onUserStateChangedLocked(userState);
             }
@@ -2606,6 +2613,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private Service mUiAutomationService;
         private IAccessibilityServiceClient mUiAutomationServiceClient;
 
+        private IBinder mUiAutomationServiceOwner;
+        private final DeathRecipient mUiAutomationSerivceOnwerDeathRecipient =
+                new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                mUiAutomationServiceOwner.unlinkToDeath(
+                        mUiAutomationSerivceOnwerDeathRecipient, 0);
+                mUiAutomationServiceOwner = null;
+                if (mUiAutomationService != null) {
+                    mUiAutomationService.binderDied();
+                }
+            }
+        };
+
         public UserState(int userId) {
             mUserId = userId;
         }
@@ -2626,8 +2647,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Clear UI test automation state.
             if (mUiAutomationService != null) {
                 mUiAutomationService.binderDied();
-                mUiAutomationService = null;
-                mUiAutomationServiceClient = null;
             }
 
             // Unbind all services.
@@ -2648,6 +2667,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mIsTouchExplorationEnabled = false;
             mIsEnhancedWebAccessibilityEnabled = false;
             mIsDisplayMagnificationEnabled = false;
+        }
+
+        public void destroyUiAutomationService() {
+            mUiAutomationService = null;
+            mUiAutomationServiceClient = null;
+            if (mUiAutomationServiceOwner != null) {
+                mUiAutomationServiceOwner.unlinkToDeath(
+                        mUiAutomationSerivceOnwerDeathRecipient, 0);
+                mUiAutomationServiceOwner = null;
+            }
         }
     }
 
