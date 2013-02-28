@@ -1057,30 +1057,34 @@ public class DateUtils
         // computation below that'd otherwise be thrown out.
         boolean isInstant = (startMillis == endMillis);
 
-        Time startDate;
+        Calendar startCalendar, endCalendar;
+        Time startDate = new Time();
         if (timeZone != null) {
-            startDate = new Time(timeZone);
+            startCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
         } else if (useUTC) {
-            startDate = new Time(Time.TIMEZONE_UTC);
+            startCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         } else {
-            startDate = new Time();
+            startCalendar = Calendar.getInstance();
         }
-        startDate.set(startMillis);
+        startCalendar.setTimeInMillis(startMillis);
+        setTimeFromCalendar(startDate, startCalendar);
 
-        Time endDate;
+        Time endDate = new Time();
         int dayDistance;
         if (isInstant) {
             endDate = startDate;
             dayDistance = 0;
         } else {
             if (timeZone != null) {
-                endDate = new Time(timeZone);
+                endCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
             } else if (useUTC) {
-                endDate = new Time(Time.TIMEZONE_UTC);
+                endCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             } else {
-                endDate = new Time();
+                endCalendar = Calendar.getInstance();
             }
-            endDate.set(endMillis);
+            endCalendar.setTimeInMillis(endMillis);
+            setTimeFromCalendar(endDate, endCalendar);
+
             int startJulianDay = Time.getJulianDay(startMillis, startDate.gmtoff);
             int endJulianDay = Time.getJulianDay(endMillis, endDate.gmtoff);
             dayDistance = endJulianDay - startJulianDay;
@@ -1421,6 +1425,20 @@ public class DateUtils
         // The values that are used in a fullFormat string are specified
         // by position.
         return formatter.format(fullFormat, timeString, startWeekDayString, dateString);
+    }
+
+    private static void setTimeFromCalendar(Time t, Calendar c) {
+        t.hour = c.get(Calendar.HOUR_OF_DAY);
+        t.minute = c.get(Calendar.MINUTE);
+        t.month = c.get(Calendar.MONTH);
+        t.monthDay = c.get(Calendar.DAY_OF_MONTH);
+        t.second = c.get(Calendar.SECOND);
+        t.weekDay = c.get(Calendar.DAY_OF_WEEK) - 1;
+        t.year = c.get(Calendar.YEAR);
+        t.yearDay = c.get(Calendar.DAY_OF_YEAR);
+        t.isDst = (c.get(Calendar.DST_OFFSET) != 0) ? 1 : 0;
+        t.gmtoff = c.get(Calendar.ZONE_OFFSET) + c.get(Calendar.DST_OFFSET);
+        t.timezone = c.getTimeZone().getID();
     }
 
     /**
