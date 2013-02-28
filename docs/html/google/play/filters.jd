@@ -434,9 +434,13 @@ href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
     <p>By using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
 &lt;uses-sdk&gt;}</a> element.</p>
   </li>
+  <li>CPU Architecture (ABI)
+    <p>By including native libraries built with the <a href="{@docRoot}tools/sdk/ndk/index.html">Android
+    NDK</a> that target a specific CPU architecture (ARM EABI v7 or x86, for example).</p>
+  </li>
 </ul>
 
-<p>All other filters still work the same as usual, but these three are the only filters that can
+<p>All other filters still work the same as usual, but these four are the only filters that can
 distinguish one APK from another within the same application listing on Google Play. For example,
 you <em>cannot</em> publish multiple APKs for the same application if the APKs differ only based on
 whether the device has a camera.</p>
