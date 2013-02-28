@@ -725,7 +725,7 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("starting CertBlacklister", e);
             }
-            
+
             if (context.getResources().getBoolean(
                     com.android.internal.R.bool.config_dreamsSupported)) {
                 try {
@@ -862,7 +862,9 @@ class ServerThread extends Thread {
             public void run() {
                 Slog.i(TAG, "Making services ready");
 
-                if (!headless) startSystemUi(contextF);
+                if (!headless) {
+                    startSystemUi(contextF);
+                }
                 try {
                     if (mountServiceF != null) mountServiceF.systemReady();
                 } catch (Throwable e) {

@@ -90,8 +90,7 @@ import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
-import com.android.internal.policy.impl.keyguard.KeyguardViewManager;
-import com.android.internal.policy.impl.keyguard.KeyguardViewMediator;
+import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
@@ -150,6 +149,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     static final int SYSTEM_UI_CHANGING_LAYOUT =
             View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+
+    /**
+     * Keyguard stuff
+     */
+    private WindowState mKeyguardScrim;
 
     /* Table of Application Launch keys.  Maps from key codes to intent categories.
      *
@@ -222,7 +226,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarWidthForRotation = new int[4];
 
     WindowState mKeyguard = null;
-    KeyguardViewMediator mKeyguardMediator;
+    KeyguardServiceDelegate mKeyguardDelegate;
     GlobalActions mGlobalActions;
     volatile boolean mPowerKeyHandled; // accessed from input reader and handler thread
     boolean mPendingPowerKeyUpCanceled;
@@ -659,7 +663,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private long getScreenshotChordLongPressDelay() {
-        if (mKeyguardMediator.isShowing()) {
+        if (mKeyguardDelegate.isShowing()) {
             // Double the time it takes to take a screenshot from the keyguard
             return (long) (KEYGUARD_SCREENSHOT_CHORD_DELAY_MULTIPLIER *
                     ViewConfiguration.getGlobalActionKeyTimeout());
@@ -722,7 +726,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyguardShowing) {
             // since it took two seconds of long press to bring this up,
             // poke the wake lock so they have some time to see the dialog.
-            mKeyguardMediator.userActivity();
+            mKeyguardDelegate.userActivity();
         }
     }
 
@@ -817,8 +821,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerFuncs = windowManagerFuncs;
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
         if (!mHeadless) {
-            // don't create KeyguardViewMediator if headless
-            mKeyguardMediator = new KeyguardViewMediator(context, null);
+            startKeyguard(context);
         }
         mHandler = new PolicyHandler();
         mOrientationListener = new MyOrientationListener(mContext, mHandler);
@@ -910,6 +913,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             screenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
+    }
+
+    private void startKeyguard(Context context) {
+        mKeyguardDelegate = new KeyguardServiceDelegate(context, null);
     }
 
     @Override
@@ -1231,6 +1238,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_DISPLAY_OVERLAY:
             case TYPE_HIDDEN_NAV_CONSUMER:
             case TYPE_KEYGUARD:
+            case TYPE_KEYGUARD_SCRIM:
             case TYPE_KEYGUARD_DIALOG:
             case TYPE_MAGNIFICATION_OVERLAY:
             case TYPE_NAVIGATION_BAR:
@@ -1347,54 +1355,57 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         case TYPE_INPUT_METHOD_DIALOG:
             // on-screen keyboards and other such input method user interfaces go here.
             return 11;
+        case TYPE_KEYGUARD_SCRIM:
+            // the safety window that shows behind keyguard while keyguard is starting
+            return 12;
         case TYPE_KEYGUARD:
             // the keyguard; nothing on top of these can take focus, since they are
             // responsible for power management when displayed.
-            return 12;
-        case TYPE_KEYGUARD_DIALOG:
             return 13;
-        case TYPE_STATUS_BAR_SUB_PANEL:
+        case TYPE_KEYGUARD_DIALOG:
             return 14;
-        case TYPE_STATUS_BAR:
+        case TYPE_STATUS_BAR_SUB_PANEL:
             return 15;
-        case TYPE_STATUS_BAR_PANEL:
+        case TYPE_STATUS_BAR:
             return 16;
+        case TYPE_STATUS_BAR_PANEL:
+            return 17;
         case TYPE_VOLUME_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 17;
+            return 18;
         case TYPE_SYSTEM_OVERLAY:
             // the on-screen volume indicator and controller shown when the user
             // changes the device volume
-            return 18;
+            return 19;
         case TYPE_NAVIGATION_BAR:
             // the navigation bar, if available, shows atop most things
-            return 19;
+            return 20;
         case TYPE_NAVIGATION_BAR_PANEL:
             // some panels (e.g. search) need to show on top of the navigation bar
-            return 20;
+            return 21;
         case TYPE_SYSTEM_ERROR:
             // system-level error dialogs
-            return 21;
+            return 22;
         case TYPE_MAGNIFICATION_OVERLAY:
             // used to highlight the magnified portion of a display
-            return 22;
+            return 23;
         case TYPE_DISPLAY_OVERLAY:
             // used to simulate secondary display devices
-            return 23;
+            return 24;
         case TYPE_DRAG:
             // the drag layer: input for drag-and-drop is associated with this window,
             // which sits above all other focusable windows
-            return 24;
-        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 25;
-        case TYPE_BOOT_PROGRESS:
+        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 26;
+        case TYPE_BOOT_PROGRESS:
+            return 27;
         case TYPE_POINTER:
             // the (mouse) pointer layer
-            return 27;
-        case TYPE_HIDDEN_NAV_CONSUMER:
             return 28;
+        case TYPE_HIDDEN_NAV_CONSUMER:
+            return 29;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return 2;
@@ -1485,6 +1496,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_DREAM:
             case TYPE_UNIVERSE_BACKGROUND:
             case TYPE_KEYGUARD:
+            case TYPE_KEYGUARD_SCRIM:
                 return false;
             default:
                 return true;
@@ -1680,7 +1692,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 mKeyguard = win;
+                hideKeyguardScrim();
                 break;
+            case TYPE_KEYGUARD_SCRIM:
+                // TODO: put this back when done testing
+//                if (mKeyguardScrim != null) {
+//                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+//                }
+                mKeyguardScrim = win;
+                break;
+
         }
         return WindowManagerGlobal.ADD_OKAY;
     }
@@ -1690,10 +1711,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mStatusBar == win) {
             mStatusBar = null;
         } else if (mKeyguard == win) {
+            Log.v(TAG, "Removing keyguard window (Did it crash?)");
             mKeyguard = null;
-        } else if (mNavigationBar == win) {
+            showKeyguardScrimLw();
+        } else if (mKeyguardScrim == win) {
+            Log.v(TAG, "Removing keyguard scrim");
+            mKeyguardScrim = null;
+        } if (mNavigationBar == win) {
             mNavigationBar = null;
         }
+    }
+
+    private void showKeyguardScrimLw() {
+        Log.v(TAG, "*** SHOWING KEYGUARD SCRIM ***");
+    }
+    
+    private void hideKeyguardScrim() {
+        Log.v(TAG, "*** HIDING KEYGUARD SCRIM ***");
     }
 
     static final boolean PRINT_ANIM = false;
@@ -1919,6 +1953,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (attrs != null) {
                 final int type = attrs.type;
                 if (type == WindowManager.LayoutParams.TYPE_KEYGUARD
+                        || type == WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM
                         || type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG) {
                     // the "app" is keyguard, so give it the key
                     return 0;
@@ -2312,12 +2347,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * given the situation with the keyguard.
      */
     void launchHomeFromHotKey() {
-        if (mKeyguardMediator != null && mKeyguardMediator.isShowingAndNotHidden()) {
+        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowingAndNotHidden()) {
             // don't launch home if keyguard showing
-        } else if (!mHideLockScreen && mKeyguardMediator.isInputRestricted()) {
+        } else if (!mHideLockScreen && mKeyguardDelegate.isInputRestricted()) {
             // when in keyguard restricted mode, must first verify unlock
             // before launching home
-            mKeyguardMediator.verifyUnlock(new OnKeyguardExitResult() {
+            mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
                 public void onKeyguardExitResult(boolean success) {
                     if (success) {
                         try {
@@ -3299,17 +3334,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguard != null) {
             if (localLOGV) Log.v(TAG, "finishPostLayoutPolicyLw: mHideKeyguard="
                     + mHideLockScreen);
-            if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !mKeyguardMediator.isSecure()) {
+            if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !mKeyguardDelegate.isSecure()) {
                 if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
-                if (mKeyguardMediator.isShowing()) {
+                if (mKeyguardDelegate.isShowing()) {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mKeyguardMediator.keyguardDone(false, false);
+                            mKeyguardDelegate.keyguardDone(false, false);
                         }
                     });
                 }
@@ -3319,7 +3354,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
-                mKeyguardMediator.setHidden(true);
+                mKeyguardDelegate.setHidden(true);
             } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
                 // This is the case of keyguard isSecure() and not mHideLockScreen.
                 if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
@@ -3329,11 +3364,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 | FINISH_LAYOUT_REDO_CONFIG
                                 | FINISH_LAYOUT_REDO_WALLPAPER;
                     }
-                    mKeyguardMediator.setHidden(false);
+                    mKeyguardDelegate.setHidden(false);
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mKeyguardMediator.dismiss();
+                            mKeyguardDelegate.dismiss();
                         }
                     });
                 }
@@ -3344,7 +3379,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
-                mKeyguardMediator.setHidden(false);
+                mKeyguardDelegate.setHidden(false);
             }
         }
 
@@ -3395,7 +3430,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (lidOpen) {
             if (keyguardIsShowingTq()) {
-                mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(KeyEvent.KEYCODE_POWER);
+                mKeyguardDelegate.onWakeKeyWhenKeyguardShowingTq(KeyEvent.KEYCODE_POWER);
             } else {
                 mPowerManager.wakeUp(SystemClock.uptimeMillis());
             }
@@ -3575,10 +3610,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // the same as if it were open and in front.
         // This will prevent any keys other than the power button from waking the screen
         // when the keyguard is hidden by another activity.
-        final boolean keyguardActive = (mKeyguardMediator == null ? false :
+        final boolean keyguardActive = (mKeyguardDelegate == null ? false :
                                             (isScreenOn ?
-                                                mKeyguardMediator.isShowingAndNotHidden() :
-                                                mKeyguardMediator.isShowing()));
+                                                mKeyguardDelegate.isShowingAndNotHidden() :
+                                                mKeyguardDelegate.isShowing()));
 
         if (keyCode == KeyEvent.KEYCODE_POWER) {
             policyFlags |= WindowManagerPolicy.FLAG_WAKE;
@@ -3617,7 +3652,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (down && isWakeKey && isWakeKeyWhenScreenOff(keyCode)) {
                 if (keyguardActive) {
                     // If the keyguard is showing, let it wake the device when ready.
-                    mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(keyCode);
+                    mKeyguardDelegate.onWakeKeyWhenKeyguardShowingTq(keyCode);
                 } else {
                     // Otherwise, wake the device ourselves.
                     result |= ACTION_WAKE_UP;
@@ -3881,9 +3916,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean isWakeMotion = (policyFlags
                 & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
         if (isWakeMotion) {
-            if (mKeyguardMediator != null && mKeyguardMediator.isShowing()) {
+            if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
                 // If the keyguard is showing, let it decide what to do with the wake motion.
-                mKeyguardMediator.onWakeMotionWhenKeyguardShowingTq();
+                mKeyguardDelegate.onWakeMotionWhenKeyguardShowingTq();
             } else {
                 // Otherwise, wake the device ourselves.
                 result |= ACTION_WAKE_UP;
@@ -3966,12 +4001,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_DREAMING_STARTED.equals(intent.getAction())) {
-                if (mKeyguardMediator != null) {
-                    mKeyguardMediator.onDreamingStarted();
+                if (mKeyguardDelegate != null) {
+                    mKeyguardDelegate.onDreamingStarted();
                 }
             } else if (Intent.ACTION_DREAMING_STOPPED.equals(intent.getAction())) {
-                if (mKeyguardMediator != null) {
-                    mKeyguardMediator.onDreamingStopped();
+                if (mKeyguardDelegate != null) {
+                    mKeyguardDelegate.onDreamingStopped();
                 }
             }
         }
@@ -4005,8 +4040,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenOnEarly = false;
             mScreenOnFully = false;
         }
-        if (mKeyguardMediator != null) {
-            mKeyguardMediator.onScreenTurnedOff(why);
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.onScreenTurnedOff(why);
         }
         synchronized (mLock) {
             updateOrientationListenerLp();
@@ -4033,9 +4068,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void waitForKeyguard(final ScreenOnListener screenOnListener) {
-        if (mKeyguardMediator != null) {
+        if (mKeyguardDelegate != null) {
             if (screenOnListener != null) {
-                mKeyguardMediator.onScreenTurnedOn(new KeyguardViewManager.ShowListener() {
+                mKeyguardDelegate.onScreenTurnedOn(new KeyguardServiceDelegate.ShowListener() {
                     @Override
                     public void onShown(IBinder windowToken) {
                         waitForKeyguardWindowDrawn(windowToken, screenOnListener);
@@ -4043,10 +4078,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 });
                 return;
             } else {
-                mKeyguardMediator.onScreenTurnedOn(null);
+                mKeyguardDelegate.onScreenTurnedOn(null);
             }
         } else {
-            Slog.i(TAG, "No keyguard mediator!");
+            Slog.i(TAG, "No keyguard interface!");
         }
         finishScreenTurningOn(screenOnListener);
     }
@@ -4101,21 +4136,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void enableKeyguard(boolean enabled) {
-        if (mKeyguardMediator != null) {
-            mKeyguardMediator.setKeyguardEnabled(enabled);
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.setKeyguardEnabled(enabled);
         }
     }
 
     /** {@inheritDoc} */
     public void exitKeyguardSecurely(OnKeyguardExitResult callback) {
-        if (mKeyguardMediator != null) {
-            mKeyguardMediator.verifyUnlock(callback);
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.verifyUnlock(callback);
         }
     }
 
     private boolean keyguardIsShowingTq() {
-        if (mKeyguardMediator == null) return false;
-        return mKeyguardMediator.isShowingAndNotHidden();
+        if (mKeyguardDelegate == null) return false;
+        return mKeyguardDelegate.isShowingAndNotHidden();
     }
 
 
@@ -4126,26 +4161,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public boolean isKeyguardSecure() {
-        if (mKeyguardMediator == null) return false;
-        return mKeyguardMediator.isSecure();
+        if (mKeyguardDelegate == null) return false;
+        return mKeyguardDelegate.isSecure();
     }
 
     /** {@inheritDoc} */
     public boolean inKeyguardRestrictedKeyInputMode() {
-        if (mKeyguardMediator == null) return false;
-        return mKeyguardMediator.isInputRestricted();
+        if (mKeyguardDelegate == null) return false;
+        return mKeyguardDelegate.isInputRestricted();
     }
 
     public void dismissKeyguardLw() {
-        if (mKeyguardMediator.isShowing()) {
+        if (mKeyguardDelegate.isShowing()) {
             mHandler.post(new Runnable() {
                 public void run() {
-                    if (mKeyguardMediator.isDismissable()) {
+                    if (mKeyguardDelegate.isDismissable()) {
                         // Can we just finish the keyguard straight away?
-                        mKeyguardMediator.keyguardDone(false, true);
+                        mKeyguardDelegate.keyguardDone(false, true);
                     } else {
                         // ask the keyguard to prompt the user to authenticate if necessary
-                        mKeyguardMediator.dismiss();
+                        mKeyguardDelegate.dismiss();
                     }
                 }
             });
@@ -4386,9 +4421,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     /** {@inheritDoc} */
     public void systemReady() {
-        if (mKeyguardMediator != null) {
+        if (mKeyguardDelegate != null) {
             // tell the keyguard
-            mKeyguardMediator.onSystemReady();
+            mKeyguardDelegate.onSystemReady();
         }
         synchronized (mLock) {
             updateOrientationListenerLp();
@@ -4500,8 +4535,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void run() {
             synchronized (this) {
                 if (localLOGV) Log.v(TAG, "mScreenLockTimeout activating keyguard");
-                if (mKeyguardMediator != null) {
-                    mKeyguardMediator.doKeyguardTimeout(options);
+                if (mKeyguardDelegate != null) {
+                    mKeyguardDelegate.doKeyguardTimeout(options);
                 }
                 mLockScreenTimerActive = false;
                 options = null;
@@ -4529,7 +4564,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void updateLockScreenTimeout() {
         synchronized (mScreenLockTimeout) {
             boolean enable = (mAllowLockscreenWhenOn && mScreenOnEarly &&
-                    mKeyguardMediator != null && mKeyguardMediator.isSecure());
+                    mKeyguardDelegate != null && mKeyguardDelegate.isSecure());
             if (mLockScreenTimerActive != enable) {
                 if (enable) {
                     if (localLOGV) Log.v(TAG, "setting lockscreen timer");
@@ -4653,7 +4688,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
-        if (!always && (hapticsDisabled || mKeyguardMediator.isShowingAndNotHidden())) {
+        if (!always && (hapticsDisabled || mKeyguardDelegate.isShowingAndNotHidden())) {
             return false;
         }
         long[] pattern = null;
@@ -4701,7 +4736,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void keepScreenOnStoppedLw() {
-        if (mKeyguardMediator != null && !mKeyguardMediator.isShowingAndNotHidden()) {
+        if (mKeyguardDelegate != null && !mKeyguardDelegate.isShowingAndNotHidden()) {
             long curTime = SystemClock.uptimeMillis();
             mPowerManager.userActivity(curTime, false);
         }
@@ -4769,8 +4804,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void setCurrentUserLw(int newUserId) {
-        if (mKeyguardMediator != null) {
-            mKeyguardMediator.setCurrentUser(newUserId);
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.setCurrentUser(newUserId);
         }
         if (mStatusBarService != null) {
             try {
@@ -4784,7 +4819,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void showAssistant() {
-        mKeyguardMediator.showAssistant();
+        mKeyguardDelegate.showAssistant();
     }
 
     @Override

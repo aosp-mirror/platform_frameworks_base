@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.systemui"
+        android:sharedUserId="android.uid.systemui"
         coreApp="true">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -71,6 +72,7 @@
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
         android:icon="@*android:drawable/platlogo"
+        android:process="com.android.systemui"
         android:supportsRtl="true">
 
         <!-- Broadcast receiver that gets the broadcast at boot time and starts

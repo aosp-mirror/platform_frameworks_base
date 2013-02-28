@@ -49,6 +49,7 @@ import java.util.Arrays;
  */
 public class LockSettingsService extends ILockSettings.Stub {
 
+    private static final String PERMISSION = "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE";
     private final DatabaseHelper mOpenHelper;
     private static final String TAG = "LockSettingsService";
 
@@ -99,29 +100,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private static final void checkWritePermission(int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("uid=" + callingUid
-                    + " not authorized to write lock settings");
-        }
+    private final void checkWritePermission(int userId) {
+        mContext.checkCallingOrSelfPermission(PERMISSION);
     }
 
-    private static final void checkPasswordReadPermission(int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("uid=" + callingUid
-                    + " not authorized to read lock password");
-        }
-    }
-
-    private static final void checkReadPermission(int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID
-                && UserHandle.getUserId(callingUid) != userId) {
-            throw new SecurityException("uid=" + callingUid
-                    + " not authorized to read settings of user " + userId);
-        }
+    private final void checkPasswordReadPermission(int userId) {
+        mContext.checkCallingOrSelfPermission(PERMISSION);
     }
 
     @Override
