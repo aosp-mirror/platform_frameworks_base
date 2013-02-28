@@ -1325,7 +1325,10 @@ public class AccountManagerService
             int userId) {
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && Binder.getCallingUid() != android.os.Process.myUid()) {
+                && Binder.getCallingUid() != android.os.Process.myUid()
+                && mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                    != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("User " + UserHandle.getCallingUserId()
                     + " trying to confirm account credentials for " + userId);
         }
@@ -1583,7 +1586,10 @@ public class AccountManagerService
     public Account[] getAccountsAsUser(String type, int userId) {
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && Binder.getCallingUid() != android.os.Process.myUid()) {
+                && Binder.getCallingUid() != android.os.Process.myUid()
+                && mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                    != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("User " + UserHandle.getCallingUserId()
                     + " trying to get account for " + userId);
         }
