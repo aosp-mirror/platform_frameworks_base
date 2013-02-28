@@ -26,6 +26,7 @@ import android.view.Surface;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.util.TypedValue;
+import android.graphics.Canvas;
 
 /**
  * <p>
@@ -429,6 +430,9 @@ public class Allocation extends BaseObj {
 
     private void validateBitmapFormat(Bitmap b) {
         Bitmap.Config bc = b.getConfig();
+        if (bc == null) {
+            throw new RSIllegalArgumentException("Bitmap has an unsupported format for this operation");
+        }
         switch (bc) {
         case ALPHA_8:
             if (mType.getElement().mKind != Element.DataKind.PIXEL_A) {
@@ -612,6 +616,13 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(Bitmap b) {
         mRS.validate();
+        if (b.getConfig() == null) {
+            Bitmap newBitmap = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(newBitmap);
+            c.drawBitmap(b, 0, 0, null);
+            copyFrom(newBitmap);
+            return;
+        }
         validateBitmapSize(b);
         validateBitmapFormat(b);
         mRS.nAllocationCopyFromBitmap(getID(mRS), b);
@@ -951,6 +962,12 @@ public class Allocation extends BaseObj {
      */
     public void copy2DRangeFrom(int xoff, int yoff, Bitmap data) {
         mRS.validate();
+        if (data.getConfig() == null) {
+            Bitmap newBitmap = Bitmap.createBitmap(data.getWidth(), data.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(newBitmap);
+            c.drawBitmap(data, 0, 0, null);
+            copy2DRangeFrom(xoff, yoff, newBitmap);
+        }
         validateBitmapFormat(data);
         validate2DRange(xoff, yoff, data.getWidth(), data.getHeight());
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, data);
@@ -1220,6 +1237,18 @@ public class Allocation extends BaseObj {
                                               MipmapControl mips,
                                               int usage) {
         rs.validate();
+
+        // WAR undocumented color formats
+        if (b.getConfig() == null) {
+            if ((usage & USAGE_SHARED) != 0) {
+                throw new RSIllegalArgumentException("USAGE_SHARED cannot be used with a Bitmap that has a null config.");
+            }
+            Bitmap newBitmap = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(newBitmap);
+            c.drawBitmap(b, 0, 0, null);
+            return createFromBitmap(rs, newBitmap, mips, usage);
+        }
+
         Type t = typeFromBitmap(rs, b, mips);
 
         // enable optimized bitmap path only with no mipmap and script-only usage
