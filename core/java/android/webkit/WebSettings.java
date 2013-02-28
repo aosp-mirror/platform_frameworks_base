@@ -422,7 +422,9 @@ public abstract class WebSettings {
 
     /**
      * Sets whether the WebView should save passwords. The default is true.
+     * @deprecated Saving passwords in WebView will not be supported in future versions.
      */
+    @Deprecated
     public void setSavePassword(boolean save) {
         throw new MustOverrideException();
     }
@@ -432,7 +434,9 @@ public abstract class WebSettings {
      *
      * @return whether the WebView saves passwords
      * @see #setSavePassword
+     * @deprecated Saving passwords in WebView will not be supported in future versions.
      */
+    @Deprecated
     public boolean getSavePassword() {
         throw new MustOverrideException();
     }
@@ -515,18 +519,20 @@ public abstract class WebSettings {
 
     /**
      * Enables using light touches to make a selection and activate mouseovers.
-     * The default is false.
+     * @deprecated From {@link android.os.Build.VERSION_CODES#JELLY_BEAN} this
+     *             setting is obsolete and has no effect.
      */
+    @Deprecated
     public void setLightTouchEnabled(boolean enabled) {
         throw new MustOverrideException();
     }
 
     /**
      * Gets whether light touches are enabled.
-     *
-     * @return whether light touches are enabled
      * @see #setLightTouchEnabled
+     * @deprecated
      */
+    @Deprecated
     public boolean getLightTouchEnabled() {
         throw new MustOverrideException();
     }
@@ -1012,7 +1018,9 @@ public abstract class WebSettings {
      * {@link PluginState#OFF}.
      *
      * @param state a PluginState value
+     * @deprecated Plugins will not be supported in future, and should not be used.
      */
+    @Deprecated
     public synchronized void setPluginState(PluginState state) {
         throw new MustOverrideException();
     }
@@ -1091,9 +1099,12 @@ public abstract class WebSettings {
      * this should be viewed as a guide, not a hard limit. Setting the
      * size to a value less than current database size does not cause the
      * database to be trimmed. The default size is {@link Long#MAX_VALUE}.
+     * It is recommended to leave the maximum size set to the default value.
      *
      * @param appCacheMaxSize the maximum size in bytes
+     * @deprecated In future quota will be managed automatically.
      */
+    @Deprecated
     public synchronized void setAppCacheMaxSize(long appCacheMaxSize) {
         throw new MustOverrideException();
     }
@@ -1219,7 +1230,9 @@ public abstract class WebSettings {
      *
      * @return the plugin state as a {@link PluginState} value
      * @see #setPluginState
+     * @deprecated Plugins will not be supported in future, and should not be used.
      */
+    @Deprecated
     public synchronized PluginState getPluginState() {
         throw new MustOverrideException();
     }
@@ -1324,7 +1337,10 @@ public abstract class WebSettings {
      * {@link RenderPriority#NORMAL}.
      *
      * @param priority the priority
+     * @deprecated It is not recommended to adjust thread priorities, and this will
+     *             not be supported in future versions.
      */
+    @Deprecated
     public synchronized void setRenderPriority(RenderPriority priority) {
         throw new MustOverrideException();
     }

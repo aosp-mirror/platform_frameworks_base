@@ -171,7 +171,9 @@ public class WebStorage {
      * The quota is specified in bytes and the origin is specified using its string
      * representation. Note that a quota is not enforced on a per-origin basis
      * for the Application Cache API.
+     * @deprecated Controlling quota per-origin will not be supported in future.
      */
+    @Deprecated
     public void setQuotaForOrigin(String origin, long quota) {
         // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
