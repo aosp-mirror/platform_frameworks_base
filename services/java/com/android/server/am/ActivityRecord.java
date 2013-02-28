@@ -949,7 +949,7 @@ final class ActivityRecord {
     @Override
     public String toString() {
         if (stringName != null) {
-            return stringName + " t" + task.taskId + "}";
+            return stringName + " t" + task.taskId + (finishing ? " f}" : "}");
         }
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");

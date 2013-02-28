@@ -94,7 +94,7 @@ final class ActivityStack {
     static final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
     static final boolean DEBUG_TASKS = ActivityManagerService.DEBUG_TASKS;
     static final boolean DEBUG_CLEANUP = ActivityManagerService.DEBUG_CLEANUP;
-    
+
     static final boolean DEBUG_STATES = false;
     static final boolean DEBUG_ADD_REMOVE = false;
     static final boolean DEBUG_SAVED_STATE = false;
@@ -512,10 +512,10 @@ final class ActivityStack {
     /**
      * This is a simplified version of topRunningActivityLocked that provides a number of
      * optional skip-over modes.  It is intended for use with the ActivityController hook only.
-     * 
+     *
      * @param token If non-null, any history records matching this token will be skipped.
      * @param taskId If non-zero, we'll attempt to skip over records with the same task ID.
-     * 
+     *
      * @return Returns the HistoryRecord of the next activity on the stack.
      */
     final ActivityRecord topRunningActivityLocked(IBinder token, int taskId) {
@@ -537,20 +537,6 @@ final class ActivityStack {
     }
 
     final ActivityRecord isInStackLocked(IBinder token) {
-        ActivityRecord newAr = newIsInStackLocked(token);
-
-        ActivityRecord r = ActivityRecord.forToken(token);
-        if (mHistory.contains(r)) {
-            if (VALIDATE_TASK_REPLACE && newAr != r) Slog.w(TAG,
-                    "isInStackLocked: mismatch: newAr=" + newAr + " r=" + r);
-            return r;
-        }
-        if (VALIDATE_TASK_REPLACE && newAr != null) Slog.w(TAG,
-                "isInStackLocked: mismatch: newAr!=null");
-        return null;
-    }
-
-    final ActivityRecord newIsInStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forToken(token);
         if (r != null) {
             final TaskRecord task = r.task;
@@ -811,7 +797,7 @@ final class ActivityStack {
                     r.compat, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profileFile, profileFd,
                     profileAutoStop);
-            
+
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
                 // manager will ensure that only activity can run in the main
@@ -831,7 +817,7 @@ final class ActivityStack {
                     mService.mHandler.sendMessage(msg);
                 }
             }
-            
+
         } catch (RemoteException e) {
             if (r.launchFailed) {
                 // This is the second time we failed -- finish activity
@@ -890,7 +876,7 @@ final class ActivityStack {
         if (mMainStack) {
             mService.startSetupActivityLocked();
         }
-        
+
         return true;
     }
 
@@ -1910,9 +1896,6 @@ final class ActivityStack {
             boolean startIt = true;
             for (int i = NH-1; i >= 0; i--) {
                 ActivityRecord p = mHistory.get(i);
-                if (p.finishing) {
-                    continue;
-                }
                 if (p.task == r.task) {
                     // Here it is!  Now, if this is not yet visible to the
                     // user, then just add it without starting; it will
@@ -2318,14 +2301,11 @@ final class ActivityStack {
                     if (DEBUG_TASKS) Slog.v(TAG, "Reparenting task at index " + i + " to " + end);
                     for (int srcPos = i; srcPos <= end; ++srcPos) {
                         final ActivityRecord p = activities.get(srcPos);
-                        if (p.finishing) {
-                            continue;
-                        }
                         p.setTask(task, null, false);
                         task.addActivityToTop(p);
 
                         mHistory.remove(p);
-                        mHistory.add(taskTopI--, p);
+                        mHistory.add(taskTopI, p);
 
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + p
                                 + " to stack at " + task,
@@ -2335,11 +2315,11 @@ final class ActivityStack {
                         mService.mWindowManager.setAppGroupId(p.appToken, taskId);
                     }
                     mService.mWindowManager.moveTaskToTop(taskId);
-                    if (VALIDATE_TOKENS) {
-                        validateAppTokensLocked();
-                    }
                     if (VALIDATE_TASK_REPLACE) {
                         verifyActivityRecords(false);
+                    }
+                    if (VALIDATE_TOKENS) {
+                        validateAppTokensLocked();
                     }
 
                     // Now we've moved it in to place...  but what if this is
@@ -2451,7 +2431,7 @@ final class ActivityStack {
                         ret.updateOptionsLocked(opts);
                     }
                     if (finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear", false)) {
-                        --activityNdx;    
+                        --activityNdx;
                         --numActivities;
                     }
                 }
@@ -3087,9 +3067,16 @@ final class ActivityStack {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            final int N = mHistory.size();
-            ActivityRecord prev =
-                N > 0 ? mHistory.get(N-1) : null;
+            ActivityRecord prev = null;
+            // Iterate to find the first non-empty task stack. Note that this code can
+            // go away once we stop storing tasks with empty mActivities lists.
+            for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+                ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                    prev = activities.get(activityNdx);
+                    break;
+                }
+            }
             r.setTask(prev != null
                     ? prev.task
                     : createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
@@ -3742,14 +3729,16 @@ final class ActivityStack {
             return;
         }
 
-        int i;
-        for (i=mHistory.size()-1; i>=0; i--) {
-            ActivityRecord r = mHistory.get(i);
-            if (r.resultTo == self && r.requestCode == requestCode) {
-                if ((r.resultWho == null && resultWho == null) ||
-                    (r.resultWho != null && r.resultWho.equals(resultWho))) {
-                    finishActivityLocked(r, Activity.RESULT_CANCELED,
-                            null, "request-sub", false);
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = activities.get(activityNdx);
+                if (r.resultTo == self && r.requestCode == requestCode) {
+                    if ((r.resultWho == null && resultWho == null) ||
+                        (r.resultWho != null && r.resultWho.equals(resultWho))) {
+                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, "request-sub",
+                                false);
+                    }
                 }
             }
         }
@@ -3763,15 +3752,25 @@ final class ActivityStack {
             // process, then terminate it to avoid getting in a loop.
             Slog.w(TAG, "  Force finishing activity "
                     + r.intent.getComponent().flattenToShortString());
-            int index = mHistory.indexOf(r);
+            int taskNdx = mTaskHistory.indexOf(r.task);
+            int activityNdx = r.task.mActivities.indexOf(r);
             r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED,
                     null, "crashed", false);
             // Also terminate any activities below it that aren't yet
             // stopped, to avoid a situation where one will get
             // re-start our crashing activity once it gets resumed again.
-            index--;
-            if (index >= 0) {
-                r = mHistory.get(index);
+            --activityNdx;
+            if (activityNdx < 0) {
+                do {
+                    --taskNdx;
+                    if (taskNdx < 0) {
+                        break;
+                    }
+                    activityNdx = mTaskHistory.get(taskNdx).mActivities.size() - 1;
+                } while (activityNdx < 0);
+            }
+            if (activityNdx >= 0) {
+                r = mTaskHistory.get(taskNdx).mActivities.get(activityNdx);
                 if (r.state == ActivityState.RESUMED
                         || r.state == ActivityState.PAUSING
                         || r.state == ActivityState.PAUSED) {
