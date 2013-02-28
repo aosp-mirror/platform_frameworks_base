@@ -1324,7 +1324,7 @@ class BrowserFrame extends Handler {
     private native void nativeSslCertErrorCancel(int handle, int certError);
 
     native void nativeSslClientCert(int handle,
-                                    int ctx,
+                                    long ctx,
                                     byte[][] asn1DerEncodedCertificateChain);
 
     native void nativeSslClientCert(int handle,
