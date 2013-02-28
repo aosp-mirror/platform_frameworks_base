@@ -134,21 +134,7 @@ class TaskRecord extends ThumbnailHolder {
             // Was not previously in list.
             numFullscreen++;
         }
-        // TODO: This only matters to achieve identical results as mHistory. Later we won't need
-        // to skip over finishing activities.
-        int i;
-        for (i = mActivities.size() - 1; i >= 0; --i) {
-            if (!mActivities.get(i).finishing) {
-                break;
-            }
-        }
-        if (i >= 0) {
-            // Add below finishing activities.
-            mActivities.add(i + 1, r);
-        } else {
-            // All activities are finishing, add to top.
-            mActivities.add(r);
-        }
+        mActivities.add(r);
     }
 
     /** @return true if this was the last activity in the task */
