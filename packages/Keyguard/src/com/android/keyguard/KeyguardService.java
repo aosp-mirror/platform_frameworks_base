@@ -106,10 +106,6 @@ public class KeyguardService extends Service {
             return mKeyguardViewMediator.isDismissable();
         }
         public void onSystemReady() {
-            // Tell the accessibility layer that this process will
-            // run as the current user, i.e. run across users.
-            AccessibilityManager.createAsSharedAcrossUsers(KeyguardService.this);
-
             mKeyguardViewMediator.onSystemReady();
         }
         public void doKeyguardTimeout(Bundle options) {
