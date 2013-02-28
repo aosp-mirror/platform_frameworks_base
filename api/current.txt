@@ -27457,7 +27457,7 @@ package android.webkit {
     method public java.lang.String getUrl();
   }
 
-  public class WebIconDatabase {
+  public deprecated class WebIconDatabase {
     method public void close();
     method public static android.webkit.WebIconDatabase getInstance();
     method public void open(java.lang.String);
@@ -27467,7 +27467,7 @@ package android.webkit {
     method public void retainIconForPageUrl(java.lang.String);
   }
 
-  public static abstract interface WebIconDatabase.IconListener {
+  public static abstract deprecated interface WebIconDatabase.IconListener {
     method public abstract void onReceivedIcon(java.lang.String, android.graphics.Bitmap);
   }
 
@@ -27506,18 +27506,18 @@ package android.webkit {
     method public synchronized boolean getJavaScriptCanOpenWindowsAutomatically();
     method public synchronized boolean getJavaScriptEnabled();
     method public synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
-    method public boolean getLightTouchEnabled();
+    method public deprecated boolean getLightTouchEnabled();
     method public boolean getLoadWithOverviewMode();
     method public synchronized boolean getLoadsImagesAutomatically();
     method public boolean getMediaPlaybackRequiresUserGesture();
     method public synchronized int getMinimumFontSize();
     method public synchronized int getMinimumLogicalFontSize();
-    method public synchronized android.webkit.WebSettings.PluginState getPluginState();
+    method public deprecated synchronized android.webkit.WebSettings.PluginState getPluginState();
     method public deprecated synchronized boolean getPluginsEnabled();
     method public deprecated synchronized java.lang.String getPluginsPath();
     method public synchronized java.lang.String getSansSerifFontFamily();
     method public boolean getSaveFormData();
-    method public boolean getSavePassword();
+    method public deprecated boolean getSavePassword();
     method public synchronized java.lang.String getSerifFontFamily();
     method public synchronized java.lang.String getStandardFontFamily();
     method public deprecated synchronized android.webkit.WebSettings.TextSize getTextSize();
@@ -27529,7 +27529,7 @@ package android.webkit {
     method public abstract void setAllowFileAccessFromFileURLs(boolean);
     method public abstract void setAllowUniversalAccessFromFileURLs(boolean);
     method public synchronized void setAppCacheEnabled(boolean);
-    method public synchronized void setAppCacheMaxSize(long);
+    method public deprecated synchronized void setAppCacheMaxSize(long);
     method public synchronized void setAppCachePath(java.lang.String);
     method public synchronized void setBlockNetworkImage(boolean);
     method public synchronized void setBlockNetworkLoads(boolean);
@@ -27552,20 +27552,20 @@ package android.webkit {
     method public synchronized void setJavaScriptCanOpenWindowsAutomatically(boolean);
     method public synchronized void setJavaScriptEnabled(boolean);
     method public synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
-    method public void setLightTouchEnabled(boolean);
+    method public deprecated void setLightTouchEnabled(boolean);
     method public void setLoadWithOverviewMode(boolean);
     method public synchronized void setLoadsImagesAutomatically(boolean);
     method public void setMediaPlaybackRequiresUserGesture(boolean);
     method public synchronized void setMinimumFontSize(int);
     method public synchronized void setMinimumLogicalFontSize(int);
     method public void setNeedInitialFocus(boolean);
-    method public synchronized void setPluginState(android.webkit.WebSettings.PluginState);
+    method public deprecated synchronized void setPluginState(android.webkit.WebSettings.PluginState);
     method public deprecated synchronized void setPluginsEnabled(boolean);
     method public deprecated synchronized void setPluginsPath(java.lang.String);
-    method public synchronized void setRenderPriority(android.webkit.WebSettings.RenderPriority);
+    method public deprecated synchronized void setRenderPriority(android.webkit.WebSettings.RenderPriority);
     method public synchronized void setSansSerifFontFamily(java.lang.String);
     method public void setSaveFormData(boolean);
-    method public void setSavePassword(boolean);
+    method public deprecated void setSavePassword(boolean);
     method public synchronized void setSerifFontFamily(java.lang.String);
     method public synchronized void setStandardFontFamily(java.lang.String);
     method public synchronized void setSupportMultipleWindows(boolean);
@@ -27632,7 +27632,7 @@ package android.webkit {
     method public void getOrigins(android.webkit.ValueCallback<java.util.Map>);
     method public void getQuotaForOrigin(java.lang.String, android.webkit.ValueCallback<java.lang.Long>);
     method public void getUsageForOrigin(java.lang.String, android.webkit.ValueCallback<java.lang.Long>);
-    method public void setQuotaForOrigin(java.lang.String, long);
+    method public deprecated void setQuotaForOrigin(java.lang.String, long);
   }
 
   public static class WebStorage.Origin {
@@ -27675,7 +27675,7 @@ package android.webkit {
     method public void clearHistory();
     method public void clearMatches();
     method public void clearSslPreferences();
-    method public void clearView();
+    method public deprecated void clearView();
     method public android.webkit.WebBackForwardList copyBackForwardList();
     method public void destroy();
     method public void documentHasImages(android.os.Message);
@@ -27722,7 +27722,7 @@ package android.webkit {
     method public void requestImageRef(android.os.Message);
     method public android.webkit.WebBackForwardList restoreState(android.os.Bundle);
     method public void resumeTimers();
-    method public void savePassword(java.lang.String, java.lang.String, java.lang.String);
+    method public deprecated void savePassword(java.lang.String, java.lang.String, java.lang.String);
     method public android.webkit.WebBackForwardList saveState(android.os.Bundle);
     method public void saveWebArchive(java.lang.String);
     method public void saveWebArchive(java.lang.String, boolean, android.webkit.ValueCallback<java.lang.String>);
@@ -27738,7 +27738,7 @@ package android.webkit {
     method public void setVerticalScrollbarOverlay(boolean);
     method public void setWebChromeClient(android.webkit.WebChromeClient);
     method public void setWebViewClient(android.webkit.WebViewClient);
-    method public boolean showFindDialog(java.lang.String, boolean);
+    method public deprecated boolean showFindDialog(java.lang.String, boolean);
     method public void stopLoading();
     method public boolean zoomIn();
     method public boolean zoomOut();

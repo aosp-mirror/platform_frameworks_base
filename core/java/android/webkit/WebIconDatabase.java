@@ -25,11 +25,19 @@ import android.graphics.Bitmap;
  * and WebView.getIconDatabase() will return a WebIconDatabase object. This
  * WebIconDatabase object is a single instance and all methods operate on that
  * single object.
+ * The main use-case for this class is calling {@link WebIconDatabase#open()}
+ * to enable favicon functionality on all WebView instances in this process.
+ *
+ * @deprecated This class is only required when running on devices
+ *             up to {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
  */
+@Deprecated
 public class WebIconDatabase {
     /**
      * Interface for receiving icons from the database.
+     * @deprecated
      */
+    @Deprecated
     public interface IconListener {
         /**
          * Called when the icon has been retrieved from the database and the
