@@ -530,7 +530,7 @@ public abstract class WebSettings {
     /**
      * Gets whether light touches are enabled.
      * @see #setLightTouchEnabled
-     * @deprecated
+     * @deprecated This setting is obsolete.
      */
     @Deprecated
     public boolean getLightTouchEnabled() {
