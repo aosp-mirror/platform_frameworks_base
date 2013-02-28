@@ -362,4 +362,19 @@ interface INetworkManagementService
      * Clear a process (pid) from being associated with an interface.
      */
     void clearDnsInterfaceForPid(int pid);
+
+    /**
+     * Start the clatd (464xlat) service
+     */
+    void startClatd(String interfaceName);
+
+    /**
+     * Stop the clatd (464xlat) service
+     */
+    void stopClatd();
+
+    /**
+     * Determine whether the clatd (464xlat) service has been started
+     */
+    boolean isClatdStarted();
 }
