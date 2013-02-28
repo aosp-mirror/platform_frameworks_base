@@ -1205,6 +1205,25 @@ public class Editor {
         return false;
     }
 
+    private void sendUpdateSelection() {
+        if (null != mInputMethodState && mInputMethodState.mBatchEditNesting <= 0) {
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            if (null != imm) {
+                final int selectionStart = mTextView.getSelectionStart();
+                final int selectionEnd = mTextView.getSelectionEnd();
+                int candStart = -1;
+                int candEnd = -1;
+                if (mTextView.getText() instanceof Spannable) {
+                    final Spannable sp = (Spannable) mTextView.getText();
+                    candStart = EditableInputConnection.getComposingSpanStart(sp);
+                    candEnd = EditableInputConnection.getComposingSpanEnd(sp);
+                }
+                imm.updateSelection(mTextView,
+                        selectionStart, selectionEnd, candStart, candEnd);
+            }
+        }
+    }
+
     void onDraw(Canvas canvas, Layout layout, Path highlight, Paint highlightPaint,
             int cursorOffsetVertical) {
         final int selectionStart = mTextView.getSelectionStart();
@@ -1223,15 +1242,9 @@ public class Editor {
                         reported = reportExtractedText();
                     }
                     if (!reported && highlight != null) {
-                        int candStart = -1;
-                        int candEnd = -1;
-                        if (mTextView.getText() instanceof Spannable) {
-                            Spannable sp = (Spannable) mTextView.getText();
-                            candStart = EditableInputConnection.getComposingSpanStart(sp);
-                            candEnd = EditableInputConnection.getComposingSpanEnd(sp);
-                        }
-                        imm.updateSelection(mTextView,
-                                selectionStart, selectionEnd, candStart, candEnd);
+                        // TODO: stop doing this here, and do it after each change
+                        // as needed instead.
+                        sendUpdateSelection();
                     }
                 }
 
