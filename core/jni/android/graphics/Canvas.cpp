@@ -54,6 +54,21 @@ static uint32_t get_thread_msec() {
 
 namespace android {
 
+class ClipCopier : public SkCanvas::ClipVisitor {
+public:
+    ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
+
+    virtual void clipRect(const SkRect& rect, SkRegion::Op op, bool antialias) {
+        m_dstCanvas->clipRect(rect, op, antialias);
+    }
+    virtual void clipPath(const SkPath& path, SkRegion::Op op, bool antialias) {
+        m_dstCanvas->clipPath(path, op, antialias);
+    }
+
+private:
+    SkCanvas* m_dstCanvas;
+};
+
 class SkCanvasGlue {
 public:
 
@@ -68,12 +83,14 @@ public:
     static void copyCanvasState(JNIEnv* env, jobject clazz,
                                 SkCanvas* srcCanvas, SkCanvas* dstCanvas) {
         if (srcCanvas && dstCanvas) {
-            if (NULL != srcCanvas->getDevice() && NULL != dstCanvas->getDevice()) {
-                dstCanvas->clipRegion(srcCanvas->getTotalClip());
-            }
             dstCanvas->setMatrix(srcCanvas->getTotalMatrix());
+            if (NULL != srcCanvas->getDevice() && NULL != dstCanvas->getDevice()) {
+                ClipCopier copier(dstCanvas);
+                srcCanvas->replayClips(&copier);
+            }
         }
     }
+
 
     static void freeCaches(JNIEnv* env, jobject) {
         // these are called in no particular order
