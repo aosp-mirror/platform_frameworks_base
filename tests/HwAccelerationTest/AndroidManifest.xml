@@ -43,6 +43,16 @@
         </activity>
 
         <activity
+                android:name="Rotate3dTextActivity"
+                android:label="Text/3D Rotation"
+                android:theme="@android:style/Theme.Holo.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="NoAATextActivity"
                 android:label="_NoAAText">
             <intent-filter>

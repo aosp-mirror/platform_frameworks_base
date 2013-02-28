@@ -52,6 +52,7 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mStyle = paint->getStyle();
     mStrokeWidth = paint->getStrokeWidth();
     mAntiAliasing = paint->isAntiAlias();
+    mLookupTransform.reset();
     mLookupTransform[SkMatrix::kMScaleX] = matrix.data[mat4::kScaleX];
     mLookupTransform[SkMatrix::kMScaleY] = matrix.data[mat4::kScaleY];
     mLookupTransform[SkMatrix::kMSkewX] = matrix.data[mat4::kSkewX];
@@ -165,7 +166,7 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
 void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
         uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
     float nPenX = x + glyph->mBitmapLeft;
-    float nPenY = y + (glyph->mBitmapTop + glyph->mBitmapHeight);
+    float nPenY = y + glyph->mBitmapTop + glyph->mBitmapHeight;
 
     float width = (float) glyph->mBitmapWidth;
     float height = (float) glyph->mBitmapHeight;
@@ -179,6 +180,38 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
             nPenX + width, nPenY, u2, v2,
             nPenX + width, nPenY - height, u2, v1,
             nPenX, nPenY - height, u1, v1, glyph->mCacheTexture);
+}
+
+void Font::drawCachedGlyphPerspective(CachedGlyphInfo* glyph, int x, int y,
+        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
+    SkMatrix i;
+    if (!mDescription.mLookupTransform.invert(&i)) {
+        return;
+    }
+
+    SkPoint p[4];
+    p[0].set(glyph->mBitmapLeft, glyph->mBitmapTop + glyph->mBitmapHeight);
+    p[1].set(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop + glyph->mBitmapHeight);
+    p[2].set(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop);
+    p[3].set(glyph->mBitmapLeft, glyph->mBitmapTop);
+
+    i.mapPoints(p, 4);
+
+    p[0].offset(x, y);
+    p[1].offset(x, y);
+    p[2].offset(x, y);
+    p[3].offset(x, y);
+
+    float u1 = glyph->mBitmapMinU;
+    float u2 = glyph->mBitmapMaxU;
+    float v1 = glyph->mBitmapMinV;
+    float v2 = glyph->mBitmapMaxV;
+
+    mState->appendRotatedMeshQuad(
+            p[0].fX, p[0].fY, u1, v2,
+            p[1].fX, p[1].fY, u2, v2,
+            p[2].fX, p[2].fY, u2, v1,
+            p[3].fX, p[3].fY, u1, v1, glyph->mCacheTexture);
 }
 
 void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
@@ -307,7 +340,7 @@ void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len
         penX += SkFixedToFloat(AUTO_KERN(prevRsbDelta, cachedGlyph->mLsbDelta));
         prevRsbDelta = cachedGlyph->mRsbDelta;
 
-        if (cachedGlyph->mIsValid) {
+        if (cachedGlyph->mIsValid && cachedGlyph->mCacheTexture) {
             drawCachedGlyph(cachedGlyph, penX, hOffset, vOffset, measure, &position, &tangent);
         }
 
@@ -328,7 +361,6 @@ void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t le
 }
 
 void Font::precache(SkPaint* paint, const char* text, int numGlyphs) {
-
     if (numGlyphs == 0 || text == NULL) {
         return;
     }
@@ -357,14 +389,18 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
 
     static RenderGlyph gRenderGlyph[] = {
             &android::uirenderer::Font::drawCachedGlyph,
+            &android::uirenderer::Font::drawCachedGlyphPerspective,
             &android::uirenderer::Font::drawCachedGlyphBitmap,
+            &android::uirenderer::Font::drawCachedGlyphBitmap,
+            &android::uirenderer::Font::measureCachedGlyph,
             &android::uirenderer::Font::measureCachedGlyph
     };
-    RenderGlyph render = gRenderGlyph[mode];
+    RenderGlyph render = gRenderGlyph[(mode << 1) + mTransform.isPerspective()];
 
     text += start;
     int glyphsCount = 0;
 
+    const bool applyTransform = !mTransform.isIdentity() && !mTransform.isPerspective();
     const SkPaint::Align align = paint->getTextAlign();
 
     while (glyphsCount < numGlyphs) {
@@ -377,12 +413,13 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
 
         CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
 
-        // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
-        if (cachedGlyph->mIsValid) {
+        // If it's still not valid, we couldn't cache it, so we shouldn't
+        // draw garbage; also skip empty glyphs (spaces)
+        if (cachedGlyph->mIsValid && cachedGlyph->mCacheTexture) {
             float penX = x + positions[(glyphsCount << 1)];
             float penY = y + positions[(glyphsCount << 1) + 1];
 
-            if (!mTransform.isIdentity()) {
+            if (applyTransform) {
                 mTransform.mapPoint(penX, penY);
             }
 
@@ -424,15 +461,18 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     glyph->mBitmapWidth = skiaGlyph.fWidth;
     glyph->mBitmapHeight = skiaGlyph.fHeight;
 
-    uint32_t cacheWidth = glyph->mCacheTexture->getWidth();
-    uint32_t cacheHeight = glyph->mCacheTexture->getHeight();
+    bool empty = skiaGlyph.fWidth == 0 || skiaGlyph.fHeight == 0;
+    if (!empty) {
+        uint32_t cacheWidth = glyph->mCacheTexture->getWidth();
+        uint32_t cacheHeight = glyph->mCacheTexture->getHeight();
 
-    glyph->mBitmapMinU = startX / (float) cacheWidth;
-    glyph->mBitmapMinV = startY / (float) cacheHeight;
-    glyph->mBitmapMaxU = endX / (float) cacheWidth;
-    glyph->mBitmapMaxV = endY / (float) cacheHeight;
+        glyph->mBitmapMinU = startX / (float) cacheWidth;
+        glyph->mBitmapMinV = startY / (float) cacheHeight;
+        glyph->mBitmapMaxU = endX / (float) cacheWidth;
+        glyph->mBitmapMaxV = endY / (float) cacheHeight;
 
-    mState->setTextureDirty();
+        mState->setTextureDirty();
+    }
 }
 
 CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching) {
@@ -440,8 +480,8 @@ CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching
     mCachedGlyphs.add(glyph, newGlyph);
 
     const SkGlyph& skiaGlyph = GET_METRICS(paint, glyph, &mDescription.mLookupTransform);
-    newGlyph->mGlyphIndex = skiaGlyph.fID;
     newGlyph->mIsValid = false;
+    newGlyph->mGlyphIndex = skiaGlyph.fID;
 
     updateGlyphCache(paint, skiaGlyph, newGlyph, precaching);
 
@@ -452,14 +492,13 @@ Font* Font::create(FontRenderer* state, const SkPaint* paint, const mat4& matrix
     FontDescription description(paint, matrix);
     Font* font = state->mActiveFonts.get(description);
 
-    if (font) {
-        font->mTransform.load(matrix);
-        return font;
+    if (!font) {
+        font = new Font(state, description);
+        state->mActiveFonts.put(description, font);
     }
+    font->mTransform.load(matrix);
 
-    Font* newFont = new Font(state, description);
-    state->mActiveFonts.put(description, newFont);
-    return newFont;
+    return font;
 }
 
 }; // namespace uirenderer

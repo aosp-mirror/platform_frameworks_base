@@ -180,7 +180,17 @@ CacheTexture* FontRenderer::cacheBitmapInTexture(const SkGlyph& glyph,
 void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
         uint32_t* retOriginX, uint32_t* retOriginY, bool precaching) {
     checkInit();
+
+    // If the glyph bitmap is empty let's assum the glyph is valid
+    // so we can avoid doing extra work later on
+    if (glyph.fWidth == 0 || glyph.fHeight == 0) {
+        cachedGlyph->mIsValid = true;
+        cachedGlyph->mCacheTexture = NULL;
+        return;
+    }
+
     cachedGlyph->mIsValid = false;
+
     // If the glyph is too tall, don't cache it
     if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 >
                 mCacheTextures[mCacheTextures.size() - 1]->getHeight()) {
