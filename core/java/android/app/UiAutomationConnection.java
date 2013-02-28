@@ -49,6 +49,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     private final Object mLock = new Object();
 
+    private final Binder mToken = new Binder();
+
     private int mInitialFrozenRotation = INITIAL_FROZEN_ROTATION_UNSPECIFIED;
 
     private IAccessibilityServiceClient mClient;
@@ -164,7 +166,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.
-            manager.registerUiTestAutomationService(client, info);
+            manager.registerUiTestAutomationService(mToken, client, info);
             mClient = client;
         } catch (RemoteException re) {
             throw new IllegalStateException("Error while registering UiTestAutomationService.", re);
