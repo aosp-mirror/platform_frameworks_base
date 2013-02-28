@@ -985,6 +985,19 @@ public class WifiManager {
     }
 
     /**
+     * Check if the chipset supports IBSS (Adhoc) mode
+     * @return {@code true} if supported, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIbssSupported() {
+        try {
+            return mService.isIbssSupported();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information

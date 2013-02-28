@@ -878,6 +878,21 @@ public final class WifiService extends IWifiManager.Stub {
     }
 
     /**
+     * Is Ad-Hoc (IBSS) mode supported by the driver?
+     * Will only return correct results when we have reached WIFI_STATE_ENABLED
+     * @return {@code true} if IBSS mode is supported, {@code false} if not
+     */
+    public boolean isIbssSupported() {
+        enforceAccessPermission();
+        if (mWifiStateMachineChannel != null) {
+            return (mWifiStateMachine.syncIsIbssSupported(mWifiStateMachineChannel) == 1);
+        } else {
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
+            return false;
+        }
+    }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
