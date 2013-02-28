@@ -85,6 +85,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -820,9 +821,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
-        if (!mHeadless) {
-            startKeyguard(context);
-        }
         mHandler = new PolicyHandler();
         mOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
@@ -913,10 +911,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             screenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
-    }
-
-    private void startKeyguard(Context context) {
-        mKeyguardDelegate = new KeyguardServiceDelegate(context, null);
     }
 
     @Override
@@ -4172,7 +4166,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public void dismissKeyguardLw() {
-        if (mKeyguardDelegate.isShowing()) {
+        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) { 
             mHandler.post(new Runnable() {
                 public void run() {
                     if (mKeyguardDelegate.isDismissable()) {
@@ -4421,8 +4415,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     /** {@inheritDoc} */
     public void systemReady() {
-        if (mKeyguardDelegate != null) {
-            // tell the keyguard
+        if (!mHeadless) {
+            mKeyguardDelegate = new KeyguardServiceDelegate(mContext, null);
             mKeyguardDelegate.onSystemReady();
         }
         synchronized (mLock) {

@@ -1,4 +1,4 @@
-# Copyright (C) 2010 The Android Open Source Project
+# Copyright (C) 2013 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,14 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files) $(call all-subdir-Iaidl-files)
 
+LOCAL_JAVA_LIBRARIES := services
+
 LOCAL_PACKAGE_NAME := Keyguard
+
 LOCAL_CERTIFICATE := platform
 
+LOCAL_PROGUARD_FLAG_FILES := proguard.flags
+
 include $(BUILD_PACKAGE)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
