@@ -45,8 +45,14 @@ import java.util.Hashtable;
  */
 public class MiniThumbFile {
     private static final String TAG = "MiniThumbFile";
-    private static final int MINI_THUMB_DATA_FILE_VERSION = 3;
+    private static final int MINI_THUMB_DATA_FILE_VERSION = 4;
     public static final int BYTES_PER_MINTHUMB = 10000;
+
+    private static final int BYTES_PER_MINTHUMB_INDEX = 8;
+    private FileChannel mIndexChannel;
+    private RandomAccessFile mMiniThumbIndexFile;
+    private final boolean debug = false;;
+
     private static final int HEADER_SIZE = 1 + 8 + 4;
     private Uri mUri;
     private RandomAccessFile mMiniThumbFile;
@@ -98,6 +104,57 @@ public class MiniThumbFile {
         }
     }
 
+    private String randomAccessIndexFilePath(int version) {
+        String directoryName =
+                Environment.getExternalStorageDirectory().toString()
+                + "/DCIM/.thumbnails";
+        return directoryName + "/.thumbindex" + version + "-" + mUri.hashCode();
+    }
+
+    private void removeOldIndexFile() {
+        String oldPath = randomAccessIndexFilePath(MINI_THUMB_DATA_FILE_VERSION - 1);
+        File oldFile = new File(oldPath);
+        if (oldFile.exists()) {
+            try {
+                oldFile.delete();
+            } catch (SecurityException ex) {
+                // ignore
+            }
+        }
+    }
+
+    private RandomAccessFile miniThumbIndexFile() {
+        if (mMiniThumbIndexFile == null) {
+            removeOldIndexFile();
+            String path = randomAccessIndexFilePath(MINI_THUMB_DATA_FILE_VERSION);
+            File directory = new File(path).getParentFile();
+            if (!directory.isDirectory()) {
+                if (!directory.mkdirs()) {
+                    Log.e(TAG, "Unable to create .thumbnails directory "
+                            + directory.toString());
+                }
+            }
+            File f = new File(path);
+
+            try {
+                mMiniThumbIndexFile = new RandomAccessFile(f, "rw");
+            } catch (IOException ex) {
+                // Open as read-only so we can at least read the existing
+                // thumbnails.
+                try {
+                    mMiniThumbIndexFile = new RandomAccessFile(f, "r");
+                } catch (IOException ex2) {
+                    // ignore exception
+                    Log.e(TAG, "miniThumbIndexFile open r exception: " + f);
+                }
+            }
+            if (mMiniThumbIndexFile != null) {
+                mIndexChannel = mMiniThumbIndexFile.getChannel();
+            }
+        }
+        return mMiniThumbIndexFile;
+    }
+
     private RandomAccessFile miniThumbDataFile() {
         if (mMiniThumbFile == null) {
             removeOldFile();
@@ -128,6 +185,8 @@ public class MiniThumbFile {
         return mMiniThumbFile;
     }
 
+
+
     public MiniThumbFile(Uri uri) {
         mUri = uri;
         mBuffer = ByteBuffer.allocateDirect(BYTES_PER_MINTHUMB);
@@ -144,6 +203,94 @@ public class MiniThumbFile {
         }
     }
 
+    /**
+    * Get the index of thumbnail, which is the real saving location.
+    * @param id the raw id in Mediaprovider database.
+    * @param create when you want to create a new thumbnail, set to true; when generally query 
+    * thumbnail saved index, set to false.
+    */
+    private long getIndex(long id, boolean create){
+        RandomAccessFile r = miniThumbIndexFile();
+        ByteBuffer buf = ByteBuffer.allocateDirect(BYTES_PER_MINTHUMB_INDEX);
+
+        if (r != null) {
+            long pos = 0;
+            //first 8 bytes are for saving next create thumbnail block number!
+            //so if create set, then begin from 0, others begin from real index 
+            // (id+1)*BYTES_PER_MINTHUMB_INDEX.
+            if (!create) {
+                pos = (id + 1) * BYTES_PER_MINTHUMB_INDEX;
+            }
+
+            FileLock lock = null;
+            try {
+                buf.clear();
+                buf.limit(BYTES_PER_MINTHUMB_INDEX);
+
+                lock = mIndexChannel.lock(pos, BYTES_PER_MINTHUMB_INDEX, false);
+                //check that we can read the following 8 bytes
+                //which is the index position of thumbnail.
+
+                int read = mIndexChannel.read(buf, pos);
+
+                if (read == BYTES_PER_MINTHUMB_INDEX) {
+                    buf.position(0);
+                    if (create) {
+                        //first, write next index.
+                        long now = buf.getLong();
+                        buf.clear();
+                        buf.position(0);
+                        buf.putLong(++now);
+                        buf.flip();
+                        int write = mIndexChannel.write(buf, pos);
+
+                        //second, write this id's index
+                        if(BYTES_PER_MINTHUMB_INDEX == write) {
+                            if (lock != null) lock.release();
+                            pos = (id + 1) * BYTES_PER_MINTHUMB_INDEX;
+                            lock = mIndexChannel.lock(pos, BYTES_PER_MINTHUMB_INDEX, false);
+                            buf.flip();
+                            write = mIndexChannel.write(buf, pos);
+                            if(debug) Log.d(TAG, "getIndex with create. index: " + now + 
+                                               "corresponding id: " + id + ", index is: " + pos);
+                        }
+                        return now;
+                    } else {
+                        long p = buf.getLong();
+                        if(debug) Log.d(TAG, "getIndex with no create. index: " + p);
+                        return p;
+                    }
+                } else if(-1 == read) {
+                    //If the index file is empty, initialize first index to 0.
+                    if(0 == r.length()){
+                        buf.clear();
+                        buf.position(0);
+                        buf.putLong(0);
+                        buf.flip();
+                        int write = mIndexChannel.write(buf, 0);
+                        if(debug) Log.d(TAG, "initialize first index");
+                        if(BYTES_PER_MINTHUMB_INDEX == write) return 0;
+                    }
+                }
+            } catch (IOException ex) {
+                Log.e(TAG, "Got exception checking file index: ", ex);
+            } catch (RuntimeException ex) {
+                // Other NIO related exception like disk full, read only channel..etc
+                Log.e(TAG, "Got exception when reading index, id = " + id +
+		                 ", disk full or mount read-only? " + ex.getClass());
+            } finally {
+                try {
+                    if (lock != null) lock.release();
+                }
+                catch (IOException ex) {
+                    // ignore it.
+                    Log.e(TAG, "release lock: ", ex);
+                }
+            }
+        }
+        return 0;
+    }
+
     // Get the magic number for the specified id in the mini-thumb file.
     // Returns 0 if the magic is not available.
     public synchronized long getMagic(long id) {
@@ -151,8 +298,14 @@ public class MiniThumbFile {
         // defined as having the right magic number at the offset
         // reserved for this "id".
         RandomAccessFile r = miniThumbDataFile();
+
         if (r != null) {
-            long pos = id * BYTES_PER_MINTHUMB;
+
+            long pos = getIndex(id, false);
+            if(pos < 0) return 0;
+
+            pos *= BYTES_PER_MINTHUMB;
+
             FileLock lock = null;
             try {
                 mBuffer.clear();
@@ -190,7 +343,11 @@ public class MiniThumbFile {
         RandomAccessFile r = miniThumbDataFile();
         if (r == null) return;
 
-        long pos = id * BYTES_PER_MINTHUMB;
+
+        long pos = getIndex(id, true);
+        if(pos < 0) return;
+
+        pos *= BYTES_PER_MINTHUMB;
         FileLock lock = null;
         try {
             if (data != null) {
