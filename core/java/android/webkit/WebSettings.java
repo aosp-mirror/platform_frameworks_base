@@ -1103,6 +1103,11 @@ public abstract class WebSettings {
      * false. See also {@link #setDatabasePath} for how to correctly set up the
      * database storage API.
      *
+     * This setting is global in effect, across all WebView instances in a process.
+     * Note you should only modify this setting prior to making <b>any</b> WebView
+     * page load within a given process, as the WebView implementation may ignore
+     * changes to this setting after that point.
+     *
      * @param flag true if the WebView should use the database storage API
      */
     public synchronized void setDatabaseEnabled(boolean flag) {
