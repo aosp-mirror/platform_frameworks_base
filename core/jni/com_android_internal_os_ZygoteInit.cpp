@@ -27,12 +27,8 @@
 #include <JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
-#include <linux/capability.h>
-#include <linux/prctl.h>
+#include <sys/capability.h>
 #include <sys/prctl.h>
-extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
-extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
-
 
 namespace android {
 
