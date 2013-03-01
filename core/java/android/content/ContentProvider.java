@@ -298,7 +298,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         private void enforceFilePermission(String callingPkg, Uri uri, String mode)
                 throws FileNotFoundException, SecurityException {
-            if (mode != null && mode.startsWith("rw")) {
+            if (mode != null && mode.indexOf('w') != -1) {
                 if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                     throw new FileNotFoundException("App op not allowed");
                 }
