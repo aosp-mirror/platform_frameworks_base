@@ -7419,29 +7419,63 @@ public final class ActivityManagerService  extends ActivityManagerNative
         SystemProperties.set("ctl.start", "bugreport");
     }
 
+    public static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
+        return r != null ? getInputDispatchingTimeoutLocked(r.app) : KEY_DISPATCHING_TIMEOUT;
+    }
+
+    public static long getInputDispatchingTimeoutLocked(ProcessRecord r) {
+        if (r != null && (r.instrumentationClass != null || r.usingWrapper)) {
+            return INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
+        }
+        return KEY_DISPATCHING_TIMEOUT;
+    }
+
+
     public long inputDispatchingTimedOut(int pid, final boolean aboveSystem) {
         if (checkCallingPermission(android.Manifest.permission.FILTER_EVENTS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
                     + android.Manifest.permission.FILTER_EVENTS);
         }
-
         ProcessRecord proc;
-
-        // TODO: Unify this code with ActivityRecord.keyDispatchingTimedOut().
+        long timeout;
         synchronized (this) {
             synchronized (mPidsSelfLocked) {
                 proc = mPidsSelfLocked.get(pid);
             }
-            if (proc != null) {
+            timeout = getInputDispatchingTimeoutLocked(proc);
+        }
+
+        if (!inputDispatchingTimedOut(proc, null, null, aboveSystem)) {
+            return -1;
+        }
+
+        return timeout;
+    }
+
+    /**
+     * Handle input dispatching timeouts.
+     * Returns whether input dispatching should be aborted or not.
+     */
+    public boolean inputDispatchingTimedOut(final ProcessRecord proc,
+            final ActivityRecord activity, final ActivityRecord parent,
+            final boolean aboveSystem) {
+        if (checkCallingPermission(android.Manifest.permission.FILTER_EVENTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.FILTER_EVENTS);
+        }
+
+        if (proc != null) {
+            synchronized (this) {
                 if (proc.debugging) {
-                    return -1;
+                    return false;
                 }
 
                 if (mDidDexOpt) {
                     // Give more time since we were dexopting.
                     mDidDexOpt = false;
-                    return -1;
+                    return false;
                 }
 
                 if (proc.instrumentationClass != null) {
@@ -7449,25 +7483,18 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     info.putString("shortMsg", "keyDispatchingTimedOut");
                     info.putString("longMsg", "Timed out while dispatching key event");
                     finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
-                    proc = null;
+                    return true;
                 }
             }
-        }
-
-        if (proc != null) {
-            final ProcessRecord pr = proc;
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    appNotResponding(pr, null, null, aboveSystem, "keyDispatchingTimedOut");
+                    appNotResponding(proc, activity, parent, aboveSystem, "keyDispatchingTimedOut");
                 }
             });
-            if (proc.instrumentationClass != null || proc.usingWrapper) {
-                return INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
-            }
         }
 
-        return KEY_DISPATCHING_TIMEOUT;
+        return true;
     }
 
     public Bundle getTopActivityExtras(int requestType) {

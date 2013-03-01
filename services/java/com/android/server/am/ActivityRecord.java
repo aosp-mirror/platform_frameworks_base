@@ -867,51 +867,20 @@ final class ActivityRecord {
     }
 
     public boolean keyDispatchingTimedOut() {
-        // TODO: Unify this code with ActivityManagerService.inputDispatchingTimedOut().
         ActivityRecord r;
-        ProcessRecord anrApp = null;
+        ProcessRecord anrApp;
         synchronized(service) {
             r = getWaitingHistoryRecordLocked();
-            if (r != null && r.app != null) {
-                if (r.app.debugging) {
-                    return false;
-                }
-                
-                if (service.mDidDexOpt) {
-                    // Give more time since we were dexopting.
-                    service.mDidDexOpt = false;
-                    return false;
-                }
-                
-                if (r.app.instrumentationClass == null) { 
-                    anrApp = r.app;
-                } else {
-                    Bundle info = new Bundle();
-                    info.putString("shortMsg", "keyDispatchingTimedOut");
-                    info.putString("longMsg", "Timed out while dispatching key event");
-                    service.finishInstrumentationLocked(
-                            r.app, Activity.RESULT_CANCELED, info);
-                }
-            }
+            anrApp = r != null ? r.app : null;
         }
-        
-        if (anrApp != null) {
-            service.appNotResponding(anrApp, r, this, false, "keyDispatchingTimedOut");
-        }
-        
-        return true;
+        return service.inputDispatchingTimedOut(anrApp, r, this, false);
     }
     
     /** Returns the key dispatching timeout for this application token. */
     public long getKeyDispatchingTimeout() {
         synchronized(service) {
             ActivityRecord r = getWaitingHistoryRecordLocked();
-            if (r != null && r.app != null
-                    && (r.app.instrumentationClass != null || r.app.usingWrapper)) {
-                return ActivityManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
-            }
-
-            return ActivityManagerService.KEY_DISPATCHING_TIMEOUT;
+            return ActivityManagerService.getInputDispatchingTimeoutLocked(r);
         }
     }
 
