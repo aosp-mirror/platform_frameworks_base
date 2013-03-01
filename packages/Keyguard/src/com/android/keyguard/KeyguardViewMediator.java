@@ -16,7 +16,8 @@
 
 package com.android.keyguard;
 
-import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.policy.IKeyguardExitCallback;
+import com.android.internal.policy.IKeyguardShowCallback;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
 import android.app.Activity;
@@ -46,6 +47,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
@@ -220,7 +222,7 @@ public class KeyguardViewMediator {
      * how we'll ultimately let them know whether it was successful.  We use this
      * var being non-null as an indicator that there is an in progress request.
      */
-    private IKeyguardResult mExitSecureCallback;
+    private IKeyguardExitCallback mExitSecureCallback;
 
     // the properties of the keyguard
 
@@ -463,7 +465,7 @@ public class KeyguardViewMediator {
         mPM.wakeUp(SystemClock.uptimeMillis());
     }
 
-    public void userActivity() {
+    private void userActivity() {
         userActivity(AWAKE_INTERVAL_DEFAULT_MS);
     }
 
@@ -590,7 +592,7 @@ public class KeyguardViewMediator {
                 try {
                     mExitSecureCallback.onKeyguardExitResult(false);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
                 }
                 mExitSecureCallback = null;
                 if (!mExternallyEnabled) {
@@ -664,13 +666,13 @@ public class KeyguardViewMediator {
     /**
      * Let's us know the screen was turned on.
      */
-    public void onScreenTurnedOn(IKeyguardResult result) {
+    public void onScreenTurnedOn(IKeyguardShowCallback callback) {
         synchronized (this) {
             mScreenOn = true;
             cancelDoKeyguardLaterLocked();
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
-            if (result != null) {
-                notifyScreenOnLocked(result);
+            if (callback != null) {
+                notifyScreenOnLocked(callback);
             }
         }
         maybeSendUserPresentBroadcast();
@@ -744,7 +746,7 @@ public class KeyguardViewMediator {
                     try {
                         mExitSecureCallback.onKeyguardExitResult(false);
                     } catch (RemoteException e) {
-                        e.printStackTrace();
+                        Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
                     }
                     mExitSecureCallback = null;
                     resetStateLocked(null);
@@ -773,16 +775,16 @@ public class KeyguardViewMediator {
     /**
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
-    public void verifyUnlock(IKeyguardResult result) {
+    public void verifyUnlock(IKeyguardExitCallback callback) {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "verifyUnlock");
             if (!mUpdateMonitor.isDeviceProvisioned()) {
                 // don't allow this api when the device isn't provisioned
                 if (DEBUG) Log.d(TAG, "ignoring because device isn't provisioned");
                 try {
-                    result.onKeyguardExitResult(false);
+                    callback.onKeyguardExitResult(false);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
                 }
             } else if (mExternallyEnabled) {
                 // this only applies when the user has externally disabled the
@@ -790,19 +792,19 @@ public class KeyguardViewMediator {
                 // using the api properly.
                 Log.w(TAG, "verifyUnlock called when not externally disabled");
                 try {
-                    result.onKeyguardExitResult(false);
+                    callback.onKeyguardExitResult(false);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
                 }
             } else if (mExitSecureCallback != null) {
                 // already in progress with someone else
                 try {
-                    result.onKeyguardExitResult(false);
+                    callback.onKeyguardExitResult(false);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
                 }
             } else {
-                mExitSecureCallback = result;
+                mExitSecureCallback = callback;
                 verifyUnlockLocked();
             }
         }
@@ -962,7 +964,7 @@ public class KeyguardViewMediator {
      * @see #onScreenTurnedOn()
      * @see #handleNotifyScreenOn
      */
-    private void notifyScreenOnLocked(IKeyguardResult result) {
+    private void notifyScreenOnLocked(IKeyguardShowCallback result) {
         if (DEBUG) Log.d(TAG, "notifyScreenOnLocked");
         Message msg = mHandler.obtainMessage(NOTIFY_SCREEN_ON, result);
         mHandler.sendMessage(msg);
@@ -973,7 +975,7 @@ public class KeyguardViewMediator {
      * its state accordingly and then poke the wake lock when it is ready.
      * @param keyCode The wake key.
      * @see #handleWakeWhenReady
-     * @see #onWakeKeyWhenKeyguardShowingTq(int)
+     * @see #onWakeKeyWhenKeyguardShowing(int)
      */
     private void wakeWhenReady(int keyCode) {
         if (DBG_WAKE) Log.d(TAG, "wakeWhenReady(" + keyCode + ")");
@@ -1055,7 +1057,7 @@ public class KeyguardViewMediator {
      *
      * @param keyCode The keycode of the key that woke the device
      */
-    public void onWakeKeyWhenKeyguardShowingTq(int keyCode) {
+    public void onWakeKeyWhenKeyguardShowing(int keyCode) {
         if (DEBUG) Log.d(TAG, "onWakeKeyWhenKeyguardShowing(" + keyCode + ")");
 
         // give the keyguard view manager a chance to adjust the state of the
@@ -1074,7 +1076,7 @@ public class KeyguardViewMediator {
      * Be sure not to take any action that takes a long time; any significant
      * action should be posted to a handler.
      */
-    public void onWakeMotionWhenKeyguardShowingTq() {
+    public void onWakeMotionWhenKeyguardShowing() {
         if (DEBUG) Log.d(TAG, "onWakeMotionWhenKeyguardShowing()");
 
         // give the keyguard view manager a chance to adjust the state of the
@@ -1100,7 +1102,7 @@ public class KeyguardViewMediator {
                 try {
                     mExitSecureCallback.onKeyguardExitResult(authenticated);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(" + authenticated + ")", e);
                 }
 
                 mExitSecureCallback = null;
@@ -1142,7 +1144,7 @@ public class KeyguardViewMediator {
                     handleNotifyScreenOff();
                     return;
                 case NOTIFY_SCREEN_ON:
-                    handleNotifyScreenOn((IKeyguardResult) msg.obj);
+                    handleNotifyScreenOn((IKeyguardShowCallback) msg.obj);
                     return;
                 case WAKE_WHEN_READY:
                     handleWakeWhenReady(msg.arg1);
@@ -1433,10 +1435,10 @@ public class KeyguardViewMediator {
      * Handle message sent by {@link #notifyScreenOnLocked()}
      * @see #NOTIFY_SCREEN_ON
      */
-    private void handleNotifyScreenOn(IKeyguardResult result) {
+    private void handleNotifyScreenOn(IKeyguardShowCallback callback) {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOn");
-            mKeyguardViewManager.onScreenTurnedOn(result);
+            mKeyguardViewManager.onScreenTurnedOn(callback);
         }
     }
 

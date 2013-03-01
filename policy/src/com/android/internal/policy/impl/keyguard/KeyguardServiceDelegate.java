@@ -12,11 +12,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManagerPolicy.OnKeyguardExitResult;
 
-import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.policy.IKeyguardExitCallback;
+import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.policy.impl.KeyguardServiceWrapper;
-import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate.ShowListener;
 
 /**
  * A local class that keeps a cache of keyguard state that can be restored in the event
@@ -27,12 +27,11 @@ public class KeyguardServiceDelegate {
     private static final String KEYGUARD_PACKAGE = "com.android.keyguard";
     private static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
     private static final String TAG = "KeyguardServiceDelegate";
-    private final static boolean DEBUG = true;
-    private ServiceConnection mKeyguardConnection;
+    private static final boolean DEBUG = true;
     protected KeyguardServiceWrapper mKeyguardService;
     private KeyguardState mKeyguardState = new KeyguardState();
 
-    /* package */ class KeyguardState {
+    /* package */ static final class KeyguardState {
         boolean showing;
         boolean showingAndNotHidden;
         boolean inputRestricted;
@@ -45,29 +44,18 @@ public class KeyguardServiceDelegate {
         public int offReason;
         public int currentUser;
         public boolean screenIsOn;
-        public boolean restoreStateWhenConnected;
-        public ShowListener showListener;
     };
 
     public interface ShowListener {
         public void onShown(IBinder windowToken);
     }
 
-    private class KeyguardResult extends IKeyguardResult.Stub {
+    // A delegate class to map a particular invocation with a ShowListener object.
+    private final class KeyguardShowDelegate extends IKeyguardShowCallback.Stub {
         private ShowListener mShowListener;
-        private OnKeyguardExitResult mOnKeyguardExitResult;
 
-        KeyguardResult(ShowListener showListener, OnKeyguardExitResult onKeyguardExitResult) {
+        KeyguardShowDelegate(ShowListener showListener) {
             mShowListener = showListener;
-            mOnKeyguardExitResult = onKeyguardExitResult;
-        }
-
-        @Override
-        public IBinder asBinder() {
-            if (DEBUG) Log.v(TAG, "asBinder() called for KeyguardResult, "
-                    + "mShowListener = " + mShowListener
-                    + ", mOnKeyguardExitResult = " + mOnKeyguardExitResult);
-            return super.asBinder();
         }
 
         @Override
@@ -76,6 +64,15 @@ public class KeyguardServiceDelegate {
             if (mShowListener != null) {
                 mShowListener.onShown(windowToken);
             }
+        }
+    };
+
+    // A delegate class to map a particular invocation with an OnKeyguardExitResult object.
+    private final class KeyguardExitDelegate extends IKeyguardExitCallback.Stub {
+        private OnKeyguardExitResult mOnKeyguardExitResult;
+
+        KeyguardExitDelegate(OnKeyguardExitResult onKeyguardExitResult) {
+            mOnKeyguardExitResult = onKeyguardExitResult;
         }
 
         @Override
@@ -88,7 +85,6 @@ public class KeyguardServiceDelegate {
     };
 
     public KeyguardServiceDelegate(Context context, LockPatternUtils lockPatternUtils) {
-        mKeyguardConnection = createServiceConnection();
         Intent intent = new Intent();
         intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
@@ -99,27 +95,24 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    private ServiceConnection createServiceConnection() {
-        return new ServiceConnection() {
-
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                if (DEBUG) Log.v(TAG, "*** Keyguard connected (yay!)");
-                mKeyguardService = new KeyguardServiceWrapper(
-                        IKeyguardService.Stub.asInterface(service));
-                if (mKeyguardState.systemIsReady) {
-                    mKeyguardService.onSystemReady();
-                }
+    private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG) Log.v(TAG, "*** Keyguard connected (yay!)");
+            mKeyguardService = new KeyguardServiceWrapper(
+                    IKeyguardService.Stub.asInterface(service));
+            if (mKeyguardState.systemIsReady) {
+                mKeyguardService.onSystemReady();
             }
+        }
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                if (DEBUG) Log.v(TAG, "*** Keyguard disconnected (boo!)");
-                mKeyguardService = null;
-            }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG) Log.v(TAG, "*** Keyguard disconnected (boo!)");
+            mKeyguardService = null;
+        }
 
-        };
-    }
+    };
 
     public boolean isShowing() {
         if (mKeyguardService != null) {
@@ -144,7 +137,7 @@ public class KeyguardServiceDelegate {
 
     public void verifyUnlock(final OnKeyguardExitResult onKeyguardExitResult) {
         if (mKeyguardService != null) {
-            mKeyguardService.verifyUnlock(new KeyguardResult(null, onKeyguardExitResult));
+            mKeyguardService.verifyUnlock(new KeyguardExitDelegate(onKeyguardExitResult));
         }
     }
 
@@ -176,13 +169,13 @@ public class KeyguardServiceDelegate {
 
     public void onWakeKeyWhenKeyguardShowingTq(int keycodePower) {
         if (mKeyguardService != null) {
-            mKeyguardService.onWakeKeyWhenKeyguardShowingTq(keycodePower);
+            mKeyguardService.onWakeKeyWhenKeyguardShowing(keycodePower);
         }
     }
 
-    public void onWakeMotionWhenKeyguardShowingTq() {
+    public void onWakeMotionWhenKeyguardShowing() {
         if (mKeyguardService != null) {
-            mKeyguardService.onWakeMotionWhenKeyguardShowingTq();
+            mKeyguardService.onWakeMotionWhenKeyguardShowing();
         }
     }
 
@@ -203,12 +196,13 @@ public class KeyguardServiceDelegate {
     public void onScreenTurnedOn(final ShowListener showListener) {
         if (mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "onScreenTurnedOn(showListener = " + showListener + ")");
-            mKeyguardService.onScreenTurnedOn(new KeyguardResult(showListener, null));
+            mKeyguardService.onScreenTurnedOn(new KeyguardShowDelegate(showListener));
         } else {
             // try again when we establish a connection
-            if (DEBUG) Log.w(TAG, "onScreenTurnedOn(): no keyguard service!");
-            mKeyguardState.showListener = showListener;
-            mKeyguardState.restoreStateWhenConnected = true;
+            Slog.w(TAG, "onScreenTurnedOn(): no keyguard service!");
+            // This shouldn't happen, but if it does, invoke the listener immediately
+            // to avoid a dark screen...
+            showListener.onShown(null);
         }
         mKeyguardState.screenIsOn = true;
     }
@@ -261,12 +255,6 @@ public class KeyguardServiceDelegate {
             mKeyguardService.setCurrentUser(newUserId);
         }
         mKeyguardState.currentUser = newUserId;
-    }
-
-    public void userActivity() {
-        if (mKeyguardService != null) {
-            mKeyguardService.userActivity();
-        }
     }
 
 }

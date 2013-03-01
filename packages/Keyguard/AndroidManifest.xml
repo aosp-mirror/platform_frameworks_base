@@ -45,17 +45,5 @@
         <service android:name=".KeyguardService"
             android:exported="true" />
 
-        <activity android:name=".KeyguardTestActivity"
-                android:label="@string/app_name"
-                android:theme="@android:style/Theme.Holo"
-                android:hardwareAccelerated="true"
-                android:process="com.android.keyguard.keyguard_test"
-                >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
     </application>
 </manifest>

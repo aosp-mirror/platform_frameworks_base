@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.policy.IKeyguardService;
-import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.policy.IKeyguardExitCallback;
+import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
 
 public class KeyguardService extends Service {
@@ -66,11 +66,8 @@ public class KeyguardService extends Service {
         public boolean isInputRestricted() {
             return mKeyguardViewMediator.isInputRestricted();
         }
-        public void userActivity() {
-            mKeyguardViewMediator.userActivity();
-        }
-        public void verifyUnlock(IKeyguardResult result) {
-            mKeyguardViewMediator.verifyUnlock(result);
+        public void verifyUnlock(IKeyguardExitCallback callback) {
+            mKeyguardViewMediator.verifyUnlock(callback);
         }
         public void keyguardDone(boolean authenticated, boolean wakeup) {
             mKeyguardViewMediator.keyguardDone(authenticated, wakeup);
@@ -81,11 +78,11 @@ public class KeyguardService extends Service {
         public void dismiss() {
             mKeyguardViewMediator.dismiss();
         }
-        public void onWakeKeyWhenKeyguardShowingTq(int keyCode) {
-            mKeyguardViewMediator.onWakeKeyWhenKeyguardShowingTq(keyCode);
+        public void onWakeKeyWhenKeyguardShowing(int keyCode) {
+            mKeyguardViewMediator.onWakeKeyWhenKeyguardShowing(keyCode);
         }
-        public void onWakeMotionWhenKeyguardShowingTq() {
-            mKeyguardViewMediator.onWakeMotionWhenKeyguardShowingTq();
+        public void onWakeMotionWhenKeyguardShowing() {
+            mKeyguardViewMediator.onWakeMotionWhenKeyguardShowing();
         }
         public void onDreamingStarted() {
             mKeyguardViewMediator.onDreamingStarted();
@@ -96,8 +93,8 @@ public class KeyguardService extends Service {
         public void onScreenTurnedOff(int reason) {
             mKeyguardViewMediator.onScreenTurnedOff(reason);
         }
-        public void onScreenTurnedOn(IKeyguardResult result) {
-            mKeyguardViewMediator.onScreenTurnedOn(result);
+        public void onScreenTurnedOn(IKeyguardShowCallback callback) {
+            mKeyguardViewMediator.onScreenTurnedOn(callback);
         }
         public void setKeyguardEnabled(boolean enabled) {
             mKeyguardViewMediator.setKeyguardEnabled(enabled);

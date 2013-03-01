@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  */
 package com.android.internal.policy;
 
-import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.policy.IKeyguardShowCallback;
+import com.android.internal.policy.IKeyguardExitCallback;
 
 import android.os.Bundle;
 
@@ -25,17 +26,16 @@ interface IKeyguardService {
     boolean isShowingAndNotHidden();
     boolean isInputRestricted();
     boolean isDismissable();
-    oneway void userActivity();
-    oneway void verifyUnlock(IKeyguardResult result);
+    oneway void verifyUnlock(IKeyguardExitCallback callback);
     oneway void keyguardDone(boolean authenticated, boolean wakeup);
     oneway void setHidden(boolean isHidden);
     oneway void dismiss();
-    oneway void onWakeKeyWhenKeyguardShowingTq(int keyCode);
-    oneway void onWakeMotionWhenKeyguardShowingTq();
+    oneway void onWakeKeyWhenKeyguardShowing(int keyCode);
+    oneway void onWakeMotionWhenKeyguardShowing();
     oneway void onDreamingStarted();
     oneway void onDreamingStopped();
     oneway void onScreenTurnedOff(int reason);
-    oneway void onScreenTurnedOn(IKeyguardResult result);
+    oneway void onScreenTurnedOn(IKeyguardShowCallback callback);
     oneway void setKeyguardEnabled(boolean enabled);
     oneway void onSystemReady();
     oneway void doKeyguardTimeout(in Bundle options);

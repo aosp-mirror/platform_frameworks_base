@@ -727,7 +727,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyguardShowing) {
             // since it took two seconds of long press to bring this up,
             // poke the wake lock so they have some time to see the dialog.
-            mKeyguardDelegate.userActivity();
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
         }
     }
 
@@ -1689,10 +1689,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 hideKeyguardScrim();
                 break;
             case TYPE_KEYGUARD_SCRIM:
-                // TODO: put this back when done testing
-//                if (mKeyguardScrim != null) {
-//                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-//                }
+                if (mKeyguardScrim != null) {
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+                }
                 mKeyguardScrim = win;
                 break;
 
@@ -3912,7 +3911,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (isWakeMotion) {
             if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
                 // If the keyguard is showing, let it decide what to do with the wake motion.
-                mKeyguardDelegate.onWakeMotionWhenKeyguardShowingTq();
+                mKeyguardDelegate.onWakeMotionWhenKeyguardShowing();
             } else {
                 // Otherwise, wake the device ourselves.
                 result |= ACTION_WAKE_UP;
@@ -4732,7 +4731,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void keepScreenOnStoppedLw() {
         if (mKeyguardDelegate != null && !mKeyguardDelegate.isShowingAndNotHidden()) {
             long curTime = SystemClock.uptimeMillis();
-            mPowerManager.userActivity(curTime, false);
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
         }
     }
 
