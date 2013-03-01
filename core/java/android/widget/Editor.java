@@ -181,7 +181,10 @@ public class Editor {
     // Set when this TextView gained focus with some text selected. Will start selection mode.
     boolean mCreatedWithASelection;
 
-    private EasyEditSpanController mEasyEditSpanController;
+    // The span controller helps monitoring the changes to which the Editor needs to react:
+    // - EasyEditSpans, for which we have some UI to display on attach and on hide
+    // - SelectionSpans, for which we need to call updateSelection if an IME is attached
+    private SpanController mSpanController;
 
     WordIterator mWordIterator;
     SpellChecker mSpellChecker;
@@ -466,8 +469,8 @@ public class Editor {
     }
 
     private void hideSpanControllers() {
-        if (mEasyEditSpanController != null) {
-            mEasyEditSpanController.hide();
+        if (mSpanController != null) {
+            mSpanController.hide();
         }
     }
 
@@ -1872,17 +1875,18 @@ public class Editor {
             text.setSpan(mKeyListener, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
         }
 
-        if (mEasyEditSpanController == null) {
-            mEasyEditSpanController = new EasyEditSpanController();
+        if (mSpanController == null) {
+            mSpanController = new SpanController();
         }
-        text.setSpan(mEasyEditSpanController, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        text.setSpan(mSpanController, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
     }
 
     /**
      * Controls the {@link EasyEditSpan} monitoring when it is added, and when the related
      * pop-up should be displayed.
+     * Also monitors {@link SelectionSpan} to call back to the attached input method.
      */
-    class EasyEditSpanController implements SpanWatcher {
+    class SpanController implements SpanWatcher {
 
         private static final int DISPLAY_TIMEOUT_MS = 3000; // 3 secs
 
@@ -1890,9 +1894,18 @@ public class Editor {
 
         private Runnable mHidePopup;
 
+        // This function is pure but inner classes can't have static functions
+        private boolean isNonIntermediateSelectionSpan(final Spannable text,
+                final Object span) {
+            return (Selection.SELECTION_START == span || Selection.SELECTION_END == span)
+                    && (text.getSpanFlags(span) & Spanned.SPAN_INTERMEDIATE) == 0;
+        }
+
         @Override
         public void onSpanAdded(Spannable text, Object span, int start, int end) {
-            if (span instanceof EasyEditSpan) {
+            if (isNonIntermediateSelectionSpan(text, span)) {
+                sendUpdateSelection();
+            } else if (span instanceof EasyEditSpan) {
                 if (mPopupWindow == null) {
                     mPopupWindow = new EasyEditPopupWindow();
                     mHidePopup = new Runnable() {
@@ -1916,7 +1929,7 @@ public class Editor {
                         int start = editable.getSpanStart(span);
                         int end = editable.getSpanEnd(span);
                         if (start >= 0 && end >= 0) {
-                            sendNotification(EasyEditSpan.TEXT_DELETED, span);
+                            sendEasySpanNotification(EasyEditSpan.TEXT_DELETED, span);
                             mTextView.deleteText_internal(start, end);
                         }
                         editable.removeSpan(span);
@@ -1947,7 +1960,9 @@ public class Editor {
 
         @Override
         public void onSpanRemoved(Spannable text, Object span, int start, int end) {
-            if (mPopupWindow != null && span == mPopupWindow.mEasyEditSpan) {
+            if (isNonIntermediateSelectionSpan(text, span)) {
+                sendUpdateSelection();
+            } else if (mPopupWindow != null && span == mPopupWindow.mEasyEditSpan) {
                 hide();
             }
         }
@@ -1955,9 +1970,11 @@ public class Editor {
         @Override
         public void onSpanChanged(Spannable text, Object span, int previousStart, int previousEnd,
                 int newStart, int newEnd) {
-            if (mPopupWindow != null && span instanceof EasyEditSpan) {
+            if (isNonIntermediateSelectionSpan(text, span)) {
+                sendUpdateSelection();
+            } else if (mPopupWindow != null && span instanceof EasyEditSpan) {
                 EasyEditSpan easyEditSpan = (EasyEditSpan) span;
-                sendNotification(EasyEditSpan.TEXT_MODIFIED, easyEditSpan);
+                sendEasySpanNotification(EasyEditSpan.TEXT_MODIFIED, easyEditSpan);
                 text.removeSpan(easyEditSpan);
             }
         }
@@ -1969,7 +1986,7 @@ public class Editor {
             }
         }
 
-        private void sendNotification(int textChangedType, EasyEditSpan span) {
+        private void sendEasySpanNotification(int textChangedType, EasyEditSpan span) {
             try {
                 PendingIntent pendingIntent = span.getPendingIntent();
                 if (pendingIntent != null) {
