@@ -23,6 +23,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
+import static com.android.server.NetworkManagementService.NetdResponseCode.ClatdStatusResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceGetCfgResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.IpFwdStatusResult;
@@ -122,6 +123,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int QuotaCounterResult        = 220;
         public static final int TetheringStatsResult      = 221;
         public static final int DnsProxyQueryResult       = 222;
+        public static final int ClatdStatusResult         = 223;
 
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
@@ -1496,6 +1498,43 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             throw new IllegalStateException(
                     "Error communicating with native deamon to clear interface for pid " + pid, e);
         }
+    }
+
+    @Override
+    public void startClatd(String interfaceName) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("clatd", "start", interfaceName);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void stopClatd() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        try {
+            mConnector.execute("clatd", "stop");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public boolean isClatdStarted() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        final NativeDaemonEvent event;
+        try {
+            event = mConnector.execute("clatd", "status");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+
+        event.checkCode(ClatdStatusResult);
+        return event.getMessage().endsWith("started");
     }
 
     /** {@inheritDoc} */
