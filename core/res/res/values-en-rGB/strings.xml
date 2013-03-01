@@ -1269,8 +1269,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Always-on VPN connecting…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Always-on VPN connected"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Always-on VPN error"</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Touch to configure"</string>
     <string name="upload_file" msgid="2897957172366730416">"Choose file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No file chosen"</string>
     <string name="reset" msgid="2448168080964209908">"Reset"</string>

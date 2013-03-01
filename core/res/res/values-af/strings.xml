@@ -1269,8 +1269,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Altydaan-VPN koppel tans..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Altydaan-VPN gekoppel"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Altydaan-VPN-fout"</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Raak om op te stel"</string>
     <string name="upload_file" msgid="2897957172366730416">"Kies lêer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Geen lêer gekies nie"</string>
     <string name="reset" msgid="2448168080964209908">"Stel terug"</string>
