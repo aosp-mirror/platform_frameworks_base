@@ -16,14 +16,17 @@
 
 package android.view.accessibility;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -132,29 +135,6 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Creates the singleton AccessibilityManager to be shared across users. This
-     * has to be called before the local AccessibilityManager is created to ensure
-     * it registers itself in the system correctly.
-     * <p>
-     * Note: Calling this method requires INTERACT_ACROSS_USERS_FULL or
-     *       INTERACT_ACROSS_USERS permission.
-     * </p>
-     * @param context Context in which this manager operates.
-     * @throws IllegalStateException if not called before the local
-     *     AccessibilityManager is instantiated.
-     *
-     * @hide
-     */
-    public static void createAsSharedAcrossUsers(Context context) {
-        synchronized (sInstanceSync) {
-            if (sInstance != null) {
-                throw new IllegalStateException("AccessibilityManager already created.");
-            }
-            createSingletonInstance(context, UserHandle.USER_CURRENT);
-        }
-    }
-
-    /**
      * Get an AccessibilityManager instance (create one if necessary).
      *
      * @param context Context in which this manager operates.
@@ -164,22 +144,24 @@ public final class AccessibilityManager {
     public static AccessibilityManager getInstance(Context context) {
         synchronized (sInstanceSync) {
             if (sInstance == null) {
-                createSingletonInstance(context, UserHandle.myUserId());
+                final int userId;
+                if (Binder.getCallingUid() == Process.SYSTEM_UID
+                        || context.checkCallingOrSelfPermission(
+                                Manifest.permission.INTERACT_ACROSS_USERS)
+                                        == PackageManager.PERMISSION_GRANTED
+                        || context.checkCallingOrSelfPermission(
+                                Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                                        == PackageManager.PERMISSION_GRANTED) {
+                    userId = UserHandle.USER_CURRENT;
+                } else {
+                    userId = UserHandle.myUserId();
+                }
+                IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
+                IAccessibilityManager service = IAccessibilityManager.Stub.asInterface(iBinder);
+                sInstance = new AccessibilityManager(context, service, userId);
             }
         }
         return sInstance;
-    }
-
-    /**
-     * Creates the singleton instance.
-     *
-     * @param context Context in which this manager operates.
-     * @param userId The user id under which to operate.
-     */
-    private static void createSingletonInstance(Context context, int userId) {
-        IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
-        IAccessibilityManager service = IAccessibilityManager.Stub.asInterface(iBinder);
-        sInstance = new AccessibilityManager(context, service, userId);
     }
 
     /**
