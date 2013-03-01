@@ -1239,6 +1239,10 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"อนุญาตให้แอปพลิเคชันเรียกใช้บริการที่เก็บค่าเริ่มต้นเพื่อคัดลอกเนื้อหา ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"กำหนดเส้นทางเอาต์พุตของสื่อ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"อนุญาตให้แอปพลิเคชันกำหนดเส้นทางเอาต์พุตของสื่อไปยังอุปกรณ์ภายนอกอื่นๆ"</string>
+    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
+    <skip />
+    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ไป"</string>
@@ -1269,8 +1273,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"กำลังเชื่อมต่อ VPN แบบเปิดตลอดเวลา…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"เชื่อมต่อ VPN แบบเปิดตลอดเวลาแล้ว"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ข้อผิดพลาดของ VPN แบบเปิดตลอดเวลา"</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"แตะเพื่อกำหนดค่า"</string>
     <string name="upload_file" msgid="2897957172366730416">"เลือกไฟล์"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ไม่ได้เลือกไฟล์ไว้"</string>
     <string name="reset" msgid="2448168080964209908">"รีเซ็ต"</string>

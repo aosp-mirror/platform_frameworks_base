@@ -1239,6 +1239,10 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Omogućuje aplikaciji dozivanje usluge zadanog spremnika radi kopiranja sadržaja. Nije namijenjena uobičajenim aplikacijama."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Usmjeravanje medijskog izlaza"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Aplikaciji omogućuje usmjeravanje medijskog izlaza na druge vanjske uređaje."</string>
+    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
+    <skip />
+    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dodirnite dvaput za upravljanje zumiranjem"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget nije moguće dodati."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Idi"</string>
@@ -1269,8 +1273,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje s uvijek uključenom VPN mrežom…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Povezan s uvijek uključenom VPN mrežom"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Pogreška uvijek uključene VPN mreže"</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Dodirnite za konfiguraciju"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odaberite datoteku"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nema odabranih datoteka"</string>
     <string name="reset" msgid="2448168080964209908">"Ponovo postavi"</string>
