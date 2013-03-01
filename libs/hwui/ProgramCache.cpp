@@ -433,6 +433,12 @@ void ProgramCache::clear() {
 
 Program* ProgramCache::get(const ProgramDescription& description) {
     programid key = description.key();
+    if (key == (PROGRAM_KEY_TEXTURE | PROGRAM_KEY_A8_TEXTURE)) {
+        // program for A8, unmodulated, texture w/o shader (black text/path textures) is equivalent
+        // to standard texture program (bitmaps, patches). Consider them equivalent.
+        key = PROGRAM_KEY_TEXTURE;
+    }
+
     ssize_t index = mCache.indexOfKey(key);
     Program* program = NULL;
     if (index < 0) {
