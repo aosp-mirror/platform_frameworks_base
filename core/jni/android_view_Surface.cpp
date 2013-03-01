@@ -53,7 +53,6 @@ static const char* const OutOfResourcesException =
 static struct {
     jclass clazz;
     jfieldID mNativeObject;
-    jfieldID mGenerationId;
     jfieldID mCanvas;
     jmethodID ctor;
 } gSurfaceClassInfo;
@@ -384,8 +383,6 @@ int register_android_view_Surface(JNIEnv* env)
     gSurfaceClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
     gSurfaceClassInfo.mNativeObject =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "I");
-    gSurfaceClassInfo.mGenerationId =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mGenerationId", "I");
     gSurfaceClassInfo.mCanvas =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvas", "Landroid/graphics/Canvas;");
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");
