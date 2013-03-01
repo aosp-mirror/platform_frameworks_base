@@ -74,16 +74,12 @@ public class Surface implements Parcelable {
     int mNativeObject; // package scope only for SurfaceControl access
 
     private int mGenerationId; // incremented each time mNativeSurface changes
+    @SuppressWarnings("UnusedDeclaration")
     private final Canvas mCanvas = new CompatibleCanvas();
-
-    // The Translator for density compatibility mode.  This is used for scaling
-    // the canvas to perform the appropriate density transformation.
-    private Translator mCompatibilityTranslator;
 
     // A matrix to scale the matrix set by application. This is set to null for
     // non compatibility mode.
     private Matrix mCompatibleMatrix;
-
 
     /**
      * Rotation constant: 0 degree rotation (natural orientation)
@@ -104,8 +100,6 @@ public class Surface implements Parcelable {
      * Rotation constant: 270 degree rotation.
      */
     public static final int ROTATION_270 = 3;
-
-
 
     /**
      * Create an empty surface, which will later be filled in by readFromParcel().
@@ -169,6 +163,7 @@ public class Surface implements Parcelable {
         if (mNativeObject != 0) {
             nativeRelease(mNativeObject);
             mNativeObject = 0;
+            mGenerationId++;
         }
         mCloseGuard.close();
     }
@@ -183,6 +178,7 @@ public class Surface implements Parcelable {
         if (mNativeObject != 0) {
             nativeDestroy(mNativeObject);
             mNativeObject = 0;
+            mGenerationId++;
         }
         mCloseGuard.close();
     }
@@ -291,6 +287,7 @@ public class Surface implements Parcelable {
                     "SurfaceControl native object is null. Are you using a released SurfaceControl?");
         }
         mNativeObject = nativeCopyFrom(mNativeObject, other.mNativeObject);
+        mGenerationId++;
     }
 
     /**
@@ -312,7 +309,10 @@ public class Surface implements Parcelable {
             }
             // transfer the reference from other to us
             mNativeObject = other.mNativeObject;
+            mGenerationId++;
+
             other.mNativeObject = 0;
+            other.mGenerationId++;
         }
     }
 
@@ -327,6 +327,7 @@ public class Surface implements Parcelable {
         }
         mName = source.readString();
         mNativeObject = nativeReadFromParcel(mNativeObject, source);
+        mGenerationId++;
     }
 
     @Override
@@ -405,24 +406,6 @@ public class Surface implements Parcelable {
         private Matrix mOrigMatrix = null;
 
         @Override
-        public int getWidth() {
-            int w = super.getWidth();
-            if (mCompatibilityTranslator != null) {
-                w = (int)(w * mCompatibilityTranslator.applicationInvertedScale + .5f);
-            }
-            return w;
-        }
-
-        @Override
-        public int getHeight() {
-            int h = super.getHeight();
-            if (mCompatibilityTranslator != null) {
-                h = (int)(h * mCompatibilityTranslator.applicationInvertedScale + .5f);
-            }
-            return h;
-        }
-
-        @Override
         public void setMatrix(Matrix matrix) {
             if (mCompatibleMatrix == null || mOrigMatrix == null || mOrigMatrix.equals(matrix)) {
                 // don't scale the matrix if it's not compatibility mode, or
@@ -435,6 +418,7 @@ public class Surface implements Parcelable {
             }
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public void getMatrix(Matrix m) {
             super.getMatrix(m);
