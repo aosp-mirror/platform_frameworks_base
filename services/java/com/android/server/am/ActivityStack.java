@@ -894,7 +894,7 @@ final class ActivityStack {
         } else if (mInitialStartTime == 0) {
             mInitialStartTime = SystemClock.uptimeMillis();
         }
-        
+
         if (app != null && app.thread != null) {
             try {
                 app.addPackage(r.info.packageName);
@@ -912,7 +912,7 @@ final class ActivityStack {
         mService.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
                 "activity", r.intent.getComponent(), false, false);
     }
-    
+
     void stopIfSleepingLocked() {
         if (mService.isSleeping()) {
             if (!mGoingToSleep.isHeld()) {
@@ -1014,7 +1014,7 @@ final class ActivityStack {
         if (who.noDisplay) {
             return null;
         }
-        
+
         Resources res = mService.mContext.getResources();
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
@@ -1063,7 +1063,7 @@ final class ActivityStack {
         prev.updateThumbnail(screenshotActivities(prev), null);
 
         mService.updateCpuStats();
-        
+
         if (prev.app != null && prev.app.thread != null) {
             if (DEBUG_PAUSE) Slog.v(TAG, "Enqueueing pending pause: " + prev);
             try {
@@ -1151,7 +1151,7 @@ final class ActivityStack {
                     completePauseLocked();
                 } else {
                     EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
-                            r.userId, System.identityHashCode(r), r.shortComponentName, 
+                            r.userId, System.identityHashCode(r), r.shortComponentName,
                             mPausingActivity != null
                                 ? mPausingActivity.shortComponentName : "(none)");
                 }
@@ -1210,7 +1210,7 @@ final class ActivityStack {
     private final void completePauseLocked() {
         ActivityRecord prev = mPausingActivity;
         if (DEBUG_PAUSE) Slog.v(TAG, "Complete pause: " + prev);
-        
+
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Executing finish of activity: " + prev);
@@ -1264,7 +1264,7 @@ final class ActivityStack {
                 resumeTopActivityLocked(null);
             }
         }
-        
+
         if (prev != null) {
             prev.resumeKeyDispatchingLocked();
         }
@@ -4495,20 +4495,18 @@ final class ActivityStack {
     }
 
     final boolean findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
-        for (int i = mHistory.size() - 1; i >= 0; i--) {
-            ActivityRecord hr = mHistory.get(i);
-            if (hr.task.taskId == taskId) {
-                if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
-                    mUserLeaving = true;
-                }
-                if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
-                    // Caller wants the home activity moved with it.  To accomplish this,
-                    // we'll just move the home task to the top first.
-                    moveHomeToFrontLocked();
-                }
-                moveTaskToFrontLocked(hr.task, null, options);
-                return true;
+        final TaskRecord task = mTaskIdToTaskRecord.get(taskId);
+        if (mTaskHistory.contains(task)) {
+            if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+                mUserLeaving = true;
             }
+            if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
+                // Caller wants the home activity moved with it.  To accomplish this,
+                // we'll just move the home task to the top first.
+                moveHomeToFrontLocked();
+            }
+            moveTaskToFrontLocked(task, null, options);
+            return true;
         }
         return false;
     }
@@ -5072,79 +5070,77 @@ final class ActivityStack {
     }
 
     ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
-        PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
+            PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
         ActivityRecord topRecord = null;
-        int pos = mHistory.size() - 1;
-        ActivityRecord next = pos >= 0 ? mHistory.get(pos) : null;
-        ActivityRecord top = null;
-        TaskRecord curTask = null;
-        int numActivities = 0;
-        int numRunning = 0;
-        while (pos >= 0 && maxNum > 0) {
-            final ActivityRecord r = next;
-            pos--;
-            next = pos >= 0 ? mHistory.get(pos) : null;
+        for (int taskNdx = mTaskHistory.size() - 1; maxNum > 0 && taskNdx >= 0;
+                --maxNum, --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            ActivityRecord r = null;
+            ActivityRecord top = null;
+            int numActivities = 0;
+            int numRunning = 0;
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                r = activities.get(activityNdx);
 
-            // Initialize state for next task if needed.
-            if (top == null || (top.state == ActivityState.INITIALIZING && top.task == r.task)) {
-                top = r;
-                curTask = r.task;
-                numActivities = numRunning = 0;
-            }
-
-            // Add 'r' into the current task.
-            numActivities++;
-            if (r.app != null && r.app.thread != null) {
-                numRunning++;
-            }
-
-            if (localLOGV) Slog.v(
-                TAG, r.intent.getComponent().flattenToShortString()
-                + ": task=" + r.task);
-
-            // If the next one is a different task, generate a new
-            // TaskInfo entry for what we have.
-            if (next == null || next.task != curTask) {
-                RunningTaskInfo ci = new RunningTaskInfo();
-                ci.id = curTask.taskId;
-                ci.baseActivity = r.intent.getComponent();
-                ci.topActivity = top.intent.getComponent();
-                if (top.thumbHolder != null) {
-                    ci.description = top.thumbHolder.lastDescription;
+                // Initialize state for next task if needed.
+                if (top == null || (top.state == ActivityState.INITIALIZING)) {
+                    top = r;
+                    numActivities = numRunning = 0;
                 }
-                ci.numActivities = numActivities;
-                ci.numRunning = numRunning;
-                //System.out.println(
-                //    "#" + maxNum + ": " + " descr=" + ci.description);
-                if (receiver != null) {
-                    if (localLOGV) Slog.v(
-                        TAG, "State=" + top.state + "Idle=" + top.idle
-                        + " app=" + top.app
-                        + " thr=" + (top.app != null ? top.app.thread : null));
-                    if (top.state == ActivityState.RESUMED || top.state == ActivityState.PAUSING) {
-                        if (top.idle && top.app != null && top.app.thread != null) {
-                            topRecord = top;
-                        } else {
-                            top.thumbnailNeeded = true;
-                        }
+
+                // Add 'r' into the current task.
+                numActivities++;
+                if (r.app != null && r.app.thread != null) {
+                    numRunning++;
+                }
+
+                if (localLOGV) Slog.v(
+                    TAG, r.intent.getComponent().flattenToShortString()
+                    + ": task=" + r.task);
+            }
+
+            RunningTaskInfo ci = new RunningTaskInfo();
+            ci.id = task.taskId;
+            ci.baseActivity = r.intent.getComponent();
+            ci.topActivity = top.intent.getComponent();
+            if (top.thumbHolder != null) {
+                ci.description = top.thumbHolder.lastDescription;
+            }
+            ci.numActivities = numActivities;
+            ci.numRunning = numRunning;
+            //System.out.println(
+            //    "#" + maxNum + ": " + " descr=" + ci.description);
+            if (receiver != null) {
+                if (localLOGV) Slog.v(
+                    TAG, "State=" + top.state + "Idle=" + top.idle
+                    + " app=" + top.app
+                    + " thr=" + (top.app != null ? top.app.thread : null));
+                if (top.state == ActivityState.RESUMED || top.state == ActivityState.PAUSING) {
+                    if (top.idle && top.app != null && top.app.thread != null) {
+                        topRecord = top;
+                    } else {
+                        top.thumbnailNeeded = true;
                     }
-                    pending.pendingRecords.add(top);
                 }
-                list.add(ci);
-                maxNum--;
-                top = null;
+                pending.pendingRecords.add(top);
             }
+            list.add(ci);
         }
         return topRecord;
     }
 
     public void unhandledBackLocked() {
-        int top = mHistory.size() - 1;
+        final int top = mTaskHistory.size() - 1;
         if (DEBUG_SWITCH) Slog.d(
             TAG, "Performing unhandledBack(): top activity at " + top);
-        if (top > 0) {
-            finishActivityLocked(mHistory.get(top),
-                        Activity.RESULT_CANCELED, null, "unhandled-back", true);
+        if (top >= 0) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
+            int activityTop = activities.size() - 1;
+            if (activityTop > 0) {
+                finishActivityLocked(activities.get(activityTop), Activity.RESULT_CANCELED, null,
+                        "unhandled-back", true);
+            }
         }
     }
 
@@ -5165,29 +5161,39 @@ final class ActivityStack {
 
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage) {
-        ActivityManagerService.dumpHistoryList(fd, pw, mHistory, "  ", "Hist", true, !dumpAll,
-            dumpClient, dumpPackage);
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            pw.print("  Task "); pw.print(taskNdx); pw.print(": id #"); pw.println(task.taskId);
+            ActivityManagerService.dumpHistoryList(fd, pw, mTaskHistory.get(taskNdx).mActivities,
+                "    ", "Hist", true, !dumpAll, dumpClient, dumpPackage);
+        }
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
         ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
 
         if ("all".equals(name)) {
-            for (ActivityRecord r1 : mHistory) {
-                activities.add(r1);
+            for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+                activities.addAll(mTaskHistory.get(taskNdx).mActivities);
             }
         } else if ("top".equals(name)) {
-            final int N = mHistory.size();
-            if (N > 0) {
-                activities.add(mHistory.get(N-1));
+            final int top = mTaskHistory.size() - 1;
+            if (top >= 0) {
+                final ArrayList<ActivityRecord> list = mTaskHistory.get(top).mActivities;
+                int listTop = list.size() - 1;
+                if (listTop >= 0) {
+                    activities.add(list.get(listTop));
+                }
             }
         } else {
             ItemMatcher matcher = new ItemMatcher();
             matcher.build(name);
 
-            for (ActivityRecord r1 : mHistory) {
-                if (matcher.match(r1, r1.intent.getComponent())) {
-                    activities.add(r1);
+            for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+                for (ActivityRecord r1 : mTaskHistory.get(taskNdx).mActivities) {
+                    if (matcher.match(r1, r1.intent.getComponent())) {
+                        activities.add(r1);
+                    }
                 }
             }
         }
@@ -5200,12 +5206,16 @@ final class ActivityStack {
 
         // All activities that came from the package must be
         // restarted as if there was a config change.
-        for (int i = mHistory.size() - 1; i >= 0; i--) {
-            ActivityRecord a = mHistory.get(i);
-            if (a.info.packageName.equals(packageName)) {
-                a.forceNewConfig = true;
-                if (starting != null && a == starting && a.visible) {
-                    a.startFreezingScreenLocked(starting.app, ActivityInfo.CONFIG_SCREEN_LAYOUT);
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord a = activities.get(activityNdx);
+                if (a.info.packageName.equals(packageName)) {
+                    a.forceNewConfig = true;
+                    if (starting != null && a == starting && a.visible) {
+                        a.startFreezingScreenLocked(starting.app,
+                                ActivityInfo.CONFIG_SCREEN_LAYOUT);
+                    }
                 }
             }
         }
