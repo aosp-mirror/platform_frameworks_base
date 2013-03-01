@@ -240,6 +240,9 @@ public:
     Program* currentProgram;
     bool scissorEnabled;
 
+    bool drawDeferDisabled;
+    bool drawReorderDisabled;
+
     // VBO to draw with
     GLuint meshBuffer;
 

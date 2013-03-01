@@ -50,9 +50,9 @@ namespace uirenderer {
 Caches::Caches(): Singleton<Caches>(), mExtensions(Extensions::getInstance()), mInitialized(false) {
     init();
     initFont();
-    initExtensions();
     initConstraints();
     initProperties();
+    initExtensions();
 
     mDebugLevel = readDebugLevel();
     ALOGD("Enabling debug mode %d", mDebugLevel);
@@ -103,15 +103,21 @@ void Caches::initFont() {
 void Caches::initExtensions() {
     if (mExtensions.hasDebugMarker()) {
         eventMark = glInsertEventMarkerEXT;
-        startMark = glPushGroupMarkerEXT;
-        endMark = glPopGroupMarkerEXT;
+        if ((drawDeferDisabled || drawReorderDisabled)) {
+            startMark = glPushGroupMarkerEXT;
+            endMark = glPopGroupMarkerEXT;
+        } else {
+            startMark = startMarkNull;
+            endMark = endMarkNull;
+        }
+
     } else {
         eventMark = eventMarkNull;
         startMark = startMarkNull;
         endMark = endMarkNull;
     }
 
-    if (mExtensions.hasDebugLabel()) {
+    if (mExtensions.hasDebugLabel() && (drawDeferDisabled || drawReorderDisabled)) {
         setLabel = glLabelObjectEXT;
         getLabel = glGetObjectLabelEXT;
     } else {
@@ -162,6 +168,20 @@ bool Caches::initProperties() {
         }
     } else {
         debugStencilClip = kStencilHide;
+    }
+
+    if (property_get(PROPERTY_DISABLE_DRAW_DEFER, property, "false")) {
+        drawDeferDisabled = !strcasecmp(property, "true");
+        INIT_LOGD("  Draw defer %s", drawDeferDisabled ? "disabled" : "enabled");
+    } else {
+        INIT_LOGD("  Draw defer enabled");
+    }
+
+    if (property_get(PROPERTY_DISABLE_DRAW_REORDER, property, "false")) {
+        drawReorderDisabled = !strcasecmp(property, "true");
+        INIT_LOGD("  Draw reorder %s", drawReorderDisabled ? "disabled" : "enabled");
+    } else {
+        INIT_LOGD("  Draw reorder enabled");
     }
 
     return (prevDebugLayersUpdates != debugLayersUpdates) ||
