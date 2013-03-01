@@ -1140,9 +1140,20 @@ public:
             const float* positions, SkPaint* paint, float length)
             : DrawBoundedOp(paint), mText(text), mBytesCount(bytesCount), mCount(count),
             mX(x), mY(y), mPositions(positions), mLength(length) {
+        // duplicates bounds calculation from OpenGLRenderer::drawText, but doesn't alter mX
         SkPaint::FontMetrics metrics;
         paint->getFontMetrics(&metrics, 0.0f);
-        mLocalBounds.set(mX, mY + metrics.fTop, mX + length, mY + metrics.fBottom);
+        switch (paint->getTextAlign()) {
+        case SkPaint::kCenter_Align:
+            x -= length / 2.0f;
+            break;
+        case SkPaint::kRight_Align:
+            x -= length;
+            break;
+        default:
+            break;
+        }
+        mLocalBounds.set(x, mY + metrics.fTop, x + length, mY + metrics.fBottom);
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
