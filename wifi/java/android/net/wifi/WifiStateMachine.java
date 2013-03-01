@@ -1378,7 +1378,7 @@ public class WifiStateMachine extends StateMachine {
     private static final String FLAGS_STR = "flags=";
     private static final String SSID_STR = "ssid=";
     private static final String DELIMITER_STR = "====";
-    private static final int SCAN_BUF_RANGE = 3900;
+    private static final String END_STR = "####";
 
     /**
      * Format:
@@ -1417,11 +1417,12 @@ public class WifiStateMachine extends StateMachine {
             if (TextUtils.isEmpty(tmpResults)) break;
             scanResultsBuf.append(tmpResults);
             scanResultsBuf.append("\n");
-            if (tmpResults.length() < SCAN_BUF_RANGE) break;
             String[] lines = tmpResults.split("\n");
             sid = -1;
             for (int i=lines.length - 1; i >= 0; i--) {
-                if (lines[i].startsWith(ID_STR)) {
+                if (lines[i].startsWith(END_STR)) {
+                    break;
+                } else if (lines[i].startsWith(ID_STR)) {
                     try {
                         sid = Integer.parseInt(lines[i].substring(ID_STR.length())) + 1;
                     } catch (NumberFormatException e) {
@@ -1472,7 +1473,7 @@ public class WifiStateMachine extends StateMachine {
                 } else if (line.startsWith(SSID_STR)) {
                     wifiSsid = WifiSsid.createFromAsciiEncoded(
                             line.substring(SSID_STR.length()));
-                } else if (line.startsWith(DELIMITER_STR)) {
+                } else if (line.startsWith(DELIMITER_STR) || line.startsWith(END_STR)) {
                     if (bssid != null) {
                         String ssid = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
                         String key = bssid + ssid;
