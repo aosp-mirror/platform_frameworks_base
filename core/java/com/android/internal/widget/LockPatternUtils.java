@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManager;
@@ -145,6 +146,8 @@ public class LockPatternUtils {
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
 
+    private final boolean mMultiUserMode;
+
     // The current user is set by KeyguardViewMediator and shared by all LockPatternUtils.
     private static volatile int sCurrentUserId = UserHandle.USER_NULL;
 
@@ -166,6 +169,12 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+
+        // If this is being called by the system or by an application like keyguard that
+        // has permision INTERACT_ACROSS_USERS, then LockPatternUtils will operate in multi-user
+        // mode where calls are for the current user rather than the user of the calling process.
+        mMultiUserMode = context.checkCallingOrSelfPermission(
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL) == PackageManager.PERMISSION_GRANTED;
     }
 
     private ILockSettings getLockSettings() {
@@ -260,13 +269,12 @@ public class LockPatternUtils {
     }
 
     private int getCurrentOrCallingUserId() {
-        int callingUid = Binder.getCallingUid();
-        if (callingUid == android.os.Process.SYSTEM_UID) {
+        if (mMultiUserMode) {
             // TODO: This is a little inefficient. See if all users of this are able to
             // handle USER_CURRENT and pass that instead.
             return getCurrentUser();
         } else {
-            return UserHandle.getUserId(callingUid);
+            return UserHandle.getCallingUserId();
         }
     }
 
