@@ -46,6 +46,7 @@
             <LinearLayout android:id="@+id/recents_linear_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_gravity="left"
                 android:orientation="horizontal">
             </LinearLayout>
 
