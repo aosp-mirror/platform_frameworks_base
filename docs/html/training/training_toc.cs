@@ -1069,6 +1069,13 @@
            "How to perform various tasks and keep your app's data and your user's data secure."
           >Security Tips</a>
       </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/security-ssl.html"
+           description=
+           "How to ensure that your app is secure when performing network transactions."
+          >Security with HTTPS and SSL</a>
+      </li>
       
       <li class="nav-section">
         <div class="nav-section-header">
