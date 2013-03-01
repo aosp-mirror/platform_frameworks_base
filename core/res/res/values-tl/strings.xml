@@ -1269,8 +1269,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Kumukonekta ang Always-on VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Nakakonekta ang Always-on VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Error sa Always-on VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Pindutin upang i-configure"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>

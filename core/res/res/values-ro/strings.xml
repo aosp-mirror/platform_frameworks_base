@@ -1269,8 +1269,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Se efectuează conectarea la reţeaua VPN activată permanent…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Conectat(ă) la reţeaua VPN activată permanent"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Eroare de reţea VPN activată permanent"</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Atingeți pentru a configura"</string>
     <string name="upload_file" msgid="2897957172366730416">"Alegeţi un fişier"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nu au fost găsite fişiere"</string>
     <string name="reset" msgid="2448168080964209908">"Resetaţi"</string>
