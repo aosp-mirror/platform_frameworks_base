@@ -16,7 +16,7 @@
 
 package com.android.keyguard;
 
-import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.app.Activity;
@@ -331,7 +331,7 @@ public class KeyguardViewManager {
         }
     }
 
-    public synchronized void onScreenTurnedOn(final IKeyguardResult result) {
+    public synchronized void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
         mScreenOn = true;
         if (mKeyguardView != null) {
@@ -339,7 +339,7 @@ public class KeyguardViewManager {
 
             // Caller should wait for this window to be shown before turning
             // on the screen.
-            if (result != null) {
+            if (callback != null) {
                 if (mKeyguardHost.getVisibility() == View.VISIBLE) {
                     // Keyguard may be in the process of being shown, but not yet
                     // updated with the window manager...  give it a chance to do so.
@@ -351,28 +351,25 @@ public class KeyguardViewManager {
                                 token = mKeyguardHost.getWindowToken();
                             }
                             try {
-                                result.onShown(token);
+                                callback.onShown(token);
                             } catch (RemoteException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+                                Slog.w(TAG, "Exception calling onShown():", e);
                             }
                         }
                     });
                 } else {
                     try {
-                        result.onShown(null);
+                        callback.onShown(null);
                     } catch (RemoteException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        Slog.w(TAG, "Exception calling onShown():", e);
                     }
                 }
             }
-        } else if (result != null) {
+        } else if (callback != null) {
             try {
-                result.onShown(null);
+                callback.onShown(null);
             } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Slog.w(TAG, "Exception calling onShown():", e);
             }
         }
     }

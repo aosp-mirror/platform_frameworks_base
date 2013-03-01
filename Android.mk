@@ -180,7 +180,8 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
 	core/java/com/android/internal/policy/IFaceLockCallback.aidl \
 	core/java/com/android/internal/policy/IFaceLockInterface.aidl \
-	core/java/com/android/internal/policy/IKeyguardResult.aidl \
+	core/java/com/android/internal/policy/IKeyguardShowCallback.aidl \
+	core/java/com/android/internal/policy/IKeyguardExitCallback.aidl \
 	core/java/com/android/internal/policy/IKeyguardService.aidl \
 	core/java/com/android/internal/os/IDropBoxManagerService.aidl \
 	core/java/com/android/internal/os/IResultReceiver.aidl \

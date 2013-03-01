@@ -16,7 +16,8 @@
 
 package com.android.keyguard;
 
-import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.policy.IKeyguardShowCallback;
+import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 
 import android.app.Activity;
@@ -58,16 +59,21 @@ public class KeyguardTestActivity extends Activity implements OnClickListener {
 
     IKeyguardService mService = null;
 
-    KeyguardResult mKeyguardResult = new KeyguardResult();
+    KeyguardShowCallback mKeyguardShowCallback = new KeyguardShowCallback();
+    KeyguardExitCallback mKeyguardExitCallback = new KeyguardExitCallback();
+
     RemoteServiceConnection mConnection;
     private boolean mSentSystemReady;
 
-    class KeyguardResult extends IKeyguardResult.Stub {
+    class KeyguardShowCallback extends IKeyguardShowCallback.Stub {
 
         @Override
         public void onShown(IBinder windowToken) throws RemoteException {
             Log.v(TAG, "Keyguard is shown, windowToken = " + windowToken);
         }
+    }
+
+    class KeyguardExitCallback extends IKeyguardExitCallback.Stub {
 
         @Override
         public void onKeyguardExitResult(boolean success) throws RemoteException {
@@ -236,7 +242,7 @@ public class KeyguardTestActivity extends Activity implements OnClickListener {
         try {
             switch (v.getId()) {
             case R.id.on_screen_turned_on:
-                mService.onScreenTurnedOn(mKeyguardResult);
+                mService.onScreenTurnedOn(mKeyguardShowCallback);
                 break;
             case R.id.on_screen_turned_off:
                 mService.onScreenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
@@ -249,7 +255,7 @@ public class KeyguardTestActivity extends Activity implements OnClickListener {
                 mService.doKeyguardTimeout(null);
                 break;
             case R.id.verify_unlock:
-                mService.verifyUnlock(mKeyguardResult);
+                mService.verifyUnlock(mKeyguardExitCallback);
                 break;
             }
         } catch (RemoteException e) {

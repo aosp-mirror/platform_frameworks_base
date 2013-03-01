@@ -19,8 +19,10 @@ package com.android.internal.policy.impl;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 
-import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.policy.IKeyguardShowCallback;
+import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 
 /**
@@ -30,6 +32,7 @@ import com.android.internal.policy.IKeyguardService;
  */
 public class KeyguardServiceWrapper implements IKeyguardService {
     private IKeyguardService mService;
+    private String TAG = "KeyguardServiceWrapper";
 
     public KeyguardServiceWrapper(IKeyguardService service) {
         mService = service;
@@ -39,7 +42,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             return mService.isShowing();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
         return false;
     }
@@ -48,7 +51,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             return mService.isSecure();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
         return false; // TODO cache state
     }
@@ -57,7 +60,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             return mService.isShowingAndNotHidden();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
         return false; // TODO cache state
     }
@@ -66,7 +69,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             return mService.isInputRestricted();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
         return false; // TODO cache state
     }
@@ -75,25 +78,16 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             return mService.isDismissable();
         } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
         return true; // TODO cache state
     }
 
-    public void userActivity() {
+    public void verifyUnlock(IKeyguardExitCallback callback) {
         try {
-            mService.userActivity();
+            mService.verifyUnlock(callback);
         } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void verifyUnlock(IKeyguardResult result) {
-        try {
-            mService.verifyUnlock(result);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -101,7 +95,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.keyguardDone(authenticated, wakeup);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -109,7 +103,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.setHidden(isHidden);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -117,23 +111,23 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.dismiss();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
-    public void onWakeKeyWhenKeyguardShowingTq(int keyCode) {
+    public void onWakeKeyWhenKeyguardShowing(int keyCode) {
         try {
-            mService.onWakeKeyWhenKeyguardShowingTq(keyCode);
+            mService.onWakeKeyWhenKeyguardShowing(keyCode);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
-    public void onWakeMotionWhenKeyguardShowingTq() {
+    public void onWakeMotionWhenKeyguardShowing() {
         try {
-            mService.onWakeMotionWhenKeyguardShowingTq();
+            mService.onWakeMotionWhenKeyguardShowing();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -141,7 +135,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.onDreamingStarted();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -149,7 +143,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.onDreamingStopped();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -157,15 +151,15 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.onScreenTurnedOff(reason);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
-    public void onScreenTurnedOn(IKeyguardResult result) {
+    public void onScreenTurnedOn(IKeyguardShowCallback result) {
         try {
             mService.onScreenTurnedOn(result);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -173,7 +167,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.setKeyguardEnabled(enabled);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -181,7 +175,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.onSystemReady();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -189,7 +183,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.doKeyguardTimeout(options);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -197,7 +191,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.setCurrentUser(userId);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
@@ -205,7 +199,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         try {
             mService.showAssistant();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Slog.w(TAG , "Remote Exception", e);
         }
     }
 
