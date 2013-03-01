@@ -24,6 +24,7 @@
 
 #include <SkXfermode.h>
 
+#include "Debug.h"
 #include "Matrix.h"
 #include "Properties.h"
 
