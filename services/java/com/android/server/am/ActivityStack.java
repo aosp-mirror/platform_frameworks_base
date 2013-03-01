@@ -1875,11 +1875,6 @@ final class ActivityStack {
         return true;
     }
 
-    /** Temporary until startActivityLocked is rewritten for tasks. */
-    private int convertAddPos(int addPos) {
-        final ActivityRecord r = mHistory.get(addPos);
-        return r.task.mActivities.indexOf(r);
-    }
 
     private final void startActivityLocked(ActivityRecord r, boolean newTask,
             boolean doResume, boolean keepCurTransition, Bundle options) {
@@ -1887,31 +1882,51 @@ final class ActivityStack {
         final int NH = mHistory.size();
 
         int addPos = -1;
+        boolean fakeStartIt = true;
+        boolean wouldReturn = false;
         if (VALIDATE_TASK_REPLACE) {
             verifyActivityRecords(true);
         }
+        TaskRecord task = null;
         if (!newTask) {
             // If starting in an existing task, find where that is...
-            boolean startIt = true;
-            for (int i = NH-1; i >= 0; i--) {
+            for (int i = NH - 1; i >= 0 && !wouldReturn; i--) {
                 ActivityRecord p = mHistory.get(i);
                 if (p.task == r.task) {
                     // Here it is!  Now, if this is not yet visible to the
                     // user, then just add it without starting; it will
                     // get started when the user navigates back to it.
                     addPos = i+1;
-                    if (!startIt) {
-                        if (DEBUG_ADD_REMOVE) {
-                            RuntimeException here = new RuntimeException("here");
-                            here.fillInStackTrace();
-                            Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos,
-                                    here);
-                        }
-                        r.task.addActivityToTop(r);
+                    if (!fakeStartIt) {
                         mHistory.add(addPos, r);
+                        wouldReturn = true;
+                    }
+                    break;
+                }
+                if (p.fullscreen) {
+                    fakeStartIt = false;
+                }
+            }
+            boolean startIt = true;
+            for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+                task = mTaskHistory.get(taskNdx);
+                if (task == r.task) {
+                    // Here it is!  Now, if this is not yet visible to the
+                    // user, then just add it without starting; it will
+                    // get started when the user navigates back to it.
+                    if (fakeStartIt != startIt) Slog.w(TAG, "Mismatch! fakeStartIt != startIt");
+                    if (!startIt) {
+                        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to task "
+                                + task, new RuntimeException("here").fillInStackTrace());
+                        task.addActivityToTop(r);
+
+                        if (mHistory.get(addPos) != r) {
+                            Slog.w(TAG, "Mismatch! mHistory(" + addPos + ") != " + r);
+                        }
+
                         r.putInHistory();
-                        mService.mWindowManager.addAppToken(convertAddPos(addPos), r.appToken,
-                                r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                        mService.mWindowManager.addAppToken(task.mActivities.indexOf(r),
+                                r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
                         if (VALIDATE_TASK_REPLACE) {
                             verifyActivityRecords(true);
@@ -1920,43 +1935,76 @@ final class ActivityStack {
                             validateAppTokensLocked();
                         }
                         ActivityOptions.abort(options);
+                        if (!wouldReturn) {
+                            Slog.w(TAG, "Mismatch! !wouldReturn");
+                        }
                         return;
                     }
                     break;
-                }
-                if (p.fullscreen) {
+                } else if (task.numFullscreen > 0) {
                     startIt = false;
                 }
             }
+            if (wouldReturn) {
+                Slog.w(TAG, "Mismatch! wouldReturn");
+            }
+        } else if (mTaskIdToTaskRecord.indexOfKey(r.task.taskId) >= 0) {
+            // All activities in this task are finishing and ActivityManagerService considers
+            // them gone. It reuses the task and expects it to be at the top so move it up.
+            mTaskHistory.remove(r.task);
+            mTaskHistory.add(r.task);
+            mService.mWindowManager.moveTaskToTop(r.task.taskId);
         }
 
         // Place a new activity at top of stack, so it is next to interact
         // with the user.
+        boolean wasLessThan0 = false;
         if (addPos < 0) {
+            wasLessThan0 = true;
             addPos = NH;
         }
-        
+
         // If we are not placing the new activity frontmost, we do not want
         // to deliver the onUserLeaving callback to the actual frontmost
         // activity
-        if (addPos < NH) {
+        if (task == r.task && mTaskHistory.indexOf(task) != (mTaskHistory.size() - 1)) {
+            if (addPos >= NH) {
+                Slog.w(TAG, "Mismatch! addPos >= NH");
+            }
             mUserLeaving = false;
-            if (DEBUG_USER_LEAVING) Slog.v(TAG, "startActivity() behind front, mUserLeaving=false");
+            if (DEBUG_USER_LEAVING) Slog.v(TAG,
+                    "startActivity() behind front, mUserLeaving=false");
+        } else if (addPos < NH) {
+            Slog.w(TAG, "Mismatch! addPos < NH");
         }
-        
+
+        task = r.task;
+
         // Slot the activity into the history stack and proceed
-        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to stack at " + addPos,
+        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to stack to task " + task,
                 new RuntimeException("here").fillInStackTrace());
-        r.task.addActivityToTop(r);
-        mHistory.add(addPos, r);
+        task.addActivityToTop(r);
+
+        if (!wouldReturn) {
+            mHistory.add(addPos, r);
+            // Activities in this task may be finishing and ActivityManagerService is ignoring
+            // them. For the sake of verification move them below this activity.
+            for (int i = addPos - 1; i >= 0; --i) {
+                ActivityRecord test = mHistory.get(i);
+                if (test.task == task) {
+                    mHistory.add(addPos, test);
+                    mHistory.remove(i);
+                    --addPos;
+                }
+            }
+        }
+
         r.putInHistory();
         r.frontOfTask = newTask;
         if (VALIDATE_TASK_REPLACE) {
-            if (verifyActivityRecords(false)) {
-                Slog.w(TAG, "startActivityLocked: addPos=" + addPos);
-            }
+            verifyActivityRecords(false);
         }
-        if (NH > 0) {
+        if (numActivities() > 1) {
             // We want to show the starting preview window if we are
             // switching to a new task, or the next activity's process is
             // not currently running.
@@ -1981,7 +2029,7 @@ final class ActivityStack {
                 mNoAnimActivities.remove(r);
             }
             r.updateOptionsLocked(options);
-            mService.mWindowManager.addAppToken(convertAddPos(addPos),
+            mService.mWindowManager.addAppToken(task.mActivities.indexOf(r),
                     r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             boolean doShow = true;
@@ -2020,8 +2068,8 @@ final class ActivityStack {
         } else {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
-            mService.mWindowManager.addAppToken(convertAddPos(addPos), r.appToken, r.task.taskId,
-                    r.info.screenOrientation, r.fullscreen,
+            mService.mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
+                    r.task.taskId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             ActivityOptions.abort(options);
         }
@@ -2033,9 +2081,7 @@ final class ActivityStack {
             resumeTopActivityLocked(null);
         }
         if (VALIDATE_TASK_REPLACE) {
-            if (verifyActivityRecords(true)) {
-                Slog.w(TAG, "startActivityLocked: addPos=" + addPos);
-            }
+            verifyActivityRecords(true);
         }
     }
 
@@ -2391,7 +2437,11 @@ final class ActivityStack {
             }
         }
 
-        taskTop = task.getTopActivity();
+        int taskNdx = mTaskHistory.indexOf(task);
+        do {
+            taskTop = mTaskHistory.get(taskNdx--).getTopActivity();
+        } while (taskTop == null && taskNdx >= 0);
+
         if (topOptions != null) {
             // If we got some ActivityOptions from an activity on top that
             // was removed from the task, propagate them to the new real top.
