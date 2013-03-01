@@ -1239,6 +1239,10 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Inaruhusu programu kuomba huduma ya chombo chaguo-msingi kunakili maudhui. Si ya matumizi na programu za kawiada."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Fuatalia utoaji wa habari"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Inaruhusu programu kufuatilia utoaji wa habari kwa vifaa vingine vya nje."</string>
+    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
+    <skip />
+    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Gusa mara mbili kwa udhibiti cha kuza"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Haikuweza kuongeza wijeti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Nenda"</string>

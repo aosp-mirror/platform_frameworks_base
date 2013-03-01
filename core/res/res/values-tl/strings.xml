@@ -1239,6 +1239,10 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Pinapayagan ang app na i-apela ang default na serbisyo ng container upang kopyahin ang nilalaman. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"I-route ang output ng media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Pinapayagan ang application na mag-route ng output ng media sa iba pang mga panlabas na device."</string>
+    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
+    <skip />
+    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
@@ -1269,8 +1273,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Kumukonekta ang Always-on VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Nakakonekta ang Always-on VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Error sa Always-on VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Pindutin upang i-configure"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>

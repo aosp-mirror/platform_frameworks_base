@@ -1239,6 +1239,10 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Permite que la aplicación ejecute el servicio de contenedor predeterminado para que copie contenido. Las aplicaciones normales no deben utilizar este permiso."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Dirigir salida de medios"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que la aplicación dirija salidas de medios a otros dispositivos externos."</string>
+    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
+    <skip />
+    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se pudo agregar el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1269,8 +1273,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Estableciendo conexión con la VPN siempre activada..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Se estableció conexión con la VPN siempre activada."</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Se produjo un error al establecer conexión con la VPN siempre activada."</string>
-    <!-- no translation found for vpn_lockdown_config (6415899150671537970) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Toca para configurar."</string>
     <string name="upload_file" msgid="2897957172366730416">"Elegir archivo"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No se seleccionó un archivo."</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
