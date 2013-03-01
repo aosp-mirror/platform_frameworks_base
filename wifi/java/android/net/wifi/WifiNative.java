@@ -210,13 +210,14 @@ public class WifiNative {
      * age=2623
      * flags=[WPA2-PSK-CCMP][WPS][ESS]
      * ssid=zubyb
+     * ====
      *
      * RANGE=ALL gets all scan results
      * RANGE=ID- gets results from ID
      * MASK=<N> see wpa_supplicant/src/common/wpa_ctrl.h for details
      */
     public String scanResults(int sid) {
-        return doStringCommand("BSS RANGE=" + sid + "- MASK=0x1987");
+        return doStringCommand("BSS RANGE=" + sid + "- MASK=0x21987");
     }
 
     public boolean startDriver() {
