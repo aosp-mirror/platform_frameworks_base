@@ -217,16 +217,19 @@ public class ShapeDrawable extends Drawable {
         int prevAlpha = paint.getAlpha();
         paint.setAlpha(modulateAlpha(prevAlpha, mShapeState.mAlpha));
 
-        if (mShapeState.mShape != null) {
-            // need the save both for the translate, and for the (unknown) Shape
-            int count = canvas.save();
-            canvas.translate(r.left, r.top);
-            onDraw(mShapeState.mShape, canvas, paint);
-            canvas.restoreToCount(count);
-        } else {
-            canvas.drawRect(r, paint);
+        // only draw shape if it may affect output
+        if (paint.getAlpha() != 0 || paint.getXfermode() != null || paint.hasShadow) {
+            if (mShapeState.mShape != null) {
+                // need the save both for the translate, and for the (unknown) Shape
+                int count = canvas.save();
+                canvas.translate(r.left, r.top);
+                onDraw(mShapeState.mShape, canvas, paint);
+                canvas.restoreToCount(count);
+            } else {
+                canvas.drawRect(r, paint);
+            }
         }
-        
+
         // restore
         paint.setAlpha(prevAlpha);
     }
