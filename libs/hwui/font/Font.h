@@ -124,6 +124,9 @@ private:
     void drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
             Rect* bounds, const float* pos);
+    void drawCachedGlyphPerspective(CachedGlyphInfo* glyph, int x, int y,
+            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
+            Rect* bounds, const float* pos);
     void drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
             Rect* bounds, const float* pos);

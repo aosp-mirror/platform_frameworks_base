@@ -2151,17 +2151,17 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
 
     alpha *= mSnapshot->alpha;
 
-    mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return DrawGlInfo::kStatusDone;
-    const AutoTexture autoCleanup(texture);
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(GL_LINEAR, true);
-
     const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
             right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
     if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
+        mCaches.activeTexture(0);
+        Texture* texture = mCaches.textureCache.get(bitmap);
+        if (!texture) return DrawGlInfo::kStatusDone;
+        const AutoTexture autoCleanup(texture);
+        texture->setWrap(GL_CLAMP_TO_EDGE, true);
+        texture->setFilter(GL_LINEAR, true);
+
         const bool pureTranslate = mSnapshot->transform->isPureTranslate();
         // Mark the current layer dirty where we are going to draw the patch
         if (hasLayer() && mesh->hasEmptyQuads) {
@@ -2666,6 +2666,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     const float oldX = x;
     const float oldY = y;
     const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+    const bool isPerspective = mSnapshot->transform->isPerspective();
 
     if (CC_LIKELY(pureTranslate)) {
         x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
@@ -2687,8 +2688,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     fontRenderer.setFont(paint, pureTranslate ? mat4::identity() : *mSnapshot->transform);
 
     // Pick the appropriate texture filtering
-    bool linearFilter = !mSnapshot->transform->isPureTranslate() ||
-            fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
+    bool linearFilter = !pureTranslate || fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
 
     // The font renderer will always use texture unit 0
     mCaches.activeTexture(0);
@@ -2701,13 +2701,13 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     setupDrawShader();
     setupDrawBlending(true, mode);
     setupDrawProgram();
-    setupDrawModelView(x, y, x, y, true, true);
+    setupDrawModelView(x, y, x, y, !isPerspective, true);
     // See comment above; the font renderer must use texture unit 0
     // assert(mTextureUnit == 0)
     setupDrawTexture(fontRenderer.getTexture(linearFilter));
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms(true);
+    setupDrawShaderUniforms(!isPerspective);
     setupDrawTextGammaUniforms();
 
     const Rect* clip = mSnapshot->hasPerspectiveTransform() ? NULL : mSnapshot->clipRect;
@@ -2727,6 +2727,9 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
     if (status && hasActiveLayer) {
+        if (isPerspective) {
+            mSnapshot->transform->mapRect(bounds);
+        }
         dirtyLayerUnchecked(bounds, getRegion());
     }
 

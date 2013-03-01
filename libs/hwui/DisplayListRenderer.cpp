@@ -406,7 +406,7 @@ status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, i
     if (addDrawOp(op)) {
         // precache if draw operation is visible
         FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-        fontRenderer.precache(paint, text, count, *mSnapshot->transform);
+        fontRenderer.precache(paint, text, count, mat4::identity());
     }
     return DrawGlInfo::kStatusDone;
 }
@@ -423,7 +423,7 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
     if (addDrawOp(op)) {
         // precache if draw operation is visible
         FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-        fontRenderer.precache(paint, text, count, *mSnapshot->transform);
+        fontRenderer.precache(paint, text, count, mat4::identity());
     }
     return DrawGlInfo::kStatusDone;
 }
@@ -442,7 +442,9 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
     if (addDrawOp(op)) {
         // precache if draw operation is visible
         FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-        fontRenderer.precache(paint, text, count, *mSnapshot->transform);
+        const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+        fontRenderer.precache(paint, text, count,
+                pureTranslate ? mat4::identity() : *mSnapshot->transform);
     }
     return DrawGlInfo::kStatusDone;
 }
