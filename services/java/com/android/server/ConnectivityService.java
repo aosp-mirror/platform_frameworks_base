@@ -3382,6 +3382,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         try {
             if (tracker != null) {
                 mNetd.setFirewallEnabled(true);
+                mNetd.setFirewallInterfaceRule("lo", true);
                 mLockdownTracker = tracker;
                 mLockdownTracker.init();
             } else {
