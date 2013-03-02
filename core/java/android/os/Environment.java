@@ -25,6 +25,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Provides access to environment variables.
@@ -36,12 +37,16 @@ public class Environment {
     private static final String ENV_EMULATED_STORAGE_SOURCE = "EMULATED_STORAGE_SOURCE";
     private static final String ENV_EMULATED_STORAGE_TARGET = "EMULATED_STORAGE_TARGET";
     private static final String ENV_MEDIA_STORAGE = "MEDIA_STORAGE";
+    private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
 
     /** {@hide} */
     public static String DIRECTORY_ANDROID = "Android";
 
-    private static final File ROOT_DIRECTORY
-            = getDirectory("ANDROID_ROOT", "/system");
+    private static final File DIR_ANDROID_ROOT = getDirectory(ENV_ANDROID_ROOT, "/system");
+    private static final File DIR_MEDIA_STORAGE = getDirectory(ENV_MEDIA_STORAGE, "/data/media");
+
+    private static final String CANONCIAL_EMULATED_STORAGE_TARGET = getCanonicalPathOrNull(
+            ENV_EMULATED_STORAGE_TARGET);
 
     private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
 
@@ -178,7 +183,7 @@ public class Environment {
      * Gets the Android root directory.
      */
     public static File getRootDirectory() {
-        return ROOT_DIRECTORY;
+        return DIR_ANDROID_ROOT;
     }
 
     /**
@@ -632,6 +637,19 @@ public class Environment {
         return path == null ? new File(defaultPath) : new File(path);
     }
 
+    private static String getCanonicalPathOrNull(String variableName) {
+        String path = System.getenv(variableName);
+        if (path == null) {
+            return null;
+        }
+        try {
+            return new File(path).getCanonicalPath();
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to resolve canonical path for " + path);
+            return null;
+        }
+    }
+
     private static void throwIfSystem() {
         if (Process.myUid() == Process.SYSTEM_UID) {
             Log.wtf(TAG, "Static storage paths aren't available from AID_SYSTEM", new Throwable());
@@ -648,5 +666,41 @@ public class Environment {
             }
         }
         return cur;
+    }
+
+    /**
+     * If the given path exists on emulated external storage, return the
+     * translated backing path hosted on internal storage. This bypasses any
+     * emulation later, improving performance. This is <em>only</em> suitable
+     * for read-only access.
+     * <p>
+     * Returns original path if given path doesn't meet these criteria. Callers
+     * must hold {@link android.Manifest.permission#WRITE_MEDIA_STORAGE}
+     * permission.
+     *
+     * @hide
+     */
+    public static File maybeTranslateEmulatedPathToInternal(File path) {
+        // Fast return if not emulated, or missing variables
+        if (!Environment.isExternalStorageEmulated()
+                || CANONCIAL_EMULATED_STORAGE_TARGET == null) {
+            return path;
+        }
+
+        try {
+            final String rawPath = path.getCanonicalPath();
+            if (rawPath.startsWith(CANONCIAL_EMULATED_STORAGE_TARGET)) {
+                final File internalPath = new File(DIR_MEDIA_STORAGE,
+                        rawPath.substring(CANONCIAL_EMULATED_STORAGE_TARGET.length()));
+                if (internalPath.exists()) {
+                    return internalPath;
+                }
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to resolve canonical path for " + path);
+        }
+
+        // Unable to translate to internal path; use original
+        return path;
     }
 }
