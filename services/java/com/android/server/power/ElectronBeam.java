@@ -16,18 +16,20 @@
 
 package com.android.server.power;
 
-import com.android.server.display.DisplayManagerService;
-import com.android.server.display.DisplayTransactionListener;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
-import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
+import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
 import android.opengl.EGLConfig;
 import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES10;
-import android.opengl.GLUtils;
+import android.opengl.GLES11Ext;
 import android.os.Looper;
 import android.util.FloatMath;
 import android.util.Slog;
@@ -37,10 +39,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+import com.android.server.display.DisplayManagerService;
+import com.android.server.display.DisplayTransactionListener;
 
 /**
  * Bzzzoooop!  *crackle*
@@ -94,6 +94,7 @@ final class ElectronBeam {
     // Texture names.  We only use one texture, which contains the screenshot.
     private final int[] mTexNames = new int[1];
     private boolean mTexNamesGenerated;
+    private float mTexMatrix[] = new float[16];
 
     // Vertex and corresponding texture coordinates.
     // We have 4 2D vertices, so 8 elements.  The vertices form a quad.
@@ -114,6 +115,7 @@ final class ElectronBeam {
      * Animates a simple dim layer to fade the contents of the screen in or out progressively.
      */
     public static final int MODE_FADE = 2;
+
 
     public ElectronBeam(DisplayManagerService displayManager) {
         mDisplayManager = displayManager;
@@ -264,19 +266,23 @@ final class ElectronBeam {
         GLES10.glVertexPointer(2, GLES10.GL_FLOAT, 0, mVertexBuffer);
         GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
 
+        // set-up texturing
+        GLES10.glDisable(GLES10.GL_TEXTURE_2D);
+        GLES10.glEnable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
+
         // bind texture and set blending for drawing planes
-        GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, mTexNames[0]);
+        GLES10.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTexNames[0]);
         GLES10.glTexEnvx(GLES10.GL_TEXTURE_ENV, GLES10.GL_TEXTURE_ENV_MODE,
                 mMode == MODE_WARM_UP ? GLES10.GL_MODULATE : GLES10.GL_REPLACE);
-        GLES10.glTexParameterx(GLES10.GL_TEXTURE_2D,
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                 GLES10.GL_TEXTURE_MAG_FILTER, GLES10.GL_LINEAR);
-        GLES10.glTexParameterx(GLES10.GL_TEXTURE_2D,
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                 GLES10.GL_TEXTURE_MIN_FILTER, GLES10.GL_LINEAR);
-        GLES10.glTexParameterx(GLES10.GL_TEXTURE_2D,
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                 GLES10.GL_TEXTURE_WRAP_S, GLES10.GL_CLAMP_TO_EDGE);
-        GLES10.glTexParameterx(GLES10.GL_TEXTURE_2D,
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                 GLES10.GL_TEXTURE_WRAP_T, GLES10.GL_CLAMP_TO_EDGE);
-        GLES10.glEnable(GLES10.GL_TEXTURE_2D);
+        GLES10.glEnable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
         GLES10.glTexCoordPointer(2, GLES10.GL_FLOAT, 0, mTexCoordBuffer);
         GLES10.glEnableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
 
@@ -296,7 +302,7 @@ final class ElectronBeam {
         GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
 
         // clean up after drawing planes
-        GLES10.glDisable(GLES10.GL_TEXTURE_2D);
+        GLES10.glDisable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
         GLES10.glDisableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
         GLES10.glColorMask(true, true, true, true);
 
@@ -371,81 +377,46 @@ final class ElectronBeam {
     }
 
     private boolean captureScreenshotTextureAndSetViewport() {
-        // TODO: Use a SurfaceTexture to avoid the extra texture upload.
-        Bitmap bitmap = SurfaceControl.screenshot(mDisplayWidth, mDisplayHeight,
-                0, ELECTRON_BEAM_LAYER - 1);
-        if (bitmap == null) {
-            Slog.e(TAG, "Could not take a screenshot!");
+        if (!attachEglContext()) {
             return false;
         }
         try {
-            if (!attachEglContext()) {
-                return false;
-            }
-            try {
-                if (!mTexNamesGenerated) {
-                    GLES10.glGenTextures(1, mTexNames, 0);
-                    if (checkGlErrors("glGenTextures")) {
-                        return false;
-                    }
-                    mTexNamesGenerated = true;
-                }
-
-                GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, mTexNames[0]);
-                if (checkGlErrors("glBindTexture")) {
+            if (!mTexNamesGenerated) {
+                GLES10.glGenTextures(1, mTexNames, 0);
+                if (checkGlErrors("glGenTextures")) {
                     return false;
                 }
-
-                float u = 1.0f;
-                float v = 1.0f;
-                GLUtils.texImage2D(GLES10.GL_TEXTURE_2D, 0, bitmap, 0);
-                if (checkGlErrors("glTexImage2D, first try", false)) {
-                    // Try a power of two size texture instead.
-                    int tw = nextPowerOfTwo(mDisplayWidth);
-                    int th = nextPowerOfTwo(mDisplayHeight);
-                    int format = GLUtils.getInternalFormat(bitmap);
-                    GLES10.glTexImage2D(GLES10.GL_TEXTURE_2D, 0,
-                            format, tw, th, 0,
-                            format, GLES10.GL_UNSIGNED_BYTE, null);
-                    if (checkGlErrors("glTexImage2D, second try")) {
-                        return false;
-                    }
-
-                    GLUtils.texSubImage2D(GLES10.GL_TEXTURE_2D, 0, 0, 0, bitmap);
-                    if (checkGlErrors("glTexSubImage2D")) {
-                        return false;
-                    }
-
-                    u = (float)mDisplayWidth / tw;
-                    v = (float)mDisplayHeight / th;
-                }
-
-                // Set up texture coordinates for a quad.
-                // We might need to change this if the texture ends up being
-                // a different size from the display for some reason.
-                mTexCoordBuffer.put(0, 0f);
-                mTexCoordBuffer.put(1, v);
-                mTexCoordBuffer.put(2, 0f);
-                mTexCoordBuffer.put(3, 0f);
-                mTexCoordBuffer.put(4, u);
-                mTexCoordBuffer.put(5, 0f);
-                mTexCoordBuffer.put(6, u);
-                mTexCoordBuffer.put(7, v);
-
-                // Set up our viewport.
-                GLES10.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
-                GLES10.glMatrixMode(GLES10.GL_PROJECTION);
-                GLES10.glLoadIdentity();
-                GLES10.glOrthof(0, mDisplayWidth, 0, mDisplayHeight, 0, 1);
-                GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
-                GLES10.glLoadIdentity();
-                GLES10.glMatrixMode(GLES10.GL_TEXTURE);
-                GLES10.glLoadIdentity();
-            } finally {
-                detachEglContext();
+                mTexNamesGenerated = true;
             }
+
+            SurfaceTexture st = new SurfaceTexture(mTexNames[0]);
+            SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
+                    SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN),
+                    new Surface(st));
+
+            st.updateTexImage();
+            st.getTransformMatrix(mTexMatrix);
+
+            // Set up texture coordinates for a quad.
+            // We might need to change this if the texture ends up being
+            // a different size from the display for some reason.
+            mTexCoordBuffer.put(0, 0f); mTexCoordBuffer.put(1, 0f);
+            mTexCoordBuffer.put(2, 0f); mTexCoordBuffer.put(3, 1f);
+            mTexCoordBuffer.put(4, 1f); mTexCoordBuffer.put(5, 1f);
+            mTexCoordBuffer.put(6, 1f); mTexCoordBuffer.put(7, 0f);
+
+            // Set up our viewport.
+            GLES10.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
+            GLES10.glMatrixMode(GLES10.GL_PROJECTION);
+            GLES10.glLoadIdentity();
+            GLES10.glOrthof(0, mDisplayWidth, 0, mDisplayHeight, 0, 1);
+            GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
+            GLES10.glLoadIdentity();
+            GLES10.glMatrixMode(GLES10.GL_TEXTURE);
+            GLES10.glLoadIdentity();
+            GLES10.glLoadMatrixf(mTexMatrix, 0);
         } finally {
-            bitmap.recycle();
+            detachEglContext();
         }
         return true;
     }
@@ -660,10 +631,6 @@ final class ElectronBeam {
 
     private static float sigmoid(float x, float s) {
         return 1.0f / (1.0f + FloatMath.exp(-x * s));
-    }
-
-    private static int nextPowerOfTwo(int value) {
-        return 1 << (32 - Integer.numberOfLeadingZeros(value));
     }
 
     private static FloatBuffer createNativeFloatBuffer(int size) {
