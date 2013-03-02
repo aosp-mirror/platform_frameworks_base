@@ -70,6 +70,7 @@ public:
         float mStrokeWidth;
         bool mAntiAliasing;
         SkMatrix mLookupTransform;
+        SkMatrix mInverseLookupTransform;
     };
 
     ~Font();
