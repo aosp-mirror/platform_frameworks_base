@@ -195,7 +195,7 @@ private:
 
     LinearAllocator& alloc() { return mDisplayListData->allocator; }
     void addStateOp(StateOp* op);
-    bool addDrawOp(DrawOp* op); // returns true if op not rejected
+    void addDrawOp(DrawOp* op);
     void addOpInternal(DisplayListOp* op) {
         insertRestoreToCount();
         insertTranslate();

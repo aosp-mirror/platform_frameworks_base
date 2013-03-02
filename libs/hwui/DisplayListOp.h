@@ -147,7 +147,8 @@ public:
 
         if (!renderer.storeDisplayState(state)) {
             // op wasn't quick-rejected, so defer
-            deferredList->add(this, renderer.disallowReorder());
+            deferredList->add(this, renderer.getCaches().drawReorderDisabled);
+            onDrawOpDeferred(renderer);
         }
 
         return DrawGlInfo::kStatusDone;
@@ -155,6 +156,9 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
             bool caching, int multipliedAlpha) = 0;
+
+    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+    }
 
     // returns true if bounds exist
     virtual bool getLocalBounds(Rect& localBounds) { return false; }
@@ -1081,6 +1085,12 @@ public:
         OP_LOG("Draw some text, %d bytes", mBytesCount);
     }
 
+    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+        SkPaint* paint = getPaint(renderer);
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
+        fontRenderer.precache(paint, mText, mCount, mat4::identity());
+    }
+
     virtual DeferredDisplayList::OpBatchId getBatchId() {
         return mPaint->getColor() == 0xff000000 ?
                 DeferredDisplayList::kOpBatch_Text :
@@ -1154,6 +1164,19 @@ public:
             break;
         }
         mLocalBounds.set(x, mY + metrics.fTop, x + length, mY + metrics.fBottom);
+    }
+
+    /*
+     * When this method is invoked the state field  is initialized to have the
+     * final rendering state. We can thus use it to process data as it will be
+     * used at draw time.
+     */
+    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+        SkPaint* paint = getPaint(renderer);
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
+        const bool pureTranslate = state.mMatrix.isPureTranslate();
+        fontRenderer.precache(paint, mText, mCount,
+                pureTranslate ? mat4::identity() : state.mMatrix);
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,

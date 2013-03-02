@@ -146,6 +146,8 @@ status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty, int32
     if (isEmpty()) return status; // nothing to flush
 
     DEFER_LOGD("--flushing");
+    renderer.eventMark("Flush");
+
     DrawModifiers restoreDrawModifiers = renderer.getDrawModifiers();
     int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     int opCount = 0;
@@ -166,6 +168,7 @@ status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty, int32
     }
 
     DEFER_LOGD("--flushed, drew %d batches (total %d ops)", mBatches.size(), opCount);
+
     renderer.restoreToCount(restoreTo);
     renderer.setDrawModifiers(restoreDrawModifiers);
     clear();

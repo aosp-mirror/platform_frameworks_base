@@ -270,8 +270,6 @@ public:
                 (mSnapshot->flags & Snapshot::kFlagFboTarget); // ensure we're not in a layer
     }
 
-    bool disallowReorder() { return mDrawReorderDisabled; }
-
     bool storeDisplayState(DeferredDisplayState& state);
     void restoreDisplayState(const DeferredDisplayState& state);
 
@@ -282,6 +280,10 @@ public:
         return mSnapshot->transform->isSimple();
     }
 
+    Caches& getCaches() {
+        return mCaches;
+    }
+
     /**
      * Sets the alpha on the current snapshot. This alpha value will be modulated
      * with other alpha values when drawing primitives.
@@ -289,6 +291,11 @@ public:
     void setAlpha(float alpha) {
         mSnapshot->alpha = alpha;
     }
+
+    /**
+     * Inserts a named event marker in the stream of GL commands.
+     */
+    void eventMark(const char* name) const;
 
     /**
      * Inserts a named group marker in the stream of GL commands. This marker
@@ -437,10 +444,6 @@ protected:
      */
     virtual bool suppressErrorChecks() {
         return false;
-    }
-
-    Caches& getCaches() {
-        return mCaches;
     }
 
 private:
@@ -957,8 +960,6 @@ private:
     // See PROPERTY_DISABLE_SCISSOR_OPTIMIZATION in
     // Properties.h
     bool mScissorOptimizationDisabled;
-    bool mDrawDeferDisabled;
-    bool mDrawReorderDisabled;
 
     // No-ops start/endTiling when set
     bool mSuppressTiling;

@@ -122,8 +122,6 @@ OpenGLRenderer::OpenGLRenderer():
     mFirstSnapshot = new Snapshot;
 
     mScissorOptimizationDisabled = false;
-    mDrawDeferDisabled = false;
-    mDrawReorderDisabled = false;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -139,20 +137,6 @@ void OpenGLRenderer::initProperties() {
                 mScissorOptimizationDisabled ? "disabled" : "enabled");
     } else {
         INIT_LOGD("  Scissor optimization enabled");
-    }
-
-    if (property_get(PROPERTY_DISABLE_DRAW_DEFER, property, "false")) {
-        mDrawDeferDisabled = !strcasecmp(property, "true");
-        INIT_LOGD("  Draw defer %s", mDrawDeferDisabled ? "disabled" : "enabled");
-    } else {
-        INIT_LOGD("  Draw defer enabled");
-    }
-
-    if (property_get(PROPERTY_DISABLE_DRAW_REORDER, property, "false")) {
-        mDrawReorderDisabled = !strcasecmp(property, "true");
-        INIT_LOGD("  Draw reorder %s", mDrawReorderDisabled ? "disabled" : "enabled");
-    } else {
-        INIT_LOGD("  Draw reorder enabled");
     }
 }
 
@@ -461,6 +445,10 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 ///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::eventMark(const char* name) const {
+    mCaches.eventMark(0, name);
+}
 
 void OpenGLRenderer::startMark(const char* name) const {
     mCaches.startMark(0, name);
@@ -1815,7 +1803,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, 
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
-        if (CC_UNLIKELY(mDrawDeferDisabled)) {
+        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             return displayList->replay(*this, dirty, flags, 0);
         }
 
@@ -2710,7 +2698,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     setupDrawShaderUniforms(!isPerspective);
     setupDrawTextGammaUniforms();
 
-    const Rect* clip = mSnapshot->hasPerspectiveTransform() ? NULL : mSnapshot->clipRect;
+    const Rect* clip = isPerspective ? NULL : mSnapshot->clipRect;
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     const bool hasActiveLayer = hasLayer();
