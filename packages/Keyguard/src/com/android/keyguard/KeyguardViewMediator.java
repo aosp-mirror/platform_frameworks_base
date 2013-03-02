@@ -236,7 +236,9 @@ public class KeyguardViewMediator {
     /**
      * we send this intent when the keyguard is dismissed.
      */
-    private Intent mUserPresentIntent;
+    private static final Intent USER_PRESENT_INTENT = new Intent(Intent.ACTION_USER_PRESENT)
+            .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                    | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
     /**
      * {@link #setKeyguardEnabled} waits on this condition when it reenables
@@ -504,10 +506,6 @@ public class KeyguardViewMediator {
 
         mKeyguardViewManager = new KeyguardViewManager(context, wm, mViewMediatorCallback,
                 mLockPatternUtils);
-
-        mUserPresentIntent = new Intent(Intent.ACTION_USER_PRESENT);
-        mUserPresentIntent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
-                | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
         final ContentResolver cr = mContext.getContentResolver();
         mShowLockIcon = (Settings.System.getInt(cr, "show_status_bar_lock", 0) == 1);
@@ -1188,11 +1186,8 @@ public class KeyguardViewMediator {
     }
 
     private void sendUserPresentBroadcast() {
-        // TODO
-//        if (!(mContext instanceof Activity)) {
-//            final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
-//            mContext.sendBroadcastAsUser(mUserPresentIntent, currentUser);
-//        }
+        final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
+        mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, currentUser);
     }
 
     /**
