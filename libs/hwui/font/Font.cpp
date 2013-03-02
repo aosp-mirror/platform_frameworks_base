@@ -57,6 +57,9 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mLookupTransform[SkMatrix::kMScaleY] = matrix.data[mat4::kScaleY];
     mLookupTransform[SkMatrix::kMSkewX] = matrix.data[mat4::kSkewX];
     mLookupTransform[SkMatrix::kMSkewY] = matrix.data[mat4::kSkewY];
+    if (!mLookupTransform.invert(&mInverseLookupTransform)) {
+        ALOGW("Could not query the inverse lookup transform for this font");
+    }
 }
 
 Font::~Font() {
@@ -184,18 +187,13 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
 
 void Font::drawCachedGlyphPerspective(CachedGlyphInfo* glyph, int x, int y,
         uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
-    SkMatrix i;
-    if (!mDescription.mLookupTransform.invert(&i)) {
-        return;
-    }
-
     SkPoint p[4];
-    p[0].set(glyph->mBitmapLeft, glyph->mBitmapTop + glyph->mBitmapHeight);
-    p[1].set(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop + glyph->mBitmapHeight);
-    p[2].set(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop);
-    p[3].set(glyph->mBitmapLeft, glyph->mBitmapTop);
+    p[0].iset(glyph->mBitmapLeft, glyph->mBitmapTop + glyph->mBitmapHeight);
+    p[1].iset(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop + glyph->mBitmapHeight);
+    p[2].iset(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop);
+    p[3].iset(glyph->mBitmapLeft, glyph->mBitmapTop);
 
-    i.mapPoints(p, 4);
+    mDescription.mInverseLookupTransform.mapPoints(p, 4);
 
     p[0].offset(x, y);
     p[1].offset(x, y);
@@ -208,10 +206,10 @@ void Font::drawCachedGlyphPerspective(CachedGlyphInfo* glyph, int x, int y,
     float v2 = glyph->mBitmapMaxV;
 
     mState->appendRotatedMeshQuad(
-            p[0].fX, p[0].fY, u1, v2,
-            p[1].fX, p[1].fY, u2, v2,
-            p[2].fX, p[2].fY, u2, v1,
-            p[3].fX, p[3].fY, u1, v1, glyph->mCacheTexture);
+            p[0].x(), p[0].y(), u1, v2,
+            p[1].x(), p[1].y(), u2, v2,
+            p[2].x(), p[2].y(), u2, v1,
+            p[3].x(), p[3].y(), u1, v1, glyph->mCacheTexture);
 }
 
 void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
@@ -265,14 +263,14 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
     const float v2 = glyph->mBitmapMaxV;
 
     mState->appendRotatedMeshQuad(
-            position->fX + destination[0].fX,
-            position->fY + destination[0].fY, u1, v2,
-            position->fX + destination[1].fX,
-            position->fY + destination[1].fY, u2, v2,
-            position->fX + destination[2].fX,
-            position->fY + destination[2].fY, u2, v1,
-            position->fX + destination[3].fX,
-            position->fY + destination[3].fY, u1, v1,
+            position->x() + destination[0].x(),
+            position->y() + destination[0].y(), u1, v2,
+            position->x() + destination[1].x(),
+            position->y() + destination[1].y(), u2, v2,
+            position->x() + destination[2].x(),
+            position->y() + destination[2].y(), u2, v1,
+            position->x() + destination[3].x(),
+            position->y() + destination[3].y(), u1, v1,
             glyph->mCacheTexture);
 }
 
