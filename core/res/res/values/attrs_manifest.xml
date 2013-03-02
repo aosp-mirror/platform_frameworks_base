@@ -254,7 +254,11 @@
          not normally be used by applications; it requires that the system keep
          your application running at all times. -->
     <attr name="persistent" format="boolean" />
-    
+
+    <!-- Flag to specify if this application needs to be present for all users. Only pre-installed
+         applications can request this feature. Default value is false. -->
+    <attr name="requiredForAllUsers" format="boolean" />
+
     <!-- Flag indicating whether the application can be debugged, even when
          running on a device that is running in user mode. -->
     <attr name="debuggable" format="boolean" />
@@ -844,6 +848,7 @@
              for normal behavior. -->
         <attr name="hasCode" format="boolean" />
         <attr name="persistent" />
+        <attr name="requiredForAllUsers" />
         <!-- Specify whether the components in this application are enabled or not (that is, can be
              instantiated by the system).
              If "false", it overrides any component specific values (a value of "true" will not

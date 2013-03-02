@@ -17,14 +17,17 @@
 package android.app;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.RestrictionEntry;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.UserManager;
 
 /**
  * Base class for those who need to maintain global application state. You can
@@ -129,6 +132,11 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 }
             }
         }
+    }
+
+    public List<RestrictionEntry> getApplicationRestrictions() {
+        return ((UserManager) getSystemService(USER_SERVICE))
+                .getApplicationRestrictions(getPackageName(), android.os.Process.myUserHandle());
     }
 
     public void registerComponentCallbacks(ComponentCallbacks callback) {
