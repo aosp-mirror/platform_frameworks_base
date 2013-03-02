@@ -238,7 +238,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public ParcelFileDescriptor openFile(Uri uri, String mode)
                 throws FileNotFoundException {
-            if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
+            if (mode != null && mode.indexOf('w') != -1) enforceWritePermission(uri);
             else enforceReadPermission(uri);
             return ContentProvider.this.openFile(uri, mode);
         }
@@ -246,7 +246,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public AssetFileDescriptor openAssetFile(Uri uri, String mode)
                 throws FileNotFoundException {
-            if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
+            if (mode != null && mode.indexOf('w') != -1) enforceWritePermission(uri);
             else enforceReadPermission(uri);
             return ContentProvider.this.openAssetFile(uri, mode);
         }
