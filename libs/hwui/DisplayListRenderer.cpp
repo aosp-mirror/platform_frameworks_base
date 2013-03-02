@@ -403,11 +403,7 @@ status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, i
 
     DrawOp* op = new (alloc()) DrawTextOnPathOp(text, bytesCount, count, path,
             hOffset, vOffset, paint);
-    if (addDrawOp(op)) {
-        // precache if draw operation is visible
-        FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-        fontRenderer.precache(paint, text, count, mat4::identity());
-    }
+    addDrawOp(op);
     return DrawGlInfo::kStatusDone;
 }
 
@@ -420,11 +416,7 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
     paint = refPaint(paint);
 
     DrawOp* op = new (alloc()) DrawPosTextOp(text, bytesCount, count, positions, paint);
-    if (addDrawOp(op)) {
-        // precache if draw operation is visible
-        FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-        fontRenderer.precache(paint, text, count, mat4::identity());
-    }
+    addDrawOp(op);
     return DrawGlInfo::kStatusDone;
 }
 
@@ -439,13 +431,7 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
     paint = refPaint(paint);
 
     DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count, x, y, positions, paint, length);
-    if (addDrawOp(op)) {
-        // precache if draw operation is visible
-        FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-        const bool pureTranslate = mSnapshot->transform->isPureTranslate();
-        fontRenderer.precache(paint, text, count,
-                pureTranslate ? mat4::identity() : *mSnapshot->transform);
-    }
+    addDrawOp(op);
     return DrawGlInfo::kStatusDone;
 }
 
@@ -515,17 +501,15 @@ void DisplayListRenderer::addStateOp(StateOp* op) {
     addOpInternal(op);
 }
 
-bool DisplayListRenderer::addDrawOp(DrawOp* op) {
-    bool rejected = false;
+void DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
     if (op->getLocalBounds(localBounds)) {
-        rejected = quickRejectNoScissor(localBounds.left, localBounds.top,
+        bool rejected = quickRejectNoScissor(localBounds.left, localBounds.top,
                 localBounds.right, localBounds.bottom);
         op->setQuickRejected(rejected);
     }
     mHasDrawOps = true;
     addOpInternal(op);
-    return !rejected;
 }
 
 }; // namespace uirenderer

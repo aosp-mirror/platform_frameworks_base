@@ -284,7 +284,8 @@ CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool pre
 
         // Is the glyph still in texture cache?
         if (!cachedGlyph->mIsValid) {
-            const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit, &mDescription.mLookupTransform);
+            const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit,
+                    &mDescription.mLookupTransform);
             updateGlyphCache(paint, skiaGlyph, cachedGlyph, precaching);
         }
     } else {
