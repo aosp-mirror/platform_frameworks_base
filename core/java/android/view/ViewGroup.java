@@ -1162,8 +1162,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
 
                 mDragNotifiedChildren.clear();
-                mCurrentDrag.recycle();
-                mCurrentDrag = null;
+                if (mCurrentDrag != null) {
+                    mCurrentDrag.recycle();
+                    mCurrentDrag = null;
+                }
             }
 
             // We consider drag-ended to have been handled if one of our children
