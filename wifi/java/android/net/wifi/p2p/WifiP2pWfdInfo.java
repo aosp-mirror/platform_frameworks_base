@@ -155,6 +155,7 @@ public class WifiP2pWfdInfo implements Parcelable {
     /** copy constructor */
     public WifiP2pWfdInfo(WifiP2pWfdInfo source) {
         if (source != null) {
+            mWfdEnabled = source.mWfdEnabled;
             mDeviceInfo = source.mDeviceInfo;
             mCtrlPort = source.mCtrlPort;
             mMaxThroughput = source.mMaxThroughput;
