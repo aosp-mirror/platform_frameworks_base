@@ -1563,6 +1563,10 @@ public class Canvas {
      * Save the canvas state, draw the picture, and restore the canvas state.
      * This differs from picture.draw(canvas), which does not perform any
      * save/restore.
+     *
+     * <p>
+     * <strong>Note:</strong> This forces the picture to internally call
+     * {@link Picture#endRecording} in order to prepare for playback.
      * 
      * @param picture  The picture to be drawn
      */
