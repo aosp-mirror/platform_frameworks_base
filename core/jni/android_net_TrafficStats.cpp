@@ -166,7 +166,7 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type) {
 
     struct Stats stats;
     memset(&stats, 0, sizeof(Stats));
-    if (parseIfaceStats(NULL, &stats) == 0) {
+    if (parseIfaceStats(iface8.c_str(), &stats) == 0) {
         return getStatsType(&stats, (StatsType) type);
     } else {
         return UNKNOWN;
