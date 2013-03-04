@@ -867,8 +867,11 @@ public class Canvas {
 
     /**
      * Draw a line segment with the specified start and stop x,y coordinates,
-     * using the specified paint. NOTE: since a line is always "framed", the
-     * Style is ignored in the paint.
+     * using the specified paint.
+     *
+     * <p>Note that since a line is always "framed", the Style is ignored in the paint.</p>
+     *
+     * <p>Degenerate lines (length is 0) will not be drawn.</p>
      *
      * @param startX The x-coordinate of the start point of the line
      * @param startY The y-coordinate of the start point of the line
