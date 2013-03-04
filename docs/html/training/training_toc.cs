@@ -287,6 +287,10 @@
             Caching Bitmaps
           </a>
           </li>
+          <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/manage-memory.html">
+            Managing Bitmap Memory
+          </a>
+          </li>
           <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/display-bitmap.html">
             Displaying Bitmaps in Your UI
           </a></li>
