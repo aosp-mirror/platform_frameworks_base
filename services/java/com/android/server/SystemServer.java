@@ -206,9 +206,6 @@ class ServerThread extends Thread {
             installer = new Installer();
             installer.ping();
 
-            Slog.i(TAG, "Entropy Mixer");
-            ServiceManager.addService("entropy", new EntropyMixer());
-
             Slog.i(TAG, "Power Manager");
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
@@ -256,6 +253,9 @@ class ServerThread extends Thread {
             }
 
             ActivityManagerService.setSystemProcess();
+
+            Slog.i(TAG, "Entropy Mixer");
+            ServiceManager.addService("entropy", new EntropyMixer(context));
 
             Slog.i(TAG, "User Service");
             ServiceManager.addService(Context.USER_SERVICE,
