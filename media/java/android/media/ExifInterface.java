@@ -117,6 +117,9 @@ public class ExifInterface {
      * Reads Exif tags from the specified JPEG file.
      */
     public ExifInterface(String filename) throws IOException {
+        if (filename == null) {
+            throw new IllegalArgumentException("filename cannot be null");
+        }
         mFilename = filename;
         loadAttributes();
     }
