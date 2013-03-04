@@ -23,6 +23,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -44,9 +48,6 @@ import android.util.Slog;
  * <p>This class was modeled after the script in
  * <a href="http://www.kernel.org/doc/man-pages/online/pages/man4/random.4.html">man
  * 4 random</a>.
- *
- * <p>TODO: Investigate attempting to write entropy data at shutdown time
- * instead of periodically.
  */
 public class EntropyMixer extends Binder {
     private static final String TAG = "EntropyMixer";
@@ -73,12 +74,19 @@ public class EntropyMixer extends Binder {
         }
     };
 
-    public EntropyMixer() {
-        this(getSystemDir() + "/entropy.dat", "/dev/urandom");
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            writeEntropy();
+        }
+    };
+
+    public EntropyMixer(Context context) {
+        this(context, getSystemDir() + "/entropy.dat", "/dev/urandom");
     }
 
     /** Test only interface, not for public use */
-    public EntropyMixer(String entropyFile, String randomDevice) {
+    public EntropyMixer(Context context, String entropyFile, String randomDevice) {
         if (randomDevice == null) { throw new NullPointerException("randomDevice"); }
         if (entropyFile == null) { throw new NullPointerException("entropyFile"); }
 
@@ -88,6 +96,10 @@ public class EntropyMixer extends Binder {
         addDeviceSpecificEntropy();
         writeEntropy();
         scheduleEntropyWriter();
+        IntentFilter broadcastFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
+        broadcastFilter.addAction(Intent.ACTION_POWER_CONNECTED);
+        broadcastFilter.addAction(Intent.ACTION_REBOOT);
+        context.registerReceiver(mBroadcastReceiver, broadcastFilter);
     }
 
     private void scheduleEntropyWriter() {
@@ -107,6 +119,7 @@ public class EntropyMixer extends Binder {
 
     private void writeEntropy() {
         try {
+            Slog.i(TAG, "Writing entropy...");
             RandomBlock.fromFile(randomDevice).toFile(entropyFile, true);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to write entropy", e);
