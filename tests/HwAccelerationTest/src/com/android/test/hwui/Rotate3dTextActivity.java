@@ -22,6 +22,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class Rotate3dTextActivity extends Activity {
@@ -30,8 +32,28 @@ public class Rotate3dTextActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final Rotate3dTextView view = new Rotate3dTextView(this);
-        setContentView(view);
+        final LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        Rotate3dTextView view = new Rotate3dTextView(this);
+        layout.addView(view, makeLayoutParams());
+
+        view = new Rotate3dTextView(this);
+
+        FrameLayout container = new FrameLayout(this);
+        container.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        container.addView(view);
+
+        layout.addView(container, makeLayoutParams());
+
+        setContentView(layout);
+    }
+
+    private static LinearLayout.LayoutParams makeLayoutParams() {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0);
+        lp.weight = 1.0f;
+        return lp;
     }
 
     public static class Rotate3dTextView extends View {
@@ -54,11 +76,7 @@ public class Rotate3dTextActivity extends Activity {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
             canvas.drawText(TEXT, getWidth() / 2.0f, getHeight() / 2.0f, mPaint);
-
-            invalidate();
         }
     }
 }
