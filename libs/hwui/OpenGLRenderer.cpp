@@ -2673,7 +2673,26 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
                 alpha, mode, oldX, oldY);
     }
 
-    fontRenderer.setFont(paint, pureTranslate ? mat4::identity() : *mSnapshot->transform);
+    const bool hasActiveLayer = hasLayer();
+
+    const mat4* fontTransform;
+    if (CC_LIKELY(pureTranslate)) {
+        fontTransform = &mat4::identity();
+    } else {
+        if (CC_UNLIKELY(isPerspective)) {
+            // When the below condition is true, we are rendering text with a
+            // perspective transform inside a layer (either an inline layer
+            // created by Canvas.saveLayer() or a hardware layer.)
+            if (hasActiveLayer || getTargetFbo() != 0) {
+                fontTransform = mSnapshot->transform;
+            } else {
+                fontTransform = &mat4::identity();
+            }
+        } else {
+            fontTransform = mSnapshot->transform;
+        }
+    }
+    fontRenderer.setFont(paint, *fontTransform);
 
     // Pick the appropriate texture filtering
     bool linearFilter = !pureTranslate || fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
@@ -2700,8 +2719,6 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     const Rect* clip = isPerspective ? NULL : mSnapshot->clipRect;
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
-
-    const bool hasActiveLayer = hasLayer();
 
     bool status;
     if (CC_UNLIKELY(paint->getTextAlign() != SkPaint::kLeft_Align)) {
