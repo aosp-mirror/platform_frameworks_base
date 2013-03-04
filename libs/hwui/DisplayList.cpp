@@ -485,7 +485,7 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
 
 #if DEBUG_DISPLAY_LIST
     Rect* clipRect = renderer.getClipRect();
-    DISPLAY_LIST_LOGD("%*sStart display list (%p, %s), clipRect: %.0f, %.f, %.0f, %.0f",
+    DISPLAY_LIST_LOGD("%*sStart display list (%p, %s), clipRect: %.0f, %.0f, %.0f, %.0f",
             level * 2, "", this, mName.string(), clipRect->left, clipRect->top,
             clipRect->right, clipRect->bottom);
 #endif
