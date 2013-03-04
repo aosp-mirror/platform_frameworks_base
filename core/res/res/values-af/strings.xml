@@ -1239,10 +1239,8 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Laat die program toe om die verstek houerdiens in te roep om inhoud te kopieer. Nie vir gebruik deur normale programme nie."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Roeteer media-uitvoer"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Laat \'n program toe om media-uitvoere na ander eksterne toestelle te roeteer."</string>
-    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
-    <skip />
-    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
-    <skip />
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Kry toegang tot keyguard se veilige berging"</string>
+    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Laat \'n program toe om toegang tot keyguard se veilige berging te kry."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kon nie legstuk byvoeg nie."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gaan"</string>
