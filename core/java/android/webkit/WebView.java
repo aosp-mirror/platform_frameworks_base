@@ -832,7 +832,7 @@ public class WebView extends AbsoluteLayout
      *                 defaults to 'text/html'.
      * @param encoding the encoding of the data
      * @param historyUrl the URL to use as the history entry. If null defaults
-     *                   to 'about:blank'.
+     *                   to 'about:blank'. If non-null, this must be a valid URL.
      */
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl) {
