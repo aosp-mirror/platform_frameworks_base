@@ -75,7 +75,7 @@ public final class ClientCertRequestHandler extends Handler {
     /**
      * Proceed with the specified private key bytes and client certificate chain.
      */
-    private void setSslClientCertFromCtx(final int ctx, final byte[][] chainBytes) {
+    private void setSslClientCertFromCtx(final long ctx, final byte[][] chainBytes) {
         post(new Runnable() {
                 public void run() {
                     mBrowserFrame.nativeSslClientCert(mHandle, ctx, chainBytes);
