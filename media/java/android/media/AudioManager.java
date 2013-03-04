@@ -2171,15 +2171,36 @@ public class AudioManager {
     /**
      * @hide
      * Registers a remote control display that will be sent information by remote control clients.
-     * @param rcd
+     * Use this method if your IRemoteControlDisplay is not going to display artwork, otherwise
+     * use {@link #registerRemoteControlDisplay(IRemoteControlDisplay, int, int)} to pass the
+     * artwork size directly, or
+     * {@link #remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay, int, int)} later if artwork
+     * is not yet needed.
+     * @param rcd the IRemoteControlDisplay
      */
     public void registerRemoteControlDisplay(IRemoteControlDisplay rcd) {
+        // passing a negative value for art work width and height as they are unknown at this stage
+        registerRemoteControlDisplay(rcd, /*w*/-1, /*h*/ -1);
+    }
+
+    /**
+     * @hide
+     * Registers a remote control display that will be sent information by remote control clients.
+     * @param rcd
+     * @param w the maximum width of the expected bitmap. Negative values indicate it is
+     *   useless to send artwork.
+     * @param h the maximum height of the expected bitmap. Negative values indicate it is
+     *   useless to send artwork.
+     */
+    public void registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
         if (rcd == null) {
             return;
         }
         IAudioService service = getService();
         try {
-            service.registerRemoteControlDisplay(rcd);
+            // passing a negative value for art work width and height as they are unknown at
+            // this stage
+            service.registerRemoteControlDisplay(rcd, w, h);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerRemoteControlDisplay " + e);
         }
@@ -2222,63 +2243,6 @@ public class AudioManager {
             Log.e(TAG, "Dead object in remoteControlDisplayUsesBitmapSize " + e);
         }
     }
-
-    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
-    /**
-     * @hide
-     * Broadcast intent action indicating that the displays on the remote controls
-     * should be updated because a new remote control client is now active. If there is no
-     * {@link #EXTRA_REMOTE_CONTROL_CLIENT}, the remote control display should be cleared
-     * because there is no valid client to supply it with information.
-     *
-     * @see #EXTRA_REMOTE_CONTROL_CLIENT
-     */
-    public static final String REMOTE_CONTROL_CLIENT_CHANGED =
-            "android.media.REMOTE_CONTROL_CLIENT_CHANGED";
-
-    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
-    /**
-     * @hide
-     * The IRemoteControlClientDispatcher monotonically increasing generation counter.
-     *
-     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
-     */
-    public static final String EXTRA_REMOTE_CONTROL_CLIENT_GENERATION =
-            "android.media.EXTRA_REMOTE_CONTROL_CLIENT_GENERATION";
-
-    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
-    /**
-     * @hide
-     * The name of the RemoteControlClient.
-     * This String is passed as the client name when calling methods from the
-     * IRemoteControlClientDispatcher interface.
-     *
-     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
-     */
-    public static final String EXTRA_REMOTE_CONTROL_CLIENT_NAME =
-            "android.media.EXTRA_REMOTE_CONTROL_CLIENT_NAME";
-
-    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
-    /**
-     * @hide
-     * The media button event receiver associated with the RemoteControlClient.
-     * The {@link android.content.ComponentName} value of the event receiver can be retrieved with
-     * {@link android.content.ComponentName#unflattenFromString(String)}
-     *
-     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
-     */
-    public static final String EXTRA_REMOTE_CONTROL_EVENT_RECEIVER =
-            "android.media.EXTRA_REMOTE_CONTROL_EVENT_RECEIVER";
-
-    // FIXME remove because we are not using intents anymore between AudioService and RcDisplay
-    /**
-     * @hide
-     * The flags describing what information has changed in the current remote control client.
-     *
-     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
-     */
-    public static final String EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED =
-            "android.media.EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED";
 
     /**
      *  @hide

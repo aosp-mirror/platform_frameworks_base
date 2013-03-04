@@ -4890,7 +4890,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         "  -- vol: " + rcse.mPlaybackVolume +
                         "  -- volMax: " + rcse.mPlaybackVolumeMax +
                         "  -- volObs: " + rcse.mRemoteVolumeObs);
-
             }
         }
         synchronized (mMainRemote) {
@@ -4903,6 +4902,23 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             "PLAYBACK_VOLUME_FIXED(0)" : "PLAYBACK_VOLUME_VARIABLE(1)"));
             pw.println("  volume: " + mMainRemote.mVolume);
             pw.println("  volume steps: " + mMainRemote.mVolumeMax);
+        }
+    }
+
+    /**
+     * Helper function:
+     * Display in the log the current entries in the list of remote control displays
+     */
+    private void dumpRCDList(PrintWriter pw) {
+        pw.println("\nRemote Control Display list entries:");
+        synchronized(mRCStack) {
+            final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                pw.println("  IRCD: " + di.mRcDisplay +
+                        "  -- w:" + di.mArtworkExpectedWidth +
+                        "  -- h:" + di.mArtworkExpectedHeight);
+            }
         }
     }
 
@@ -5044,16 +5060,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      */
     private void setNewRcClientOnDisplays_syncRcsCurrc(int newClientGeneration,
             PendingIntent newMediaIntent, boolean clearing) {
-        // NOTE: Only one IRemoteControlDisplay supported in this implementation
-        if (mRcDisplay != null) {
-            try {
-                mRcDisplay.setCurrentClientId(
-                        newClientGeneration, newMediaIntent, clearing);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Dead display in setNewRcClientOnDisplays_syncRcsCurrc() "+e);
-                // if we had a display before, stop monitoring its death
-                rcDisplay_stopDeathMonitor_syncRcStack();
-                mRcDisplay = null;
+        synchronized(mRCStack) {
+            if (mRcDisplays.size() > 0) {
+                final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+                while (displayIterator.hasNext()) {
+                    final DisplayInfoForServer di = displayIterator.next();
+                    try {
+                        di.mRcDisplay.setCurrentClientId(
+                                newClientGeneration, newMediaIntent, clearing);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Dead display in setNewRcClientOnDisplays_syncRcsCurrc()",e);
+                        di.release();
+                        displayIterator.remove();
+                    }
+                }
             }
         }
     }
@@ -5071,7 +5091,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 try {
                     se.mRcClient.setCurrentClientGenerationId(newClientGeneration);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Dead client in setNewRcClientGenerationOnClients_syncRcsCurrc()"+e);
+                    Log.w(TAG, "Dead client in setNewRcClientGenerationOnClients_syncRcsCurrc()",e);
                     stackIterator.remove();
                     se.unlinkToRcClientDeath();
                 }
@@ -5129,8 +5149,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
                     // tell the current client that it needs to send info
                     try {
-                        mCurrentRcClient.onInformationRequested(mCurrentRcClientGen,
-                                flags, mArtworkExpectedWidth, mArtworkExpectedHeight);
+                        mCurrentRcClient.onInformationRequested(mCurrentRcClientGen, flags);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Current valid remote client is dead: "+e);
                         mCurrentRcClient = null;
@@ -5394,13 +5413,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             rccId = rcse.mRccId;
 
                             // there is a new (non-null) client:
-                            // 1/ give the new client the current display (if any)
-                            if (mRcDisplay != null) {
-                                try {
-                                    rcse.mRcClient.plugRemoteControlDisplay(mRcDisplay);
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Error connecting RCD to RCC in RCC registration",e);
-                                }
+                            // 1/ give the new client the displays (if any)
+                            if (mRcDisplays.size() > 0) {
+                                plugRemoteControlDisplaysIntoClient_syncRcStack(rcse.mRcClient);
                             }
                             // 2/ monitor the new client's death
                             IBinder b = rcse.mRcClient.asBinder();
@@ -5470,102 +5485,141 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    /**
-     * The remote control displays.
-     * Access synchronized on mRCStack
-     * NOTE: Only one IRemoteControlDisplay supported in this implementation
-     */
-    private IRemoteControlDisplay mRcDisplay;
-    private RcDisplayDeathHandler mRcDisplayDeathHandler;
-    private int mArtworkExpectedWidth = -1;
-    private int mArtworkExpectedHeight = -1;
-    /**
-     * Inner class to monitor remote control display deaths, and unregister them from the list
-     * of displays if necessary.
-     */
-    private class RcDisplayDeathHandler implements IBinder.DeathRecipient {
-        private IBinder mCb; // To be notified of client's death
 
-        public RcDisplayDeathHandler(IBinder b) {
-            if (DEBUG_RC) Log.i(TAG, "new RcDisplayDeathHandler for "+b);
-            mCb = b;
+    /**
+     * A class to encapsulate all the information about a remote control display.
+     * After instanciation, init() must always be called before the object is added in the list
+     * of displays.
+     * Before being removed from the list of displays, release() must always be called (otherwise
+     * it will leak death handlers).
+     */
+    private class DisplayInfoForServer implements IBinder.DeathRecipient {
+        /** may never be null */
+        private IRemoteControlDisplay mRcDisplay;
+        private IBinder mRcDisplayBinder;
+        private int mArtworkExpectedWidth = -1;
+        private int mArtworkExpectedHeight = -1;
+
+        public DisplayInfoForServer(IRemoteControlDisplay rcd, int w, int h) {
+            if (DEBUG_RC) Log.i(TAG, "new DisplayInfoForServer for " + rcd + " w=" + w + " h=" + h);
+            mRcDisplay = rcd;
+            mRcDisplayBinder = rcd.asBinder();
+            mArtworkExpectedWidth = w;
+            mArtworkExpectedHeight = h;
+        }
+
+        public boolean init() {
+            try {
+                mRcDisplayBinder.linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                // remote control display is DOA, disqualify it
+                Log.w(TAG, "registerRemoteControlDisplay() has a dead client " + mRcDisplayBinder);
+                return false;
+            }
+            return true;
+        }
+
+        public void release() {
+            try {
+                mRcDisplayBinder.unlinkToDeath(this, 0);
+            } catch (java.util.NoSuchElementException e) {
+                // not much we can do here, the display should have been unregistered anyway
+                Log.e(TAG, "Error in DisplaInfoForServer.relase()", e);
+            }
         }
 
         public void binderDied() {
             synchronized(mRCStack) {
-                Log.w(TAG, "RemoteControl: display died");
-                mRcDisplay = null;
+                Log.w(TAG, "RemoteControl: display " + mRcDisplay + " died");
+                // remove the display from the list
+                final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+                while (displayIterator.hasNext()) {
+                    final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                    if (di.mRcDisplay == mRcDisplay) {
+                        if (DEBUG_RC) Log.w(TAG, " RCD removed from list");
+                        displayIterator.remove();
+                        return;
+                    }
+                }
             }
-        }
-
-        public void unlinkToRcDisplayDeath() {
-            if (DEBUG_RC) Log.i(TAG, "unlinkToRcDisplayDeath for "+mCb);
-            try {
-                mCb.unlinkToDeath(this, 0);
-            } catch (java.util.NoSuchElementException e) {
-                // not much we can do here, the display was being unregistered anyway
-                Log.e(TAG, "Encountered " + e + " in unlinkToRcDisplayDeath()");
-                e.printStackTrace();
-            }
-        }
-
-    }
-
-    private void rcDisplay_stopDeathMonitor_syncRcStack() {
-        if (mRcDisplay != null) { // implies (mRcDisplayDeathHandler != null)
-            // we had a display before, stop monitoring its death
-            mRcDisplayDeathHandler.unlinkToRcDisplayDeath();
         }
     }
 
-    private void rcDisplay_startDeathMonitor_syncRcStack() {
-        if (mRcDisplay != null) {
-            // new non-null display, monitor its death
-            IBinder b = mRcDisplay.asBinder();
-            mRcDisplayDeathHandler = new RcDisplayDeathHandler(b);
+    /**
+     * The remote control displays.
+     * Access synchronized on mRCStack
+     */
+    private ArrayList<DisplayInfoForServer> mRcDisplays = new ArrayList<DisplayInfoForServer>(1);
+
+    /**
+     * Plug each registered display into the specified client
+     * @param rcc, guaranteed non null
+     */
+    private void plugRemoteControlDisplaysIntoClient_syncRcStack(IRemoteControlClient rcc) {
+        final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+        while (displayIterator.hasNext()) {
+            final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
             try {
-                b.linkToDeath(mRcDisplayDeathHandler, 0);
+                rcc.plugRemoteControlDisplay(di.mRcDisplay, di.mArtworkExpectedWidth,
+                        di.mArtworkExpectedHeight);
             } catch (RemoteException e) {
-                // remote control display is DOA, disqualify it
-                Log.w(TAG, "registerRemoteControlDisplay() has a dead client " + b);
-                mRcDisplay = null;
+                Log.e(TAG, "Error connecting RCD to RCC in RCC registration",e);
             }
         }
+    }
+
+    /**
+     * Is the remote control display interface already registered
+     * @param rcd
+     * @return true if the IRemoteControlDisplay is already in the list of displays
+     */
+    private boolean rcDisplayIsPluggedIn_syncRcStack(IRemoteControlDisplay rcd) {
+        final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+        while (displayIterator.hasNext()) {
+            final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+            if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Register an IRemoteControlDisplay.
      * Notify all IRemoteControlClient of the new display and cause the RemoteControlClient
      * at the top of the stack to update the new display with its information.
-     * Since only one IRemoteControlDisplay is supported, this will unregister the previous display.
+     * @see android.media.IAudioService#registerRemoteControlDisplay(android.media.IRemoteControlDisplay, int, int)
      * @param rcd the IRemoteControlDisplay to register. No effect if null.
+     * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
      */
-    public void registerRemoteControlDisplay(IRemoteControlDisplay rcd) {
+    public void registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
         if (DEBUG_RC) Log.d(TAG, ">>> registerRemoteControlDisplay("+rcd+")");
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
-                if ((mRcDisplay == rcd) || (rcd == null)) {
+                if ((rcd == null) || rcDisplayIsPluggedIn_syncRcStack(rcd)) {
                     return;
                 }
-                // if we had a display before, stop monitoring its death
-                rcDisplay_stopDeathMonitor_syncRcStack();
-                mRcDisplay = rcd;
-                // new display, start monitoring its death
-                rcDisplay_startDeathMonitor_syncRcStack();
+                DisplayInfoForServer di = new DisplayInfoForServer(rcd, w, h);
+                if (!di.init()) {
+                    if (DEBUG_RC) Log.e(TAG, " error registering RCD");
+                    return;
+                }
+                // add RCD to list of displays
+                mRcDisplays.add(di);
 
-                // let all the remote control clients know there is a new display, so the remote
-                //   control stack traversal order doesn't matter.
-                // No need to unplug the previous because we only support one display
-                // and the clients don't track the death of the display
+                // let all the remote control clients know there is a new display (so the remote
+                //   control stack traversal order doesn't matter).
                 Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
                 while(stackIterator.hasNext()) {
                     RemoteControlStackEntry rcse = stackIterator.next();
                     if(rcse.mRcClient != null) {
                         try {
-                            rcse.mRcClient.plugRemoteControlDisplay(mRcDisplay);
+                            rcse.mRcClient.plugRemoteControlDisplay(rcd, w, h);
                         } catch (RemoteException e) {
-                            Log.e(TAG, "Error connecting remote control display to client: " + e);
-                            e.printStackTrace();
+                            Log.e(TAG, "Error connecting RCD to client: ", e);
                         }
                     }
                 }
@@ -5578,44 +5632,86 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /**
      * Unregister an IRemoteControlDisplay.
-     * Since only one IRemoteControlDisplay is supported, this has no effect if the one to
-     *    unregister is not the current one.
+     * No effect if the IRemoteControlDisplay hasn't been successfully registered.
+     * @see android.media.IAudioService#unregisterRemoteControlDisplay(android.media.IRemoteControlDisplay)
      * @param rcd the IRemoteControlDisplay to unregister. No effect if null.
      */
     public void unregisterRemoteControlDisplay(IRemoteControlDisplay rcd) {
         if (DEBUG_RC) Log.d(TAG, "<<< unregisterRemoteControlDisplay("+rcd+")");
         synchronized(mRCStack) {
-            // only one display here, so you can only unregister the current display
-            if ((rcd == null) || (rcd != mRcDisplay)) {
-                if (DEBUG_RC) Log.w(TAG, "    trying to unregister unregistered RCD");
+            if (rcd == null) {
                 return;
             }
-            // if we had a display before, stop monitoring its death
-            rcDisplay_stopDeathMonitor_syncRcStack();
-            mRcDisplay = null;
 
-            // disconnect this remote control display from all the clients, so the remote
-            //   control stack traversal order doesn't matter
-            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-            while(stackIterator.hasNext()) {
-                RemoteControlStackEntry rcse = stackIterator.next();
-                if(rcse.mRcClient != null) {
-                    try {
-                        rcse.mRcClient.unplugRemoteControlDisplay(rcd);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error disconnecting remote control display to client: " + e);
-                        e.printStackTrace();
+            boolean displayWasPluggedIn = false;
+            final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext() && !displayWasPluggedIn) {
+                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                    displayWasPluggedIn = true;
+                    di.release();
+                    displayIterator.remove();
+                }
+            }
+
+            if (displayWasPluggedIn) {
+                // disconnect this remote control display from all the clients, so the remote
+                //   control stack traversal order doesn't matter
+                final Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+                while(stackIterator.hasNext()) {
+                    final RemoteControlStackEntry rcse = stackIterator.next();
+                    if(rcse.mRcClient != null) {
+                        try {
+                            rcse.mRcClient.unplugRemoteControlDisplay(rcd);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error disconnecting remote control display to client: ", e);
+                        }
                     }
                 }
+            } else {
+                if (DEBUG_RC) Log.w(TAG, "  trying to unregister unregistered RCD");
             }
         }
     }
 
+    /**
+     * Update the size of the artwork used by an IRemoteControlDisplay.
+     * @see android.media.IAudioService#remoteControlDisplayUsesBitmapSize(android.media.IRemoteControlDisplay, int, int)
+     * @param rcd the IRemoteControlDisplay with the new artwork size requirement
+     * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     */
     public void remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay rcd, int w, int h) {
         synchronized(mRCStack) {
-            // NOTE: Only one IRemoteControlDisplay supported in this implementation
-            mArtworkExpectedWidth = w;
-            mArtworkExpectedHeight = h;
+            final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+            boolean artworkSizeUpdate = false;
+            while (displayIterator.hasNext() && !artworkSizeUpdate) {
+                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                    if ((di.mArtworkExpectedWidth != w) || (di.mArtworkExpectedHeight != h)) {
+                        di.mArtworkExpectedWidth = w;
+                        di.mArtworkExpectedHeight = h;
+                        artworkSizeUpdate = true;
+                    }
+                }
+            }
+            if (artworkSizeUpdate) {
+                // RCD is currently plugged in and its artwork size has changed, notify all RCCs,
+                // stack traversal order doesn't matter
+                final Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+                while(stackIterator.hasNext()) {
+                    final RemoteControlStackEntry rcse = stackIterator.next();
+                    if(rcse.mRcClient != null) {
+                        try {
+                            rcse.mRcClient.setBitmapSizeForDisplay(rcd, w, h);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error setting bitmap size for RCD on RCC: ", e);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -6218,6 +6314,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         dumpFocusStack(pw);
         dumpRCStack(pw);
         dumpRCCStack(pw);
+        dumpRCDList(pw);
         dumpStreamStates(pw);
         dumpRingerMode(pw);
         pw.println("\nAudio routes:");

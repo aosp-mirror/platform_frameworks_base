@@ -131,8 +131,31 @@ interface IAudioService {
     oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
            in IRemoteControlClient rcClient);
 
-    oneway void   registerRemoteControlDisplay(in IRemoteControlDisplay rcd);
+    /**
+     * Register an IRemoteControlDisplay.
+     * Notify all IRemoteControlClient of the new display and cause the RemoteControlClient
+     * at the top of the stack to update the new display with its information.
+     * @param rcd the IRemoteControlDisplay to register. No effect if null.
+     * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     */
+    oneway void   registerRemoteControlDisplay(in IRemoteControlDisplay rcd, int w, int h);
+    /**
+     * Unregister an IRemoteControlDisplay.
+     * No effect if the IRemoteControlDisplay hasn't been successfully registered.
+     * @param rcd the IRemoteControlDisplay to unregister. No effect if null.
+     */
     oneway void unregisterRemoteControlDisplay(in IRemoteControlDisplay rcd);
+    /**
+     * Update the size of the artwork used by an IRemoteControlDisplay.
+     * @param rcd the IRemoteControlDisplay with the new artwork size requirement
+     * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     */
     oneway void remoteControlDisplayUsesBitmapSize(in IRemoteControlDisplay rcd, int w, int h);
 
     oneway void setPlaybackInfoForRcc(int rccId, int what, int value);
