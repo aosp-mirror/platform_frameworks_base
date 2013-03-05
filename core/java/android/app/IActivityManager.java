@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
@@ -99,19 +101,22 @@ public interface IActivityManager extends IInterface {
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
-    public List getTasks(int maxNum, int flags,
+    public List<RunningTaskInfo> getTasks(int maxNum, int flags,
                          IThumbnailReceiver receiver) throws RemoteException;
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException;
     public ActivityManager.TaskThumbnails getTaskThumbnails(int taskId) throws RemoteException;
     public Bitmap getTaskTopThumbnail(int taskId) throws RemoteException;
-    public List getServices(int maxNum, int flags) throws RemoteException;
+    public List<RunningServiceInfo> getServices(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
             throws RemoteException;
     public void moveTaskToFront(int task, int flags, Bundle options) throws RemoteException;
     public void moveTaskToBack(int task) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
+    public int createStack(int position, int relativeStackId, float weight) throws RemoteException;
+    public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
+    public void resizeStack(int stackId, float weight) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     /* oneway */
     public void reportThumbnail(IBinder token,
@@ -632,4 +637,7 @@ public interface IActivityManager extends IInterface {
     int GET_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+161;
     int REPORT_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+162;
     int GET_LAUNCHED_FROM_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+163;
+    int CREATE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
+    int MOVE_TASK_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
+    int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+166;
 }

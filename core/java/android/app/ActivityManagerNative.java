@@ -609,6 +609,36 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case CREATE_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int position = data.readInt();
+            int relativeStackId = data.readInt();
+            float weight = data.readFloat();
+            int res = createStack(position, relativeStackId, weight);
+            reply.writeNoException();
+            reply.writeInt(res);
+            return true;
+        }
+
+        case MOVE_TASK_TO_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            int stackId = data.readInt();
+            boolean toTop = data.readInt() != 0;
+            moveTaskToStack(taskId, stackId, toTop);
+            reply.writeNoException();
+            return true;
+        }
+
+        case RESIZE_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int stackId = data.readInt();
+            float weight = data.readFloat();
+            resizeStack(stackId, weight);
+            reply.writeNoException();
+            return true;
+        }
+
         case GET_TASK_FOR_ACTIVITY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -2535,6 +2565,46 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(task);
         mRemote.transact(MOVE_TASK_BACKWARDS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
+    public int createStack(int position, int relativeStackId, float weight) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInt(position);
+        data.writeInt(relativeStackId);
+        data.writeFloat(weight);
+        mRemote.transact(CREATE_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+    @Override
+    public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInt(taskId);
+        data.writeInt(stackId);
+        data.writeInt(toTop ? 1 : 0);
+        mRemote.transact(MOVE_TASK_TO_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
+    public void resizeStack(int stackId, float weight) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInt(stackId);
+        data.writeFloat(weight);
+        mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

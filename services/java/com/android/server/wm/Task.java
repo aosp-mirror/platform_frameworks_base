@@ -16,16 +16,33 @@
 
 package com.android.server.wm;
 
-class TaskList {
+class Task {
 //    private final String TAG = "TaskGroup";
-    DisplayContent mDisplayContent;
+    TaskStack mStack;
     final AppTokenList mAppTokens = new AppTokenList();
     final int taskId;
 
-    TaskList(AppWindowToken wtoken, DisplayContent displayContent) {
+    Task(AppWindowToken wtoken, TaskStack stack) {
         taskId = wtoken.groupId;
         mAppTokens.add(wtoken);
-        mDisplayContent = displayContent;
+        mStack = stack;
+    }
+
+    DisplayContent getDisplayContent() {
+        return mStack.getDisplayContent();
+    }
+
+    void addAppToken(int addPos, AppWindowToken wtoken) {
+        mAppTokens.add(addPos, wtoken);
+    }
+
+    boolean removeAppToken(AppWindowToken wtoken) {
+        mAppTokens.remove(wtoken);
+        if (mAppTokens.size() == 0) {
+            mStack.removeTask(this);
+            return true;
+        }
+        return false;
     }
 
     @Override

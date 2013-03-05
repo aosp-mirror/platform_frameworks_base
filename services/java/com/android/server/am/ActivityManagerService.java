@@ -207,6 +207,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static final long MONITOR_CPU_MAX_TIME = 0x0fffffff;    // wait possibly forever for next cpu sample.
     static final boolean MONITOR_THREAD_CPU_USAGE = false;
 
+    static final int HOME_ACTIVITY_STACK = 0;
+
     // The flags that are set for all calls we make to the package manager.
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
     
@@ -269,14 +271,18 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static final int PENDING_ACTIVITY_RESULT_TIMEOUT = 2*2000;
 
     static final int MY_PID = Process.myPid();
-    
+
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     /** All of the stacks in the system */
-    final public ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
+    final ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
+
+    /** Identifier counter for all ActivityStacks */
+    private int mLastStackId = 0;
 
     /** The current stack for manipulating */
     public ActivityStack mFocusedStack;
+    public ActivityStack mHomeStack;
 
     private final boolean mHeadless;
 
@@ -515,11 +521,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
     final CompatModePackages mCompatModePackages;
 
     /**
-     * Set of PendingResultRecord objects that are currently active.
-     */
-    final HashSet mPendingResultRecords = new HashSet();
-
-    /**
      * Set of IntentSenderRecord objects that are currently active.
      */
     final HashMap<PendingIntentRecord.Key, WeakReference<PendingIntentRecord>> mIntentSenderRecords
@@ -548,7 +549,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * broadcasts.  Hash keys are the receiver IBinder, hash value is
      * a ReceiverList.
      */
-    final HashMap mRegisteredReceivers = new HashMap();
+    final HashMap<IBinder, ReceiverList> mRegisteredReceivers =
+            new HashMap<IBinder, ReceiverList>();
 
     /**
      * Resolver for broadcast intents to registered receivers.
@@ -875,8 +877,9 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static ActivityManagerService mSelf;
     static ActivityThread mSystemThread;
 
+    private Looper mLooper;
+
     private int mCurrentUserId = 0;
-    private int[] mCurrentUserArray = new int[] { 0 };
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -894,6 +897,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             mAppThread = thread;
         }
 
+        @Override
         public void binderDied() {
             if (localLOGV) Slog.v(
                 TAG, "Death received in " + this
@@ -946,10 +950,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
         //    if (localLOGV) Slog.v(TAG, "Handler started!");
         //}
 
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case SHOW_ERROR_MSG: {
-                HashMap data = (HashMap) msg.obj;
+                HashMap<String, Object> data = (HashMap<String, Object>) msg.obj;
                 boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                         Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
                 synchronized (ActivityManagerService.this) {
@@ -989,7 +994,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             } break;
             case SHOW_NOT_RESPONDING_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    HashMap data = (HashMap) msg.obj;
+                    HashMap<String, Object> data = (HashMap<String, Object>) msg.obj;
                     ProcessRecord proc = (ProcessRecord)data.get("app");
                     if (proc != null && proc.anrDialog != null) {
                         Slog.e(TAG, "App already has anr dialog: " + proc);
@@ -1415,7 +1420,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     public static void setSystemProcess() {
         try {
             ActivityManagerService m = mSelf;
-            
+
             ServiceManager.addService("activity", m, true);
             ServiceManager.addService("meminfo", new MemBinder(m));
             ServiceManager.addService("gfxinfo", new GraphicsBinder(m));
@@ -1451,6 +1456,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
+        wm.createStack(HOME_ACTIVITY_STACK, -1, ActivityManager.TASK_STACK_GOES_OVER, 1.0f);
     }
 
     public static final Context main(int factoryTest) {
@@ -1474,7 +1480,10 @@ public final class ActivityManagerService  extends ActivityManagerNative
         context.setTheme(android.R.style.Theme_Holo);
         m.mContext = context;
         m.mFactoryTest = factoryTest;
-        m.mFocusedStack = new ActivityStack(m, context, true, thr.mLooper);
+        m.mLooper = thr.mLooper;
+
+        m.mHomeStack = m.mFocusedStack
+                = new ActivityStack(m, context, true, thr.mLooper, HOME_ACTIVITY_STACK);
         m.mStacks.add(m.mFocusedStack);
 
         m.mBatteryStatsService.publish(context);
@@ -1487,14 +1496,14 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
 
         m.startRunning(null, null, null, null);
-        
+
         return context;
     }
 
     public static ActivityManagerService self() {
         return mSelf;
     }
-    
+
     static class AThread extends Thread {
         ActivityManagerService mService;
         Looper mLooper;
@@ -1504,6 +1513,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             super("ActivityManager");
         }
 
+        @Override
         public void run() {
             Looper.prepare();
 
@@ -1624,7 +1634,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     private ActivityManagerService() {
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
-        
+
         mFgBroadcastQueue = new BroadcastQueue(this, "foreground", BROADCAST_FG_TIMEOUT);
         mBgBroadcastQueue = new BroadcastQueue(this, "background", BROADCAST_BG_TIMEOUT);
         mBroadcastQueues[0] = mFgBroadcastQueue;
@@ -1662,7 +1672,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessStats.init();
-        
+
         mCompatModePackages = new CompatModePackages(this, systemDir);
 
         // Add ourself to the Watchdog monitors.
@@ -1787,7 +1797,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                             (softIrq * 100) / total);
                 }
             }
-            
+
             long[] cpuSpeedTimes = mProcessStats.getLastCpuSpeedTimes();
             final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
             synchronized(bstats) {
@@ -2306,7 +2316,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     aInfo.applicationInfo.uid);
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mFocusedStack.startActivityLocked(null, intent, null, aInfo,
+                mHomeStack.startActivityLocked(null, intent, null, aInfo,
                         null, null, 0, 0, 0, null, 0, null, false, null);
             }
         }
@@ -6088,6 +6098,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return false;
     }
 
+    @Override
     public void moveTaskBackwards(int task) {
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
                 "moveTaskBackwards()");
@@ -6105,6 +6116,49 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     private final void moveTaskBackwardsLocked(int task) {
         Slog.e(TAG, "moveTaskBackwards not yet implemented!");
+    }
+
+    private ActivityStack getStack(int stackId) {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (stack.getStackId() == stackId) {
+                return stack;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public int createStack(int relativeStackId, int position, float weight) {
+        synchronized (this) {
+            while (true) {
+                if (++mLastStackId <= HOME_ACTIVITY_STACK) {
+                    mLastStackId = HOME_ACTIVITY_STACK + 1;
+                }
+                if (getStack(mLastStackId) == null) {
+                    break;
+                }
+            }
+            mStacks.add(new ActivityStack(this, mContext, false, mLooper, mLastStackId));
+            mWindowManager.createStack(mLastStackId, position, relativeStackId, weight);
+            return mLastStackId;
+        }
+    }
+
+    @Override
+    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+        final ActivityStack stack = getStack(stackId);
+        if (stack == null) {
+            Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
+            return;
+        }
+        stack.moveTask(taskId, toTop);
+        mWindowManager.moveTaskToStack(taskId, stackId, toTop);
+    }
+
+    @Override
+    public void resizeStack(int stackId, float weight) {
+        mWindowManager.resizeStack(stackId, weight);
     }
 
     @Override
@@ -14187,7 +14241,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 }
 
                 mCurrentUserId = userId;
-                mCurrentUserArray = new int[] { userId };
                 final Integer userIdInt = Integer.valueOf(userId);
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);

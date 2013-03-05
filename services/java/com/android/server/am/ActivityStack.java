@@ -67,7 +67,6 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.Display;
 
 import java.io.FileDescriptor;
@@ -309,6 +308,8 @@ final class ActivityStack {
 
     private int mCurrentUser;
 
+    final int mStackId;
+
     static final int SLEEP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG;
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int IDLE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
@@ -451,7 +452,8 @@ final class ActivityStack {
         return count;
     }
 
-    ActivityStack(ActivityManagerService service, Context context, boolean mainStack, Looper looper) {
+    ActivityStack(ActivityManagerService service, Context context, boolean mainStack, Looper looper,
+            int stackId) {
         mHandler = new ActivityStackHandler(looper);
         mService = service;
         mContext = context;
@@ -461,6 +463,7 @@ final class ActivityStack {
         mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
         mLaunchingActivity = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
         mLaunchingActivity.setReferenceCounted(false);
+        mStackId = stackId;
     }
 
     private boolean okToShow(ActivityRecord r) {
@@ -1855,7 +1858,8 @@ final class ActivityStack {
                         task.addActivityToTop(r);
                         r.putInHistory();
                         mService.mWindowManager.addAppToken(task.mActivities.indexOf(r),
-                                r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                                r.appToken, r.task.taskId, mStackId, r.info.screenOrientation,
+                                r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
@@ -1917,7 +1921,7 @@ final class ActivityStack {
             }
             r.updateOptionsLocked(options);
             mService.mWindowManager.addAppToken(task.mActivities.indexOf(r),
-                    r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                    r.appToken, r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             boolean doShow = true;
             if (newTask) {
@@ -1956,7 +1960,7 @@ final class ActivityStack {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
             mService.mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
-                    r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                    r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             ActivityOptions.abort(options);
         }
@@ -5033,5 +5037,27 @@ final class ActivityStack {
             mTaskHistory.add(0, task);
         }
         return task;
+    }
+
+    ArrayList<TaskRecord> getAllTasks() {
+        return new ArrayList<TaskRecord>(mTaskHistory);
+    }
+
+    void moveTask(int taskId, boolean toTop) {
+        final TaskRecord task = mService.anyTaskForIdLocked(taskId);
+        if (task == null) {
+            return;
+        }
+        task.stack.mTaskHistory.remove(task);
+        task.stack = this;
+        if (toTop) {
+            mTaskHistory.add(task);
+        } else {
+            mTaskHistory.add(0, task);
+        }
+    }
+
+    public int getStackId() {
+        return mStackId;
     }
 }
