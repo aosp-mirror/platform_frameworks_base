@@ -27,6 +27,7 @@
 #include "android/graphics/Region.h"
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 
 #include <gui/Surface.h>
@@ -161,7 +162,7 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
     }
 }
 
-static jobject nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
+static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject displayTokenObj,
         jint width, jint height, jint minLayer, jint maxLayer, bool allLayers) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken == NULL) {
@@ -197,6 +198,24 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenO
     }
 
     return GraphicsJNI::createBitmap(env, bitmap, false, NULL);
+}
+
+static void nativeScreenshot(JNIEnv* env, jclass clazz,
+        jobject displayTokenObj, jobject surfaceObj,
+        jint width, jint height, jint minLayer, jint maxLayer, bool allLayers) {
+    sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
+    if (displayToken != NULL) {
+        sp<Surface> consumer = android_view_Surface_getSurface(env, surfaceObj);
+        if (consumer != NULL) {
+            if (allLayers) {
+                minLayer = 0;
+                maxLayer = -1;
+            }
+            ScreenshotClient::capture(
+                    displayToken, consumer->getIGraphicBufferProducer(),
+                    width, height, uint32_t(minLayer), uint32_t(maxLayer));
+        }
+    }
 }
 
 static void nativeOpenTransaction(JNIEnv* env, jclass clazz) {
@@ -393,6 +412,8 @@ static JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeDestroy", "(I)V",
             (void*)nativeDestroy },
     {"nativeScreenshot", "(Landroid/os/IBinder;IIIIZ)Landroid/graphics/Bitmap;",
+            (void*)nativeScreenshotBitmap },
+    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/view/Surface;IIIIZ)V",
             (void*)nativeScreenshot },
     {"nativeOpenTransaction", "()V",
             (void*)nativeOpenTransaction },

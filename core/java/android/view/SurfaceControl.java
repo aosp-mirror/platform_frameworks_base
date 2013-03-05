@@ -20,6 +20,7 @@ import dalvik.system.CloseGuard;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.view.Surface;
 import android.os.IBinder;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -38,6 +39,8 @@ public class SurfaceControl {
     private static native void nativeDestroy(int nativeObject);
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
+            int width, int height, int minLayer, int maxLayer, boolean allLayers);
+    private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
             int width, int height, int minLayer, int maxLayer, boolean allLayers);
 
     private static native void nativeOpenTransaction();
@@ -524,9 +527,59 @@ public class SurfaceControl {
         return nativeGetBuiltInDisplay(builtInDisplayId);
     }
 
-    
+
+    /**
+     * Copy the current screen contents into the provided {@link Surface}
+     *
+     * @param display The display to take the screenshot of.
+     * @param consumer The {@link Surface} to take the screenshot into.
+     * @param width The desired width of the returned bitmap; the raw
+     * screen will be scaled down to this size.
+     * @param height The desired height of the returned bitmap; the raw
+     * screen will be scaled down to this size.
+     * @param minLayer The lowest (bottom-most Z order) surface layer to
+     * include in the screenshot.
+     * @param maxLayer The highest (top-most Z order) surface layer to
+     * include in the screenshot.
+     */
+    public static void screenshot(IBinder display, Surface consumer,
+            int width, int height, int minLayer, int maxLayer) {
+        screenshot(display, consumer, width, height, minLayer, maxLayer, false);
+    }
+
+    /**
+     * Copy the current screen contents into the provided {@link Surface}
+     *
+     * @param display The display to take the screenshot of.
+     * @param consumer The {@link Surface} to take the screenshot into.
+     * @param width The desired width of the returned bitmap; the raw
+     * screen will be scaled down to this size.
+     * @param height The desired height of the returned bitmap; the raw
+     * screen will be scaled down to this size.
+     */
+    public static void screenshot(IBinder display, Surface consumer,
+            int width, int height) {
+        screenshot(display, consumer, width, height, 0, 0, true);
+    }
+
+    /**
+     * Copy the current screen contents into the provided {@link Surface}
+     *
+     * @param display The display to take the screenshot of.
+     * @param consumer The {@link Surface} to take the screenshot into.
+     */
+    public static void screenshot(IBinder display, Surface consumer) {
+        screenshot(display, consumer, 0, 0, 0, 0, true);
+    }
+
+
     /**
      * Copy the current screen contents into a bitmap and return it.
+     *
+     * CAVEAT: Versions of screenshot that return a {@link Bitmap} can
+     * be extremely slow; avoid use unless absolutely necessary; prefer
+     * the versions that use a {@link Surface} instead, such as
+     * {@link SurfaceControl#screenshot(IBinder, Surface)}.
      *
      * @param width The desired width of the returned bitmap; the raw
      * screen will be scaled down to this size.
@@ -538,25 +591,36 @@ public class SurfaceControl {
      * include in the screenshot.
      * @return Returns a Bitmap containing the screen contents, or null
      * if an error occurs.
-     *
      */
     public static Bitmap screenshot(int width, int height, int minLayer, int maxLayer) {
         // TODO: should take the display as a parameter
-        IBinder displayToken = SurfaceControl.getBuiltInDisplay(SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(
+                SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
         return nativeScreenshot(displayToken, width, height, minLayer, maxLayer, false);
     }
 
     /**
      * Like {@link SurfaceControl#screenshot(int, int, int, int)} but includes all
      * Surfaces in the screenshot.
-     *
      */
     public static Bitmap screenshot(int width, int height) {
         // TODO: should take the display as a parameter
-        IBinder displayToken = SurfaceControl.getBuiltInDisplay(SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(
+                SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
         return nativeScreenshot(displayToken, width, height, 0, 0, true);
     }
     
+    private static void screenshot(IBinder display, Surface consumer,
+            int width, int height, int minLayer, int maxLayer, boolean allLayers) {
+        if (display == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        if (consumer == null) {
+            throw new IllegalArgumentException("consumer must not be null");
+        }
+        nativeScreenshot(display, consumer, width, height, minLayer, maxLayer, allLayers);
+    }
+
     private static void checkHeadless() {
         if (HEADLESS) {
             throw new UnsupportedOperationException("Device is headless");
