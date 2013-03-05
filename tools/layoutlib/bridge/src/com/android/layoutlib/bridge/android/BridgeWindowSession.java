@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.IWindow;
+import android.view.IWindowId;
 import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.Surface;
@@ -198,5 +199,11 @@ public final class BridgeWindowSession implements IWindowSession {
     @Override
     public void onRectangleOnScreenRequested(IBinder window, Rect rectangle, boolean immediate) {
         // pass for now.
+    }
+
+    @Override
+    public IWindowId getWindowId(IBinder window) throws RemoteException {
+        // pass for now.
+        return null;
     }
 }
