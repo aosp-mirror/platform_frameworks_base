@@ -22794,7 +22794,9 @@ package android.text.method {
     method public static void clearMetaKeyState(android.text.Editable, int);
     method public long clearMetaKeyState(long, int);
     method public static final int getMetaState(java.lang.CharSequence);
+    method public static final int getMetaState(java.lang.CharSequence, android.view.KeyEvent);
     method public static final int getMetaState(java.lang.CharSequence, int);
+    method public static final int getMetaState(java.lang.CharSequence, int, android.view.KeyEvent);
     method public static final int getMetaState(long);
     method public static final int getMetaState(long, int);
     method public static long handleKeyDown(long, int, android.view.KeyEvent);
