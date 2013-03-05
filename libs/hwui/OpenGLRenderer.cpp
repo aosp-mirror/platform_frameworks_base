@@ -723,7 +723,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     Rect clip;
     Rect bounds(left, top, right, bottom);
     Rect untransformedBounds(bounds);
-    mSnapshot->transform->mapRect(bounds);
+    currentTransform().mapRect(bounds);
 
     // Layers only make sense if they are in the framebuffer's bounds
     if (bounds.intersect(*mSnapshot->clipRect)) {
@@ -738,7 +738,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
         } else if (fboLayer) {
             clip.set(bounds);
             mat4 inverse;
-            inverse.loadInverse(*mSnapshot->transform);
+            inverse.loadInverse(currentTransform());
             inverse.mapRect(clip);
             clip.snapToPixelBoundaries();
             if (clip.intersect(untransformedBounds)) {
@@ -938,11 +938,11 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     } else {
         setupDrawExternalTexture(layer->getTexture());
     }
-    if (mSnapshot->transform->isPureTranslate() &&
+    if (currentTransform().isPureTranslate() &&
             layer->getWidth() == (uint32_t) rect.getWidth() &&
             layer->getHeight() == (uint32_t) rect.getHeight()) {
-        const float x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
-        const float y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
+        const float x = (int) floorf(rect.left + currentTransform().getTranslateX() + 0.5f);
+        const float y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
 
         layer->setFilter(GL_NEAREST);
         setupDrawModelView(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
@@ -966,15 +966,15 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 
         float x = rect.left;
         float y = rect.top;
-        bool simpleTransform = mSnapshot->transform->isPureTranslate() &&
+        bool simpleTransform = currentTransform().isPureTranslate() &&
                 layer->getWidth() == (uint32_t) rect.getWidth() &&
                 layer->getHeight() == (uint32_t) rect.getHeight();
 
         if (simpleTransform) {
             // When we're swapping, the layer is already in screen coordinates
             if (!swap) {
-                x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
-                y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
+                x = (int) floorf(rect.left + currentTransform().getTranslateX() + 0.5f);
+                y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
             }
 
             layer->setFilter(GL_NEAREST, true);
@@ -1041,9 +1041,9 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         setupDrawPureColorUniforms();
         setupDrawColorFilterUniforms();
         setupDrawTexture(layer->getTexture());
-        if (mSnapshot->transform->isPureTranslate()) {
-            const float x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
-            const float y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
+        if (currentTransform().isPureTranslate()) {
+            const float x = (int) floorf(rect.left + currentTransform().getTranslateX() + 0.5f);
+            const float y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
 
             layer->setFilter(GL_NEAREST);
             setupDrawModelViewTranslate(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
@@ -1241,7 +1241,7 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state) {
 }
 
 void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state) {
-    mSnapshot->transform->load(state.mMatrix);
+    currentTransform().load(state.mMatrix);
 
     // NOTE: a clip RECT will be saved and restored, but DeferredDisplayState doesn't support
     // complex clips. In the future, we should add support for deferral of operations clipped by
@@ -1256,42 +1256,42 @@ void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::translate(float dx, float dy) {
-    mSnapshot->transform->translate(dx, dy, 0.0f);
+    currentTransform().translate(dx, dy, 0.0f);
 }
 
 void OpenGLRenderer::rotate(float degrees) {
-    mSnapshot->transform->rotate(degrees, 0.0f, 0.0f, 1.0f);
+    currentTransform().rotate(degrees, 0.0f, 0.0f, 1.0f);
 }
 
 void OpenGLRenderer::scale(float sx, float sy) {
-    mSnapshot->transform->scale(sx, sy, 1.0f);
+    currentTransform().scale(sx, sy, 1.0f);
 }
 
 void OpenGLRenderer::skew(float sx, float sy) {
-    mSnapshot->transform->skew(sx, sy);
+    currentTransform().skew(sx, sy);
 }
 
 void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
     if (matrix) {
-        mSnapshot->transform->load(*matrix);
+        currentTransform().load(*matrix);
     } else {
-        mSnapshot->transform->loadIdentity();
+        currentTransform().loadIdentity();
     }
 }
 
 bool OpenGLRenderer::hasRectToRectTransform() {
-    return CC_LIKELY(mSnapshot->transform->rectToRect());
+    return CC_LIKELY(currentTransform().rectToRect());
 }
 
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
-    mSnapshot->transform->copyTo(*matrix);
+    currentTransform().copyTo(*matrix);
 }
 
 void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
     SkMatrix transform;
-    mSnapshot->transform->copyTo(transform);
+    currentTransform().copyTo(transform);
     transform.preConcat(*matrix);
-    mSnapshot->transform->load(transform);
+    currentTransform().load(transform);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1385,7 +1385,7 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
     }
 
     Rect r(left, top, right, bottom);
-    mSnapshot->transform->mapRect(r);
+    currentTransform().mapRect(r);
     r.snapToPixelBoundaries();
 
     Rect clipRect(*mSnapshot->clipRect);
@@ -1401,7 +1401,7 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
     }
 
     transformed.set(left, top, right, bottom);
-    mSnapshot->transform->mapRect(transformed);
+    currentTransform().mapRect(transformed);
     transformed.snapToPixelBoundaries();
 
     clip.set(*mSnapshot->clipRect);
@@ -1426,7 +1426,7 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
     }
 
     Rect r(left, top, right, bottom);
-    mSnapshot->transform->mapRect(r);
+    currentTransform().mapRect(r);
     r.snapToPixelBoundaries();
 
     Rect clipRect(*mSnapshot->clipRect);
@@ -1449,7 +1449,7 @@ void OpenGLRenderer::debugClip() {
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
-    if (CC_LIKELY(mSnapshot->transform->rectToRect())) {
+    if (CC_LIKELY(currentTransform().rectToRect())) {
         bool clipped = mSnapshot->clip(left, top, right, bottom, op);
         if (clipped) {
             dirtyClip();
@@ -1465,7 +1465,7 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
 
 bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
     SkMatrix transform;
-    mSnapshot->transform->copyTo(transform);
+    currentTransform().copyTo(transform);
 
     SkPath transformed;
     path->transform(transform, &transformed);
@@ -1642,8 +1642,8 @@ void OpenGLRenderer::setupDrawModelViewTranslate(float left, float top, float ri
         bool ignoreTransform) {
     mModelView.loadTranslate(left, top, 0.0f);
     if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-        if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, currentTransform());
+        if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, currentTransform());
     } else {
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity());
         if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
@@ -1651,7 +1651,7 @@ void OpenGLRenderer::setupDrawModelViewTranslate(float left, float top, float ri
 }
 
 void OpenGLRenderer::setupDrawModelViewIdentity(bool offset) {
-    mCaches.currentProgram->set(mOrthoMatrix, mat4::identity(), *mSnapshot->transform, offset);
+    mCaches.currentProgram->set(mOrthoMatrix, mat4::identity(), currentTransform(), offset);
 }
 
 void OpenGLRenderer::setupDrawModelView(float left, float top, float right, float bottom,
@@ -1664,9 +1664,9 @@ void OpenGLRenderer::setupDrawModelView(float left, float top, float right, floa
     }
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
     if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, currentTransform());
         if (mTrackDirtyRegions && dirty) {
-            dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+            dirtyLayer(left, top, right, bottom, currentTransform());
         }
     } else {
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity());
@@ -1694,7 +1694,7 @@ void OpenGLRenderer::setupDrawPureColorUniforms() {
 void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
     if (mDrawModifiers.mShader) {
         if (ignoreTransform) {
-            mModelView.loadInverse(*mSnapshot->transform);
+            mModelView.loadInverse(currentTransform());
         }
         mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
                 mModelView, *mSnapshot, &mTextureUnit);
@@ -1833,9 +1833,9 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
     bool ignoreTransform = false;
-    if (mSnapshot->transform->isPureTranslate()) {
-        x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
-        y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
+    if (currentTransform().isPureTranslate()) {
+        x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
+        y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
         ignoreTransform = true;
 
         texture->setFilter(GL_NEAREST, true);
@@ -1999,7 +1999,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     float a = alpha / 255.0f;
 
     if (hasLayer()) {
-        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        dirtyLayer(left, top, right, bottom, currentTransform());
     }
 
     setupDraw();
@@ -2069,9 +2069,9 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     bool useScaleTransform = mDrawModifiers.mShader && scaled;
     bool ignoreTransform = false;
 
-    if (CC_LIKELY(mSnapshot->transform->isPureTranslate() && !useScaleTransform)) {
-        float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
-        float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
+    if (CC_LIKELY(currentTransform().isPureTranslate() && !useScaleTransform)) {
+        float x = (int) floorf(dstLeft + currentTransform().getTranslateX() + 0.5f);
+        float y = (int) floorf(dstTop + currentTransform().getTranslateY() + 0.5f);
 
         dstRight = x + (dstRight - dstLeft);
         dstBottom = y + (dstBottom - dstTop);
@@ -2150,11 +2150,11 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
         texture->setWrap(GL_CLAMP_TO_EDGE, true);
         texture->setFilter(GL_LINEAR, true);
 
-        const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+        const bool pureTranslate = currentTransform().isPureTranslate();
         // Mark the current layer dirty where we are going to draw the patch
         if (hasLayer() && mesh->hasEmptyQuads) {
-            const float offsetX = left + mSnapshot->transform->getTranslateX();
-            const float offsetY = top + mSnapshot->transform->getTranslateY();
+            const float offsetX = left + currentTransform().getTranslateX();
+            const float offsetY = top + currentTransform().getTranslateY();
             const size_t count = mesh->quads.size();
             for (size_t i = 0; i < count; i++) {
                 const Rect& bounds = mesh->quads.itemAt(i);
@@ -2164,14 +2164,14 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
                     dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getHeight());
                 } else {
                     dirtyLayer(left + bounds.left, top + bounds.top,
-                            left + bounds.right, top + bounds.bottom, *mSnapshot->transform);
+                            left + bounds.right, top + bounds.bottom, currentTransform());
                 }
             }
         }
 
         if (CC_LIKELY(pureTranslate)) {
-            const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
-            const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
+            const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
+            const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
 
             drawTextureMesh(x, y, x + right - left, y + bottom - top, texture->id, alpha / 255.0f,
                     mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
@@ -2253,7 +2253,7 @@ status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
 
     SkRect bounds = path.getBounds();
     PathTessellator::expandBoundsForStroke(bounds, paint, false);
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
 
     return drawVertexBuffer(vertexBuffer, paint);
 }
@@ -2282,7 +2282,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         return DrawGlInfo::kStatusDone;
     }
 
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
 
     bool useOffset = !paint->isAntiAlias();
     return drawVertexBuffer(buffer, paint, useOffset);
@@ -2342,7 +2342,7 @@ status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
         float top = points[i + 1] - halfWidth;
         float bottom = points [i + 1] + halfWidth;
 
-        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        dirtyLayer(left, top, right, bottom, currentTransform());
     }
 
     glDrawArrays(GL_POINTS, 0, generatedVerticesCount);
@@ -2502,7 +2502,7 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
         return drawConvexPath(path, p);
     }
 
-    if (p->isAntiAlias() && !mSnapshot->transform->isSimple()) {
+    if (p->isAntiAlias() && !currentTransform().isSimple()) {
         SkPath path;
         path.addRect(left, top, right, bottom);
         return drawConvexPath(path, p);
@@ -2562,16 +2562,16 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     }
 
     // NOTE: Skia does not support perspective transform on drawPosText yet
-    if (!mSnapshot->transform->isSimple()) {
+    if (!currentTransform().isSimple()) {
         return DrawGlInfo::kStatusDone;
     }
 
     float x = 0.0f;
     float y = 0.0f;
-    const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+    const bool pureTranslate = currentTransform().isPureTranslate();
     if (pureTranslate) {
-        x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
-        y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+        x = (int) floorf(x + currentTransform().getTranslateX() + 0.5f);
+        y = (int) floorf(y + currentTransform().getTranslateY() + 0.5f);
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
@@ -2587,7 +2587,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     }
 
     // Pick the appropriate texture filtering
-    bool linearFilter = mSnapshot->transform->changesBounds();
+    bool linearFilter = currentTransform().changesBounds();
     if (pureTranslate && !linearFilter) {
         linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
     }
@@ -2618,7 +2618,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
             positions, hasActiveLayer ? &bounds : NULL)) {
         if (hasActiveLayer) {
             if (!pureTranslate) {
-                mSnapshot->transform->mapRect(bounds);
+                currentTransform().mapRect(bounds);
             }
             dirtyLayerUnchecked(bounds, getRegion());
         }
@@ -2653,12 +2653,12 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     const float oldX = x;
     const float oldY = y;
-    const bool pureTranslate = mSnapshot->transform->isPureTranslate();
-    const bool isPerspective = mSnapshot->transform->isPerspective();
+    const bool pureTranslate = currentTransform().isPureTranslate();
+    const bool isPerspective = currentTransform().isPerspective();
 
     if (CC_LIKELY(pureTranslate)) {
-        x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
-        y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+        x = (int) floorf(x + currentTransform().getTranslateX() + 0.5f);
+        y = (int) floorf(y + currentTransform().getTranslateY() + 0.5f);
     }
 
     int alpha;
@@ -2675,24 +2675,24 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     const bool hasActiveLayer = hasLayer();
 
-    const mat4* fontTransform;
+    mat4 fontTransform;
     if (CC_LIKELY(pureTranslate)) {
-        fontTransform = &mat4::identity();
+        fontTransform = mat4::identity();
     } else {
         if (CC_UNLIKELY(isPerspective)) {
             // When the below condition is true, we are rendering text with a
             // perspective transform inside a layer (either an inline layer
             // created by Canvas.saveLayer() or a hardware layer.)
             if (hasActiveLayer || getTargetFbo() != 0) {
-                fontTransform = mSnapshot->transform;
+                fontTransform = currentTransform();
             } else {
-                fontTransform = &mat4::identity();
+                fontTransform = mat4::identity();
             }
         } else {
-            fontTransform = mSnapshot->transform;
+            fontTransform = currentTransform();
         }
     }
-    fontRenderer.setFont(paint, *fontTransform);
+    fontRenderer.setFont(paint, fontTransform);
 
     // Pick the appropriate texture filtering
     bool linearFilter = !pureTranslate || fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
@@ -2733,7 +2733,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     if (status && hasActiveLayer) {
         if (isPerspective) {
-            mSnapshot->transform->mapRect(bounds);
+            currentTransform().mapRect(bounds);
         }
         dirtyLayerUnchecked(bounds, getRegion());
     }
@@ -2781,7 +2781,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
             hOffset, vOffset, hasActiveLayer ? &bounds : NULL)) {
         if (hasActiveLayer) {
-            mSnapshot->transform->mapRect(bounds);
+            currentTransform().mapRect(bounds);
             dirtyLayerUnchecked(bounds, getRegion());
         }
     }
@@ -2816,7 +2816,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         transform = &layer->getTransform();
         if (!transform->isIdentity()) {
             save(0);
-            mSnapshot->transform->multiply(*transform);
+            currentTransform().multiply(*transform);
         }
     }
 
@@ -2854,9 +2854,9 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
             setupDrawPureColorUniforms();
             setupDrawColorFilterUniforms();
             setupDrawTexture(layer->getTexture());
-            if (CC_LIKELY(mSnapshot->transform->isPureTranslate())) {
-                int tx = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
-                int ty = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+            if (CC_LIKELY(currentTransform().isPureTranslate())) {
+                int tx = (int) floorf(x + currentTransform().getTranslateX() + 0.5f);
+                int ty = (int) floorf(y + currentTransform().getTranslateY() + 0.5f);
 
                 layer->setFilter(GL_NEAREST);
                 setupDrawModelViewTranslate(tx, ty,
@@ -3074,6 +3074,9 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
 
 status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,
         SkXfermode::Mode mode, bool ignoreTransform, bool dirty, bool clip) {
+    if (count == 0) {
+        return DrawGlInfo::kStatusDone;
+    }
 
     float left = FLT_MAX;
     float top = FLT_MAX;
@@ -3090,24 +3093,22 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
         float r = rects[index + 2];
         float b = rects[index + 3];
 
-        if (ignoreTransform || !quickRejectNoScissor(left, top, right, bottom)) {
-            Vertex::set(vertex++, l, b);
-            Vertex::set(vertex++, l, t);
-            Vertex::set(vertex++, r, t);
-            Vertex::set(vertex++, l, b);
-            Vertex::set(vertex++, r, t);
-            Vertex::set(vertex++, r, b);
+        Vertex::set(vertex++, l, b);
+        Vertex::set(vertex++, l, t);
+        Vertex::set(vertex++, r, t);
+        Vertex::set(vertex++, l, b);
+        Vertex::set(vertex++, r, t);
+        Vertex::set(vertex++, r, b);
 
-            vertexCount += 6;
+        vertexCount += 6;
 
-            left = fminf(left, l);
-            top = fminf(top, t);
-            right = fmaxf(right, r);
-            bottom = fmaxf(bottom, b);
-        }
+        left = fminf(left, l);
+        top = fminf(top, t);
+        right = fmaxf(right, r);
+        bottom = fmaxf(bottom, b);
     }
 
-    if (count == 0 || (clip && quickReject(left, top, right, bottom))) {
+    if (clip && quickReject(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -3126,7 +3127,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     setupDrawVertices((GLvoid*) &mesh[0].position[0]);
 
     if (dirty && hasLayer()) {
-        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        dirtyLayer(left, top, right, bottom, currentTransform());
     }
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
@@ -3165,9 +3166,9 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
-    if (CC_LIKELY(mSnapshot->transform->isPureTranslate())) {
-        const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
-        const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
+    if (CC_LIKELY(currentTransform().isPureTranslate())) {
+        const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
+        const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
 
         texture->setFilter(GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
