@@ -566,8 +566,9 @@ public class BitmapFactory {
             float scale = targetDensity / (float) density;
             if (scale != 1.0f) {
                 final Bitmap oldBitmap = bm;
-                bm = Bitmap.createScaledBitmap(oldBitmap, (int) (bm.getWidth() * scale + 0.5f),
-                        (int) (bm.getHeight() * scale + 0.5f), true);
+                bm = Bitmap.createScaledBitmap(oldBitmap,
+                        Math.max(1, (int) (bm.getWidth() * scale + 0.5f)),
+                        Math.max(1, (int) (bm.getHeight() * scale + 0.5f)), true);
                 if (bm != oldBitmap) oldBitmap.recycle();
 
                 if (isNinePatch) {
