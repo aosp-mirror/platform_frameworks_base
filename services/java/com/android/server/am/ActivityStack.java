@@ -1888,6 +1888,17 @@ final class ActivityStack {
             verifyActivityRecords(true);
         }
         TaskRecord task = null;
+        final int taskId = r.task.taskId;
+        if (mTaskIdToTaskRecord.indexOfKey(taskId) < 0 || newTask) {
+            // Last activity in task had been removed or ActivityManagerService is reusing task.
+            // Insert or replace.
+            mTaskIdToTaskRecord.put(taskId, r.task);
+            // Might not even be in.
+            mTaskHistory.remove(r.task);
+            // Now put task at top.
+            mTaskHistory.add(r.task);
+            mService.mWindowManager.moveTaskToTop(r.task.taskId);
+        }
         if (!newTask) {
             // If starting in an existing task, find where that is...
             for (int i = NH - 1; i >= 0 && !wouldReturn; i--) {
@@ -1914,7 +1925,9 @@ final class ActivityStack {
                     // Here it is!  Now, if this is not yet visible to the
                     // user, then just add it without starting; it will
                     // get started when the user navigates back to it.
-                    if (fakeStartIt != startIt) Slog.w(TAG, "Mismatch! fakeStartIt != startIt");
+                    if (fakeStartIt != startIt) {
+                        Slog.w(TAG, "Mismatch! fakeStartIt != startIt");
+                    }
                     if (!startIt) {
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to task "
                                 + task, new RuntimeException("here").fillInStackTrace());
@@ -1926,7 +1939,7 @@ final class ActivityStack {
 
                         r.putInHistory();
                         mService.mWindowManager.addAppToken(task.mActivities.indexOf(r),
-                                r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                                r.appToken, taskId, r.info.screenOrientation, r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
                         if (VALIDATE_TASK_REPLACE) {
                             verifyActivityRecords(true);
@@ -1948,12 +1961,6 @@ final class ActivityStack {
             if (wouldReturn) {
                 Slog.w(TAG, "Mismatch! wouldReturn");
             }
-        } else if (mTaskIdToTaskRecord.indexOfKey(r.task.taskId) >= 0) {
-            // All activities in this task are finishing and ActivityManagerService considers
-            // them gone. It reuses the task and expects it to be at the top so move it up.
-            mTaskHistory.remove(r.task);
-            mTaskHistory.add(r.task);
-            mService.mWindowManager.moveTaskToTop(r.task.taskId);
         }
 
         // Place a new activity at top of stack, so it is next to interact
@@ -2298,10 +2305,8 @@ final class ActivityStack {
      * @param topTaskIsHigher True if #task has already been processed by resetTaskIfNeededLocked.
      * @param forceReset Flag passed in to resetTaskIfNeededLocked.
      */
-    private final void resetAffinityTaskIfNeededLocked(TaskRecord affinityTask, TaskRecord task,
-            boolean topTaskIsHigher, boolean forceReset
-            , ActivityRecord taskTop
-            ) {
+    private final int resetAffinityTaskIfNeededLocked(TaskRecord affinityTask, TaskRecord task,
+            boolean topTaskIsHigher, boolean forceReset, int taskInsertionPoint) {
         int replyChainEnd = -1;
         final int taskId = task.taskId;
         final String taskAffinity = task.affinity;
@@ -2353,17 +2358,26 @@ final class ActivityStack {
                         finishActivityLocked(p, Activity.RESULT_CANCELED, null, "reset", false);
                     }
                 } else {
-                    int taskTopI = mHistory.indexOf(taskTop);
-                    final int end = replyChainEnd >= 0 ? replyChainEnd : i;
-                    if (DEBUG_TASKS) Slog.v(TAG, "Reparenting task at index " + i + " to " + end);
-                    for (int srcPos = i; srcPos <= end; ++srcPos) {
+                    if (taskInsertionPoint < 0) {
+                        taskInsertionPoint = task.mActivities.size();
+                        
+                    }
+                    int taskTopI = mHistory.indexOf(task.mActivities.get(taskInsertionPoint - 1));
+
+                    final int start = replyChainEnd >= 0 ? replyChainEnd : i;
+                    if (DEBUG_TASKS) Slog.v(TAG, "Reparenting from task=" + affinityTask + ":"
+                            + start + "-" + i + " to task=" + task + ":" + taskInsertionPoint);
+                    for (int srcPos = start; srcPos >= i; --srcPos) {
                         final ActivityRecord p = activities.get(srcPos);
                         setTask(p, task, null, false);
-                        task.addActivityToTop(p);
+                        task.addActivityAtIndex(taskInsertionPoint, p);
 
                         { // TODO: remove when mHistory no longer used.
                             mHistory.remove(p);
                             mHistory.add(taskTopI, p);
+                            if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + p
+                                    + " to stack at " + taskTopI);
+                            --taskTopI;
                         }
 
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + p
@@ -2404,6 +2418,7 @@ final class ActivityStack {
                 replyChainEnd = -1;
             }
         }
+        return taskInsertionPoint;
     }
 
     private final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
@@ -2426,6 +2441,9 @@ final class ActivityStack {
         /** If ActivityOptions are moved out and need to be aborted or moved to taskTop. */
         ActivityOptions topOptions = null;
 
+        // Preserve the location for reparenting in the new task.
+        int reparentInsertionPoint = -1;
+
         for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
             final TaskRecord targetTask = mTaskHistory.get(i);
 
@@ -2433,7 +2451,8 @@ final class ActivityStack {
                 topOptions = resetTargetTaskIfNeededLocked(task, forceReset);
                 taskFound = true;
             } else {
-                resetAffinityTaskIfNeededLocked(targetTask, task, taskFound, forceReset, taskTop);
+                reparentInsertionPoint = resetAffinityTaskIfNeededLocked(targetTask, task,
+                        taskFound, forceReset, reparentInsertionPoint);
             }
         }
 
