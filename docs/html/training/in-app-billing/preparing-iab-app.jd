@@ -33,15 +33,15 @@ next.link=list-iab-products.html
 <p>Before you can start using the In-app Billing service, you'll need to add the library that contains the In-app Billing Version 3 API to your Android project. You also need to setting the permissions for your application to communicate with Google Play. In addition, you'll need to establish a connection between your application and  Google Play. You should also verify that the In-app Billing API version that you are using in your application is supported by Google Play.</p>
 
 <h2 id="GetSample">Download the Sample Application</h2>
-<p>In this training class, you will use a reference implementation for the In-app Billing Version 3 API called the {@code TrivialDrive} sample application. The sample includes convenience classes to quickly set up the In-app Billing service, marshal and unmarshal data types, and handle In-app Billing requests from the main thread of your application.  </p>
+<p>In this training class, you will use a reference implementation for the In-app Billing Version 3 API called the {@code TrivialDrive} sample application. The sample includes convenience classes to quickly set up the In-app Billing service, marshal and unmarshal data types, and handle In-app Billing requests from the main thread of your application.</p>
 <p>To download the sample application:</p>
 <ol>
 <li>Open the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.</li>
 <li>In the SDK Manager, expand the {@code Extras} section.</li>
-<li>Select <strong>Google Play Billing Library</strong>. Make sure to select the download for In-app Billing Version 3 or above.</li>
-<li>Click <strong>Install</strong> to complete the download.</li>
+<li>Select <strong>Google Play Billing Library</strong>.</li>
+<li>Click <strong>Install packages</strong> to complete the download.</li>
 </ol>
-<p>The sample files will be installed to {@code /your/sdk/location/extras/google/play_billing/in-app-billing-v03}.</p>
+<p>The sample files will be installed to {@code &lt;sdk&gt;/extras/google/play_billing/}.</p>
 
 <h2 id="AddToDevConsole">Add Your Application to the Developer Console</h2>
 <p>The Google Play Developer Console is where you publish your In-app Billing application and  manage the various digital goods that are available for purchase from your application. When you create a new application entry in the Developer Console, it automatically generates a public license key for your application. You will need this key to establish a trusted connection from your application to the Google Play servers. You only need to generate this key once per application, and don’t need to repeat these steps when you update the APK file for your application.</p>
