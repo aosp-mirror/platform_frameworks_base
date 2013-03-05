@@ -147,11 +147,6 @@ public final class WifiService extends IWifiManager.Stub {
     private AsyncChannel mWifiStateMachineChannel;
 
     /**
-     * Clients receiving asynchronous messages
-     */
-    private List<Messenger> mClients = new ArrayList<Messenger>();
-
-    /**
      * Handles client connections
      */
     private class ClientHandler extends Handler {
@@ -168,7 +163,7 @@ public final class WifiService extends IWifiManager.Stub {
                         if (DBG) Slog.d(TAG, "New client listening to asynchronous messages");
                         // We track the clients by the Messenger
                         // since it is expected to be always available
-                        mClients.add(msg.replyTo);
+                        mTrafficPoller.addClient(msg.replyTo);
                     } else {
                         Slog.e(TAG, "Client connection failure, error=" + msg.arg1);
                     }
@@ -180,7 +175,7 @@ public final class WifiService extends IWifiManager.Stub {
                     } else {
                         if (DBG) Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
                     }
-                    mClients.remove(msg.replyTo);
+                    mTrafficPoller.removeClient(msg.replyTo);
                     break;
                 }
                 case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
@@ -270,7 +265,7 @@ public final class WifiService extends IWifiManager.Stub {
         mIdleIntent = PendingIntent.getBroadcast(mContext, IDLE_REQUEST, idleIntent, 0);
 
         mNotificationController = new WifiNotificationController(mContext, mWifiStateMachine);
-        mTrafficPoller = new WifiTrafficPoller(mContext, mClients, mInterfaceName);
+        mTrafficPoller = new WifiTrafficPoller(mContext, mInterfaceName);
         mSettingsStore = new WifiSettingsStore(mContext);
 
         mContext.registerReceiver(
