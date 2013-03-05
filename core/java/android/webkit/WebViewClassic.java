@@ -8368,8 +8368,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mListBoxDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
+                 if (mWebViewCore != null) {
                     mWebViewCore.sendMessage(
                                 EventHub.SINGLE_LISTBOX_CHOICE, -2, 0);
+                    }
                     mListBoxDialog = null;
                 }
             });
