@@ -29,8 +29,7 @@ This is an optimized layout for a screen with the Action Bar enabled.
         android:layout_height="match_parent" />
     <LinearLayout android:id="@+id/top_action_bar"
                   android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="top">
+                  android:layout_height="wrap_content">
         <com.android.internal.widget.ActionBarContainer android:id="@+id/action_bar_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +56,6 @@ This is an optimized layout for a screen with the Action Bar enabled.
     <com.android.internal.widget.ActionBarContainer android:id="@+id/split_action_bar"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_gravity="bottom"
                   style="?android:attr/actionBarSplitStyle"
                   android:visibility="gone"
                   android:gravity="center"/>
