@@ -242,35 +242,31 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     uint8_t* cacheBuffer = cacheTexture->getTexture();
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
 
-    // Zero out the borders
-    for (cacheX = startX - TEXTURE_BORDER_SIZE; cacheX < endX + TEXTURE_BORDER_SIZE; cacheX++) {
-        cacheBuffer[(startY - TEXTURE_BORDER_SIZE) * cacheWidth + cacheX] = 0;
-        cacheBuffer[(endY + TEXTURE_BORDER_SIZE - 1) * cacheWidth + cacheX] = 0;
-    }
-
-    for (cacheY = startY - TEXTURE_BORDER_SIZE + 1;
-            cacheY < endY + TEXTURE_BORDER_SIZE - 1; cacheY++) {
-        cacheBuffer[cacheY * cacheWidth + startX - TEXTURE_BORDER_SIZE] = 0;
-        cacheBuffer[cacheY * cacheWidth + endX + TEXTURE_BORDER_SIZE - 1] = 0;
-    }
-
     // Copy the glyph image, taking the mask format into account
     uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
     int stride = glyph.rowBytes();
+
+    uint32_t row = (startY - TEXTURE_BORDER_SIZE) * cacheWidth + startX - TEXTURE_BORDER_SIZE;
+    memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
 
     switch (format) {
         case SkMask::kA8_Format: {
             if (mGammaTable) {
                 for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += stride) {
+                    row = cacheY * cacheWidth;
+                    cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
                     for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
                         uint8_t tempCol = bitmapBuffer[bY + bX];
-                        cacheBuffer[cacheY * cacheWidth + cacheX] = mGammaTable[tempCol];
+                        cacheBuffer[row + cacheX] = mGammaTable[tempCol];
                     }
+                    cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
                 }
             } else {
                 for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += stride) {
-                    memcpy(&cacheBuffer[cacheY * cacheWidth + startX], &bitmapBuffer[bY],
-                            glyph.fWidth);
+                    row = cacheY * cacheWidth;
+                    memcpy(&cacheBuffer[row + startX], &bitmapBuffer[bY], glyph.fWidth);
+                    cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
+                    cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
                 }
             }
             break;
@@ -283,12 +279,15 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
                 int rowBytes = stride;
                 uint8_t* buffer = bitmapBuffer;
 
+                row = cacheY * cacheWidth;
+                cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
                 while (--rowBytes >= 0) {
                     uint8_t b = *buffer++;
                     for (int8_t mask = 7; mask >= 0 && cacheX < endX; mask--) {
                         cacheBuffer[cacheY * cacheWidth + cacheX++] = COLORS[(b >> mask) & 0x1];
                     }
                 }
+                cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
 
                 bitmapBuffer += stride;
             }
@@ -298,6 +297,9 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
             ALOGW("Unkown glyph format: 0x%x", format);
             break;
     }
+
+    row = (endY + TEXTURE_BORDER_SIZE - 1) * cacheWidth + startX - TEXTURE_BORDER_SIZE;
+    memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
 
     cachedGlyph->mIsValid = true;
 }
