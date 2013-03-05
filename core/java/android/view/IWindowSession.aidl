@@ -24,6 +24,7 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.view.InputChannel;
 import android.view.IWindow;
+import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.Surface;
@@ -188,4 +189,6 @@ interface IWindowSession {
      * Notifies that a rectangle on the screen has been requested.
      */
     void onRectangleOnScreenRequested(IBinder token, in Rect rectangle, boolean immediate);
+
+    IWindowId getWindowId(IBinder window);
 }
