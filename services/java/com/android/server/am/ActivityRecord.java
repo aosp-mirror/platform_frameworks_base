@@ -20,7 +20,6 @@ import com.android.internal.app.ResolverActivity;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
 
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ResultInfo;
 import android.content.ComponentName;
@@ -56,7 +55,6 @@ import java.util.HashSet;
  */
 final class ActivityRecord {
     final ActivityManagerService service; // owner
-    final ActivityStack stack; // owner
     final IApplicationToken.Stub appToken; // window manager token
     final ActivityInfo info; // all about me
     final int launchedFromUid; // always the uid who started the activity.
@@ -183,7 +181,7 @@ final class ActivityRecord {
         if (newIntents != null && newIntents.size() > 0) {
             pw.print(prefix); pw.println("Pending New Intents:");
             for (int i=0; i<newIntents.size(); i++) {
-                Intent intent = (Intent)newIntents.get(i);
+                Intent intent = newIntents.get(i);
                 pw.print(prefix); pw.print("  - ");
                 if (intent == null) {
                     pw.println("null");
@@ -327,13 +325,12 @@ final class ActivityRecord {
         }
     }
 
-    ActivityRecord(ActivityManagerService _service, ActivityStack _stack, ProcessRecord _caller,
+    ActivityRecord(ActivityManagerService _service, ProcessRecord _caller,
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified) {
         service = _service;
-        stack = _stack;
         appToken = new Token(this);
         info = aInfo;
         launchedFromUid = _launchedFromUid;
@@ -565,7 +562,7 @@ final class ActivityRecord {
 
     void addNewIntentLocked(Intent intent) {
         if (newIntents == null) {
-            newIntents = new ArrayList();
+            newIntents = new ArrayList<Intent>();
         }
         newIntents.add(intent);
     }
@@ -585,7 +582,7 @@ final class ActivityRecord {
         // case we will deliver it if this is the current top activity on its
         // stack.
         if ((state == ActivityState.RESUMED || (service.mSleeping
-                        && stack.topRunningActivityLocked(null) == this))
+                        && task.stack.topRunningActivityLocked(null) == this))
                 && app != null && app.thread != null) {
             try {
                 ArrayList<Intent> ar = new ArrayList<Intent>();
@@ -729,6 +726,7 @@ final class ActivityRecord {
 
     boolean continueLaunchTickingLocked() {
         if (launchTickTime != 0) {
+            final ActivityStack stack = task.stack;
             Message msg = stack.mHandler.obtainMessage(ActivityStack.LAUNCH_TICK_MSG);
             msg.obj = this;
             stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
@@ -740,7 +738,7 @@ final class ActivityRecord {
 
     void finishLaunchTickingLocked() {
         launchTickTime = 0;
-        stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
+        task.stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
     }
 
     // IApplicationToken
@@ -769,6 +767,7 @@ final class ActivityRecord {
     public void windowsDrawn() {
         synchronized(service) {
             if (launchTime != 0) {
+                final ActivityStack stack = task.stack;
                 final long curTime = SystemClock.uptimeMillis();
                 final long thisTime = curTime - launchTime;
                 final long totalTime = stack.mInitialStartTime != 0
@@ -804,6 +803,7 @@ final class ActivityRecord {
 
     public void windowsVisible() {
         synchronized(service) {
+            final ActivityStack stack = task.stack;
             stack.reportActivityVisibleLocked(this);
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
@@ -824,8 +824,7 @@ final class ActivityRecord {
                     final int N = stack.mWaitingVisibleActivities.size();
                     if (N > 0) {
                         for (int i=0; i<N; i++) {
-                            ActivityRecord r = (ActivityRecord)
-                                stack.mWaitingVisibleActivities.get(i);
+                            ActivityRecord r = stack.mWaitingVisibleActivities.get(i);
                             r.waitingVisible = false;
                             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                                     ActivityManagerService.TAG,
@@ -853,6 +852,7 @@ final class ActivityRecord {
         // for another app to start, then we have paused dispatching
         // for this activity.
         ActivityRecord r = this;
+        final ActivityStack stack = task.stack;
         if (r.waitingVisible) {
             // Hmmm, who might we be waiting for?
             r = stack.mResumedActivity;
@@ -902,6 +902,7 @@ final class ActivityRecord {
         if (app != null && app.thread != null) {
             try {
                 app.thread.scheduleSleeping(appToken, _sleeping);
+                final ActivityStack stack = task.stack;
                 if (sleeping && !stack.mGoingToSleepActivities.contains(this)) {
                     stack.mGoingToSleepActivities.add(this);
                 }
@@ -911,6 +912,35 @@ final class ActivityRecord {
                         + intent.getComponent(), e);
             }
         }
+    }
+
+    static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
+        final ActivityRecord r = ActivityRecord.forToken(token);
+        if (r == null) {
+            return -1;
+        }
+        final TaskRecord task = r.task;
+        switch (task.mActivities.indexOf(r)) {
+            case -1: return -1;
+            case 0: return task.taskId;
+            default: return onlyRoot ? -1 : task.taskId;
+        }
+    }
+
+    static ActivityRecord isInStackLocked(IBinder token) {
+        final ActivityRecord r = ActivityRecord.forToken(token);
+        if (r != null) {
+            return r.task.stack.isInStackLocked(token);
+        }
+        return null;
+    }
+
+    static final ActivityStack getStackLocked(IBinder token) {
+        final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+        if (r != null) {
+            return r.task.stack;
+        }
+        return null;
     }
 
     @Override

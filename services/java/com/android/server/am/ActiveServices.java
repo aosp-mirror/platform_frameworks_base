@@ -439,7 +439,7 @@ public class ActiveServices {
 
         ActivityRecord activity = null;
         if (token != null) {
-            activity = mAm.mMainStack.isInStackLocked(token);
+            activity = ActivityRecord.isInStackLocked(token);
             if (activity == null) {
                 Slog.w(TAG, "Binding with unknown activity: " + token);
                 return 0;

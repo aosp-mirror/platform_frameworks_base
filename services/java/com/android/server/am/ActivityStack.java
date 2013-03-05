@@ -164,11 +164,6 @@ final class ActivityStack {
     private ArrayList<TaskRecord> mTaskHistory = new ArrayList<TaskRecord>();
 
     /**
-     * Mapping from taskId to TaskRecord
-     */
-    private SparseArray<TaskRecord> mTaskIdToTaskRecord = new SparseArray<TaskRecord>();
-
-    /**
      * Used for validating app tokens with window manager.
      */
     final ArrayList<TaskGroup> mValidateAppTokens = new ArrayList<TaskGroup>();
@@ -368,9 +363,9 @@ final class ActivityStack {
                             mService.logAppTooSlow(r.app, r.pauseTime,
                                     "pausing " + r);
                         }
-                    }
 
-                    activityPaused(r != null ? r.appToken : null, true);
+                        activityPausedLocked(r != null ? r.appToken : null, true);
+                    }
                 } break;
                 case IDLE_TIMEOUT_MSG: {
                     if (mService.mDidDexOpt) {
@@ -400,7 +395,9 @@ final class ActivityStack {
                     // We don't at this point know if the activity is fullscreen,
                     // so we need to be conservative and assume it isn't.
                     Slog.w(TAG, "Activity destroy timeout for " + r);
-                    activityDestroyed(r != null ? r.appToken : null);
+                    synchronized (mService) {
+                        activityDestroyedLocked(r != null ? r.appToken : null);
+                    }
                 } break;
                 case IDLE_NOW_MSG: {
                     ActivityRecord r = (ActivityRecord)msg.obj;
@@ -526,28 +523,27 @@ final class ActivityStack {
         return null;
     }
 
-    final ActivityRecord isInStackLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forToken(token);
-        if (r != null) {
-            final TaskRecord task = r.task;
-            if (mTaskHistory.contains(task) && task.mActivities.contains(r)) {
-                return r;
+    TaskRecord taskForIdLocked(int id) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            if (task.taskId == id) {
+                return task;
             }
         }
         return null;
     }
 
-    int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
+    ActivityRecord isInStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forToken(token);
-        if (r == null) {
-            return -1;
+        if (r != null) {
+            final TaskRecord task = r.task;
+            if (task.mActivities.contains(r) && mTaskHistory.contains(task)) {
+                if (task.stack != this) Slog.w(TAG,
+                    "Illegal state! task does not point to stack it is in.");
+                return r;
+            }
         }
-        final TaskRecord task = r.task;
-        switch (task.mActivities.indexOf(r)) {
-            case -1: return -1;
-            case 0: return task.taskId;
-            default: return onlyRoot ? -1 : task.taskId;
-        }
+        return null;
     }
 
     private final boolean updateLRUListLocked(ActivityRecord r) {
@@ -819,9 +815,7 @@ final class ActivityStack {
             r.stopped = false;
             mResumedActivity = r;
             r.task.touchActiveTime();
-            if (mMainStack) {
-                mService.addRecentTaskLocked(r.task);
-            }
+            mService.addRecentTaskLocked(r.task);
             completeResumeLocked(r);
             checkReadyForSleepLocked();
             if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
@@ -1092,36 +1086,30 @@ final class ActivityStack {
         }
     }
 
-    final void activityResumed(IBinder token) {
-        synchronized (mService) {
-            final ActivityRecord r = isInStackLocked(token);
-            if (r != null) {
-                if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; dropping state of: " + r);
-                r.icicle = null;
-                r.haveState = false;
-            }
-        }
+    final void activityResumedLocked(IBinder token) {
+        final ActivityRecord r = ActivityRecord.forToken(token);
+        if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; dropping state of: " + r);
+        r.icicle = null;
+        r.haveState = false;
     }
 
-    final void activityPaused(IBinder token, boolean timeout) {
+    final void activityPausedLocked(IBinder token, boolean timeout) {
         if (DEBUG_PAUSE) Slog.v(
             TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
 
-        synchronized (mService) {
-            final ActivityRecord r = isInStackLocked(token);
-            if (r != null) {
-                mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
-                if (mPausingActivity == r) {
-                    if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSED: " + r
-                            + (timeout ? " (due to timeout)" : " (pause complete)"));
-                    r.state = ActivityState.PAUSED;
-                    completePauseLocked();
-                } else {
-                    EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
-                            r.userId, System.identityHashCode(r), r.shortComponentName,
-                            mPausingActivity != null
-                                ? mPausingActivity.shortComponentName : "(none)");
-                }
+        final ActivityRecord r = isInStackLocked(token);
+        if (r != null) {
+            mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
+            if (mPausingActivity == r) {
+                if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSED: " + r
+                        + (timeout ? " (due to timeout)" : " (pause complete)"));
+                r.state = ActivityState.PAUSED;
+                completePauseLocked();
+            } else {
+                EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
+                        r.userId, System.identityHashCode(r), r.shortComponentName,
+                        mPausingActivity != null
+                            ? mPausingActivity.shortComponentName : "(none)");
             }
         }
     }
@@ -1706,9 +1694,7 @@ final class ActivityStack {
             next.state = ActivityState.RESUMED;
             mResumedActivity = next;
             next.task.touchActiveTime();
-            if (mMainStack) {
-                mService.addRecentTaskLocked(next.task);
-            }
+            mService.addRecentTaskLocked(next.task);
             mService.updateLruProcessLocked(next.app, true);
             updateLRUListLocked(next);
 
@@ -1843,16 +1829,16 @@ final class ActivityStack {
     private final void startActivityLocked(ActivityRecord r, boolean newTask,
             boolean doResume, boolean keepCurTransition, Bundle options) {
         TaskRecord task = null;
-        final int taskId = r.task.taskId;
-        if (mTaskIdToTaskRecord.indexOfKey(taskId) < 0 || newTask) {
+        TaskRecord rTask = r.task;
+        final int taskId = rTask.taskId;
+        if (taskForIdLocked(taskId) == null || newTask) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
-            mTaskIdToTaskRecord.put(taskId, r.task);
             // Might not even be in.
-            mTaskHistory.remove(r.task);
+            mTaskHistory.remove(rTask);
             // Now put task at top.
-            mTaskHistory.add(r.task);
-            mService.mWindowManager.moveTaskToTop(r.task.taskId);
+            mTaskHistory.add(rTask);
+            mService.mWindowManager.moveTaskToTop(taskId);
         }
         if (!newTask) {
             // If starting in an existing task, find where that is...
@@ -2073,14 +2059,8 @@ final class ActivityStack {
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to bottom task " + p.task);
                 } else {
-                    do {
-                        mService.mCurTask++;
-                        if (mService.mCurTask <= 0) {
-                            mService.mCurTask = 1;
-                        }
-                    } while (mTaskIdToTaskRecord.get(mService.mCurTask) != null);
-                    setTask(target, createTaskRecord(mService.mCurTask, target.info, null, false),
-                            null, false);
+                    setTask(target, createTaskRecord(mService.getNextTaskId(), target.info, null,
+                            false), null, false);
                     target.task.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to new task " + target.task);
@@ -2235,7 +2215,7 @@ final class ActivityStack {
                 } else {
                     if (taskInsertionPoint < 0) {
                         taskInsertionPoint = task.mActivities.size();
-                        
+
                     }
 
                     final int start = replyChainEnd >= 0 ? replyChainEnd : i;
@@ -2578,7 +2558,7 @@ final class ActivityStack {
                 } catch (RemoteException e) {
                     mService.mController = null;
                 }
-    
+
                 if (abort) {
                     if (resultRecord != null) {
                         sendActivityResultLocked(-1,
@@ -2594,7 +2574,7 @@ final class ActivityStack {
             }
         }
 
-        ActivityRecord r = new ActivityRecord(mService, this, callerApp, callingUid, callingPackage,
+        ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
                 intent, resolvedType, aInfo, mService.mConfiguration,
                 resultRecord, resultWho, requestCode, componentSpecified);
         if (outActivity != null) {
@@ -2615,7 +2595,7 @@ final class ActivityStack {
                     return ActivityManager.START_SWITCHES_CANCELED;
                 }
             }
-        
+
             if (mService.mDidAppSwitch) {
                 // This is the second allowed switch since we stopped switches,
                 // so now just generally allow switches.  Use case: user presses
@@ -2626,10 +2606,10 @@ final class ActivityStack {
             } else {
                 mService.mDidAppSwitch = true;
             }
-         
+
             mService.doPendingActivityLaunchesLocked(false);
         }
-        
+
         err = startActivityUncheckedLocked(r, sourceRecord,
                 startFlags, true, options);
         if (mDismissKeyguardOnNextActivity && mPausingActivity == null) {
@@ -2642,7 +2622,7 @@ final class ActivityStack {
         }
         return err;
     }
-  
+
     final void moveHomeToFrontFromLaunchLocked(int launchFlags) {
         if ((launchFlags &
                 (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME))
@@ -2660,20 +2640,20 @@ final class ActivityStack {
         final int callingUid = r.launchedFromUid;
 
         int launchFlags = intent.getFlags();
-        
+
         // We'll invoke onUserLeaving before onPause only if the launching
         // activity did not explicitly state that this is an automated launch.
         mUserLeaving = (launchFlags&Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
         if (DEBUG_USER_LEAVING) Slog.v(TAG,
                 "startActivity() => mUserLeaving=" + mUserLeaving);
-        
+
         // If the caller has asked not to resume at this point, we make note
         // of this in the record so that we can skip it when trying to find
         // the top running activity.
         if (!doResume) {
             r.delayedResume = true;
         }
-        
+
         ActivityRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
                 != 0 ? r : null;
 
@@ -2935,12 +2915,8 @@ final class ActivityStack {
         if (r.resultTo == null && !addingToTask
                 && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             if (reuseTask == null) {
-                // todo: should do better management of integers.
-                mService.mCurTask++;
-                if (mService.mCurTask <= 0) {
-                    mService.mCurTask = 1;
-                }
-                setTask(r, createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
+                setTask(r, createTaskRecord(mService.getNextTaskId(), r.info, intent, true), null,
+                        true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                         + " in new task " + r.task);
             } else {
@@ -2950,7 +2926,7 @@ final class ActivityStack {
             if (!movedHome) {
                 moveHomeToFrontFromLaunchLocked(launchFlags);
             }
-            
+
         } else if (sourceRecord != null) {
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
@@ -3010,7 +2986,8 @@ final class ActivityStack {
             }
             setTask(r, prev != null
                     ? prev.task
-                    : createTaskRecord(mService.mCurTask, r.info, intent, true), null, true);
+                    : createTaskRecord(mService.getNextTaskId(), r.info, intent, true), null,
+                            true);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
@@ -3654,12 +3631,7 @@ final class ActivityStack {
         return true;
     }
 
-    final void finishSubActivityLocked(IBinder token, String resultWho, int requestCode) {
-        ActivityRecord self = isInStackLocked(token);
-        if (self == null) {
-            return;
-        }
-
+    final void finishSubActivityLocked(ActivityRecord self, String resultWho, int requestCode) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
@@ -3685,8 +3657,7 @@ final class ActivityStack {
                     + r.intent.getComponent().flattenToShortString());
             int taskNdx = mTaskHistory.indexOf(r.task);
             int activityNdx = r.task.mActivities.indexOf(r);
-            r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED,
-                    null, "crashed", false);
+            finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed", false);
             // Also terminate any activities below it that aren't yet
             // stopped, to avoid a situation where one will get
             // re-start our crashing activity once it gets resumed again.
@@ -3708,22 +3679,14 @@ final class ActivityStack {
                     if (!r.isHomeActivity || mService.mHomeProcess != r.app) {
                         Slog.w(TAG, "  Force finishing activity "
                                 + r.intent.getComponent().flattenToShortString());
-                        r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED,
-                                null, "crashed", false);
+                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed", false);
                     }
                 }
             }
         }
     }
 
-    final boolean finishActivityAffinityLocked(IBinder token) {
-        ActivityRecord r = isInStackLocked(token);
-        if (DEBUG_RESULTS) Slog.v(
-                TAG, "Finishing activity affinity token=" + token + " r=" + r);
-        if (r == null) {
-            return false;
-        }
-
+    final boolean finishActivityAffinityLocked(ActivityRecord r) {
         ArrayList<ActivityRecord> activities = r.task.mActivities;
         for (int index = activities.indexOf(r); index >= 0; --index) {
             ActivityRecord cur = activities.get(index);
@@ -3913,8 +3876,9 @@ final class ActivityStack {
         return r;
     }
 
-    final boolean navigateUpToLocked(ActivityRecord srec, Intent destIntent, int resultCode,
+    final boolean navigateUpToLocked(IBinder token, Intent destIntent, int resultCode,
             Intent resultData) {
+        final ActivityRecord srec = ActivityRecord.forToken(token);
         final TaskRecord task = srec.task;
         final ArrayList<ActivityRecord> activities = task.mActivities;
         final int start = activities.indexOf(srec);
@@ -4165,10 +4129,7 @@ final class ActivityStack {
 
         if (hadApp) {
             if (removeFromApp) {
-                int idx = r.app.activities.indexOf(r);
-                if (idx >= 0) {
-                    r.app.activities.remove(idx);
-                }
+                r.app.activities.remove(r);
                 if (mService.mHeavyWeightProcess == r.app && r.app.activities.size() <= 0) {
                     mService.mHeavyWeightProcess = null;
                     mService.mHandler.sendEmptyMessage(
@@ -4244,25 +4205,23 @@ final class ActivityStack {
         return removedFromHistory;
     }
 
-    final void activityDestroyed(IBinder token) {
-        synchronized (mService) {
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                ActivityRecord r = ActivityRecord.forToken(token);
-                if (r != null) {
-                    mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
-                }
-
-                if (isInStackLocked(token) != null) {
-                    if (r.state == ActivityState.DESTROYING) {
-                        cleanUpActivityLocked(r, true, false);
-                        removeActivityFromHistoryLocked(r);
-                    }
-                }
-                resumeTopActivityLocked(null);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
+    final void activityDestroyedLocked(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            ActivityRecord r = ActivityRecord.forToken(token);
+            if (r != null) {
+                mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
             }
+
+            if (isInStackLocked(token) != null) {
+                if (r.state == ActivityState.DESTROYING) {
+                    cleanUpActivityLocked(r, true, false);
+                    removeActivityFromHistoryLocked(r);
+                }
+            }
+            resumeTopActivityLocked(null);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
     
@@ -4358,7 +4317,7 @@ final class ActivityStack {
                         }
                     }
 
-                    r.stack.cleanUpActivityLocked(r, true, true);
+                    cleanUpActivityLocked(r, true, true);
                 }
             }
         }
@@ -4397,8 +4356,8 @@ final class ActivityStack {
     }
 
     final boolean findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
-        final TaskRecord task = mTaskIdToTaskRecord.get(taskId);
-        if (mTaskHistory.contains(task)) {
+        final TaskRecord task = taskForIdLocked(taskId);
+        if (task != null) {
             if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
                 mUserLeaving = true;
             }
@@ -4496,7 +4455,10 @@ final class ActivityStack {
         if (DEBUG_TRANSITION) Slog.v(TAG,
                 "Prepare to back transition: task=" + task);
 
-        final TaskRecord tr = mTaskIdToTaskRecord.get(task);
+        final TaskRecord tr = taskForIdLocked(task);
+        if (tr == null) {
+            return false;
+        }
         mTaskHistory.remove(tr);
         mTaskHistory.add(0, tr);
 
@@ -4525,7 +4487,7 @@ final class ActivityStack {
         TaskAccessInfo info = getTaskAccessInfoLocked(tr, true);
         ActivityRecord resumed = mResumedActivity;
         if (resumed != null && resumed.thumbHolder == tr) {
-            info.mainThumbnail = resumed.stack.screenshotActivities(resumed);
+            info.mainThumbnail = screenshotActivities(resumed);
         }
         if (info.mainThumbnail == null) {
             info.mainThumbnail = tr.lastThumbnail;
@@ -4538,7 +4500,7 @@ final class ActivityStack {
         if (resumed != null && resumed.task == tr) {
             // This task is the current resumed task, we just need to take
             // a screenshot of it and return that.
-            return resumed.stack.screenshotActivities(resumed);
+            return screenshotActivities(resumed);
         }
         // Return the information about the task, to figure out the top
         // thumbnail to return.
@@ -4551,7 +4513,10 @@ final class ActivityStack {
 
     public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex,
             boolean taskRequired) {
-        final TaskRecord task = mTaskIdToTaskRecord.get(taskId);
+        final TaskRecord task = taskForIdLocked(taskId);
+        if (task == null) {
+            return null;
+        }
         TaskAccessInfo info = getTaskAccessInfoLocked(task, false);
         if (info.root == null) {
             if (taskRequired) {
@@ -4633,7 +4598,7 @@ final class ActivityStack {
                     TaskAccessInfo.SubTask sub = thumbs.subtasks.get(index);
                     ActivityRecord resumed = mResumedActivity;
                     if (resumed != null && resumed.thumbHolder == sub.holder) {
-                        return resumed.stack.screenshotActivities(resumed);
+                        return screenshotActivities(resumed);
                     }
                     return sub.holder.lastThumbnail;
                 }
@@ -4847,8 +4812,7 @@ final class ActivityStack {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                    r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED,
-                            null, "close-sys", true);
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "close-sys", true);
                 }
             }
         }
@@ -4884,8 +4848,7 @@ final class ActivityStack {
                         r.app = null;
                     }
                     lastTask = r.task;
-                    r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
-                            true);
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop", true);
                 }
             }
         }
@@ -4975,8 +4938,7 @@ final class ActivityStack {
                 if (r.app == app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + r.intent.getComponent().flattenToShortString());
-                    r.stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed",
-                            false);
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed", false);
                 }
             }
         }
@@ -5048,11 +5010,11 @@ final class ActivityStack {
 
     private void removeActivity(ActivityRecord r) {
         final TaskRecord task = r.task;
+        // TODO: use ActivityManagerService.removeTask to do this.
         if (task.removeActivity(r)) {
             if (DEBUG_ADD_REMOVE) Slog.i(TAG, "removeActivity: Removing from history, task="
                     + task);
             mTaskHistory.remove(task);
-            mTaskIdToTaskRecord.delete(task.taskId);
         }
     }
 
@@ -5066,13 +5028,7 @@ final class ActivityStack {
 
     private TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
             boolean toTop) {
-        TaskRecord oldTask = mTaskIdToTaskRecord.get(taskId);
-        if (oldTask != null) {
-            Slog.w(TAG, "createTaskRecord: Reusing taskId=" + taskId + " without removing");
-            mTaskHistory.remove(oldTask);
-        }
-        TaskRecord task = new TaskRecord(taskId, info, intent);
-        mTaskIdToTaskRecord.put(taskId, task);
+        TaskRecord task = new TaskRecord(taskId, info, intent, this);
         if (toTop) {
             mTaskHistory.add(task);
         } else {

@@ -43,12 +43,17 @@ class TaskRecord extends ThumbnailHolder {
 
     int numFullscreen;      // Number of fullscreen activities.
 
+    /** List of all activities in the task arranged in history order */
     final ArrayList<ActivityRecord> mActivities = new ArrayList<ActivityRecord>();
 
-    TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
+    /** Current stack */
+    ActivityStack stack;
+
+    TaskRecord(int _taskId, ActivityInfo info, Intent _intent, ActivityStack _stack) {
         taskId = _taskId;
         affinity = info.taskAffinity;
         setIntent(_intent, info);
+        stack = _stack;
     }
 
     void touchActiveTime() {
