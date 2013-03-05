@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import android.animation.ObjectAnimator;
@@ -30,7 +29,6 @@ import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -39,6 +37,9 @@ import com.android.systemui.R;
 public class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
+
+    public static final boolean DEBUG_NAN = true; // http://b/7686690
+
     public final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
         Slog.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -141,8 +142,17 @@ public class PanelView extends FrameLayout {
                 last = event;
                 i++;
             }
-            mVX /= totalweight;
-            mVY /= totalweight;
+            if (totalweight > 0) {
+                mVX /= totalweight;
+                mVY /= totalweight;
+            } else {
+                if (DEBUG_NAN) {
+                    Slog.v("FlingTracker", "computeCurrentVelocity warning: totalweight=0",
+                            new Throwable());
+                }
+                // so as not to contaminate the velocities with NaN
+                mVX = mVY = 0;
+            }
 
             if (FlingTracker.DEBUG) {
                 Slog.v("FlingTracker", "computed: vx=" + mVX + " vy=" + mVY);
@@ -150,15 +160,19 @@ public class PanelView extends FrameLayout {
         }
         public float getXVelocity() {
             if (Float.isNaN(mVX)) {
-                Slog.v("FlingTracker", "warning: vx=NaN");
-                // XXX: should return 0
+                if (DEBUG_NAN) {
+                    Slog.v("FlingTracker", "warning: vx=NaN");
+                }
+                mVX = 0;
             }
             return mVX;
         }
         public float getYVelocity() {
             if (Float.isNaN(mVY)) {
-                Slog.v("FlingTracker", "warning: vx=NaN");
-                // XXX: should return 0
+                if (DEBUG_NAN) {
+                    Slog.v("FlingTracker", "warning: vx=NaN");
+                }
+                mVY = 0;
             }
             return mVY;
         }
@@ -531,8 +545,12 @@ public class PanelView extends FrameLayout {
 
     public void setExpandedHeightInternal(float h) {
         if (Float.isNaN(h)) {
-            Slog.v(TAG, "setExpandedHeightInternal: warning: h=NaN");
-            // XXX: should set h to 0
+            // If a NaN gets in here, it will freeze the Animators.
+            if (DEBUG_NAN) {
+                Slog.v(TAG, "setExpandedHeightInternal: warning: h=NaN, using 0 instead",
+                        new Throwable());
+            }
+            h = 0;
         }
 
         float fh = getFullHeight();
@@ -566,8 +584,12 @@ public class PanelView extends FrameLayout {
 
     public void setExpandedFraction(float frac) {
         if (Float.isNaN(frac)) {
-            Slog.v(TAG, "setExpandedFraction: frac=NaN");
-            // XXX: set frac to 0 to defend
+            // If a NaN gets in here, it will freeze the Animators.
+            if (DEBUG_NAN) {
+                Slog.v(TAG, "setExpandedFraction: frac=NaN, using 0 instead",
+                        new Throwable());
+            }
+            frac = 0;
         }
         setExpandedHeight(getFullHeight() * frac);
     }
