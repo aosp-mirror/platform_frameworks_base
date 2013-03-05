@@ -89,12 +89,12 @@ class GLES20RenderLayer extends GLES20Layer {
 
     @Override
     void end(Canvas currentCanvas) {
-        if (currentCanvas instanceof GLES20Canvas) {
-            ((GLES20Canvas) currentCanvas).resume();
-        }
         HardwareCanvas canvas = getCanvas();
         if (canvas != null) {
             canvas.onPostDraw();
+        }
+        if (currentCanvas instanceof GLES20Canvas) {
+            ((GLES20Canvas) currentCanvas).resume();
         }
     }
 
