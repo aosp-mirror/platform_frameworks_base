@@ -12004,6 +12004,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         resetAccessibilityStateChanged();
     }
 
+    void invalidateInheritedLayoutMode(int layoutModeOfRoot) {
+    }
+
     /**
      * @return The number of times this view has been attached to a window
      */

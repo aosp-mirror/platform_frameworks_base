@@ -3387,8 +3387,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void clearCachedLayoutMode() {
-        if (mLayoutMode != LAYOUT_MODE_UNDEFINED &&
-                (mGroupFlags & FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET) == 0) {
+        if (!getBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET)) {
            mLayoutMode = LAYOUT_MODE_UNDEFINED;
         }
     }
@@ -4697,6 +4696,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         setBooleanFlag(FLAG_USE_CHILD_DRAWING_ORDER, enabled);
     }
 
+    private boolean getBooleanFlag(int flag) {
+        return (mGroupFlags & flag) == flag;
+    }
+
     private void setBooleanFlag(int flag, boolean value) {
         if (value) {
             mGroupFlags |= flag;
@@ -4740,6 +4743,38 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mPersistentDrawingCache = drawingCacheToKeep & PERSISTENT_ALL_CACHES;
     }
 
+    private void setLayoutMode(int layoutMode, boolean explicitly) {
+        mLayoutMode = layoutMode;
+        setBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET, explicitly);
+    }
+
+    /**
+     * Recursively traverse the view hierarchy, resetting the layoutMode of any
+     * descendants that had inherited a different layoutMode from a previous parent.
+     * Recursion terminates when a descendant's mode is:
+     * <ul>
+     *     <li>Undefined</li>
+     *     <li>The same as the root node's</li>
+     *     <li>A mode that had been explicitly set</li>
+     * <ul/>
+     * The first two clauses are optimizations.
+     * @param layoutModeOfRoot
+     */
+    @Override
+    void invalidateInheritedLayoutMode(int layoutModeOfRoot) {
+        if (mLayoutMode == LAYOUT_MODE_UNDEFINED ||
+            mLayoutMode == layoutModeOfRoot ||
+            getBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET)) {
+            return;
+        }
+        setLayoutMode(LAYOUT_MODE_UNDEFINED, false);
+
+        // apply recursively
+        for (int i = 0, N = getChildCount(); i < N; i++) {
+            getChildAt(i).invalidateInheritedLayoutMode(layoutModeOfRoot);
+        }
+    }
+
     /**
      * Returns the basis of alignment during layout operations on this ViewGroup:
      * either {@link #LAYOUT_MODE_CLIP_BOUNDS} or {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
@@ -4754,8 +4789,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public int getLayoutMode() {
         if (mLayoutMode == LAYOUT_MODE_UNDEFINED) {
-            mLayoutMode = (mParent instanceof ViewGroup) ?
-                    ((ViewGroup)mParent).getLayoutMode() : LAYOUT_MODE_DEFAULT;
+            int inheritedLayoutMode = (mParent instanceof ViewGroup) ?
+                    ((ViewGroup) mParent).getLayoutMode() : LAYOUT_MODE_DEFAULT;
+            setLayoutMode(inheritedLayoutMode, false);
         }
         return mLayoutMode;
     }
@@ -4770,9 +4806,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #getLayoutMode()
      */
     public void setLayoutMode(int layoutMode) {
-        setBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET, layoutMode != LAYOUT_MODE_UNDEFINED);
         if (mLayoutMode != layoutMode) {
-            mLayoutMode = layoutMode;
+            invalidateInheritedLayoutMode(layoutMode);
+            setLayoutMode(layoutMode, layoutMode != LAYOUT_MODE_UNDEFINED);
             requestLayout();
         }
     }
