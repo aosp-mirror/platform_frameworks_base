@@ -36,6 +36,7 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
@@ -656,19 +657,18 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    private class SynthesisToFileSpeechDescriptorItem extends SynthesisSpeechItem {
-        private final FileDescriptor mFileDescriptor;
+    private class SynthesisToFileOutputStreamSpeechItem extends SynthesisSpeechItem {
+        private final FileOutputStream mFileOutputStream;
 
         public SynthesisToFileSpeechDescriptorItem(Object callerIdentity, int callerUid,
-                int callerPid, Bundle params, String text, FileDescriptor fileDescriptor) {
+                int callerPid, Bundle params, String text, FileOutputStream fileOutputStream) {
             super(callerIdentity, callerUid, callerPid, params, text);
-            mFileDescriptor = fileDescriptor;
+            mFileOutputStream = fileOutputStream;
         }
 
         @Override
         protected AbstractSynthesisCallback createSynthesisCallback() {
-            FileOutputStream fileOutputStream = new FileOutputStream(mFileDescriptor);
-            return new FileSynthesisCallback(fileOutputStream.getChannel());
+            return new FileSynthesisCallback(mFileOutputStream.getChannel());
         }
 
         @Override
@@ -679,6 +679,11 @@ public abstract class TextToSpeechService extends Service {
                 dispatchOnDone();
             } else {
                 dispatchOnError();
+            }
+            try {
+              mFileOutputStream.close();
+            } catch(IOException e) {
+              Log.w(TAG, "Failed to close output file", e);
             }
             return status;
         }
@@ -805,9 +810,9 @@ public abstract class TextToSpeechService extends Service {
                 return TextToSpeech.ERROR;
             }
 
-            SpeechItem item = new SynthesisToFileSpeechDescriptorItem(caller, Binder.getCallingUid(),
-                    Binder.getCallingPid(), params, text,
-                    fileDescriptor.getFileDescriptor());
+            SpeechItem item = new SynthesisToFileOutputStreamSpeechItem(caller,
+                    Binder.getCallingUid(), Binder.getCallingPid(), params, text,
+                    new ParcelFileDescriptor.AutoCloseOutputStream(fileDescriptor));
             return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
         }
 
