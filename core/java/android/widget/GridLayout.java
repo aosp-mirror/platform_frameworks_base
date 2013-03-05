@@ -224,6 +224,12 @@ public class GridLayout extends ViewGroup {
     static final int MAX_SIZE = 100000;
     static final int DEFAULT_CONTAINER_MARGIN = 0;
     static final int UNINITIALIZED_HASH = 0;
+    static final Printer LOG_PRINTER = new LogPrinter(Log.DEBUG, GridLayout.class.getName());
+    static final Printer NO_PRINTER = new Printer() {
+        @Override
+        public void println(String x) {
+        }
+    };
 
     // Defaults
 
@@ -252,7 +258,7 @@ public class GridLayout extends ViewGroup {
     int alignmentMode = DEFAULT_ALIGNMENT_MODE;
     int defaultGap;
     int lastLayoutParamsHashCode = UNINITIALIZED_HASH;
-    Printer printer = new LogPrinter(Log.DEBUG, getClass().getName());
+    Printer printer = LOG_PRINTER;
 
     // Constructors
 
@@ -589,7 +595,7 @@ public class GridLayout extends ViewGroup {
      * @see #getPrinter()
      */
     public void setPrinter(Printer printer) {
-        this.printer = printer;
+        this.printer = (printer == null) ? NO_PRINTER : printer;
     }
 
     // Static utility methods
