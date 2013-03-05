@@ -93,6 +93,8 @@ public final class MediaCodecInfo {
         public final static int COLOR_Format24BitABGR6666           = 43;
 
         public final static int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
+        /** @hide -- TODO(fadden): make this public before release */
+        public final static int COLOR_FormatAndroidOpaque             = 0x7F000789;
         public final static int COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00;
 
         /**
