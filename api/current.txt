@@ -25279,6 +25279,7 @@ package android.view {
     method public int getVisibility();
     method public final int getWidth();
     method protected int getWindowAttachCount();
+    method public android.view.WindowId getWindowId();
     method public int getWindowSystemUiVisibility();
     method public android.os.IBinder getWindowToken();
     method public int getWindowVisibility();
@@ -26222,6 +26223,21 @@ package android.view {
     method public abstract void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
     method public abstract void onWindowFocusChanged(boolean);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
+  }
+
+  public class WindowId implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isFocused();
+    method public void registerFocusObserver(android.view.WindowId.FocusObserver);
+    method public void unregisterFocusObserver(android.view.WindowId.FocusObserver);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static abstract class WindowId.FocusObserver {
+    ctor public WindowId.FocusObserver();
+    method public abstract void onFocusGained(android.view.WindowId);
+    method public abstract void onFocusLost(android.view.WindowId);
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {

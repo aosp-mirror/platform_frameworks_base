@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.view.IWindowId;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
@@ -445,6 +446,10 @@ final class Session extends IWindowSession.Stub
                 Binder.restoreCallingIdentity(identity);
             }
         }
+    }
+
+    public IWindowId getWindowId(IBinder window) {
+        return mService.getWindowId(window);
     }
 
     void windowAddedLocked() {
