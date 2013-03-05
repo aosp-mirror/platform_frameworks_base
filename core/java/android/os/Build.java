@@ -436,6 +436,11 @@ public class Build {
          * Android 4.X: Jelly Bean MR2, the revenge of the beans.
          */
         public static final int JELLY_BEAN_MR2 = CUR_DEVELOPMENT;
+
+        /**
+         * Android X.X: Key Lime Pie, another tasty treat.
+         */
+        public static final int KEY_LIME_PIE = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */
