@@ -54,14 +54,15 @@ class HTML5Audio extends Handler
     // The private status of the view that created this player
     private IsPrivateBrowsingEnabledGetter mIsPrivateBrowsingEnabledGetter;
 
-    private static int IDLE        =  0;
-    private static int INITIALIZED =  1;
-    private static int PREPARED    =  2;
-    private static int STARTED     =  4;
-    private static int COMPLETE    =  5;
-    private static int PAUSED      =  6;
-    private static int STOPPED     = -2;
-    private static int ERROR       = -1;
+    private static int IDLE                =  0;
+    private static int INITIALIZED         =  1;
+    private static int PREPARED            =  2;
+    private static int STARTED             =  4;
+    private static int COMPLETE            =  5;
+    private static int PAUSED              =  6;
+    private static int PAUSED_TRANSITORILY =  7;
+    private static int STOPPED             = -2;
+    private static int ERROR               = -1;
 
     private int mState = IDLE;
 
@@ -247,7 +248,7 @@ class HTML5Audio extends Handler
             // resume playback
             if (mMediaPlayer == null) {
                 resetMediaPlayer();
-            } else if (mState != ERROR && !mMediaPlayer.isPlaying()) {
+            } else if (mState == PAUSED_TRANSITORILY && !mMediaPlayer.isPlaying()) {
                 mMediaPlayer.start();
                 mState = STARTED;
             }
@@ -265,7 +266,9 @@ class HTML5Audio extends Handler
         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
             // Lost focus for a short time, but we have to stop
             // playback.
-            if (mState != ERROR && mMediaPlayer.isPlaying()) pause();
+            if (mState != ERROR && mMediaPlayer.isPlaying()) {
+                pause(PAUSED_TRANSITORILY);
+            }
             break;
         }
     }
@@ -298,12 +301,16 @@ class HTML5Audio extends Handler
     }
 
     private void pause() {
+        pause(PAUSED);
+    }
+
+    private void pause(int state) {
         if (mState == STARTED) {
             if (mTimer != null) {
                 mTimer.purge();
             }
             mMediaPlayer.pause();
-            mState = PAUSED;
+            mState = state;
         }
     }
 
