@@ -15852,6 +15852,7 @@ package android.os {
     field public static final int JELLY_BEAN = 16; // 0x10
     field public static final int JELLY_BEAN_MR1 = 17; // 0x11
     field public static final int JELLY_BEAN_MR2 = 10000; // 0x2710
+    field public static final int KEY_LIME_PIE = 10000; // 0x2710
   }
 
   public final class Bundle implements java.lang.Cloneable android.os.Parcelable {
