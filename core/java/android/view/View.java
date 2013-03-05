@@ -12023,6 +12023,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Retrieve the {@link WindowId} for the window this view is
+     * currently attached to.
+     */
+    public WindowId getWindowId() {
+        if (mAttachInfo == null) {
+            return null;
+        }
+        if (mAttachInfo.mWindowId == null) {
+            try {
+                mAttachInfo.mIWindowId = mAttachInfo.mSession.getWindowId(
+                        mAttachInfo.mWindowToken);
+                mAttachInfo.mWindowId = new WindowId(
+                        mAttachInfo.mIWindowId);
+            } catch (RemoteException e) {
+            }
+        }
+        return mAttachInfo.mWindowId;
+    }
+
+    /**
      * Retrieve a unique token identifying the top-level "real" window of
      * the window that this view is attached to.  That is, this is like
      * {@link #getWindowToken}, except if the window this view in is a panel
@@ -17899,6 +17919,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Callbacks mRootCallbacks;
 
         HardwareCanvas mHardwareCanvas;
+
+        IWindowId mIWindowId;
+        WindowId mWindowId;
 
         /**
          * The top view of the hierarchy.

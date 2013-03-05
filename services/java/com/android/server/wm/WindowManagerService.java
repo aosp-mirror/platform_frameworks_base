@@ -43,6 +43,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
 import android.app.AppOpsManager;
+import android.view.IWindowId;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
@@ -2661,6 +2662,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     mDisplayMagnifier.onRectangleOnScreenRequestedLocked(rectangle, immediate);
                 }
             }
+        }
+    }
+
+    public IWindowId getWindowId(IBinder token) {
+        synchronized (mWindowMap) {
+            WindowState window = mWindowMap.get(token);
+            return window != null ? window.mWindowId : null;
         }
     }
 
@@ -6685,22 +6693,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         //System.out.println("Changing focus from " + lastFocus
                         //                   + " to " + newFocus);
                         if (newFocus != null) {
-                            try {
-                                //Slog.i(TAG, "Gaining focus: " + newFocus);
-                                newFocus.mClient.windowFocusChanged(true, mInTouchMode);
-                            } catch (RemoteException e) {
-                                // Ignore if process has died.
-                            }
+                            //Slog.i(TAG, "Gaining focus: " + newFocus);
+                            newFocus.reportFocusChangedSerialized(true, mInTouchMode);
                             notifyFocusChanged();
                         }
 
                         if (lastFocus != null) {
-                            try {
-                                //Slog.i(TAG, "Losing focus: " + lastFocus);
-                                lastFocus.mClient.windowFocusChanged(false, mInTouchMode);
-                            } catch (RemoteException e) {
-                                // Ignore if process has died.
-                            }
+                            //Slog.i(TAG, "Losing focus: " + lastFocus);
+                            lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
                         }
                     }
                 } break;
@@ -6715,12 +6715,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     final int N = losers.size();
                     for (int i=0; i<N; i++) {
-                        try {
-                            //Slog.i(TAG, "Losing delayed focus: " + losers.get(i));
-                            losers.get(i).mClient.windowFocusChanged(false, mInTouchMode);
-                        } catch (RemoteException e) {
-                             // Ignore if process has died.
-                        }
+                        //Slog.i(TAG, "Losing delayed focus: " + losers.get(i));
+                        losers.get(i).reportFocusChangedSerialized(false, mInTouchMode);
                     }
                 } break;
 

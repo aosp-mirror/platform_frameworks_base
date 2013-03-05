@@ -25,6 +25,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
+import android.os.RemoteCallbackList;
+import android.view.IWindowFocusObserver;
+import android.view.IWindowId;
 import com.android.server.input.InputWindowHandle;
 
 import android.content.Context;
@@ -79,6 +82,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final int mAppOp;
     // UserId and appId of the owner. Don't display windows of non-current user.
     final int mOwnerUid;
+    final IWindowId mWindowId;
     WindowToken mToken;
     WindowToken mRootToken;
     AppWindowToken mAppToken;
@@ -106,6 +110,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAppFreezing;
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
+
+    RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
     /**
      * The window size that was requested by the application.  These are in
@@ -302,6 +308,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mAppOp = appOp;
         mToken = token;
         mOwnerUid = s.mUid;
+        mWindowId = new IWindowId.Stub() {
+            @Override
+            public void registerFocusObserver(IWindowFocusObserver observer) {
+                WindowState.this.registerFocusObserver(observer);
+            }
+            @Override
+            public void unregisterFocusObserver(IWindowFocusObserver observer) {
+                WindowState.this.unregisterFocusObserver(observer);
+            }
+            @Override
+            public boolean isFocused() {
+                return WindowState.this.isFocused();
+            }
+        };
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
         mDisplayContent = displayContent;
@@ -1180,6 +1200,55 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     WindowList getWindowList() {
         return mDisplayContent.getWindowList();
+    }
+
+    /**
+     * Report a focus change.  Must be called with no locks held, and consistently
+     * from the same serialized thread (such as dispatched from a handler).
+     */
+    public void reportFocusChangedSerialized(boolean focused, boolean inTouchMode) {
+        try {
+            mClient.windowFocusChanged(focused, inTouchMode);
+        } catch (RemoteException e) {
+        }
+        if (mFocusCallbacks != null) {
+            final int N = mFocusCallbacks.beginBroadcast();
+            for (int i=0; i<N; i++) {
+                IWindowFocusObserver obs = mFocusCallbacks.getBroadcastItem(i);
+                try {
+                    if (focused) {
+                        obs.focusGained(mWindowId.asBinder());
+                    } else {
+                        obs.focusLost(mWindowId.asBinder());
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+            mFocusCallbacks.finishBroadcast();
+        }
+    }
+
+    public void registerFocusObserver(IWindowFocusObserver observer) {
+        synchronized(mService.mWindowMap) {
+            if (mFocusCallbacks == null) {
+                mFocusCallbacks = new RemoteCallbackList<IWindowFocusObserver>();
+            }
+            mFocusCallbacks.register(observer);
+        }
+    }
+
+    public void unregisterFocusObserver(IWindowFocusObserver observer) {
+        synchronized(mService.mWindowMap) {
+            if (mFocusCallbacks != null) {
+                mFocusCallbacks.unregister(observer);
+            }
+        }
+    }
+
+    public boolean isFocused() {
+        synchronized(mService.mWindowMap) {
+            return mService.mCurrentFocus == this;
+        }
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {

@@ -146,7 +146,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/ISchedulingPolicyService.aidl \
 	core/java/android/os/IUpdateLock.aidl \
-        core/java/android/os/IUserManager.aidl \
+	core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
@@ -164,6 +164,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
 	core/java/android/view/IRotationWatcher.aidl \
 	core/java/android/view/IWindow.aidl \
+	core/java/android/view/IWindowFocusObserver.aidl \
+	core/java/android/view/IWindowId.aidl \
 	core/java/android/view/IWindowManager.aidl \
 	core/java/android/view/IWindowSession.aidl \
 	core/java/android/speech/IRecognitionListener.aidl \
