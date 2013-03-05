@@ -122,11 +122,7 @@ class TaskRecord extends ThumbnailHolder {
     }
 
     void addActivityAtBottom(ActivityRecord r) {
-        if (!mActivities.remove(r) && r.fullscreen) {
-            // Was not previously in list.
-            numFullscreen++;
-        }
-        mActivities.add(0, r);
+        addActivityAtIndex(0, r);
     }
 
     void addActivityToTop(ActivityRecord r) {
@@ -135,6 +131,14 @@ class TaskRecord extends ThumbnailHolder {
             numFullscreen++;
         }
         mActivities.add(r);
+    }
+
+    void addActivityAtIndex(int index, ActivityRecord r) {
+        if (!mActivities.remove(r) && r.fullscreen) {
+            // Was not previously in list.
+            numFullscreen++;
+        }
+        mActivities.add(index, r);
     }
 
     /** @return true if this was the last activity in the task */
