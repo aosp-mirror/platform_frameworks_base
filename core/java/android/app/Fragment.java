@@ -1019,7 +1019,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Call {@link Activity#startActivity(Intent)} on the fragment's
+     * Call {@link Activity#startActivity(Intent)} from the fragment's
      * containing Activity.
      *
      * @param intent The intent to start.
@@ -1029,7 +1029,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
     
     /**
-     * Call {@link Activity#startActivity(Intent, Bundle)} on the fragment's
+     * Call {@link Activity#startActivity(Intent, Bundle)} from the fragment's
      * containing Activity.
      *
      * @param intent The intent to start.
@@ -1051,7 +1051,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Call {@link Activity#startActivityForResult(Intent, int)} on the fragment's
+     * Call {@link Activity#startActivityForResult(Intent, int)} from the fragment's
      * containing Activity.
      */
     public void startActivityForResult(Intent intent, int requestCode) {
@@ -1059,7 +1059,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Call {@link Activity#startActivityForResult(Intent, int, Bundle)} on the fragment's
+     * Call {@link Activity#startActivityForResult(Intent, int, Bundle)} from the fragment's
      * containing Activity.
      */
     public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
