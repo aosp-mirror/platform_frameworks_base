@@ -88,9 +88,8 @@ public class BitmapFactory {
          * pixel in the decoded bitmap. For example, inSampleSize == 4 returns
          * an image that is 1/4 the width/height of the original, and 1/16 the
          * number of pixels. Any value <= 1 is treated the same as 1. Note: the
-         * decoder will try to fulfill this request, but the resulting bitmap
-         * may have different dimensions that precisely what has been requested.
-         * Also, powers of 2 are often faster/easier for the decoder to honor.
+         * decoder uses a final value based on powers of 2, any other value will
+         * be rounded down to the nearest power of 2.
          */
         public int inSampleSize;
 
