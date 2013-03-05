@@ -133,6 +133,7 @@ mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
 <pre>
 &#64;Override
 public void onDestroy() {
+   super.onDestroy();
    if (mHelper != null) mHelper.dispose();
    mHelper = null;
 }
