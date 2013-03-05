@@ -3,26 +3,7 @@ parent.title=In-app Billing
 parent.link=index.html
 @jd:body
 
-<!--notice block -->
-    <div style="background-color:#fffbd9;width:100%;margin-bottom:1em;padding:8px 8px 1px;">
-      <p><em>15 February 2013</em></p>
-      <p>In-app Billing V3 now supports subscriptions and you can get
-        started developing today. A small app update is currently being
-        rolled out to Android devices. This process is automatic and
-        most devices will get the update in the next few days. However,
-        if you wish to get the update today to start developing right
-        away, simply reboot your device. </p>
-
-      <p>However, we recommend that you <em>do not publish</em> an app with 
-        V3 subscriptions until all Android devices have received the update. We'll
-        notify you here that all devices have received the update and its safe
-        to publish your apps that use V3 subscriptions. </p>
-    </div>
-
-<!-- Use non-standard wrapper to support notice block. Restore standard 
-     wrapper when notice is removed. -->
-<!--<div id="qv-wrapper"> -->
-<div id="qv-wrapper" style="margin-top:.25em;">
+<div id="qv-wrapper">
 <div id="qv">
   <h2>Quickview</h2>
   <ul>
