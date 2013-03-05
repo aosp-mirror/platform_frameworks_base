@@ -123,6 +123,11 @@ status_t JMediaCodec::configure(
     return mCodec->configure(format, mSurfaceTextureClient, crypto, flags);
 }
 
+status_t JMediaCodec::createInputSurface(
+        sp<IGraphicBufferProducer>* bufferProducer) {
+    return mCodec->createInputSurface(bufferProducer);
+}
+
 status_t JMediaCodec::start() {
     return mCodec->start();
 }
@@ -188,6 +193,10 @@ status_t JMediaCodec::releaseOutputBuffer(size_t index, bool render) {
     return render
         ? mCodec->renderOutputBufferAndRelease(index)
         : mCodec->releaseOutputBuffer(index);
+}
+
+status_t JMediaCodec::signalEndOfInputStream() {
+    return mCodec->signalEndOfInputStream();
 }
 
 status_t JMediaCodec::getOutputFormat(JNIEnv *env, jobject *format) const {
@@ -415,6 +424,29 @@ static void android_media_MediaCodec_native_configure(
     err = codec->configure(format, bufferProducer, crypto, flags);
 
     throwExceptionAsNecessary(env, err);
+}
+
+static jobject android_media_MediaCodec_createInputSurface(JNIEnv* env,
+        jobject thiz) {
+    ALOGV("android_media_MediaCodec_createInputSurface");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    // Tell the MediaCodec that we want to use a Surface as input.
+    sp<IGraphicBufferProducer> bufferProducer;
+    status_t err = codec->createInputSurface(&bufferProducer);
+    if (err != NO_ERROR) {
+        throwExceptionAsNecessary(env, err);
+        return NULL;
+    }
+
+    // Wrap the IGBP in a Java-language Surface.
+    return android_view_Surface_createFromIGraphicBufferProducer(env,
+            bufferProducer);
 }
 
 static void android_media_MediaCodec_start(JNIEnv *env, jobject thiz) {
@@ -685,6 +717,21 @@ static void android_media_MediaCodec_releaseOutputBuffer(
     throwExceptionAsNecessary(env, err);
 }
 
+static void android_media_MediaCodec_signalEndOfInputStream(JNIEnv* env,
+        jobject thiz) {
+    ALOGV("android_media_MediaCodec_signalEndOfInputStream");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    status_t err = codec->signalEndOfInputStream();
+
+    throwExceptionAsNecessary(env, err);
+}
+
 static jobject android_media_MediaCodec_getOutputFormatNative(
         JNIEnv *env, jobject thiz) {
     ALOGV("android_media_MediaCodec_getOutputFormatNative");
@@ -852,6 +899,9 @@ static JNINativeMethod gMethods[] = {
       "Landroid/media/MediaCrypto;I)V",
       (void *)android_media_MediaCodec_native_configure },
 
+    { "createInputSurface", "()Landroid/view/Surface;",
+      (void *)android_media_MediaCodec_createInputSurface },
+
     { "start", "()V", (void *)android_media_MediaCodec_start },
     { "stop", "()V", (void *)android_media_MediaCodec_stop },
     { "flush", "()V", (void *)android_media_MediaCodec_flush },
@@ -870,6 +920,9 @@ static JNINativeMethod gMethods[] = {
 
     { "releaseOutputBuffer", "(IZ)V",
       (void *)android_media_MediaCodec_releaseOutputBuffer },
+
+    { "signalEndOfInputStream", "()V",
+      (void *)android_media_MediaCodec_signalEndOfInputStream },
 
     { "getOutputFormatNative", "()Ljava/util/Map;",
       (void *)android_media_MediaCodec_getOutputFormatNative },
