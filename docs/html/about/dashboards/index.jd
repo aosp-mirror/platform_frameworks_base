@@ -31,32 +31,32 @@ Google Play within a 14-day period ending on the data collection date noted belo
   <th>Distribution</th>
 </tr>
 <tr><td><a href="/about/versions/android-1.6.html">1.6</a></td><td>Donut</td>    <td>4</td><td>0.2%</td></tr>
-<tr><td><a href="/about/versions/android-2.1.html">2.1</a></td><td>Eclair</td>   <td>7</td><td>2.2%</td></tr>
-<tr><td><a href="/about/versions/android-2.2.html">2.2</a></td><td>Froyo</td>    <td>8</td><td>8.1%</td></tr>
+<tr><td><a href="/about/versions/android-2.1.html">2.1</a></td><td>Eclair</td>   <td>7</td><td>1.9%</td></tr>
+<tr><td><a href="/about/versions/android-2.2.html">2.2</a></td><td>Froyo</td>    <td>8</td><td>7.6%</td></tr>
 <tr><td><a href="/about/versions/android-2.3.html">2.3 - 2.3.2</a>
                                    </td><td rowspan="2">Gingerbread</td>    <td>9</td><td>0.2%</td></tr>
 <tr><td><a href="/about/versions/android-2.3.3.html">2.3.3 - 2.3.7
-        </a></td><!-- Gingerbread -->                                       <td>10</td><td>45.4%</td></tr>
+        </a></td><!-- Gingerbread -->                                       <td>10</td><td>44%</td></tr>
 <tr><td><a href="/about/versions/android-3.1.html">3.1</a></td>
                                                    <td rowspan="2">Honeycomb</td>      <td>12</td><td>0.3%</td></tr>
-<tr><td><a href="/about/versions/android-3.2.html">3.2</a></td>      <!-- Honeycomb --><td>13</td><td>1.0%</td></tr>
+<tr><td><a href="/about/versions/android-3.2.html">3.2</a></td>      <!-- Honeycomb --><td>13</td><td>0.9%</td></tr>
 <tr><td><a href="/about/versions/android-4.0.3.html">4.0.3 - 4.0.4</a></td>
-                                                            <td>Ice Cream Sandwich</td><td>15</td><td>29.0%</td></tr> 
+                                                            <td>Ice Cream Sandwich</td><td>15</td><td>28.6%</td></tr> 
 <tr><td><a href="/about/versions/android-4.1.html">4.1</a></td>
-                                                   <td rowspan="2">Jelly Bean</td><td>16</td><td>12.2%</td></tr>
-<tr><td><a href="/about/versions/android-4.2.html">4.2</a></td><!--Jelly Bean-->  <td>17</td><td>1.4%</td></tr>  
+                                                   <td rowspan="2">Jelly Bean</td><td>16</td><td>14.9%</td></tr>
+<tr><td><a href="/about/versions/android-4.2.html">4.2</a></td><!--Jelly Bean-->  <td>17</td><td>1.6%</td></tr>  
 </table>
 
 </div>
 
 <div class="col-8" style="margin-right:0">
 <img style="margin-left:30px" alt=""
-src="//chart.apis.google.com/chart?&cht=p&chs=460x245&chf=bg,s,00000000&chd=t:2.4,8.1,45.4,0.3,29,13.6&chl=Eclair%20%26%20older|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=c4df9b,6fad0c"
+src="//chart.apis.google.com/chart?&cht=p&chs=460x245&chf=bg,s,00000000&chd=t:2.0,7.6,44.2,1.2,28.6,16.5&chl=Eclair%20%26%20older|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=c4df9b,6fad0c"
 />
 
 </div><!-- end dashboard-panel -->
 
-<p style="clear:both"><em>Data collected during a 14-day period ending on February 4, 2013</em></p>
+<p style="clear:both"><em>Data collected during a 14-day period ending on March 4, 2013</em></p>
 <!--
 <p style="font-size:.9em">* <em>Other: 0.1% of devices running obsolete versions</em></p>
 -->
@@ -81,9 +81,9 @@ line for that version meets the y-axis on the right.</p>
 Google Play within a 14-day period ending on the date indicated on the x-axis.</p>
 
 <img alt="" height="250" width="660"
-src="//chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chf=bg,s,00000000&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C08/01%7C08/15%7C09/01%7C09/15%7C10/01%7C10/15%7C11/01%7C11/15%7C12/01%7C12/15%7C01/01%7C01/15%7C02/01%7C1%3A%7C2012%7C%7C%7C%7C%7C%7C%7C%7C%7C%7C2013%7C%7C2013%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:99.2,99.2,99.3,99.4,99.5,99.5,99.5,99.6,100.0,100.0,100.0,100.0,100.0|95.0,95.2,95.6,95.8,96.1,96.3,96.4,96.7,96.9,97.2,97.4,97.4,97.6|79.5,80.4,81.4,82.3,83.2,83.8,84.7,85.6,86.4,87.0,88.2,88.8,89.4|18.9,21.2,23.7,25.5,27.4,28.7,31.1,33.0,35.4,36.8,40.3,42.0,43.6|16.6,19.0,21.5,23.5,25.5,26.8,29.4,31.4,33.8,35.2,38.8,40.7,42.3|0.8,0.9,1.1,1.4,1.8,2.1,3.2,4.8,6.5,7.5,9.9,11.7,13.3&chm=b,c3df9b,0,1,0|tFroyo,689326,1,0,15,,t::-5|b,b4db77,1,2,0|tGingerbread,547a19,2,0,15,,t::-5|b,a5db51,2,3,0|b,96dd28,3,4,0|tIce%20Cream%20Sandwich,293f07,4,0,15,,t::-5|b,83c916,4,5,0|tJelly%20Bean,131d02,5,11,15,,t::-5|B,6fad0c,5,6,0&chg=7,25&chdl=Eclair|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=add274,9dd14f,8ece2a,7ab61c,659b11,507d08"
+src="//chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chf=bg,s,00000000&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C09/01%7C09/15%7C10/01%7C10/15%7C11/01%7C11/15%7C12/01%7C12/15%7C01/01%7C01/15%7C02/01%7C02/15%7C03/01%7C1%3A%7C2012%7C%7C%7C%7C%7C%7C%7C%7C2013%7C%7C%7C%7C2013%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:99.3,99.4,99.5,99.5,99.5,99.6,100.0,100.0,100.0,100.0,100.0,100.0,100.0|95.6,95.8,96.1,96.3,96.4,96.7,96.9,97.2,97.4,97.4,97.6,97.7,97.9|81.4,82.3,83.2,83.8,84.7,85.6,86.4,87.0,88.2,88.8,89.4,89.9,90.3|23.7,25.5,27.4,28.7,31.1,33.0,35.4,36.8,40.3,42.0,43.6,45.1,46.0|21.5,23.5,25.5,26.8,29.4,31.4,33.8,35.2,38.8,40.7,42.3,43.9,44.8|1.1,1.4,1.8,2.1,3.2,4.8,6.5,7.5,9.9,11.7,13.3,14.8,16.1&chm=b,c3df9b,0,1,0|tFroyo,689326,1,0,15,,t::-5|b,b4db77,1,2,0|tGingerbread,547a19,2,0,15,,t::-5|b,a5db51,2,3,0|b,96dd28,3,4,0|tIce%20Cream%20Sandwich,293f07,4,0,15,,t::-5|b,83c916,4,5,0|tJelly%20Bean,131d02,5,9,15,,t::-5|B,6fad0c,5,6,0&chg=7,25&chdl=Eclair|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=add274,9dd14f,8ece2a,7ab61c,659b11,507d08"
 />
-<p><em>Last historical dataset collected during a 14-day period ending on February 1, 2013</em></p>
+<p><em>Last historical dataset collected during a 14-day period ending on March 1, 2013</em></p>
 
 
 
