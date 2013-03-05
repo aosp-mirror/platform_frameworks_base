@@ -79,6 +79,20 @@ public:
         load(v);
     }
 
+    float operator[](int index) const {
+        return data[index];
+    }
+
+    float& operator[](int index) {
+        mType = kTypeUnknown;
+        return data[index];
+    }
+
+    Matrix4& operator=(const SkMatrix& v) {
+        load(v);
+        return *this;
+    }
+
     void loadIdentity();
 
     void load(const float* v);
@@ -149,6 +163,8 @@ public:
 
     float getTranslateX();
     float getTranslateY();
+
+    void decomposeScale(float& sx, float& sy) const;
 
     void dump() const;
 

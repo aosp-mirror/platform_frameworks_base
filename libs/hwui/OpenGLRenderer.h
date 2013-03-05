@@ -903,6 +903,10 @@ private:
         mDirtyClip = true;
     }
 
+    inline mat4& currentTransform() const {
+        return *mSnapshot->transform;
+    }
+
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
