@@ -200,9 +200,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
             if (view != null) {
                 // Put in recycler for re-measuring and/or layout
                 mRecycler.put(selectedPosition, view);
-            }
 
-            if (view != null) {
                 if (view.getLayoutParams() == null) {
                     mBlockLayoutRequests = true;
                     view.setLayoutParams(generateDefaultLayoutParams());
