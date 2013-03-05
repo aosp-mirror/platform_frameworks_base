@@ -1145,12 +1145,6 @@ public class WifiManager {
     /** @hide */
     public static final int RSSI_PKTCNT_FETCH_FAILED        = BASE + 22;
 
-    /* For system use only */
-    /** @hide */
-    public static final int ENABLE_TRAFFIC_STATS_POLL       = BASE + 31;
-    /** @hide */
-    public static final int TRAFFIC_STATS_POLL              = BASE + 32;
-
 
     /**
      * Passed with {@link ActionListener#onFailure}.

@@ -32,6 +32,7 @@ import android.os.Message;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,6 +46,11 @@ final class WifiTrafficPoller {
      */
     private static final int POLL_TRAFFIC_STATS_INTERVAL_MSECS = 1000;
 
+    private static final int ENABLE_TRAFFIC_STATS_POLL  = 1;
+    private static final int TRAFFIC_STATS_POLL         = 2;
+    private static final int ADD_CLIENT                 = 3;
+    private static final int REMOVE_CLIENT              = 4;
+
     private boolean mEnableTrafficStatsPoll = false;
     private int mTrafficStatsPollToken = 0;
     private long mTxPkts;
@@ -52,7 +58,7 @@ final class WifiTrafficPoller {
     /* Tracks last reported data activity */
     private int mDataActivity;
 
-    private final List<Messenger> mClients;
+    private final List<Messenger> mClients = new ArrayList<Messenger>();
     // err on the side of updating at boot since screen on broadcast may be missed
     // the first time
     private AtomicBoolean mScreenOn = new AtomicBoolean(true);
@@ -60,8 +66,7 @@ final class WifiTrafficPoller {
     private NetworkInfo mNetworkInfo;
     private final String mInterface;
 
-    WifiTrafficPoller(Context context, List<Messenger> clients, String iface) {
-        mClients = clients;
+    WifiTrafficPoller(Context context, String iface) {
         mInterface = iface;
         mTrafficHandler = new TrafficHandler();
 
@@ -88,28 +93,40 @@ final class WifiTrafficPoller {
                 }, filter);
     }
 
+    void addClient(Messenger client) {
+        Message.obtain(mTrafficHandler, ADD_CLIENT, client).sendToTarget();
+    }
+
+    void removeClient(Messenger client) {
+        Message.obtain(mTrafficHandler, REMOVE_CLIENT, client).sendToTarget();
+    }
+
 
     private class TrafficHandler extends Handler {
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case WifiManager.ENABLE_TRAFFIC_STATS_POLL: {
+                case ENABLE_TRAFFIC_STATS_POLL:
                     mEnableTrafficStatsPoll = (msg.arg1 == 1);
                     mTrafficStatsPollToken++;
                     if (mEnableTrafficStatsPoll) {
                         notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, WifiManager.TRAFFIC_STATS_POLL,
+                        sendMessageDelayed(Message.obtain(this, TRAFFIC_STATS_POLL,
                                 mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
                     }
                     break;
-                }
-                case WifiManager.TRAFFIC_STATS_POLL: {
+                case TRAFFIC_STATS_POLL:
                     if (msg.arg1 == mTrafficStatsPollToken) {
                         notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, WifiManager.TRAFFIC_STATS_POLL,
+                        sendMessageDelayed(Message.obtain(this, TRAFFIC_STATS_POLL,
                                 mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
                     }
                     break;
-                }
+                case ADD_CLIENT:
+                    mClients.add((Messenger) msg.obj);
+                    break;
+                case REMOVE_CLIENT:
+                    mClients.remove(msg.obj);
+                    break;
             }
 
         }
@@ -120,10 +137,10 @@ final class WifiTrafficPoller {
         if (mNetworkInfo == null) return;
         if (mNetworkInfo.getDetailedState() == CONNECTED && mScreenOn.get()) {
             msg = Message.obtain(mTrafficHandler,
-                    WifiManager.ENABLE_TRAFFIC_STATS_POLL, 1, 0);
+                    ENABLE_TRAFFIC_STATS_POLL, 1, 0);
         } else {
             msg = Message.obtain(mTrafficHandler,
-                    WifiManager.ENABLE_TRAFFIC_STATS_POLL, 0, 0);
+                    ENABLE_TRAFFIC_STATS_POLL, 0, 0);
         }
         msg.sendToTarget();
     }
