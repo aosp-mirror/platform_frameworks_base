@@ -454,6 +454,14 @@ void Matrix4::mapRect(Rect& r) const {
     }
 }
 
+void Matrix4::decomposeScale(float& sx, float& sy) const {
+    float len;
+    len = data[mat4::kScaleX] * data[mat4::kScaleX] + data[mat4::kSkewX] * data[mat4::kSkewX];
+    sx = copysignf(sqrtf(len), data[mat4::kScaleX]);
+    len = data[mat4::kScaleY] * data[mat4::kScaleY] + data[mat4::kSkewY] * data[mat4::kSkewY];
+    sy = copysignf(sqrtf(len), data[mat4::kScaleY]);
+}
+
 void Matrix4::dump() const {
     ALOGD("Matrix4[simple=%d, type=0x%x", isSimple(), getType());
     ALOGD("  %f %f %f %f", data[kScaleX], data[kSkewX], data[8], data[kTranslateX]);
