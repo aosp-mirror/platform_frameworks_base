@@ -1239,10 +1239,8 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"允许应用调用默认的容器服务，以便复制内容。普通应用不应使用此权限。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
-    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
-    <skip />
-    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
-    <skip />
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"访问密钥保护安全存储空间"</string>
+    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"允许应用访问密钥保护安全存储空间。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>
