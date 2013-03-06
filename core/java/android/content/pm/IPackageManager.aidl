@@ -194,20 +194,22 @@ interface IPackageManager {
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
 
     /**
-     * Delete a package.
+     * Delete a package for a specific user.
      *
      * @param packageName The fully qualified name of the package to delete.
      * @param observer a callback to use to notify when the package deletion in finished.
+     * @param userId the id of the user for whom to delete the package
      * @param flags - possible values: {@link #DONT_DELETE_DATA}
      */
-    void deletePackage(in String packageName, IPackageDeleteObserver observer, int flags);
+    void deletePackageAsUser(in String packageName, IPackageDeleteObserver observer,
+            int userId, int flags);
 
     String getInstallerPackageName(in String packageName);
 
     void addPackageToPreferred(String packageName);
-    
+
     void removePackageFromPreferred(String packageName);
-    
+
     List<PackageInfo> getPreferredPackages(int flags);
 
     void resetPreferredActivities(int userId);
@@ -381,7 +383,7 @@ interface IPackageManager {
             in VerificationParams verificationParams,
             in ContainerEncryptionParams encryptionParams);
 
-    int installExistingPackage(String packageName);
+    int installExistingPackageAsUser(String packageName, int userId);
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);

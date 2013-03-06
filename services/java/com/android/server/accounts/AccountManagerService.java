@@ -21,7 +21,6 @@ import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerResponse;
 import android.accounts.AuthenticatorDescription;
 import android.accounts.GrantCredentialsPermissionActivity;
 import android.accounts.IAccountAuthenticator;
@@ -70,6 +69,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
@@ -103,7 +103,7 @@ public class AccountManagerService
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     private final Context mContext;
 
@@ -145,6 +145,8 @@ public class AccountManagerService
     private static final String TABLE_META = "meta";
     private static final String META_KEY = "key";
     private static final String META_VALUE = "value";
+
+    private static final String TABLE_SHARED_ACCOUNTS = "shared_accounts";
 
     private static final String[] ACCOUNT_TYPE_COUNT_PROJECTION =
             new String[] { ACCOUNTS_TYPE, ACCOUNTS_TYPE_COUNT};
@@ -249,12 +251,18 @@ public class AccountManagerService
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiver(new BroadcastReceiver() {
+        userFilter.addAction(Intent.ACTION_USER_STARTED);
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                onUserRemoved(intent);
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                    onUserRemoved(intent);
+                } else if (Intent.ACTION_USER_STARTED.equals(action)) {
+                    onUserStarted(intent);
+                }
             }
-        }, userFilter);
+        }, UserHandle.ALL, userFilter, null, null);
     }
 
     public void systemReady() {
@@ -430,6 +438,21 @@ public class AccountManagerService
         }
     }
 
+    private void onUserStarted(Intent intent) {
+        int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+        if (userId < 1) return;
+
+        // Check if there's a shared account that needs to be created as an account
+        Account[] sharedAccounts = getSharedAccountsAsUser(userId);
+        if (sharedAccounts == null || sharedAccounts.length == 0) return;
+        Account[] accounts = getAccountsAsUser(null, userId);
+        for (Account sa : sharedAccounts) {
+            if (ArrayUtils.contains(accounts, sa)) continue;
+            // Account doesn't exist. Copy it now.
+            copyAccountToUser(sa, UserHandle.USER_OWNER, userId);
+        }
+    }
+
     @Override
     public void onServiceChanged(AuthenticatorDescription desc, int userId, boolean removed) {
         Slog.d(TAG, "onServiceChanged() for userId " + userId);
@@ -535,14 +558,120 @@ public class AccountManagerService
         // fails if the account already exists
         long identityToken = clearCallingIdentity();
         try {
-            return addAccountInternal(accounts, account, password, extras);
+            return addAccountInternal(accounts, account, password, extras, false);
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
+    private boolean copyAccountToUser(final Account account, int userFrom, int userTo) {
+        final UserAccounts fromAccounts = getUserAccounts(userFrom);
+        final UserAccounts toAccounts = getUserAccounts(userTo);
+        if (fromAccounts == null || toAccounts == null) {
+            return false;
+        }
+
+        long identityToken = clearCallingIdentity();
+        try {
+            new Session(fromAccounts, null, account.type, false,
+                    false /* stripAuthTokenFromResult */) {
+                protected String toDebugString(long now) {
+                    return super.toDebugString(now) + ", getAccountCredentialsForClone"
+                            + ", " + account.type;
+                }
+
+                public void run() throws RemoteException {
+                    mAuthenticator.getAccountCredentialsForCloning(this, account);
+                }
+
+                public void onResult(Bundle result) {
+                    if (result != null) {
+                        if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
+                            // Create a Session for the target user and pass in the bundle
+                            Slog.i(TAG, "getAccountCredentialsForCloning returned success, "
+                                    + "sending result to target user");
+                            completeCloningAccount(result, account, toAccounts);
+                        } else {
+                            Slog.e(TAG, "getAccountCredentialsForCloning returned failure");
+                            clonePassword(fromAccounts, toAccounts, account);
+                        }
+                        return;
+                    } else {
+                        Slog.e(TAG, "getAccountCredentialsForCloning returned null");
+                        clonePassword(fromAccounts, toAccounts, account);
+                        super.onResult(result);
+                    }
+                }
+            }.bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return true;
+    }
+
+    // TODO: Remove fallback - move to authenticator
+    private void clonePassword(UserAccounts fromAccounts, UserAccounts toAccounts,
+            Account account) {
+        long id = clearCallingIdentity();
+        try {
+            String password = readPasswordInternal(fromAccounts, account);
+            String extraFlags = readUserDataInternal(fromAccounts, account, "flags");
+            String extraServices = readUserDataInternal(fromAccounts, account, "services");
+            Bundle extras = new Bundle();
+            extras.putString("flags", extraFlags);
+            extras.putString("services", extraServices);
+            addAccountInternal(toAccounts, account, password, extras, true);
+        } finally {
+            restoreCallingIdentity(id);
+        }
+    }
+
+    void completeCloningAccount(final Bundle result, final Account account,
+            final UserAccounts targetUser) {
+        long id = clearCallingIdentity();
+        try {
+            new Session(targetUser, null, account.type, false,
+                    false /* stripAuthTokenFromResult */) {
+                protected String toDebugString(long now) {
+                    return super.toDebugString(now) + ", getAccountCredentialsForClone"
+                            + ", " + account.type;
+                }
+
+                public void run() throws RemoteException {
+                    mAuthenticator.addAccountFromCredentials(this, account, result);
+                }
+
+                public void onResult(Bundle result) {
+                    if (result != null) {
+                        if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
+                            // TODO: Anything?
+                            Slog.i(TAG, "addAccount returned success");
+                        } else {
+                            // TODO: Show error notification
+                            // TODO: Should we remove the shadow account to avoid retries?
+                            Slog.e(TAG, "addAccountFromCredentials returned failure");
+                        }
+                        return;
+                    } else {
+                        Slog.e(TAG, "addAccountFromCredentials returned null");
+                        super.onResult(result);
+                    }
+                }
+
+                public void onError(int errorCode, String errorMessage) {
+                    super.onError(errorCode,  errorMessage);
+                    // TODO: Show error notification to user
+                    // TODO: Should we remove the shadow account so that it doesn't keep trying?
+                }
+
+            }.bind();
+        } finally {
+            restoreCallingIdentity(id);
+        }
+    }
+
     private boolean addAccountInternal(UserAccounts accounts, Account account, String password,
-            Bundle extras) {
+            Bundle extras, boolean restricted) {
         if (account == null) {
             return false;
         }
@@ -767,6 +896,21 @@ public class AccountManagerService
                     new String[]{account.name, account.type});
             removeAccountFromCacheLocked(accounts, account);
             sendAccountsChangedBroadcast(accounts.userId);
+        }
+        if (accounts.userId == UserHandle.USER_OWNER) {
+            // Owner's account was removed, remove from any users that are sharing
+            // this account.
+            long id = Binder.clearCallingIdentity();
+            try {
+                List<UserInfo> users = mUserManager.getUsers(true);
+                for (UserInfo user : users) {
+                    if (!user.isPrimary() && user.isRestricted()) {
+                        removeSharedAccountAsUser(account, user.id);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(id);
+            }
         }
     }
 
@@ -1612,6 +1756,65 @@ public class AccountManagerService
     }
 
     @Override
+    public boolean addSharedAccountAsUser(Account account, int userId) {
+        userId = handleIncomingUser(userId);
+        SQLiteDatabase db = getUserAccounts(userId).openHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(ACCOUNTS_NAME, account.name);
+        values.put(ACCOUNTS_TYPE, account.type);
+        db.delete(TABLE_SHARED_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                new String[] {account.name, account.type});
+        long accountId = db.insert(TABLE_SHARED_ACCOUNTS, ACCOUNTS_NAME, values);
+        if (accountId < 0) {
+            Log.w(TAG, "insertAccountIntoDatabase: " + account
+                    + ", skipping the DB insert failed");
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean removeSharedAccountAsUser(Account account, int userId) {
+        userId = handleIncomingUser(userId);
+        UserAccounts accounts = getUserAccounts(userId);
+        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+        int r = db.delete(TABLE_SHARED_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                new String[] {account.name, account.type});
+        if (r > 0) {
+            removeAccountInternal(accounts, account);
+        }
+        return r > 0;
+    }
+
+    @Override
+    public Account[] getSharedAccountsAsUser(int userId) {
+        userId = handleIncomingUser(userId);
+        UserAccounts accounts = getUserAccounts(userId);
+        ArrayList<Account> accountList = new ArrayList<Account>();
+        Cursor cursor = null;
+        try {
+            cursor = accounts.openHelper.getReadableDatabase()
+                    .query(TABLE_SHARED_ACCOUNTS, new String[]{ACCOUNTS_NAME, ACCOUNTS_TYPE},
+                    null, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(ACCOUNTS_NAME);
+                int typeIndex = cursor.getColumnIndex(ACCOUNTS_TYPE);
+                do {
+                    accountList.add(new Account(cursor.getString(nameIndex),
+                            cursor.getString(typeIndex)));
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        Account[] accountArray = new Account[accountList.size()];
+        accountList.toArray(accountArray);
+        return accountArray;
+    }
+
+    @Override
     public Account[] getAccounts(String type) {
         return getAccountsAsUser(type, UserHandle.getCallingUserId());
     }
@@ -1685,7 +1888,6 @@ public class AccountManagerService
         private int mNumRequestContinued = 0;
         private int mNumErrors = 0;
 
-
         IAccountAuthenticator mAuthenticator = null;
 
         private final boolean mStripAuthTokenFromResult;
@@ -1694,7 +1896,7 @@ public class AccountManagerService
         public Session(UserAccounts accounts, IAccountManagerResponse response, String accountType,
                 boolean expectActivityLaunch, boolean stripAuthTokenFromResult) {
             super();
-            if (response == null) throw new IllegalArgumentException("response is null");
+            //if (response == null) throw new IllegalArgumentException("response is null");
             if (accountType == null) throw new IllegalArgumentException("accountType is null");
             mAccounts = accounts;
             mStripAuthTokenFromResult = stripAuthTokenFromResult;
@@ -1705,11 +1907,13 @@ public class AccountManagerService
             synchronized (mSessions) {
                 mSessions.put(toString(), this);
             }
-            try {
-                response.asBinder().linkToDeath(this, 0 /* flags */);
-            } catch (RemoteException e) {
-                mResponse = null;
-                binderDied();
+            if (response != null) {
+                try {
+                    response.asBinder().linkToDeath(this, 0 /* flags */);
+                } catch (RemoteException e) {
+                    mResponse = null;
+                    binderDied();
+                }
             }
         }
 
@@ -2017,7 +2221,17 @@ public class AccountManagerService
                     + META_KEY + " TEXT PRIMARY KEY NOT NULL, "
                     + META_VALUE + " TEXT)");
 
+            createSharedAccountsTable(db);
+
             createAccountsDeletionTrigger(db);
+        }
+
+        private void createSharedAccountsTable(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE " + TABLE_SHARED_ACCOUNTS + " ( "
+                    + ACCOUNTS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + ACCOUNTS_NAME + " TEXT NOT NULL, "
+                    + ACCOUNTS_TYPE + " TEXT NOT NULL, "
+                    + "UNIQUE(" + ACCOUNTS_NAME + "," + ACCOUNTS_TYPE + "))");
         }
 
         private void createAccountsDeletionTrigger(SQLiteDatabase db) {
@@ -2063,6 +2277,15 @@ public class AccountManagerService
                 db.execSQL("UPDATE " + TABLE_ACCOUNTS + " SET " + ACCOUNTS_TYPE +
                         " = 'com.google' WHERE " + ACCOUNTS_TYPE + " == 'com.google.GAIA'");
                 oldVersion++;
+            }
+
+            if (oldVersion == 4) {
+                createSharedAccountsTable(db);
+                oldVersion++;
+            }
+
+            if (oldVersion != newVersion) {
+                Log.e(TAG, "failed to upgrade version " + oldVersion + " to version " + newVersion);
             }
         }
 
@@ -2220,6 +2443,16 @@ public class AccountManagerService
         String msg = "caller uid " + uid + " lacks any of " + TextUtils.join(",", permissions);
         Log.w(TAG, "  " + msg);
         throw new SecurityException(msg);
+    }
+
+    private int handleIncomingUser(int userId) {
+        try {
+            return ActivityManagerNative.getDefault().handleIncomingUser(
+                    Binder.getCallingPid(), Binder.getCallingUid(), userId, true, true, "", null);
+        } catch (RemoteException re) {
+            // Shouldn't happen, local.
+        }
+        return userId;
     }
 
     private boolean inSystemImage(int callingUid) {
