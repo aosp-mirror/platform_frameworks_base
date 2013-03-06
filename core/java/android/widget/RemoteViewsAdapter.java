@@ -22,9 +22,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import android.Manifest;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -34,6 +36,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -50,9 +53,11 @@ import com.android.internal.widget.LockPatternUtils;
  */
 /** @hide */
 public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback {
+    private static final String MULTI_USER_PERM = Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+
     private static final String TAG = "RemoteViewsAdapter";
 
-    // The max number of items in the cache 
+    // The max number of items in the cache
     private static final int sDefaultCacheSize = 40;
     // The delay (in millis) to wait until attempting to unbind from a service after a request.
     // This ensures that we don't stay continually bound to the service and that it can be destroyed
@@ -63,7 +68,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private static final int sDefaultLoadingViewHeight = 50;
 
     // Type defs for controlling different messages across the main and worker message queues
-    private static final int sDefaultMessageType = 0; 
+    private static final int sDefaultMessageType = 0;
     private static final int sUnbindServiceMessageType = 1;
 
     private final Context mContext;
@@ -90,7 +95,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private Handler mMainQueue;
 
     // We cache the FixedSizeRemoteViewsCaches across orientation. These are the related data
-    // structures; 
+    // structures;
     private static final HashMap<RemoteViewsCacheKey,
             FixedSizeRemoteViewsCache> sCachedRemoteViewsCaches
             = new HashMap<RemoteViewsCacheKey,
@@ -155,13 +160,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 try {
                     RemoteViewsAdapter adapter;
                     final AppWidgetManager mgr = AppWidgetManager.getInstance(context);
-                    if (Process.myUid() == Process.SYSTEM_UID
-                            && (adapter = mAdapter.get()) != null) {
+                    if ((adapter = mAdapter.get()) != null) {
+                        checkInteractAcrossUsersPermission(context, adapter.mUserId);
                         mgr.bindRemoteViewsService(appWidgetId, intent, asBinder(),
                                 new UserHandle(adapter.mUserId));
                     } else {
-                        mgr.bindRemoteViewsService(appWidgetId, intent, asBinder(),
-                                Process.myUserHandle());
+                        Slog.w(TAG, "bind: adapter was null");
                     }
                     mIsConnecting = true;
                 } catch (Exception e) {
@@ -176,12 +180,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             try {
                 RemoteViewsAdapter adapter;
                 final AppWidgetManager mgr = AppWidgetManager.getInstance(context);
-                if (Process.myUid() == Process.SYSTEM_UID
-                        && (adapter = mAdapter.get()) != null) {
+                if ((adapter = mAdapter.get()) != null) {
+                    checkInteractAcrossUsersPermission(context, adapter.mUserId);
                     mgr.unbindRemoteViewsService(appWidgetId, intent,
                             new UserHandle(adapter.mUserId));
                 } else {
-                    mgr.unbindRemoteViewsService(appWidgetId, intent, Process.myUserHandle());
+                    Slog.w(TAG, "unbind: adapter was null");
                 }
                 mIsConnecting = false;
             } catch (Exception e) {
@@ -263,7 +267,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             // Clear the main/worker queues
             final RemoteViewsAdapter adapter = mAdapter.get();
             if (adapter == null) return;
-            
+
             adapter.mMainQueue.post(new Runnable() {
                 @Override
                 public void run() {
@@ -828,11 +832,9 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
         mRequestedViews = new RemoteViewsFrameLayoutRefSet();
 
-        if (Process.myUid() == Process.SYSTEM_UID) {
-            mUserId = new LockPatternUtils(context).getCurrentUser();
-        } else {
-            mUserId = UserHandle.myUserId();
-        }
+        checkInteractAcrossUsersPermission(context, UserHandle.myUserId());
+        mUserId = context.getUserId();
+
         // Strip the previously injected app widget id from service intent
         if (intent.hasExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID)) {
             intent.removeExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID);
@@ -873,6 +875,15 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             if (!mDataReady) {
                 requestBindService();
             }
+        }
+    }
+
+    private static void checkInteractAcrossUsersPermission(Context context, int userId) {
+        if (context.getUserId() != userId
+                && context.checkCallingOrSelfPermission(MULTI_USER_PERM)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must have permission " + MULTI_USER_PERM
+                    + " to inflate another user's widget");
         }
     }
 
