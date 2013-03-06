@@ -208,6 +208,16 @@ public class ActionBarOverlayLayout extends ViewGroup {
     }
 
     @Override
+    protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return new LayoutParams(p);
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        return p instanceof LayoutParams;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int maxHeight = 0;
         int maxWidth = 0;
@@ -334,6 +344,11 @@ public class ActionBarOverlayLayout extends ViewGroup {
                 child.layout(childLeft, childTop, childLeft + width, childTop + height);
             }
         }
+    }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
     }
 
     void pullChildren() {
