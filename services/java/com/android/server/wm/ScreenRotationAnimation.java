@@ -216,14 +216,20 @@ class ScreenRotationAnimation {
         try {
             try {
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                    mSurfaceControl = new SurfaceTrace(session, "FreezeSurface",
+                    mSurfaceControl = new SurfaceTrace(session, "ScreenshotSurface",
                             mWidth, mHeight,
-                            PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_SCREENSHOT | SurfaceControl.HIDDEN);
+                            PixelFormat.OPAQUE, SurfaceControl.HIDDEN);
                 } else {
-                    mSurfaceControl = new SurfaceControl(session, "FreezeSurface",
+                    mSurfaceControl = new SurfaceControl(session, "ScreenshotSurface",
                             mWidth, mHeight,
-                            PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_SCREENSHOT | SurfaceControl.HIDDEN);
+                            PixelFormat.OPAQUE, SurfaceControl.HIDDEN);
                 }
+                // capture a screenshot into the surface we just created
+                Surface sur = new Surface();
+                sur.copyFrom(mSurfaceControl);
+                // FIXME: we should use the proper display
+                SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
+                        SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), sur);
                 mSurfaceControl.setLayerStack(mDisplay.getLayerStack());
                 mSurfaceControl.setLayer(FREEZE_LAYER + 1);
                 mSurfaceControl.setAlpha(0);

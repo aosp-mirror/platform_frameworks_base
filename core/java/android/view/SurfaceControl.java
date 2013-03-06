@@ -159,17 +159,6 @@ public class SurfaceControl {
     public static final int FX_SURFACE_NORMAL   = 0x00000000;
 
     /**
-     * Surface creation flag: Creates a Blur surface.
-     * Everything behind this surface is blurred by some amount.
-     * The quality and refresh speed of the blur effect is not settable or guaranteed.
-     * It is an error to lock a Blur surface, since it doesn't have a backing store.
-     *
-     * @deprecated
-     */
-    @Deprecated
-    public static final int FX_SURFACE_BLUR = 0x00010000;
-
-    /**
      * Surface creation flag: Creates a Dim surface.
      * Everything behind this surface is dimmed by the amount specified
      * in {@link #setAlpha}.  It is an error to lock a Dim surface, since it
@@ -177,11 +166,6 @@ public class SurfaceControl {
      *
      */
     public static final int FX_SURFACE_DIM = 0x00020000;
-
-    /**
-     *
-     */
-    public static final int FX_SURFACE_SCREENSHOT = 0x00030000;
 
     /**
      * Mask used for FX values above.
