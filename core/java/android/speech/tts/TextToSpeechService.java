@@ -660,7 +660,7 @@ public abstract class TextToSpeechService extends Service {
     private class SynthesisToFileOutputStreamSpeechItem extends SynthesisSpeechItem {
         private final FileOutputStream mFileOutputStream;
 
-        public SynthesisToFileSpeechDescriptorItem(Object callerIdentity, int callerUid,
+        public SynthesisToFileOutputStreamSpeechItem(Object callerIdentity, int callerUid,
                 int callerPid, Bundle params, String text, FileOutputStream fileOutputStream) {
             super(callerIdentity, callerUid, callerPid, params, text);
             mFileOutputStream = fileOutputStream;
