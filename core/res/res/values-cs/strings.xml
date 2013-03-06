@@ -959,7 +959,7 @@
   </plurals>
   <plurals name="in_num_days">
     <item quantity="one" msgid="5413088743009839518">"zítra"</item>
-    <item quantity="other" msgid="5109449375100953247">"zbývající počet dní: <xliff:g id="COUNT">%d</xliff:g>"</item>
+    <item quantity="other" msgid="5109449375100953247">"za <xliff:g id="COUNT">%d</xliff:g> dny"</item>
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
     <item quantity="one" msgid="1849036840200069118">"před 1 s"</item>
@@ -991,7 +991,7 @@
   </plurals>
   <plurals name="abbrev_in_num_days">
     <item quantity="one" msgid="2178576254385739855">"zítra"</item>
-    <item quantity="other" msgid="2973062968038355991">"zbývající počet dní: <xliff:g id="COUNT">%d</xliff:g>"</item>
+    <item quantity="other" msgid="2973062968038355991">"za <xliff:g id="COUNT">%d</xliff:g> dny"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"dne <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"v <xliff:g id="TIME">%s</xliff:g>"</string>

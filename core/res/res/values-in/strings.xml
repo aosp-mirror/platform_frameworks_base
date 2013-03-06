@@ -1239,10 +1239,8 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Mengizinkan apl menjalankan layanan kontainer default untuk menyalin konten. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Menentukan rute keluaran media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Memungkinkan aplikasi menentukan rute keluaran media ke perangkat eksternal lainnya."</string>
-    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
-    <skip />
-    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
-    <skip />
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Mengakses pengaman penyimpanan aman"</string>
+    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Mengizinkan aplikasi mengakses pengaman penyimpanan aman."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mengontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Buka"</string>
