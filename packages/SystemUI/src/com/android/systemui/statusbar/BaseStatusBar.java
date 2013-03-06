@@ -559,6 +559,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                             + thumbBgPadding + thumbLeftMargin);
                     y = (int) (dm.heightPixels
                             - res.getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height) - thumbBgPadding);
+                    if (mLayoutDirection == View.LAYOUT_DIRECTION_RTL) {
+                        x = dm.widthPixels - x - res
+                                .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
+                    }
+
                 } else { // if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     float thumbTopMargin = res
                             .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_top_margin);
@@ -595,10 +600,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                             - thumbBgPadding - recentsItemRightPadding - recentsScrollViewRightPadding);
                     y = (int) ((dm.heightPixels - statusBarHeight - height) / 2f + thumbTopMargin
                             + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
-                }
-                if (mLayoutDirection == View.LAYOUT_DIRECTION_RTL) {
-                    x = dm.widthPixels - x - res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
                 }
 
                 ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(
