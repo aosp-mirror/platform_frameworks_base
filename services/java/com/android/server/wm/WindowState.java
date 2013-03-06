@@ -1003,6 +1003,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
                         mService.removeWindowLocked(mSession, win);
+                    } else if (WindowState.this.mHasSurface) {
+                        Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
+                        mService.removeWindowLocked(mSession, WindowState.this);
                     }
                 }
             } catch (IllegalArgumentException ex) {
