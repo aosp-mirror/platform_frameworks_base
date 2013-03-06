@@ -83,6 +83,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private boolean mAnimateIconOfFirstTask;
     private boolean mWaitingForWindowAnimation;
     private long mWindowAnimationStartTime;
+    private boolean mCallUiHiddenBeforeNextReload;
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
@@ -180,17 +181,18 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
             if (index == 0) {
                 if (mAnimateIconOfFirstTask) {
-                    if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
-                        holder.iconView.setAlpha(1f);
-                        holder.iconView.setTranslationX(0f);
-                        holder.iconView.setTranslationY(0f);
-                        holder.labelView.setAlpha(1f);
-                        holder.labelView.setTranslationX(0f);
-                        holder.labelView.setTranslationY(0f);
-                        if (holder.calloutLine != null) {
-                            holder.calloutLine.setAlpha(1f);
-                            holder.calloutLine.setTranslationX(0f);
-                            holder.calloutLine.setTranslationY(0f);
+                    ViewHolder oldHolder = mItemToAnimateInWhenWindowAnimationIsFinished;
+                    if (oldHolder != null) {
+                        oldHolder.iconView.setAlpha(1f);
+                        oldHolder.iconView.setTranslationX(0f);
+                        oldHolder.iconView.setTranslationY(0f);
+                        oldHolder.labelView.setAlpha(1f);
+                        oldHolder.labelView.setTranslationX(0f);
+                        oldHolder.labelView.setTranslationY(0f);
+                        if (oldHolder.calloutLine != null) {
+                            oldHolder.calloutLine.setAlpha(1f);
+                            oldHolder.calloutLine.setTranslationX(0f);
+                            oldHolder.calloutLine.setTranslationY(0f);
                         }
                     }
                     mItemToAnimateInWhenWindowAnimationIsFinished = null;
@@ -198,17 +200,18 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     final ViewTreeObserver observer = getViewTreeObserver();
                     final OnGlobalLayoutListener animateFirstIcon = new OnGlobalLayoutListener() {
                         public void onGlobalLayout() {
-                            if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
-                                holder.iconView.setAlpha(1f);
-                                holder.iconView.setTranslationX(0f);
-                                holder.iconView.setTranslationY(0f);
-                                holder.labelView.setAlpha(1f);
-                                holder.labelView.setTranslationX(0f);
-                                holder.labelView.setTranslationY(0f);
-                                if (holder.calloutLine != null) {
-                                    holder.calloutLine.setAlpha(1f);
-                                    holder.calloutLine.setTranslationX(0f);
-                                    holder.calloutLine.setTranslationY(0f);
+                            ViewHolder oldHolder = mItemToAnimateInWhenWindowAnimationIsFinished;
+                            if (oldHolder != null) {
+                                oldHolder.iconView.setAlpha(1f);
+                                oldHolder.iconView.setTranslationX(0f);
+                                oldHolder.iconView.setTranslationY(0f);
+                                oldHolder.labelView.setAlpha(1f);
+                                oldHolder.labelView.setTranslationX(0f);
+                                oldHolder.labelView.setTranslationY(0f);
+                                if (oldHolder.calloutLine != null) {
+                                    oldHolder.calloutLine.setAlpha(1f);
+                                    oldHolder.calloutLine.setTranslationX(0f);
+                                    oldHolder.calloutLine.setTranslationY(0f);
                                 }
                             }
                             mItemToAnimateInWhenWindowAnimationIsFinished = holder;
@@ -325,8 +328,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public void show(boolean show, ArrayList<TaskDescription> recentTaskDescriptions,
             boolean firstScreenful, boolean animateIconOfFirstTask) {
-        mAnimateIconOfFirstTask = animateIconOfFirstTask;
-        mWaitingForWindowAnimation = animateIconOfFirstTask;
+        if (show && mCallUiHiddenBeforeNextReload) {
+            onUiHidden();
+            recentTaskDescriptions = null;
+            mAnimateIconOfFirstTask = false;
+            mWaitingForWindowAnimation = false;
+        } else {
+            mAnimateIconOfFirstTask = animateIconOfFirstTask;
+            mWaitingForWindowAnimation = animateIconOfFirstTask;
+        }
         if (show) {
             mWaitingToShow = true;
             refreshRecentTasksList(recentTaskDescriptions, firstScreenful);
@@ -372,6 +382,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         } else {
             mWaitingToShow = false;
             // call onAnimationEnd() and clearRecentTasksList() in onUiHidden()
+            mCallUiHiddenBeforeNextReload = true;
             if (mPopup != null) {
                 mPopup.dismiss();
             }
@@ -379,6 +390,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void onUiHidden() {
+        mCallUiHiddenBeforeNextReload = false;
         if (!mShowing && mRecentTaskDescriptions != null) {
             onAnimationEnd(null);
             clearRecentTasksList();
