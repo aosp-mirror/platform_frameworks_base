@@ -5652,7 +5652,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 null);
 
         final int uid = Binder.getCallingUid();
-        if (!isUserAllowed(uid, UserManager.ALLOW_INSTALL_APPS)) {
+        if (!isUserAllowed(UserHandle.getUserId(uid), UserManager.ALLOW_INSTALL_APPS)) {
             try {
                 observer.packageInstalled("", PackageManager.INSTALL_FAILED_USER_RESTRICTED);
             } catch (RemoteException re) {
@@ -5690,13 +5690,17 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @hide
      */
     @Override
-    public int installExistingPackage(String packageName) {
+    public int installExistingPackageAsUser(String packageName, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
                 null);
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(uid);
-        if (!isUserAllowed(uid, UserManager.ALLOW_INSTALL_APPS)) {
+        if (UserHandle.getUserId(uid) != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "installExistingPackage for user " + userId);
+        }
+        if (!isUserAllowed(userId, UserManager.ALLOW_INSTALL_APPS)) {
             return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
         }
 
@@ -5730,14 +5734,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private boolean isUserAllowed(int callingUid, String restrictionKey) {
-        if (callingUid != android.os.Process.myUid()) {
-            Bundle restrictions = sUserManager.getUserRestrictions(
-                    UserHandle.getUserId(callingUid));
-            if (!restrictions.getBoolean(UserManager.ALLOW_INSTALL_APPS)) {
-                Log.w(TAG, "User does not have permission to: " + restrictionKey);
-                return false;
-            }
+    private boolean isUserAllowed(int userId, String restrictionKey) {
+        Bundle restrictions = sUserManager.getUserRestrictions(userId);
+        if (!restrictions.getBoolean(UserManager.ALLOW_INSTALL_APPS)) {
+            Log.w(TAG, "User does not have permission to: " + restrictionKey);
+            return false;
         }
         return true;
     }
@@ -8090,14 +8091,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         return tmpPackageFile;
     }
 
-    public void deletePackage(final String packageName,
-                              final IPackageDeleteObserver observer,
-                              final int flags) {
+    @Override
+    public void deletePackageAsUser(final String packageName,
+                                    final IPackageDeleteObserver observer,
+                                    final int userId, final int flags) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
-        // Queue up an async operation since the package deletion may take a little while.
         final int uid = Binder.getCallingUid();
-        if (!isUserAllowed(uid, UserManager.ALLOW_UNINSTALL_APPS)) {
+        if (UserHandle.getUserId(uid) != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "deletePackage for user " + userId);
+        }
+        if (!isUserAllowed(userId, UserManager.ALLOW_UNINSTALL_APPS)) {
             try {
                 observer.packageDeleted(packageName, PackageManager.DELETE_FAILED_USER_RESTRICTED);
             } catch (RemoteException re) {
@@ -8105,10 +8111,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
-                final int returnCode = deletePackageX(packageName, uid, flags);
+                final int returnCode = deletePackageX(packageName, userId, flags);
                 if (observer != null) {
                     try {
                         observer.packageDeleted(packageName, returnCode);
@@ -8134,14 +8141,14 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  persisting settings for later use
      *  sending a broadcast if necessary
      */
-    private int deletePackageX(String packageName, int uid, int flags) {
+    private int deletePackageX(String packageName, int userId, int flags) {
         final PackageRemovedInfo info = new PackageRemovedInfo();
         final boolean res;
 
         IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
         try {
-            if (dpm != null && dpm.packageHasActiveAdmins(packageName, UserHandle.getUserId(uid))) {
+            if (dpm != null && dpm.packageHasActiveAdmins(packageName, userId)) {
                 Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
                 return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
             }
@@ -8153,7 +8160,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mInstallLock) {
             res = deletePackageLI(packageName,
                     (flags & PackageManager.DELETE_ALL_USERS) != 0
-                            ? UserHandle.ALL : new UserHandle(UserHandle.getUserId(uid)),
+                            ? UserHandle.ALL : new UserHandle(userId),
                     true, flags | REMOVE_CHATTY, info, true);
             systemUpdate = info.isRemovedPackageSystemUpdate;
             if (res && !systemUpdate && mPackages.get(packageName) == null) {
@@ -8376,7 +8383,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
                 return false;
             }
-            if (!isSystemApp(ps) && user != null
+            if (user != null
                     && user.getIdentifier() != UserHandle.USER_ALL) {
                 // The caller is asking that the package only be deleted for a single
                 // user.  To do this, we just mark its uninstalled state and delete
@@ -8387,17 +8394,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                         true,  //stopped
                         true,  //notLaunched
                         null, null);
-                if (ps.isAnyInstalled(sUserManager.getUserIds())) {
-                    // Other user still have this package installed, so all
+                if (!isSystemApp(ps)) {
+                    if (ps.isAnyInstalled(sUserManager.getUserIds())) {
+                        // Other user still have this package installed, so all
+                        // we need to do is clear this user's data and save that
+                        // it is uninstalled.
+                        removeUser = user.getIdentifier();
+                        appId = ps.appId;
+                        mSettings.writePackageRestrictionsLPr(removeUser);
+                    } else {
+                        // We need to set it back to 'installed' so the uninstall
+                        // broadcasts will be sent correctly.
+                        ps.setInstalled(true, user.getIdentifier());
+                    }
+                } else {
+                    // This is a system app, so we assume that the
+                    // other users still have this package installed, so all
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
                     removeUser = user.getIdentifier();
                     appId = ps.appId;
                     mSettings.writePackageRestrictionsLPr(removeUser);
-                } else {
-                    // We need to set it back to 'installed' so the uninstall
-                    // broadcasts will be sent correctly.
-                    ps.setInstalled(true, user.getIdentifier());
                 }
             }
         }

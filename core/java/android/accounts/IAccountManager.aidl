@@ -58,4 +58,9 @@ interface IAccountManager {
         in Bundle options, boolean expectActivityLaunch, int userId);
     void getAuthTokenLabel(in IAccountManagerResponse response, String accountType,
         String authTokenType);
+
+    /* Shared accounts */
+    boolean addSharedAccountAsUser(in Account account, int userId);
+    Account[] getSharedAccountsAsUser(int userId);
+    boolean removeSharedAccountAsUser(in Account account, int userId);
 }

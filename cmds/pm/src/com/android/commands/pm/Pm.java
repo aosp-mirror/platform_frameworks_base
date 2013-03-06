@@ -1094,7 +1094,7 @@ public final class Pm {
     private boolean deletePackage(String pkg, int unInstallFlags) {
         PackageDeleteObserver obs = new PackageDeleteObserver();
         try {
-            mPm.deletePackage(pkg, obs, unInstallFlags);
+            mPm.deletePackageAsUser(pkg, obs, UserHandle.USER_OWNER, unInstallFlags);
 
             synchronized (obs) {
                 while (!obs.finished) {
