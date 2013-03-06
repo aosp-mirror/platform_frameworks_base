@@ -395,6 +395,23 @@ class WifiConfigStore {
         return ret;
     }
 
+    void disableAllNetworks() {
+        boolean networkDisabled = false;
+        for(WifiConfiguration config : mConfiguredNetworks.values()) {
+            if(config != null && config.status != Status.DISABLED) {
+                if(mWifiNative.disableNetwork(config.networkId)) {
+                    networkDisabled = true;
+                    config.status = Status.DISABLED;
+                } else {
+                    loge("Disable network failed on " + config.networkId);
+                }
+            }
+        }
+
+        if (networkDisabled) {
+            sendConfiguredNetworksChangedBroadcast();
+        }
+    }
     /**
      * Disable a network. Note that there is no saveConfig operation.
      * @param netId network to be disabled

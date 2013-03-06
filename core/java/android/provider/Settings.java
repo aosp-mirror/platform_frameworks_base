@@ -4784,6 +4784,13 @@ public final class Settings {
        public static final String WIFI_ON = "wifi_on";
 
        /**
+        * Setting to allow scans to be enabled even wifi is turned off for connectivity.
+        * @hide
+        */
+       public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
+                "wifi_scan_always_enabled";
+
+       /**
         * Used to save the Wifi_ON state prior to tethering.
         * This state will be checked to restore Wifi after
         * the user turns off tethering.
@@ -5345,6 +5352,7 @@ public final class Settings {
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
             WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
+            WIFI_SCAN_ALWAYS_AVAILABLE,
             WIFI_NUM_OPEN_NETWORKS_KEPT,
             EMERGENCY_TONE,
             CALL_AUTO_RETRY,
