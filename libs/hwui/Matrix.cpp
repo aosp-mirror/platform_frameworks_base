@@ -232,11 +232,11 @@ void Matrix4::copyTo(float* v) const {
     memcpy(v, data, sizeof(data));
 }
 
-float Matrix4::getTranslateX() {
+float Matrix4::getTranslateX() const {
     return data[kTranslateX];
 }
 
-float Matrix4::getTranslateY() {
+float Matrix4::getTranslateY() const {
     return data[kTranslateY];
 }
 

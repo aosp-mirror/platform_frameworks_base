@@ -1175,8 +1175,8 @@ public:
         SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         const bool pureTranslate = state.mMatrix.isPureTranslate();
-        fontRenderer.precache(paint, mText, mCount,
-                pureTranslate ? mat4::identity() : state.mMatrix);
+        const mat4 transform = renderer.findBestFontTransform(state.mMatrix);
+        fontRenderer.precache(paint, mText, mCount, transform);
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
