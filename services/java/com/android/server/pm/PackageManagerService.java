@@ -1618,16 +1618,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
         final PackageUserState state = ps.readUserState(userId);
-        pi = PackageParser.generatePackageInfo(p, gp.gids, flags,
+        return PackageParser.generatePackageInfo(p, gp.gids, flags,
                 ps.firstInstallTime, ps.lastUpdateTime, gp.grantedPermissions,
                 state, userId);
-        if (pi != null) {
-            pi.applicationInfo.enabledSetting = state.enabled;
-            pi.applicationInfo.enabled =
-                    pi.applicationInfo.enabledSetting == COMPONENT_ENABLED_STATE_DEFAULT
-                    || pi.applicationInfo.enabledSetting == COMPONENT_ENABLED_STATE_ENABLED;
-        }
-        return pi;
     }
 
     @Override
