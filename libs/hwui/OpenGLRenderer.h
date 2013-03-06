@@ -335,6 +335,12 @@ public:
         }
     }
 
+    /**
+     * Return the best transform to use to rasterize text given a full
+     * transform matrix.
+     */
+    mat4 findBestFontTransform(const mat4& transform) const;
+
 protected:
     /**
      * Computes the projection matrix, initialize the first snapshot
@@ -384,28 +390,28 @@ protected:
     /**
      * Returns the current snapshot.
      */
-    sp<Snapshot> getSnapshot() {
+    sp<Snapshot> getSnapshot() const {
         return mSnapshot;
     }
 
     /**
      * Returns the region of the current layer.
      */
-    virtual Region* getRegion() {
+    virtual Region* getRegion() const {
         return mSnapshot->region;
     }
 
     /**
      * Indicates whether rendering is currently targeted at a layer.
      */
-    virtual bool hasLayer() {
+    virtual bool hasLayer() const {
         return (mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region;
     }
 
     /**
      * Returns the name of the FBO this renderer is rendering into.
      */
-    virtual GLint getTargetFbo() {
+    virtual GLint getTargetFbo() const {
         return 0;
     }
 
@@ -442,7 +448,7 @@ protected:
     /**
      * Set to true to suppress error checks at the end of a frame.
      */
-    virtual bool suppressErrorChecks() {
+    virtual bool suppressErrorChecks() const {
         return false;
     }
 

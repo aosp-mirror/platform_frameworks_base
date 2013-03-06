@@ -65,10 +65,10 @@ public:
 
 protected:
     virtual void ensureStencilBuffer();
-    virtual bool hasLayer();
-    virtual Region* getRegion();
-    virtual GLint getTargetFbo();
-    virtual bool suppressErrorChecks();
+    virtual bool hasLayer() const;
+    virtual Region* getRegion() const;
+    virtual GLint getTargetFbo() const;
+    virtual bool suppressErrorChecks() const;
 
 private:
     void generateMesh();

@@ -161,8 +161,8 @@ public:
     void mapRect(Rect& r) const;
     void mapPoint(float& x, float& y) const;
 
-    float getTranslateX();
-    float getTranslateY();
+    float getTranslateX() const;
+    float getTranslateY() const;
 
     void decomposeScale(float& sx, float& sy) const;
 

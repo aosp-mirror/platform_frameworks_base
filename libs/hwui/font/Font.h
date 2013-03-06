@@ -125,7 +125,7 @@ private:
     void drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
             Rect* bounds, const float* pos);
-    void drawCachedGlyphPerspective(CachedGlyphInfo* glyph, int x, int y,
+    void drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y,
             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
             Rect* bounds, const float* pos);
     void drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
@@ -142,7 +142,7 @@ private:
     // Cache of glyphs
     DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
 
-    mat4 mTransform;
+    bool mIdentityTransform;
 };
 
 inline int strictly_order_type(const Font::FontDescription& lhs,
