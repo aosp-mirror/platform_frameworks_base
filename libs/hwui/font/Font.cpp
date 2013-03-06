@@ -53,10 +53,8 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mStrokeWidth = paint->getStrokeWidth();
     mAntiAliasing = paint->isAntiAlias();
     mLookupTransform.reset();
-    mLookupTransform[SkMatrix::kMScaleX] = matrix.data[mat4::kScaleX];
-    mLookupTransform[SkMatrix::kMScaleY] = matrix.data[mat4::kScaleY];
-    mLookupTransform[SkMatrix::kMSkewX] = matrix.data[mat4::kSkewX];
-    mLookupTransform[SkMatrix::kMSkewY] = matrix.data[mat4::kSkewY];
+    mLookupTransform[SkMatrix::kMScaleX] = matrix[mat4::kScaleX];
+    mLookupTransform[SkMatrix::kMScaleY] = matrix[mat4::kScaleY];
     if (!mLookupTransform.invert(&mInverseLookupTransform)) {
         ALOGW("Could not query the inverse lookup transform for this font");
     }
@@ -81,8 +79,6 @@ hash_t Font::FontDescription::hash() const {
     hash = JenkinsHashMix(hash, int(mAntiAliasing));
     hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMScaleX]));
     hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMScaleY]));
-    hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMSkewX]));
-    hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMSkewY]));
     return JenkinsHashWhiten(hash);
 }
 
@@ -121,16 +117,6 @@ int Font::FontDescription::compare(const Font::FontDescription& lhs,
             rhs.mLookupTransform[SkMatrix::kMScaleY]) return -1;
     if (lhs.mLookupTransform[SkMatrix::kMScaleY] >
             rhs.mLookupTransform[SkMatrix::kMScaleY]) return +1;
-
-    if (lhs.mLookupTransform[SkMatrix::kMSkewX] <
-            rhs.mLookupTransform[SkMatrix::kMSkewX]) return -1;
-    if (lhs.mLookupTransform[SkMatrix::kMSkewX] >
-            rhs.mLookupTransform[SkMatrix::kMSkewX]) return +1;
-
-    if (lhs.mLookupTransform[SkMatrix::kMSkewY] <
-            rhs.mLookupTransform[SkMatrix::kMSkewY]) return -1;
-    if (lhs.mLookupTransform[SkMatrix::kMSkewY] >
-            rhs.mLookupTransform[SkMatrix::kMSkewY]) return +1;
 
     return 0;
 }
@@ -185,7 +171,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
             nPenX, nPenY - height, u1, v1, glyph->mCacheTexture);
 }
 
-void Font::drawCachedGlyphPerspective(CachedGlyphInfo* glyph, int x, int y,
+void Font::drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y,
         uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
     SkPoint p[4];
     p[0].iset(glyph->mBitmapLeft, glyph->mBitmapTop + glyph->mBitmapHeight);
@@ -388,18 +374,17 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
 
     static RenderGlyph gRenderGlyph[] = {
             &android::uirenderer::Font::drawCachedGlyph,
-            &android::uirenderer::Font::drawCachedGlyphPerspective,
+            &android::uirenderer::Font::drawCachedGlyphTransformed,
             &android::uirenderer::Font::drawCachedGlyphBitmap,
             &android::uirenderer::Font::drawCachedGlyphBitmap,
             &android::uirenderer::Font::measureCachedGlyph,
             &android::uirenderer::Font::measureCachedGlyph
     };
-    RenderGlyph render = gRenderGlyph[(mode << 1) + mTransform.isPerspective()];
+    RenderGlyph render = gRenderGlyph[(mode << 1) + !mIdentityTransform];
 
     text += start;
     int glyphsCount = 0;
 
-    const bool applyTransform = !mTransform.isIdentity() && !mTransform.isPerspective();
     const SkPaint::Align align = paint->getTextAlign();
 
     while (glyphsCount < numGlyphs) {
@@ -417,10 +402,6 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
         if (cachedGlyph->mIsValid && cachedGlyph->mCacheTexture) {
             float penX = x + positions[(glyphsCount << 1)];
             float penY = y + positions[(glyphsCount << 1) + 1];
-
-            if (applyTransform) {
-                mTransform.mapPoint(penX, penY);
-            }
 
             (*this.*render)(cachedGlyph, roundf(penX), roundf(penY),
                     bitmap, bitmapW, bitmapH, bounds, positions);
@@ -495,7 +476,7 @@ Font* Font::create(FontRenderer* state, const SkPaint* paint, const mat4& matrix
         font = new Font(state, description);
         state->mActiveFonts.put(description, font);
     }
-    font->mTransform.load(matrix);
+    font->mIdentityTransform = matrix.isIdentity();
 
     return font;
 }

@@ -92,11 +92,11 @@ void LayerRenderer::finish() {
     // who will invoke OpenGLRenderer::resume()
 }
 
-GLint LayerRenderer::getTargetFbo() {
+GLint LayerRenderer::getTargetFbo() const {
     return mLayer->getFbo();
 }
 
-bool LayerRenderer::suppressErrorChecks() {
+bool LayerRenderer::suppressErrorChecks() const {
     return true;
 }
 
@@ -104,7 +104,7 @@ bool LayerRenderer::suppressErrorChecks() {
 // Layer support
 ///////////////////////////////////////////////////////////////////////////////
 
-bool LayerRenderer::hasLayer() {
+bool LayerRenderer::hasLayer() const {
     return true;
 }
 
@@ -116,7 +116,7 @@ void LayerRenderer::ensureStencilBuffer() {
 // Dirty region tracking
 ///////////////////////////////////////////////////////////////////////////////
 
-Region* LayerRenderer::getRegion() {
+Region* LayerRenderer::getRegion() const {
     if (getSnapshot()->flags & Snapshot::kFlagFboTarget) {
         return OpenGLRenderer::getRegion();
     }

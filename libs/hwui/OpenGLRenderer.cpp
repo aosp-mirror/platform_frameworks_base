@@ -2627,6 +2627,31 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     return DrawGlInfo::kStatusDrew;
 }
 
+mat4 OpenGLRenderer::findBestFontTransform(const mat4& transform) const {
+    mat4 fontTransform;
+    if (CC_LIKELY(transform.isPureTranslate())) {
+        fontTransform = mat4::identity();
+    } else {
+        if (CC_UNLIKELY(transform.isPerspective())) {
+            // When the below condition is true, we are rendering text with a
+            // perspective transform inside a layer (either an inline layer
+            // created by Canvas.saveLayer() or a hardware layer.)
+            if (hasLayer() || getTargetFbo() != 0) {
+                float sx, sy;
+                currentTransform().decomposeScale(sx, sy);
+                fontTransform.loadScale(sx, sy, 1.0f);
+            } else {
+                fontTransform = mat4::identity();
+            }
+        } else {
+            float sx, sy;
+            currentTransform().decomposeScale(sx, sy);
+            fontTransform.loadScale(sx, sy, 1.0f);
+        }
+    }
+    return fontTransform;
+}
+
 status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, SkPaint* paint, float length) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
@@ -2653,12 +2678,13 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     const float oldX = x;
     const float oldY = y;
-    const bool pureTranslate = currentTransform().isPureTranslate();
-    const bool isPerspective = currentTransform().isPerspective();
+
+    const mat4& transform = currentTransform();
+    const bool pureTranslate = transform.isPureTranslate();
 
     if (CC_LIKELY(pureTranslate)) {
-        x = (int) floorf(x + currentTransform().getTranslateX() + 0.5f);
-        y = (int) floorf(y + currentTransform().getTranslateY() + 0.5f);
+        x = (int) floorf(x + transform.getTranslateX() + 0.5f);
+        y = (int) floorf(y + transform.getTranslateY() + 0.5f);
     }
 
     int alpha;
@@ -2675,23 +2701,18 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     const bool hasActiveLayer = hasLayer();
 
-    mat4 fontTransform;
-    if (CC_LIKELY(pureTranslate)) {
-        fontTransform = mat4::identity();
-    } else {
-        if (CC_UNLIKELY(isPerspective)) {
-            // When the below condition is true, we are rendering text with a
-            // perspective transform inside a layer (either an inline layer
-            // created by Canvas.saveLayer() or a hardware layer.)
-            if (hasActiveLayer || getTargetFbo() != 0) {
-                fontTransform = currentTransform();
-            } else {
-                fontTransform = mat4::identity();
-            }
-        } else {
-            fontTransform = currentTransform();
-        }
-    }
+    // We only pass a partial transform to the font renderer. That partial
+    // matrix defines how glyphs are rasterized. Typically we want glyphs
+    // to be rasterized at their final size on screen, which means the partial
+    // matrix needs to take the scale factor into account.
+    // When a partial matrix is used to transform glyphs during rasterization,
+    // the mesh is generated with the inverse transform (in the case of scale,
+    // the mesh is generated at 1.0 / scale for instance.) This allows us to
+    // apply the full transform matrix at draw time in the vertex shader.
+    // Applying the full matrix in the shader is the easiest way to handle
+    // rotation and perspective and allows us to always generated quads in the
+    // font renderer which greatly simplifies the code, clipping in particular.
+    mat4 fontTransform = findBestFontTransform(transform);
     fontRenderer.setFont(paint, fontTransform);
 
     // Pick the appropriate texture filtering
@@ -2708,16 +2729,17 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     setupDrawShader();
     setupDrawBlending(true, mode);
     setupDrawProgram();
-    setupDrawModelView(x, y, x, y, !isPerspective, true);
+    setupDrawModelView(x, y, x, y, pureTranslate, true);
     // See comment above; the font renderer must use texture unit 0
     // assert(mTextureUnit == 0)
     setupDrawTexture(fontRenderer.getTexture(linearFilter));
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms(!isPerspective);
+    setupDrawShaderUniforms(pureTranslate);
     setupDrawTextGammaUniforms();
 
-    const Rect* clip = isPerspective ? NULL : mSnapshot->clipRect;
+    // TODO: Implement better clipping for scaled/rotated text
+    const Rect* clip = !pureTranslate ? NULL : mSnapshot->clipRect;
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;
@@ -2732,8 +2754,8 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
     if (status && hasActiveLayer) {
-        if (isPerspective) {
-            currentTransform().mapRect(bounds);
+        if (!pureTranslate) {
+            transform.mapRect(bounds);
         }
         dirtyLayerUnchecked(bounds, getRegion());
     }
