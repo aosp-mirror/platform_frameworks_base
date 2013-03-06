@@ -2341,7 +2341,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * allows it to avoid artifacts when switching in and out of that mode, at
      * the expense that some of its user interface may be covered by screen
      * decorations when they are shown.  You can perform layout of your inner
-     * UI elements to account for the navagation system UI through the
+     * UI elements to account for the navigation system UI through the
      * {@link #fitSystemWindows(Rect)} method.
      */
     public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 0x00000200;
