@@ -156,6 +156,12 @@ public class SwipeHelper implements Gefingerpoken {
 
     private void updateAlphaFromOffset(View animView, boolean dismissable) {
         if (FADE_OUT_DURING_SWIPE && dismissable) {
+            float alpha = getAlphaForOffset(animView);
+            if (alpha != 0f && alpha != 1f) {
+                animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            } else {
+                animView.setLayerType(View.LAYER_TYPE_NONE, null);
+            }
             animView.setAlpha(getAlphaForOffset(animView));
         }
         invalidateGlobalRegion(animView);
