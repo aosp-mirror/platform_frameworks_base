@@ -11265,6 +11265,7 @@ package android.media {
     method public static android.media.MediaCodec createByCodecName(java.lang.String);
     method public static android.media.MediaCodec createDecoderByType(java.lang.String);
     method public static android.media.MediaCodec createEncoderByType(java.lang.String);
+    method public final android.view.Surface createInputSurface();
     method public final int dequeueInputBuffer(long);
     method public final int dequeueOutputBuffer(android.media.MediaCodec.BufferInfo, long);
     method public final void flush();
@@ -11278,6 +11279,7 @@ package android.media {
     method public final void release();
     method public final void releaseOutputBuffer(int, boolean);
     method public final void setVideoScalingMode(int);
+    method public final void signalEndOfInputStream();
     method public final void start();
     method public final void stop();
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
@@ -11357,6 +11359,7 @@ package android.media {
     field public static final int COLOR_FormatRawBayer10bit = 31; // 0x1f
     field public static final int COLOR_FormatRawBayer8bit = 30; // 0x1e
     field public static final int COLOR_FormatRawBayer8bitcompressed = 32; // 0x20
+    field public static final int COLOR_FormatSurface = 2130708361; // 0x7f000789
     field public static final int COLOR_FormatYCbYCr = 25; // 0x19
     field public static final int COLOR_FormatYCrYCb = 26; // 0x1a
     field public static final int COLOR_FormatYUV411PackedPlanar = 18; // 0x12
@@ -14111,6 +14114,7 @@ package android.opengl {
     method public static int eglGetError();
     method public static boolean eglInitialize(android.opengl.EGLDisplay, int[], int, int[], int);
     method public static boolean eglMakeCurrent(android.opengl.EGLDisplay, android.opengl.EGLSurface, android.opengl.EGLSurface, android.opengl.EGLContext);
+    method public static boolean eglPresentationTimeANDROID(android.opengl.EGLDisplay, android.opengl.EGLSurface, long);
     method public static int eglQueryAPI();
     method public static boolean eglQueryContext(android.opengl.EGLDisplay, android.opengl.EGLContext, int, int[], int);
     method public static java.lang.String eglQueryString(android.opengl.EGLDisplay, int);
