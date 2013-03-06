@@ -73,10 +73,6 @@ public class ActionBarOverlayLayout extends ViewGroup {
         ta.recycle();
     }
 
-    public void setOverlayMode(boolean mode) {
-        mOverlayMode = mode;
-    }
-
     public void setActionBar(ActionBarImpl impl, boolean overlayMode) {
         mActionBar = impl;
         mOverlayMode = overlayMode;
@@ -177,7 +173,9 @@ public class ActionBarOverlayLayout extends ViewGroup {
 
         // The top and bottom action bars are always within the content area.
         boolean changed = applyInsets(mActionBarTop, insets, true, true, false, true);
-        changed |= applyInsets(mActionBarBottom, insets, true, false, true, true);
+        if (mActionBarBottom != null) {
+            changed |= applyInsets(mActionBarBottom, insets, true, false, true, true);
+        }
 
         mBaseInnerInsets.set(insets);
         computeFitSystemWindows(mBaseInnerInsets, mBaseContentInsets);
@@ -219,6 +217,8 @@ public class ActionBarOverlayLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        pullChildren();
+
         int maxHeight = 0;
         int maxWidth = 0;
         int childState = 0;
@@ -234,13 +234,16 @@ public class ActionBarOverlayLayout extends ViewGroup {
                 mActionBarTop.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
         childState = combineMeasuredStates(childState, mActionBarTop.getMeasuredState());
 
-        measureChildWithMargins(mActionBarBottom, widthMeasureSpec, 0, heightMeasureSpec, 0);
-        lp = (LayoutParams) mActionBarBottom.getLayoutParams();
-        maxWidth = Math.max(maxWidth,
-                mActionBarBottom.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
-        maxHeight = Math.max(maxHeight,
-                mActionBarBottom.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-        childState = combineMeasuredStates(childState, mActionBarBottom.getMeasuredState());
+        // xlarge screen layout doesn't have bottom action bar.
+        if (mActionBarBottom != null) {
+            measureChildWithMargins(mActionBarBottom, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            lp = (LayoutParams) mActionBarBottom.getLayoutParams();
+            maxWidth = Math.max(maxWidth,
+                    mActionBarBottom.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
+            maxHeight = Math.max(maxHeight,
+                    mActionBarBottom.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
+            childState = combineMeasuredStates(childState, mActionBarBottom.getMeasuredState());
+        }
 
         final int vis = getWindowSystemUiVisibility();
         final boolean stable = (vis & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
@@ -264,10 +267,12 @@ public class ActionBarOverlayLayout extends ViewGroup {
 
         if (mActionView.isSplitActionBar()) {
             // If action bar is split, adjust bottom insets for it.
-            if (stable) {
-                bottomInset = mActionBarHeight;
-            } else {
-                bottomInset = mActionBarBottom.getMeasuredHeight();
+            if (mActionBarBottom != null) {
+                if (stable) {
+                    bottomInset = mActionBarHeight;
+                } else {
+                    bottomInset = mActionBarBottom.getMeasuredHeight();
+                }
             }
         }
 
