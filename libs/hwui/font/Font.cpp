@@ -53,8 +53,8 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mStrokeWidth = paint->getStrokeWidth();
     mAntiAliasing = paint->isAntiAlias();
     mLookupTransform.reset();
-    mLookupTransform[SkMatrix::kMScaleX] = matrix[mat4::kScaleX];
-    mLookupTransform[SkMatrix::kMScaleY] = matrix[mat4::kScaleY];
+    mLookupTransform[SkMatrix::kMScaleX] = roundf(fmaxf(1.0f, matrix[mat4::kScaleX]));
+    mLookupTransform[SkMatrix::kMScaleY] = roundf(fmaxf(1.0f, matrix[mat4::kScaleY]));
     if (!mLookupTransform.invert(&mInverseLookupTransform)) {
         ALOGW("Could not query the inverse lookup transform for this font");
     }
