@@ -132,19 +132,19 @@ static jint nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         jniThrowException(env, OutOfResourcesException, NULL);
         return 0;
     }
-    surface->incStrong(clazz);
+    surface->incStrong((void *)nativeCreate);
     return int(surface.get());
 }
 
 static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
-    ctrl->decStrong(clazz);
+    ctrl->decStrong((void *)nativeCreate);
 }
 
 static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
     ctrl->clear();
-    ctrl->decStrong(clazz);
+    ctrl->decStrong((void *)nativeCreate);
 }
 
 static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {

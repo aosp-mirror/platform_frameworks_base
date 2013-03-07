@@ -496,7 +496,7 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     // We use a weak reference so the Camera object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     sp<JNICameraContext> context = new JNICameraContext(env, weak_this, clazz, camera);
-    context->incStrong(thiz);
+    context->incStrong((void*)android_hardware_Camera_native_setup);
     camera->setListener(context);
 
     // save context in opaque field
@@ -534,7 +534,7 @@ static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
         }
 
         // remove context to prevent further Java access
-        context->decStrong(thiz);
+        context->decStrong((void*)android_hardware_Camera_native_setup);
     }
 }
 

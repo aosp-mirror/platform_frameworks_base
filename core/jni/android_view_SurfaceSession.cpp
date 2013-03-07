@@ -41,13 +41,13 @@ sp<SurfaceComposerClient> android_view_SurfaceSession_getClient(
 
 static jint nativeCreate(JNIEnv* env, jclass clazz) {
     SurfaceComposerClient* client = new SurfaceComposerClient();
-    client->incStrong(clazz);
+    client->incStrong((void*)nativeCreate);
     return reinterpret_cast<jint>(client);
 }
 
 static void nativeDestroy(JNIEnv* env, jclass clazz, jint ptr) {
     SurfaceComposerClient* client = reinterpret_cast<SurfaceComposerClient*>(ptr);
-    client->decStrong(clazz);
+    client->decStrong((void*)nativeCreate);
 }
 
 static void nativeKill(JNIEnv* env, jclass clazz, jint ptr) {

@@ -191,10 +191,10 @@ static sp<AudioTrack> setAudioTrack(JNIEnv* env, jobject thiz, const sp<AudioTra
     sp<AudioTrack> old =
             (AudioTrack*)env->GetIntField(thiz, javaAudioTrackFields.nativeTrackInJavaObj);
     if (at.get()) {
-        at->incStrong(thiz);
+        at->incStrong((void*)setAudioTrack);
     }
     if (old != 0) {
-        old->decStrong(thiz);
+        old->decStrong((void*)setAudioTrack);
     }
     env->SetIntField(thiz, javaAudioTrackFields.nativeTrackInJavaObj, (int)at.get());
     return old;
