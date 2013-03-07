@@ -154,10 +154,10 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
     sp<AudioRecord> old =
             (AudioRecord*)env->GetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj);
     if (ar.get()) {
-        ar->incStrong(thiz);
+        ar->incStrong((void*)setAudioRecord);
     }
     if (old != 0) {
-        old->decStrong(thiz);
+        old->decStrong((void*)setAudioRecord);
     }
     env->SetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj, (int)ar.get());
     return old;
