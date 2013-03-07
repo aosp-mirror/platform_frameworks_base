@@ -442,9 +442,8 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
     for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
         DisplayListOp *op = mDisplayListData->displayListOps[i];
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
-        Caches::getInstance().eventMark(strlen(op->name()), op->name());
+        renderer.eventMark(strlen(op->name()), op->name());
 #endif
-
         drawGlStatus |= op->replay(renderer, dirty, flags,
                 saveCount, level, mCaching, mMultipliedAlpha, deferredList);
         logBuffer.writeCommand(level, op->name());
