@@ -2064,13 +2064,13 @@
     <!-- Spouse relationship type [CHAR LIMIT=20] -->
     <string name="relationTypeSpouse">Spouse</string>
 
-    <!-- Custom SIP address type -->
+    <!-- Custom SIP address type. Same context as Custom phone type.  -->
     <string name="sipAddressTypeCustom">Custom</string>
-    <!-- Home SIP address type -->
+    <!-- Home SIP address type. Same context as Home phone type. -->
     <string name="sipAddressTypeHome">Home</string>
-    <!-- Work SIP address type -->
+    <!-- Work SIP address type. Same context as Work phone type. -->
     <string name="sipAddressTypeWork">Work</string>
-    <!-- Other SIP address type -->
+    <!-- Other SIP address type. Same context as Other phone type. -->
     <string name="sipAddressTypeOther">Other</string>
 
     <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
