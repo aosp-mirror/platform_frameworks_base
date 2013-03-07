@@ -17857,6 +17857,13 @@ package android.provider {
     field public static final java.lang.String TYPE = "data2";
   }
 
+  public static final class ContactsContract.CommonDataKinds.Contactables implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
+    ctor public ContactsContract.CommonDataKinds.Contactables();
+    field public static final android.net.Uri CONTENT_FILTER_URI;
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String VISIBLE_CONTACTS_ONLY = "visible_contacts_only";
+  }
+
   public static final class ContactsContract.CommonDataKinds.Email implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
@@ -18150,6 +18157,7 @@ package android.provider {
     method public static android.net.Uri getContactLookupUri(android.content.ContentResolver, android.net.Uri);
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/data";
     field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String VISIBLE_CONTACTS_ONLY = "visible_contacts_only";
   }
 
   protected static abstract interface ContactsContract.DataColumns {
