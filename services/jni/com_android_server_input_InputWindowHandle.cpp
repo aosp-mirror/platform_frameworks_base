@@ -183,7 +183,7 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
 
         jweak objWeak = env->NewWeakGlobalRef(inputWindowHandleObj);
         handle = new NativeInputWindowHandle(inputApplicationHandle, objWeak);
-        handle->incStrong(inputWindowHandleObj);
+        handle->incStrong((void*)android_server_InputWindowHandle_getHandle);
         env->SetIntField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr,
                 reinterpret_cast<int>(handle));
     }
@@ -201,7 +201,7 @@ static void android_server_InputWindowHandle_nativeDispose(JNIEnv* env, jobject 
         env->SetIntField(obj, gInputWindowHandleClassInfo.ptr, 0);
 
         NativeInputWindowHandle* handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
-        handle->decStrong(obj);
+        handle->decStrong((void*)android_server_InputWindowHandle_getHandle);
     }
 }
 

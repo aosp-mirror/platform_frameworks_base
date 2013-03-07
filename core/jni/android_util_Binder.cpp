@@ -586,7 +586,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
         LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object);
         // The proxy holds a reference to the native object.
         env->SetIntField(object, gBinderProxyOffsets.mObject, (int)val.get());
-        val->incStrong(object);
+        val->incStrong((void*)javaObjectForIBinder);
 
         // The native object needs to hold a weak reference back to the
         // proxy, so we can retrieve the same proxy if it is still active.
@@ -1187,7 +1187,7 @@ static void android_os_BinderProxy_destroy(JNIEnv* env, jobject obj)
     env->SetIntField(obj, gBinderProxyOffsets.mObject, 0);
     env->SetIntField(obj, gBinderProxyOffsets.mOrgue, 0);
     drl->decStrong((void*)javaObjectForIBinder);
-    b->decStrong(obj);
+    b->decStrong((void*)javaObjectForIBinder);
 
     IPCThreadState::self()->flushCommands();
 }

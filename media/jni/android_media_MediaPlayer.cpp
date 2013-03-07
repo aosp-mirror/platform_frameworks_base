@@ -136,10 +136,10 @@ static sp<MediaPlayer> setMediaPlayer(JNIEnv* env, jobject thiz, const sp<MediaP
     Mutex::Autolock l(sLock);
     sp<MediaPlayer> old = (MediaPlayer*)env->GetIntField(thiz, fields.context);
     if (player.get()) {
-        player->incStrong(thiz);
+        player->incStrong((void*)setMediaPlayer);
     }
     if (old != 0) {
-        old->decStrong(thiz);
+        old->decStrong((void*)setMediaPlayer);
     }
     env->SetIntField(thiz, fields.context, (int)player.get());
     return old;
@@ -252,7 +252,7 @@ decVideoSurfaceRef(JNIEnv *env, jobject thiz)
 
     sp<IGraphicBufferProducer> old_st = getVideoSurfaceTexture(env, thiz);
     if (old_st != NULL) {
-        old_st->decStrong(thiz);
+        old_st->decStrong((void*)decVideoSurfaceRef);
     }
 }
 
@@ -279,7 +279,7 @@ setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface, jboolean mediaPlaye
                     "The surface does not have a binding SurfaceTexture!");
                 return;
             }
-            new_st->incStrong(thiz);
+            new_st->incStrong((void*)decVideoSurfaceRef);
         } else {
             jniThrowException(env, "java/lang/IllegalArgumentException",
                     "The surface has been released");

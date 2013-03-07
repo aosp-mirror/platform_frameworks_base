@@ -109,7 +109,7 @@ static void android_view_TextureView_createNativeWindow(JNIEnv* env, jobject tex
     sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(env, surface));
     sp<ANativeWindow> window = new Surface(glConsumer->getBufferQueue());
 
-    window->incStrong(0);
+    window->incStrong((void*)android_view_TextureView_createNativeWindow);
     SET_INT(textureView, gTextureViewClassInfo.nativeWindow, jint(window.get()));
 }
 
@@ -120,7 +120,7 @@ static void android_view_TextureView_destroyNativeWindow(JNIEnv* env, jobject te
 
     if (nativeWindow) {
         sp<ANativeWindow> window(nativeWindow);
-            window->decStrong(0);
+            window->decStrong((void*)android_view_TextureView_createNativeWindow);
         SET_INT(textureView, gTextureViewClassInfo.nativeWindow, 0);
     }
 }

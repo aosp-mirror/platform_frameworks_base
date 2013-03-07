@@ -982,7 +982,7 @@ static jint nativeInit(JNIEnv* env, jclass clazz,
 
     NativeInputManager* im = new NativeInputManager(contextObj, serviceObj,
             messageQueue->getLooper());
-    im->incStrong(serviceObj);
+    im->incStrong(0);
     return reinterpret_cast<jint>(im);
 }
 
