@@ -41,6 +41,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.util.Log.d;
 
 /**
@@ -1215,6 +1216,7 @@ public class RelativeLayout extends ViewGroup {
         private int mEnd = DEFAULT_RELATIVE;
 
         private boolean mRulesChanged = false;
+        private boolean mIsRtlCompatibilityMode = false;
 
         /**
          * When true, uses the parent as the anchor if the anchor doesn't exist or if
@@ -1228,6 +1230,10 @@ public class RelativeLayout extends ViewGroup {
 
             TypedArray a = c.obtainStyledAttributes(attrs,
                     com.android.internal.R.styleable.RelativeLayout_Layout);
+
+            final int targetSdkVersion = c.getApplicationInfo().targetSdkVersion;
+            mIsRtlCompatibilityMode = (targetSdkVersion < JELLY_BEAN_MR1 ||
+                    !c.getApplicationInfo().hasRtlSupport());
 
             final int[] rules = mRules;
             //noinspection MismatchedReadAndWriteOfArray
@@ -1397,28 +1403,132 @@ public class RelativeLayout extends ViewGroup {
                     mInitialRules[ALIGN_PARENT_START] != 0 || mInitialRules[ALIGN_PARENT_END] != 0);
         }
 
+        // The way we are resolving rules depends on the layout direction and if we are pre JB MR1
+        // or not.
+        //
+        // If we are pre JB MR1 (said as "RTL compatibility mode"), "left"/"right" rules are having
+        // predominance over any "start/end" rules that could have been defined. A special case:
+        // if no "left"/"right" rule has been defined and "start"/"end" rules are defined then we
+        // resolve those "start"/"end" rules to "left"/"right" respectively.
+        //
+        // If we are JB MR1+, then "start"/"end" rules are having predominance over "left"/"right"
+        // rules. If no "start"/"end" rule is defined then we use "left"/"right" rules.
+        //
+        // In all cases, the result of the resolution should clear the "start"/"end" rules to leave
+        // only the "left"/"right" rules at the end.
         private void resolveRules(int layoutDirection) {
             final boolean isLayoutRtl = (layoutDirection == View.LAYOUT_DIRECTION_RTL);
+
             // Reset to initial state
             System.arraycopy(mInitialRules, LEFT_OF, mRules, LEFT_OF, VERB_COUNT);
-            // Apply rules depending on direction
-            if (mRules[ALIGN_START] != 0) {
-                mRules[isLayoutRtl ? ALIGN_RIGHT : ALIGN_LEFT] = mRules[ALIGN_START];
-            }
-            if (mRules[ALIGN_END] != 0) {
-                mRules[isLayoutRtl ? ALIGN_LEFT : ALIGN_RIGHT] = mRules[ALIGN_END];
-            }
-            if (mRules[START_OF] != 0) {
-                mRules[isLayoutRtl ? RIGHT_OF : LEFT_OF] = mRules[START_OF];
-            }
-            if (mRules[END_OF] != 0) {
-                mRules[isLayoutRtl ? LEFT_OF : RIGHT_OF] = mRules[END_OF];
-            }
-            if (mRules[ALIGN_PARENT_START] != 0) {
-                mRules[isLayoutRtl ? ALIGN_PARENT_RIGHT : ALIGN_PARENT_LEFT] = mRules[ALIGN_PARENT_START];
-            }
-            if (mRules[ALIGN_PARENT_END] != 0) {
-                mRules[isLayoutRtl ? ALIGN_PARENT_LEFT : ALIGN_PARENT_RIGHT] = mRules[ALIGN_PARENT_END];
+
+            // Apply rules depending on direction and if we are in RTL compatibility mode
+            if (mIsRtlCompatibilityMode) {
+                if (mRules[ALIGN_START] != 0) {
+                    if (mRules[ALIGN_LEFT] == 0) {
+                        // "left" rule is not defined but "start" rule is: use the "start" rule as
+                        // the "left" rule
+                        mRules[ALIGN_LEFT] = mRules[ALIGN_START];
+                    }
+                    mRules[ALIGN_START] = 0;
+                }
+
+                if (mRules[ALIGN_END] != 0) {
+                    if (mRules[ALIGN_RIGHT] == 0) {
+                        // "right" rule is not defined but "end" rule is: use the "end" rule as the
+                        // "right" rule
+                        mRules[ALIGN_RIGHT] = mRules[ALIGN_END];
+                    }
+                    mRules[ALIGN_END] = 0;
+                }
+
+                if (mRules[START_OF] != 0) {
+                    if (mRules[LEFT_OF] == 0) {
+                        // "left" rule is not defined but "start" rule is: use the "start" rule as
+                        // the "left" rule
+                        mRules[LEFT_OF] = mRules[START_OF];
+                    }
+                    mRules[START_OF] = 0;
+                }
+
+                if (mRules[END_OF] != 0) {
+                    if (mRules[RIGHT_OF] == 0) {
+                        // "right" rule is not defined but "end" rule is: use the "end" rule as the
+                        // "right" rule
+                        mRules[RIGHT_OF] = mRules[END_OF];
+                    }
+                    mRules[END_OF] = 0;
+                }
+
+                if (mRules[ALIGN_PARENT_START] != 0) {
+                    if (mRules[ALIGN_PARENT_LEFT] == 0) {
+                        // "left" rule is not defined but "start" rule is: use the "start" rule as
+                        // the "left" rule
+                        mRules[ALIGN_PARENT_LEFT] = mRules[ALIGN_PARENT_START];
+                    }
+                    mRules[ALIGN_PARENT_START] = 0;
+                }
+
+                if (mRules[ALIGN_PARENT_RIGHT] == 0) {
+                    if (mRules[ALIGN_PARENT_RIGHT] == 0) {
+                        // "right" rule is not defined but "end" rule is: use the "end" rule as the
+                        // "right" rule
+                        mRules[ALIGN_PARENT_RIGHT] = mRules[ALIGN_PARENT_END];
+                    }
+                    mRules[ALIGN_PARENT_END] = 0;
+                }
+            } else {
+                // JB MR1+ case
+                if ((mRules[ALIGN_START] != 0 || mRules[ALIGN_END] != 0) &&
+                        (mRules[ALIGN_LEFT] != 0 || mRules[ALIGN_RIGHT] != 0)) {
+                    // "start"/"end" rules take precedence over "left"/"right" rules
+                    mRules[ALIGN_LEFT] = 0;
+                    mRules[ALIGN_RIGHT] = 0;
+                }
+                if (mRules[ALIGN_START] != 0) {
+                    // "start" rule resolved to "left" or "right" depending on the direction
+                    mRules[isLayoutRtl ? ALIGN_RIGHT : ALIGN_LEFT] = mRules[ALIGN_START];
+                    mRules[ALIGN_START] = 0;
+                }
+                if (mRules[ALIGN_END] != 0) {
+                    // "end" rule resolved to "left" or "right" depending on the direction
+                    mRules[isLayoutRtl ? ALIGN_LEFT : ALIGN_RIGHT] = mRules[ALIGN_END];
+                    mRules[ALIGN_END] = 0;
+                }
+
+                if ((mRules[START_OF] != 0 || mRules[END_OF] != 0) &&
+                        (mRules[LEFT_OF] != 0 || mRules[RIGHT_OF] != 0)) {
+                    // "start"/"end" rules take precedence over "left"/"right" rules
+                    mRules[LEFT_OF] = 0;
+                    mRules[RIGHT_OF] = 0;
+                }
+                if (mRules[START_OF] != 0) {
+                    // "start" rule resolved to "left" or "right" depending on the direction
+                    mRules[isLayoutRtl ? RIGHT_OF : LEFT_OF] = mRules[START_OF];
+                    mRules[START_OF] = 0;
+                }
+                if (mRules[END_OF] != 0) {
+                    // "end" rule resolved to "left" or "right" depending on the direction
+                    mRules[isLayoutRtl ? LEFT_OF : RIGHT_OF] = mRules[END_OF];
+                    mRules[END_OF] = 0;
+                }
+
+                if ((mRules[ALIGN_PARENT_START] != 0 || mRules[ALIGN_PARENT_END] != 0) &&
+                        (mRules[ALIGN_PARENT_LEFT] != 0 || mRules[ALIGN_PARENT_RIGHT] != 0)) {
+                    // "start"/"end" rules take precedence over "left"/"right" rules
+                    mRules[ALIGN_PARENT_LEFT] = 0;
+                    mRules[ALIGN_PARENT_RIGHT] = 0;
+                }
+                if (mRules[ALIGN_PARENT_START] != 0) {
+                    // "start" rule resolved to "left" or "right" depending on the direction
+                    mRules[isLayoutRtl ? ALIGN_PARENT_RIGHT : ALIGN_PARENT_LEFT] = mRules[ALIGN_PARENT_START];
+                    mRules[ALIGN_PARENT_START] = 0;
+                }
+                if (mRules[ALIGN_PARENT_END] != 0) {
+                    // "end" rule resolved to "left" or "right" depending on the direction
+                    mRules[isLayoutRtl ? ALIGN_PARENT_LEFT : ALIGN_PARENT_RIGHT] = mRules[ALIGN_PARENT_END];
+                    mRules[ALIGN_PARENT_END] = 0;
+                }
             }
             mRulesChanged = false;
         }
