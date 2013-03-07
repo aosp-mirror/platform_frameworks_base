@@ -1255,9 +1255,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                     sendAccessibilityEvent(notification, pkg);
                 }
 
-                // finally, keep some of this information around for later use
-                mArchive.record(n);
-
                 notifyPostedLocked(r);
             } else {
                 Slog.e(TAG, "Ignoring notification with icon==0: " + notification);
@@ -1472,6 +1469,9 @@ public class NotificationManagerService extends INotificationManager.Stub
         if (mLedNotification == r) {
             mLedNotification = null;
         }
+
+        // Save it for users of getHistoricalNotifications()
+        mArchive.record(r.sbn);
     }
 
     /**
