@@ -122,6 +122,8 @@ final class Settings {
     private final HashMap<String, PackageSetting> mDisabledSysPackages =
         new HashMap<String, PackageSetting>();
 
+    private static int mFirstAvailableUid = 0;
+
     // These are the last platform API version we were using for
     // the apps installed on internal and external storage.  It is
     // used to grant newer permissions one time during a system upgrade.
@@ -735,6 +737,7 @@ final class Settings {
         } else {
             mOtherUserIds.remove(uid);
         }
+        setFirstAvailableUid(uid+1);
     }
 
     private void replaceUserIdLPw(int uid, Object obj) {
@@ -2513,11 +2516,18 @@ final class Settings {
         file.delete();
     }
 
+    // This should be called (at least) whenever an application is removed
+    private void setFirstAvailableUid(int uid) {
+        if (uid > mFirstAvailableUid) {
+            mFirstAvailableUid = uid;
+        }
+    }
+
     // Returns -1 if we could not find an available UserId to assign
     private int newUserIdLPw(Object obj) {
         // Let's be stupidly inefficient for now...
         final int N = mUserIds.size();
-        for (int i = 0; i < N; i++) {
+        for (int i = mFirstAvailableUid; i < N; i++) {
             if (mUserIds.get(i) == null) {
                 mUserIds.set(i, obj);
                 return Process.FIRST_APPLICATION_UID + i;
