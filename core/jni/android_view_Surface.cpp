@@ -76,6 +76,9 @@ static struct {
 
 // ----------------------------------------------------------------------------
 
+// this is just a pointer we use to pass to inc/decStrong
+static const void *sRefBaseOwner;
+
 bool android_view_Surface_isInstanceOf(JNIEnv* env, jobject obj) {
     return env->IsInstanceOf(obj, gSurfaceClassInfo.clazz);
 }
@@ -109,7 +112,7 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         }
         return NULL;
     }
-    surface->incStrong(surfaceObj);
+    surface->incStrong(&sRefBaseOwner);
     return surfaceObj;
 }
 
@@ -137,18 +140,18 @@ static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         return 0;
     }
 
-    surface->incStrong(clazz);
+    surface->incStrong(&sRefBaseOwner);
     return int(surface.get());
 }
 
 static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    sur->decStrong(clazz);
+    sur->decStrong(&sRefBaseOwner);
 }
 
 static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    sur->decStrong(clazz);
+    sur->decStrong(&sRefBaseOwner);
 }
 
 static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jint nativeObject) {
@@ -309,12 +312,12 @@ static jint nativeCopyFrom(JNIEnv* env, jclass clazz,
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
     sp<Surface> other(ctrl->getSurface());
     if (other != NULL) {
-        other->incStrong(clazz);
+        other->incStrong(&sRefBaseOwner);
     }
 
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     if (sur != NULL) {
-        sur->decStrong(clazz);
+        sur->decStrong(&sRefBaseOwner);
     }
 
     return int(other.get());
@@ -329,11 +332,11 @@ static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
     if (self != NULL) {
-        self->decStrong(clazz);
+        self->decStrong(&sRefBaseOwner);
     }
     sp<Surface> sur(Surface::readFromParcel(*parcel));
     if (sur != NULL) {
-        sur->incStrong(clazz);
+        sur->incStrong(&sRefBaseOwner);
     }
     return int(sur.get());
 }

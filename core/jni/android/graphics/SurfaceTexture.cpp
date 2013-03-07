@@ -53,10 +53,10 @@ static void SurfaceTexture_setSurfaceTexture(JNIEnv* env, jobject thiz,
     GLConsumer* const p =
         (GLConsumer*)env->GetIntField(thiz, fields.surfaceTexture);
     if (surfaceTexture.get()) {
-        surfaceTexture->incStrong(thiz);
+        surfaceTexture->incStrong((void*)SurfaceTexture_setSurfaceTexture);
     }
     if (p) {
-        p->decStrong(thiz);
+        p->decStrong((void*)SurfaceTexture_setSurfaceTexture);
     }
     env->SetIntField(thiz, fields.surfaceTexture, (int)surfaceTexture.get());
 }
@@ -68,10 +68,10 @@ static void SurfaceTexture_setFrameAvailableListener(JNIEnv* env,
         (GLConsumer::FrameAvailableListener*)
             env->GetIntField(thiz, fields.frameAvailableListener);
     if (listener.get()) {
-        listener->incStrong(thiz);
+        listener->incStrong((void*)SurfaceTexture_setSurfaceTexture);
     }
     if (p) {
-        p->decStrong(thiz);
+        p->decStrong((void*)SurfaceTexture_setSurfaceTexture);
     }
     env->SetIntField(thiz, fields.frameAvailableListener, (int)listener.get());
 }

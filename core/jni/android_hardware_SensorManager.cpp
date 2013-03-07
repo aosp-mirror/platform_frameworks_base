@@ -176,7 +176,7 @@ static jint nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ
     }
 
     sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQ, scratch);
-    receiver->incStrong(clazz);
+    receiver->incStrong((void*)nativeInitSensorEventQueue);
     return jint(receiver.get());
 }
 
@@ -193,7 +193,7 @@ static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jint eventQ, jint han
 static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jint eventQ, jint handle) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     receiver->destroy();
-    receiver->decStrong(clazz);
+    receiver->decStrong((void*)nativeInitSensorEventQueue);
 }
 
 

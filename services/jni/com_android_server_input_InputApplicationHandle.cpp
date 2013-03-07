@@ -97,7 +97,7 @@ sp<InputApplicationHandle> android_server_InputApplicationHandle_getHandle(
     } else {
         jweak objWeak = env->NewWeakGlobalRef(inputApplicationHandleObj);
         handle = new NativeInputApplicationHandle(objWeak);
-        handle->incStrong(inputApplicationHandleObj);
+        handle->incStrong((void*)android_server_InputApplicationHandle_getHandle);
         env->SetIntField(inputApplicationHandleObj, gInputApplicationHandleClassInfo.ptr,
                 reinterpret_cast<int>(handle));
     }
@@ -115,7 +115,7 @@ static void android_server_InputApplicationHandle_nativeDispose(JNIEnv* env, job
         env->SetIntField(obj, gInputApplicationHandleClassInfo.ptr, 0);
 
         NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
-        handle->decStrong(obj);
+        handle->decStrong((void*)android_server_InputApplicationHandle_getHandle);
     }
 }
 
