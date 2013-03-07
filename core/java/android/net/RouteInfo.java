@@ -45,6 +45,18 @@ public class RouteInfo implements Parcelable {
     private final boolean mIsDefault;
     private final boolean mIsHost;
 
+    /**
+     * The IPv4 default route.
+     */
+    public static final RouteInfo IPV4_DEFAULT = new RouteInfo(
+        new LinkAddress(Inet4Address.ANY, 0));
+
+    /**
+     * The IPv6 default route.
+     */
+    public static final RouteInfo IPV6_DEFAULT = new RouteInfo(
+        new LinkAddress(Inet6Address.ANY, 0));
+
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         if (destination == null) {
             if (gateway != null) {
