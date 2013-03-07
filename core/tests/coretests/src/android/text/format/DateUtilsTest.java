@@ -21,8 +21,9 @@ import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.TestCase;
 
 public class DateUtilsTest extends TestCase {
+    // This test is not in CTS because formatDuration is @hidden.
     @SmallTest
-    public void testFormatDurationSeconds() throws Exception {
+    public void test_formatDuration_seconds() throws Exception {
         assertEquals("0 seconds", DateUtils.formatDuration(0));
         assertEquals("0 seconds", DateUtils.formatDuration(1));
         assertEquals("0 seconds", DateUtils.formatDuration(499));
@@ -31,16 +32,18 @@ public class DateUtilsTest extends TestCase {
         assertEquals("2 seconds", DateUtils.formatDuration(1500));
     }
 
+    // This test is not in CTS because formatDuration is @hidden.
     @SmallTest
-    public void testFormatDurationMinutes() throws Exception {
+    public void test_formatDuration_Minutes() throws Exception {
         assertEquals("59 seconds", DateUtils.formatDuration(59000));
         assertEquals("60 seconds", DateUtils.formatDuration(59500));
         assertEquals("1 minute", DateUtils.formatDuration(60000));
         assertEquals("2 minutes", DateUtils.formatDuration(120000));
     }
 
+    // This test is not in CTS because formatDuration is @hidden.
     @SmallTest
-    public void testFormatDurationHours() throws Exception {
+    public void test_formatDuration_Hours() throws Exception {
         assertEquals("59 minutes", DateUtils.formatDuration(3540000));
         assertEquals("1 hour", DateUtils.formatDuration(3600000));
         assertEquals("48 hours", DateUtils.formatDuration(172800000));
