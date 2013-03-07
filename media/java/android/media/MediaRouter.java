@@ -299,16 +299,21 @@ public class MediaRouter {
     }
 
     /**
-     * @hide for use by framework routing UI
+     * Gets the default route for playing media content on the system.
+     * <p>
+     * The system always provides a default route.
+     * </p>
+     *
+     * @return The default route, which is guaranteed to never be null.
      */
-    public RouteInfo getSystemAudioRoute() {
+    public RouteInfo getDefaultRoute() {
         return sStatic.mDefaultAudioVideo;
     }
 
     /**
      * @hide for use by framework routing UI
      */
-    public RouteCategory getSystemAudioCategory() {
+    public RouteCategory getSystemCategory() {
         return sStatic.mSystemCategory;
     }
 
@@ -372,14 +377,17 @@ public class MediaRouter {
 
     /**
      * Select the specified route to use for output of the given media types.
+     * <p class="note">
+     * As API version 18, this function may be used to select any route.
+     * In prior versions, this function could only be used to select user
+     * routes and would ignore any attempt to select a system route.
+     * </p>
      *
      * @param types type flags indicating which types this route should be used for.
      *              The route must support at least a subset.
      * @param route Route to select
      */
     public void selectRoute(int types, RouteInfo route) {
-        // Applications shouldn't programmatically change anything but user routes.
-        types &= ROUTE_TYPE_USER;
         selectRouteStatic(types, route);
     }
     
@@ -454,7 +462,7 @@ public class MediaRouter {
      * App-specified route definitions are created using {@link #createUserRoute(RouteCategory)}
      *
      * @param info Definition of the route to add
-     * @see #createUserRoute()
+     * @see #createUserRoute(RouteCategory)
      * @see #removeUserRoute(UserRouteInfo)
      */
     public void addUserRoute(UserRouteInfo info) {

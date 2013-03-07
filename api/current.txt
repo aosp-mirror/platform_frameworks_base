@@ -11793,6 +11793,7 @@ package android.media {
     method public android.media.MediaRouter.UserRouteInfo createUserRoute(android.media.MediaRouter.RouteCategory);
     method public android.media.MediaRouter.RouteCategory getCategoryAt(int);
     method public int getCategoryCount();
+    method public android.media.MediaRouter.RouteInfo getDefaultRoute();
     method public android.media.MediaRouter.RouteInfo getRouteAt(int);
     method public int getRouteCount();
     method public android.media.MediaRouter.RouteInfo getSelectedRoute(int);
