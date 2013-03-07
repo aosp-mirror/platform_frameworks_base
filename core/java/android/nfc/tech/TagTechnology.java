@@ -50,6 +50,7 @@ import java.io.IOException;
  * <ul>
  * <li>{@link MifareClassic}
  * <li>{@link MifareUltralight}
+ * <li>{@link NfcBarcode}
  * <li>{@link NdefFormatable} must only be enumerated on tags for which this Android device
  * is capable of formatting. Proprietary knowledge is often required to format a tag
  * to make it NDEF compatible.
