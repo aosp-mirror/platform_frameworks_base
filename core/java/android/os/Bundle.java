@@ -218,7 +218,7 @@ public final class Bundle implements Parcelable, Cloneable {
             return;
         }
         if (mMap == null) {
-            mMap = new HashMap<String, Object>();
+            mMap = new HashMap<String, Object>(N);
         }
         mParcelledData.readMapInternal(mMap, N, mClassLoader);
         mParcelledData.recycle();
