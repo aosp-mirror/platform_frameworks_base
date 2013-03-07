@@ -32,11 +32,11 @@ Google Play within a 14-day period ending on the data collection date noted belo
 </tr>
 <tr><td><a href="/about/versions/android-1.6.html">1.6</a></td><td>Donut</td>    <td>4</td><td>0.2%</td></tr>
 <tr><td><a href="/about/versions/android-2.1.html">2.1</a></td><td>Eclair</td>   <td>7</td><td>1.9%</td></tr>
-<tr><td><a href="/about/versions/android-2.2.html">2.2</a></td><td>Froyo</td>    <td>8</td><td>7.6%</td></tr>
+<tr><td><a href="/about/versions/android-2.2.html">2.2</a></td><td>Froyo</td>    <td>8</td><td>7.5%</td></tr>
 <tr><td><a href="/about/versions/android-2.3.html">2.3 - 2.3.2</a>
                                    </td><td rowspan="2">Gingerbread</td>    <td>9</td><td>0.2%</td></tr>
 <tr><td><a href="/about/versions/android-2.3.3.html">2.3.3 - 2.3.7
-        </a></td><!-- Gingerbread -->                                       <td>10</td><td>44%</td></tr>
+        </a></td><!-- Gingerbread -->                                       <td>10</td><td>43.9%</td></tr>
 <tr><td><a href="/about/versions/android-3.1.html">3.1</a></td>
                                                    <td rowspan="2">Honeycomb</td>      <td>12</td><td>0.3%</td></tr>
 <tr><td><a href="/about/versions/android-3.2.html">3.2</a></td>      <!-- Honeycomb --><td>13</td><td>0.9%</td></tr>
@@ -51,7 +51,7 @@ Google Play within a 14-day period ending on the data collection date noted belo
 
 <div class="col-8" style="margin-right:0">
 <img style="margin-left:30px" alt=""
-src="//chart.apis.google.com/chart?&cht=p&chs=460x245&chf=bg,s,00000000&chd=t:2.0,7.6,44.2,1.2,28.6,16.5&chl=Eclair%20%26%20older|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=c4df9b,6fad0c"
+src="//chart.apis.google.com/chart?&cht=p&chs=460x245&chf=bg,s,00000000&chd=t:2.1,7.5,44.1,1.2,28.6,16.5&chl=Eclair%20%26%20older|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=c4df9b,6fad0c"
 />
 
 </div><!-- end dashboard-panel -->
