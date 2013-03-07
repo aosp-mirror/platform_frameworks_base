@@ -179,7 +179,7 @@ private class OnTokenAcquired implements AccountManagerCallback&lt;Bundle&gt; {
     &#64;Override
     public void run(AccountManagerFuture&lt;Bundle&gt; result) {
         ...
-        Intent launch = (Intent) result.get(AccountManager.KEY_INTENT);
+        Intent launch = (Intent) result.getResult().get(AccountManager.KEY_INTENT);
         if (launch != null) {
             startActivityForResult(launch, 0);
             return;
