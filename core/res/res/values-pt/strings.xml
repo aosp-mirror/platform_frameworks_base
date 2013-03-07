@@ -1239,10 +1239,8 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Permite que o aplicativo invoque serviços contêiner padrão para copiar conteúdo. Não deve ser usado em aplicativos normais."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Rotear saída de mídia"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que um aplicativo faça o roteamento de saída de mídia para outros dispositivos externos."</string>
-    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
-    <skip />
-    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
-    <skip />
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Acessar o armazenamento seguro do bloqueio de teclado"</string>
+    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permite que o aplicativo acesse o armazenamento seguro do bloqueio de teclado."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toque duas vezes para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Não foi possível adicionar widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
