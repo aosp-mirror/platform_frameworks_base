@@ -123,14 +123,34 @@ public class ArrayUtils
      * @return true if the value is present in the array
      */
     public static <T> boolean contains(T[] array, T value) {
-        for (T element : array) {
-            if (element == null) {
-                if (value == null) return true;
+        return indexOf(array, value) != -1;
+    }
+
+    /**
+     * Return first index of {@code value} in {@code array}, or {@code -1} if
+     * not found.
+     */
+    public static <T> int indexOf(T[] array, T value) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == null) {
+                if (value == null) return i;
             } else {
-                if (value != null && element.equals(value)) return true;
+                if (value != null && array[i].equals(value)) return i;
             }
         }
-        return false;
+        return -1;
+    }
+
+    /**
+     * Test if all {@code check} items are contained in {@code array}.
+     */
+    public static <T> boolean containsAll(T[] array, T[] check) {
+        for (T checkItem : check) {
+            if (!contains(array, checkItem)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean contains(int[] array, int value) {

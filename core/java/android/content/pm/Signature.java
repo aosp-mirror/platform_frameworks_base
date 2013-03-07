@@ -19,6 +19,8 @@ package android.content.pm;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.ByteArrayInputStream;
 import java.lang.ref.SoftReference;
 import java.security.PublicKey;
@@ -197,5 +199,14 @@ public class Signature implements Parcelable {
 
     private Signature(Parcel source) {
         mSignature = source.createByteArray();
+    }
+
+    /**
+     * Test if given {@link Signature} sets are exactly equal.
+     *
+     * @hide
+     */
+    public static boolean areExactMatch(Signature[] a, Signature[] b) {
+        return ArrayUtils.containsAll(a, b) && ArrayUtils.containsAll(b, a);
     }
 }
