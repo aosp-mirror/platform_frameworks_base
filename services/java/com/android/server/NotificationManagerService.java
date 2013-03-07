@@ -186,8 +186,14 @@ public class NotificationManagerService extends INotificationManager.Stub
             this.userid = userid;
         }
 
+        boolean userMatches(StatusBarNotification sbn) {
+            if (this.userid == UserHandle.USER_ALL) return true;
+            int nid = sbn.getUserId();
+            return (nid == UserHandle.USER_ALL || nid == this.userid);
+        }
+
         public void notifyPostedIfUserMatch(StatusBarNotification sbn) {
-            if (this.userid != sbn.getUserId()) return;
+            if (!userMatches(sbn)) return;
             try {
                 listener.onNotificationPosted(sbn);
             } catch (RemoteException ex) {
@@ -196,7 +202,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         public void notifyRemovedIfUserMatch(StatusBarNotification sbn) {
-            if (this.userid != sbn.getUserId()) return;
+            if (!userMatches(sbn)) return;
             try {
                 listener.onNotificationRemoved(sbn);
             } catch (RemoteException ex) {
