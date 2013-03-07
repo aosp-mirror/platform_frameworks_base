@@ -70,6 +70,22 @@ import java.util.HashSet;
  * <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a> developer
  * guide.</p></div>
  *
+ * <p>Here is a complete implementation of a custom ViewGroup that implements
+ * a simple {@link android.widget.FrameLayout} along with the ability to stack
+ * children in left and right gutters.</p>
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/view/CustomLayout.java
+ *      Complete}
+ *
+ * <p>If you are implementing XML layout attributes as shown in the example, this is the
+ * corresponding definition for them that would go in <code>res/values/attrs.xml</code>:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/values/attrs.xml CustomLayout}
+ *
+ * <p>Finally the layout manager can be used in an XML layout like so:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/layout/custom_layout.xml Complete}
+ *
  * @attr ref android.R.styleable#ViewGroup_clipChildren
  * @attr ref android.R.styleable#ViewGroup_clipToPadding
  * @attr ref android.R.styleable#ViewGroup_layoutAnimation
