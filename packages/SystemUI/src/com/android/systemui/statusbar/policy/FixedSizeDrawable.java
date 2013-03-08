@@ -60,6 +60,10 @@ public class FixedSizeDrawable extends Drawable {
         mDrawable.setAlpha(alpha);
     }
 
+    public int getAlpha() {
+        return mDrawable.getAlpha();
+    }
+
     public void setColorFilter(ColorFilter cf) {
         mDrawable.setColorFilter(cf);
     }

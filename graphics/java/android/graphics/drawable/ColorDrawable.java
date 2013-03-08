@@ -116,6 +116,7 @@ public class ColorDrawable extends Drawable {
      *
      * @return A value between 0 and 255.
      */
+    @Override
     public int getAlpha() {
         return mState.mUseColor >>> 24;
     }
