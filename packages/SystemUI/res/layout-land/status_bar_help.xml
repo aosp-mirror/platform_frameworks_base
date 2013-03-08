@@ -22,8 +22,8 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/status_bar_cling"
-    android:paddingLeft="40dp"
-    android:paddingRight="40dp"
+    android:paddingStart="40dp"
+    android:paddingEnd="40dp"
     android:background="#DD000000"
     android:focusable="true"
     android:orientation="horizontal" 
@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_weight="0"
         android:layout_height="wrap_content"
-        android:layout_marginRight="50dp"
+        android:layout_marginEnd="50dp"
         android:gravity="center"
         android:src="@drawable/arrow_dashed"
         tools:ignore="ContentDescription" />
@@ -64,8 +64,8 @@
             style="@style/ClingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="50dp"
-            android:paddingRight="50dp"
+            android:paddingStart="50dp"
+            android:paddingEnd="50dp"
             android:text="@android:string/ok" />
     </LinearLayout>
 </LinearLayout>
