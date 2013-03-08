@@ -52,7 +52,7 @@
         android:background="@drawable/compat_mode_help_divider_bottom"
         android:layout_marginBottom="55dp"
         android:layout_marginEnd="80dp"
-        android:layout_alignLeft="@id/header"
+        android:layout_alignStart="@id/header"
         android:layout_alignParentBottom="true"
         >
         <ImageView
@@ -82,7 +82,7 @@
         android:id="@+id/button"
         android:layout_width="208dp"
         android:layout_height="48dp"
-        android:layout_alignLeft="@id/header"
+        android:layout_alignStart="@id/header"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="20dp"
         android:textSize="28sp"
