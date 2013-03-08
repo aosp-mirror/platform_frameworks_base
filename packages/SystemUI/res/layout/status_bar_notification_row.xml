@@ -20,8 +20,8 @@
         android:gravity="end"
         android:layout_marginEnd="-80dp"
         android:background="@null"
-        android:paddingRight="8dp"
-        android:paddingLeft="8dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
         />
 
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"

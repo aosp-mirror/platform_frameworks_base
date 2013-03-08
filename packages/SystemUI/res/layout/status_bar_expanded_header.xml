@@ -30,8 +30,8 @@
         android:id="@+id/datetime"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:background="@drawable/ic_notify_button_bg"
         android:enabled="false"
         >

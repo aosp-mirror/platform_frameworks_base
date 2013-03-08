@@ -22,8 +22,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
-    android:paddingLeft="@dimen/status_bar_recents_item_padding"
-    android:paddingRight="@dimen/status_bar_recents_item_padding"
+    android:paddingStart="@dimen/status_bar_recents_item_padding"
+    android:paddingEnd="@dimen/status_bar_recents_item_padding"
     android:importantForAccessibility="no"
     android:clipChildren="false">
 
@@ -72,7 +72,7 @@
             android:fadingEdge="horizontal"
             android:fadingEdgeLength="@dimen/status_bar_recents_text_fading_edge_length"
             android:scrollHorizontally="true"
-            android:layout_alignLeft="@id/app_thumbnail"
+            android:layout_alignStart="@id/app_thumbnail"
             android:layout_below="@id/app_thumbnail"
             android:layout_marginTop="@dimen/status_bar_recents_text_description_padding"
             android:layout_marginStart="@dimen/status_bar_recents_app_label_left_margin"

@@ -34,7 +34,7 @@
         android:id="@+id/notification_lights_out"
         android:layout_width="@dimen/status_bar_icon_size"
         android:layout_height="match_parent"
-        android:paddingLeft="6dip"
+        android:paddingStart="6dip"
         android:paddingBottom="2dip"
         android:src="@drawable/ic_sysbar_lights_out_dot_small"
         android:scaleType="center"
@@ -44,8 +44,8 @@
     <LinearLayout android:id="@+id/status_bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="6dip"
-        android:paddingRight="6dip"
+        android:paddingStart="6dip"
+        android:paddingEnd="6dip"
         android:orientation="horizontal"
         >
 
@@ -86,7 +86,7 @@
                 android:id="@+id/signal_battery_cluster"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:paddingLeft="2dp"
+                android:paddingStart="2dp"
                 android:orientation="horizontal"
                 android:gravity="center"
                 >
@@ -99,7 +99,7 @@
                     android:id="@+id/battery"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:paddingLeft="4dip"
+                    android:paddingStart="4dip"
                     />
             </LinearLayout>
     
@@ -109,7 +109,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="true"
-                android:paddingLeft="6dip"
+                android:paddingStart="6dip"
                 android:gravity="center_vertical|start"
                 />
         </LinearLayout>
@@ -118,7 +118,7 @@
     <LinearLayout android:id="@+id/ticker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="6dip"
+        android:paddingStart="6dip"
         android:animationCache="false"
         android:orientation="horizontal" >
         <ImageSwitcher android:id="@+id/tickerIcon"
@@ -142,7 +142,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:paddingTop="2dip"
-            android:paddingRight="10dip">
+            android:paddingEnd="10dip">
             <TextView
                 android:textAppearance="@style/TextAppearance.StatusBar.PhoneTicker"
                 android:layout_width="match_parent"

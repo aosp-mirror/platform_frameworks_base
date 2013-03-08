@@ -36,7 +36,7 @@
             android:id="@+id/search_panel_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true">
+            android:layout_alignParentEnd="true">
 
             <com.android.internal.widget.multiwaveview.GlowPadView
                 android:id="@+id/glow_pad_view"
