@@ -633,6 +633,19 @@ public final class InputDevice implements Parcelable {
             return mSource;
         }
 
+
+        /**
+         * Determines whether the event is from the given source.
+         *
+         * @param source The input source to check against. This can be a specific device type,
+         * such as {@link InputDevice#SOURCE_TOUCH_NAVIGATION}, or a more generic device class,
+         * such as {@link InputDevice#SOURCE_CLASS_POINTER}.
+         * @return Whether the event is from the given source.
+         */
+        public boolean isFromSource(int source) {
+            return (getSource() & source) == source;
+        }
+
         /**
          * Gets the inclusive minimum value for the axis.
          * @return The inclusive minimum value.
