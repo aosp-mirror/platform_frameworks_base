@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.imagejb)
+#include "ip.rsh"
 
-void root(const uchar4 *in, uchar4 *out) {
-    *out = *in;
-}
-
+#include "vignette_approx.rsh"
 

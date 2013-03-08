@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.imagejb)
-#pragma rs_fp_relaxed
+package com.android.rs.imagejb;
 
-const static float3 gMonoMult = {0.299f, 0.587f, 0.114f};
+import java.lang.Math;
 
-void root(const uchar4 *v_in, uchar4 *out) {
-    float4 f4 = rsUnpackColor8888(*v_in);
+import android.renderscript.Allocation;
 
-    float3 mono = dot(f4.rgb, gMonoMult);
-    *out = rsPackColorTo8888(mono);
+public class Contrast extends TestBase {
+    private ScriptC_contrast mScript;
+
+    public void createTest(android.content.res.Resources res) {
+        mScript = new ScriptC_contrast(mRS);
+    }
+
+    public void runTest() {
+        mScript.invoke_setBright(50.f);
+        mScript.forEach_contrast(mInPixelsAllocation, mOutPixelsAllocation);
+    }
+
 }
-
-

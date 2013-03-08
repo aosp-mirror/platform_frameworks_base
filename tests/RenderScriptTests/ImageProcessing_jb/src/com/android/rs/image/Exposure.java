@@ -14,7 +14,22 @@
  * limitations under the License.
  */
 
-#include "ip.rsh"
+package com.android.rs.imagejb;
 
-#include "levels.rsh"
+import java.lang.Math;
 
+import android.renderscript.Allocation;
+
+public class Exposure extends TestBase {
+    private ScriptC_exposure mScript;
+
+    public void createTest(android.content.res.Resources res) {
+        mScript = new ScriptC_exposure(mRS);
+    }
+
+    public void runTest() {
+        mScript.invoke_setBright(50.f);
+        mScript.forEach_exposure(mInPixelsAllocation, mOutPixelsAllocation);
+    }
+
+}

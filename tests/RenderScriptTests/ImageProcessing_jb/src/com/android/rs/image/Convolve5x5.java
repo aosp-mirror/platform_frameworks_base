@@ -24,16 +24,21 @@ import android.renderscript.Matrix4f;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import android.renderscript.ScriptC;
+import android.renderscript.ScriptGroup;
+import android.renderscript.ScriptIntrinsicConvolve5x5;
 import android.renderscript.Type;
 import android.util.Log;
 
 public class Convolve5x5 extends TestBase {
     private ScriptC_convolve5x5 mScript;
+    private ScriptIntrinsicConvolve5x5 mIntrinsic;
 
     private int mWidth;
     private int mHeight;
+    private boolean mUseIntrinsic;
 
-    public Convolve5x5() {
+    public Convolve5x5(boolean useIntrinsic) {
+        mUseIntrinsic = useIntrinsic;
     }
 
     public void createTest(android.content.res.Resources res) {
@@ -59,15 +64,25 @@ public class Convolve5x5 extends TestBase {
         f[15]= -3.f; f[16]=  0.f; f[17]=  6.f; f[18]=  0.f; f[19]= -3.f;
         f[20]= -1.f; f[21]= -3.f; f[22]= -4.f; f[23]= -3.f; f[24]= -1.f;
 
-        mScript = new ScriptC_convolve5x5(mRS, res, R.raw.convolve5x5);
-        mScript.set_gCoeffs(f);
-        mScript.set_gIn(mInPixelsAllocation);
-        mScript.set_gWidth(mWidth);
-        mScript.set_gHeight(mHeight);
+        if (mUseIntrinsic) {
+            mIntrinsic = ScriptIntrinsicConvolve5x5.create(mRS, Element.U8_4(mRS));
+            mIntrinsic.setCoefficients(f);
+            mIntrinsic.setInput(mInPixelsAllocation);
+        } else {
+            mScript = new ScriptC_convolve5x5(mRS, res, R.raw.convolve5x5);
+            mScript.set_gCoeffs(f);
+            mScript.set_gIn(mInPixelsAllocation);
+            mScript.set_gWidth(mWidth);
+            mScript.set_gHeight(mHeight);
+        }
     }
 
     public void runTest() {
-        mScript.forEach_root(mOutPixelsAllocation);
+        if (mUseIntrinsic) {
+            mIntrinsic.forEach(mOutPixelsAllocation);
+        } else {
+            mScript.forEach_root(mOutPixelsAllocation);
+        }
     }
 
 }

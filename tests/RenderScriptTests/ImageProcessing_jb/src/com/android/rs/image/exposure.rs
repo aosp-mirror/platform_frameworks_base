@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.imagejb)
-#pragma rs_fp_relaxed
+#include "ip.rsh"
 
-#include "levels.rsh"
+static float bright = 0.f;
+
+void setBright(float v) {
+    bright = 255.f / (255.f - v);
+}
+
+void exposure(const uchar4 *in, uchar4 *out)
+{
+    out->r = rsClamp((int)(bright * in->r), 0, 255);
+    out->g = rsClamp((int)(bright * in->g), 0, 255);
+    out->b = rsClamp((int)(bright * in->b), 0, 255);
+}
 

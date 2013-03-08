@@ -49,8 +49,8 @@ uchar4 __attribute__((kernel)) root(uchar4 in, uint32_t x, uint32_t y) {
     const float4 fin = convert_float4(in);
     const float2 inCoord = {(float)x, (float)y};
     const float2 coord = mad(inCoord, inv_dimensions, neg_center);
-    const float sloped_dist_ratio = length(axis_scale * coord)  * sloped_inv_max_dist;
-    const float lumen = opp_shade + shade / ( 1.0f + sloped_neg_range * exp(sloped_dist_ratio) );
+    const float sloped_dist_ratio = fast_length(axis_scale * coord)  * sloped_inv_max_dist;
+    const float lumen = opp_shade + shade * half_recip(1.f + sloped_neg_range * exp(sloped_dist_ratio));
     float4 fout;
     fout.rgb = fin.rgb * lumen;
     fout.w = fin.w;
