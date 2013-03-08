@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-#include "ip.rsh"
+package com.android.rs.image2;
 
-#include "vignette_approx.rsh"
+import java.lang.Math;
 
+
+public class BWFilter extends TestBase {
+    private ScriptC_bwfilter mScript;
+
+    public void createTest(android.content.res.Resources res) {
+        mScript = new ScriptC_bwfilter(mRS);
+    }
+
+    public void runTest() {
+        mScript.invoke_prepareBwFilter(50, 50, 50);
+        mScript.forEach_bwFilterKernel(mInPixelsAllocation, mOutPixelsAllocation);
+    }
+
+}

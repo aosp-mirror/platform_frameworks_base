@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image2)
-#pragma rs_fp_relaxed
+package com.android.rs.image2;
 
-#include "levels.rsh"
+import java.lang.Math;
 
+
+public class Contrast extends TestBase {
+    private ScriptC_contrast mScript;
+
+    public void createTest(android.content.res.Resources res) {
+        mScript = new ScriptC_contrast(mRS);
+    }
+
+    public void runTest() {
+        mScript.invoke_setBright(50.f);
+        mScript.forEach_contrast(mInPixelsAllocation, mOutPixelsAllocation);
+    }
+
+}

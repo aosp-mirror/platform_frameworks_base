@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image2)
-#pragma rs_fp_relaxed
+#include "ip.rsh"
 
 int32_t gWidth;
 int32_t gHeight;
@@ -24,7 +22,7 @@ rs_allocation gIn;
 
 float gCoeffs[25];
 
-void root(uchar4 *out, uint32_t x, uint32_t y) {
+uchar4 __attribute__((kernel)) root(uint32_t x, uint32_t y) {
     uint32_t x0 = max((int32_t)x-2, 0);
     uint32_t x1 = max((int32_t)x-1, 0);
     uint32_t x2 = x;
@@ -68,8 +66,7 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
               + convert_float4(rsGetElementAt_uchar4(gIn, x4, y4)) * gCoeffs[24];
 
     p0 = clamp(p0 + p1 + p2 + p3 + p4, 0.f, 255.f);
-    p0.a = 255.f;
-    *out = convert_uchar4(p0);
+    return convert_uchar4(p0);
 }
 
 
