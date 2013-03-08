@@ -2633,16 +2633,7 @@ mat4 OpenGLRenderer::findBestFontTransform(const mat4& transform) const {
         fontTransform = mat4::identity();
     } else {
         if (CC_UNLIKELY(transform.isPerspective())) {
-            // When the below condition is true, we are rendering text with a
-            // perspective transform inside a layer (either an inline layer
-            // created by Canvas.saveLayer() or a hardware layer.)
-            if (hasLayer() || getTargetFbo() != 0) {
-                float sx, sy;
-                currentTransform().decomposeScale(sx, sy);
-                fontTransform.loadScale(sx, sy, 1.0f);
-            } else {
-                fontTransform = mat4::identity();
-            }
+            fontTransform = mat4::identity();
         } else {
             float sx, sy;
             currentTransform().decomposeScale(sx, sy);
