@@ -28,7 +28,7 @@ import android.os.UserHandle;
 import android.util.Log;
 
 /**
- * This class creates DPAD events from touchpad events.
+ * This class creates DPAD events from TouchNavigation events.
  * 
  * @see ViewRootImpl
  */
@@ -47,18 +47,18 @@ class SimulatedDpad {
     private static final int MSG_FLICK = 313;
     // TODO: Pass touch slop from the input device
     private static final int TOUCH_SLOP = 30;
-    // The position of the previous touchpad event
-    private float mLastTouchpadXPosition;
-    private float mLastTouchpadYPosition;
-    // Where the touchpad was initially pressed
-    private float mTouchpadEnterXPosition;
-    private float mTouchpadEnterYPosition;
+    // The position of the previous TouchNavigation event
+    private float mLastTouchNavigationXPosition;
+    private float mLastTouchNavigationYPosition;
+    // Where the Touch Navigation was initially pressed
+    private float mTouchNavigationEnterXPosition;
+    private float mTouchNavigationEnterYPosition;
     // When the most recent ACTION_HOVER_ENTER occurred
-    private long mLastTouchPadStartTimeMs = 0;
+    private long mLastTouchNavigationStartTimeMs = 0;
     // When the most recent direction key was sent
-    private long mLastTouchPadKeySendTimeMs = 0;
+    private long mLastTouchNavigationKeySendTimeMs = 0;
     // When the most recent touch event of any type occurred
-    private long mLastTouchPadEventTimeMs = 0;
+    private long mLastTouchNavigationEventTimeMs = 0;
     // Did the swipe begin in a valid region
     private boolean mEdgeSwipePossible;
 
@@ -140,7 +140,7 @@ class SimulatedDpad {
         }
     };
 
-    public void updateTouchPad(ViewRootImpl viewroot, MotionEvent event,
+    public void updateTouchNavigation(ViewRootImpl viewroot, MotionEvent event,
             boolean synthesizeNewKeys) {
         if (!synthesizeNewKeys) {
             mHandler.removeMessages(MSG_FLICK);
@@ -149,14 +149,14 @@ class SimulatedDpad {
         if (device == null) {
             return;
         }
-        // Store what time the touchpad event occurred
+        // Store what time the TouchNavigation event occurred
         final long time = SystemClock.uptimeMillis();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mLastTouchPadStartTimeMs = time;
+                mLastTouchNavigationStartTimeMs = time;
                 mAlwaysInTapRegion = true;
-                mTouchpadEnterXPosition = event.getX();
-                mTouchpadEnterYPosition = event.getY();
+                mTouchNavigationEnterXPosition = event.getX();
+                mTouchNavigationEnterYPosition = event.getY();
                 mAccumulatedX = 0;
                 mAccumulatedY = 0;
                 mLastMoveX = 0;
@@ -173,8 +173,8 @@ class SimulatedDpad {
                 break;
             case MotionEvent.ACTION_MOVE:
                 // Determine whether the move is slop or an intentional move
-                float deltaX = event.getX() - mTouchpadEnterXPosition;
-                float deltaY = event.getY() - mTouchpadEnterYPosition;
+                float deltaX = event.getX() - mTouchNavigationEnterXPosition;
+                float deltaY = event.getY() - mTouchNavigationEnterYPosition;
                 if (mTouchSlopSquared < deltaX * deltaX + deltaY * deltaY) {
                     mAlwaysInTapRegion = false;
                 }
@@ -199,9 +199,9 @@ class SimulatedDpad {
                     }
                 }
                 // Find the difference in position between the two most recent
-                // touchpad events
-                mLastMoveX = event.getX() - mLastTouchpadXPosition;
-                mLastMoveY = event.getY() - mLastTouchpadYPosition;
+                // TouchNavigation events
+                mLastMoveX = event.getX() - mLastTouchNavigationXPosition;
+                mLastMoveY = event.getY() - mLastTouchNavigationYPosition;
                 mAccumulatedX += mLastMoveX;
                 mAccumulatedY += mLastMoveY;
                 float mAccumulatedXSquared = mAccumulatedX * mAccumulatedX;
@@ -251,28 +251,28 @@ class SimulatedDpad {
                     mAccumulatedY = isXAxis ? 0 : dominantAxis;
 
                     mLastKeySent = key;
-                    mKeySendRateMs = (int) ((time - mLastTouchPadKeySendTimeMs) / repeatCount);
-                    mLastTouchPadKeySendTimeMs = time;
+                    mKeySendRateMs = (int) (time - mLastTouchNavigationKeySendTimeMs) / repeatCount;
+                    mLastTouchNavigationKeySendTimeMs = time;
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (time - mLastTouchPadStartTimeMs < MAX_TAP_TIME && mAlwaysInTapRegion) {
+                if (time - mLastTouchNavigationStartTimeMs < MAX_TAP_TIME && mAlwaysInTapRegion) {
                     if (synthesizeNewKeys) {
-                        viewroot.enqueueInputEvent(new KeyEvent(mLastTouchPadStartTimeMs, time,
-                                KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0,
-                                event.getMetaState(), event.getDeviceId(), 0,
-                                KeyEvent.FLAG_FALLBACK, event.getSource()));
-                        viewroot.enqueueInputEvent(new KeyEvent(mLastTouchPadStartTimeMs, time,
-                                KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0,
-                                event.getMetaState(), event.getDeviceId(), 0,
-                                KeyEvent.FLAG_FALLBACK, event.getSource()));
+                        viewroot.enqueueInputEvent(new KeyEvent(mLastTouchNavigationStartTimeMs,
+                                    time, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0,
+                                    event.getMetaState(), event.getDeviceId(), 0,
+                                    KeyEvent.FLAG_FALLBACK, event.getSource()));
+                        viewroot.enqueueInputEvent(new KeyEvent(mLastTouchNavigationStartTimeMs,
+                                    time, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0,
+                                    event.getMetaState(), event.getDeviceId(), 0,
+                                    KeyEvent.FLAG_FALLBACK, event.getSource()));
                     }
                 } else {
                     float xMoveSquared = mLastMoveX * mLastMoveX;
                     float yMoveSquared = mLastMoveY * mLastMoveY;
                     // Determine whether the last gesture was a fling.
                     if (mMinFlickDistanceSquared <= xMoveSquared + yMoveSquared &&
-                            time - mLastTouchPadEventTimeMs <= MAX_TAP_TIME &&
+                            time - mLastTouchNavigationEventTimeMs <= MAX_TAP_TIME &&
                             mKeySendRateMs <= mMaxRepeatDelay && mKeySendRateMs > 0) {
                         mLastDeviceId = event.getDeviceId();
                         mLastSource = event.getSource();
@@ -291,8 +291,8 @@ class SimulatedDpad {
         }
 
         // Store touch event position and time
-        mLastTouchPadEventTimeMs = time;
-        mLastTouchpadXPosition = event.getX();
-        mLastTouchpadYPosition = event.getY();
+        mLastTouchNavigationEventTimeMs = time;
+        mLastTouchNavigationXPosition = event.getX();
+        mLastTouchNavigationYPosition = event.getY();
     }
 }

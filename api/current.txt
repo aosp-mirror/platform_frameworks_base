@@ -24171,6 +24171,7 @@ package android.view {
     field public static final int SOURCE_CLASS_BUTTON = 1; // 0x1
     field public static final int SOURCE_CLASS_JOYSTICK = 16; // 0x10
     field public static final int SOURCE_CLASS_MASK = 255; // 0xff
+    field public static final int SOURCE_CLASS_NONE = 0; // 0x0
     field public static final int SOURCE_CLASS_POINTER = 2; // 0x2
     field public static final int SOURCE_CLASS_POSITION = 8; // 0x8
     field public static final int SOURCE_CLASS_TRACKBALL = 4; // 0x4
@@ -24182,6 +24183,7 @@ package android.view {
     field public static final int SOURCE_STYLUS = 16386; // 0x4002
     field public static final int SOURCE_TOUCHPAD = 1048584; // 0x100008
     field public static final int SOURCE_TOUCHSCREEN = 4098; // 0x1002
+    field public static final int SOURCE_TOUCH_NAVIGATION = 2097152; // 0x200000
     field public static final int SOURCE_TRACKBALL = 65540; // 0x10004
     field public static final int SOURCE_UNKNOWN = 0; // 0x0
   }
