@@ -26,7 +26,7 @@ void init_filter(uint32_t dim_x, uint32_t dim_y, float center_x, float center_y,
     neg_center = -center;
     inv_dimensions.x = 1.f / (float)dim_x;
     inv_dimensions.y = 1.f / (float)dim_y;
-    alpha = k * 2.0 + 0.75;
+    alpha = k * 2.0f + 0.75f;
 
     axis_scale = (float2)1.f;
     if (dim_x > dim_y)
@@ -34,15 +34,15 @@ void init_filter(uint32_t dim_x, uint32_t dim_y, float center_x, float center_y,
     else
         axis_scale.x = (float)dim_x / (float)dim_y;
 
-    const float bound2 = 0.25 * (axis_scale.x*axis_scale.x + axis_scale.y*axis_scale.y);
+    const float bound2 = 0.25f * (axis_scale.x*axis_scale.x + axis_scale.y*axis_scale.y);
     const float bound = sqrt(bound2);
-    const float radius = 1.15 * bound;
+    const float radius = 1.15f * bound;
     radius2 = radius*radius;
     const float max_radian = M_PI_2 - atan(alpha / bound * sqrt(radius2 - bound2));
     factor = bound / max_radian;
 }
 
-void root(uchar4 *out, uint32_t x, uint32_t y) {
+uchar4 __attribute__((kernel)) root(uint32_t x, uint32_t y) {
     // Convert x and y to floating point coordinates with center as origin
     const float2 inCoord = {(float)x, (float)y};
     const float2 coord = mad(inCoord, inv_dimensions, neg_center);
@@ -53,6 +53,6 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
     const float scalar = radian * factor * inv_dist;
     const float2 new_coord = mad(coord, scalar, center);
     const float4 fout = rsSample(in_alloc, sampler, new_coord);
-    *out = rsPackColorTo8888(fout);
+    return rsPackColorTo8888(fout);
 }
 

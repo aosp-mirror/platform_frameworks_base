@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image)
-#pragma rs_fp_relaxed
+#include "ip.rsh"
 
 int32_t gWidth;
 int32_t gHeight;

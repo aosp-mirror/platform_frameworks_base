@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image)
-#pragma rs_fp_full
+#include "ip.rsh"
 
 static float bright = 0.f;
 

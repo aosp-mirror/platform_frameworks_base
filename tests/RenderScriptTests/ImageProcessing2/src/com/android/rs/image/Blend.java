@@ -44,8 +44,10 @@ public class Blend extends TestBase {
             new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                     currentIntrinsic = pos;
-                    runTest();
-                    act.updateDisplay();
+                    if (mRS != null) {
+                        runTest();
+                        act.updateDisplay();
+                    }
                 }
 
                 public void onNothingSelected(AdapterView parent) {

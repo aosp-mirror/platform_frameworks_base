@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,5 @@
 
 #pragma version(1)
 #pragma rs java_package_name(com.android.rs.image2)
-#pragma rs_fp_relaxed
-
-const static float3 gMonoMult = {0.299f, 0.587f, 0.114f};
-
-void root(const uchar4 *v_in, uchar4 *v_out) {
-    float4 f4 = rsUnpackColor8888(*v_in);
-
-    float3 mono = dot(f4.rgb, gMonoMult);
-    *v_out = rsPackColorTo8888(mono);
-}
 
 
