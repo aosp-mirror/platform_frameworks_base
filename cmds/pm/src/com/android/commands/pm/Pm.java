@@ -1149,10 +1149,7 @@ public final class Pm {
 
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs, userId)) {
-                System.err.println("Failed");
-            }
-
+            ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs, userId);
             synchronized (obs) {
                 while (!obs.finished) {
                     try {
