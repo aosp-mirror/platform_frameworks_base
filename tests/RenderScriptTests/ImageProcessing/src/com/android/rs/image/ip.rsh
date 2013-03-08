@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 #pragma version(1)
-#pragma rs java_package_name(com.android.rs.image2)
-#pragma rs_fp_relaxed
+#pragma rs java_package_name(com.android.rs.image)
 
-#include "vignette.rsh"
 

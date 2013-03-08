@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image2)
-#pragma rs_fp_relaxed
+#include "ip.rsh"
 
-void genRand(uchar *out) {
-    *out = (uchar)rsRand(0xff);
+uchar __attribute__((kernel)) genRand() {
+    return (uchar)rsRand(0xff);
 }
 
 /*
@@ -42,7 +40,7 @@ int32_t gWMask;
 int32_t gHMask;
 
 rs_allocation gBlendSource;
-void blend9(uchar *out, uint32_t x, uint32_t y) {
+uchar __attribute__((kernel)) blend9(uint32_t x, uint32_t y) {
     uint32_t x1 = (x-1) & gWMask;
     uint32_t x2 = (x+1) & gWMask;
     uint32_t y1 = (y-1) & gHMask;
@@ -70,14 +68,14 @@ void blend9(uchar *out, uint32_t x, uint32_t y) {
     p20 += p02;
 
     p20 = min(p20 >> 10, (uint)255);
-    *out = (uchar)p20;
+    return (uchar)p20;
 }
 
 float gNoiseStrength;
 
 rs_allocation gNoise;
-void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
-    float4 ip = convert_float4(*in);
+uchar4 __attribute__((kernel)) root(uchar4 in, uint32_t x, uint32_t y) {
+    float4 ip = convert_float4(in);
     float pnoise = (float) rsGetElementAt_uchar(gNoise, x & gWMask, y & gHMask);
 
     float energy_level = ip.r + ip.g + ip.b;
@@ -89,5 +87,5 @@ void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
 
     uchar4 p = convert_uchar4(ip);
     p.a = 0xff;
-    *out = p;
+    return p;
 }

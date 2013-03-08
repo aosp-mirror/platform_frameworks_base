@@ -21,24 +21,26 @@ float outWMinOutB;
 float overInWMinInB;
 rs_matrix3x3 colorMat;
 
-void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
-    float3 pixel = convert_float4(in[0]).rgb;
+uchar4 __attribute__((kernel)) root(uchar4 in, uint32_t x, uint32_t y) {
+    uchar4 out;
+    float3 pixel = convert_float4(in).rgb;
     pixel = rsMatrixMultiply(&colorMat, pixel);
     pixel = clamp(pixel, 0.f, 255.f);
     pixel = (pixel - inBlack) * overInWMinInB;
     pixel = pixel * outWMinOutB + outBlack;
     pixel = clamp(pixel, 0.f, 255.f);
-    out->xyz = convert_uchar3(pixel);
-    out->w = 0xff;
+    out.xyz = convert_uchar3(pixel);
+    out.w = 0xff;
+    return out;
 }
 
-void root4(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
-    float4 pixel = convert_float4(in[0]);
+uchar4 __attribute__((kernel)) root4(uchar4 in, uint32_t x, uint32_t y) {
+    float4 pixel = convert_float4(in);
     pixel.rgb = rsMatrixMultiply(&colorMat, pixel.rgb);
     pixel = clamp(pixel, 0.f, 255.f);
     pixel = (pixel - inBlack) * overInWMinInB;
     pixel = pixel * outWMinOutB + outBlack;
     pixel = clamp(pixel, 0.f, 255.f);
-    out->xyzw = convert_uchar4(pixel);
+    return convert_uchar4(pixel);
 }
 

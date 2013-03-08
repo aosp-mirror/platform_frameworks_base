@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image2)
-#pragma rs_fp_relaxed
+package com.android.rs.image2;
 
-#include "vignette_approx.rsh"
 
+public class Shadows extends TestBase {
+    private ScriptC_shadows mScript;
+
+    public void createTest(android.content.res.Resources res) {
+        mScript = new ScriptC_shadows(mRS);
+    }
+
+    public void runTest() {
+        mScript.invoke_prepareShadows(50.f);
+        mScript.forEach_shadowsKernel(mInPixelsAllocation, mOutPixelsAllocation);
+    }
+
+}

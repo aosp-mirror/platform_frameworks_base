@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image2)
-#pragma rs_fp_relaxed
+package com.android.rs.image2;
 
+public class Vibrance extends TestBase {
+    private ScriptC_vibrance mScript;
 
-static rs_matrix4x4 Mat;
+    public void createTest(android.content.res.Resources res) {
+        mScript = new ScriptC_vibrance(mRS);
+    }
 
-void init() {
-    rsMatrixLoadIdentity(&Mat);
+    public void runTest() {
+        mScript.set_vibrance(50.f);
+        mScript.invoke_prepareVibrance();
+        mScript.forEach_vibranceKernel(mInPixelsAllocation, mOutPixelsAllocation);
+    }
+
 }
-
-void setMatrix(rs_matrix4x4 m) {
-    Mat = m;
-}
-
-void root(const uchar4 *in, uchar4 *out) {
-    float4 f = convert_float4(*in);
-    f = rsMatrixMultiply(&Mat, f);
-    f = clamp(f, 0.f, 255.f);
-    *out = convert_uchar4(f);
-}
-
