@@ -402,7 +402,18 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             array[i].mDrawable.setAlpha(alpha);
         }
     }
-    
+
+    @Override
+    public int getAlpha() {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        if (mLayerState.mNum > 0) {
+            // All layers should have the same alpha set on them - just return the first one
+            return array[0].mDrawable.getAlpha();
+        } else {
+            return super.getAlpha();
+        }
+    }
+
     @Override
     public void setColorFilter(ColorFilter cf) {
         final ChildDrawable[] array = mLayerState.mChildren;
