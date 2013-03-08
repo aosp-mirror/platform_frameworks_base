@@ -22276,19 +22276,19 @@ package android.text.format {
     method public static java.text.DateFormat getMediumDateFormat(android.content.Context);
     method public static java.text.DateFormat getTimeFormat(android.content.Context);
     method public static boolean is24HourFormat(android.content.Context);
-    field public static final char AM_PM = 97; // 0x0061 'a'
-    field public static final char CAPITAL_AM_PM = 65; // 0x0041 'A'
-    field public static final char DATE = 100; // 0x0064 'd'
-    field public static final char DAY = 69; // 0x0045 'E'
-    field public static final char HOUR = 104; // 0x0068 'h'
-    field public static final char HOUR_OF_DAY = 107; // 0x006b 'k'
-    field public static final char MINUTE = 109; // 0x006d 'm'
-    field public static final char MONTH = 77; // 0x004d 'M'
-    field public static final char QUOTE = 39; // 0x0027 '\''
-    field public static final char SECONDS = 115; // 0x0073 's'
-    field public static final char STANDALONE_MONTH = 76; // 0x004c 'L'
-    field public static final char TIME_ZONE = 122; // 0x007a 'z'
-    field public static final char YEAR = 121; // 0x0079 'y'
+    field public static final deprecated char AM_PM = 97; // 0x0061 'a'
+    field public static final deprecated char CAPITAL_AM_PM = 65; // 0x0041 'A'
+    field public static final deprecated char DATE = 100; // 0x0064 'd'
+    field public static final deprecated char DAY = 69; // 0x0045 'E'
+    field public static final deprecated char HOUR = 104; // 0x0068 'h'
+    field public static final deprecated char HOUR_OF_DAY = 107; // 0x006b 'k'
+    field public static final deprecated char MINUTE = 109; // 0x006d 'm'
+    field public static final deprecated char MONTH = 77; // 0x004d 'M'
+    field public static final deprecated char QUOTE = 39; // 0x0027 '\''
+    field public static final deprecated char SECONDS = 115; // 0x0073 's'
+    field public static final deprecated char STANDALONE_MONTH = 76; // 0x004c 'L'
+    field public static final deprecated char TIME_ZONE = 122; // 0x007a 'z'
+    field public static final deprecated char YEAR = 121; // 0x0079 'y'
   }
 
   public class DateUtils {
