@@ -345,7 +345,7 @@ function showDevelopersLivePlaylist() {
   var playlistId = "PLWz5rJ2EKKc_XOgcRukSoKKjewFJZrKV0"; /* DevBytes */
   var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
                 + playlistId +
-                "?v=2&alt=json-in-script&max-results=10&callback=renderDevelopersLivePlaylist&orderby=published'><\/script > ";
+                "?v=2&alt=json-in-script&max-results=10&callback=renderDevelopersLivePlaylist&orderby=reversedPosition'><\/script > ";
   $("body").append(script);
 }
 
