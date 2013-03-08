@@ -252,12 +252,7 @@ public class ShapeDrawable extends Drawable {
         mShapeState.mAlpha = alpha;
         invalidateSelf();
     }
-
-    @Override
-    public int getAlpha() {
-        return mShapeState.mAlpha;
-    }
-
+    
     @Override
     public void setColorFilter(ColorFilter cf) {
         mShapeState.mPaint.setColorFilter(cf);

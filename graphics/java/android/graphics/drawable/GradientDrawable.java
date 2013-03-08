@@ -639,11 +639,6 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public int getAlpha() {
-        return mAlpha;
-    }
-
-    @Override
     public void setDither(boolean dither) {
         if (dither != mDither) {
             mDither = dither;

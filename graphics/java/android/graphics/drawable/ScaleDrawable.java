@@ -177,11 +177,6 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public int getAlpha() {
-        return mScaleState.mDrawable.getAlpha();
-    }
-
-    @Override
     public void setColorFilter(ColorFilter cf) {
         mScaleState.mDrawable.setColorFilter(cf);
     }

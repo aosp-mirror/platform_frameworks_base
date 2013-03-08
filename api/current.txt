@@ -9442,6 +9442,7 @@ package android.graphics.drawable {
     ctor public ColorDrawable();
     ctor public ColorDrawable(int);
     method public void draw(android.graphics.Canvas);
+    method public int getAlpha();
     method public int getColor();
     method public int getOpacity();
     method public void setAlpha(int);
@@ -9461,7 +9462,6 @@ package android.graphics.drawable {
     method public static android.graphics.drawable.Drawable createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.graphics.drawable.Drawable createFromXmlInner(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public abstract void draw(android.graphics.Canvas);
-    method public int getAlpha();
     method public final android.graphics.Rect getBounds();
     method public android.graphics.drawable.Drawable.Callback getCallback();
     method public int getChangingConfigurations();
