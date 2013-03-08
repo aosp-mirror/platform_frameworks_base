@@ -192,12 +192,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
     public void setAlpha(int alpha) {
         mInsetState.mDrawable.setAlpha(alpha);
     }
-
-    @Override
-    public int getAlpha() {
-        return mInsetState.mDrawable.getAlpha();
-    }
-
+    
     @Override
     public void setColorFilter(ColorFilter cf) {
         mInsetState.mDrawable.setColorFilter(cf);

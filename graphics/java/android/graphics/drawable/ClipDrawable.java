@@ -158,11 +158,6 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public int getAlpha() {
-        return mClipState.mDrawable.getAlpha();
-    }
-
-    @Override
     public void setColorFilter(ColorFilter cf) {
         mClipState.mDrawable.setColorFilter(cf);
     }

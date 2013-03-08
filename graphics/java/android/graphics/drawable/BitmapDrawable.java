@@ -456,11 +456,6 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public int getAlpha() {
-        return mBitmapState.mPaint.getAlpha();
-    }
-
-    @Override
     public void setColorFilter(ColorFilter cf) {
         mBitmapState.mPaint.setColorFilter(cf);
         invalidateSelf();

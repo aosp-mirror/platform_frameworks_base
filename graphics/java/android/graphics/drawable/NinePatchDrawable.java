@@ -251,15 +251,6 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public int getAlpha() {
-        if (mPaint == null) {
-            // Fast common case -- normal alpha.
-            return 0xFF;
-        }
-        return getPaint().getAlpha();
-    }
-
-    @Override
     public void setColorFilter(ColorFilter cf) {
         if (mPaint == null && cf == null) {
             // Fast common case -- leave at no color filter.
