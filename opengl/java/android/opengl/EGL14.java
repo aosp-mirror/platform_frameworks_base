@@ -447,7 +447,6 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
 
     // C function EGLBoolean eglPresentationTimeANDROID ( EGLDisplay dpy, EGLSurface sur, EGLnsecsANDROID time )
 
-    /** @hide -- TODO(fadden) unhide this */
     public static native boolean eglPresentationTimeANDROID(
         EGLDisplay dpy,
         EGLSurface sur,

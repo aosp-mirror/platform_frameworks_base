@@ -268,7 +268,6 @@ final public class MediaCodec {
      * <p>
      * The application is responsible for calling release() on the Surface when
      * done.
-     * @hide -- TODO(fadden): make this public before release
      */
     public native final Surface createInputSurface();
 
@@ -471,7 +470,6 @@ final public class MediaCodec {
      * Signals end-of-stream on input.  Equivalent to submitting an empty buffer with
      * {@link #BUFFER_FLAG_END_OF_STREAM} set.  This may only be used with
      * encoders receiving input from a Surface created by {@link #createInputSurface}.
-     * @hide -- TODO(fadden): make this public before release
      */
     public native final void signalEndOfInputStream();
 
