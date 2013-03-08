@@ -24,14 +24,19 @@ import android.renderscript.Matrix4f;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import android.renderscript.ScriptC;
+import android.renderscript.ScriptGroup;
+import android.renderscript.ScriptIntrinsicColorMatrix;
 import android.renderscript.Type;
 import android.util.Log;
 
 public class ColorMatrix extends TestBase {
     private ScriptC_colormatrix mScript;
+    private ScriptIntrinsicColorMatrix mIntrinsic;
+    private boolean mUseIntrinsic;
     private boolean mUseGrey;
 
-    public ColorMatrix(boolean useGrey) {
+    public ColorMatrix(boolean useIntrinsic, boolean useGrey) {
+        mUseIntrinsic = useIntrinsic;
         mUseGrey = useGrey;
     }
 
@@ -41,12 +46,25 @@ public class ColorMatrix extends TestBase {
         m.set(1, 1, 0.9f);
         m.set(1, 2, 0.2f);
 
-        mScript = new ScriptC_colormatrix(mRS, res, R.raw.colormatrix);
-        mScript.invoke_setMatrix(m);
+        if (mUseIntrinsic) {
+            mIntrinsic = ScriptIntrinsicColorMatrix.create(mRS, Element.U8_4(mRS));
+            if (mUseGrey) {
+                mIntrinsic.setGreyscale();
+            } else {
+                mIntrinsic.setColorMatrix(m);
+            }
+        } else {
+            mScript = new ScriptC_colormatrix(mRS, res, R.raw.colormatrix);
+            mScript.invoke_setMatrix(m);
+        }
     }
 
     public void runTest() {
-        mScript.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
+        if (mUseIntrinsic) {
+            mIntrinsic.forEach(mInPixelsAllocation, mOutPixelsAllocation);
+        } else {
+            mScript.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
+        }
     }
 
 }

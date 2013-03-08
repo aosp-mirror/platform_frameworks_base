@@ -16,5 +16,20 @@
 
 #include "ip.rsh"
 
-#include "levels.rsh"
+static rs_matrix4x4 Mat;
+
+void init() {
+    rsMatrixLoadIdentity(&Mat);
+}
+
+void setMatrix(rs_matrix4x4 m) {
+    Mat = m;
+}
+
+uchar4 __attribute__((kernel)) root(uchar4 in) {
+    float4 f = convert_float4(in);
+    f = rsMatrixMultiply(&Mat, f);
+    f = clamp(f, 0.f, 255.f);
+    return convert_uchar4(f);
+}
 
