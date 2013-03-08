@@ -24,6 +24,6 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) \
 #LOCAL_STATIC_JAVA_LIBRARIES := android.renderscript
 
 LOCAL_PACKAGE_NAME := ImageProcessingJB
-LOCAL_SDK_VERSION := 16
+LOCAL_SDK_VERSION := 17
 
 include $(BUILD_PACKAGE)

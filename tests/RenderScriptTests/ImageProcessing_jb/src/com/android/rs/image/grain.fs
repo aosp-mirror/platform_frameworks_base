@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.imagejb)
-#pragma rs_fp_relaxed
+#include "ip.rsh"
 
-void genRand(uchar *out) {
-    *out = (uchar)rsRand(0xff);
-}
-
-static inline uchar GetElementAt_uchar(rs_allocation a, uint32_t x, uint32_t y) {
-    return ((uchar *)rsGetElementAt(a, x, y))[0];
-}
-
-static inline float4 GetElementAt_float4(rs_allocation a, uint32_t x, uint32_t y) {
-    return ((float4 *)rsGetElementAt(a, x, y))[0];
+uchar __attribute__((kernel)) genRand() {
+    return (uchar)rsRand(0xff);
 }
 
 /*
@@ -50,21 +40,21 @@ int32_t gWMask;
 int32_t gHMask;
 
 rs_allocation gBlendSource;
-void blend9(uchar *out, uint32_t x, uint32_t y) {
+uchar __attribute__((kernel)) blend9(uint32_t x, uint32_t y) {
     uint32_t x1 = (x-1) & gWMask;
     uint32_t x2 = (x+1) & gWMask;
     uint32_t y1 = (y-1) & gHMask;
     uint32_t y2 = (y+1) & gHMask;
 
-    uint p00 = 56 *  GetElementAt_uchar(gBlendSource, x1, y1);
-    uint p01 = 114 * GetElementAt_uchar(gBlendSource, x, y1);
-    uint p02 = 56 *  GetElementAt_uchar(gBlendSource, x2, y1);
-    uint p10 = 114 * GetElementAt_uchar(gBlendSource, x1, y);
-    uint p11 = 230 * GetElementAt_uchar(gBlendSource, x, y);
-    uint p12 = 114 * GetElementAt_uchar(gBlendSource, x2, y);
-    uint p20 = 56 *  GetElementAt_uchar(gBlendSource, x1, y2);
-    uint p21 = 114 * GetElementAt_uchar(gBlendSource, x, y2);
-    uint p22 = 56 *  GetElementAt_uchar(gBlendSource, x2, y2);
+    uint p00 = 56 *  rsGetElementAt_uchar(gBlendSource, x1, y1);
+    uint p01 = 114 * rsGetElementAt_uchar(gBlendSource, x, y1);
+    uint p02 = 56 *  rsGetElementAt_uchar(gBlendSource, x2, y1);
+    uint p10 = 114 * rsGetElementAt_uchar(gBlendSource, x1, y);
+    uint p11 = 230 * rsGetElementAt_uchar(gBlendSource, x, y);
+    uint p12 = 114 * rsGetElementAt_uchar(gBlendSource, x2, y);
+    uint p20 = 56 *  rsGetElementAt_uchar(gBlendSource, x1, y2);
+    uint p21 = 114 * rsGetElementAt_uchar(gBlendSource, x, y2);
+    uint p22 = 56 *  rsGetElementAt_uchar(gBlendSource, x2, y2);
 
     p00 += p01;
     p02 += p10;
@@ -78,15 +68,15 @@ void blend9(uchar *out, uint32_t x, uint32_t y) {
     p20 += p02;
 
     p20 = min(p20 >> 10, (uint)255);
-    *out = (uchar)p20;
+    return (uchar)p20;
 }
 
 float gNoiseStrength;
 
 rs_allocation gNoise;
-void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
-    float4 ip = convert_float4(*in);
-    float pnoise = (float) GetElementAt_uchar(gNoise, x & gWMask, y & gHMask);
+uchar4 __attribute__((kernel)) root(uchar4 in, uint32_t x, uint32_t y) {
+    float4 ip = convert_float4(in);
+    float pnoise = (float) rsGetElementAt_uchar(gNoise, x & gWMask, y & gHMask);
 
     float energy_level = ip.r + ip.g + ip.b;
     float energy_mask = (28.f - sqrt(energy_level)) * 0.03571f;
@@ -97,5 +87,5 @@ void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
 
     uchar4 p = convert_uchar4(ip);
     p.a = 0xff;
-    *out = p;
+    return p;
 }

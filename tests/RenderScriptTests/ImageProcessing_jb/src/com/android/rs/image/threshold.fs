@@ -1,6 +1,20 @@
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.imagejb)
-#pragma rs_fp_relaxed
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "ip.rsh"
 
 
 int height;
@@ -56,51 +70,49 @@ void setRadius(int rad) {
     }
 }
 
-void copyIn(const uchar4 *in, float4 *out) {
-    *out = convert_float4(*in);
+float4 __attribute__((kernel)) copyIn(uchar4 in) {
+    return convert_float4(in);
 }
 
-static inline float4 GetElementAt_float4(rs_allocation a, uint32_t x, uint32_t y) {
-    return ((float4 *)rsGetElementAt(a, x, y))[0];
-}
-
-void vert(uchar4 *out, uint32_t x, uint32_t y) {
+uchar4 __attribute__((kernel)) vert(uint32_t x, uint32_t y) {
     float3 blurredPixel = 0;
     int gi = 0;
+    uchar4 out;
     if ((y > radius) && (y < (height - radius))) {
         for (int r = -radius; r <= radius; r ++) {
-            float4 i = GetElementAt_float4(ScratchPixel2, x, y + r);
+            float4 i = rsGetElementAt_float4(ScratchPixel2, x, y + r);
             blurredPixel += i.xyz * gaussian[gi++];
         }
     } else {
         for (int r = -radius; r <= radius; r ++) {
             int validH = rsClamp((int)y + r, (int)0, (int)(height - 1));
-            float4 i = GetElementAt_float4(ScratchPixel2, x, validH);
+            float4 i = rsGetElementAt_float4(ScratchPixel2, x, validH);
             blurredPixel += i.xyz * gaussian[gi++];
         }
     }
 
-    out->xyz = convert_uchar3(clamp(blurredPixel, 0.f, 255.f));
-    out->w = 0xff;
+    out.xyz = convert_uchar3(clamp(blurredPixel, 0.f, 255.f));
+    out.w = 0xff;
+    return out;
 }
 
-void horz(float4 *out, uint32_t x, uint32_t y) {
+float4 __attribute__((kernel)) horz(uint32_t x, uint32_t y) {
     float4 blurredPixel = 0;
     int gi = 0;
     if ((x > radius) && (x < (width - radius))) {
         for (int r = -radius; r <= radius; r ++) {
-            float4 i = GetElementAt_float4(ScratchPixel1, x + r, y);
+            float4 i = rsGetElementAt_float4(ScratchPixel1, x + r, y);
             blurredPixel += i * gaussian[gi++];
         }
     } else {
         for (int r = -radius; r <= radius; r ++) {
             // Stepping left and right away from the pixel
             int validX = rsClamp((int)x + r, (int)0, (int)(width - 1));
-            float4 i = GetElementAt_float4(ScratchPixel1, validX, y);
+            float4 i = rsGetElementAt_float4(ScratchPixel1, validX, y);
             blurredPixel += i * gaussian[gi++];
         }
     }
 
-    *out = blurredPixel;
+    return blurredPixel;
 }
 

@@ -16,5 +16,8 @@
 
 #include "ip.rsh"
 
-#include "levels.rsh"
+uchar4 __attribute__((kernel)) root(uchar4 v_in) {
+    return v_in;
+}
+
 

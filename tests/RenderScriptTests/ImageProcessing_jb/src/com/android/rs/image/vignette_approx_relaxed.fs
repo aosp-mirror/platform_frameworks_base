@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.imagejb)
-#pragma rs_fp_relaxed
+#include "ip.rsh"
 
-#include "vignette.rsh"
+#include "vignette_approx.rsh"
 
