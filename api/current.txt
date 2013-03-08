@@ -2135,8 +2135,10 @@ package android.accounts {
   public abstract class AbstractAccountAuthenticator {
     ctor public AbstractAccountAuthenticator(android.content.Context);
     method public abstract android.os.Bundle addAccount(android.accounts.AccountAuthenticatorResponse, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle) throws android.accounts.NetworkErrorException;
+    method public android.os.Bundle addAccountFromCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle confirmCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle editProperties(android.accounts.AccountAuthenticatorResponse, java.lang.String);
+    method public android.os.Bundle getAccountCredentialsForCloning(android.accounts.AccountAuthenticatorResponse, android.accounts.Account) throws android.accounts.NetworkErrorException;
     method public android.os.Bundle getAccountRemovalAllowed(android.accounts.AccountAuthenticatorResponse, android.accounts.Account) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle getAuthToken(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public abstract java.lang.String getAuthTokenLabel(java.lang.String);

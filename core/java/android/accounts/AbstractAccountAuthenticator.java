@@ -505,7 +505,6 @@ public abstract class AbstractAccountAuthenticator {
     }
 
     /**
-     * @hide
      * Returns a Bundle that contains whatever is required to clone the account on a different
      * user. The Bundle is passed to the authenticator instance in the target user via
      * {@link #addAccountFromCredentials(AccountAuthenticatorResponse, Account, Bundle)}.
@@ -529,7 +528,6 @@ public abstract class AbstractAccountAuthenticator {
     }
 
     /**
-     * @hide
      * Creates an account based on credentials provided by the authenticator instance of another
      * user on the device, who has chosen to share the account with this user.
      * @param response to send the result back to the AccountManager, will never be null
