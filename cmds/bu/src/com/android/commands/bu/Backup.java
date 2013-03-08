@@ -22,6 +22,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public final class Backup {
@@ -64,6 +65,7 @@ public final class Backup {
     private void doFullBackup(int socketFd) {
         ArrayList<String> packages = new ArrayList<String>();
         boolean saveApks = false;
+        boolean saveObbs = false;
         boolean saveShared = false;
         boolean doEverything = false;
         boolean allIncludesSystem = true;
@@ -75,6 +77,10 @@ public final class Backup {
                     saveApks = true;
                 } else if ("-noapk".equals(arg)) {
                     saveApks = false;
+                } else if ("-obb".equals(arg)) {
+                    saveObbs = true;
+                } else if ("-noobb".equals(arg)) {
+                    saveObbs = false;
                 } else if ("-shared".equals(arg)) {
                     saveShared = true;
                 } else if ("-noshared".equals(arg)) {
@@ -104,23 +110,37 @@ public final class Backup {
             return;
         }
 
+        ParcelFileDescriptor fd = null;
         try {
-            ParcelFileDescriptor fd = ParcelFileDescriptor.adoptFd(socketFd);
+            fd = ParcelFileDescriptor.adoptFd(socketFd);
             String[] packArray = new String[packages.size()];
-            mBackupManager.fullBackup(fd, saveApks, saveShared, doEverything, allIncludesSystem,
-                    packages.toArray(packArray));
+            mBackupManager.fullBackup(fd, saveApks, saveObbs, saveShared, doEverything,
+                    allIncludesSystem, packages.toArray(packArray));
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for backup");
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.close();
+                } catch (IOException e) {}
+            }
         }
     }
 
     private void doFullRestore(int socketFd) {
         // No arguments to restore
+        ParcelFileDescriptor fd = null;
         try {
-            ParcelFileDescriptor fd = ParcelFileDescriptor.adoptFd(socketFd);
+            fd = ParcelFileDescriptor.adoptFd(socketFd);
             mBackupManager.fullRestore(fd);
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for restore");
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.close();
+                } catch (IOException e) {}
+            }
         }
     }
 

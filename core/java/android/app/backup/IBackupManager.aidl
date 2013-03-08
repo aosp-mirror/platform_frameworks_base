@@ -152,6 +152,8 @@ interface IBackupManager {
      * @param fd The file descriptor to which a 'tar' file stream is to be written
      * @param includeApks If <code>true</code>, the resulting tar stream will include the
      *     application .apk files themselves as well as their data.
+     * @param includeObbs If <code>true</code>, the resulting tar stream will include any
+     *     application expansion (OBB) files themselves belonging to each application.
      * @param includeShared If <code>true</code>, the resulting tar stream will include
      *     the contents of the device's shared storage (SD card or equivalent).
      * @param allApps If <code>true</code>, the resulting tar stream will include all
@@ -164,8 +166,9 @@ interface IBackupManager {
      * @param packageNames The package names of the apps whose data (and optionally .apk files)
      *     are to be backed up.  The <code>allApps</code> parameter supersedes this.
      */
-    void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeShared,
-            boolean allApps, boolean allIncludesSystem, in String[] packageNames);
+    void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
+            boolean includeShared, boolean allApps, boolean allIncludesSystem,
+            in String[] packageNames);
 
     /**
      * Restore device content from the data stream passed through the given socket.  The

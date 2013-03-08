@@ -180,6 +180,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
+	core/java/com/android/internal/backup/IObbBackupService.aidl \
 	core/java/com/android/internal/policy/IFaceLockCallback.aidl \
 	core/java/com/android/internal/policy/IFaceLockInterface.aidl \
 	core/java/com/android/internal/os/IDropBoxManagerService.aidl \
