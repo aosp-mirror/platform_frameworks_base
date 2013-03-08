@@ -61,6 +61,12 @@ void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
 
 void DisplayList::clearResources() {
     mDisplayListData = NULL;
+
+    mClipRectOp = NULL;
+    mSaveLayerOp = NULL;
+    mSaveOp = NULL;
+    mRestoreToCountOp = NULL;
+
     delete mTransformMatrix;
     delete mTransformCamera;
     delete mTransformMatrix3D;
@@ -155,6 +161,13 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     if (mSize == 0) {
         return;
     }
+
+    // allocate reusable ops for state-deferral
+    LinearAllocator& alloc = mDisplayListData->allocator;
+    mClipRectOp = new (alloc) ClipRectOp();
+    mSaveLayerOp = new (alloc) SaveLayerOp();
+    mSaveOp = new (alloc) SaveOp();
+    mRestoreToCountOp = new (alloc) RestoreToCountOp();
 
     mFunctorCount = recorder.getFunctorCount();
 
@@ -318,7 +331,7 @@ void DisplayList::updateMatrix() {
     }
 }
 
-void DisplayList::outputViewProperties(uint32_t level) {
+void DisplayList::outputViewProperties(const int level) {
     updateMatrix();
     if (mLeft != 0 || mTop != 0) {
         ALOGD("%*sTranslate (left, top) %d, %d", level * 2, "", mLeft, mTop);
@@ -358,10 +371,17 @@ void DisplayList::outputViewProperties(uint32_t level) {
     }
 }
 
-status_t DisplayList::setViewProperties(OpenGLRenderer& renderer, Rect& dirty,
-        int32_t flags, uint32_t level, DeferredDisplayList* deferredList) {
-    status_t status = DrawGlInfo::kStatusDone;
-#if DEBUG_DISPLAYLIST
+/*
+ * For property operations, we pass a savecount of 0, since the operations aren't part of the
+ * displaylist, and thus don't have to compensate for the record-time/playback-time discrepancy in
+ * base saveCount (i.e., how RestoreToCount uses saveCount + mCount)
+ */
+#define PROPERTY_SAVECOUNT 0
+
+template <class T>
+void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
+        const int level) {
+#if DEBUG_DISPLAY_LIST
     outputViewProperties(level);
 #endif
     updateMatrix();
@@ -381,86 +401,121 @@ status_t DisplayList::setViewProperties(OpenGLRenderer& renderer, Rect& dirty,
         }
     }
     if (mAlpha < 1 && !mCaching) {
-        if (deferredList) {
-            // flush since we'll either enter a Layer, or set alpha, both not supported in deferral
-            status |= deferredList->flush(renderer, dirty, flags, level);
-        }
-
         if (!mHasOverlappingRendering) {
             renderer.setAlpha(mAlpha);
         } else {
             // TODO: should be able to store the size of a DL at record time and not
             // have to pass it into this call. In fact, this information might be in the
             // location/size info that we store with the new native transform data.
-            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
+            int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
             if (mClipChildren) {
-                flags |= SkCanvas::kClipToLayer_SaveFlag;
+                saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
             }
-            renderer.saveLayerAlpha(0, 0, mRight - mLeft, mBottom - mTop,
-                    mMultipliedAlpha, flags);
+            handler(mSaveLayerOp->reinit(0, 0, mRight - mLeft, mBottom - mTop,
+                    mMultipliedAlpha, SkXfermode::kSrcOver_Mode, saveFlags), PROPERTY_SAVECOUNT);
         }
     }
     if (mClipChildren && !mCaching) {
-        if (deferredList && CC_UNLIKELY(!renderer.hasRectToRectTransform())) {
-            // flush, since clip will likely be a region
-            status |= deferredList->flush(renderer, dirty, flags, level);
-        }
-        renderer.clipRect(0, 0, mRight - mLeft, mBottom - mTop,
-                SkRegion::kIntersect_Op);
+        handler(mClipRectOp->reinit(0, 0, mRight - mLeft, mBottom - mTop, SkRegion::kIntersect_Op),
+                PROPERTY_SAVECOUNT);
     }
-    return status;
 }
 
-status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level,
-        DeferredDisplayList* deferredList) {
-    status_t drawGlStatus = DrawGlInfo::kStatusDone;
+class DeferOperationHandler {
+public:
+    DeferOperationHandler(DeferStateStruct& deferStruct, int multipliedAlpha, int level)
+        : mDeferStruct(deferStruct), mMultipliedAlpha(multipliedAlpha), mLevel(level) {}
+    inline void operator()(DisplayListOp* operation, int saveCount) {
+        operation->defer(mDeferStruct, saveCount, mLevel, mMultipliedAlpha);
+    }
+private:
+    DeferStateStruct& mDeferStruct;
+    const int mMultipliedAlpha;
+    const int mLevel;
+};
+
+void DisplayList::defer(DeferStateStruct& deferStruct, const int level) {
+    DeferOperationHandler handler(deferStruct, mCaching ? mMultipliedAlpha : -1, level);
+    iterate<DeferOperationHandler>(deferStruct.mRenderer, handler, level);
+}
+
+class ReplayOperationHandler {
+public:
+    ReplayOperationHandler(ReplayStateStruct& replayStruct, int multipliedAlpha, int level)
+        : mReplayStruct(replayStruct), mMultipliedAlpha(multipliedAlpha), mLevel(level) {}
+    inline void operator()(DisplayListOp* operation, int saveCount) {
+#if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
+        replayStruct.mRenderer.eventMark(operation->name());
+#endif
+        operation->replay(mReplayStruct, saveCount, mLevel, mMultipliedAlpha);
+    }
+private:
+    ReplayStateStruct& mReplayStruct;
+    const int mMultipliedAlpha;
+    const int mLevel;
+};
+
+void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
+    ReplayOperationHandler handler(replayStruct, mCaching ? mMultipliedAlpha : -1, level);
+
+    replayStruct.mRenderer.startMark(mName.string());
+    iterate<ReplayOperationHandler>(replayStruct.mRenderer, handler, level);
+    replayStruct.mRenderer.endMark();
+
+    DISPLAY_LIST_LOGD("%*sDone (%p, %s), returning %d", level * 2, "", this, mName.string(),
+            replayStruct.mDrawGlStatus);
+}
+
+/**
+ * This function serves both defer and replay modes, and will organize the displayList's component
+ * operations for a single frame:
+ *
+ * Every 'simple' operation that affects just the matrix and alpha (or other factors of
+ * DeferredDisplayState) may be issued directly to the renderer, but complex operations (with custom
+ * defer logic) and operations in displayListOps are issued through the 'handler' which handles the
+ * defer vs replay logic, per operation
+ */
+template <class T>
+void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
+    if (mSize == 0 || mAlpha <= 0) {
+        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
+        return;
+    }
 
 #if DEBUG_DISPLAY_LIST
     Rect* clipRect = renderer.getClipRect();
     DISPLAY_LIST_LOGD("%*sStart display list (%p, %s), clipRect: %.0f, %.f, %.0f, %.0f",
-            (level+1)*2, "", this, mName.string(), clipRect->left, clipRect->top,
+            level * 2, "", this, mName.string(), clipRect->left, clipRect->top,
             clipRect->right, clipRect->bottom);
 #endif
 
-    renderer.startMark(mName.string());
+    int restoreTo = renderer.getSaveCount();
+    handler(mSaveOp->reinit(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+            PROPERTY_SAVECOUNT);
 
-    int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    DISPLAY_LIST_LOGD("%*sSave %d %d", level * 2, "",
+    DISPLAY_LIST_LOGD("%*sSave %d %d", (level + 1) * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
 
-    drawGlStatus |= setViewProperties(renderer, dirty, flags, level, deferredList);
+    setViewProperties<T>(renderer, handler, level + 1);
 
     if (renderer.quickRejectNoScissor(0, 0, mWidth, mHeight)) {
         DISPLAY_LIST_LOGD("%*sRestoreToCount %d", level * 2, "", restoreTo);
-        renderer.restoreToCount(restoreTo);
-        renderer.endMark();
-        return drawGlStatus;
+        handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT);
+        return;
     }
 
     DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
     int saveCount = renderer.getSaveCount() - 1;
     for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
         DisplayListOp *op = mDisplayListData->displayListOps[i];
-#if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
-        renderer.eventMark(strlen(op->name()), op->name());
-#endif
-        drawGlStatus |= op->replay(renderer, dirty, flags,
-                saveCount, level, mCaching, mMultipliedAlpha, deferredList);
+
+        handler(op, saveCount);
         logBuffer.writeCommand(level, op->name());
     }
 
-    DISPLAY_LIST_LOGD("%*sRestoreToCount %d", level * 2, "", restoreTo);
+    DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
+    handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT);
     renderer.restoreToCount(restoreTo);
-    renderer.endMark();
-
-    DISPLAY_LIST_LOGD("%*sDone (%p, %s), returning %d", (level + 1) * 2, "", this, mName.string(),
-            drawGlStatus);
-
-    if (!level && CC_LIKELY(deferredList)) {
-        drawGlStatus |= deferredList->flush(renderer, dirty, flags, level);
-    }
-
-    return drawGlStatus;
 }
 
 }; // namespace uirenderer
