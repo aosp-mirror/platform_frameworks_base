@@ -45,7 +45,7 @@ public final class ScriptIntrinsic3DLUT extends ScriptIntrinsic {
         int id = rs.nScriptIntrinsicCreate(8, e.getID(rs));
 
         if (!e.isCompatible(Element.U8_4(rs))) {
-            throw new RSIllegalArgumentException("Element must be compatibile with uchar4.");
+            throw new RSIllegalArgumentException("Element must be compatible with uchar4.");
         }
 
         return new ScriptIntrinsic3DLUT(id, rs, e);
