@@ -263,8 +263,8 @@ final public class MediaCodec {
             Surface surface, MediaCrypto crypto, int flags);
 
     /**
-     * Requests a Surface to use instead of input buffers.  This may only be called after
-     * {@link #configure} and before {@link #start}.
+     * Requests a Surface to use as the input to an encoder, in place of input buffers.  This
+     * may only be called after {@link #configure} and before {@link #start}.
      * <p>
      * The application is responsible for calling release() on the Surface when
      * done.
