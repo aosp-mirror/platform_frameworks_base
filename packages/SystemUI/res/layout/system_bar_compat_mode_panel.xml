@@ -22,7 +22,7 @@
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:paddingBottom="@dimen/panel_float"
-    android:paddingRight="20dp"
+    android:paddingEnd="20dp"
     >
     <RadioGroup android:id="@+id/compat_mode_radio_group"
         android:background="@*android:drawable/dialog_full_holo_dark"

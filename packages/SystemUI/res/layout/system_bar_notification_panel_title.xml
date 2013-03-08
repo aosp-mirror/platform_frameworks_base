@@ -23,9 +23,9 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:orientation="vertical"
-    android:paddingLeft="26dp"
+    android:paddingStart="26dp"
     android:paddingTop="14dp"
-    android:paddingRight="26dp"
+    android:paddingEnd="26dp"
     >
 
     <TableLayout
@@ -52,7 +52,7 @@
                     android:id="@+id/bluetooth"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:paddingRight="16dp"
+                    android:paddingEnd="16dp"
                     android:visibility="gone"
                     android:contentDescription="@null"
                     android:layout_gravity="center_vertical"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:paddingRight="6dp"
+                android:paddingEnd="6dp"
                 >
 
                 <ImageView
@@ -89,7 +89,7 @@
                 android:layout_gravity="start|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="12dp"
+                android:paddingEnd="12dp"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:text="@string/status_bar_settings_settings_button"
@@ -101,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:paddingRight="6dp"
+                android:paddingEnd="6dp"
                 >
 
                 <ImageView
@@ -125,7 +125,7 @@
                 android:layout_gravity="start|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="12dp"
+                android:paddingEnd="12dp"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:text="@string/status_bar_settings_settings_button"
@@ -138,7 +138,7 @@
                 android:scaleType="centerInside"
                 android:layout_gravity="center_vertical"
                 android:layout_alignBaseline="@id/wifi_signal"
-                android:paddingRight="6dp"
+                android:paddingEnd="6dp"
                 android:contentDescription="@null"
                 />
 
@@ -148,7 +148,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|center_vertical"
-                android:paddingRight="2dp"
+                android:paddingEnd="2dp"
                 android:singleLine="true"
                 android:text="@string/status_bar_settings_settings_button"
                 />

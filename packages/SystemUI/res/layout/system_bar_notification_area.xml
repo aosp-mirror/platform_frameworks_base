@@ -84,7 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:singleLine="true"
-            android:paddingLeft="6dip"
+            android:paddingStart="6dip"
             android:layout_marginEnd="8dip"
             android:gravity="center_vertical|start"
             />
@@ -119,14 +119,14 @@
                 android:id="@+id/bluetooth"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:paddingLeft="4dip"
+                android:paddingStart="4dip"
                 android:visibility="gone"
                 />
             <ImageView
                 android:id="@+id/battery"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:paddingLeft="4dip"
+                android:paddingStart="4dip"
                 />
         </LinearLayout>
     </LinearLayout>
