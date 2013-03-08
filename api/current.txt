@@ -27659,8 +27659,6 @@ package android.webkit {
     method public synchronized int getMinimumFontSize();
     method public synchronized int getMinimumLogicalFontSize();
     method public deprecated synchronized android.webkit.WebSettings.PluginState getPluginState();
-    method public deprecated synchronized boolean getPluginsEnabled();
-    method public deprecated synchronized java.lang.String getPluginsPath();
     method public synchronized java.lang.String getSansSerifFontFamily();
     method public boolean getSaveFormData();
     method public deprecated boolean getSavePassword();
@@ -27706,8 +27704,6 @@ package android.webkit {
     method public synchronized void setMinimumLogicalFontSize(int);
     method public void setNeedInitialFocus(boolean);
     method public deprecated synchronized void setPluginState(android.webkit.WebSettings.PluginState);
-    method public deprecated synchronized void setPluginsEnabled(boolean);
-    method public deprecated synchronized void setPluginsPath(java.lang.String);
     method public deprecated synchronized void setRenderPriority(android.webkit.WebSettings.RenderPriority);
     method public synchronized void setSansSerifFontFamily(java.lang.String);
     method public void setSaveFormData(boolean);
