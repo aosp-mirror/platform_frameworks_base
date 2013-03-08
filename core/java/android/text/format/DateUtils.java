@@ -429,20 +429,7 @@ public class DateUtils
                 }
             }
         } else if (duration < WEEK_IN_MILLIS && minResolution < WEEK_IN_MILLIS) {
-            count = getNumberOfDaysPassed(time, now);
-            if (past) {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_num_days_ago;
-                } else {
-                    resId = com.android.internal.R.plurals.num_days_ago;
-                }
-            } else {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_in_num_days;
-                } else {
-                    resId = com.android.internal.R.plurals.in_num_days;
-                }
-            }
+            return getRelativeDayString(r, time, now);
         } else {
             // We know that we won't be showing the time, so it is safe to pass
             // in a null context.
@@ -451,24 +438,6 @@ public class DateUtils
 
         String format = r.getQuantityString(resId, (int) count);
         return String.format(format, count);
-    }
-
-    /**
-     * Returns the number of days passed between two dates.
-     *
-     * @param date1 first date
-     * @param date2 second date
-     * @return number of days passed between to dates.
-     */
-    private synchronized static long getNumberOfDaysPassed(long date1, long date2) {
-        if (sThenTime == null) {
-            sThenTime = new Time();
-        }
-        sThenTime.set(date1);
-        int day1 = Time.getJulianDay(date1, sThenTime.gmtoff);
-        sThenTime.set(date2);
-        int day2 = Time.getJulianDay(date2, sThenTime.gmtoff);
-        return Math.abs(day2 - day1);
     }
 
     /**
@@ -529,28 +498,29 @@ public class DateUtils
      * today this function returns "Today", if the day was a week ago it returns "7 days ago", and
      * if the day is in 2 weeks it returns "in 14 days".
      *
-     * @param r the resources to get the strings from
+     * @param r the resources
      * @param day the relative day to describe in UTC milliseconds
      * @param today the current time in UTC milliseconds
-     * @return a formatting string
      */
     private static final String getRelativeDayString(Resources r, long day, long today) {
+        Locale locale = r.getConfiguration().locale;
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+
+        // TODO: use TimeZone.getOffset instead.
         Time startTime = new Time();
         startTime.set(day);
+        int startDay = Time.getJulianDay(day, startTime.gmtoff);
+
         Time currentTime = new Time();
         currentTime.set(today);
-
-        int startDay = Time.getJulianDay(day, startTime.gmtoff);
         int currentDay = Time.getJulianDay(today, currentTime.gmtoff);
 
         int days = Math.abs(currentDay - startDay);
         boolean past = (today > day);
 
         // TODO: some locales name other days too, such as de_DE's "Vorgestern" (today - 2).
-        Locale locale = r.getConfiguration().locale;
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
         if (days == 1) {
             if (past) {
                 return LocaleData.get(locale).yesterday;
