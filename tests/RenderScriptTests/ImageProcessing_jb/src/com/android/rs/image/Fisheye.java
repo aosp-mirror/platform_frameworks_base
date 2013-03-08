@@ -23,20 +23,18 @@ import android.renderscript.Type;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class Vignette extends TestBase {
-    private ScriptC_vignette_full mScript_full = null;
-    private ScriptC_vignette_relaxed mScript_relaxed = null;
-    private ScriptC_vignette_approx_full mScript_approx_full = null;
-    private ScriptC_vignette_approx_relaxed mScript_approx_relaxed = null;
+public class Fisheye extends TestBase {
+    private ScriptC_fisheye_full mScript_full = null;
+    private ScriptC_fisheye_relaxed mScript_relaxed = null;
+    private ScriptC_fisheye_approx_full mScript_approx_full = null;
+    private ScriptC_fisheye_approx_relaxed mScript_approx_relaxed = null;
     private final boolean approx;
     private final boolean relaxed;
     private float center_x = 0.5f;
     private float center_y = 0.5f;
     private float scale = 0.5f;
-    private float shade = 0.5f;
-    private float slope = 20.0f;
 
-    public Vignette(boolean approx, boolean relaxed) {
+    public Fisheye(boolean approx, boolean relaxed) {
         this.approx = approx;
         this.relaxed = relaxed;
     }
@@ -48,24 +46,12 @@ public class Vignette extends TestBase {
         return true;
     }
     public boolean onBar2Setup(SeekBar b, TextView t) {
-        t.setText("Shade");
-        b.setMax(100);
-        b.setProgress(50);
-        return true;
-    }
-    public boolean onBar3Setup(SeekBar b, TextView t) {
-        t.setText("Slope");
-        b.setMax(100);
-        b.setProgress(20);
-        return true;
-    }
-    public boolean onBar4Setup(SeekBar b, TextView t) {
         t.setText("Shift center X");
         b.setMax(100);
         b.setProgress(50);
         return true;
     }
-    public boolean onBar5Setup(SeekBar b, TextView t) {
+    public boolean onBar3Setup(SeekBar b, TextView t) {
         t.setText("Shift center Y");
         b.setMax(100);
         b.setProgress(50);
@@ -77,18 +63,10 @@ public class Vignette extends TestBase {
         do_init();
     }
     public void onBar2Changed(int progress) {
-        shade = progress / 100.0f;
-        do_init();
-    }
-    public void onBar3Changed(int progress) {
-        slope = (float)progress;
-        do_init();
-    }
-    public void onBar4Changed(int progress) {
         center_x = progress / 100.0f;
         do_init();
     }
-    public void onBar5Changed(int progress) {
+    public void onBar3Changed(int progress) {
         center_y = progress / 100.0f;
         do_init();
     }
@@ -96,58 +74,64 @@ public class Vignette extends TestBase {
     private void do_init() {
         if (approx) {
             if (relaxed)
-                mScript_approx_relaxed.invoke_init_vignette(
+                mScript_approx_relaxed.invoke_init_filter(
                         mInPixelsAllocation.getType().getX(),
                         mInPixelsAllocation.getType().getY(), center_x,
-                        center_y, scale, shade, slope);
+                        center_y, scale);
             else
-                mScript_approx_full.invoke_init_vignette(
+                mScript_approx_full.invoke_init_filter(
                         mInPixelsAllocation.getType().getX(),
                         mInPixelsAllocation.getType().getY(), center_x,
-                        center_y, scale, shade, slope);
+                        center_y, scale);
         } else if (relaxed)
-            mScript_relaxed.invoke_init_vignette(
+            mScript_relaxed.invoke_init_filter(
                     mInPixelsAllocation.getType().getX(),
                     mInPixelsAllocation.getType().getY(), center_x, center_y,
-                    scale, shade, slope);
+                    scale);
         else
-            mScript_full.invoke_init_vignette(
+            mScript_full.invoke_init_filter(
                     mInPixelsAllocation.getType().getX(),
                     mInPixelsAllocation.getType().getY(), center_x, center_y,
-                    scale, shade, slope);
+                    scale);
     }
 
     public void createTest(android.content.res.Resources res) {
         if (approx) {
-            if (relaxed)
-                mScript_approx_relaxed = new ScriptC_vignette_approx_relaxed(
-                        mRS, res, R.raw.vignette_approx_relaxed);
-            else
-                mScript_approx_full = new ScriptC_vignette_approx_full(
-                        mRS, res, R.raw.vignette_approx_full);
-        } else if (relaxed)
-            mScript_relaxed = new ScriptC_vignette_relaxed(mRS, res,
-                    R.raw.vignette_relaxed);
-        else
-            mScript_full = new ScriptC_vignette_full(mRS, res,
-                    R.raw.vignette_full);
+            if (relaxed) {
+                mScript_approx_relaxed = new ScriptC_fisheye_approx_relaxed(mRS,
+                        res, R.raw.fisheye_approx_relaxed);
+                mScript_approx_relaxed.set_in_alloc(mInPixelsAllocation);
+                mScript_approx_relaxed.set_sampler(Sampler.CLAMP_LINEAR(mRS));
+            } else {
+                mScript_approx_full = new ScriptC_fisheye_approx_full(mRS, res,
+                        R.raw.fisheye_approx_full);
+                mScript_approx_full.set_in_alloc(mInPixelsAllocation);
+                mScript_approx_full.set_sampler(Sampler.CLAMP_LINEAR(mRS));
+            }
+        } else if (relaxed) {
+            mScript_relaxed = new ScriptC_fisheye_relaxed(mRS, res,
+                    R.raw.fisheye_relaxed);
+            mScript_relaxed.set_in_alloc(mInPixelsAllocation);
+            mScript_relaxed.set_sampler(Sampler.CLAMP_LINEAR(mRS));
+        } else {
+            mScript_full = new ScriptC_fisheye_full(mRS, res,
+                    R.raw.fisheye_full);
+            mScript_full.set_in_alloc(mInPixelsAllocation);
+            mScript_full.set_sampler(Sampler.CLAMP_LINEAR(mRS));
+        }
         do_init();
     }
 
     public void runTest() {
         if (approx) {
             if (relaxed)
-                mScript_approx_relaxed.forEach_root(mInPixelsAllocation,
-                        mOutPixelsAllocation);
+                mScript_approx_relaxed.forEach_root(mOutPixelsAllocation);
             else
-                mScript_approx_full.forEach_root(mInPixelsAllocation,
-                        mOutPixelsAllocation);
+                mScript_approx_full.forEach_root(mOutPixelsAllocation);
         } else if (relaxed)
-            mScript_relaxed.forEach_root(mInPixelsAllocation,
-                    mOutPixelsAllocation);
+            mScript_relaxed.forEach_root(mOutPixelsAllocation);
         else
-            mScript_full.forEach_root(mInPixelsAllocation,
-                    mOutPixelsAllocation);
+            mScript_full.forEach_root(mOutPixelsAllocation);
     }
 
 }
