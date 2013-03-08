@@ -16,17 +16,23 @@
 
 package com.android.rs.image2;
 
-import android.util.Log;
+import java.lang.Math;
 
-public class Greyscale extends TestBase {
-    private ScriptC_greyscale mScript;
+import android.support.v8.renderscript.*;
+
+public class WhiteBalance extends TestBase {
+    private ScriptC_wbalance mScript;
 
     public void createTest(android.content.res.Resources res) {
-        mScript = new ScriptC_greyscale(mRS, res, R.raw.greyscale);
+        mScript = new ScriptC_wbalance(mRS);
     }
 
     public void runTest() {
-        mScript.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
+        mScript.set_histogramSource(mInPixelsAllocation);
+        mScript.set_histogramWidth(mInPixelsAllocation.getType().getX());
+        mScript.set_histogramHeight(mInPixelsAllocation.getType().getY());
+        mScript.invoke_prepareWhiteBalance();
+        mScript.forEach_whiteBalanceKernel(mInPixelsAllocation, mOutPixelsAllocation);
     }
 
 }

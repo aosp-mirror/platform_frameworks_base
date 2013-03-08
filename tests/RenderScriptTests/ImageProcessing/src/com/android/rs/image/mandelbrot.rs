@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image)
+#include "ip.rsh"
 
 uint32_t gMaxIteration = 500;
 uint32_t gDimX = 1024;

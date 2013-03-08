@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma version(1)
-#pragma rs java_package_name(com.android.rs.image2)
+#include "ip.rsh"
 
 uint32_t gMaxIteration = 500;
 uint32_t gDimX = 1024;
@@ -23,7 +22,7 @@ float lowerBoundX = -2.f;
 float lowerBoundY = -2.f;
 float scaleFactor = 4.f;
 
-void root(uchar4 *v_out, uint32_t x, uint32_t y) {
+uchar4 __attribute__((kernel)) root(uint32_t x, uint32_t y) {
   float2 p;
   p.x = lowerBoundX + ((float)x / gDimX) * scaleFactor;
   p.y = lowerBoundY + ((float)y / gDimY) * scaleFactor;
@@ -41,16 +40,16 @@ void root(uchar4 *v_out, uint32_t x, uint32_t y) {
 
   if(iter >= gMaxIteration) {
     // write a non-transparent black pixel
-    *v_out = (uchar4){0, 0, 0, 0xff};
+    return (uchar4){0, 0, 0, 0xff};
   } else {
     float mi3 = gMaxIteration / 3.f;
     if (iter <= (gMaxIteration / 3))
-      *v_out = (uchar4){0xff * (iter / mi3), 0, 0, 0xff};
+      return (uchar4){0xff * (iter / mi3), 0, 0, 0xff};
     else if (iter <= (((gMaxIteration / 3) * 2)))
-      *v_out = (uchar4){0xff - (0xff * ((iter - mi3) / mi3)),
-                        (0xff * ((iter - mi3) / mi3)), 0, 0xff};
+      return (uchar4){0xff - (0xff * ((iter - mi3) / mi3)),
+                      (0xff * ((iter - mi3) / mi3)), 0, 0xff};
     else
-      *v_out = (uchar4){0, 0xff - (0xff * ((iter - (mi3 * 2)) / mi3)),
-                        (0xff * ((iter - (mi3 * 2)) / mi3)), 0xff};
+      return (uchar4){0, 0xff - (0xff * ((iter - (mi3 * 2)) / mi3)),
+                      (0xff * ((iter - (mi3 * 2)) / mi3)), 0xff};
   }
 }
