@@ -114,6 +114,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public int getAlpha() {
+        return mAlpha;
+    }
+
+    @Override
     public void setDither(boolean dither) {
         if (mDrawableContainerState.mDither != dither) {
             mDrawableContainerState.mDither = dither;
