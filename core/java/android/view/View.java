@@ -10642,7 +10642,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Opaque if:
         //   - Has a background
         //   - Background is opaque
-        //   - Doesn't have scrollbars or scrollbars are inside overlay
+        //   - Doesn't have scrollbars or scrollbars overlay
 
         if (mBackground != null && mBackground.getOpacity() == PixelFormat.OPAQUE) {
             mPrivateFlags |= PFLAG_OPAQUE_BACKGROUND;
@@ -10652,7 +10652,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final int flags = mViewFlags;
         if (((flags & SCROLLBARS_VERTICAL) == 0 && (flags & SCROLLBARS_HORIZONTAL) == 0) ||
-                (flags & SCROLLBARS_STYLE_MASK) == SCROLLBARS_INSIDE_OVERLAY) {
+                (flags & SCROLLBARS_STYLE_MASK) == SCROLLBARS_INSIDE_OVERLAY ||
+                (flags & SCROLLBARS_STYLE_MASK) == SCROLLBARS_OUTSIDE_OVERLAY) {
             mPrivateFlags |= PFLAG_OPAQUE_SCROLLBARS;
         } else {
             mPrivateFlags &= ~PFLAG_OPAQUE_SCROLLBARS;
