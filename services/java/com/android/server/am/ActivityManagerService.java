@@ -3515,7 +3515,14 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 } catch (RemoteException e) {
                 }
                 if (pkgUid == -1) {
-                    Slog.w(TAG, "Invalid packageName:" + packageName);
+                    Slog.w(TAG, "Invalid packageName: " + packageName);
+                    if (observer != null) {
+                        try {
+                            observer.onRemoveCompleted(packageName, false);
+                        } catch (RemoteException e) {
+                            Slog.i(TAG, "Observer no longer exists.");
+                        }
+                    }
                     return false;
                 }
                 if (uid == pkgUid || checkComponentPermission(
