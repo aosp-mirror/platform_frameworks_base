@@ -153,20 +153,23 @@ public class ImageProcessingActivity extends Activity
         // more work is ready.  Either way, display the result.
         @Override
         public void handleMessage(Message msg) {
-            mTest.updateBitmap(mBitmapOut);
-            mDisplayView.invalidate();
-
             boolean doTest = false;
             synchronized(this) {
+                if (mRS == null) {
+                    return;
+                }
+                mTest.updateBitmap(mBitmapOut);
+                mDisplayView.invalidate();
                 if (mRunCount > 0) {
                     mRunCount--;
                     if (mRunCount > 0) {
                         doTest = true;
                     }
                 }
-            }
-            if (doTest) {
-                mTest.runTestSendMessage();
+
+                if (doTest) {
+                    mTest.runTestSendMessage();
+                }
             }
         }
 
@@ -382,11 +385,7 @@ public class ImageProcessingActivity extends Activity
                 }
             };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-
+    void init() {
         mBitmapIn = loadBitmap(R.drawable.img1600x1067);
         mBitmapIn2 = loadBitmap(R.drawable.img1600x1067b);
         mBitmapOut = Bitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(),
@@ -434,6 +433,50 @@ public class ImageProcessingActivity extends Activity
         changeTest(TestName.LEVELS_VEC3_RELAXED);
     }
 
+    void cleanup() {
+        synchronized(this) {
+            RenderScript rs = mRS;
+            mRS = null;
+            while(mDoingBenchmark) {
+                try {
+                    Thread.sleep(1, 0);
+                } catch(InterruptedException e) {
+                }
+
+            }
+            rs.destroy();
+        }
+
+        mInPixelsAllocation = null;
+        mInPixelsAllocation2 = null;
+        mOutPixelsAllocation = null;
+        mBitmapIn = null;
+        mBitmapIn2 = null;
+        mBitmapOut = null;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        init();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        cleanup();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        init();
+    }
 
     private Bitmap loadBitmap(int resource) {
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -476,8 +519,13 @@ public class ImageProcessingActivity extends Activity
         changeTest(TestName.LEVELS_VEC3_RELAXED);
     }
 
+
+
     // For benchmark test
     public float getBenchmark() {
+        if (mRS == null) {
+            return 0;
+        }
         mDoingBenchmark = true;
 
         mTest.setupBenchmark();
@@ -504,7 +552,6 @@ public class ImageProcessingActivity extends Activity
 
         mTest.exitBenchmark();
         mDoingBenchmark = false;
-
         return ft;
     }
 }
