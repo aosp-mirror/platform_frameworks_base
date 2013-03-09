@@ -274,10 +274,6 @@ public class DateUtils
      */
     @Deprecated
     public static String getMonthString(int month, int abbrev) {
-        // Note that here we use d.shortMonthNames for MEDIUM, SHORT and SHORTER.
-        // This is a shortcut to not spam the translators with too many variations
-        // of the same string.  If we find that in a language the distinction
-        // is necessary, we can can add more without changing this API.
         LocaleData d = LocaleData.get(Locale.getDefault());
         String[] names;
         switch (abbrev) {
@@ -308,19 +304,14 @@ public class DateUtils
      */
     @Deprecated
     public static String getStandaloneMonthString(int month, int abbrev) {
-        // Note that here we use d.shortMonthNames for MEDIUM, SHORT and SHORTER.
-        // This is a shortcut to not spam the translators with too many variations
-        // of the same string.  If we find that in a language the distinction
-        // is necessary, we can can add more without changing this API.
         LocaleData d = LocaleData.get(Locale.getDefault());
         String[] names;
         switch (abbrev) {
-            case LENGTH_LONG:       names = d.longStandAloneMonthNames;
-                                                            break;
+            case LENGTH_LONG:       names = d.longStandAloneMonthNames; break;
             case LENGTH_MEDIUM:     names = d.shortMonthNames; break;
             case LENGTH_SHORT:      names = d.shortMonthNames; break;
             case LENGTH_SHORTER:    names = d.shortMonthNames; break;
-            case LENGTH_SHORTEST:   names = d.tinyMonthNames;  break;
+            case LENGTH_SHORTEST:   names = d.tinyStandAloneMonthNames; break;
             default:                names = d.shortMonthNames; break;
         }
         return names[month];
