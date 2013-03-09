@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
+import com.android.internal.widget.LockPatternView.Cell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +72,12 @@ public class LockPatternView extends View {
      * constant * the length of the pattern to complete.
      */
     private static final int MILLIS_PER_CIRCLE_ANIMATING = 700;
+
+    /**
+     * This can be used to avoid updating the display for very small motions or noisy panels.
+     * It didn't seem to have much impact on the devices tested, so currently set to 0.
+     */
+    private static final float DRAG_THRESHHOLD = 0.0f;
 
     private OnPatternListener mOnPatternListener;
     private ArrayList<Cell> mPattern = new ArrayList<Cell>(9);
@@ -674,10 +681,11 @@ public class LockPatternView extends View {
         // Handle all recent motion events so we don't skip any cells even when the device
         // is busy...
         final int historySize = event.getHistorySize();
+        Rect invalidateRect = mInvalidate;
+        boolean invalidateNow = false;
         for (int i = 0; i < historySize + 1; i++) {
             final float x = i < historySize ? event.getHistoricalX(i) : event.getX();
             final float y = i < historySize ? event.getHistoricalY(i) : event.getY();
-            final int patternSizePreHitDetect = mPattern.size();
             Cell hitCell = detectAndAddHit(x, y);
             final int patternSize = mPattern.size();
             if (hitCell != null && patternSize == 1) {
@@ -687,113 +695,47 @@ public class LockPatternView extends View {
             // note current x and y for rubber banding of in progress patterns
             final float dx = Math.abs(x - mInProgressX);
             final float dy = Math.abs(y - mInProgressY);
-            if (dx + dy > mSquareWidth * 0.01f) {
-                float oldX = mInProgressX;
-                float oldY = mInProgressY;
-
-                mInProgressX = x;
-                mInProgressY = y;
-
-                if (mPatternInProgress && patternSize > 0) {
-                    final ArrayList<Cell> pattern = mPattern;
-                    final float radius = mSquareWidth * mDiameterFactor * 0.5f;
-
-                    final Cell lastCell = pattern.get(patternSize - 1);
-
-                    float startX = getCenterXForColumn(lastCell.column);
-                    float startY = getCenterYForRow(lastCell.row);
-
-                    float left;
-                    float top;
-                    float right;
-                    float bottom;
-
-                    final Rect invalidateRect = mInvalidate;
-
-                    if (startX < x) {
-                        left = startX;
-                        right = x;
-                    } else {
-                        left = x;
-                        right = startX;
-                    }
-
-                    if (startY < y) {
-                        top = startY;
-                        bottom = y;
-                    } else {
-                        top = y;
-                        bottom = startY;
-                    }
-
-                    // Invalidate between the pattern's last cell and the current location
-                    invalidateRect.set((int) (left - radius), (int) (top - radius),
-                            (int) (right + radius), (int) (bottom + radius));
-
-                    if (startX < oldX) {
-                        left = startX;
-                        right = oldX;
-                    } else {
-                        left = oldX;
-                        right = startX;
-                    }
-
-                    if (startY < oldY) {
-                        top = startY;
-                        bottom = oldY;
-                    } else {
-                        top = oldY;
-                        bottom = startY;
-                    }
-
-                    // Invalidate between the pattern's last cell and the previous location
-                    invalidateRect.union((int) (left - radius), (int) (top - radius),
-                            (int) (right + radius), (int) (bottom + radius));
-
-                    // Invalidate between the pattern's new cell and the pattern's previous cell
-                    if (hitCell != null) {
-                        startX = getCenterXForColumn(hitCell.column);
-                        startY = getCenterYForRow(hitCell.row);
-
-                        if (patternSize >= 2) {
-                            // (re-using hitcell for old cell)
-                            hitCell = pattern.get(patternSize - 1 - (patternSize - patternSizePreHitDetect));
-                            oldX = getCenterXForColumn(hitCell.column);
-                            oldY = getCenterYForRow(hitCell.row);
-
-                            if (startX < oldX) {
-                                left = startX;
-                                right = oldX;
-                            } else {
-                                left = oldX;
-                                right = startX;
-                            }
-
-                            if (startY < oldY) {
-                                top = startY;
-                                bottom = oldY;
-                            } else {
-                                top = oldY;
-                                bottom = startY;
-                            }
-                        } else {
-                            left = right = startX;
-                            top = bottom = startY;
-                        }
-
-                        final float widthOffset = mSquareWidth / 2f;
-                        final float heightOffset = mSquareHeight / 2f;
-
-                        invalidateRect.set((int) (left - widthOffset),
-                                (int) (top - heightOffset), (int) (right + widthOffset),
-                                (int) (bottom + heightOffset));
-                    }
-
-                    invalidate(invalidateRect);
-                } else {
-                    invalidate();
-                }
+            if (dx > DRAG_THRESHHOLD || dy > DRAG_THRESHHOLD) {
+                invalidateNow = true;
             }
+
+            if (mPatternInProgress && patternSize > 0) {
+                final ArrayList<Cell> pattern = mPattern;
+                final Cell lastCell = pattern.get(patternSize - 1);
+                float startX = getCenterXForColumn(lastCell.column);
+                float startY = getCenterYForRow(lastCell.row);
+
+                // Adjust for current position. Radius accounts for line width.
+                final float radius = (mSquareWidth * mDiameterFactor * 0.5f);
+                float left = Math.min(startX, x) - radius;
+                float right = Math.max(startX, x) + radius;
+                float top = Math.min(startY, y) - radius;
+                float bottom = Math.max(startY, y) + radius;
+
+                // Invalidate between the pattern's new cell and the pattern's previous cell
+                if (hitCell != null && patternSize >= 2) {
+                    final float width = mSquareWidth * 0.5f;
+                    final float height = mSquareHeight * 0.5f;
+                    final float x2 = getCenterXForColumn(hitCell.column);
+                    final float y2 = getCenterYForRow(hitCell.row);
+                    left = Math.min(x2, left - width);
+                    right = Math.max(x2, right + width);
+                    top = Math.min(y2, top - height);
+                    bottom = Math.max(y2, bottom + height);
+                }
+
+                // Invalidate between the pattern's last cell and the previous location
+                invalidateRect.union(Math.round(left), Math.round(top),
+                        Math.round(right), Math.round(bottom));
+            }
+        }
+        mInProgressX = event.getX();
+        mInProgressY = event.getY();
+
+        // To save updates, we only invalidate if the user moved beyond a certain amount.
+        if (invalidateNow) {
+            invalidate(invalidateRect);
+            invalidateRect.setEmpty();
         }
     }
 
