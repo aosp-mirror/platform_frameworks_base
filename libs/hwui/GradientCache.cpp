@@ -17,7 +17,6 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include <utils/JenkinsHash.h>
-#include <utils/threads.h>
 
 #include "Caches.h"
 #include "Debug.h"

@@ -17,13 +17,20 @@
 #ifndef ANDROID_HWUI_PATH_CACHE_H
 #define ANDROID_HWUI_PATH_CACHE_H
 
+#include <utils/Thread.h>
 #include <utils/Vector.h>
 
 #include "Debug.h"
 #include "ShapeCache.h"
+#include "thread/Signal.h"
+
+class SkPaint;
+class SkPath;
 
 namespace android {
 namespace uirenderer {
+
+class Caches;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
@@ -69,6 +76,7 @@ inline hash_t hash_type(const PathCacheEntry& entry) {
 class PathCache: public ShapeCache<PathCacheEntry> {
 public:
     PathCache();
+    ~PathCache();
 
     /**
      * Returns the texture associated with the specified path. If the texture
@@ -89,7 +97,35 @@ public:
      */
     void clearGarbage();
 
+    void precache(SkPath* path, SkPaint* paint);
+
 private:
+    class PrecacheThread: public Thread {
+    public:
+        PrecacheThread(): mSignal(Condition::WAKE_UP_ONE) { }
+
+        void addTask(PathTexture* texture, SkPath* path, SkPaint* paint);
+        void exit();
+
+    private:
+        struct Task {
+            PathTexture* texture;
+            SkPath* path;
+            SkPaint* paint;
+        };
+
+        virtual bool threadLoop();
+
+        // Lock for the list of tasks
+        Mutex mLock;
+        Vector<Task> mTasks;
+
+        // Signal used to wake up the thread when a new
+        // task is available in the list
+        mutable Signal mSignal;
+    };
+
+    sp<PrecacheThread> mThread;
     Vector<SkPath*> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache
