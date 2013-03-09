@@ -529,7 +529,8 @@ public class BluetoothGattCharacteristic {
             case FORMAT_UINT32:
                 mValue[offset++] = (byte)(value & 0xFF);
                 mValue[offset++] = (byte)((value >> 8) & 0xFF);
-                mValue[offset] = (byte)((value >> 16) & 0xFF);
+                mValue[offset++] = (byte)((value >> 16) & 0xFF);
+                mValue[offset] = (byte)((value >> 24) & 0xFF);
                 break;
 
             default:
