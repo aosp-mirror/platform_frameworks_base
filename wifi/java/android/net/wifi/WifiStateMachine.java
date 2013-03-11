@@ -3319,9 +3319,14 @@ public class WifiStateMachine extends StateMachine {
                     }
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
-                    // Drop a third party reconnect/reassociate if we are
-                    // tempoarily disconnected for p2p
-                    if (mTemporarilyDisconnectWifi) ret = NOT_HANDLED;
+                    if (mTemporarilyDisconnectWifi) {
+                        // Drop a third party reconnect/reassociate if STA is
+                        // temporarily disconnected for p2p
+                        break;
+                    } else {
+                        // ConnectModeState handles it
+                        ret = NOT_HANDLED;
+                    }
                     break;
                 default:
                     ret = NOT_HANDLED;
