@@ -39,6 +39,7 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.Slog;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -351,6 +352,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * Take care of attaching the given window token provided by the system.
          */
         public void attachToken(IBinder token) {
+            Slog.i(TAG, "attachToken: b8263462 Existing token=" + mToken + " new token=" + token);
             if (mToken == null) {
                 mToken = token;
                 mWindow.setToken(token);
