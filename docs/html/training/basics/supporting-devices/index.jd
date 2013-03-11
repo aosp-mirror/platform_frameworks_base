@@ -1,9 +1,8 @@
 page.title=Supporting Different Devices
+page.tags="resources","screens","versions","localization"
 
 trainingnavtop=true
 startpage=true
-next.title=Supporting Multiple Languages
-next.link=languages.html
 
 @jd:body
 
