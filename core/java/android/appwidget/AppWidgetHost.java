@@ -404,12 +404,10 @@ public class AppWidgetHost {
      * @hide
      */
     protected void onProvidersChanged(int userId) {
-        checkUserMatch(userId);
         // Does nothing
     }
 
     void updateAppWidgetView(int appWidgetId, RemoteViews views, int userId) {
-        checkUserMatch(userId);
         AppWidgetHostView v;
         synchronized (mViews) {
             v = mViews.get(appWidgetId);
@@ -420,23 +418,12 @@ public class AppWidgetHost {
     }
 
     void viewDataChanged(int appWidgetId, int viewId, int userId) {
-        checkUserMatch(userId);
         AppWidgetHostView v;
         synchronized (mViews) {
             v = mViews.get(appWidgetId);
         }
         if (v != null) {
             v.viewDataChanged(viewId);
-        }
-    }
-
-    // Ensure that the userId passed to us agrees with the one associated with this instance
-    // of AppWidgetHost.
-    // TODO: This should be removed in production code.
-    private void checkUserMatch(int userId) {
-        if (userId != mContext.getUserId()) {
-            throw new IllegalStateException(
-                "User ids don't match, userId=" + userId + ", mUserId=" + mContext.getUserId());
         }
     }
 
