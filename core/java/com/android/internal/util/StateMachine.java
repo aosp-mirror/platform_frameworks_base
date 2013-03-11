@@ -1606,6 +1606,19 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    public final void sendMessage(int what, int arg1, int arg2, Object obj) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessage(obtainMessage(what, arg1, arg2, obj));
+    }
+
+    /**
+     * Enqueue a message to this state machine.
+     *
+     * Message is ignored if state machine has quit.
+     */
     public final void sendMessage(Message msg) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1638,6 +1651,20 @@ public class StateMachine {
         if (smh == null) return;
 
         smh.sendMessageDelayed(obtainMessage(what, obj), delayMillis);
+    }
+
+    /**
+     * Enqueue a message to this state machine after a delay.
+     *
+     * Message is ignored if state machine has quit.
+     */
+    public final void sendMessageDelayed(int what, int arg1, int arg2, Object obj,
+            long delayMillis) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageDelayed(obtainMessage(what, arg1, arg2, obj), delayMillis);
     }
 
     /**
@@ -1679,6 +1706,20 @@ public class StateMachine {
         if (smh == null) return;
 
         smh.sendMessageAtFrontOfQueue(obtainMessage(what));
+    }
+
+    /**
+     * Enqueue a message to the front of the queue for this state machine.
+     * Protected, may only be called by instances of StateMachine.
+     *
+     * Message is ignored if state machine has quit.
+     */
+    protected final void sendMessageAtFrontOfQueue(int what, int arg1, int arg2, Object obj) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageAtFrontOfQueue(obtainMessage(what, arg1, arg2, obj));
     }
 
     /**
