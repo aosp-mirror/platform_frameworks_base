@@ -29,6 +29,17 @@ import java.util.Collection;
 /**
  * A simple container for route information.
  *
+ * In order to be used, a route must have a destination prefix and:
+ *
+ * - A gateway address (next-hop, for gatewayed routes), or
+ * - An interface (for directly-connected routes), or
+ * - Both a gateway and an interface.
+ *
+ * This class does not enforce these constraints because there is code that
+ * uses RouteInfo objects to store directly-connected routes without interfaces.
+ * Such objects cannot be used directly, but can be put into a LinkProperties
+ * object which then specifies the interface.
+ *
  * @hide
  */
 public class RouteInfo implements Parcelable {
@@ -42,10 +53,30 @@ public class RouteInfo implements Parcelable {
      */
     private final InetAddress mGateway;
 
+    /**
+     * The interface for this route.
+     */
+    private final String mInterface;
+
     private final boolean mIsDefault;
     private final boolean mIsHost;
 
-    public RouteInfo(LinkAddress destination, InetAddress gateway) {
+    /**
+     * Constructs a RouteInfo object.
+     *
+     * If @destination is null, then @gateway must be specified and the
+     * constructed route is either the IPv4 default route <code>0.0.0.0</code>
+     * if @gateway is an instance of {@link Inet4Address}, or the IPv6 default
+     * route <code>::/0</code> if @gateway is an instance of
+     * {@link Inet6Address}.
+     *
+     * @destination and @gateway may not both be null.
+     *
+     * @param destination the destination prefix
+     * @param gateway the IP address to route packets through
+     * @param iface the interface name to send packets on
+     */
+    public RouteInfo(LinkAddress destination, InetAddress gateway, String iface) {
         if (destination == null) {
             if (gateway != null) {
                 if (gateway instanceof Inet4Address) {
@@ -55,7 +86,8 @@ public class RouteInfo implements Parcelable {
                 }
             } else {
                 // no destination, no gateway. invalid.
-                throw new RuntimeException("Invalid arguments passed in.");
+                throw new IllegalArgumentException("Invalid arguments passed in: " + gateway + "," +
+                                                   destination);
             }
         }
         if (gateway == null) {
@@ -68,16 +100,21 @@ public class RouteInfo implements Parcelable {
         mDestination = new LinkAddress(NetworkUtils.getNetworkPart(destination.getAddress(),
                 destination.getNetworkPrefixLength()), destination.getNetworkPrefixLength());
         mGateway = gateway;
+        mInterface = iface;
         mIsDefault = isDefault();
         mIsHost = isHost();
     }
 
+    public RouteInfo(LinkAddress destination, InetAddress gateway) {
+        this(destination, gateway, null);
+    }
+
     public RouteInfo(InetAddress gateway) {
-        this(null, gateway);
+        this(null, gateway, null);
     }
 
     public RouteInfo(LinkAddress host) {
-        this(host, null);
+        this(host, null, null);
     }
 
     public static RouteInfo makeHostRoute(InetAddress host) {
@@ -119,6 +156,10 @@ public class RouteInfo implements Parcelable {
         return mGateway;
     }
 
+    public String getInterface() {
+        return mInterface;
+    }
+
     public boolean isDefaultRoute() {
         return mIsDefault;
     }
@@ -153,6 +194,8 @@ public class RouteInfo implements Parcelable {
             dest.writeByte((byte) 1);
             dest.writeByteArray(mGateway.getAddress());
         }
+
+        dest.writeString(mInterface);
     }
 
     @Override
@@ -171,14 +214,19 @@ public class RouteInfo implements Parcelable {
                 target.getGateway() == null
                 : mGateway.equals(target.getGateway());
 
-        return sameDestination && sameAddress
+        boolean sameInterface = (mInterface == null) ?
+                target.getInterface() == null
+                : mInterface.equals(target.getInterface());
+
+        return sameDestination && sameAddress && sameInterface
             && mIsDefault == target.mIsDefault;
     }
 
     @Override
     public int hashCode() {
-        return (mDestination == null ? 0 : mDestination.hashCode())
-            + (mGateway == null ? 0 :mGateway.hashCode())
+        return (mDestination == null ? 0 : mDestination.hashCode() * 41)
+            + (mGateway == null ? 0 :mGateway.hashCode() * 47)
+            + (mInterface == null ? 0 :mInterface.hashCode() * 67)
             + (mIsDefault ? 3 : 7);
     }
 
@@ -206,13 +254,15 @@ public class RouteInfo implements Parcelable {
                 } catch (UnknownHostException e) {}
             }
 
+            String iface = in.readString();
+
             LinkAddress dest = null;
 
             if (destAddr != null) {
                 dest = new LinkAddress(destAddr, prefix);
             }
 
-            return new RouteInfo(dest, gateway);
+            return new RouteInfo(dest, gateway, iface);
         }
 
         public RouteInfo[] newArray(int size) {
@@ -220,12 +270,8 @@ public class RouteInfo implements Parcelable {
         }
     };
 
-    private boolean matches(InetAddress destination) {
+    protected boolean matches(InetAddress destination) {
         if (destination == null) return false;
-
-        // if the destination is present and the route is default.
-        // return true
-        if (isDefault()) return true;
 
         // match the route destination and destination with prefix length
         InetAddress dstNet = NetworkUtils.getNetworkPart(destination,

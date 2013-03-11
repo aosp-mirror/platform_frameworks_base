@@ -92,6 +92,11 @@ public class LinkProperties implements Parcelable {
 
     public void setInterfaceName(String iface) {
         mIfaceName = iface;
+        ArrayList<RouteInfo> newRoutes = new ArrayList<RouteInfo>(mRoutes.size());
+        for (RouteInfo route : mRoutes) {
+            newRoutes.add(routeWithInterface(route));
+        }
+        mRoutes = newRoutes;
     }
 
     public String getInterfaceName() {
@@ -130,9 +135,25 @@ public class LinkProperties implements Parcelable {
         mDomains = domains;
     }
 
-    public void addRoute(RouteInfo route) {
-        if (route != null) mRoutes.add(route);
+    private RouteInfo routeWithInterface(RouteInfo route) {
+        return new RouteInfo(
+            route.getDestination(),
+            route.getGateway(),
+            mIfaceName);
     }
+
+    public void addRoute(RouteInfo route) {
+        if (route != null) {
+            String routeIface = route.getInterface();
+            if (routeIface != null && !routeIface.equals(mIfaceName)) {
+                throw new IllegalStateException(
+                   "Route added with non-matching interface: " + routeIface +
+                   " vs. mIfaceName");
+            }
+            mRoutes.add(routeWithInterface(route));
+        }
+    }
+
     public Collection<RouteInfo> getRoutes() {
         return Collections.unmodifiableCollection(mRoutes);
     }
