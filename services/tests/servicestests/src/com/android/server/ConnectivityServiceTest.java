@@ -62,13 +62,17 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private static final String MOBILE_IFACE = "rmnet3";
     private static final String WIFI_IFACE = "wlan6";
 
-    private static final RouteInfo MOBILE_ROUTE_V4 = RouteInfo.makeHostRoute(parse("10.0.0.33"));
-    private static final RouteInfo MOBILE_ROUTE_V6 = RouteInfo.makeHostRoute(parse("fd00::33"));
+    private static final RouteInfo MOBILE_ROUTE_V4 = RouteInfo.makeHostRoute(parse("10.0.0.33"),
+                                                                             MOBILE_IFACE);
+    private static final RouteInfo MOBILE_ROUTE_V6 = RouteInfo.makeHostRoute(parse("fd00::33"),
+                                                                             MOBILE_IFACE);
 
-    private static final RouteInfo WIFI_ROUTE_V4 = RouteInfo.makeHostRoute(
-            parse("192.168.0.66"), parse("192.168.0.1"));
-    private static final RouteInfo WIFI_ROUTE_V6 = RouteInfo.makeHostRoute(
-            parse("fd00::66"), parse("fd00::"));
+    private static final RouteInfo WIFI_ROUTE_V4 = RouteInfo.makeHostRoute(parse("192.168.0.66"),
+                                                                           parse("192.168.0.1"),
+                                                                           WIFI_IFACE);
+    private static final RouteInfo WIFI_ROUTE_V6 = RouteInfo.makeHostRoute(parse("fd00::66"),
+                                                                           parse("fd00::"),
+                                                                           WIFI_IFACE);
 
     private INetworkManagementService mNetManager;
     private INetworkStatsService mStatsService;
