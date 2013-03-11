@@ -2585,10 +2585,8 @@ final class ActivityStack {
             if (mResumedActivity == null
                     || mResumedActivity.info.applicationInfo.uid != callingUid) {
                 if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
-                    PendingActivityLaunch pal = new PendingActivityLaunch();
-                    pal.r = r;
-                    pal.sourceRecord = sourceRecord;
-                    pal.startFlags = startFlags;
+                    PendingActivityLaunch pal =
+                            new PendingActivityLaunch(r, sourceRecord, startFlags, this);
                     mService.mPendingActivityLaunches.add(pal);
                     mDismissKeyguardOnNextActivity = false;
                     ActivityOptions.abort(options);

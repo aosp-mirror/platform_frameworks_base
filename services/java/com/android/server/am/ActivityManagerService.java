@@ -290,9 +290,18 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * due to app switches being disabled.
      */
     static class PendingActivityLaunch {
-        ActivityRecord r;
-        ActivityRecord sourceRecord;
-        int startFlags;
+        final ActivityRecord r;
+        final ActivityRecord sourceRecord;
+        final int startFlags;
+        final ActivityStack stack;
+
+        public PendingActivityLaunch(ActivityRecord _r, ActivityRecord _sourceRecord,
+                int _startFlags, ActivityStack _stack) {
+            r = _r;
+            sourceRecord = _sourceRecord;
+            startFlags = _startFlags;
+            stack = _stack;
+        }
     }
     
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
@@ -2505,8 +2514,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
         for (int i=0; i<N; i++) {
             PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
-            pal.r.task.stack.startActivityUncheckedLocked(pal.r, pal.sourceRecord,
-                    pal.startFlags, doResume && i == (N-1), null);
+            pal.stack.startActivityUncheckedLocked(pal.r, pal.sourceRecord, pal.startFlags,
+                    doResume && i == (N-1), null);
         }
         mPendingActivityLaunches.clear();
     }
