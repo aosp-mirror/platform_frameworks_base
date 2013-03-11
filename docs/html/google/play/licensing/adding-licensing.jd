@@ -598,15 +598,15 @@ href="#impl-Obfuscator">Obfuscator</a> implementation. </p>
 <p>First, open the class file of the application's main Activity and import
 {@code LicenseChecker} and {@code LicenseCheckerCallback} from the LVL package.</p>
 
-<pre>    import com.android.vending.licensing.LicenseChecker;
-    import com.android.vending.licensing.LicenseCheckerCallback;</pre>
+<pre>    import com.google.android.vending.licensing.LicenseChecker;
+    import com.google.android.vending.licensing.LicenseCheckerCallback;</pre>
 
 <p>If you are using the default {@code Policy} implementation provided with the LVL,
 ServerManagedPolicy, import it also, together with the AESObfuscator. If you are
 using a custom {@code Policy} or {@code Obfuscator}, import those instead. </p>
 
-<pre>    import com.android.vending.licensing.ServerManagedPolicy;
-    import com.android.vending.licensing.AESObfuscator;</pre>
+<pre>    import com.google.android.vending.licensing.ServerManagedPolicy;
+    import com.google.android.vending.licensing.AESObfuscator;</pre>
 
 <h3 id="lc-impl">Implement LicenseCheckerCallback as a private inner class</h3>
 
