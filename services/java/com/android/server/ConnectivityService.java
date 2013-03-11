@@ -1430,17 +1430,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd,
             boolean toDefaultTable) {
+        String iface = lp.getInterfaceName();
         RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), addr);
         if (bestRoute == null) {
-            bestRoute = RouteInfo.makeHostRoute(addr);
+            bestRoute = RouteInfo.makeHostRoute(addr, iface);
         } else {
             if (bestRoute.getGateway().equals(addr)) {
                 // if there is no better route, add the implied hostroute for our gateway
-                bestRoute = RouteInfo.makeHostRoute(addr);
+                bestRoute = RouteInfo.makeHostRoute(addr, iface);
             } else {
                 // if we will connect to this through another route, add a direct route
                 // to it's gateway
-                bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway());
+                bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway(), iface);
             }
         }
         return modifyRoute(lp.getInterfaceName(), lp, bestRoute, 0, doAdd, toDefaultTable);
@@ -1463,11 +1464,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (bestRoute != null) {
                 if (bestRoute.getGateway().equals(r.getGateway())) {
                     // if there is no better route, add the implied hostroute for our gateway
-                    bestRoute = RouteInfo.makeHostRoute(r.getGateway());
+                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(), ifaceName);
                 } else {
                     // if we will connect to our gateway through another route, add a direct
                     // route to it's gateway
-                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(), bestRoute.getGateway());
+                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(),
+                                                        bestRoute.getGateway(),
+                                                        ifaceName);
                 }
                 modifyRoute(ifaceName, lp, bestRoute, cycleCount+1, doAdd, toDefaultTable);
             }
