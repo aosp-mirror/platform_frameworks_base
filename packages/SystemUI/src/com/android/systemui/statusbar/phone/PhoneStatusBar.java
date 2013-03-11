@@ -132,6 +132,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
     private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
 
+    private static final long AUTOHIDE_TIMEOUT_MS = 3000;
+    private static final float TRANSPARENT_ALPHA = 0.7f;
+
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
     private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
@@ -303,6 +306,15 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
     };
+
+    private boolean mAutohideSuspended;
+
+    private final Runnable mAutohide = new Runnable() {
+        @Override
+        public void run() {
+            int requested = mSystemUiVisibility & ~View.STATUS_BAR_OVERLAY;
+            notifyUiVisibilityChanged(requested);
+        }};
 
     @Override
     public void start() {
@@ -1384,6 +1396,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         visibilityChanged(true);
+
+        suspendAutohide();
     }
 
     public void animateCollapsePanels() {
@@ -1666,6 +1680,11 @@ public class PhoneStatusBar extends BaseStatusBar {
             mPostCollapseCleanup.run();
             mPostCollapseCleanup = null;
         }
+
+        // Reschedule suspended auto-hide if necessary
+        if (mAutohideSuspended) {
+            scheduleAutohide();
+        }
     }
 
     /**
@@ -1812,6 +1831,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             hideCling();
         }
 
+        suspendAutohide();
         return false;
     }
 
@@ -1855,8 +1875,39 @@ public class PhoneStatusBar extends BaseStatusBar {
                 setStatusBarLowProfile(lightsOut);
             }
 
-            notifyUiVisibilityChanged();
+            if (0 != (diff & View.STATUS_BAR_OVERLAY)) {
+                boolean overlay = 0 != (vis & View.STATUS_BAR_OVERLAY);
+                if (overlay) {
+                    setTransparent(true);
+                    scheduleAutohide();
+                } else {
+                    setTransparent(false);
+                    cancelAutohide();
+                }
+            }
+            notifyUiVisibilityChanged(mSystemUiVisibility);
         }
+    }
+
+    private void suspendAutohide() {
+        mHandler.removeCallbacks(mAutohide);
+        mAutohideSuspended = (0 != (mSystemUiVisibility & View.STATUS_BAR_OVERLAY));
+    }
+
+    private void cancelAutohide() {
+        mAutohideSuspended = false;
+        mHandler.removeCallbacks(mAutohide);
+    }
+
+    private void scheduleAutohide() {
+        cancelAutohide();
+        mHandler.postDelayed(mAutohide, AUTOHIDE_TIMEOUT_MS);
+    }
+
+    private void setTransparent(boolean transparent) {
+        float alpha = transparent ? TRANSPARENT_ALPHA : 1;
+        if (DEBUG) Slog.d(TAG, "Setting alpha to " + alpha);
+        mStatusBarView.setAlpha(alpha);
     }
 
     private void setStatusBarLowProfile(boolean lightsOut) {
@@ -1913,9 +1964,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    private void notifyUiVisibilityChanged() {
+    private void notifyUiVisibilityChanged(int vis) {
         try {
-            mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
+            mWindowManagerService.statusBarVisibilityChanged(vis);
         } catch (RemoteException ex) {
         }
     }

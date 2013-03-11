@@ -146,6 +146,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
 
+    static public final String ACTION_HIDEYBARS = "android.intent.action.HIDEYBARS";
+
     /**
      * These are the system UI flags that, when changing, can cause the layout
      * of the screen to change.
@@ -544,6 +546,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     MyOrientationListener mOrientationListener;
 
+    private static final int HIDEYBARS_NONE = 0;
+    private static final int HIDEYBARS_SHOWING = 1;
+    private static final int HIDEYBARS_HIDING = 2;
+    private int mHideybars;
+
+    BroadcastReceiver mHideybarsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+           receivedHideybars(intent.getAction());
+        }
+    };
+
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
             if (mStatusBarService == null) {
@@ -891,6 +905,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         context.registerReceiver(mMultiuserReceiver, filter);
+
+        // register for hideybars
+        filter = new IntentFilter();
+        filter.addAction(ACTION_HIDEYBARS);
+        context.registerReceiver(mHideybarsReceiver, filter);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
@@ -2480,6 +2499,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public int adjustSystemUiVisibilityLw(int visibility) {
+        if (mHideybars == HIDEYBARS_SHOWING && 0 == (visibility & View.STATUS_BAR_OVERLAY)) {
+            mHideybars = HIDEYBARS_HIDING;
+            mStatusBar.hideLw(true);
+        }
         // Reset any bits in mForceClearingStatusBarVisibility that
         // are now clear.
         mResettingSystemUiFlags &= visibility;
@@ -2715,9 +2738,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // For layout, the status bar is always at the top with our fixed height.
                 mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
 
+                boolean statusBarOverlay = (mLastSystemUiFlags & View.STATUS_BAR_OVERLAY) != 0;
+
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
-                if (mStatusBar.isVisibleLw()) {
+                if (mStatusBar.isVisibleLw() && !statusBarOverlay) {
                     // Status bar may go away, so the screen area it occupies
                     // is available to apps but just covering them when the
                     // status bar is visible.
@@ -2735,11 +2760,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mContentLeft, mContentTop, mContentRight, mContentBottom,
                             mCurLeft, mCurTop, mCurRight, mCurBottom));
                 }
-                if (mStatusBar.isVisibleLw() && !mStatusBar.isAnimatingLw()) {
+                if (mStatusBar.isVisibleLw() && !mStatusBar.isAnimatingLw() && !statusBarOverlay) {
                     // If the status bar is currently requested to be visible,
                     // and not in the process of animating on or off, then
                     // we can tell the app that it is covered by it.
                     mSystemTop = mUnrestrictedScreenTop + mStatusBarHeight;
+                }
+                if (mHideybars == HIDEYBARS_HIDING && !mStatusBar.isVisibleLw()) {
+                    // Hideybars have finished animating out, cleanup and reset alpha
+                    mHideybars = HIDEYBARS_NONE;
+                    updateSystemUiVisibilityLw();
                 }
             }
         }
@@ -3320,7 +3350,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // and mTopIsFullscreen is that that mTopIsFullscreen is set only if the window
                 // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the
                 // case though.
-                if (topIsFullscreen) {
+                if (mHideybars == HIDEYBARS_SHOWING) {
+                    if (mStatusBar.showLw(true)) {
+                        changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                    }
+                } else if (topIsFullscreen) {
                     if (DEBUG_LAYOUT) Log.v(TAG, "** HIDING status bar");
                     if (mStatusBar.hideLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
@@ -4060,6 +4094,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    private void receivedHideybars(String action) {
+        synchronized(mLock) {
+            if (action.equals(ACTION_HIDEYBARS)) {
+                if (mHideybars == HIDEYBARS_SHOWING) {
+                    if (DEBUG) Slog.d(TAG, "Not showing hideybars, already shown");
+                    return;
+                }
+                if (mStatusBar.isDisplayedLw()) {
+                    if (DEBUG) Slog.d(TAG, "Not showing hideybars, status bar already visible");
+                    return;
+                }
+                mHideybars = HIDEYBARS_SHOWING;
+                updateSystemUiVisibilityLw();
+            }
+        }
+    }
+
     @Override
     public void screenTurnedOff(int why) {
         EventLog.writeEvent(70000, 0);
@@ -4794,11 +4845,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // will quickly lose focus once it correctly gets hidden.
             return 0;
         }
+
         int tmpVisibility = mFocusedWindow.getSystemUiVisibility()
                 & ~mResettingSystemUiFlags
                 & ~mForceClearedSystemUiFlags;
         if (mForcingShowNavBar && mFocusedWindow.getSurfaceLayer() < mForcingShowNavBarLayer) {
             tmpVisibility &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
+        }
+
+        boolean hideybarsAllowed =
+                (mFocusedWindow.getAttrs().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0
+                || mFocusedWindow.getAttrs().type == TYPE_STATUS_BAR;
+        if (mHideybars == HIDEYBARS_SHOWING) {
+            if (!hideybarsAllowed) {
+                mHideybars = HIDEYBARS_NONE;
+            } else {
+                tmpVisibility |= View.STATUS_BAR_OVERLAY;
+                if ((mLastSystemUiFlags & View.STATUS_BAR_OVERLAY) == 0) {
+                    mStatusBar.showLw(true);
+                }
+            }
         }
         final int visibility = tmpVisibility;
         int diff = visibility ^ mLastSystemUiFlags;

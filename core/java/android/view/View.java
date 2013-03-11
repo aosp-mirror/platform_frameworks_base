@@ -2479,6 +2479,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to specify that the status bar should temporarily overlay underlying content
+     * that is otherwise assuming the status bar is hidden.  The status bar will typically
+     * have some degree of transparency while in this temporary overlay mode.
+     */
+    public static final int STATUS_BAR_OVERLAY = 0x04000000;
+
+    /**
+     * @hide
      */
     public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x0000FFFF;
 
