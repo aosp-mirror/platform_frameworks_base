@@ -64,13 +64,13 @@ public class RouteInfo implements Parcelable {
     /**
      * Constructs a RouteInfo object.
      *
-     * If @destination is null, then @gateway must be specified and the
+     * If destination is null, then gateway must be specified and the
      * constructed route is either the IPv4 default route <code>0.0.0.0</code>
      * if @gateway is an instance of {@link Inet4Address}, or the IPv6 default
-     * route <code>::/0</code> if @gateway is an instance of
+     * route <code>::/0</code> if gateway is an instance of
      * {@link Inet6Address}.
      *
-     * @destination and @gateway may not both be null.
+     * destination and gateway may not both be null.
      *
      * @param destination the destination prefix
      * @param gateway the IP address to route packets through
