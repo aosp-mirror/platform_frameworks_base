@@ -158,6 +158,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 27;
     private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 28;
     private static final int MSG_PROMOTE_RCC = 29;
+    private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 30;
+
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
     // persisted
@@ -1946,8 +1948,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 !mBootCompleted) {
             return;
         }
+        final long ident = Binder.clearCallingIdentity();
         ScoClient client = getScoClient(cb, true);
         client.incCount();
+        Binder.restoreCallingIdentity(ident);
     }
 
     /** @see AudioManager#stopBluetoothSco() */
@@ -1956,10 +1960,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 !mBootCompleted) {
             return;
         }
+        final long ident = Binder.clearCallingIdentity();
         ScoClient client = getScoClient(cb, false);
         if (client != null) {
             client.decCount();
         }
+        Binder.restoreCallingIdentity(ident);
     }
 
 
@@ -2209,6 +2215,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     private void broadcastScoConnectionState(int state) {
+        sendMsg(mAudioHandler, MSG_BROADCAST_BT_CONNECTION_STATE,
+                SENDMSG_QUEUE, state, 0, null, 0);
+    }
+
+    private void onBroadcastScoConnectionState(int state) {
         if (state != mScoConnectionState) {
             Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
             newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, state);
@@ -3531,6 +3542,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
                 case MSG_PROMOTE_RCC:
                     onPromoteRcc(msg.arg1);
+                    break;
+
+                case MSG_BROADCAST_BT_CONNECTION_STATE:
+                    onBroadcastScoConnectionState(msg.arg1);
                     break;
             }
         }
