@@ -1204,7 +1204,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurId = info.getId();
             mCurToken = new Binder();
             try {
-                if (DEBUG) Slog.v(TAG, "Adding window token: " + mCurToken);
+                if (true || DEBUG) Slog.v(TAG, "b8263462 Adding window token: " + mCurToken);
                 mIWindowManager.addWindowToken(mCurToken,
                         WindowManager.LayoutParams.TYPE_INPUT_METHOD);
             } catch (RemoteException e) {
@@ -1248,7 +1248,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     unbindCurrentMethodLocked(false, false);
                     return;
                 }
-                if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
+                if (true || DEBUG) Slog.v(TAG, "b8263462 Initiating attach with token: " + mCurToken);
                 executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                         MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
                 if (mCurClient != null) {
@@ -2324,7 +2324,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_ATTACH_TOKEN:
                 args = (SomeArgs)msg.obj;
                 try {
-                    if (DEBUG) Slog.v(TAG, "Sending attach of token: " + args.arg2);
+                    if (true || DEBUG) Slog.v(TAG, "b8263462 Sending attach of token: " + args.arg2);
                     ((IInputMethod)args.arg1).attachToken((IBinder)args.arg2);
                 } catch (RemoteException e) {
                 }
