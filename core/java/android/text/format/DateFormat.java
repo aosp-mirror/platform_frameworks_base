@@ -46,7 +46,7 @@ import libcore.icu.LocaleData;
  * <p>The format methods in this class implement a subset of Unicode
  * <a href="http://www.unicode.org/reports/tr35/#Date_Format_Patterns">UTS #35</a> patterns.
  * The subset supported by this class includes the following format characters:
- * {@code acdEhkLMmsyz}. See {@link java.text.SimpleDateFormat} for more documentation
+ * {@code acdEHhLKkLMmsyz}. See {@link java.text.SimpleDateFormat} for more documentation
  * about patterns, or if you need a more compete implementation.
  */
 public class DateFormat {
@@ -191,7 +191,6 @@ public class DateFormat {
     public static java.text.DateFormat getDateFormatForSetting(Context context,
                                                                String value) {
         String format = getDateFormatStringForSetting(context, value);
-
         return new java.text.SimpleDateFormat(format);
     }
 
@@ -431,12 +430,25 @@ public class DateFormat {
                     replacement = getDayOfWeekString(localeData,
                                                      inDate.get(Calendar.DAY_OF_WEEK), count, c);
                     break;
-                case 'h':
-                    int hour = inDate.get(Calendar.HOUR);
-                    replacement = zeroPad(hour == 0 ? 24 : hour, count);
+                case 'K': // hour in am/pm (0-11)
+                case 'h': // hour in am/pm (1-12)
+                    {
+                        int hour = inDate.get(Calendar.HOUR);
+                        if (c == 'h' && hour == 0) {
+                            hour = 12;
+                        }
+                        replacement = zeroPad(hour, count);
+                    }
                     break;
-                case 'k':
-                    replacement = zeroPad(inDate.get(Calendar.HOUR_OF_DAY), count);
+                case 'H': // hour in day (0-23)
+                case 'k': // hour in day (1-24)
+                    {
+                        int hour = inDate.get(Calendar.HOUR_OF_DAY);
+                        if (c == 'k' && hour == 0) {
+                            hour = 24;
+                        }
+                        replacement = zeroPad(hour, count);
+                    }
                     break;
                 case 'L':
                 case 'M':
