@@ -117,17 +117,17 @@ public class RouteInfo implements Parcelable {
         this(host, null, null);
     }
 
-    public static RouteInfo makeHostRoute(InetAddress host) {
-        return makeHostRoute(host, null);
+    public static RouteInfo makeHostRoute(InetAddress host, String iface) {
+        return makeHostRoute(host, null, iface);
     }
 
-    public static RouteInfo makeHostRoute(InetAddress host, InetAddress gateway) {
+    public static RouteInfo makeHostRoute(InetAddress host, InetAddress gateway, String iface) {
         if (host == null) return null;
 
         if (host instanceof Inet4Address) {
-            return new RouteInfo(new LinkAddress(host, 32), gateway);
+            return new RouteInfo(new LinkAddress(host, 32), gateway, iface);
         } else {
-            return new RouteInfo(new LinkAddress(host, 128), gateway);
+            return new RouteInfo(new LinkAddress(host, 128), gateway, iface);
         }
     }
 
