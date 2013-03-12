@@ -1,37 +1,40 @@
 #include "shared.rsh"
 
-int *a;
+rs_allocation aRaw;
 int dimX;
 int dimY;
+static bool failed = false;
 
 void root(int *out, uint32_t x, uint32_t y) {
     *out = x + y * dimX;
 }
 
-static bool test_foreach_output() {
+static bool test_root_output() {
     bool failed = false;
     int i, j;
 
     for (j = 0; j < dimY; j++) {
         for (i = 0; i < dimX; i++) {
-            _RS_ASSERT(a[i + j * dimX] == (i + j * dimX));
+            int v = rsGetElementAt_int(aRaw, i, j);
+            _RS_ASSERT(v == (i + j * dimX));
         }
     }
 
     if (failed) {
-        rsDebug("test_foreach_output FAILED", 0);
+        rsDebug("test_root_output FAILED", 0);
     }
     else {
-        rsDebug("test_foreach_output PASSED", 0);
+        rsDebug("test_root_output PASSED", 0);
     }
 
     return failed;
 }
 
-void foreach_test() {
-    bool failed = false;
-    failed |= test_foreach_output();
+void verify_root() {
+    failed |= test_root_output();
+}
 
+void foreach_test() {
     if (failed) {
         rsSendToClientBlocking(RS_MSG_TEST_FAILED);
     }
