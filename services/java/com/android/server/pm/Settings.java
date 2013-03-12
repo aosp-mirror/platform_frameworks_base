@@ -32,7 +32,6 @@ import android.util.LogPrinter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
-import com.android.server.IntentResolver;
 import com.android.server.pm.PackageManagerService.DumpState;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -2709,6 +2708,162 @@ final class Settings {
         ApplicationInfo.FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
     };
 
+    void dumpPackageLPr(PrintWriter pw, String prefix, PackageSetting ps, SimpleDateFormat sdf,
+            Date date, List<UserInfo> users) {
+        pw.print(prefix); pw.print("Package [");
+            pw.print(ps.realName != null ? ps.realName : ps.name);
+            pw.print("] (");
+            pw.print(Integer.toHexString(System.identityHashCode(ps)));
+            pw.println("):");
+
+        if (ps.realName != null) {
+            pw.print(prefix); pw.print("  compat name=");
+            pw.println(ps.name);
+        }
+
+        pw.print(prefix); pw.print("  userId="); pw.print(ps.appId);
+                pw.print(" gids="); pw.println(PackageManagerService.arrayToString(ps.gids));
+        if (ps.sharedUser != null) {
+            pw.print(prefix); pw.print("  sharedUser="); pw.println(ps.sharedUser);
+        }
+        pw.print(prefix); pw.print("  pkg="); pw.println(ps.pkg);
+        pw.print(prefix); pw.print("  codePath="); pw.println(ps.codePathString);
+        pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.resourcePathString);
+        pw.print(prefix); pw.print("  nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
+        pw.print(prefix); pw.print("  versionCode="); pw.print(ps.versionCode);
+        if (ps.pkg != null) {
+            pw.print(" targetSdk="); pw.print(ps.pkg.applicationInfo.targetSdkVersion);
+        }
+        pw.println();
+        if (ps.pkg != null) {
+            pw.print(prefix); pw.print("  versionName="); pw.println(ps.pkg.mVersionName);
+            pw.print(prefix); pw.print("  applicationInfo=");
+                pw.println(ps.pkg.applicationInfo.toString());
+            pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,
+                    FLAG_DUMP_SPEC); pw.println();
+            pw.print(prefix); pw.print("  dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
+            if (ps.pkg.mOperationPending) {
+                pw.print(prefix); pw.println("  mOperationPending=true");
+            }
+            pw.print(prefix); pw.print("  supportsScreens=[");
+            boolean first = true;
+            if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
+                if (!first)
+                    pw.print(", ");
+                first = false;
+                pw.print("small");
+            }
+            if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
+                if (!first)
+                    pw.print(", ");
+                first = false;
+                pw.print("medium");
+            }
+            if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                if (!first)
+                    pw.print(", ");
+                first = false;
+                pw.print("large");
+            }
+            if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+                if (!first)
+                    pw.print(", ");
+                first = false;
+                pw.print("xlarge");
+            }
+            if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+                if (!first)
+                    pw.print(", ");
+                first = false;
+                pw.print("resizeable");
+            }
+            if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+                if (!first)
+                    pw.print(", ");
+                first = false;
+                pw.print("anyDensity");
+            }
+            pw.println("]");
+            if (ps.pkg.libraryNames != null && ps.pkg.libraryNames.size() > 0) {
+                pw.print(prefix); pw.println("  libraries:");
+                for (int i=0; i<ps.pkg.libraryNames.size(); i++) {
+                    pw.print(prefix); pw.print("    "); pw.println(ps.pkg.libraryNames.get(i));
+                }
+            }
+            if (ps.pkg.usesLibraries != null && ps.pkg.usesLibraries.size() > 0) {
+                pw.print(prefix); pw.println("  usesLibraries:");
+                for (int i=0; i<ps.pkg.usesLibraries.size(); i++) {
+                    pw.print(prefix); pw.print("    "); pw.println(ps.pkg.usesLibraries.get(i));
+                }
+            }
+            if (ps.pkg.usesOptionalLibraries != null
+                    && ps.pkg.usesOptionalLibraries.size() > 0) {
+                pw.print(prefix); pw.println("  usesOptionalLibraries:");
+                for (int i=0; i<ps.pkg.usesOptionalLibraries.size(); i++) {
+                    pw.print(prefix); pw.print("    ");
+                        pw.println(ps.pkg.usesOptionalLibraries.get(i));
+                }
+            }
+            if (ps.pkg.usesLibraryFiles != null
+                    && ps.pkg.usesLibraryFiles.length > 0) {
+                pw.print(prefix); pw.println("  usesLibraryFiles:");
+                for (int i=0; i<ps.pkg.usesLibraryFiles.length; i++) {
+                    pw.print(prefix); pw.print("    "); pw.println(ps.pkg.usesLibraryFiles[i]);
+                }
+            }
+        }
+        pw.print(prefix); pw.print("  timeStamp=");
+            date.setTime(ps.timeStamp);
+            pw.println(sdf.format(date));
+        pw.print(prefix); pw.print("  firstInstallTime=");
+            date.setTime(ps.firstInstallTime);
+            pw.println(sdf.format(date));
+        pw.print(prefix); pw.print("  lastUpdateTime=");
+            date.setTime(ps.lastUpdateTime);
+            pw.println(sdf.format(date));
+        if (ps.installerPackageName != null) {
+            pw.print(prefix); pw.print("  installerPackageName=");
+                    pw.println(ps.installerPackageName);
+        }
+        pw.print(prefix); pw.print("  signatures="); pw.println(ps.signatures);
+        pw.print(prefix); pw.print("  permissionsFixed="); pw.print(ps.permissionsFixed);
+                pw.print(" haveGids="); pw.print(ps.haveGids);
+                pw.print(" installStatus="); pw.println(ps.installStatus);
+        pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
+                pw.println();
+        for (UserInfo user : users) {
+            pw.print(prefix); pw.print("  User "); pw.print(user.id); pw.print(": ");
+            pw.print(" installed=");
+            pw.print(ps.getInstalled(user.id));
+            pw.print(" stopped=");
+            pw.print(ps.getStopped(user.id));
+            pw.print(" notLaunched=");
+            pw.print(ps.getNotLaunched(user.id));
+            pw.print(" enabled=");
+            pw.println(ps.getEnabled(user.id));
+            HashSet<String> cmp = ps.getDisabledComponents(user.id);
+            if (cmp != null && cmp.size() > 0) {
+                pw.print(prefix); pw.println("    disabledComponents:");
+                for (String s : cmp) {
+                    pw.print(prefix); pw.print("    "); pw.println(s);
+                }
+            }
+            cmp = ps.getEnabledComponents(user.id);
+            if (cmp != null && cmp.size() > 0) {
+                pw.print(prefix); pw.println("    enabledComponents:");
+                for (String s : cmp) {
+                    pw.print(prefix); pw.print("    "); pw.println(s);
+                }
+            }
+        }
+        if (ps.grantedPermissions.size() > 0) {
+            pw.print(prefix); pw.println("  grantedPermissions:");
+            for (String s : ps.grantedPermissions) {
+                pw.print(prefix); pw.print("    "); pw.println(s);
+            }
+        }
+    }
+
     void dumpPackagesLPr(PrintWriter pw, String packageName, DumpState dumpState) {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         final Date date = new Date();
@@ -2730,123 +2885,7 @@ final class Settings {
                 pw.println("Packages:");
                 printedSomething = true;
             }
-            pw.print("  Package [");
-                pw.print(ps.realName != null ? ps.realName : ps.name);
-                pw.print("] (");
-                pw.print(Integer.toHexString(System.identityHashCode(ps)));
-                pw.println("):");
-
-            if (ps.realName != null) {
-                pw.print("    compat name=");
-                pw.println(ps.name);
-            }
-
-            pw.print("    userId="); pw.print(ps.appId);
-            pw.print(" gids="); pw.println(PackageManagerService.arrayToString(ps.gids));
-            pw.print("    sharedUser="); pw.println(ps.sharedUser);
-            pw.print("    pkg="); pw.println(ps.pkg);
-            pw.print("    codePath="); pw.println(ps.codePathString);
-            pw.print("    resourcePath="); pw.println(ps.resourcePathString);
-            pw.print("    nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
-            pw.print("    versionCode="); pw.println(ps.versionCode);
-            if (ps.pkg != null) {
-                pw.print("    applicationInfo="); pw.println(ps.pkg.applicationInfo.toString());
-                pw.print("    flags="); printFlags(pw, ps.pkg.applicationInfo.flags, FLAG_DUMP_SPEC); pw.println();
-                pw.print("    versionName="); pw.println(ps.pkg.mVersionName);
-                pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
-                pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
-                if (ps.pkg.mOperationPending) {
-                    pw.println("    mOperationPending=true");
-                }
-                pw.print("    supportsScreens=[");
-                boolean first = true;
-                if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
-                    if (!first)
-                        pw.print(", ");
-                    first = false;
-                    pw.print("small");
-                }
-                if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
-                    if (!first)
-                        pw.print(", ");
-                    first = false;
-                    pw.print("medium");
-                }
-                if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-                    if (!first)
-                        pw.print(", ");
-                    first = false;
-                    pw.print("large");
-                }
-                if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-                    if (!first)
-                        pw.print(", ");
-                    first = false;
-                    pw.print("xlarge");
-                }
-                if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
-                    if (!first)
-                        pw.print(", ");
-                    first = false;
-                    pw.print("resizeable");
-                }
-                if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
-                    if (!first)
-                        pw.print(", ");
-                    first = false;
-                    pw.print("anyDensity");
-                }
-                pw.println("]");
-            }
-            pw.print("    timeStamp=");
-                date.setTime(ps.timeStamp);
-                pw.println(sdf.format(date));
-            pw.print("    firstInstallTime=");
-                date.setTime(ps.firstInstallTime);
-                pw.println(sdf.format(date));
-            pw.print("    lastUpdateTime=");
-                date.setTime(ps.lastUpdateTime);
-                pw.println(sdf.format(date));
-            if (ps.installerPackageName != null) {
-                pw.print("    installerPackageName="); pw.println(ps.installerPackageName);
-            }
-            pw.print("    signatures="); pw.println(ps.signatures);
-            pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);
-                    pw.print(" haveGids="); pw.print(ps.haveGids);
-                    pw.print(" installStatus="); pw.println(ps.installStatus);
-            pw.print("    pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
-                    pw.println();
-            for (UserInfo user : users) {
-                pw.print("    User "); pw.print(user.id); pw.print(": ");
-                pw.print(" installed=");
-                pw.print(ps.getInstalled(user.id));
-                pw.print(" stopped=");
-                pw.print(ps.getStopped(user.id));
-                pw.print(" notLaunched=");
-                pw.print(ps.getNotLaunched(user.id));
-                pw.print(" enabled=");
-                pw.println(ps.getEnabled(user.id));
-                HashSet<String> cmp = ps.getDisabledComponents(user.id);
-                if (cmp != null && cmp.size() > 0) {
-                    pw.println("      disabledComponents:");
-                    for (String s : cmp) {
-                        pw.print("      "); pw.println(s);
-                    }
-                }
-                cmp = ps.getEnabledComponents(user.id);
-                if (cmp != null && cmp.size() > 0) {
-                    pw.println("      enabledComponents:");
-                    for (String s : cmp) {
-                        pw.print("      "); pw.println(s);
-                    }
-                }
-            }
-            if (ps.grantedPermissions.size() > 0) {
-                pw.println("    grantedPermissions:");
-                for (String s : ps.grantedPermissions) {
-                    pw.print("      "); pw.println(s);
-                }
-            }
+            dumpPackageLPr(pw, "  ", ps, sdf, date, users);
         }
 
         printedSomething = false;
@@ -2882,27 +2921,7 @@ final class Settings {
                     pw.println("Hidden system packages:");
                     printedSomething = true;
                 }
-                pw.print("  Package [");
-                pw.print(ps.realName != null ? ps.realName : ps.name);
-                pw.print("] (");
-                pw.print(Integer.toHexString(System.identityHashCode(ps)));
-                pw.println("):");
-                if (ps.realName != null) {
-                    pw.print("    compat name=");
-                    pw.println(ps.name);
-                }
-                if (ps.pkg != null && ps.pkg.applicationInfo != null) {
-                    pw.print("    applicationInfo=");
-                    pw.println(ps.pkg.applicationInfo.toString());
-                }
-                pw.print("    userId=");
-                pw.println(ps.appId);
-                pw.print("    sharedUser=");
-                pw.println(ps.sharedUser);
-                pw.print("    codePath=");
-                pw.println(ps.codePathString);
-                pw.print("    resourcePath=");
-                pw.println(ps.resourcePathString);
+                dumpPackageLPr(pw, "  ", ps, sdf, date, users);
             }
         }
     }

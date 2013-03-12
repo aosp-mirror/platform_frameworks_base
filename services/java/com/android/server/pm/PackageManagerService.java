@@ -173,7 +173,7 @@ adb shell am instrument -w -e class com.android.unit_tests.PackageManagerTests c
 public class PackageManagerService extends IPackageManager.Stub {
     static final String TAG = "PackageManager";
     static final boolean DEBUG_SETTINGS = false;
-    static final boolean DEBUG_PREFERRED = true;
+    static final boolean DEBUG_PREFERRED = false;
     static final boolean DEBUG_UPGRADE = false;
     private static final boolean DEBUG_INSTALL = false;
     private static final boolean DEBUG_REMOVE = false;
@@ -342,9 +342,20 @@ public class PackageManagerService extends IPackageManager.Stub {
     final SparseArray<HashSet<String>> mSystemPermissions =
             new SparseArray<HashSet<String>>();
 
+    static final class SharedLibraryEntry {
+        final String path;
+        final String apk;
+
+        SharedLibraryEntry(String _path, String _apk) {
+            path = _path;
+            apk = _apk;
+        }
+    }
+
     // These are the built-in shared libraries that were read from the
     // etc/permissions.xml file.
-    final HashMap<String, String> mSharedLibraries = new HashMap<String, String>();
+    final HashMap<String, SharedLibraryEntry> mSharedLibraries
+            = new HashMap<String, SharedLibraryEntry>();
 
     // Temporary for building the final shared libraries for an .apk.
     String[] mTmpSharedLibraries = null;
@@ -393,8 +404,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final SparseArray<PackageVerificationState> mPendingVerification
             = new SparseArray<PackageVerificationState>();
 
-    final ArrayList<PackageParser.Package> mDeferredDexOpt =
-            new ArrayList<PackageParser.Package>();
+    HashSet<PackageParser.Package> mDeferredDexOpt = null;
 
     /** Token for keys in mPendingVerification. */
     private int mPendingVerificationToken = 0;
@@ -517,10 +527,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         void doHandleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
-                    if (DEBUG_INSTALL) Slog.i(TAG, "init_copy");
                     HandlerParams params = (HandlerParams) msg.obj;
                     int idx = mPendingInstalls.size();
-                    if (DEBUG_INSTALL) Slog.i(TAG, "idx=" + idx);
+                    if (DEBUG_INSTALL) Slog.i(TAG, "init_copy idx=" + idx + ": " + params);
                     // If a bind was already initiated we dont really
                     // need to do anything. The pending install
                     // will be processed later on.
@@ -1075,9 +1084,12 @@ public class PackageManagerService extends IPackageManager.Stub {
              * Also ensure all external libraries have had dexopt run on them.
              */
             if (mSharedLibraries.size() > 0) {
-                Iterator<String> libs = mSharedLibraries.values().iterator();
+                Iterator<SharedLibraryEntry> libs = mSharedLibraries.values().iterator();
                 while (libs.hasNext()) {
-                    String lib = libs.next();
+                    String lib = libs.next().path;
+                    if (lib == null) {
+                        continue;
+                    }
                     try {
                         if (dalvik.system.DexFile.isDexOptNeeded(lib)) {
                             libFiles.add(lib);
@@ -1280,6 +1292,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mAppInstallObserver = null;
                 mDrmAppInstallObserver = null;
             }
+
+            // Now that we know all of the shared libraries, update all clients to have
+            // the correct library paths.
+            updateAllSharedLibrariesLPw();
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -1521,7 +1537,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 + parser.getPositionDescription());
                     } else {
                         //Log.i(TAG, "Got library " + lname + " in " + lfile);
-                        mSharedLibraries.put(lname, lfile);
+                        mSharedLibraries.put(lname, new SharedLibraryEntry(lfile, null));
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -3253,6 +3269,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             int parseFlags, int scanMode, long currentTime, UserHandle user) {
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         String scanPath = scanFile.getPath();
+        if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanPath);
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser(scanPath);
         pp.setSeparateProcesses(mSeparateProcesses);
@@ -3284,6 +3301,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // package.  Must look for it either under the original or real
             // package name depending on our state.
             updatedPkg = mSettings.getDisabledSystemPkgLPr(ps != null ? ps.name : pkg.packageName);
+            if (DEBUG_INSTALL && updatedPkg != null) Slog.d(TAG, "updatedPkg = " + updatedPkg);
         }
         // First check if this is a system package that may involve an update
         if (updatedPkg != null && (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
@@ -3291,6 +3309,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // The path has changed from what was last scanned...  check the
                 // version of the new path against what we have stored to determine
                 // what to do.
+                if (DEBUG_INSTALL) Slog.d(TAG, "Path changing from " + ps.codePath);
                 if (pkg.mVersionCode < ps.versionCode) {
                     // The system package has been updated and the code path does not match
                     // Ignore entry. Skip it.
@@ -3304,6 +3323,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         updatedPkg.codePath = scanFile;
                         updatedPkg.codePathString = scanFile.toString();                        
                     }
+                    updatedPkg.pkg = pkg;
                     mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
                     return null;
                 } else {
@@ -3359,6 +3379,7 @@ public class PackageManagerService extends IPackageManager.Stub {
              */
             if (compareSignatures(ps.signatures.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
+                if (DEBUG_INSTALL) Slog.d(TAG, "Signature mismatch!");
                 deletePackageLI(pkg.packageName, null, true, 0, null, false);
                 ps = null;
             } else {
@@ -3491,28 +3512,28 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public void performBootDexOpt() {
-        ArrayList<PackageParser.Package> pkgs = null;
+        HashSet<PackageParser.Package> pkgs = null;
         synchronized (mPackages) {
-            if (mDeferredDexOpt.size() > 0) {
-                pkgs = new ArrayList<PackageParser.Package>(mDeferredDexOpt);
-                mDeferredDexOpt.clear();
-            }
+            pkgs = mDeferredDexOpt;
+            mDeferredDexOpt = null;
         }
         if (pkgs != null) {
-            for (int i=0; i<pkgs.size(); i++) {
+            int i = 0;
+            for (PackageParser.Package pkg : pkgs) {
                 if (!isFirstBoot()) {
+                    i++;
                     try {
                         ActivityManagerNative.getDefault().showBootMessage(
                                 mContext.getResources().getString(
                                         com.android.internal.R.string.android_upgrading_apk,
-                                        i+1, pkgs.size()), true);
+                                        i, pkgs.size()), true);
                     } catch (RemoteException e) {
                     }
                 }
-                PackageParser.Package p = pkgs.get(i);
+                PackageParser.Package p = pkg;
                 synchronized (mInstallLock) {
                     if (!p.mDidDexOpt) {
-                        performDexOptLI(p, false, false);
+                        performDexOptLI(p, false, false, true);
                     }
                 }
             }
@@ -3534,7 +3555,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         synchronized (mInstallLock) {
-            return performDexOptLI(p, false, false) == DEX_OPT_PERFORMED;
+            return performDexOptLI(p, false, false, true) == DEX_OPT_PERFORMED;
+        }
+    }
+
+    private void performDexOptLibsLI(ArrayList<String> libs, boolean forceDex, boolean defer,
+            HashSet<String> done) {
+        for (int i=0; i<libs.size(); i++) {
+            PackageParser.Package libPkg;
+            String libName;
+            synchronized (mPackages) {
+                libName = libs.get(i);
+                SharedLibraryEntry lib = mSharedLibraries.get(libName);
+                if (lib != null && lib.apk != null) {
+                    libPkg = mPackages.get(lib.apk);
+                } else {
+                    libPkg = null;
+                }
+            }
+            if (libPkg != null && !done.contains(libName)) {
+                performDexOptLI(libPkg, forceDex, defer, done);
+            }
         }
     }
 
@@ -3543,14 +3584,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int DEX_OPT_DEFERRED = 2;
     static final int DEX_OPT_FAILED = -1;
 
-    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex, boolean defer) {
+    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex, boolean defer,
+            HashSet<String> done) {
         boolean performed = false;
+        if (done != null) {
+            done.add(pkg.packageName);
+            if (pkg.usesLibraries != null) {
+                performDexOptLibsLI(pkg.usesLibraries, forceDex, defer, done);
+            }
+            if (pkg.usesOptionalLibraries != null) {
+                performDexOptLibsLI(pkg.usesOptionalLibraries, forceDex, defer, done);
+            }
+        }
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             String path = pkg.mScanPath;
             int ret = 0;
             try {
                 if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
                     if (!forceDex && defer) {
+                        if (mDeferredDexOpt == null) {
+                            mDeferredDexOpt = new HashSet<PackageParser.Package>();
+                        }
                         mDeferredDexOpt.add(pkg);
                         return DEX_OPT_DEFERRED;
                     } else {
@@ -3581,6 +3635,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return performed ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
+    }
+
+    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex, boolean defer,
+            boolean inclDependencies) {
+        HashSet<String> done;
+        boolean performed = false;
+        if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
+            done = new HashSet<String>();
+            done.add(pkg.packageName);
+        } else {
+            done = null;
+        }
+        return performDexOptLI(pkg, forceDex, defer, done);
     }
 
     private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, PackageParser.Package newPkg) {
@@ -3650,6 +3717,113 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Couldn't delete native library directory " + nativeLibraryFile.getPath());
         }
 
+        return res;
+    }
+
+    private int addSharedLibraryLPw(final SharedLibraryEntry file, int num,
+            PackageParser.Package changingLib) {
+        if (file.path != null) {
+            mTmpSharedLibraries[num] = file.path;
+            return num+1;
+        }
+        PackageParser.Package p = mPackages.get(file.apk);
+        if (changingLib != null && changingLib.packageName.equals(file.apk)) {
+            // If we are doing this while in the middle of updating a library apk,
+            // then we need to make sure to use that new apk for determining the
+            // dependencies here.  (We haven't yet finished committing the new apk
+            // to the package manager state.)
+            if (p == null || p.packageName.equals(changingLib.packageName)) {
+                p = changingLib;
+            }
+        }
+        if (p != null) {
+            String path = p.mPath;
+            for (int i=0; i<num; i++) {
+                if (mTmpSharedLibraries[i].equals(path)) {
+                    return num;
+                }
+            }
+            mTmpSharedLibraries[num] = p.mPath;
+            return num+1;
+        }
+        return num;
+    }
+
+    private boolean updateSharedLibrariesLPw(PackageParser.Package pkg,
+            PackageParser.Package changingLib) {
+        if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
+            if (mTmpSharedLibraries == null ||
+                    mTmpSharedLibraries.length < mSharedLibraries.size()) {
+                mTmpSharedLibraries = new String[mSharedLibraries.size()];
+            }
+            int num = 0;
+            int N = pkg.usesLibraries != null ? pkg.usesLibraries.size() : 0;
+            for (int i=0; i<N; i++) {
+                final SharedLibraryEntry file = mSharedLibraries.get(pkg.usesLibraries.get(i));
+                if (file == null) {
+                    Slog.e(TAG, "Package " + pkg.packageName
+                            + " requires unavailable shared library "
+                            + pkg.usesLibraries.get(i) + "; failing!");
+                    mLastScanError = PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
+                    return false;
+                }
+                num = addSharedLibraryLPw(file, num, changingLib);
+            }
+            N = pkg.usesOptionalLibraries != null ? pkg.usesOptionalLibraries.size() : 0;
+            for (int i=0; i<N; i++) {
+                final SharedLibraryEntry file = mSharedLibraries.get(pkg.usesOptionalLibraries.get(i));
+                if (file == null) {
+                    Slog.w(TAG, "Package " + pkg.packageName
+                            + " desires unavailable shared library "
+                            + pkg.usesOptionalLibraries.get(i) + "; ignoring!");
+                } else {
+                    num = addSharedLibraryLPw(file, num, changingLib);
+                }
+            }
+            if (num > 0) {
+                pkg.usesLibraryFiles = new String[num];
+                System.arraycopy(mTmpSharedLibraries, 0,
+                        pkg.usesLibraryFiles, 0, num);
+            } else {
+                pkg.usesLibraryFiles = null;
+            }
+        }
+        return true;
+    }
+
+    private static boolean hasString(List<String> list, List<String> which) {
+        if (list == null) {
+            return false;
+        }
+        for (int i=list.size()-1; i>=0; i--) {
+            for (int j=which.size()-1; j>=0; j--) {
+                if (which.get(j).equals(list.get(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void updateAllSharedLibrariesLPw() {
+        for (PackageParser.Package pkg : mPackages.values()) {
+            updateSharedLibrariesLPw(pkg, null);
+        }
+    }
+
+    private ArrayList<PackageParser.Package> updateAllSharedLibrariesLPw(
+            PackageParser.Package changingPkg) {
+        ArrayList<PackageParser.Package> res = null;
+        for (PackageParser.Package pkg : mPackages.values()) {
+            if (hasString(pkg.usesLibraries, changingPkg.libraryNames)
+                    || hasString(pkg.usesOptionalLibraries, changingPkg.libraryNames)) {
+                if (res == null) {
+                    res = new ArrayList<PackageParser.Package>();
+                }
+                res.add(pkg);
+                updateSharedLibrariesLPw(pkg, changingPkg);
+            }
+        }
         return res;
     }
 
@@ -3732,42 +3906,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // writer
         synchronized (mPackages) {
-            // Check all shared libraries and map to their actual file path.
-            if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
-                if (mTmpSharedLibraries == null ||
-                        mTmpSharedLibraries.length < mSharedLibraries.size()) {
-                    mTmpSharedLibraries = new String[mSharedLibraries.size()];
-                }
-                int num = 0;
-                int N = pkg.usesLibraries != null ? pkg.usesLibraries.size() : 0;
-                for (int i=0; i<N; i++) {
-                    final String file = mSharedLibraries.get(pkg.usesLibraries.get(i));
-                    if (file == null) {
-                        Slog.e(TAG, "Package " + pkg.packageName
-                                + " requires unavailable shared library "
-                                + pkg.usesLibraries.get(i) + "; failing!");
-                        mLastScanError = PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
-                        return null;
-                    }
-                    mTmpSharedLibraries[num] = file;
-                    num++;
-                }
-                N = pkg.usesOptionalLibraries != null ? pkg.usesOptionalLibraries.size() : 0;
-                for (int i=0; i<N; i++) {
-                    final String file = mSharedLibraries.get(pkg.usesOptionalLibraries.get(i));
-                    if (file == null) {
-                        Slog.w(TAG, "Package " + pkg.packageName
-                                + " desires unavailable shared library "
-                                + pkg.usesOptionalLibraries.get(i) + "; ignoring!");
-                    } else {
-                        mTmpSharedLibraries[num] = file;
-                        num++;
-                    }
-                }
-                if (num > 0) {
-                    pkg.usesLibraryFiles = new String[num];
-                    System.arraycopy(mTmpSharedLibraries, 0,
-                            pkg.usesLibraryFiles, 0, num);
+            if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                // Check all shared libraries and map to their actual file path.
+                // We only do this here for apps not on a system dir, because those
+                // are the only ones that can fail an install due to this.  We
+                // will take care of the system apps by updating all of their
+                // library paths after the scan is done.
+                if (!updateSharedLibrariesLPw(pkg, null)) {
+                    return null;
                 }
             }
 
@@ -4173,7 +4319,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         pkg.mScanPath = path;
 
         if ((scanMode&SCAN_NO_DEX) == 0) {
-            if (performDexOptLI(pkg, forceDex, (scanMode&SCAN_DEFER_DEX) != 0)
+            if (performDexOptLI(pkg, forceDex, (scanMode&SCAN_DEFER_DEX) != 0, false)
                     == DEX_OPT_FAILED) {
                 mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
                 return null;
@@ -4185,12 +4331,95 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FACTORY_TEST;
         }
 
+        ArrayList<PackageParser.Package> clientLibPkgs = null;
+
+        // writer
+        synchronized (mPackages) {
+            if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+                // Only system apps can add new shared libraries.
+                if (pkg.libraryNames != null) {
+                    for (int i=0; i<pkg.libraryNames.size(); i++) {
+                        String name = pkg.libraryNames.get(i);
+                        boolean allowed = false;
+                        if (isUpdatedSystemApp(pkg)) {
+                            // New library entries can only be added through the
+                            // system image.  This is important to get rid of a lot
+                            // of nasty edge cases: for example if we allowed a non-
+                            // system update of the app to add a library, then uninstalling
+                            // the update would make the library go away, and assumptions
+                            // we made such as through app install filtering would now
+                            // have allowed apps on the device which aren't compatible
+                            // with it.  Better to just have the restriction here, be
+                            // conservative, and create many fewer cases that can negatively
+                            // impact the user experience.
+                            final PackageSetting sysPs = mSettings
+                                    .getDisabledSystemPkgLPr(pkg.packageName);
+                            if (sysPs.pkg != null && sysPs.pkg.libraryNames != null) {
+                                for (int j=0; j<sysPs.pkg.libraryNames.size(); j++) {
+                                    if (name.equals(sysPs.pkg.libraryNames.get(j))) {
+                                        allowed = true;
+                                        allowed = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            allowed = true;
+                        }
+                        if (allowed) {
+                            if (!mSharedLibraries.containsKey(name)) {
+                                mSharedLibraries.put(name, new SharedLibraryEntry(null,
+                                        pkg.packageName));
+                            } else if (!name.equals(pkg.packageName)) {
+                                Slog.w(TAG, "Package " + pkg.packageName + " library "
+                                        + name + " already exists; skipping");
+                            }
+                        } else {
+                            Slog.w(TAG, "Package " + pkg.packageName + " declares lib "
+                                    + name + " that is not declared on system image; skipping");
+                        }
+                    }
+                    if ((scanMode&SCAN_BOOTING) == 0) {
+                        // If we are not booting, we need to update any applications
+                        // that are clients of our shared library.  If we are booting,
+                        // this will all be done once the scan is complete.
+                        clientLibPkgs = updateAllSharedLibrariesLPw(pkg);
+                    }
+                }
+            }
+        }
+
+        // We also need to dexopt any apps that are dependent on this library.  Note that
+        // if these fail, we should abort the install since installing the library will
+        // result in some apps being broken.
+        if (clientLibPkgs != null) {
+            if ((scanMode&SCAN_NO_DEX) == 0) {
+                for (int i=0; i<clientLibPkgs.size(); i++) {
+                    PackageParser.Package clientPkg = clientLibPkgs.get(i);
+                    if (performDexOptLI(clientPkg, forceDex, (scanMode&SCAN_DEFER_DEX) != 0, false)
+                            == DEX_OPT_FAILED) {
+                        mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
+                        return null;
+                    }
+                }
+            }
+        }
+
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
         if ((parseFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
             killApplication(pkg.applicationInfo.packageName,
                         pkg.applicationInfo.uid);
+        }
+
+        // Also need to kill any apps that are dependent on the library.
+        if (clientLibPkgs != null) {
+            for (int i=0; i<clientLibPkgs.size(); i++) {
+                PackageParser.Package clientPkg = clientLibPkgs.get(i);
+                killApplication(clientPkg.applicationInfo.packageName,
+                        clientPkg.applicationInfo.uid);
+            }
         }
 
         // writer
@@ -4616,7 +4845,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            if (chatty) {
+            if (DEBUG_REMOVE && chatty) {
                 if (r == null) {
                     r = new StringBuilder(256);
                 } else {
@@ -4652,7 +4881,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (i=0; i<N; i++) {
             PackageParser.Activity a = pkg.receivers.get(i);
             mReceivers.removeActivity(a, "receiver");
-            if (chatty) {
+            if (DEBUG_REMOVE && chatty) {
                 if (r == null) {
                     r = new StringBuilder(256);
                 } else {
@@ -4670,7 +4899,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (i=0; i<N; i++) {
             PackageParser.Activity a = pkg.activities.get(i);
             mActivities.removeActivity(a, "activity");
-            if (chatty) {
+            if (DEBUG_REMOVE && chatty) {
                 if (r == null) {
                     r = new StringBuilder(256);
                 } else {
@@ -4693,7 +4922,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             if (bp != null && bp.perm == p) {
                 bp.perm = null;
-                if (chatty) {
+                if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
@@ -4712,7 +4941,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (i=0; i<N; i++) {
             PackageParser.Instrumentation a = pkg.instrumentation.get(i);
             mInstrumentation.remove(a.getComponentName());
-            if (chatty) {
+            if (DEBUG_REMOVE && chatty) {
                 if (r == null) {
                     r = new StringBuilder(256);
                 } else {
@@ -4723,6 +4952,31 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (r != null) {
             if (DEBUG_REMOVE) Log.d(TAG, "  Instrumentation: " + r);
+        }
+
+        r = null;
+        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+            // Only system apps can hold shared libraries.
+            if (pkg.libraryNames != null) {
+                for (i=0; i<pkg.libraryNames.size(); i++) {
+                    String name = pkg.libraryNames.get(i);
+                    SharedLibraryEntry cur = mSharedLibraries.get(name);
+                    if (cur != null && cur.apk != null && cur.apk.equals(pkg.packageName)) {
+                        mSharedLibraries.remove(name);
+                        if (DEBUG_REMOVE && chatty) {
+                            if (r == null) {
+                                r = new StringBuilder(256);
+                            } else {
+                                r.append(' ');
+                            }
+                            r.append(name);
+                        }
+                    }
+                }
+            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Libraries: " + r);
         }
     }
 
@@ -4885,7 +5139,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 if (origGp.grantedPermissions.contains(perm)) {
                                     allowed = true;
                                 } else {
+                                    // The system apk may have been updated with an older
+                                    // version of the one on the data partition, but which
+                                    // granted a new system permission that it didn't have
+                                    // before.  In this case we do want to allow the app to
+                                    // now get the new permission, because it is allowed by
+                                    // the system image.
                                     allowed = false;
+                                    if (sysPs.pkg != null) {
+                                        for (int j=0;
+                                                j<sysPs.pkg.requestedPermissions.size(); j++) {
+                                            if (perm.equals(
+                                                    sysPs.pkg.requestedPermissions.get(j))) {
+                                                allowed = true;
+                                                break;
+                                            }
+                                        }
+                                    }
                                 }
                             } else {
                                 allowed = true;
@@ -5582,6 +5852,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 if ((event&REMOVE_EVENTS) != 0) {
                     if (ps != null) {
+                        if (DEBUG_REMOVE) Slog.d(TAG, "Package disappeared: " + ps);
                         removePackageLI(ps, true);
                         removedPackage = ps.name;
                         removedAppId = ps.appId;
@@ -5590,6 +5861,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 if ((event&ADD_EVENTS) != 0) {
                     if (p == null) {
+                        if (DEBUG_INSTALL) Slog.d(TAG, "New file appeared: " + fullPath);
                         p = scanPackageLI(fullPath,
                                 (mIsRom ? PackageParser.PARSE_IS_SYSTEM
                                         | PackageParser.PARSE_IS_SYSTEM_DIR: 0) |
@@ -6151,7 +6423,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean startCopy() {
             boolean res;
             try {
-                if (DEBUG_INSTALL) Slog.i(TAG, "startCopy");
+                if (DEBUG_INSTALL) Slog.i(TAG, "startCopy " + mUser + ": " + this);
 
                 if (++mRetries > MAX_RETRIES) {
                     Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
@@ -6192,6 +6464,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             super(new UserHandle(stats.userHandle));
             mObserver = observer;
             mStats = stats;
+        }
+
+        @Override
+        public String toString() {
+            return "MeasureParams{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " " + mStats.packageName + "}";
         }
 
         @Override
@@ -6281,6 +6560,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.installerPackageName = installerPackageName;
             this.verificationParams = verificationParams;
             this.encryptionParams = encryptionParams;
+        }
+
+        @Override
+        public String toString() {
+            return "InstallParams{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " " + mPackageURI + "}";
         }
 
         public ManifestDigest getManifestDigest() {
@@ -6694,6 +6980,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 targetArgs = null;
             }
+        }
+
+        @Override
+        public String toString() {
+            return "MoveParams{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " " + packageName + "}";
         }
 
         public void handleStartCopy() throws RemoteException {
@@ -7607,6 +7900,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Remember this for later, in case we need to rollback this install
         String pkgName = pkg.packageName;
 
+        if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
         boolean dataDirExists = getDataPathForPackage(pkg.packageName, 0).exists();
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
@@ -7663,6 +7957,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
+            if (DEBUG_INSTALL) Slog.d(TAG, "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
             if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
                 Slog.w(TAG, "New package has a different signature: " + pkgName);
@@ -7688,6 +7983,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean deletedPkg = true;
         boolean updatedSettings = false;
 
+        if (DEBUG_INSTALL) Slog.d(TAG, "replaceNonSystemPackageLI: new=" + pkg + ", old="
+                + deletedPackage);
         long origUpdateTime;
         if (pkg.mExtras != null) {
             origUpdateTime = ((PackageSetting)pkg.mExtras).lastUpdateTime;
@@ -7725,6 +8022,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // scanPackageLocked, unless those directories existed before we even tried to
             // install.
             if(updatedSettings) {
+                if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, rolling pack: " + pkgName);
                 deletePackageLI(
                         pkgName, null, true,
                         PackageManager.DELETE_KEEP_DATA,
@@ -7733,6 +8031,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Since we failed to install the new package we need to restore the old
             // package that we deleted.
             if(deletedPkg) {
+                if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, reinstalling: " + deletedPackage);
                 File restoreFile = new File(deletedPackage.mPath);
                 // Parse old package
                 boolean oldOnSd = isExternal(deletedPackage);
@@ -7762,6 +8061,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
             String installerPackageName, PackageInstalledInfo res) {
+        if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
+                + ", old=" + deletedPackage);
         PackageParser.Package newPackage = null;
         boolean updatedSettings = false;
         parseFlags |= PackageManager.INSTALL_REPLACE_EXISTING |
@@ -7884,7 +8185,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        Log.d(TAG, "New package installed in " + newPackage.mPath);
+        if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + newPackage.mPath);
 
         synchronized (mPackages) {
             updatePermissionsLPw(newPackage.packageName, newPackage,
@@ -7914,6 +8215,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Result object to be returned
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
+        if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
         // Retrieve PackageSettings and parse package
         int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
@@ -7975,14 +8277,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkg.setPackageName(oldName);
                     pkgName = pkg.packageName;
                     replace = true;
+                    if (DEBUG_INSTALL) Slog.d(TAG, "Replacing existing renamed package: oldName="
+                            + oldName + " pkgName=" + pkgName);
                 } else if (mPackages.containsKey(pkgName)) {
                     // This package, under its official name, already exists
                     // on the device; we should replace it.
                     replace = true;
+                    if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing pacakge: " + pkgName);
                 }
             }
             PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (ps != null) {
+                if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
                 oldCodePath = mSettings.mPackages.get(pkgName).codePathString;
                 if (ps.pkg != null && ps.pkg.applicationInfo != null) {
                     systemApp = (ps.pkg.applicationInfo.flags &
@@ -8129,6 +8435,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageAsUser: pkg=" + packageName + " user=" + userId);
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
@@ -8176,6 +8483,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean removedForAllUsers = false;
         boolean systemUpdate = false;
         synchronized (mInstallLock) {
+            if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             res = deletePackageLI(packageName,
                     (flags & PackageManager.DELETE_ALL_USERS) != 0
                             ? UserHandle.ALL : new UserHandle(userId),
@@ -8184,6 +8492,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (res && !systemUpdate && mPackages.get(packageName) == null) {
                 removedForAllUsers = true;
             }
+            if (DEBUG_REMOVE) Slog.d(TAG, "delete res: systemUpdate=" + systemUpdate
+                    + " removedForAllUsers=" + removedForAllUsers);
         }
 
         if (res) {
@@ -8259,6 +8569,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void removePackageDataLI(PackageSetting ps, PackageRemovedInfo outInfo,
             int flags, boolean writeSettings) {
         String packageName = ps.name;
+        if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + ps);
         removePackageLI(ps, (flags&REMOVE_CHATTY) != 0);
         // Retrieve object to delete permissions for shared user later on
         final PackageSetting deletedPs;
@@ -8314,11 +8625,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             disabledPs = mSettings.getDisabledSystemPkgLPr(newPs.name);
         }
+        if (DEBUG_REMOVE) Slog.d(TAG, "deleteSystemPackageLI: newPs=" + newPs
+                + " disabledPs=" + disabledPs);
         if (disabledPs == null) {
             Slog.w(TAG, "Attempt to delete unknown system package "+ newPs.name);
             return false;
-        } else {
-            Log.i(TAG, "Deleting system pkg from data partition");
+        } else if (DEBUG_REMOVE) {
+            Slog.d(TAG, "Deleting system pkg from data partition");
         }
         // Delete the updated package
         outInfo.isRemovedPackageSystemUpdate = true;
@@ -8342,6 +8655,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             NativeLibraryHelper.removeNativeBinariesLI(newPs.nativeLibraryPathString);
         }
         // Install the system package
+        if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
         PackageParser.Package newPkg = scanPackageLI(disabledPs.codePath,
                 PackageParser.PARSE_MUST_BE_APK | PackageParser.PARSE_IS_SYSTEM,
                 SCAN_MONITOR | SCAN_NO_PATHS, 0, null);
@@ -8391,6 +8705,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Attempt to delete null packageName.");
             return false;
         }
+        if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: " + packageName + " user " + user);
         PackageSetting ps;
         boolean dataOnly = false;
         int removeUser = -1;
@@ -8401,11 +8716,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
                 return false;
             }
-            if (user != null
+            if ((!isSystemApp(ps) || (flags&PackageManager.DELETE_SYSTEM_APP) != 0) && user != null
                     && user.getIdentifier() != UserHandle.USER_ALL) {
                 // The caller is asking that the package only be deleted for a single
                 // user.  To do this, we just mark its uninstalled state and delete
-                // its data.
+                // its data.  If this is a system app, we only allow this to happen if
+                // they have set the special DELETE_SYSTEM_APP which requests different
+                // semantics than normal for uninstalling system apps.
+                if (DEBUG_REMOVE) Slog.d(TAG, "Only deleting for single user");
                 ps.setUserState(user.getIdentifier(),
                         COMPONENT_ENABLED_STATE_DEFAULT,
                         false, //installed
@@ -8417,12 +8735,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // Other user still have this package installed, so all
                         // we need to do is clear this user's data and save that
                         // it is uninstalled.
+                        if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
                         removeUser = user.getIdentifier();
                         appId = ps.appId;
                         mSettings.writePackageRestrictionsLPr(removeUser);
                     } else {
                         // We need to set it back to 'installed' so the uninstall
                         // broadcasts will be sent correctly.
+                        if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
                         ps.setInstalled(true, user.getIdentifier());
                     }
                 } else {
@@ -8430,6 +8750,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // other users still have this package installed, so all
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
+                    if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
                     removeUser = user.getIdentifier();
                     appId = ps.appId;
                     mSettings.writePackageRestrictionsLPr(removeUser);
@@ -8440,6 +8761,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (removeUser >= 0) {
             // From above, we determined that we are deleting this only
             // for a single user.  Continue the work here.
+            if (DEBUG_REMOVE) Slog.d(TAG, "Updating install state for user: " + removeUser);
             if (outInfo != null) {
                 outInfo.removedPackage = packageName;
                 outInfo.removedAppId = appId;
@@ -8452,6 +8774,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (dataOnly) {
             // Delete application data first
+            if (DEBUG_REMOVE) Slog.d(TAG, "Removing package data only");
             removePackageDataLI(ps, outInfo, flags, writeSettings);
             return true;
         }
@@ -8459,12 +8782,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean ret = false;
         mSettings.mKeySetManager.removeAppKeySetData(packageName);
         if (isSystemApp(ps)) {
-            Log.i(TAG, "Removing system package:" + ps.name);
+            if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package:" + ps.name);
             // When an updated system application is deleted we delete the existing resources as well and
             // fall back to existing code in system partition
             ret = deleteSystemPackageLI(ps, flags, outInfo, writeSettings);
         } else {
-            Log.i(TAG, "Removing non-system package:" + ps.name);
+            if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package:" + ps.name);
             // Kill application pre-emptively especially for apps on sd.
             killApplication(packageName, ps.appId);
             ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags, outInfo,
@@ -9441,7 +9764,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pw.print("  ");
                     pw.print(name);
                     pw.print(" -> ");
-                    pw.println(mSharedLibraries.get(name));
+                    SharedLibraryEntry ent = mSharedLibraries.get(name);
+                    if (ent.path != null) {
+                        pw.print("(jar) ");
+                        pw.print(ent.path);
+                    } else {
+                        pw.print("(apk) ");
+                        pw.print(ent.apk);
+                    }
+                    pw.println();
                 }
             }
 
