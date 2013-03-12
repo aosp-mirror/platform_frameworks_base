@@ -146,9 +146,9 @@ public class LinkProperties implements Parcelable {
         if (route != null) {
             String routeIface = route.getInterface();
             if (routeIface != null && !routeIface.equals(mIfaceName)) {
-                throw new IllegalStateException(
+                throw new IllegalArgumentException(
                    "Route added with non-matching interface: " + routeIface +
-                   " vs. mIfaceName");
+                   " vs. " + mIfaceName);
             }
             mRoutes.add(routeWithInterface(route));
         }
@@ -370,7 +370,7 @@ public class LinkProperties implements Parcelable {
     public CompareResult<RouteInfo> compareRoutes(LinkProperties target) {
         /*
          * Duplicate the RouteInfos into removed, we will be removing
-         * routes which are common between mDnses and target
+         * routes which are common between mRoutes and target
          * leaving the routes that are different. And route address which
          * are in target but not in mRoutes are placed in added.
          */
