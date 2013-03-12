@@ -268,8 +268,9 @@ public class BaseInputConnection implements InputConnection {
         if (content != null) {
             beginBatchEdit();
             removeComposingSpans(content);
-            endBatchEdit();
+            // Note: sendCurrentText does nothing unless mDummyMode is set
             sendCurrentText();
+            endBatchEdit();
         }
         return true;
     }
@@ -466,8 +467,9 @@ public class BaseInputConnection implements InputConnection {
             content.setSpan(COMPOSING, a, b,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
 
-            endBatchEdit();
+            // Note: sendCurrentText does nothing unless mDummyMode is set
             sendCurrentText();
+            endBatchEdit();
         }
         return true;
     }

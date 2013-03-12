@@ -1085,9 +1085,12 @@ public class Editor {
             mTextView.updateAfterEdit();
             reportExtractedText();
         } else if (ims.mCursorChanged) {
-            // Cheezy way to get us to report the current cursor location.
+            // Cheesy way to get us to report the current cursor location.
             mTextView.invalidateCursor();
         }
+        // sendUpdateSelection knows to avoid sending if the selection did
+        // not actually change.
+        sendUpdateSelection();
     }
 
     static final int EXTRACT_NOTHING = -2;
@@ -1221,6 +1224,8 @@ public class Editor {
                     candStart = EditableInputConnection.getComposingSpanStart(sp);
                     candEnd = EditableInputConnection.getComposingSpanEnd(sp);
                 }
+                // InputMethodManager#updateSelection skips sending the message if
+                // none of the parameters have changed since the last time we called it.
                 imm.updateSelection(mTextView,
                         selectionStart, selectionEnd, candStart, candEnd);
             }
@@ -1243,11 +1248,6 @@ public class Editor {
                         // in some way... just report complete new text to the
                         // input method.
                         reported = reportExtractedText();
-                    }
-                    if (!reported && highlight != null) {
-                        // TODO: stop doing this here, and do it after each change
-                        // as needed instead.
-                        sendUpdateSelection();
                     }
                 }
 
