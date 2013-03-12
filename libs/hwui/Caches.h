@@ -25,6 +25,9 @@
 
 #include <cutils/compiler.h>
 
+#include "thread/TaskProcessor.h"
+#include "thread/TaskManager.h"
+
 #include "FontRenderer.h"
 #include "GammaFontRenderer.h"
 #include "TextureCache.h"
@@ -277,6 +280,8 @@ public:
     ResourceCache resourceCache;
 
     GammaFontRenderer* fontRenderer;
+
+    TaskManager tasks;
 
     Dither dither;
     Stencil stencil;

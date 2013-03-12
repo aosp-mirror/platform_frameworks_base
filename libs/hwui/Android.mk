@@ -7,6 +7,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES:= \
 		utils/Blur.cpp \
 		utils/SortedListImpl.cpp \
+		thread/TaskManager.cpp \
 		font/CacheTexture.cpp \
 		font/Font.cpp \
 		FontRenderer.cpp \
