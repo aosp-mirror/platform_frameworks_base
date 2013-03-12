@@ -182,7 +182,7 @@
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Acceder a dispositivos y redes a través de Bluetooth"</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Configuración de audio"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Cambiar la configuración de audio"</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Afecta la batería."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Afecta la batería"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Uso de las características que se pueden agotar rápidamente la batería"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Acceso directo a calendario y eventos"</string>
