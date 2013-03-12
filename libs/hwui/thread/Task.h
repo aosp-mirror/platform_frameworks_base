@@ -14,45 +14,50 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_FUTURE_H
-#define ANDROID_HWUI_FUTURE_H
+#ifndef ANDROID_HWUI_TASK_H
+#define ANDROID_HWUI_TASK_H
+
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <utils/RefBase.h>
+#include <utils/Trace.h>
 
-#include "Barrier.h"
+#include "Future.h"
 
 namespace android {
 namespace uirenderer {
 
-template<typename T>
-class Future: public LightRefBase<Future<T> > {
+class TaskBase: public RefBase {
 public:
-    Future(Condition::WakeUpType type = Condition::WAKE_UP_ONE): mBarrier(type), mResult() { }
-    ~Future() { }
+    TaskBase() { }
+    virtual ~TaskBase() { }
+};
 
-    /**
-     * Returns the result of this future, blocking if
-     * the result is not available yet.
-     */
-    T get() const {
-        mBarrier.wait();
-        return mResult;
+template<typename T>
+class Task: public TaskBase {
+public:
+    Task(): mFuture(new Future<T>()) { }
+    virtual ~Task() { }
+
+    T getResult() const {
+        ATRACE_NAME("waitForTask");
+        return mFuture->get();
     }
 
-    /**
-     * This method must be called only once.
-     */
-    void produce(T result) {
-        mResult = result;
-        mBarrier.open();
+    void setResult(T result) {
+        mFuture->produce(result);
+    }
+
+protected:
+    const sp<Future<T> >& future() const {
+        return mFuture;
     }
 
 private:
-    Barrier mBarrier;
-    T mResult;
+    sp<Future<T> > mFuture;
 };
 
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_HWUI_FUTURE_H
+#endif // ANDROID_HWUI_TASK_H
