@@ -248,6 +248,15 @@ public class KeyguardTransportControlView extends FrameLayout implements OnClick
     }
 
     @Override
+    protected void onSizeChanged (int w, int h, int oldw, int oldh) {
+        if (mAttached) {
+            int dim = Math.min(512, Math.max(w, h));
+            if (DEBUG) Log.v(TAG, "TCV uses bitmap size=" + dim);
+            mAudioManager.remoteControlDisplayUsesBitmapSize(mIRCD, dim, dim);
+        }
+    }
+
+    @Override
     public void onDetachedFromWindow() {
         if (DEBUG) Log.v(TAG, "onDetachFromWindow()");
         super.onDetachedFromWindow();
