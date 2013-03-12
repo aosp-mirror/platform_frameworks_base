@@ -114,7 +114,7 @@ am.getAuthToken(
     new Handler(new OnError()));    // Callback called if an error occurs
 </pre>
 
-<p>In this example, <code>OnTokenAcquired</code> is a class that extends
+<p>In this example, <code>OnTokenAcquired</code> is a class that implements
 {@link android.accounts.AccountManagerCallback}. {@link android.accounts.AccountManager} calls
 {@link android.accounts.AccountManagerCallback#run run()} on <code>OnTokenAcquired</code> with an
 {@link android.accounts.AccountManagerFuture} that contains a {@link android.os.Bundle}. If
