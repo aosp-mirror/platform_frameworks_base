@@ -23,8 +23,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.KeyManagementException;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPrivateKey;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -89,7 +89,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private TrustManager[] mTrustManagers = null;
     private KeyManager[] mKeyManagers = null;
     private byte[] mNpnProtocols = null;
-    private ECPrivateKey mChannelIdPrivateKey = null;
+    private PrivateKey mChannelIdPrivateKey = null;
 
     private final int mHandshakeTimeoutMillis;
     private final SSLClientSessionCache mSessionCache;
@@ -321,7 +321,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     /**
-     * Sets the {@link ECPrivateKey} to be used for TLS Channel ID by connections made by this
+     * Sets the private key to be used for TLS Channel ID by connections made by this
      * factory.
      *
      * @param privateKey private key (enables TLS Channel ID) or {@code null} for no key (disables
@@ -330,7 +330,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @hide
      */
-    public void setChannelIdPrivateKey(ECPrivateKey privateKey) {
+    public void setChannelIdPrivateKey(PrivateKey privateKey) {
         mChannelIdPrivateKey = privateKey;
     }
 
