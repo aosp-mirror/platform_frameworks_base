@@ -1243,6 +1243,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     unbindCurrentMethodLocked(false, false);
                     return;
                 }
+                // Remove commands relating to the previous service. Otherwise WindowManagerService
+                // will reject the command because the token attached to these messages is invalid.
+                mCaller.removeMessages(MSG_SHOW_SOFT_INPUT);
+                mCaller.removeMessages(MSG_HIDE_SOFT_INPUT);
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                 executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                         MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
