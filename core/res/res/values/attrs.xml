@@ -2407,6 +2407,11 @@
              constructor or 0. Arrays.hashCode(new Object[] {locale, mode, extraValue,
              isAuxiliary, overridesImplicitlyEnabledSubtype}) will be used instead. -->
         <attr name="subtypeId" format="integer"/>
+        <!-- Set to true if this subtype is ASCII capable. If the subtype is ASCII
+             capable, it should guarantee that the user can input ASCII characters with
+             this subtype. This is important because many password fields only allow
+             ASCII-characters. -->
+        <attr name="isAsciiCapable" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>spell-checker</code> as the root tag of the XML resource that
