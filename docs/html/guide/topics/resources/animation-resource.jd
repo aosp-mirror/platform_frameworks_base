@@ -217,7 +217,7 @@ group animation elements together inside the <code>&lt;set&gt;</code> element, i
     </dd>
 
 <dt id="val-animator-element"><code>&lt;animator&gt;</code></dt>
-    <dd>Animates a over a specified amount of time.
+    <dd>Performs an animation over a specified amount of time.
     Represents a {@link android.animation.ValueAnimator}.
 
       <p class="caps">attributes:</p>
