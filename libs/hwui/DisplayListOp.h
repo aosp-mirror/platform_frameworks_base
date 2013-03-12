@@ -1005,7 +1005,7 @@ public:
             : DrawBoundedOp(paint), mPath(path) {
         float left, top, offset;
         uint32_t width, height;
-        computePathBounds(path, paint, left, top, offset, width, height);
+        PathCache::computePathBounds(path, paint, left, top, offset, width, height);
         left -= offset;
         top -= offset;
         mLocalBounds.set(left, top, left + width, top + height);
@@ -1014,6 +1014,11 @@ public:
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
             bool caching, int multipliedAlpha) {
         return renderer.drawPath(mPath, getPaint(renderer));
+    }
+
+    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+        SkPaint* paint = getPaint(renderer);
+        renderer.getCaches().pathCache.precache(mPath, paint);
     }
 
     virtual void output(int level, uint32_t flags) {

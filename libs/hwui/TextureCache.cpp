@@ -20,7 +20,7 @@
 
 #include <SkCanvas.h>
 
-#include <utils/threads.h>
+#include <utils/Mutex.h>
 
 #include "Caches.h"
 #include "TextureCache.h"
