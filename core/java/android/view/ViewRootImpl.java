@@ -3559,15 +3559,15 @@ public final class ViewRootImpl implements ViewParent,
     private int deliverGenericMotionEventPostIme(QueuedInputEvent q) {
         final MotionEvent event = (MotionEvent) q.mEvent;
         final int source = event.getSource();
-        final boolean isJoystick = (source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0;
-        final boolean isTouchPad = (source & InputDevice.SOURCE_CLASS_POSITION) != 0;
+        final boolean isJoystick = event.isFromSource(InputDevice.SOURCE_CLASS_JOYSTICK);
+        final boolean isTouchNavigation = event.isFromSource(InputDevice.SOURCE_TOUCH_NAVIGATION);
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
             if (isJoystick) {
                 updateJoystickDirection(event, false);
-            } else if (isTouchPad) {
-              mSimulatedDpad.updateTouchPad(this, event, false);
+            } else if (isTouchNavigation) {
+                mSimulatedDpad.updateTouchNavigation(this, event, false);
             }
             return EVENT_NOT_HANDLED;
         }
@@ -3576,8 +3576,8 @@ public final class ViewRootImpl implements ViewParent,
         if (mView.dispatchGenericMotionEvent(event)) {
             if (isJoystick) {
                 updateJoystickDirection(event, false);
-            } else if (isTouchPad) {
-              mSimulatedDpad.updateTouchPad(this, event, false);
+            } else if (isTouchNavigation) {
+                mSimulatedDpad.updateTouchNavigation(this, event, false);
             }
             return EVENT_HANDLED;
         }
@@ -3588,8 +3588,8 @@ public final class ViewRootImpl implements ViewParent,
             updateJoystickDirection(event, true);
             return EVENT_HANDLED;
         }
-        if (isTouchPad) {
-            mSimulatedDpad.updateTouchPad(this, event, true);
+        if (isTouchNavigation) {
+            mSimulatedDpad.updateTouchNavigation(this, event, true);
             return EVENT_HANDLED;
         }
         return EVENT_NOT_HANDLED;

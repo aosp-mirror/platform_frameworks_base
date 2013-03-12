@@ -8112,13 +8112,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * delivered to the focused view.
      * </p>
      * <pre> public boolean onGenericMotionEvent(MotionEvent event) {
-     *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+     *     if (event.isFromSource(InputDevice.SOURCE_CLASS_JOYSTICK)) {
      *         if (event.getAction() == MotionEvent.ACTION_MOVE) {
      *             // process the joystick movement...
      *             return true;
      *         }
      *     }
-     *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_POINTER) != 0) {
+     *     if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
      *         switch (event.getAction()) {
      *             case MotionEvent.ACTION_HOVER_MOVE:
      *                 // process the mouse hover movement...
