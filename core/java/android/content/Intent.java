@@ -1164,12 +1164,13 @@ public class Intent implements Parcelable, Cloneable {
      * additional optional contextual information about where the user was when they requested
      * the voice assist.
      * Output: nothing.
+     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
 
     /**
-     * An optional field on {@link #ACTION_ASSIST} and {@link #ACTION_VOICE_ASSIST}
+     * An optional field on {@link #ACTION_ASSIST}
      * containing the name of the current foreground application package at the time
      * the assist was invoked.
      */
@@ -1177,7 +1178,7 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.ASSIST_PACKAGE";
 
     /**
-     * An optional field on {@link #ACTION_ASSIST} and {@link #ACTION_VOICE_ASSIST}
+     * An optional field on {@link #ACTION_ASSIST}
      * containing additional contextual information supplied by the current
      * foreground app at the time of the assist request.  This is a {@link Bundle} of
      * additional data.
