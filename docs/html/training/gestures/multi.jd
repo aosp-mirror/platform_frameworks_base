@@ -25,12 +25,18 @@ next.link=scale.html
    <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
     </li>
     <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
-    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
     <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
     <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
     <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
 </ul>
 
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/InteractiveChart.zip"
+class="button">Download the sample</a>
+ <p class="filename">InteractiveChart.zip</p>
+</div>
 
 </div>
 </div>
