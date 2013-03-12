@@ -39,6 +39,7 @@ public class UT_alloc extends UnitTest {
         typeBuilder.setX(X).setY(Y);
         Allocation A = Allocation.createTyped(RS, typeBuilder.create());
         s.bind_a(A);
+        s.set_aRaw(A);
 
         typeBuilder = new Type.Builder(RS, Element.I32(RS));
         typeBuilder.setX(X).setY(Y).setFaces(true);
@@ -56,9 +57,10 @@ public class UT_alloc extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_alloc s = new ScriptC_alloc(pRS, mRes, R.raw.alloc);
+        ScriptC_alloc s = new ScriptC_alloc(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
+        s.forEach_root(s.get_aRaw());
         s.invoke_alloc_test();
         pRS.finish();
         waitForMessage();

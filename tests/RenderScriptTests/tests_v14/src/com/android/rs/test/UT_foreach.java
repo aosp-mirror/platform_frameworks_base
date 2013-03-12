@@ -37,17 +37,18 @@ public class UT_foreach extends UnitTest {
         s.set_dimY(Y);
         typeBuilder.setX(X).setY(Y);
         A = Allocation.createTyped(RS, typeBuilder.create());
-        s.bind_a(A);
+        s.set_aRaw(A);
 
         return;
     }
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_foreach s = new ScriptC_foreach(pRS, mRes, R.raw.foreach);
+        ScriptC_foreach s = new ScriptC_foreach(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
         s.forEach_root(A);
+        s.invoke_verify_root();
         s.invoke_foreach_test();
         pRS.finish();
         waitForMessage();
