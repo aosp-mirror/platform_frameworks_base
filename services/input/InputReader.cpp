@@ -2788,6 +2788,8 @@ void TouchInputMapper::configureParameters() {
             mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_SCREEN;
         } else if (deviceTypeString == "touchPad") {
             mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_PAD;
+        } else if (deviceTypeString == "touchNavigation") {
+            mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_NAVIGATION;
         } else if (deviceTypeString == "pointer") {
             mParameters.deviceType = Parameters::DEVICE_TYPE_POINTER;
         } else if (deviceTypeString != "default") {
@@ -2831,6 +2833,9 @@ void TouchInputMapper::dumpParameters(String8& dump) {
         break;
     case Parameters::DEVICE_TYPE_TOUCH_PAD:
         dump.append(INDENT4 "DeviceType: touchPad\n");
+        break;
+    case Parameters::DEVICE_TYPE_TOUCH_NAVIGATION:
+        dump.append(INDENT4 "DeviceType: touchNavigation\n");
         break;
     case Parameters::DEVICE_TYPE_POINTER:
         dump.append(INDENT4 "DeviceType: pointer\n");
@@ -2885,6 +2890,9 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
         if (hasStylus()) {
             mSource |= AINPUT_SOURCE_STYLUS;
         }
+    } else if (mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_NAVIGATION) {
+        mSource = AINPUT_SOURCE_TOUCH_NAVIGATION;
+        mDeviceMode = DEVICE_MODE_UNSCALED;
     } else {
         mSource = AINPUT_SOURCE_TOUCHPAD;
         mDeviceMode = DEVICE_MODE_UNSCALED;

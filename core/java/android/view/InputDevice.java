@@ -62,7 +62,14 @@ public final class InputDevice implements Parcelable {
      * specify the desired interpretation for its input events.
      */
     public static final int SOURCE_CLASS_MASK = 0x000000ff;
-    
+
+    /**
+     * The input source has no class.
+     *
+     * It is up to the application to determine how to handle the device based on the device type.
+     */
+    public static final int SOURCE_CLASS_NONE = 0x00000000;
+
     /**
      * The input source has buttons or keys.
      * Examples: {@link #SOURCE_KEYBOARD}, {@link #SOURCE_DPAD}.
@@ -200,6 +207,17 @@ public final class InputDevice implements Parcelable {
      * @see #SOURCE_CLASS_POSITION
      */
     public static final int SOURCE_TOUCHPAD = 0x00100000 | SOURCE_CLASS_POSITION;
+
+    /**
+     * The input source is a touch device whose motions should be interpreted as navigation events.
+     *
+     * For example, an upward swipe should be as an upward focus traversal in the same manner as
+     * pressing up on a D-Pad would be. Swipes to the left, right and down should be treated in a
+     * similar manner.
+     *
+     * @see #SOURCE_CLASS_NONE
+     */
+    public static final int SOURCE_TOUCH_NAVIGATION = 0x00200000 | SOURCE_CLASS_NONE;
 
     /**
      * The input source is a joystick.
@@ -631,6 +649,19 @@ public final class InputDevice implements Parcelable {
          */
         public int getSource() {
             return mSource;
+        }
+
+
+        /**
+         * Determines whether the event is from the given source.
+         *
+         * @param source The input source to check against. This can be a specific device type,
+         * such as {@link InputDevice#SOURCE_TOUCH_NAVIGATION}, or a more generic device class,
+         * such as {@link InputDevice#SOURCE_CLASS_POINTER}.
+         * @return Whether the event is from the given source.
+         */
+        public boolean isFromSource(int source) {
+            return (getSource() & source) == source;
         }
 
         /**
