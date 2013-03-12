@@ -135,6 +135,9 @@ public abstract class MetaKeyKeyListener {
     private static final Object SYM = new NoCopySpan.Concrete();
     private static final Object SELECTING = new NoCopySpan.Concrete();
 
+    private static final int PRESSED_RETURN_VALUE = 1;
+    private static final int LOCKED_RETURN_VALUE = 2;
+
     /**
      * Resets all meta state to inactive.
      */
@@ -160,10 +163,12 @@ public abstract class MetaKeyKeyListener {
                getActive(text, SELECTING, META_SELECTING, META_SELECTING);
     }
 
+    // As META_SELECTING is @hide we should not mention it in public comments, hence the
+    // omission in @param meta
     /**
      * Gets the state of a particular meta key.
      *
-     * @param meta META_SHIFT_ON, META_ALT_ON, META_SYM_ON, or META_SELECTING
+     * @param meta META_SHIFT_ON, META_ALT_ON, META_SYM_ON
      * @param text the buffer in which the meta key would have been pressed.
      *
      * @return 0 if inactive, 1 if active, 2 if locked.
@@ -171,16 +176,16 @@ public abstract class MetaKeyKeyListener {
     public static final int getMetaState(CharSequence text, int meta) {
         switch (meta) {
             case META_SHIFT_ON:
-                return getActive(text, CAP, 1, 2);
+                return getActive(text, CAP, PRESSED_RETURN_VALUE, LOCKED_RETURN_VALUE);
 
             case META_ALT_ON:
-                return getActive(text, ALT, 1, 2);
+                return getActive(text, ALT, PRESSED_RETURN_VALUE, LOCKED_RETURN_VALUE);
 
             case META_SYM_ON:
-                return getActive(text, SYM, 1, 2);
+                return getActive(text, SYM, PRESSED_RETURN_VALUE, LOCKED_RETURN_VALUE);
 
             case META_SELECTING:
-                return getActive(text, SELECTING, 1, 2);
+                return getActive(text, SELECTING, PRESSED_RETURN_VALUE, LOCKED_RETURN_VALUE);
 
             default:
                 return 0;
@@ -430,18 +435,18 @@ public abstract class MetaKeyKeyListener {
     public static final int getMetaState(long state, int meta) {
         switch (meta) {
             case META_SHIFT_ON:
-                if ((state & META_CAP_LOCKED) != 0) return 2;
-                if ((state & META_SHIFT_ON) != 0) return 1;
+                if ((state & META_CAP_LOCKED) != 0) return LOCKED_RETURN_VALUE;
+                if ((state & META_SHIFT_ON) != 0) return PRESSED_RETURN_VALUE;
                 return 0;
 
             case META_ALT_ON:
-                if ((state & META_ALT_LOCKED) != 0) return 2;
-                if ((state & META_ALT_ON) != 0) return 1;
+                if ((state & META_ALT_LOCKED) != 0) return LOCKED_RETURN_VALUE;
+                if ((state & META_ALT_ON) != 0) return PRESSED_RETURN_VALUE;
                 return 0;
 
             case META_SYM_ON:
-                if ((state & META_SYM_LOCKED) != 0) return 2;
-                if ((state & META_SYM_ON) != 0) return 1;
+                if ((state & META_SYM_LOCKED) != 0) return LOCKED_RETURN_VALUE;
+                if ((state & META_SYM_ON) != 0) return PRESSED_RETURN_VALUE;
                 return 0;
 
             default:
@@ -599,4 +604,3 @@ public abstract class MetaKeyKeyListener {
     private static final int LOCKED = 
         Spannable.SPAN_MARK_MARK | (4 << Spannable.SPAN_USER_SHIFT);
 }
-
