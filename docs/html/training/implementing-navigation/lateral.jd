@@ -131,6 +131,9 @@ public class CollectionDemoActivity extends FragmentActivity {
     ViewPager mViewPager;
 
     public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_collection_demo);
+
         // ViewPager and its adapters use support library
         // fragments, so use getSupportFragmentManager.
         mDemoCollectionPagerAdapter =
