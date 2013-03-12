@@ -36,6 +36,8 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import java.lang.IllegalArgumentException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * RemoteControlClient enables exposing information meant to be consumed by remote controls
@@ -498,13 +500,7 @@ public class RemoteControlClient
             if (key != BITMAP_KEY_ARTWORK) {
                 throw(new IllegalArgumentException("Invalid type 'Bitmap' for key "+ key));
             }
-            if ((mArtworkExpectedWidth > 0) && (mArtworkExpectedHeight > 0)) {
-                mEditorArtwork = scaleBitmapIfTooBig(bitmap,
-                        mArtworkExpectedWidth, mArtworkExpectedHeight);
-            } else {
-                // no valid resize dimensions, store as is
-                mEditorArtwork = bitmap;
-            }
+            mEditorArtwork = bitmap;
             mArtworkChanged = true;
             return this;
         }
@@ -536,10 +532,10 @@ public class RemoteControlClient
             synchronized(mCacheLock) {
                 // assign the edited data
                 mMetadata = new Bundle(mEditorMetadata);
-                if ((mArtwork != null) && (!mArtwork.equals(mEditorArtwork))) {
-                    mArtwork.recycle();
+                if ((mOriginalArtwork != null) && (!mOriginalArtwork.equals(mEditorArtwork))) {
+                    mOriginalArtwork.recycle();
                 }
-                mArtwork = mEditorArtwork;
+                mOriginalArtwork = mEditorArtwork;
                 mEditorArtwork = null;
                 if (mMetadataChanged & mArtworkChanged) {
                     // send to remote control display if conditions are met
@@ -571,7 +567,7 @@ public class RemoteControlClient
             editor.mArtworkChanged = true;
         } else {
             editor.mEditorMetadata = new Bundle(mMetadata);
-            editor.mEditorArtwork = mArtwork;
+            editor.mEditorArtwork = mOriginalArtwork;
             editor.mMetadataChanged = false;
             editor.mArtworkChanged = false;
         }
@@ -766,11 +762,7 @@ public class RemoteControlClient
      * accessed to be resized, in which case a copy will be made. This would add overhead in
      * Bundle operations.
      */
-    private Bitmap mArtwork;
-    private final int ARTWORK_DEFAULT_SIZE = 256;
-    private final int ARTWORK_INVALID_SIZE = -1;
-    private int mArtworkExpectedWidth = ARTWORK_DEFAULT_SIZE;
-    private int mArtworkExpectedHeight = ARTWORK_DEFAULT_SIZE;
+    private Bitmap mOriginalArtwork;
     /**
      * Cache for the transport control mask.
      * Access synchronized on mCacheLock
@@ -802,10 +794,27 @@ public class RemoteControlClient
     private final PendingIntent mRcMediaIntent;
 
     /**
-     * The remote control display to which this client will send information.
-     * NOTE: Only one IRemoteControlDisplay supported in this implementation
+     * A class to encapsulate all the information about a remote control display.
+     * A RemoteControlClient's metadata and state may be displayed on multiple IRemoteControlDisplay
      */
-    private IRemoteControlDisplay mRcDisplay;
+    private class DisplayInfoForClient {
+        /** may never be null */
+        private IRemoteControlDisplay mRcDisplay;
+        private int mArtworkExpectedWidth;
+        private int mArtworkExpectedHeight;
+
+        DisplayInfoForClient(IRemoteControlDisplay rcd, int w, int h) {
+            mRcDisplay = rcd;
+            mArtworkExpectedWidth = w;
+            mArtworkExpectedHeight = h;
+        }
+    }
+
+    /**
+     * The list of remote control displays to which this client will send information.
+     * Accessed and modified synchronized on mCacheLock
+     */
+    private ArrayList<DisplayInfoForClient> mRcDisplays = new ArrayList<DisplayInfoForClient>(1);
 
     /**
      * @hide
@@ -827,17 +836,14 @@ public class RemoteControlClient
      */
     private final IRemoteControlClient mIRCC = new IRemoteControlClient.Stub() {
 
-        public void onInformationRequested(int clientGeneration, int infoFlags,
-                int artWidth, int artHeight) {
+        public void onInformationRequested(int clientGeneration, int infoFlags) {
             // only post messages, we can't block here
             if (mEventHandler != null) {
                 // signal new client
                 mEventHandler.removeMessages(MSG_NEW_INTERNAL_CLIENT_GEN);
                 mEventHandler.dispatchMessage(
-                        mEventHandler.obtainMessage(
-                                MSG_NEW_INTERNAL_CLIENT_GEN,
-                                artWidth, artHeight,
-                                new Integer(clientGeneration)));
+                        mEventHandler.obtainMessage(MSG_NEW_INTERNAL_CLIENT_GEN,
+                                /*arg1*/ clientGeneration, /*arg2, ignored*/ 0));
                 // send the information
                 mEventHandler.removeMessages(MSG_REQUEST_PLAYBACK_STATE);
                 mEventHandler.removeMessages(MSG_REQUEST_METADATA);
@@ -861,19 +867,27 @@ public class RemoteControlClient
             }
         }
 
-        public void plugRemoteControlDisplay(IRemoteControlDisplay rcd) {
+        public void plugRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
             // only post messages, we can't block here
-            if (mEventHandler != null) {
+            if ((mEventHandler != null) && (rcd != null)) {
                 mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
-                        MSG_PLUG_DISPLAY, rcd));
+                        MSG_PLUG_DISPLAY, w, h, rcd));
             }
         }
 
         public void unplugRemoteControlDisplay(IRemoteControlDisplay rcd) {
             // only post messages, we can't block here
-            if (mEventHandler != null) {
+            if ((mEventHandler != null) && (rcd != null)) {
                 mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
                         MSG_UNPLUG_DISPLAY, rcd));
+            }
+        }
+
+        public void setBitmapSizeForDisplay(IRemoteControlDisplay rcd, int w, int h) {
+            // only post messages, we can't block here
+            if ((mEventHandler != null) && (rcd != null)) {
+                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
+                        MSG_UPDATE_DISPLAY_ARTWORK_SIZE, w, h, rcd));
             }
         }
     };
@@ -915,6 +929,7 @@ public class RemoteControlClient
     private final static int MSG_NEW_CURRENT_CLIENT_GEN = 6;
     private final static int MSG_PLUG_DISPLAY = 7;
     private final static int MSG_UNPLUG_DISPLAY = 8;
+    private final static int MSG_UPDATE_DISPLAY_ARTWORK_SIZE = 9;
 
     private class EventHandler extends Handler {
         public EventHandler(RemoteControlClient rcc, Looper looper) {
@@ -945,16 +960,19 @@ public class RemoteControlClient
                     }
                     break;
                 case MSG_NEW_INTERNAL_CLIENT_GEN:
-                    onNewInternalClientGen((Integer)msg.obj, msg.arg1, msg.arg2);
+                    onNewInternalClientGen(msg.arg1);
                     break;
                 case MSG_NEW_CURRENT_CLIENT_GEN:
                     onNewCurrentClientGen(msg.arg1);
                     break;
                 case MSG_PLUG_DISPLAY:
-                    onPlugDisplay((IRemoteControlDisplay)msg.obj);
+                    onPlugDisplay((IRemoteControlDisplay)msg.obj, msg.arg1, msg.arg2);
                     break;
                 case MSG_UNPLUG_DISPLAY:
                     onUnplugDisplay((IRemoteControlDisplay)msg.obj);
+                    break;
+                case MSG_UPDATE_DISPLAY_ARTWORK_SIZE:
+                    onUpdateDisplayArtworkSize((IRemoteControlDisplay)msg.obj, msg.arg1, msg.arg2);
                     break;
                 default:
                     Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
@@ -963,75 +981,106 @@ public class RemoteControlClient
     }
 
     //===========================================================
-    // Communication with IRemoteControlDisplay
-
-    private void detachFromDisplay_syncCacheLock() {
-        mRcDisplay = null;
-        mArtworkExpectedWidth = ARTWORK_INVALID_SIZE;
-        mArtworkExpectedHeight = ARTWORK_INVALID_SIZE;
-    }
+    // Communication with the IRemoteControlDisplay (the displays known to the system)
 
     private void sendPlaybackState_syncCacheLock() {
-        if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
-            try {
-                mRcDisplay.setPlaybackState(mInternalClientGenId, mPlaybackState,
-                        mPlaybackStateChangeTimeMs);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error in setPlaybackState(), dead display "+e);
-                detachFromDisplay_syncCacheLock();
+        if (mCurrentClientGenId == mInternalClientGenId) {
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                try {
+                    di.mRcDisplay.setPlaybackState(mInternalClientGenId,
+                            mPlaybackState, mPlaybackStateChangeTimeMs);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in setPlaybackState(), dead display " + di.mRcDisplay, e);
+                    displayIterator.remove();
+                }
             }
         }
     }
 
     private void sendMetadata_syncCacheLock() {
-        if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
-            try {
-                mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error in sendPlaybackState(), dead display "+e);
-                detachFromDisplay_syncCacheLock();
+        if (mCurrentClientGenId == mInternalClientGenId) {
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                try {
+                    di.mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in setMetadata(), dead display " + di.mRcDisplay, e);
+                    displayIterator.remove();
+                }
             }
         }
     }
 
     private void sendTransportControlFlags_syncCacheLock() {
-        if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
-            try {
-                mRcDisplay.setTransportControlFlags(mInternalClientGenId,
-                        mTransportControlFlags);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error in sendTransportControlFlags(), dead display "+e);
-                detachFromDisplay_syncCacheLock();
+        if (mCurrentClientGenId == mInternalClientGenId) {
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                try {
+                    di.mRcDisplay.setTransportControlFlags(mInternalClientGenId,
+                            mTransportControlFlags);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in setTransportControlFlags(), dead display " + di.mRcDisplay,
+                            e);
+                    displayIterator.remove();
+                }
             }
         }
     }
 
     private void sendArtwork_syncCacheLock() {
-        if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
-            // even though we have already scaled in setArtwork(), when this client needs to
-            // send the bitmap, there might be newer and smaller expected dimensions, so we have
-            // to check again.
-            mArtwork = scaleBitmapIfTooBig(mArtwork, mArtworkExpectedWidth, mArtworkExpectedHeight);
-            try {
-                mRcDisplay.setArtwork(mInternalClientGenId, mArtwork);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error in sendArtwork(), dead display "+e);
-                detachFromDisplay_syncCacheLock();
+        // FIXME modify to cache all requested sizes?
+        if (mCurrentClientGenId == mInternalClientGenId) {
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                if (!sendArtworkToDisplay((DisplayInfoForClient) displayIterator.next())) {
+                    displayIterator.remove();
+                }
             }
         }
     }
 
-    private void sendMetadataWithArtwork_syncCacheLock() {
-        if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != null)) {
-            // even though we have already scaled in setArtwork(), when this client needs to
-            // send the bitmap, there might be newer and smaller expected dimensions, so we have
-            // to check again.
-            mArtwork = scaleBitmapIfTooBig(mArtwork, mArtworkExpectedWidth, mArtworkExpectedHeight);
+    /**
+     * Send artwork to an IRemoteControlDisplay.
+     * @param di encapsulates the IRemoteControlDisplay that will receive the artwork, and its
+     *    dimension requirements.
+     * @return false if there was an error communicating with the IRemoteControlDisplay.
+     */
+    private boolean sendArtworkToDisplay(DisplayInfoForClient di) {
+        if ((di.mArtworkExpectedWidth > 0) && (di.mArtworkExpectedHeight > 0)) {
+            Bitmap artwork = scaleBitmapIfTooBig(mOriginalArtwork,
+                    di.mArtworkExpectedWidth, di.mArtworkExpectedHeight);
             try {
-                mRcDisplay.setAllMetadata(mInternalClientGenId, mMetadata, mArtwork);
+                di.mRcDisplay.setArtwork(mInternalClientGenId, artwork);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error in setAllMetadata(), dead display "+e);
-                detachFromDisplay_syncCacheLock();
+                Log.e(TAG, "Error in sendArtworkToDisplay(), dead display " + di.mRcDisplay, e);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void sendMetadataWithArtwork_syncCacheLock() {
+        // FIXME modify to cache all requested sizes?
+        if (mCurrentClientGenId == mInternalClientGenId) {
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                try {
+                    if ((di.mArtworkExpectedWidth > 0) && (di.mArtworkExpectedHeight > 0)) {
+                        Bitmap artwork = scaleBitmapIfTooBig(mOriginalArtwork,
+                                di.mArtworkExpectedWidth, di.mArtworkExpectedHeight);
+                        di.mRcDisplay.setAllMetadata(mInternalClientGenId, mMetadata, artwork);
+                    } else {
+                        di.mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error when setting metadata, dead display " + di.mRcDisplay, e);
+                    displayIterator.remove();
+                }
             }
         }
     }
@@ -1067,15 +1116,11 @@ public class RemoteControlClient
     //===========================================================
     // Message handlers
 
-    private void onNewInternalClientGen(Integer clientGeneration, int artWidth, int artHeight) {
+    private void onNewInternalClientGen(int clientGeneration) {
         synchronized (mCacheLock) {
             // this remote control client is told it is the "focused" one:
             // it implies that now (mCurrentClientGenId == mInternalClientGenId) is true
-            mInternalClientGenId = clientGeneration.intValue();
-            if (artWidth > 0) {
-                mArtworkExpectedWidth = artWidth;
-                mArtworkExpectedHeight = artHeight;
-            }
+            mInternalClientGenId = clientGeneration;
         }
     }
 
@@ -1085,18 +1130,62 @@ public class RemoteControlClient
         }
     }
 
-    private void onPlugDisplay(IRemoteControlDisplay rcd) {
+    /** pre-condition rcd != null */
+    private void onPlugDisplay(IRemoteControlDisplay rcd, int w, int h) {
         synchronized(mCacheLock) {
-            mRcDisplay = rcd;
+            // do we have this display already?
+            boolean displayKnown = false;
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext() && !displayKnown) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                displayKnown = di.mRcDisplay.asBinder().equals(rcd.asBinder());
+                if (displayKnown) {
+                    // this display was known but the change in artwork size will cause the
+                    // artwork to be refreshed
+                    if ((di.mArtworkExpectedWidth != w) || (di.mArtworkExpectedHeight != h)) {
+                        di.mArtworkExpectedWidth = w;
+                        di.mArtworkExpectedHeight = h;
+                        if (!sendArtworkToDisplay(di)) {
+                            displayIterator.remove();
+                        }
+                    }
+                }
+            }
+            if (!displayKnown) {
+                mRcDisplays.add(new DisplayInfoForClient(rcd, w, h));
+            }
         }
     }
 
+    /** pre-condition rcd != null */
     private void onUnplugDisplay(IRemoteControlDisplay rcd) {
         synchronized(mCacheLock) {
-            if ((mRcDisplay != null) && (mRcDisplay.asBinder().equals(rcd.asBinder()))) {
-                mRcDisplay = null;
-                mArtworkExpectedWidth = ARTWORK_DEFAULT_SIZE;
-                mArtworkExpectedHeight = ARTWORK_DEFAULT_SIZE;
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                    displayIterator.remove();
+                    return;
+                }
+            }
+        }
+    }
+
+    /** pre-condition rcd != null */
+    private void onUpdateDisplayArtworkSize(IRemoteControlDisplay rcd, int w, int h) {
+        synchronized(mCacheLock) {
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                if (di.mRcDisplay.asBinder().equals(rcd.asBinder()) &&
+                        ((di.mArtworkExpectedWidth != w) || (di.mArtworkExpectedHeight != h))) {
+                    di.mArtworkExpectedWidth = w;
+                    di.mArtworkExpectedHeight = h;
+                    if (!sendArtworkToDisplay(di)) {
+                        displayIterator.remove();
+                    }
+                    break;
+                }
             }
         }
     }
