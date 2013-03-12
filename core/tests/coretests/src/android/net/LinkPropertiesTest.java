@@ -197,4 +197,63 @@ public class LinkPropertiesTest extends TestCase {
         }
     }
 
+    private void assertAllRoutesHaveInterface(String iface, LinkProperties lp) {
+        for (RouteInfo r : lp.getRoutes()) {
+            assertEquals(iface, r.getInterface());
+        }
+    }
+
+    @SmallTest
+    public void testRouteInterfaces() {
+        LinkAddress prefix = new LinkAddress(
+            NetworkUtils.numericToInetAddress("2001:db8::"), 32);
+        InetAddress address = NetworkUtils.numericToInetAddress(ADDRV6);
+
+        // Add a route with no interface to a LinkProperties with no interface. No errors.
+        LinkProperties lp = new LinkProperties();
+        RouteInfo r = new RouteInfo(prefix, address, null);
+        lp.addRoute(r);
+        assertEquals(1, lp.getRoutes().size());
+        assertAllRoutesHaveInterface(null, lp);
+
+        // Add a route with an interface. Except an exception.
+        r = new RouteInfo(prefix, address, "wlan0");
+        try {
+          lp.addRoute(r);
+          fail("Adding wlan0 route to LP with no interface, expect exception");
+        } catch (IllegalArgumentException expected) {}
+
+        // Change the interface name. All the routes should change their interface name too.
+        lp.setInterfaceName("rmnet0");
+        assertAllRoutesHaveInterface("rmnet0", lp);
+
+        // Now add a route with the wrong interface. This causes an exception too.
+        try {
+          lp.addRoute(r);
+          fail("Adding wlan0 route to rmnet0 LP, expect exception");
+        } catch (IllegalArgumentException expected) {}
+
+        // If the interface name matches, the route is added.
+        lp.setInterfaceName("wlan0");
+        lp.addRoute(r);
+        assertEquals(2, lp.getRoutes().size());
+        assertAllRoutesHaveInterface("wlan0", lp);
+
+        // Routes with null interfaces are converted to wlan0.
+        r = RouteInfo.makeHostRoute(NetworkUtils.numericToInetAddress(ADDRV6), null);
+        lp.addRoute(r);
+        assertEquals(3, lp.getRoutes().size());
+        assertAllRoutesHaveInterface("wlan0", lp);
+
+        // Check comparisons work.
+        LinkProperties lp2 = new LinkProperties(lp);
+        assertAllRoutesHaveInterface("wlan0", lp);
+        assertEquals(0, lp.compareRoutes(lp2).added.size());
+        assertEquals(0, lp.compareRoutes(lp2).removed.size());
+
+        lp2.setInterfaceName("p2p0");
+        assertAllRoutesHaveInterface("p2p0", lp2);
+        assertEquals(3, lp.compareRoutes(lp2).added.size());
+        assertEquals(3, lp.compareRoutes(lp2).removed.size());
+    }
 }
