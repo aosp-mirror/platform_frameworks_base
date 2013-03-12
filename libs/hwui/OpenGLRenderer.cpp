@@ -276,6 +276,12 @@ void OpenGLRenderer::finish() {
     renderOverdraw();
     endTiling();
 
+    // When finish() is invoked on FBO 0 we've reached the end
+    // of the current frame
+    if (getTargetFbo() == 0) {
+        mCaches.pathCache.trim();
+    }
+
     if (!suppressErrorChecks()) {
 #if DEBUG_OPENGL
         GLenum status = GL_NO_ERROR;
