@@ -534,7 +534,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      *
      * <p>The connection may not be established right away, but will be
      * completed when the remote device is available. A
-     * {@link BluetoothGattCallback#onConnectionStateChange} callback will be
+     * {@link BluetoothGattServerCallback#onConnectionStateChange} callback will be
      * invoked when the connection state changes as a result of this function.
      *
      * <p>The autoConnect paramter determines whether to actively connect to
@@ -553,7 +553,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @return true, if the connection attempt was initiated successfully
      */
     public boolean connect(BluetoothDevice device, boolean autoConnect) {
-        if (DBG) Log.d(TAG, "connect: " + device.getAddress() + ", auto: " + autoConnect);
+        if (DBG) Log.d(TAG, "connect() - device: " + device.getAddress() + ", auto: " + autoConnect);
         if (mService == null || mServerIf == 0) return false;
 
         try {
