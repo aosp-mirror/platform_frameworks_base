@@ -15,6 +15,7 @@ next.link=viewgroup.html
 <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#drag">Drag an Object</a></li>
+  <li><a href="#pan">Drag to Pan</a></li>
   <li><a href="#scale">Use Touch to Perform Scaling</a></li>
 </ol>
 
@@ -25,20 +26,25 @@ next.link=viewgroup.html
     <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
     </li>
     <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
-    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
     <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
     <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
     <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
 </ul>
 
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/InteractiveChart.zip"
+class="button">Download the sample</a>
+ <p class="filename">InteractiveChart.zip</p>
+</div>
 
 </div>
 </div>
+
 <p>This lesson describes how to use touch gestures to drag and scale on-screen
 objects, using {@link android.view.View#onTouchEvent onTouchEvent()} to intercept
-touch events. Here is the original <a
-href="http://code.google.com/p/android-touchexample/">source code</a>
-for the examples used in this lesson.
+touch events. 
 </p>
 
 <h2 id="drag">Drag an Object</h2>
@@ -128,17 +134,15 @@ public boolean onTouchEvent(MotionEvent ev) {
         final float x = MotionEventCompat.getX(ev, pointerIndex);
         final float y = MotionEventCompat.getY(ev, pointerIndex);
             
-        // Only move if the ScaleGestureDetector isn't processing a gesture.
-        if (!mScaleDetector.isInProgress()) {
-            // Calculate the distance moved
-            final float dx = x - mLastTouchX;
-            final float dy = y - mLastTouchY;
+        // Calculate the distance moved
+        final float dx = x - mLastTouchX;
+        final float dy = y - mLastTouchY;
 
-            mPosX += dx;
-            mPosY += dy;
+        mPosX += dx;
+        mPosY += dy;
 
-            invalidate();
-        }
+        invalidate();
+
         // Remember this touch position for the next move event
         mLastTouchX = x;
         mLastTouchY = y;
@@ -175,6 +179,88 @@ public boolean onTouchEvent(MotionEvent ev) {
     return true;
 }</pre>
 
+<h2 id="pan">Drag to Pan</h2>
+
+<p>The previous section showed an example of dragging an object around the screen. Another 
+common scenario is <em>panning</em>, which is when a user's dragging motion causes scrolling 
+in both the x and y axes. The above snippet directly intercepted the {@link android.view.MotionEvent} 
+actions to implement dragging. The snippet in this section takes advantage of the platform's 
+built-in support for common gestures. It overrides 
+{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} in 
+{@link android.view.GestureDetector.SimpleOnGestureListener}.</p>
+
+<p>To provide a little more context, {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} 
+is called when a user is dragging his finger to pan the content. 
+{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} is only called when 
+a finger is down; as soon as the finger is lifted from the screen, the gesture either ends, 
+or a fling gesture is started (if the finger was moving with some speed just before it was lifted). 
+For more discussion of scrolling vs. flinging, see <a href="scroll.html">Animating a Scroll Gesture</a>.</p>
+
+<p>Here is the snippet for {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()}:
+
+
+<pre>// The current viewport. This rectangle represents the currently visible 
+// chart domain and range. 
+private RectF mCurrentViewport = 
+        new RectF(AXIS_X_MIN, AXIS_Y_MIN, AXIS_X_MAX, AXIS_Y_MAX);
+
+// The current destination rectangle (in pixel coordinates) into which the 
+// chart data should be drawn.
+private Rect mContentRect;
+
+private final GestureDetector.SimpleOnGestureListener mGestureListener
+            = new GestureDetector.SimpleOnGestureListener() {
+...
+
+&#64;Override
+public boolean onScroll(MotionEvent e1, MotionEvent e2, 
+            float distanceX, float distanceY) {
+    // Scrolling uses math based on the viewport (as opposed to math using pixels).
+    
+    // Pixel offset is the offset in screen pixels, while viewport offset is the
+    // offset within the current viewport. 
+    float viewportOffsetX = distanceX * mCurrentViewport.width() 
+            / mContentRect.width();
+    float viewportOffsetY = -distanceY * mCurrentViewport.height() 
+            / mContentRect.height();
+    ...
+    // Updates the viewport, refreshes the display. 
+    setViewportBottomLeft(
+            mCurrentViewport.left + viewportOffsetX,
+            mCurrentViewport.bottom + viewportOffsetY);
+    ...
+    return true;
+}</pre>
+
+<p>The implementation of {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} 
+scrolls the viewport in response to the touch gesture:</p>
+
+<pre>
+/**
+ * Sets the current viewport (defined by mCurrentViewport) to the given
+ * X and Y positions. Note that the Y value represents the topmost pixel position, 
+ * and thus the bottom of the mCurrentViewport rectangle.
+ */
+private void setViewportBottomLeft(float x, float y) {
+    /*
+     * Constrains within the scroll range. The scroll range is simply the viewport 
+     * extremes (AXIS_X_MAX, etc.) minus the viewport size. For example, if the 
+     * extremes were 0 and 10, and the viewport size was 2, the scroll range would 
+     * be 0 to 8.
+     */
+
+    float curWidth = mCurrentViewport.width();
+    float curHeight = mCurrentViewport.height();
+    x = Math.max(AXIS_X_MIN, Math.min(x, AXIS_X_MAX - curWidth));
+    y = Math.max(AXIS_Y_MIN + curHeight, Math.min(y, AXIS_Y_MAX));
+
+    mCurrentViewport.set(x, y - curHeight, x + curWidth, y);
+
+    // Invalidates the View to update the display.
+    ViewCompat.postInvalidateOnAnimation(this);
+}
+</pre>
+
 <h2 id="scale">Use Touch to Perform Scaling</h2>
 
 <p>As discussed in <a href="detector.html">Detecting Common Gestures</a>,
@@ -191,10 +277,10 @@ Android provides
 {@link android.view.ScaleGestureDetector.SimpleOnScaleGestureListener} 
 as a helper class that you can extend if you don’t care about all of the reported events.</p>
 
-<p>Here is a snippet that gives you the basic idea of how to perform scaling.
-Here is the original <a
-href="http://code.google.com/p/android-touchexample/">source code</a>
-for the examples.</p>
+
+<h3>Basic scaling example</h3>
+
+<p>Here is a snippet that illustrates the basic ingredients involved in scaling.</p>
 
 <pre>private ScaleGestureDetector mScaleDetector;
 private float mScaleFactor = 1.f;
@@ -238,3 +324,88 @@ private class ScaleListener
         return true;
     }
 }</pre>
+
+
+
+
+<h3>More complex scaling example</h3>
+<p>Here is a more complex example from the {@code InteractiveChart} sample provided with this class. 
+The {@code InteractiveChart} sample supports both scrolling (panning) and scaling with multiple fingers,
+using the {@link android.view.ScaleGestureDetector} "span" 
+({@link android.view.ScaleGestureDetector#getCurrentSpanX getCurrentSpanX/Y}) and 
+"focus" ({@link android.view.ScaleGestureDetector#getFocusX getFocusX/Y}) features:</p>
+
+<pre>&#64;Override
+private RectF mCurrentViewport = 
+        new RectF(AXIS_X_MIN, AXIS_Y_MIN, AXIS_X_MAX, AXIS_Y_MAX);
+private Rect mContentRect;
+private ScaleGestureDetector mScaleGestureDetector;
+...
+public boolean onTouchEvent(MotionEvent event) {
+    boolean retVal = mScaleGestureDetector.onTouchEvent(event);
+    retVal = mGestureDetector.onTouchEvent(event) || retVal;
+    return retVal || super.onTouchEvent(event);
+}
+
+/**
+ * The scale listener, used for handling multi-finger scale gestures.
+ */
+private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
+        = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    /**
+     * This is the active focal point in terms of the viewport. Could be a local
+     * variable but kept here to minimize per-frame allocations.
+     */
+    private PointF viewportFocus = new PointF();
+    private float lastSpanX;
+    private float lastSpanY;
+
+    // Detects that new pointers are going down.
+    &#64;Override
+    public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
+        lastSpanX = ScaleGestureDetectorCompat.
+                getCurrentSpanX(scaleGestureDetector);
+        lastSpanY = ScaleGestureDetectorCompat.
+                getCurrentSpanY(scaleGestureDetector);
+        return true;
+    }
+
+    &#64;Override
+    public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+
+        float spanX = ScaleGestureDetectorCompat.
+                getCurrentSpanX(scaleGestureDetector);
+        float spanY = ScaleGestureDetectorCompat.
+                getCurrentSpanY(scaleGestureDetector);
+
+        float newWidth = lastSpanX / spanX * mCurrentViewport.width();
+        float newHeight = lastSpanY / spanY * mCurrentViewport.height();
+
+        float focusX = scaleGestureDetector.getFocusX();
+        float focusY = scaleGestureDetector.getFocusY();
+        // Makes sure that the chart point is within the chart region.
+        // See the sample for the implementation of hitTest().
+        hitTest(scaleGestureDetector.getFocusX(),
+                scaleGestureDetector.getFocusY(),
+                viewportFocus);
+
+        mCurrentViewport.set(
+                viewportFocus.x
+                        - newWidth * (focusX - mContentRect.left)
+                        / mContentRect.width(),
+                viewportFocus.y
+                        - newHeight * (mContentRect.bottom - focusY)
+                        / mContentRect.height(),
+                0,
+                0);
+        mCurrentViewport.right = mCurrentViewport.left + newWidth;
+        mCurrentViewport.bottom = mCurrentViewport.top + newHeight;     
+        ...
+        // Invalidates the View to update the display.
+        ViewCompat.postInvalidateOnAnimation(InteractiveLineGraphView.this);
+
+        lastSpanX = spanX;
+        lastSpanY = spanY;
+        return true;
+    }
+};</pre>
