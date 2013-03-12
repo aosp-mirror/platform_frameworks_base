@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="3352888186674981593">"KeyguardTestActivity"</string>
+    <string name="secure_app_name" msgid="7955498742816868049">"UnifiedCamera"</string>
+    <string name="none_menu_item" msgid="6156747285687551424">"عدم وجود امنیت"</string>
+    <string name="pin_menu_item" msgid="1179756433268962311">"پین"</string>
+    <string name="password_menu_item" msgid="1959980499662153160">"گذرواژه"</string>
+    <string name="pattern_menu_item" msgid="2987798152175140249">"الگو"</string>
+    <string name="sim_pin_menu_item" msgid="3962286639645084880">"پین سیم کارت"</string>
+    <string name="sim_puk_menu_item" msgid="6190044133008392974">"PUK سیم کارت"</string>
+    <string name="add_widget_item" msgid="279702152366857415">"انتخاب ابزارک..."</string>
+    <string name="on_screen_turned_off" msgid="8761396329770508367">"onScreenTurnedOff"</string>
+    <string name="on_screen_turned_on" msgid="9222926818030728999">"onScreenTurnedOn"</string>
+    <string name="do_keyguard" msgid="9210936977823118796">"doKeyguard"</string>
+    <string name="verify_unlock" msgid="8508722273329306968">"verifyUnlock"</string>
+</resources>

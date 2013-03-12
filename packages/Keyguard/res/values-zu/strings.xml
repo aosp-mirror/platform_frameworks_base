@@ -30,36 +30,21 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Ikhodi ye-PIN engalungile!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Ukuvula, chofoza Menyu bese 0."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Ukuzama Kokuvula Ubuso Okuningi kudluliwe"</string>
-    <!-- no translation found for keyguard_charged (3272223906073492454) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in (8117572000639998388) -->
-    <skip />
-    <!-- no translation found for keyguard_low_battery (8143808018719173859) -->
-    <skip />
-    <!-- no translation found for keyguard_instructions_when_pattern_disabled (1332288268600329841) -->
-    <skip />
-    <!-- no translation found for keyguard_network_locked_message (9169717779058037168) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message_short (494980561304211931) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (1445849005909260039) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (3481110395508637643) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (5210891509995942250) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (5968985489463870358) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (8340813989586622356) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (5892940909699723544) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (6875773413306380902) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (3747232467471801633) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (7975221805033614426) -->
-    <skip />
+    <string name="keyguard_charged" msgid="3272223906073492454">"Kushajiwe"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Iyashaja, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Xhuma ishaja yakho."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Chofoza imenyu ukuze uvule."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Inethiwekhi ikhiyiwe"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Alikho ikhadi le-SIM"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Alikho ikhadi le-SIM kuthebulethi."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Alikho ikhadi le-SIM kufoni."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Faka ikhadi le-SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Ikhadi le-SIM alitholakali noma alifundeki. Faka ikhadi le-SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Ikhadi le-SIM elingasebenziseki."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"I-SIM khadi yakho ikhutshazwe unomphela."\n" Xhumana nomhlinzeki wakho wokuxhumana okungenazintambo ukuze uthole enye i-SIM khadi."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Ikhadi le-SIM likhiyiwe."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Ikhadi le-SIM likhiywe nge-PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Ivula ikhadi le-SIM..."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. iwijethi %2$d ye-%3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Engeza iwijethi."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Akunalutho"</string>
@@ -81,16 +66,11 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ukuvula ngephasiwedi."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Indawo yephethini."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Indawo yokushelelisa."</string>
-    <!-- no translation found for keyguard_accessibility_transport_prev_description (1337286538318543555) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_next_description (7073928300444909320) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_pause_description (8455979545295224302) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_play_description (8146417789511154044) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_stop_description (7656358482980912216) -->
-    <skip />
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Inkinombo yethrekhi yangaphambilini"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Inkinobho yethrekhi elandelayo"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Inkinobho yokumiswa isikhashana"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Inkinobho yokudlala"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Inkinobho yokumisa"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -149,16 +129,10 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google"\n\n" Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Susa"</string>
-    <!-- no translation found for keyguard_transport_prev_description (8229108430245669854) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_next_description (4299258300283778305) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_pause_description (5093073338238310224) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_play_description (2924628863741150956) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_stop_description (3084179324810575787) -->
-    <skip />
-    <!-- no translation found for keyguard_carrier_default (8700650403054042153) -->
-    <skip />
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Inkinombo yethrekhi yangaphambilini"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Inkinobho yethrekhi elandelayo"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Inkinobho yokumiswa isikhashana"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Inkinobho yokudlala"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Inkinobho yokumisa"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ayikho isevisi."</string>
 </resources>

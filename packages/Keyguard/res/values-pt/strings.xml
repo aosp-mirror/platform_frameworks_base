@@ -30,36 +30,21 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorreto."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, pressione Menu e, em seguida, 0."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
-    <!-- no translation found for keyguard_charged (3272223906073492454) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in (8117572000639998388) -->
-    <skip />
-    <!-- no translation found for keyguard_low_battery (8143808018719173859) -->
-    <skip />
-    <!-- no translation found for keyguard_instructions_when_pattern_disabled (1332288268600329841) -->
-    <skip />
-    <!-- no translation found for keyguard_network_locked_message (9169717779058037168) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message_short (494980561304211931) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (1445849005909260039) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (3481110395508637643) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (5210891509995942250) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (5968985489463870358) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (8340813989586622356) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (5892940909699723544) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (6875773413306380902) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (3747232467471801633) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (7975221805033614426) -->
-    <skip />
+    <string name="keyguard_charged" msgid="3272223906073492454">"Carregado"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Carregando, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Conecte seu carregador."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Pressione \"Menu\" para desbloquear."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Rede bloqueada"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Sem cartão SIM"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Não há um cartão SIM no tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Não há um cartão SIM no telefone."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Insira um cartão SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"O cartão SIM não foi inserido ou não é possível lê-lo. Insira um cartão SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Cartão SIM inutilizável."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"O cartão SIM foi desativado permanentemente."\n"Entre em contato com seu provedor de serviços sem fio para receber outro cartão SIM."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"O cartão SIM está bloqueado."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"O cartão SIM está bloqueado pelo PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Desbloqueando o cartão SIM…"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d de %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Adicionar widget"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Vazio"</string>
@@ -81,16 +66,11 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueio com senha."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área do padrão."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Área de deslize."</string>
-    <!-- no translation found for keyguard_accessibility_transport_prev_description (1337286538318543555) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_next_description (7073928300444909320) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_pause_description (8455979545295224302) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_play_description (8146417789511154044) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_stop_description (7656358482980912216) -->
-    <skip />
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Botão \"Faixa anterior\""</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Botão \"Próxima faixa\""</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Botão \"Pausar\""</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Botão \"Reproduzir\""</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Botão \"Parar\""</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -149,16 +129,10 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear."\n\n" Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remover"</string>
-    <!-- no translation found for keyguard_transport_prev_description (8229108430245669854) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_next_description (4299258300283778305) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_pause_description (5093073338238310224) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_play_description (2924628863741150956) -->
-    <skip />
-    <!-- no translation found for keyguard_transport_stop_description (3084179324810575787) -->
-    <skip />
-    <!-- no translation found for keyguard_carrier_default (8700650403054042153) -->
-    <skip />
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Botão \"Faixa anterior\""</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Botão \"Próxima faixa\""</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Botão \"Pausar\""</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Botão \"Reproduzir\""</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Botão \"Parar\""</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sem serviço."</string>
 </resources>
