@@ -1948,8 +1948,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 !mBootCompleted) {
             return;
         }
-        final long ident = Binder.clearCallingIdentity();
         ScoClient client = getScoClient(cb, true);
+        // The calling identity must be cleared before calling ScoClient.incCount().
+        // inCount() calls requestScoState() which in turn can call BluetoothHeadset APIs
+        // and this must be done on behalf of system server to make sure permissions are granted.
+        // The caller identity must be cleared after getScoClient() because it is needed if a new
+        // client is created.
+        final long ident = Binder.clearCallingIdentity();
         client.incCount();
         Binder.restoreCallingIdentity(ident);
     }
@@ -1960,8 +1965,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 !mBootCompleted) {
             return;
         }
-        final long ident = Binder.clearCallingIdentity();
         ScoClient client = getScoClient(cb, false);
+        // The calling identity must be cleared before calling ScoClient.decCount().
+        // decCount() calls requestScoState() which in turn can call BluetoothHeadset APIs
+        // and this must be done on behalf of system server to make sure permissions are granted.
+        final long ident = Binder.clearCallingIdentity();
         if (client != null) {
             client.decCount();
         }
