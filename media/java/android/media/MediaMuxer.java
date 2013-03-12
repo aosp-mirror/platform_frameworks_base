@@ -91,6 +91,8 @@ final public class MediaMuxer {
     private static native void nativeStop(int nativeObject);
     private static native int nativeAddTrack(int nativeObject, String[] keys,
             Object[] values);
+    private static native void nativeSetOrientationHint(int nativeObject,
+            int degrees);
     private static native void nativeWriteSampleData(int nativeObject,
             int trackIndex, ByteBuffer byteBuf,
             int offset, int size, long presentationTimeUs, int flags);
@@ -109,7 +111,7 @@ final public class MediaMuxer {
     private int mNativeObject;
 
     /**
-     * Constructor
+     * Constructor.
      * Creates a media muxer that writes to the specified path.
      * @param path The path of the output media file.
      * @param format The format of the output media file.
@@ -135,6 +137,31 @@ final public class MediaMuxer {
             if (fos != null) {
                 fos.close();
             }
+        }
+    }
+
+    /**
+     * Sets the orientation hint for output video playback.
+     * <p>This method should be called before {@link #start}. Calling this
+     * method will not rotate the video frame when muxer is generating the file,
+     * but add a composition matrix containing the rotation angle in the output
+     * video if the output format is
+     * {@link OutputFormat#MUXER_OUTPUT_MPEG_4} so that a video player can
+     * choose the proper orientation for playback. Note that some video players
+     * may choose to ignore the composition matrix in a video during playback.
+     * By default, the rotation degree is 0.</p>
+     * @param degrees the angle to be rotated clockwise in degrees.
+     * The supported angles are 0, 90, 180, and 270 degrees.
+     */
+    public void setOrientationHint(int degrees) {
+        if (degrees != 0 && degrees != 90  && degrees != 180 && degrees != 270) {
+            throw new IllegalArgumentException("Unsupported angle: " + degrees);
+        }
+        if (mState == MUXER_STATE_INITIALIZED) {
+            nativeSetOrientationHint(mNativeObject, degrees);
+        } else {
+            throw new IllegalStateException("Can't set rotation degrees due" +
+                    " to wrong state.");
         }
     }
 

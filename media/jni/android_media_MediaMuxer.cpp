@@ -146,6 +146,24 @@ static jint android_media_MediaMuxer_native_setup(
     return int(muxer.get());
 }
 
+static void android_media_MediaMuxer_setOrientationHint(
+        JNIEnv *env, jclass clazz, jint nativeObject, jint degrees) {
+    sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
+    if (muxer == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Muxer was not set up correctly");
+        return;
+    }
+    status_t err = muxer->setOrientationHint(degrees);
+
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to set orientation hint");
+        return;
+    }
+
+}
+
 static void android_media_MediaMuxer_start(JNIEnv *env, jclass clazz,
                                            jint nativeObject) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
@@ -194,6 +212,9 @@ static JNINativeMethod gMethods[] = {
 
     { "nativeAddTrack", "(I[Ljava/lang/String;[Ljava/lang/Object;)I",
         (void *)android_media_MediaMuxer_addTrack },
+
+    { "nativeSetOrientationHint", "(II)V",
+        (void *)android_media_MediaMuxer_setOrientationHint},
 
     { "nativeStart", "(I)V", (void *)android_media_MediaMuxer_start},
 
