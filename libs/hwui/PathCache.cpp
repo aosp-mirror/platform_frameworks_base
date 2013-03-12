@@ -31,69 +31,32 @@ namespace uirenderer {
 // Path precaching
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PathCache::PrecacheThread::threadLoop() {
-    mSignal.wait();
-    Vector<Task> tasks;
-    {
-        Mutex::Autolock l(mLock);
-        tasks = mTasks;
-        mTasks.clear();
-    }
-
-    Caches& caches = Caches::getInstance();
-    uint32_t maxSize = caches.maxTextureSize;
-
-    ATRACE_BEGIN("pathPrecache");
-    for (size_t i = 0; i < tasks.size(); i++) {
-        const Task& task = tasks.itemAt(i);
-
-        float left, top, offset;
-        uint32_t width, height;
-        PathCache::computePathBounds(task.path, task.paint, left, top, offset, width, height);
-
-        if (width <= maxSize && height <= maxSize) {
-            SkBitmap* bitmap = new SkBitmap();
-
-            PathTexture* texture = task.texture;
-            texture->left = left;
-            texture->top = top;
-            texture->offset = offset;
-            texture->width = width;
-            texture->height = height;
-
-            PathCache::drawPath(task.path, task.paint, *bitmap, left, top, offset, width, height);
-
-            texture->future()->produce(bitmap);
-        } else {
-            task.texture->future()->produce(NULL);
-        }
-    }
-    ATRACE_END();
-    return true;
+PathCache::PathProcessor::PathProcessor(Caches& caches):
+        TaskProcessor<SkBitmap*>(&caches.tasks), mMaxTextureSize(caches.maxTextureSize) {
 }
 
-void PathCache::PrecacheThread::addTask(PathTexture* texture, SkPath* path, SkPaint* paint) {
-    if (!isRunning()) {
-        run("libhwui:pathPrecache", PRIORITY_DEFAULT);
+void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
+    sp<PathTask> t = static_cast<PathTask* >(task.get());
+    ATRACE_NAME("pathPrecache");
+
+    float left, top, offset;
+    uint32_t width, height;
+    PathCache::computePathBounds(t->path, t->paint, left, top, offset, width, height);
+
+    PathTexture* texture = t->texture;
+    texture->left = left;
+    texture->top = top;
+    texture->offset = offset;
+    texture->width = width;
+    texture->height = height;
+
+    if (width <= mMaxTextureSize && height <= mMaxTextureSize) {
+        SkBitmap* bitmap = new SkBitmap();
+        PathCache::drawPath(t->path, t->paint, *bitmap, left, top, offset, width, height);
+        t->setResult(bitmap);
+    } else {
+        t->setResult(NULL);
     }
-
-    Task task;
-    task.texture = texture;
-    task.path = path;
-    task.paint = paint;
-
-    Mutex::Autolock l(mLock);
-    mTasks.add(task);
-    mSignal.signal();
-}
-
-void PathCache::PrecacheThread::exit() {
-    {
-        Mutex::Autolock l(mLock);
-        mTasks.clear();
-    }
-    requestExit();
-    mSignal.signal();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,11 +64,10 @@ void PathCache::PrecacheThread::exit() {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathCache::PathCache(): ShapeCache<PathCacheEntry>("path",
-        PROPERTY_PATH_CACHE_SIZE, DEFAULT_PATH_CACHE_SIZE), mThread(new PrecacheThread()) {
+        PROPERTY_PATH_CACHE_SIZE, DEFAULT_PATH_CACHE_SIZE) {
 }
 
 PathCache::~PathCache() {
-    mThread->exit();
 }
 
 void PathCache::remove(SkPath* path) {
@@ -165,17 +127,18 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     } else {
         // A bitmap is attached to the texture, this means we need to
         // upload it as a GL texture
-        if (texture->future() != NULL) {
+        const sp<Task<SkBitmap*> >& task = texture->task();
+        if (task != NULL) {
             // But we must first wait for the worker thread to be done
             // producing the bitmap, so let's wait
-            SkBitmap* bitmap = texture->future()->get();
+            SkBitmap* bitmap = task->getResult();
             if (bitmap) {
                 addTexture(entry, bitmap, texture);
-                texture->clearFuture();
+                texture->clearTask();
             } else {
                 ALOGW("Path too large to be rendered into a texture (%dx%d)",
                         texture->width, texture->height);
-                texture->clearFuture();
+                texture->clearTask();
                 texture = NULL;
                 mCache.remove(entry);
             }
@@ -189,6 +152,10 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
 }
 
 void PathCache::precache(SkPath* path, SkPaint* paint) {
+    if (!Caches::getInstance().tasks.canRunTasks()) {
+        return;
+    }
+
     path = getSourcePath(path);
 
     PathCacheEntry entry(path, paint);
@@ -205,7 +172,9 @@ void PathCache::precache(SkPath* path, SkPaint* paint) {
     if (generate) {
         // It is important to specify the generation ID so we do not
         // attempt to precache the same path several times
-        texture = createTexture(0.0f, 0.0f, 0.0f, 0, 0, path->getGenerationID(), true);
+        texture = createTexture(0.0f, 0.0f, 0.0f, 0, 0, path->getGenerationID());
+        sp<PathTask> task = new PathTask(path, paint, texture);
+        texture->setTask(task);
 
         // During the precaching phase we insert path texture objects into
         // the cache that do not point to any GL texture. They are instead
@@ -215,7 +184,11 @@ void PathCache::precache(SkPath* path, SkPaint* paint) {
         // asks for a path texture. This is also when the cache limit will
         // be enforced.
         mCache.put(entry, texture);
-        mThread->addTask(texture, path, paint);
+
+        if (mProcessor == NULL) {
+            mProcessor = new PathProcessor(Caches::getInstance());
+        }
+        mProcessor->add(task);
     }
 }
 

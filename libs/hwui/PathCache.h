@@ -23,6 +23,8 @@
 #include "Debug.h"
 #include "ShapeCache.h"
 #include "thread/Signal.h"
+#include "thread/Task.h"
+#include "thread/TaskProcessor.h"
 
 class SkPaint;
 class SkPath;
@@ -100,32 +102,33 @@ public:
     void precache(SkPath* path, SkPaint* paint);
 
 private:
-    class PrecacheThread: public Thread {
+    class PathTask: public Task<SkBitmap*> {
     public:
-        PrecacheThread(): mSignal(Condition::WAKE_UP_ONE) { }
+        PathTask(SkPath* path, SkPaint* paint, PathTexture* texture):
+            path(path), paint(paint), texture(texture) {
+        }
 
-        void addTask(PathTexture* texture, SkPath* path, SkPaint* paint);
-        void exit();
+        ~PathTask() {
+            delete future()->get();
+        }
 
-    private:
-        struct Task {
-            PathTexture* texture;
-            SkPath* path;
-            SkPaint* paint;
-        };
-
-        virtual bool threadLoop();
-
-        // Lock for the list of tasks
-        Mutex mLock;
-        Vector<Task> mTasks;
-
-        // Signal used to wake up the thread when a new
-        // task is available in the list
-        mutable Signal mSignal;
+        SkPath* path;
+        SkPaint* paint;
+        PathTexture* texture;
     };
 
-    sp<PrecacheThread> mThread;
+    class PathProcessor: public TaskProcessor<SkBitmap*> {
+    public:
+        PathProcessor(Caches& caches);
+        ~PathProcessor() { }
+
+        virtual void onProcess(const sp<Task<SkBitmap*> >& task);
+
+    private:
+        uint32_t mMaxTextureSize;
+    };
+
+    sp<PathProcessor> mProcessor;
     Vector<SkPath*> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache

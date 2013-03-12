@@ -30,12 +30,11 @@
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
 #include <utils/Trace.h>
-#include <utils/CallStack.h>
 
 #include "Debug.h"
 #include "Properties.h"
 #include "Texture.h"
-#include "thread/Future.h"
+#include "thread/Task.h"
 
 namespace android {
 namespace uirenderer {
@@ -62,14 +61,8 @@ struct PathTexture: public Texture {
     PathTexture(): Texture() {
     }
 
-    PathTexture(bool hasFuture): Texture() {
-        if (hasFuture) {
-            mFuture = new Future<SkBitmap*>();
-        }
-    }
-
     ~PathTexture() {
-        clearFuture();
+        clearTask();
     }
 
     /**
@@ -85,19 +78,22 @@ struct PathTexture: public Texture {
      */
     float offset;
 
-    sp<Future<SkBitmap*> > future() const {
-        return mFuture;
+    sp<Task<SkBitmap*> > task() const {
+        return mTask;
     }
 
-    void clearFuture() {
-        if (mFuture != NULL) {
-            delete mFuture->get();
-            mFuture.clear();
+    void setTask(const sp<Task<SkBitmap*> >& task) {
+        mTask = task;
+    }
+
+    void clearTask() {
+        if (mTask != NULL) {
+            mTask.clear();
         }
     }
 
 private:
-    sp<Future<SkBitmap*> > mFuture;
+    sp<Task<SkBitmap*> > mTask;
 }; // struct PathTexture
 
 /**
@@ -551,8 +547,8 @@ protected:
     }
 
     static PathTexture* createTexture(float left, float top, float offset,
-            uint32_t width, uint32_t height, uint32_t id, bool hasFuture = false) {
-        PathTexture* texture = new PathTexture(hasFuture);
+            uint32_t width, uint32_t height, uint32_t id) {
+        PathTexture* texture = new PathTexture();
         texture->left = left;
         texture->top = top;
         texture->offset = offset;
