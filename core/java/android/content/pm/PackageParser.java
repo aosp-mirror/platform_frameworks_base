@@ -1941,6 +1941,28 @@ public class PackageParser {
                     return false;
                 }
 
+            } else if (tagName.equals("library")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestLibrary);
+
+                // Note: don't allow this value to be a reference to a resource
+                // that may change.
+                String lname = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestLibrary_name);
+
+                sa.recycle();
+
+                if (lname != null) {
+                    if (owner.libraryNames == null) {
+                        owner.libraryNames = new ArrayList<String>();
+                    }
+                    if (!owner.libraryNames.contains(lname)) {
+                        owner.libraryNames.add(lname.intern());
+                    }
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+
             } else if (tagName.equals("uses-library")) {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestUsesLibrary);
@@ -3182,7 +3204,8 @@ public class PackageParser {
         public final ArrayList<Boolean> requestedPermissionsRequired = new ArrayList<Boolean>();
 
         public ArrayList<String> protectedBroadcasts;
-        
+
+        public ArrayList<String> libraryNames = null;
         public ArrayList<String> usesLibraries = null;
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;

@@ -691,6 +691,17 @@ public abstract class PackageManager {
     public static final int DELETE_ALL_USERS = 0x00000002;
 
     /**
+     * Flag parameter for {@link #deletePackage} to indicate that, if you are calling
+     * uninstall on a system that has been updated, then don't do the normal process
+     * of uninstalling the update and rolling back to the older system version (which
+     * needs to happen for all users); instead, just mark the app as uninstalled for
+     * the current user.
+     *
+     * @hide
+     */
+    public static final int DELETE_SYSTEM_APP = 0x00000004;
+
+    /**
      * Return code for when package deletion succeeds. This is passed to the
      * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
      * succeeded in deleting the package.
