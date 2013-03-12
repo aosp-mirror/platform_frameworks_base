@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_SHAPE_CACHE_H
 #define ANDROID_HWUI_SHAPE_CACHE_H
 
+#define ATRACE_TAG ATRACE_TAG_VIEW
+
 #include <GLES2/gl2.h>
 
 #include <SkBitmap.h>
@@ -27,10 +29,13 @@
 
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
+#include <utils/Trace.h>
+#include <utils/CallStack.h>
 
 #include "Debug.h"
 #include "Properties.h"
 #include "Texture.h"
+#include "thread/Future.h"
 
 namespace android {
 namespace uirenderer {
@@ -57,6 +62,16 @@ struct PathTexture: public Texture {
     PathTexture(): Texture() {
     }
 
+    PathTexture(bool hasFuture): Texture() {
+        if (hasFuture) {
+            mFuture = new Future<SkBitmap*>();
+        }
+    }
+
+    ~PathTexture() {
+        clearFuture();
+    }
+
     /**
      * Left coordinate of the path bounds.
      */
@@ -69,6 +84,20 @@ struct PathTexture: public Texture {
      * Offset to draw the path at the correct origin.
      */
     float offset;
+
+    sp<Future<SkBitmap*> > future() const {
+        return mFuture;
+    }
+
+    void clearFuture() {
+        if (mFuture != NULL) {
+            delete mFuture->get();
+            mFuture.clear();
+        }
+    }
+
+private:
+    sp<Future<SkBitmap*> > mFuture;
 }; // struct PathTexture
 
 /**
@@ -449,6 +478,52 @@ public:
      */
     uint32_t getSize();
 
+    /**
+     * Trims the contents of the cache, removing items until it's under its
+     * specified limit.
+     *
+     * Trimming is used for caches that support pre-caching from a worker
+     * thread. During pre-caching the maximum limit of the cache can be
+     * exceeded for the duration of the frame. It is therefore required to
+     * trim the cache at the end of the frame to keep the total amount of
+     * memory used under control.
+     *
+     * Only the PathCache currently supports pre-caching.
+     */
+    void trim();
+
+    static void computePathBounds(const SkPath* path, const SkPaint* paint,
+            float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
+        const SkRect& bounds = path->getBounds();
+        computeBounds(bounds, paint, left, top, offset, width, height);
+    }
+
+    static void computeBounds(const SkRect& bounds, const SkPaint* paint,
+            float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
+        const float pathWidth = fmax(bounds.width(), 1.0f);
+        const float pathHeight = fmax(bounds.height(), 1.0f);
+
+        left = bounds.fLeft;
+        top = bounds.fTop;
+
+        offset = (int) floorf(fmax(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
+
+        width = uint32_t(pathWidth + offset * 2.0 + 0.5);
+        height = uint32_t(pathHeight + offset * 2.0 + 0.5);
+    }
+
+    static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
+            float left, float top, float offset, uint32_t width, uint32_t height) {
+        initBitmap(bitmap, width, height);
+
+        SkPaint pathPaint(*paint);
+        initPaint(pathPaint);
+
+        SkCanvas canvas(bitmap);
+        canvas.translate(-left + offset, -top + offset);
+        canvas.drawPath(*path, pathPaint);
+    }
+
 protected:
     PathTexture* addTexture(const Entry& entry, const SkPath *path, const SkPaint* paint);
     PathTexture* addTexture(const Entry& entry, SkBitmap* bitmap);
@@ -460,16 +535,50 @@ protected:
      */
     void purgeCache(uint32_t width, uint32_t height);
 
-    void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height);
-    void initPaint(SkPaint& paint);
-
-    bool checkTextureSize(uint32_t width, uint32_t height);
-
     PathTexture* get(Entry entry) {
         return mCache.get(entry);
     }
 
     void removeTexture(PathTexture* texture);
+
+    bool checkTextureSize(uint32_t width, uint32_t height) {
+        if (width > mMaxTextureSize || height > mMaxTextureSize) {
+            ALOGW("Shape %s too large to be rendered into a texture (%dx%d, max=%dx%d)",
+                    mName, width, height, mMaxTextureSize, mMaxTextureSize);
+            return false;
+        }
+        return true;
+    }
+
+    static PathTexture* createTexture(float left, float top, float offset,
+            uint32_t width, uint32_t height, uint32_t id, bool hasFuture = false) {
+        PathTexture* texture = new PathTexture(hasFuture);
+        texture->left = left;
+        texture->top = top;
+        texture->offset = offset;
+        texture->width = width;
+        texture->height = height;
+        texture->generation = id;
+        return texture;
+    }
+
+    static void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
+        bitmap.setConfig(SkBitmap::kA8_Config, width, height);
+        bitmap.allocPixels();
+        bitmap.eraseColor(0);
+    }
+
+    static void initPaint(SkPaint& paint) {
+        // Make sure the paint is opaque, color, alpha, filter, etc.
+        // will be applied later when compositing the alpha8 texture
+        paint.setColor(0xff000000);
+        paint.setAlpha(255);
+        paint.setColorFilter(NULL);
+        paint.setMaskFilter(NULL);
+        paint.setShader(NULL);
+        SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
+        SkSafeUnref(paint.setXfermode(mode));
+    }
 
     LruCache<Entry, PathTexture*> mCache;
     uint32_t mSize;
@@ -617,23 +726,6 @@ void ShapeCache<Entry>::removeTexture(PathTexture* texture) {
     }
 }
 
-void computePathBounds(const SkPath* path, const SkPaint* paint,
-        float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
-void computeBounds(const SkRect& bounds, const SkPaint* paint,
-        float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
-
-static PathTexture* createTexture(float left, float top, float offset,
-        uint32_t width, uint32_t height, uint32_t id) {
-    PathTexture* texture = new PathTexture;
-    texture->left = left;
-    texture->top = top;
-    texture->offset = offset;
-    texture->width = width;
-    texture->height = height;
-    texture->generation = id;
-    return texture;
-}
-
 template<class Entry>
 void ShapeCache<Entry>::purgeCache(uint32_t width, uint32_t height) {
     const uint32_t size = width * height;
@@ -646,38 +738,16 @@ void ShapeCache<Entry>::purgeCache(uint32_t width, uint32_t height) {
 }
 
 template<class Entry>
-void ShapeCache<Entry>::initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
-    bitmap.setConfig(SkBitmap::kA8_Config, width, height);
-    bitmap.allocPixels();
-    bitmap.eraseColor(0);
-}
-
-template<class Entry>
-void ShapeCache<Entry>::initPaint(SkPaint& paint) {
-    // Make sure the paint is opaque, color, alpha, filter, etc.
-    // will be applied later when compositing the alpha8 texture
-    paint.setColor(0xff000000);
-    paint.setAlpha(255);
-    paint.setColorFilter(NULL);
-    paint.setMaskFilter(NULL);
-    paint.setShader(NULL);
-    SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
-    SkSafeUnref(paint.setXfermode(mode));
-}
-
-template<class Entry>
-bool ShapeCache<Entry>::checkTextureSize(uint32_t width, uint32_t height) {
-    if (width > mMaxTextureSize || height > mMaxTextureSize) {
-        ALOGW("Shape %s too large to be rendered into a texture (%dx%d, max=%dx%d)",
-                mName, width, height, mMaxTextureSize, mMaxTextureSize);
-        return false;
+void ShapeCache<Entry>::trim() {
+    while (mSize > mMaxSize) {
+        mCache.removeOldest();
     }
-    return true;
 }
 
 template<class Entry>
 PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *path,
         const SkPaint* paint) {
+    ATRACE_CALL();
 
     float left, top, offset;
     uint32_t width, height;
@@ -688,16 +758,10 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     purgeCache(width, height);
 
     SkBitmap bitmap;
-    initBitmap(bitmap, width, height);
+    drawPath(path, paint, bitmap, left, top, offset, width, height);
 
-    SkPaint pathPaint(*paint);
-    initPaint(pathPaint);
-
-    SkCanvas canvas(bitmap);
-    canvas.translate(-left + offset, -top + offset);
-    canvas.drawPath(*path, pathPaint);
-
-    PathTexture* texture = createTexture(left, top, offset, width, height, path->getGenerationID());
+    PathTexture* texture = createTexture(left, top, offset, width, height,
+            path->getGenerationID());
     addTexture(entry, &bitmap, texture);
 
     return texture;
