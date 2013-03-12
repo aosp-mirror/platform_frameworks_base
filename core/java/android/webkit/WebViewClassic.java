@@ -5419,7 +5419,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         ClipData clipData = cm.getPrimaryClip();
         if (clipData != null) {
             ClipData.Item clipItem = clipData.getItemAt(0);
-            CharSequence pasteText = clipItem.getText();
+            CharSequence pasteText = clipItem.coerceToText(mContext);
             if (mInputConnection != null) {
                 mInputConnection.replaceSelection(pasteText);
             }
