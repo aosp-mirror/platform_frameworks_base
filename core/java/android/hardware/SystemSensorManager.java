@@ -82,9 +82,9 @@ public class SystemSensorManager extends SensorManager {
                 } while (i>0);
 
                 sSensorEventPool = new Pools.SynchronizedPool<SensorEvent>(
-                        Math.max(sFullSensorsList.size()*2, 1));
+                        sFullSensorsList.size()*2);
                 sTriggerEventPool = new Pools.SynchronizedPool<TriggerEvent>(
-                        Math.max(sFullSensorsList.size()*2, 1));
+                        sFullSensorsList.size()*2);
             }
         }
     }
