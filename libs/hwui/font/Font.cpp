@@ -15,10 +15,12 @@
  */
 
 #define LOG_TAG "OpenGLRenderer"
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <cutils/compiler.h>
 
 #include <utils/JenkinsHash.h>
+#include <utils/Trace.h>
 
 #include <SkGlyph.h>
 #include <SkUtils.h>
@@ -261,11 +263,8 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
 }
 
 CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool precaching) {
-    CachedGlyphInfo* cachedGlyph = NULL;
-    ssize_t index = mCachedGlyphs.indexOfKey(textUnit);
-    if (index >= 0) {
-        cachedGlyph = mCachedGlyphs.valueAt(index);
-
+    CachedGlyphInfo* cachedGlyph = mCachedGlyphs.valueFor(textUnit);
+    if (cachedGlyph) {
         // Is the glyph still in texture cache?
         if (!cachedGlyph->mIsValid) {
             const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit,
@@ -346,11 +345,13 @@ void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t le
 }
 
 void Font::precache(SkPaint* paint, const char* text, int numGlyphs) {
+    ATRACE_NAME("precacheText");
+
     if (numGlyphs == 0 || text == NULL) {
         return;
     }
-    int glyphsCount = 0;
 
+    int glyphsCount = 0;
     while (glyphsCount < numGlyphs) {
         glyph_t glyph = GET_GLYPH(text);
 
@@ -360,7 +361,6 @@ void Font::precache(SkPaint* paint, const char* text, int numGlyphs) {
         }
 
         CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph, true);
-
         glyphsCount++;
     }
 }
