@@ -93,6 +93,14 @@ public:
         return *this;
     }
 
+    friend bool operator==(const Matrix4& a, const Matrix4& b) {
+        return !memcmp(&a.data[0], &b.data[0], 16 * sizeof(float));
+    }
+
+    friend bool operator!=(const Matrix4& a, const Matrix4& b) {
+        return !(a == b);
+    }
+
     void loadIdentity();
 
     void load(const float* v);
