@@ -810,9 +810,15 @@ public abstract class TextToSpeechService extends Service {
                 return TextToSpeech.ERROR;
             }
 
+            // In test env, ParcelFileDescriptor instance may be EXACTLY the same
+            // one that is used by client. And it will be closed by a client, thus
+            // preventing us from writing anything to it.
+            final ParcelFileDescriptor sameFileDescriptor = ParcelFileDescriptor.adoptFd(
+                    fileDescriptor.detachFd());
+
             SpeechItem item = new SynthesisToFileOutputStreamSpeechItem(caller,
                     Binder.getCallingUid(), Binder.getCallingPid(), params, text,
-                    new ParcelFileDescriptor.AutoCloseOutputStream(fileDescriptor));
+                    new ParcelFileDescriptor.AutoCloseOutputStream(sameFileDescriptor));
             return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
         }
 
