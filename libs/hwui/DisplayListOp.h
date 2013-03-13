@@ -1169,6 +1169,7 @@ public:
             break;
         }
         mLocalBounds.set(x, mY + metrics.fTop, x + length, mY + metrics.fBottom);
+        memset(&mPrecacheTransform.data[0], 0xff, 16 * sizeof(float));
     }
 
     /*
@@ -1179,9 +1180,11 @@ public:
     virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
         SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
-        const bool pureTranslate = state.mMatrix.isPureTranslate();
-        const mat4 transform = renderer.findBestFontTransform(state.mMatrix);
-        fontRenderer.precache(paint, mText, mCount, transform);
+        const mat4& transform = renderer.findBestFontTransform(state.mMatrix);
+        if (mPrecacheTransform != transform) {
+            fontRenderer.precache(paint, mText, mCount, transform);
+            mPrecacheTransform = transform;
+        }
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
@@ -1210,6 +1213,7 @@ private:
     float mY;
     const float* mPositions;
     float mLength;
+    mat4 mPrecacheTransform;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
