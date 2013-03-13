@@ -1256,6 +1256,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * interfaces that are cheaper and/or unnatural for a table-like
      * model.
      *
+     * <p class="note"><strong>WARNING:</strong> The framework does no permission checking
+     * on this entry into the content provider besides the basic ability for the application
+     * to get access to the provider at all.  For example, it has no idea whether the call
+     * being executed may read or write data in the provider, so can't enforce those
+     * individual permissions.  Any implementation of this method <strong>must</strong>
+     * do its own permission checks on incoming calls to make sure they are allowed.</p>
+     *
      * @param method method name to call.  Opaque to framework, but should not be {@code null}.
      * @param arg provider-defined String argument.  May be {@code null}.
      * @param extras provider-defined Bundle argument.  May be {@code null}.
