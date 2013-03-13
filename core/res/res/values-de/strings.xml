@@ -329,7 +329,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Ermöglicht der App, die Benutzeroberfläche zur Bestätigung der vollständigen Sicherung zu starten. Kann nicht von jeder App verwendet werden."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"Nicht autorisierte Fenster anzeigen"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Ermöglicht der App die Erstellung von Fenstern, die von der Benutzeroberfläche des internen Systems verwendet werden. Nicht für normale Apps vorgesehen."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"Über andere Apps zeichnen"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"Über anderen Apps einblenden"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Ermöglicht der App, über andere Apps oder Teile der Benutzeroberfläche zu zeichnen. Dies kann sich auf die Oberfläche in jeder App auswirken oder die erwartete Darstellung in anderen Apps verändern."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"Allgemeine Animationsgeschwindigkeit einstellen"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Ermöglicht der App, die allgemeine Animationsgeschwindigkeit (langsamere oder schnellere Animationen) jederzeit anzupassen."</string>

@@ -751,7 +751,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Syster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Make/maka"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Anpassad"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Startsida"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Hem"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbete"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Övrigt"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ange PIN-kod"</string>
