@@ -482,19 +482,9 @@ public final class WifiService extends IWifiManager.Stub {
      *         started or is already in the queue.
      */
     public boolean isScanningAlwaysAvailable() {
-        // TODO: implement
-        return true;
+        enforceAccessPermission();
+        return mSettingsStore.isScanAlwaysAvailable();
     }
-
-    /**
-     * @param enable {@code true} to enable, {@code false} to disable.
-     * @return {@code true} if the enable/disable operation was
-     *         started or is already in the queue.
-     */
-    public void setScanningAlwaysAvailable(boolean enable) {
-        // TODO: implement
-    }
-
 
     /**
      * see {@link android.net.wifi.WifiManager#disconnect()}
