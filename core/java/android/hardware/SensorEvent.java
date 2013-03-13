@@ -17,9 +17,11 @@
 package android.hardware;
 
 /**
+ * <p>
  * This class represents a {@link android.hardware.Sensor Sensor} event and
  * holds informations such as the sensor's type, the time-stamp, accuracy and of
  * course the sensor's {@link SensorEvent#values data}.
+ * </p>
  *
  * <p>
  * <u>Definition of the coordinate system used by the SensorEvent API.</u>
@@ -65,9 +67,15 @@ public class SensorEvent {
      * Sensor.TYPE_ACCELEROMETER}:</h4> All values are in SI units (m/s^2)
      * 
      * <ul>
-     * <li> values[0]: Acceleration minus Gx on the x-axis </li>
-     * <li> values[1]: Acceleration minus Gy on the y-axis </li>
-     * <li> values[2]: Acceleration minus Gz on the z-axis </li>
+     * <p>
+     * values[0]: Acceleration minus Gx on the x-axis
+     * </p>
+     * <p>
+     * values[1]: Acceleration minus Gy on the y-axis
+     * </p>
+     * <p>
+     * values[2]: Acceleration minus Gz on the z-axis
+     * </p>
      * </ul>
      * 
      * <p>
@@ -157,9 +165,15 @@ public class SensorEvent {
      * definition of positive rotation and does not agree with the definition of
      * roll given earlier.
      * <ul>
-     * <li> values[0]: Angular speed around the x-axis </li>
-     * <li> values[1]: Angular speed around the y-axis </li>
-     * <li> values[2]: Angular speed around the z-axis </li>
+     * <p>
+     * values[0]: Angular speed around the x-axis
+     * </p>
+     * <p>
+     * values[1]: Angular speed around the y-axis
+     * </p>
+     * <p>
+     * values[2]: Angular speed around the z-axis
+     * </p>
      * </ul>
      * <p>
      * Typically the output of the gyroscope is integrated over time to
@@ -219,19 +233,22 @@ public class SensorEvent {
      * </p>
      * <h4>{@link android.hardware.Sensor#TYPE_LIGHT Sensor.TYPE_LIGHT}:</h4>
      * <ul>
-     * <li>values[0]: Ambient light level in SI lux units </li>
+     * <p>
+     * values[0]: Ambient light level in SI lux units
      * </ul>
      * 
      * <h4>{@link android.hardware.Sensor#TYPE_PRESSURE Sensor.TYPE_PRESSURE}:</h4>
      * <ul>
-     * <li>values[0]: Atmospheric pressure in hPa (millibar) </li>
+     * <p>
+     * values[0]: Atmospheric pressure in hPa (millibar)
      * </ul>
      *
      * <h4>{@link android.hardware.Sensor#TYPE_PROXIMITY Sensor.TYPE_PROXIMITY}:
      * </h4>
      * 
      * <ul>
-     * <li>values[0]: Proximity sensor distance measured in centimeters </li>
+     * <p>
+     * values[0]: Proximity sensor distance measured in centimeters
      * </ul>
      * 
      * <p>
@@ -287,23 +304,39 @@ public class SensorEvent {
      * </p>
      *
      * <ul>
-     * <li> values[0]: x*sin(&#952/2) </li>
-     * <li> values[1]: y*sin(&#952/2) </li>
-     * <li> values[2]: z*sin(&#952/2) </li>
-     * <li> values[3]: cos(&#952/2) <i>(optional: only if value.length = 4)</i> </li>
+     * <p>
+     * values[0]: x*sin(&#952/2)
+     * </p>
+     * <p>
+     * values[1]: y*sin(&#952/2)
+     * </p>
+     * <p>
+     * values[2]: z*sin(&#952/2)
+     * </p>
+     * <p>
+     * values[3]: cos(&#952/2) <i>(optional: only if value.length = 4)</i>
+     * </p>
      * </ul>
      *
      * <h4>{@link android.hardware.Sensor#TYPE_ORIENTATION
      * Sensor.TYPE_ORIENTATION}:</h4> All values are angles in degrees.
      * 
      * <ul>
-     * <li> values[0]: Azimuth, angle between the magnetic north direction and the
+     * <p>
+     * values[0]: Azimuth, angle between the magnetic north direction and the
      * y-axis, around the z-axis (0 to 359). 0=North, 90=East, 180=South,
-     * 270=West </li>
-     * <li> values[1]: Pitch, rotation around x-axis (-180 to 180), with positive
-     * values when the z-axis moves <b>toward</b> the y-axis. </li>
-     * <li> values[2]: Roll, rotation around y-axis (-90 to 90), with positive values
-     * when the x-axis moves <b>toward</b> the z-axis. </li>
+     * 270=West
+     * </p>
+     * 
+     * <p>
+     * values[1]: Pitch, rotation around x-axis (-180 to 180), with positive
+     * values when the z-axis moves <b>toward</b> the y-axis.
+     * </p>
+     * 
+     * <p>
+     * values[2]: Roll, rotation around y-axis (-90 to 90), with positive values
+     * when the x-axis moves <b>toward</b> the z-axis.
+     * </p>
      * </ul>
      * 
      * <p>
@@ -331,7 +364,9 @@ public class SensorEvent {
      * <h4>{@link android.hardware.Sensor#TYPE_RELATIVE_HUMIDITY
      * Sensor.TYPE_RELATIVE_HUMIDITY}:</h4>
      * <ul>
-     * <li> values[0]: Relative ambient air humidity in percent </li>
+     * <p>
+     * values[0]: Relative ambient air humidity in percent
+     * </p>
      * </ul>
      * <p>
      * When relative ambient air humidity and ambient temperature are
@@ -388,58 +423,21 @@ public class SensorEvent {
      * </h4>
      *
      * <ul>
-     * <li> values[0]: ambient (room) temperature in degree Celsius.</li>
+     * <p>
+     * values[0]: ambient (room) temperature in degree Celsius.
      * </ul>
      *
      * @see SensorEvent
      * @see GeomagneticField
-     *
-     * <h4>{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD_UNCALIBRATED} </h4>
-     * All values are in micro-Tesla (uT) and measure the ambient magnetic field
-     * in the X, Y and Z axis.
-     * <p>
-     * No periodic calibration is performed (ie: there are no discontinuities
-     * in the data stream while using this sensor). Assumptions that the the
-     * magnetic field is due to the Earth's poles is avoided. Factory calibration
-     * and temperature compensation is still performed.
-     * </p>
-     *
-     * <h4> {@link android.hardware.Sensor#TYPE_GYROSCOPE_UNCALIBRATED} </h4>
-     * All values are in radians/second and measure the rate of rotation
-     * around the X, Y and Z axis. An estimation of the drift on each axis is
-     * reported as well.
-     * <p>
-     * No gyro-drift compensation is performed. Factory calibration and temperature
-     * compensation is still applied to the rate of rotation (angular speeds).
-     * </p>
-     * <p>
-     * The coordinate system is the same as is used for the
-     * {@link android.hardware.Sensor#TYPE_ACCELEROMETER}
-     * Rotation is positive in the counter-clockwise direction (right-hand rule).
-     * That is, an observer looking from some positive location on the x, y or z axis
-     * at a device positioned on the origin would report positive rotation if the device
-     * appeared to be rotating counter clockwise.
-     * The range would at least be 17.45 rad/s (ie: ~1000 deg/s).
-     * <ul>
-     * <li> values[0] : angular speed (w/o drift compensation) around the X axis in rad/s </li>
-     * <li> values[1] : angular speed (w/o drift compensation) around the Y axis in rad/s </li>
-     * <li> values[2] : angular speed (w/o drift compensation) around the Z axis in rad/s </li>
-     * <li> values[3] : estimated drift around X axis in rad/s </li>
-     * <li> values[4] : estimated drift around Y axis in rad/s </li>
-     * <li> values[5] : estimated drift around Z axis in rad/s </li>
-     * </ul>
-     * </p>
-     * <h4></h4>
-     * <h4> Pro Tip: Always use the length of the values array while performing operations
-     * on it. In earlier versions, this used to be always 3 which has changed now. </h4>
      */
+
     public final float[] values;
 
     /**
      * The sensor that generated this event. See
      * {@link android.hardware.SensorManager SensorManager} for details.
      */
-    public Sensor sensor;
+   public Sensor sensor;
 
     /**
      * The accuracy of this event. See {@link android.hardware.SensorManager
@@ -447,10 +445,12 @@ public class SensorEvent {
      */
     public int accuracy;
 
+
     /**
      * The time in nanosecond at which the event happened
      */
     public long timestamp;
+
 
     SensorEvent(int size) {
         values = new float[size];
