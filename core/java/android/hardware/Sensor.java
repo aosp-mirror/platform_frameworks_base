@@ -114,89 +114,10 @@ public final class Sensor {
     /** A constant describing an ambient temperature sensor type */
     public static final int TYPE_AMBIENT_TEMPERATURE = 13;
 
-    /**
-     * A constant describing a magnetic field uncalibrated sensor type. See
-     * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
-     * details.
-     * <p>
-     * No periodic calibration is performed (ie: there are no discontinuities
-     * in the data stream while using this sensor). Assumptions that the
-     * magnetic field is due to the Earth's poles is avoided. Factory calibration
-     * and temperature compensation is still performed.
-     * </p>
-     */
-    public static final int TYPE_MAGNETIC_FIELD_UNCALIBRATED = 14;
-
-    /**
-     * Identical to {@link #TYPE_ROTATION_VECTOR} except that it doesn't
-     * use the geomagnetic field. Therefore the Y axis doesn't
-     * point north, but instead to some other reference, that reference is
-     * allowed to drift by the same order of magnitude as the gyroscope
-     * drift around the Z axis.
-     * <p>
-     * In the ideal case, a phone rotated and returning to the same real-world
-     * orientation should report the same game rotation vector
-     * (without using the earth's geomagnetic field). However, the orientation
-     * may drift somewhat over time.
-     * </p>
-     */
-
-    public static final int TYPE_GAME_ROTATION_VECTOR = 15;
-
-    /**
-     * A constant describing a gyroscope uncalibrated sensor type. See
-     * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
-     * details.
-     * <p>
-     * No gyro-drift compensation is performed.
-     * Factory calibration and temperature compensation is still applied
-     * to the rate of rotation (angular speeds).
-     * </p>
-     */
-    public static final int TYPE_GYROSCOPE_UNCALIBRATED = 16;
-
-    /**
-     * A constant describing the significant motion trigger sensor.
-     * See {@link android.hardware.SensorEvent#values} for more details.
-     * <p>
-     * It triggers when an event occurs and then automatically disables
-     * itself. The sensor continues to operate while the device is asleep
-     * and will automatically wake the device to notify when significant
-     * motion is detected. The application does not need to hold any wake
-     * locks for this sensor to trigger.
-     * </p>
-     */
-    public static final int TYPE_SIGNIFICANT_MOTION = 17;
-
-    /**
+    /** 
      * A constant describing all sensor types.
      */
     public static final int TYPE_ALL = -1;
-
-    /* Reporting mode constants for sensors. Each sensor will have exactly one
-       reporting mode associated with it. */
-    // Events are reported at a constant rate.
-    static int REPORTING_MODE_CONTINUOUS = 1;
-
-    // Events are reported only when the value changes.
-    static int REPORTING_MODE_ON_CHANGE = 2;
-
-    // Upon detection of an event, the sensor deactivates itself and then sends a single event.
-    static int REPORTING_MODE_ONE_SHOT = 3;
-
-    // Note: This needs to be updated, whenever a new sensor is added.
-    private static int[] sSensorReportingModes = {
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_ON_CHANGE, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_ON_CHANGE, REPORTING_MODE_ON_CHANGE, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_ON_CHANGE,
-            REPORTING_MODE_ON_CHANGE, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_ONE_SHOT };
-
-    static int getReportingMode(Sensor sensor) {
-        // mType starts from offset 1.
-        return sSensorReportingModes[sensor.mType - 1];
-    }
 
     /* Some of these fields are set only by the native bindings in
      * SensorManager.
@@ -210,6 +131,7 @@ public final class Sensor {
     private float   mResolution;
     private float   mPower;
     private int     mMinDelay;
+
 
     Sensor() {
     }
