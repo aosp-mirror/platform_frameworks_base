@@ -68,7 +68,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
                 try {
                     // Ensure the cursor window is filled.
                     cursor.getCount();
-                    registerContentObserver(cursor, mObserver);
+                    cursor.registerContentObserver(mObserver);
                 } catch (RuntimeException ex) {
                     cursor.close();
                     throw ex;
@@ -91,14 +91,6 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
                 mCancellationSignal.cancel();
             }
         }
-    }
-
-    /**
-     * Registers an observer to get notifications from the content provider
-     * when the cursor needs to be refreshed.
-     */
-    void registerContentObserver(Cursor cursor, ContentObserver observer) {
-        cursor.registerContentObserver(mObserver);
     }
 
     /* Runs on the UI thread */
