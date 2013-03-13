@@ -77,7 +77,7 @@ public class DhcpStateMachine extends StateMachine {
         RENEW
     };
 
-    private String mInterfaceName;
+    private final String mInterfaceName;
     private boolean mRegisteredForPreDhcpNotification = false;
 
     private static final int BASE = Protocol.BASE_DHCP;
@@ -349,6 +349,7 @@ public class DhcpStateMachine extends StateMachine {
     private boolean runDhcp(DhcpAction dhcpAction) {
         boolean success = false;
         DhcpResults dhcpResults = new DhcpResults();
+        dhcpResults.linkProperties.mLogMe = true;
 
         if (dhcpAction == DhcpAction.START) {
             /* Stop any existing DHCP daemon before starting new */
