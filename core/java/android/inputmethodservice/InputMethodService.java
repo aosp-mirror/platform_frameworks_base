@@ -39,6 +39,7 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.Slog;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -351,6 +352,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * Take care of attaching the given window token provided by the system.
          */
         public void attachToken(IBinder token) {
+            Slog.i(TAG, "attachToken: Existing token=" + mToken + " new token=" + token);
             if (mToken == null) {
                 mToken = token;
                 mWindow.setToken(token);
@@ -417,7 +419,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * Handle a request by the system to show the soft input area.
          */
         public void showSoftInput(int flags, ResultReceiver resultReceiver) {
-            if (DEBUG) Log.v(TAG, "showSoftInput()");
+            if (true || DEBUG) Slog.v(TAG, "showSoftInput()");
             boolean wasVis = isInputViewShown();
             mShowInputFlags = 0;
             if (onShowInputRequested(flags, false)) {
@@ -1388,7 +1390,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     public void showWindow(boolean showInput) {
-        if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
+        if (true || DEBUG) Slog.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
                 + " mWindowAdded=" + mWindowAdded
                 + " mWindowCreated=" + mWindowCreated
