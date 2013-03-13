@@ -31,7 +31,6 @@ package android.hardware;
  *
  * <pre class="prettyprint">
  * class TriggerListener extends TriggerEventListener {
- *     @Override
  *     public void onTrigger(TriggerEvent event) {
  *          // Do Work.
  *
