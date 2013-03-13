@@ -1947,20 +1947,16 @@ public final class ViewRootImpl implements ViewParent,
             // Would not normally trigger another layout, so just let it pass through as usual
             return true;
         }
+        if (!mLayoutRequesters.contains(view)) {
+            mLayoutRequesters.add(view);
+        }
         if (!mHandlingLayoutInLayoutRequest) {
-            if (!mLayoutRequesters.contains(view)) {
-                mLayoutRequesters.add(view);
-            }
+            // Let the request proceed normally; it will be processed in a second layout pass
+            // if necessary
             return true;
         } else {
-            Log.w("View", "requestLayout() called by " + view + " during second layout pass: " +
-                    "posting to next frame");
-            view.post(new Runnable() {
-                @Override
-                public void run() {
-                    view.requestLayout();
-                }
-            });
+            // Don't let the request proceed during the second layout pass.
+            // It will post to the next frame instead.
             return false;
         }
     }
@@ -1988,64 +1984,117 @@ public final class ViewRootImpl implements ViewParent,
                 // If no layout-request flags are set on the requesting views, there is no problem.
                 // If some requests are still pending, then we need to clear those flags and do
                 // a full request/measure/layout pass to handle this situation.
-
-                // Check state of layout flags for all requesters
-                ArrayList<View> mValidLayoutRequesters = null;
-                for (int i = 0; i < numViewsRequestingLayout; ++i) {
-                    View view = mLayoutRequesters.get(i);
-                    if ((view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) == View.PFLAG_FORCE_LAYOUT) {
-                        while (view != null && view.mAttachInfo != null && view.mParent != null &&
-                                (view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) != 0) {
-                            if ((view.mViewFlags & View.VISIBILITY_MASK) != View.GONE) {
-                                // Only trigger new requests for non-GONE views
-                                Log.w(TAG, "requestLayout() improperly called during " +
-                                        "layout: running second layout pass for " + view);
-                                if (mValidLayoutRequesters == null) {
-                                    mValidLayoutRequesters = new ArrayList<View>();
-                                }
-                                mValidLayoutRequesters.add(view);
-                                break;
-                            }
-                            if (view.mParent instanceof View) {
-                                view = (View) view.mParent;
-                            } else {
-                                view = null;
-                            }
-                        }
-                    }
-                }
-                if (mValidLayoutRequesters != null) {
-                    // Clear flags throughout hierarchy, walking up from each flagged requester
-                    for (int i = 0; i < numViewsRequestingLayout; ++i) {
-                        View view = mLayoutRequesters.get(i);
-                        while (view != null &&
-                                (view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) != 0) {
-                            view.mPrivateFlags &= ~View.PFLAG_FORCE_LAYOUT;
-                            if (view.mParent instanceof View) {
-                                view = (View) view.mParent;
-                            } else {
-                                view = null;
-                            }
-                        }
-                    }
-                    // Process fresh layout requests, then measure and layout
+                ArrayList<View> validLayoutRequesters = getValidLayoutRequesters(mLayoutRequesters,
+                        false);
+                if (validLayoutRequesters != null) {
+                    // Set this flag to indicate that any further requests are happening during
+                    // the second pass, which may result in posting those requests to the next
+                    // frame instead
                     mHandlingLayoutInLayoutRequest = true;
-                    int numValidRequests = mValidLayoutRequesters.size();
+
+                    // Process fresh layout requests, then measure and layout
+                    int numValidRequests = validLayoutRequesters.size();
                     for (int i = 0; i < numValidRequests; ++i) {
-                        mValidLayoutRequesters.get(i).requestLayout();
+                        final View view = validLayoutRequesters.get(i);
+                        Log.w("View", "requestLayout() improperly called by " + view +
+                                " during layout: running second layout pass");
+                        view.requestLayout();
                     }
                     measureHierarchy(host, lp, mView.getContext().getResources(),
                             desiredWindowWidth, desiredWindowHeight);
                     mInLayout = true;
                     host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+
                     mHandlingLayoutInLayoutRequest = false;
+
+                    // Check the valid requests again, this time without checking/clearing the
+                    // layout flags, since requests happening during the second pass get noop'd
+                    validLayoutRequesters = getValidLayoutRequesters(mLayoutRequesters, true);
+                    if (validLayoutRequesters != null) {
+                        final ArrayList<View> finalRequesters = validLayoutRequesters;
+                        // Post second-pass requests to the next frame
+                        getRunQueue().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                int numValidRequests = finalRequesters.size();
+                                for (int i = 0; i < numValidRequests; ++i) {
+                                    final View view = finalRequesters.get(i);
+                                    Log.w("View", "requestLayout() improperly called by " + view +
+                                            " during second layout pass: posting in next frame");
+                                    view.requestLayout();
+                                }
+                            }
+                        });
+                    }
                 }
-                mLayoutRequesters.clear();
+
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
         mInLayout = false;
+    }
+
+    /**
+     * This method is called during layout when there have been calls to requestLayout() during
+     * layout. It walks through the list of views that requested layout to determine which ones
+     * still need it, based on visibility in the hierarchy and whether they have already been
+     * handled (as is usually the case with ListView children).
+     *
+     * @param layoutRequesters The list of views that requested layout during layout
+     * @param secondLayoutRequests Whether the requests were issued during the second layout pass.
+     * If so, the FORCE_LAYOUT flag was not set on requesters.
+     * @return A list of the actual views that still need to be laid out.
+     */
+    private ArrayList<View> getValidLayoutRequesters(ArrayList<View> layoutRequesters,
+            boolean secondLayoutRequests) {
+
+        int numViewsRequestingLayout = layoutRequesters.size();
+        ArrayList<View> validLayoutRequesters = null;
+        for (int i = 0; i < numViewsRequestingLayout; ++i) {
+            View view = layoutRequesters.get(i);
+            if (view != null && view.mAttachInfo != null && view.mParent != null &&
+                    (secondLayoutRequests || (view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) ==
+                            View.PFLAG_FORCE_LAYOUT)) {
+                boolean gone = false;
+                View parent = view;
+                // Only trigger new requests for views in a non-GONE hierarchy
+                while (parent != null) {
+                    if ((parent.mViewFlags & View.VISIBILITY_MASK) == View.GONE) {
+                        gone = true;
+                        break;
+                    }
+                    if (parent.mParent instanceof View) {
+                        parent = (View) parent.mParent;
+                    } else {
+                        parent = null;
+                    }
+                }
+                if (!gone) {
+                    if (validLayoutRequesters == null) {
+                        validLayoutRequesters = new ArrayList<View>();
+                    }
+                    validLayoutRequesters.add(view);
+                }
+            }
+        }
+        if (!secondLayoutRequests) {
+            // If we're checking the layout flags, then we need to clean them up also
+            for (int i = 0; i < numViewsRequestingLayout; ++i) {
+                View view = layoutRequesters.get(i);
+                while (view != null &&
+                        (view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) != 0) {
+                    view.mPrivateFlags &= ~View.PFLAG_FORCE_LAYOUT;
+                    if (view.mParent instanceof View) {
+                        view = (View) view.mParent;
+                    } else {
+                        view = null;
+                    }
+                }
+            }
+        }
+        layoutRequesters.clear();
+        return validLayoutRequesters;
     }
 
     public void requestTransparentRegion(View child) {
