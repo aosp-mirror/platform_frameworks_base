@@ -27,6 +27,8 @@
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
+#include <binder/Parcel.h>
+
 #include <gui/Surface.h>
 #include <gui/SurfaceControl.h>
 #include <gui/GLConsumer.h>
@@ -334,10 +336,15 @@ static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
     if (self != NULL) {
         self->decStrong(&sRefBaseOwner);
     }
-    sp<Surface> sur(Surface::readFromParcel(*parcel));
-    if (sur != NULL) {
+
+    sp<Surface> sur;
+    sp<IGraphicBufferProducer> gbp(
+            interface_cast<IGraphicBufferProducer>(parcel->readStrongBinder()));
+    if (gbp != NULL) {
+        sur = new Surface(gbp);
         sur->incStrong(&sRefBaseOwner);
     }
+
     return int(sur.get());
 }
 
@@ -349,7 +356,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         return;
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
-    Surface::writeToParcel(self, parcel);
+    parcel->writeStrongBinder( self != 0 ? self->getIGraphicBufferProducer()->asBinder() : NULL);
 }
 
 // ----------------------------------------------------------------------------
