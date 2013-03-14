@@ -151,11 +151,6 @@ static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
     sur->decStrong(&sRefBaseOwner);
 }
 
-static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
-    sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    sur->decStrong(&sRefBaseOwner);
-}
-
 static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jint nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     return isSurfaceValid(sur) ? JNI_TRUE : JNI_FALSE;
@@ -379,8 +374,6 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeCreateFromSurfaceTexture },
     {"nativeRelease", "(I)V",
             (void*)nativeRelease },
-    {"nativeDestroy", "(I)V",
-            (void*)nativeDestroy },
     {"nativeIsValid", "(I)Z",
             (void*)nativeIsValid },
     {"nativeIsConsumerRunningBehind", "(I)Z",
