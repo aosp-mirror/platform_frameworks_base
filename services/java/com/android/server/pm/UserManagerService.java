@@ -26,7 +26,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.RestrictionEntry;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -619,6 +618,10 @@ public class UserManagerService extends IUserManager.Stub {
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_INSTALL_APPS);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
+                writeBoolean(serializer, restrictions,
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -735,6 +738,10 @@ public class UserManagerService extends IUserManager.Stub {
                         readBoolean(parser, restrictions, UserManager.DISALLOW_INSTALL_APPS);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
+                        readBoolean(parser, restrictions,
+                                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                     }
                 }
             }
