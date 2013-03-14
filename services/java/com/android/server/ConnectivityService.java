@@ -96,6 +96,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
@@ -153,6 +154,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean mLockdownEnabled;
     private LockdownVpnTracker mLockdownTracker;
+
+    private Nat464Xlat mClat;
 
     /** Lock around {@link #mUidRules} and {@link #mMeteredIfaces}. */
     private Object mRulesLock = new Object();
@@ -544,9 +547,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mVpn = new Vpn(mContext, mVpnCallback, mNetd);
         mVpn.startMonitoring(mContext, mTrackerHandler);
 
+        mClat = new Nat464Xlat(mContext, mNetd, this, mTrackerHandler);
+
         try {
             mNetd.registerObserver(mTethering);
             mNetd.registerObserver(mDataActivityObserver);
+            mNetd.registerObserver(mClat);
         } catch (RemoteException e) {
             loge("Error registering observer :" + e);
         }
@@ -2273,6 +2279,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         }
                     }
                 }
+            }
+        }
+
+        // Update 464xlat state.
+        // TODO: Move to handleConnect()
+        NetworkStateTracker tracker = mNetTrackers[netType];
+        if (mClat.requiresClat(netType, tracker)) {
+            if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
+                mClat.startClat(tracker);
+            } else {
+                mClat.stopClat();
             }
         }
 
