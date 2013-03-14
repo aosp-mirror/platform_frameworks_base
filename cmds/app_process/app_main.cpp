@@ -12,6 +12,7 @@
 #include <utils/Log.h>
 #include <cutils/process_name.h>
 #include <cutils/memory.h>
+#include <cutils/properties.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <sys/personality.h>
 
@@ -143,11 +144,15 @@ int main(int argc, char* const argv[])
      * This breaks some programs which improperly embed
      * an out of date copy of Android's linker.
      */
-    int current = personality(0xFFFFFFFF);
-    if ((current & ADDR_COMPAT_LAYOUT) == 0) {
-        personality(current | ADDR_COMPAT_LAYOUT);
-        execv("/system/bin/app_process", argv);
-        return -1;
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.kernel.qemu", value, "");
+    if (strcmp(value, "1") != 0) {
+        int current = personality(0xFFFFFFFF);
+        if ((current & ADDR_COMPAT_LAYOUT) == 0) {
+            personality(current | ADDR_COMPAT_LAYOUT);
+            execv("/system/bin/app_process", argv);
+            return -1;
+        }
     }
 #endif
 
