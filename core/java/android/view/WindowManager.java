@@ -272,7 +272,7 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_APPLICATION_PANEL  = FIRST_SUB_WINDOW;
     
         /**
-         * Window type: window for showing media (e.g. video).  These windows
+         * Window type: window for showing media (such as video).  These windows
          * are displayed behind their attached window.
          */
         public static final int TYPE_APPLICATION_MEDIA  = FIRST_SUB_WINDOW+1;
@@ -592,14 +592,14 @@ public interface WindowManager extends ViewManager {
         /** Window flag: this window can never receive touch events. */
         public static final int FLAG_NOT_TOUCHABLE      = 0x00000010;
         
-        /** Window flag: Even when this window is focusable (its
-         * {@link #FLAG_NOT_FOCUSABLE is not set), allow any pointer events
+        /** Window flag: even when this window is focusable (its
+         * {@link #FLAG_NOT_FOCUSABLE} is not set), allow any pointer events
          * outside of the window to be sent to the windows behind it.  Otherwise
          * it will consume all pointer events itself, regardless of whether they
          * are inside of the window. */
         public static final int FLAG_NOT_TOUCH_MODAL    = 0x00000020;
         
-        /** Window flag: When set, if the device is asleep when the touch
+        /** Window flag: when set, if the device is asleep when the touch
          * screen is pressed, you will receive this first touch event.  Usually
          * the first touch event is consumed by the system since the user can
          * not see what they are pressing on.
@@ -611,7 +611,7 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_KEEP_SCREEN_ON     = 0x00000080;
         
         /** Window flag: place the window within the entire screen, ignoring
-         *  decorations around the border (a.k.a. the status bar).  The
+         *  decorations around the border (such as the status bar).  The
          *  window must correctly position its contents to take the screen
          *  decoration into account.  This flag is normally set for you
          *  by Window as described in {@link Window#setFlags}. */
@@ -621,7 +621,7 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_LAYOUT_NO_LIMITS   = 0x00000200;
         
         /**
-         * Window flag: Hide all screen decorations (e.g. status bar) while
+         * Window flag: hide all screen decorations (such as the status bar) while
          * this window is displayed.  This allows the window to use the entire
          * display space for itself -- the status bar will be hidden when
          * an app window with this flag set is on the top layer.
@@ -639,8 +639,8 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_FULLSCREEN      = 0x00000400;
         
-        /** Window flag: Override {@link #FLAG_FULLSCREEN and force the
-         *  screen decorations (such as status bar) to be shown. */
+        /** Window flag: override {@link #FLAG_FULLSCREEN} and force the
+         *  screen decorations (such as the status bar) to be shown. */
         public static final int FLAG_FORCE_NOT_FULLSCREEN   = 0x00000800;
         
         /** Window flag: turn on dithering when compositing this window to
@@ -649,7 +649,7 @@ public interface WindowManager extends ViewManager {
         @Deprecated
         public static final int FLAG_DITHER             = 0x00001000;
         
-        /** Window flag: Treat the content of the window as secure, preventing
+        /** Window flag: treat the content of the window as secure, preventing
          * it from appearing in screenshots or from being viewed on non-secure
          * displays.
          *
