@@ -1031,4 +1031,14 @@
 
     <!-- Flag indicating if the speed up audio on mt call code should be executed -->
     <bool name="config_speed_up_audio_on_mt_calls">false</bool>
+
+    <!-- Class name of the framework account picker activity.
+         Can be customized for other product types -->
+    <string name="config_chooseAccountActivity"
+            >android/android.accounts.ChooseAccountActivity</string>
+    <!-- Class name of the account type and account picker activity.
+         Can be customized for other product types -->
+    <string name="config_chooseTypeAndAccountActivity"
+            >android/android.accounts.ChooseTypeAndAccountActivity</string>
+
 </resources>
