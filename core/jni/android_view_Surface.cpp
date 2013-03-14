@@ -332,17 +332,30 @@ static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
         doThrowNPE(env);
         return 0;
     }
+
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
-    if (self != NULL) {
-        self->decStrong(&sRefBaseOwner);
+    sp<IBinder> binder(parcel->readStrongBinder());
+
+    // update the Surface only if the underlying IGraphicBufferProducer
+    // has changed.
+    if (self != NULL
+            && (self->getIGraphicBufferProducer()->asBinder() == binder)) {
+        // same IGraphicBufferProducer, return ourselves
+        return int(self.get());
     }
 
     sp<Surface> sur;
-    sp<IGraphicBufferProducer> gbp(
-            interface_cast<IGraphicBufferProducer>(parcel->readStrongBinder()));
+    sp<IGraphicBufferProducer> gbp(interface_cast<IGraphicBufferProducer>(binder));
     if (gbp != NULL) {
+        // we have a new IGraphicBufferProducer, create a new Surface for it
         sur = new Surface(gbp);
+        // and keep a reference before passing to java
         sur->incStrong(&sRefBaseOwner);
+    }
+
+    if (self != NULL) {
+        // and loose the java reference to ourselves
+        self->decStrong(&sRefBaseOwner);
     }
 
     return int(sur.get());
