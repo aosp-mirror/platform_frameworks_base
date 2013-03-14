@@ -245,8 +245,10 @@ public final class ViewRootImpl implements ViewParent,
 
     // Input event queue.
     QueuedInputEvent mFirstPendingInputEvent;
+    int mPendingInputEventCount;
     QueuedInputEvent mCurrentInputEvent;
     boolean mProcessInputEventsScheduled;
+    String mPendingInputEventQueueLengthCounterName = "pq";
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -642,6 +644,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (view.getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
                     view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                 }
+
+                mPendingInputEventQueueLengthCounterName = "pq:" + attrs.getTitle();
             }
         }
     }
@@ -4427,6 +4431,9 @@ public final class ViewRootImpl implements ViewParent,
             }
             last.mNext = q;
         }
+        mPendingInputEventCount += 1;
+        Trace.traceCounter(Trace.TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
+                mPendingInputEventCount);
 
         if (processImmediately) {
             doProcessInputEvents();
@@ -4450,6 +4457,10 @@ public final class ViewRootImpl implements ViewParent,
             mFirstPendingInputEvent = q.mNext;
             q.mNext = null;
             mCurrentInputEvent = q;
+
+            mPendingInputEventCount -= 1;
+            Trace.traceCounter(Trace.TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
+                    mPendingInputEventCount);
 
             final int result = deliverInputEvent(q);
             if (result != EVENT_IN_PROGRESS) {
