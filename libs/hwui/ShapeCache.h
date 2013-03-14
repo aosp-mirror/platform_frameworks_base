@@ -717,7 +717,9 @@ void ShapeCache<Entry>::removeTexture(PathTexture* texture) {
             ALOGD("Shape %s deleted, size = %d", mName, size);
         }
 
-        glDeleteTextures(1, &texture->id);
+        if (texture->id) {
+            glDeleteTextures(1, &texture->id);
+        }
         delete texture;
     }
 }

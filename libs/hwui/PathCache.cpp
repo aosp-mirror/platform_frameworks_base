@@ -55,6 +55,8 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
         PathCache::drawPath(t->path, t->paint, *bitmap, left, top, offset, width, height);
         t->setResult(bitmap);
     } else {
+        texture->width = 0;
+        texture->height = 0;
         t->setResult(NULL);
     }
 }
@@ -136,8 +138,7 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
                 addTexture(entry, bitmap, texture);
                 texture->clearTask();
             } else {
-                ALOGW("Path too large to be rendered into a texture (%dx%d)",
-                        texture->width, texture->height);
+                ALOGW("Path too large to be rendered into a texture");
                 texture->clearTask();
                 texture = NULL;
                 mCache.remove(entry);
