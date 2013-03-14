@@ -276,7 +276,7 @@ final public class MediaMuxer {
      */
     public void release() {
         if (mState == MUXER_STATE_STARTED) {
-            throw new IllegalStateException("Can't release when muxer is started");
+            stop();
         }
         if (mNativeObject != 0) {
             nativeRelease(mNativeObject);
