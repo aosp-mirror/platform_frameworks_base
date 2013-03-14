@@ -284,6 +284,12 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 flags, resultReceiver));
     }
 
+    @Override
+    public void removeSoftInputMessages() {
+        mCaller.removeMessages(DO_SHOW_SOFT_INPUT);
+        mCaller.removeMessages(DO_HIDE_SOFT_INPUT);
+    }
+
     public void changeInputMethodSubtype(InputMethodSubtype subtype) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_CHANGE_INPUTMETHOD_SUBTYPE,
                 subtype));
