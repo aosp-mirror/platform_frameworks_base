@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.view.View;
@@ -104,7 +105,8 @@ public class EmergencyButton extends Button {
             Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            getContext().startActivity(intent);
+            getContext().startActivityAsUser(intent,
+                    new UserHandle(mLockPatternUtils.getCurrentUser()));
         }
     }
 
