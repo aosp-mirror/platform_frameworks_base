@@ -82,7 +82,7 @@ final class ElectronBeam {
     private int mDisplayHeight;     // real height, not rotated
     private SurfaceSession mSurfaceSession;
     private SurfaceControl mSurfaceControl;
-    private final Surface mSurface = new Surface();
+    private Surface mSurface;
     private NaturalSurfaceLayout mSurfaceLayout;
     private EGLDisplay mEglDisplay;
     private EGLConfig mEglConfig;
@@ -519,6 +519,7 @@ final class ElectronBeam {
 
             mSurfaceControl.setLayerStack(mDisplayLayerStack);
             mSurfaceControl.setSize(mDisplayWidth, mDisplayHeight);
+            mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);
             
             mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManager, mSurfaceControl);

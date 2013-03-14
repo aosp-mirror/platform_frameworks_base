@@ -39,7 +39,6 @@ public class Surface implements Parcelable {
     private native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
 
     private static native void nativeRelease(int nativeObject);
-    private static native void nativeDestroy(int nativeObject);
     private static native boolean nativeIsValid(int nativeObject);
     private static native boolean nativeIsConsumerRunningBehind(int nativeObject);
     private static native int nativeCopyFrom(int nativeObject, int surfaceControlNativeObject);
@@ -106,7 +105,6 @@ public class Surface implements Parcelable {
      * @hide
      */
     public Surface() {
-        mCloseGuard.open("release");
     }
 
     /**
@@ -135,6 +133,7 @@ public class Surface implements Parcelable {
         mCloseGuard.open("release");
     }
 
+    /* called from android_view_Surface_createFromIGraphicBufferProducer() */
     private Surface(int nativeObject) {
         mNativeObject = nativeObject;
         mCloseGuard.open("release");
@@ -146,9 +145,7 @@ public class Surface implements Parcelable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            if (mNativeObject != 0) {
-                nativeRelease(mNativeObject);
-            }
+            release();
         } finally {
             super.finalize();
         }
@@ -175,12 +172,7 @@ public class Surface implements Parcelable {
      * @hide
      */
     public void destroy() {
-        if (mNativeObject != 0) {
-            nativeDestroy(mNativeObject);
-            mNativeObject = 0;
-            mGenerationId++;
-        }
-        mCloseGuard.close();
+        release();
     }
 
     /**
@@ -287,6 +279,10 @@ public class Surface implements Parcelable {
                     "SurfaceControl native object is null. Are you using a released SurfaceControl?");
         }
         mNativeObject = nativeCopyFrom(mNativeObject, other.mNativeObject);
+        if (mNativeObject == 0) {
+            // nativeCopyFrom released our reference
+            mCloseGuard.close();
+        }
         mGenerationId++;
     }
 
@@ -308,11 +304,15 @@ public class Surface implements Parcelable {
                 nativeRelease(mNativeObject);
             }
             // transfer the reference from other to us
+            if (other.mNativeObject != 0 && mNativeObject == 0) {
+                mCloseGuard.open("release");
+            }
             mNativeObject = other.mNativeObject;
             mGenerationId++;
 
             other.mNativeObject = 0;
             other.mGenerationId++;
+            other.mCloseGuard.close();
         }
     }
 
@@ -326,7 +326,11 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("source must not be null");
         }
         mName = source.readString();
-        mNativeObject = nativeReadFromParcel(mNativeObject, source);
+        int nativeObject = nativeReadFromParcel(mNativeObject, source);
+        if (nativeObject !=0 && mNativeObject == 0) {
+            mCloseGuard.open("release");
+        }
+        mNativeObject = nativeObject;
         mGenerationId++;
     }
 
