@@ -1549,6 +1549,24 @@ public class StateMachine {
      *
      * @param what  is assigned to Message.what
      * @param arg1  is assigned to Message.arg1
+     * @return  A Message object from the global pool
+     */
+    public final Message obtainMessage(int what, int arg1) {
+        // use this obtain so we don't match the obtain(h, what, Object) method
+        return Message.obtain(mSmHandler, what, arg1, 0);
+    }
+
+    /**
+     * Get a message and set Message.target state machine handler,
+     * what, arg1 and arg2
+     *
+     * Note: The handler can be null if the state machine has quit,
+     * which means target will be null and may cause a AndroidRuntimeException
+     * in MessageQueue#enqueMessage if sent directly or if sent using
+     * StateMachine#sendMessage the message will just be ignored.
+     *
+     * @param what  is assigned to Message.what
+     * @param arg1  is assigned to Message.arg1
      * @param arg2  is assigned to Message.arg2
      * @return  A Message object from the global pool
      */
@@ -1599,6 +1617,32 @@ public class StateMachine {
         if (smh == null) return;
 
         smh.sendMessage(obtainMessage(what, obj));
+    }
+
+    /**
+     * Enqueue a message to this state machine.
+     *
+     * Message is ignored if state machine has quit.
+     */
+    public final void sendMessage(int what, int arg1) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessage(obtainMessage(what, arg1));
+    }
+
+    /**
+     * Enqueue a message to this state machine.
+     *
+     * Message is ignored if state machine has quit.
+     */
+    public final void sendMessage(int what, int arg1, int arg2) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessage(obtainMessage(what, arg1, arg2));
     }
 
     /**
@@ -1658,6 +1702,32 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    public final void sendMessageDelayed(int what, int arg1, long delayMillis) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageDelayed(obtainMessage(what, arg1), delayMillis);
+    }
+
+    /**
+     * Enqueue a message to this state machine after a delay.
+     *
+     * Message is ignored if state machine has quit.
+     */
+    public final void sendMessageDelayed(int what, int arg1, int arg2, long delayMillis) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageDelayed(obtainMessage(what, arg1, arg2), delayMillis);
+    }
+
+    /**
+     * Enqueue a message to this state machine after a delay.
+     *
+     * Message is ignored if state machine has quit.
+     */
     public final void sendMessageDelayed(int what, int arg1, int arg2, Object obj,
             long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
@@ -1686,6 +1756,20 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    protected final void sendMessageAtFrontOfQueue(int what) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageAtFrontOfQueue(obtainMessage(what));
+    }
+
+    /**
+     * Enqueue a message to the front of the queue for this state machine.
+     * Protected, may only be called by instances of StateMachine.
+     *
+     * Message is ignored if state machine has quit.
+     */
     protected final void sendMessageAtFrontOfQueue(int what, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1700,12 +1784,27 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    protected final void sendMessageAtFrontOfQueue(int what) {
+    protected final void sendMessageAtFrontOfQueue(int what, int arg1) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
 
-        smh.sendMessageAtFrontOfQueue(obtainMessage(what));
+        smh.sendMessageAtFrontOfQueue(obtainMessage(what, arg1));
+    }
+
+
+    /**
+     * Enqueue a message to the front of the queue for this state machine.
+     * Protected, may only be called by instances of StateMachine.
+     *
+     * Message is ignored if state machine has quit.
+     */
+    protected final void sendMessageAtFrontOfQueue(int what, int arg1, int arg2) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageAtFrontOfQueue(obtainMessage(what, arg1, arg2));
     }
 
     /**
