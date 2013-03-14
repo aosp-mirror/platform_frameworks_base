@@ -68,7 +68,32 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.BLUETOOTH_STACK" />
-    
-    <application android:hasCode="false" android:label="@string/app_label">
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+    <application android:label="@string/app_label">
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.android.shell"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
+
+        <activity
+            android:name=".BugreportWarningActivity"
+            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".BugreportReceiver"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="android.intent.action.BUGREPORT_FINISHED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
