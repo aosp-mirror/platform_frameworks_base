@@ -303,9 +303,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
         mViewStateManager.setSecurityViewContainer(mSecurityViewContainer);
 
-        if (!(mContext instanceof Activity)) {
-            setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
-        }
+        setBackButtonEnabled(false);
 
         addDefaultWidgets();
 
@@ -320,6 +318,13 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
+    }
+
+    private void setBackButtonEnabled(boolean enabled) {
+        if (mContext instanceof Activity) return;  // always enabled in activity mode
+        setSystemUiVisibility(enabled ?
+                getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_BACK :
+                getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
     }
 
     private boolean shouldEnableAddWidget() {
@@ -898,6 +903,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (securityMode == SecurityMode.None) {
             // Discard current runnable if we're switching back to the selector view
             setOnDismissAction(null);
+        }
+        if (securityMode == SecurityMode.Account && !mLockPatternUtils.isPermanentlyLocked()) {
+            // we're showing account as a backup, provide a way to get back to primary
+            setBackButtonEnabled(true);
         }
         mCurrentSecuritySelection = securityMode;
     }
@@ -1564,6 +1573,12 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     public boolean handleBackKey() {
+        if (mCurrentSecuritySelection == SecurityMode.Account) {
+            // go back to primary screen and re-disable back
+            setBackButtonEnabled(false);
+            showPrimarySecurityScreen(false /*turningOff*/);
+            return true;
+        }
         if (mCurrentSecuritySelection != SecurityMode.None) {
             mCallback.dismiss(false);
             return true;
