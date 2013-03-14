@@ -120,14 +120,14 @@ interface IAudioService {
     oneway void dispatchMediaKeyEvent(in KeyEvent keyEvent);
     void dispatchMediaKeyEventUnderWakelock(in KeyEvent keyEvent);
 
-    oneway void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c);
+           void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c);
     oneway void unregisterMediaButtonIntent(in PendingIntent pi,  in ComponentName c);
 
     oneway void registerMediaButtonEventReceiverForCalls(in ComponentName c);
     oneway void unregisterMediaButtonEventReceiverForCalls();
 
-    int registerRemoteControlClient(in PendingIntent mediaIntent,
-           in IRemoteControlClient rcClient, in String callingPackageName);
+           int registerRemoteControlClient(in PendingIntent mediaIntent,
+               in IRemoteControlClient rcClient, in String callingPackageName);
     oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
            in IRemoteControlClient rcClient);
 
