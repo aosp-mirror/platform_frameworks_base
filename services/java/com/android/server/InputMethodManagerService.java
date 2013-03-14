@@ -1199,7 +1199,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurId = info.getId();
             mCurToken = new Binder();
             try {
-                if (DEBUG) Slog.v(TAG, "Adding window token: " + mCurToken);
+                if (true || DEBUG) Slog.v(TAG, "Adding window token: " + mCurToken);
                 mIWindowManager.addWindowToken(mCurToken,
                         WindowManager.LayoutParams.TYPE_INPUT_METHOD);
             } catch (RemoteException e) {
@@ -1237,14 +1237,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void onServiceConnected(ComponentName name, IBinder service) {
         synchronized (mMethodMap) {
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
+                IInputMethod prevMethod = mCurMethod;
                 mCurMethod = IInputMethod.Stub.asInterface(service);
                 if (mCurToken == null) {
                     Slog.w(TAG, "Service connected without a token!");
                     unbindCurrentMethodLocked(false, false);
                     return;
                 }
-                // Remove commands relating to the previous service. Otherwise WindowManagerService
-                // will reject the command because the token attached to these messages is invalid.
+                // Remove messages relating to the previous service. Otherwise WindowManagerService
+                // will throw a BadTokenException because the old token is being removed.
+                if (prevMethod != null) {
+                    try {
+                        prevMethod.removeSoftInputMessages();
+                    } catch (RemoteException e) {
+                    }
+                }
                 mCaller.removeMessages(MSG_SHOW_SOFT_INPUT);
                 mCaller.removeMessages(MSG_HIDE_SOFT_INPUT);
                 if (true || DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
@@ -2309,8 +2316,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     if (true || DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".showSoftInput("
                             + msg.arg1 + ", " + args.arg2 + ")");
-                    ((IInputMethod)args.arg1).showSoftInput(msg.arg1,
-                            (ResultReceiver)args.arg2);
+                    ((IInputMethod)args.arg1).showSoftInput(msg.arg1, (ResultReceiver)args.arg2);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -2320,8 +2326,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     if (true || DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".hideSoftInput(0, "
                             + args.arg2 + ")");
-                    ((IInputMethod)args.arg1).hideSoftInput(0,
-                            (ResultReceiver)args.arg2);
+                    ((IInputMethod)args.arg1).hideSoftInput(0, (ResultReceiver)args.arg2);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
