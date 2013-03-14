@@ -38,11 +38,7 @@ import java.util.List;
  * hours. Note that the system will <i>not</i> disable sensors automatically when
  * the screen turns off.
  * </p>
- * <p class="note">
- * Note: Don't use this mechanism with a Trigger Sensor, have a look
- * at {@link TriggerEventListener}. {@link Sensor#TYPE_SIGNIFICANT_MOTION}
- * is an example of a trigger sensor.
- * </p>
+ *
  * <pre class="prettyprint">
  * public class SensorActivity extends Activity, implements SensorEventListener {
  *     private final SensorManager mSensorManager;
@@ -519,12 +515,6 @@ public abstract class SensorManager {
     /**
      * Unregisters a listener for the sensors with which it is registered.
      *
-     * <p class="note"></p>
-     * Note: Don't use this method with a one shot trigger sensor such as
-     * {@link Sensor#TYPE_SIGNIFICANT_MOTION}.
-     * Use {@link #cancelTriggerSensor(TriggerEventListener, Sensor)} instead.
-     * </p>
-     *
      * @param listener
      *        a SensorEventListener object
      *
@@ -534,7 +524,6 @@ public abstract class SensorManager {
      * @see #unregisterListener(SensorEventListener)
      * @see #registerListener(SensorEventListener, Sensor, int)
      *
-     * @throws IllegalArgumentException when sensor is a trigger sensor.
      */
     public void unregisterListener(SensorEventListener listener, Sensor sensor) {
         if (listener == null || sensor == null) {
@@ -569,12 +558,6 @@ public abstract class SensorManager {
      * Registers a {@link android.hardware.SensorEventListener
      * SensorEventListener} for the given sensor.
      *
-     * <p class="note"></p>
-     * Note: Don't use this method with a one shot trigger sensor such as
-     * {@link Sensor#TYPE_SIGNIFICANT_MOTION}.
-     * Use {@link #requestTriggerSensor(TriggerEventListener, Sensor)} instead.
-     * </p>
-     *
      * @param listener
      *        A {@link android.hardware.SensorEventListener SensorEventListener}
      *        object.
@@ -598,7 +581,6 @@ public abstract class SensorManager {
      * @see #unregisterListener(SensorEventListener)
      * @see #unregisterListener(SensorEventListener, Sensor)
      *
-     * @throws IllegalArgumentException when sensor is null or a trigger sensor
      */
     public boolean registerListener(SensorEventListener listener, Sensor sensor, int rate) {
         return registerListener(listener, sensor, rate, null);
@@ -607,12 +589,6 @@ public abstract class SensorManager {
     /**
      * Registers a {@link android.hardware.SensorEventListener
      * SensorEventListener} for the given sensor.
-     *
-     * <p class="note"></p>
-     * Note: Don't use this method with a one shot trigger sensor such as
-     * {@link Sensor#TYPE_SIGNIFICANT_MOTION}.
-     * Use {@link #requestTriggerSensor(TriggerEventListener, Sensor)} instead.
-     * </p>
      *
      * @param listener
      *        A {@link android.hardware.SensorEventListener SensorEventListener}
@@ -641,7 +617,6 @@ public abstract class SensorManager {
      * @see #unregisterListener(SensorEventListener)
      * @see #unregisterListener(SensorEventListener, Sensor)
      *
-     * @throws IllegalArgumentException when sensor is null or a trigger sensor
      */
     public boolean registerListener(SensorEventListener listener, Sensor sensor, int rate,
             Handler handler) {
@@ -1328,68 +1303,6 @@ public abstract class SensorManager {
         Q[2] = rv[1];
         Q[3] = rv[2];
     }
-
-    /**
-     * Requests receiving trigger events for a trigger sensor.
-     *
-     * <p>
-     * When the sensor detects a trigger event condition, such as significant motion in
-     * the case of the {@link Sensor#TYPE_SIGNIFICANT_MOTION}, the provided trigger listener
-     * will be invoked once and then its request to receive trigger events will be canceled.
-     * To continue receiving trigger events, the application must request to receive trigger
-     * events again.
-     * </p>
-     *
-     * @param listener The listener on which the
-     *        {@link TriggerEventListener#onTrigger(TriggerEvent)} will be delivered.
-     * @param sensor The sensor to be enabled.
-     *
-     * @return true if the sensor was successfully enabled.
-     *
-     * @throws IllegalArgumentException when sensor is null or not a trigger sensor.
-     */
-    public boolean requestTriggerSensor(TriggerEventListener listener, Sensor sensor) {
-        return requestTriggerSensorImpl(listener, sensor);
-    }
-
-    /**
-     * @hide
-     */
-    protected abstract boolean requestTriggerSensorImpl(TriggerEventListener listener,
-            Sensor sensor);
-
-    /**
-     * Cancels receiving trigger events for a trigger sensor.
-     *
-     * <p>
-     * Note that a Trigger sensor will be auto disabled if
-     * {@link TriggerEventListener#onTrigger(TriggerEvent)} has triggered.
-     * This method is provided in case the user wants to explicitly cancel the request
-     * to receive trigger events.
-     * </p>
-     *
-     * @param listener The listener on which the
-     *        {@link TriggerEventListener#onTrigger(TriggerEvent)}
-     *        is delivered.It should be the same as the one used
-     *        in {@link #requestTriggerSensor(TriggerEventListener, Sensor)}
-     * @param sensor The sensor for which the trigger request should be canceled.
-     *        If null, it cancels receiving trigger for all sensors associated
-     *        with the listener.
-     *
-     * @return true if successfully canceled.
-     *
-     * @throws IllegalArgumentException when sensor is a trigger sensor.
-     */
-    public boolean cancelTriggerSensor(TriggerEventListener listener, Sensor sensor) {
-        return cancelTriggerSensorImpl(listener, sensor);
-    }
-
-    /**
-     * @hide
-     */
-    protected abstract boolean cancelTriggerSensorImpl(TriggerEventListener listener,
-            Sensor sensor);
-
 
     private LegacySensorManager getLegacySensorManager() {
         synchronized (mSensorListByType) {
