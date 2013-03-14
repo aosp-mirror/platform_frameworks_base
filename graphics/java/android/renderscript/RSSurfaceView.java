@@ -30,6 +30,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
+ * @hide
  * @deprecated in API 16
  * The Surface View for a graphics renderscript (RenderScriptGL) to draw on.
  *

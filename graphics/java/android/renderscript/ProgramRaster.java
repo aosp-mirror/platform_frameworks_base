@@ -21,6 +21,7 @@ import android.util.Log;
 
 
 /**
+ * @hide
  * @deprecated in API 16
  * Program raster is primarily used to specify whether point sprites are enabled and to control
  * the culling mode. By default, back faces are culled.

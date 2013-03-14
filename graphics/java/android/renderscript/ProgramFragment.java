@@ -21,6 +21,7 @@ import android.util.Log;
 
 
 /**
+ * @hide
  * @deprecated in API 16
  * <p>The Renderscript fragment program, also known as fragment shader is responsible
  * for manipulating pixel data in a user defined way. It's constructed from a GLSL
