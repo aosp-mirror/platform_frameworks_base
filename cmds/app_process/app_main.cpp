@@ -13,6 +13,7 @@
 #include <cutils/process_name.h>
 #include <cutils/memory.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <sys/personality.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -128,8 +129,28 @@ static void setArgv0(const char *argv0, const char *newArgv0)
     strlcpy(const_cast<char *>(argv0), newArgv0, strlen(argv0));
 }
 
-int main(int argc, const char* const argv[])
+int main(int argc, char* const argv[])
 {
+#ifdef __arm__
+    /*
+     * b/7188322 - Temporarily revert to the compat memory layout
+     * to avoid breaking third party apps.
+     *
+     * THIS WILL GO AWAY IN A FUTURE ANDROID RELEASE.
+     *
+     * http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=7dbaa466
+     * changes the kernel mapping from bottom up to top-down.
+     * This breaks some programs which improperly embed
+     * an out of date copy of Android's linker.
+     */
+    int current = personality(0xFFFFFFFF);
+    if ((current & ADDR_COMPAT_LAYOUT) == 0) {
+        personality(current | ADDR_COMPAT_LAYOUT);
+        execv("/system/bin/app_process", argv);
+        return -1;
+    }
+#endif
+
     // These are global variables in ProcessState.cpp
     mArgC = argc;
     mArgV = argv;
