@@ -261,6 +261,7 @@ public final class PendingIntent implements Parcelable {
                 context.getContentResolver()) : null;
         try {
             intent.setAllowFds(false);
+            intent.migrateExtraStreamToClipData();
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
@@ -285,6 +286,7 @@ public final class PendingIntent implements Parcelable {
                 context.getContentResolver()) : null;
         try {
             intent.setAllowFds(false);
+            intent.migrateExtraStreamToClipData();
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,

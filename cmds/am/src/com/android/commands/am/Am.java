@@ -63,6 +63,7 @@ public class Am {
 
     private int mRepeat = 0;
     private int mUserId;
+    private String mReceiverPermission;
 
     private String mProfileFile;
 
@@ -332,6 +333,8 @@ public class Am {
                 mStartFlags |= ActivityManager.START_FLAG_OPENGL_TRACES;
             } else if (opt.equals("--user")) {
                 mUserId = parseUserArg(nextArgRequired());
+            } else if (opt.equals("--receiver-permission")) {
+                mReceiverPermission = nextArgRequired();
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return null;
@@ -608,7 +611,7 @@ public class Am {
         Intent intent = makeIntent(UserHandle.USER_ALL);
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
-        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null,
+        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, mReceiverPermission,
                 android.app.AppOpsManager.OP_NONE, true, false, mUserId);
         receiver.waitForFinish();
     }
@@ -1408,6 +1411,7 @@ public class Am {
                 "am broadcast: send a broadcast Intent.  Options are:\n" +
                 "    --user <USER_ID> | all | current: Specify which user to send to; if not\n" +
                 "        specified then send to all users.\n" +
+                "    --receiver-permission <PERMISSION>: Require receiver to hold permission.\n" +
                 "\n" +
                 "am instrument: start an Instrumentation.  Typically this target <COMPONENT>\n" +
                 "  is the form <TEST_PACKAGE>/<RUNNER_CLASS>.  Options are:\n" +
