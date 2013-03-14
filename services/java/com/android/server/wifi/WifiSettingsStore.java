@@ -37,7 +37,11 @@ final class WifiSettingsStore {
     private int mPersistWifiState = WIFI_DISABLED;
     /* Tracks current airplane mode state */
     private boolean mAirplaneModeOn = false;
-    /* Tracks whether wifi is enabled from WifiStateMachine's perspective */
+
+    /* Tracks the setting of scan being available even when wi-fi is turned off
+     */
+    private boolean mScanAlwaysAvailable;
+
     private final Context mContext;
 
     /* Tracks if we have checked the saved wi-fi state after boot */
@@ -47,9 +51,10 @@ final class WifiSettingsStore {
         mContext = context;
         mAirplaneModeOn = getPersistedAirplaneModeOn();
         mPersistWifiState = getPersistedWifiState();
+        mScanAlwaysAvailable = getPersistedScanAlwaysAvailable();
     }
 
-    synchronized boolean shouldWifiBeEnabled() {
+    synchronized boolean isWifiToggleEnabled() {
         if (!mCheckSavedStateAtBoot) {
             mCheckSavedStateAtBoot = true;
             if (testAndClearWifiSavedState()) return true;
@@ -68,6 +73,10 @@ final class WifiSettingsStore {
      */
     synchronized boolean isAirplaneModeOn() {
        return mAirplaneModeOn;
+    }
+
+    synchronized boolean isScanAlwaysAvailable() {
+        return mScanAlwaysAvailable;
     }
 
     synchronized boolean handleWifiToggled(boolean wifiEnabled) {
@@ -112,6 +121,10 @@ final class WifiSettingsStore {
             }
         }
         return true;
+    }
+
+    synchronized void handleWifiScanAlwaysAvailableToggled() {
+        mScanAlwaysAvailable = getPersistedScanAlwaysAvailable();
     }
 
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -174,5 +187,11 @@ final class WifiSettingsStore {
     private boolean getPersistedAirplaneModeOn() {
         return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+    }
+
+    private boolean getPersistedScanAlwaysAvailable() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
+                0) == 1;
     }
 }
