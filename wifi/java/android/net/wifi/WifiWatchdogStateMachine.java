@@ -587,8 +587,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     break;
 
                 case EVENT_WIFI_RADIO_STATE_CHANGE:
-                    if ((Integer) msg.obj == WifiManager.WIFI_STATE_DISABLING)
+                    if (msg.arg1 == WifiManager.WIFI_STATE_DISABLING) {
                         transitionTo(mNotConnectedState);
+                    }
                     break;
 
                 default:
