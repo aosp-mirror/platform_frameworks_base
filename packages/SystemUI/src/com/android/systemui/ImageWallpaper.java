@@ -632,6 +632,30 @@ public class ImageWallpaper extends WallpaperService {
                         GLUtils.getEGLErrorString(mEgl.eglGetError()));
             }
 
+            int attribs[] = {
+                EGL_WIDTH, 1,
+                EGL_HEIGHT, 1,
+                EGL_NONE
+            };
+            EGLSurface tmpSurface = mEgl.eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
+            mEgl.eglMakeCurrent(mEglDisplay, tmpSurface, tmpSurface, mEglContext);
+
+            int[] maxSize = new int[1];
+            Rect frame = surfaceHolder.getSurfaceFrame();
+            glGetIntegerv(GL_MAX_TEXTURE_SIZE, maxSize, 0);
+
+            mEgl.eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            mEgl.eglDestroySurface(mEglDisplay, tmpSurface);
+
+            if(frame.width() > maxSize[0] || frame.height() > maxSize[0]) {
+                mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+                mEgl.eglTerminate(mEglDisplay);
+                Log.e(GL_LOG_TAG, "requested  texture size " +
+                    frame.width() + "x" + frame.height() + " exceeds the support maximum of " +
+                    maxSize[0] + "x" + maxSize[0]);
+                return false;
+            }
+
             mEglSurface = mEgl.eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, null);
             if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
                 int error = mEgl.eglGetError();
@@ -647,20 +671,6 @@ public class ImageWallpaper extends WallpaperService {
             if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                 throw new RuntimeException("eglMakeCurrent failed " +
                         GLUtils.getEGLErrorString(mEgl.eglGetError()));
-            }
-
-            int[] maxSize = new int[1];
-            Rect frame = surfaceHolder.getSurfaceFrame();
-            glGetIntegerv(GL_MAX_TEXTURE_SIZE, maxSize, 0);
-            if(frame.width() > maxSize[0] || frame.height() > maxSize[0]) {
-                mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
-                mEgl.eglMakeCurrent(EGL_NO_DISPLAY, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-                mEgl.eglDestroyContext(mEglDisplay, mEglContext);
-                mEgl.eglTerminate(mEglDisplay);
-                Log.e(GL_LOG_TAG, "requested  texture size " +
-                        frame.width() + "x" + frame.height() + " exceeds the support maximum of " +
-                        maxSize[0] + "x" + maxSize[0]);
-                return false;
             }
 
             return true;
