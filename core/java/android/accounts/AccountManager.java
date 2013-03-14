@@ -18,9 +18,11 @@ package android.accounts;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
+import android.content.res.Resources;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.android.internal.R;
 import com.google.android.collect.Maps;
 
 /**
@@ -1777,8 +1780,11 @@ public class AccountManager {
                                     };
                                     // have many accounts, launch the chooser
                                     Intent intent = new Intent();
-                                    intent.setClassName("android",
-                                            "android.accounts.ChooseAccountActivity");
+                                    ComponentName componentName = ComponentName.unflattenFromString(
+                                            Resources.getSystem().getString(
+                                                    R.string.config_chooseAccountActivity));
+                                    intent.setClassName(componentName.getPackageName(),
+                                            componentName.getClassName());
                                     intent.putExtra(KEY_ACCOUNTS, accounts);
                                     intent.putExtra(KEY_ACCOUNT_MANAGER_RESPONSE,
                                             new AccountManagerResponse(chooseResponse));
@@ -1934,7 +1940,10 @@ public class AccountManager {
             String[] addAccountRequiredFeatures,
             Bundle addAccountOptions) {
         Intent intent = new Intent();
-        intent.setClassName("android", "android.accounts.ChooseTypeAndAccountActivity");
+        ComponentName componentName = ComponentName.unflattenFromString(
+                Resources.getSystem().getString(R.string.config_chooseTypeAndAccountActivity));
+        intent.setClassName(componentName.getPackageName(),
+                componentName.getClassName());
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
                 allowableAccounts);
         intent.putExtra(ChooseTypeAndAccountActivity.EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
