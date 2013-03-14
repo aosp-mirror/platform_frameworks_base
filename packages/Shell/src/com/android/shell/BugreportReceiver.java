@@ -29,17 +29,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.FileUtils;
 import android.os.SystemProperties;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
+import android.text.format.DateUtils;
 import android.util.Patterns;
 
 import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Receiver that handles finished bugreports, usually by attaching them to an
@@ -54,10 +53,15 @@ public class BugreportReceiver extends BroadcastReceiver {
     private static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
 
     /**
-     * Number of bugreports to retain before deleting the oldest; 4 reports and
-     * 4 screenshots are roughly 17MB of disk space.
+     * Always keep the newest 8 bugreport files; 4 reports and 4 screenshots are
+     * roughly 17MB of disk space.
      */
-    private static final int NUM_OLD_FILES = 8;
+    private static final int MIN_KEEP_COUNT = 8;
+
+    /**
+     * Always keep bugreports taken in the last week.
+     */
+    private static final long MIN_KEEP_AGE = DateUtils.WEEK_IN_MILLIS;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -94,7 +98,8 @@ public class BugreportReceiver extends BroadcastReceiver {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                deleteOlderFiles(bugreportFile.getParentFile(), NUM_OLD_FILES);
+                FileUtils.deleteOlderFiles(
+                        bugreportFile.getParentFile(), MIN_KEEP_COUNT, MIN_KEEP_AGE);
                 result.finish();
                 return null;
             }
@@ -164,28 +169,6 @@ public class BugreportReceiver extends BroadcastReceiver {
         return foundAccount;
     }
 
-    /**
-     * Delete the oldest files in given directory until only the requested
-     * number remain.
-     */
-    private static void deleteOlderFiles(File dir, int retainNum) {
-        final File[] files = dir.listFiles();
-        if (files == null) return;
-
-        Arrays.sort(files, new ModifiedComparator());
-        for (int i = retainNum; i < files.length; i++) {
-            Log.d(TAG, "Deleting old file " + files[i]);
-            files[i].delete();
-        }
-    }
-
-    private static class ModifiedComparator implements Comparator<File> {
-        @Override
-        public int compare(File lhs, File rhs) {
-            return (int) (rhs.lastModified() - lhs.lastModified());
-        }
-    }
-
     private static File getFileExtra(Intent intent, String key) {
         final String path = intent.getStringExtra(key);
         if (path != null) {
@@ -194,5 +177,4 @@ public class BugreportReceiver extends BroadcastReceiver {
             return null;
         }
     }
-
 }
