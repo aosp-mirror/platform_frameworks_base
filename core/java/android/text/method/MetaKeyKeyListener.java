@@ -163,6 +163,29 @@ public abstract class MetaKeyKeyListener {
                getActive(text, SELECTING, META_SELECTING, META_SELECTING);
     }
 
+    /**
+     * Gets the state of the meta keys for a specific key event.
+     *
+     * For input devices that use toggled key modifiers, the `toggled' state
+     * is stored into the text buffer. This method retrieves the meta state
+     * for this event, accounting for the stored state. If the event has been
+     * created by a device that does not support toggled key modifiers, like
+     * a virtual device for example, the stored state is ignored.
+     *
+     * @param text the buffer in which the meta key would have been pressed.
+     * @param event the event for which to evaluate the meta state.
+     * @return an integer in which each bit set to one represents a pressed
+     *         or locked meta key.
+     */
+    public static final int getMetaState(final CharSequence text, final KeyEvent event) {
+        int metaState = event.getMetaState();
+        if (event.getKeyCharacterMap().getModifierBehavior()
+                == KeyCharacterMap.MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED) {
+            metaState |= getMetaState(text);
+        }
+        return metaState;
+    }
+
     // As META_SELECTING is @hide we should not mention it in public comments, hence the
     // omission in @param meta
     /**
@@ -190,6 +213,37 @@ public abstract class MetaKeyKeyListener {
             default:
                 return 0;
         }
+    }
+
+    /**
+     * Gets the state of a particular meta key to use with a particular key event.
+     *
+     * If the key event has been created by a device that does not support toggled
+     * key modifiers, like a virtual keyboard for example, only the meta state in
+     * the key event is considered.
+     *
+     * @param meta META_SHIFT_ON, META_ALT_ON, META_SYM_ON
+     * @param text the buffer in which the meta key would have been pressed.
+     * @param event the event for which to evaluate the meta state.
+     * @return 0 if inactive, 1 if active, 2 if locked.
+     */
+    public static final int getMetaState(final CharSequence text, final int meta,
+            final KeyEvent event) {
+        int metaState = event.getMetaState();
+        if (event.getKeyCharacterMap().getModifierBehavior()
+                == KeyCharacterMap.MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED) {
+            metaState |= getMetaState(text);
+        }
+        if (META_SELECTING == meta) {
+            // #getMetaState(long, int) does not support META_SELECTING, but we want the same
+            // behavior as #getMetaState(CharSequence, int) so we need to do it here
+            if ((metaState & META_SELECTING) != 0) {
+                // META_SELECTING is only ever set to PRESSED and can't be LOCKED, so return 1
+                return 1;
+            }
+            return 0;
+        }
+        return getMetaState(metaState, meta);
     }
 
     private static int getActive(CharSequence text, Object meta,

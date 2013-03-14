@@ -41,7 +41,7 @@ public abstract class NumberKeyListener extends BaseKeyListener
     protected abstract char[] getAcceptedChars();
 
     protected int lookup(KeyEvent event, Spannable content) {
-        return event.getMatch(getAcceptedChars(), event.getMetaState() | getMetaState(content));
+        return event.getMatch(getAcceptedChars(), getMetaState(content, event));
     }
 
     public CharSequence filter(CharSequence source, int start, int end,
