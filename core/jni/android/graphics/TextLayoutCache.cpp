@@ -87,7 +87,7 @@ void TextLayoutCache::purgeCaches() {
  * Caching
  */
 sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
-            const jchar* text, jint start, jint count, jint contextCount) {
+            const jchar* text, jint start, jint count, jint contextCount, jint dirFlags) {
     AutoMutex _l(mLock);
     nsecs_t startTime = 0;
     if (mDebugEnabled) {
@@ -95,7 +95,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
     }
 
     // Create the key
-    TextLayoutCacheKey key(paint, text, start, count, contextCount);
+    TextLayoutCacheKey key(paint, text, start, count, contextCount, dirFlags);
 
     // Get value from cache if possible
     sp<TextLayoutValue> value = mCache.get(key);
@@ -111,7 +111,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
         // Compute advances and store them
         mShaper->computeValues(value.get(), paint,
                 reinterpret_cast<const UChar*>(key.getText()), start, count,
-                size_t(contextCount));
+                size_t(contextCount), int(dirFlags));
 
         if (mDebugEnabled) {
             value->setElapsedTime(systemTime(SYSTEM_TIME_MONOTONIC) - startTime);
@@ -218,13 +218,14 @@ void TextLayoutCache::dumpCacheStats() {
  * TextLayoutCacheKey
  */
 TextLayoutCacheKey::TextLayoutCacheKey(): start(0), count(0), contextCount(0),
-        typeface(NULL), textSize(0), textSkewX(0), textScaleX(0), flags(0),
+        dirFlags(0), typeface(NULL), textSize(0), textSkewX(0), textScaleX(0), flags(0),
         hinting(SkPaint::kNo_Hinting), variant(SkPaint::kDefault_Variant), language()  {
 }
 
 TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint, const UChar* text,
-        size_t start, size_t count, size_t contextCount) :
-            start(start), count(count), contextCount(contextCount) {
+        size_t start, size_t count, size_t contextCount, int dirFlags) :
+            start(start), count(count), contextCount(contextCount),
+            dirFlags(dirFlags) {
     textCopy.setTo(text, contextCount);
     typeface = paint->getTypeface();
     textSize = paint->getTextSize();
@@ -241,6 +242,7 @@ TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
         start(other.start),
         count(other.count),
         contextCount(other.contextCount),
+        dirFlags(other.dirFlags),
         typeface(other.typeface),
         textSize(other.textSize),
         textSkewX(other.textSkewX),
@@ -278,6 +280,9 @@ int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutC
 
     deltaInt = lhs.hinting - rhs.hinting;
     if (deltaInt != 0) return (deltaInt);
+
+    deltaInt = lhs.dirFlags - rhs.dirFlags;
+    if (deltaInt) return (deltaInt);
 
     deltaInt = lhs.variant - rhs.variant;
     if (deltaInt) return (deltaInt);
@@ -354,9 +359,9 @@ TextLayoutShaper::~TextLayoutShaper() {
 }
 
 void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* paint, const UChar* chars,
-        size_t start, size_t count, size_t contextCount) {
+        size_t start, size_t count, size_t contextCount, int dirFlags) {
 
-    computeValues(paint, chars, start, count, contextCount,
+    computeValues(paint, chars, start, count, contextCount, dirFlags,
             &value->mAdvances, &value->mTotalAdvance, &value->mGlyphs, &value->mPos);
 #if DEBUG_ADVANCES
     ALOGD("Advances - start = %d, count = %d, contextCount = %d, totalAdvance = %f", start, count,
@@ -365,7 +370,7 @@ void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* pain
 }
 
 void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
-        size_t start, size_t count, size_t contextCount,
+        size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos) {
         *outTotalAdvance = 0;
@@ -373,94 +378,110 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
             return;
         }
 
-        UBiDiLevel bidiReq = UBIDI_DEFAULT_LTR;
+        UBiDiLevel bidiReq = 0;
+        bool forceLTR = false;
+        bool forceRTL = false;
+
+        switch (dirFlags & kBidi_Mask) {
+            case kBidi_LTR: bidiReq = 0; break; // no ICU constant, canonical LTR level
+            case kBidi_RTL: bidiReq = 1; break; // no ICU constant, canonical RTL level
+            case kBidi_Default_LTR: bidiReq = UBIDI_DEFAULT_LTR; break;
+            case kBidi_Default_RTL: bidiReq = UBIDI_DEFAULT_RTL; break;
+            case kBidi_Force_LTR: forceLTR = true; break; // every char is LTR
+            case kBidi_Force_RTL: forceRTL = true; break; // every char is RTL
+        }
+
         bool useSingleRun = false;
-        bool isRTL = false;
-
-        UBiDi* bidi = ubidi_open();
-        if (bidi) {
-            UErrorCode status = U_ZERO_ERROR;
+        bool isRTL = forceRTL;
+        if (forceLTR || forceRTL) {
+            useSingleRun = true;
+        } else {
+            UBiDi* bidi = ubidi_open();
+            if (bidi) {
+                UErrorCode status = U_ZERO_ERROR;
 #if DEBUG_GLYPHS
-            ALOGD("******** ComputeValues -- start");
-            ALOGD("      -- string = '%s'", String8(chars + start, count).string());
-            ALOGD("      -- start = %d", start);
-            ALOGD("      -- count = %d", count);
-            ALOGD("      -- contextCount = %d", contextCount);
-            ALOGD("      -- bidiReq = %d", bidiReq);
+                ALOGD("******** ComputeValues -- start");
+                ALOGD("      -- string = '%s'", String8(chars + start, count).string());
+                ALOGD("      -- start = %d", start);
+                ALOGD("      -- count = %d", count);
+                ALOGD("      -- contextCount = %d", contextCount);
+                ALOGD("      -- bidiReq = %d", bidiReq);
 #endif
-            ubidi_setPara(bidi, chars, contextCount, bidiReq, NULL, &status);
-            if (U_SUCCESS(status)) {
-                int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
-                ssize_t rc = ubidi_countRuns(bidi, &status);
+                ubidi_setPara(bidi, chars, contextCount, bidiReq, NULL, &status);
+                if (U_SUCCESS(status)) {
+                    int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
+                    ssize_t rc = ubidi_countRuns(bidi, &status);
 #if DEBUG_GLYPHS
-                ALOGD("      -- paraDir = %d", paraDir);
-                ALOGD("      -- run-count = %d", int(rc));
+                    ALOGD("      -- dirFlags = %d", dirFlags);
+                    ALOGD("      -- paraDir = %d", paraDir);
+                    ALOGD("      -- run-count = %d", int(rc));
 #endif
-                if (U_SUCCESS(status) && rc == 1) {
-                    // Normal case: one run, status is ok
-                    isRTL = (paraDir == 1);
-                    useSingleRun = true;
-                } else if (!U_SUCCESS(status) || rc < 1) {
-                    ALOGW("Need to force to single run -- string = '%s',"
-                            " status = %d, rc = %d",
-                            String8(chars + start, count).string(), status, int(rc));
-                    isRTL = (paraDir == 1);
-                    useSingleRun = true;
-                } else {
-                    int32_t end = start + count;
-                    for (size_t i = 0; i < size_t(rc); ++i) {
-                        int32_t startRun = -1;
-                        int32_t lengthRun = -1;
-                        UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
+                    if (U_SUCCESS(status) && rc == 1) {
+                        // Normal case: one run, status is ok
+                        isRTL = (paraDir == 1);
+                        useSingleRun = true;
+                    } else if (!U_SUCCESS(status) || rc < 1) {
+                        ALOGW("Need to force to single run -- string = '%s',"
+                                " status = %d, rc = %d",
+                                String8(chars + start, count).string(), status, int(rc));
+                        isRTL = (paraDir == 1);
+                        useSingleRun = true;
+                    } else {
+                        int32_t end = start + count;
+                        for (size_t i = 0; i < size_t(rc); ++i) {
+                            int32_t startRun = -1;
+                            int32_t lengthRun = -1;
+                            UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
 
-                        if (startRun == -1 || lengthRun == -1) {
-                            // Something went wrong when getting the visual run, need to clear
-                            // already computed data before doing a single run pass
-                            ALOGW("Visual run is not valid");
-                            outGlyphs->clear();
-                            outAdvances->clear();
-                            outPos->clear();
-                            *outTotalAdvance = 0;
-                            isRTL = (paraDir == 1);
-                            useSingleRun = true;
-                            break;
-                        }
+                            if (startRun == -1 || lengthRun == -1) {
+                                // Something went wrong when getting the visual run, need to clear
+                                // already computed data before doing a single run pass
+                                ALOGW("Visual run is not valid");
+                                outGlyphs->clear();
+                                outAdvances->clear();
+                                outPos->clear();
+                                *outTotalAdvance = 0;
+                                isRTL = (paraDir == 1);
+                                useSingleRun = true;
+                                break;
+                            }
 
-                        if (startRun >= end) {
-                            continue;
-                        }
-                        int32_t endRun = startRun + lengthRun;
-                        if (endRun <= int32_t(start)) {
-                            continue;
-                        }
-                        if (startRun < int32_t(start)) {
-                            startRun = int32_t(start);
-                        }
-                        if (endRun > end) {
-                            endRun = end;
-                        }
+                            if (startRun >= end) {
+                                continue;
+                            }
+                            int32_t endRun = startRun + lengthRun;
+                            if (endRun <= int32_t(start)) {
+                                continue;
+                            }
+                            if (startRun < int32_t(start)) {
+                                startRun = int32_t(start);
+                            }
+                            if (endRun > end) {
+                                endRun = end;
+                            }
 
-                        lengthRun = endRun - startRun;
-                        isRTL = (runDir == UBIDI_RTL);
+                            lengthRun = endRun - startRun;
+                            isRTL = (runDir == UBIDI_RTL);
 #if DEBUG_GLYPHS
-                        ALOGD("Processing Bidi Run = %d -- run-start = %d, run-len = %d, isRTL = %d",
-                                i, startRun, lengthRun, isRTL);
+                            ALOGD("Processing Bidi Run = %d -- run-start = %d, run-len = %d, isRTL = %d",
+                                    i, startRun, lengthRun, isRTL);
 #endif
-                        computeRunValues(paint, chars, startRun, lengthRun, contextCount, isRTL,
-                                outAdvances, outTotalAdvance, outGlyphs, outPos);
+                            computeRunValues(paint, chars, startRun, lengthRun, contextCount, isRTL,
+                                    outAdvances, outTotalAdvance, outGlyphs, outPos);
 
+                        }
                     }
+                } else {
+                    ALOGW("Cannot set Para");
+                    useSingleRun = true;
+                    isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
                 }
+                ubidi_close(bidi);
             } else {
-                ALOGW("Cannot set Para");
+                ALOGW("Cannot ubidi_open()");
                 useSingleRun = true;
                 isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
             }
-            ubidi_close(bidi);
-        } else {
-            ALOGW("Cannot ubidi_open()");
-            useSingleRun = true;
-            isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
         }
 
         // Default single run case
@@ -897,11 +918,11 @@ TextLayoutEngine::~TextLayoutEngine() {
 }
 
 sp<TextLayoutValue> TextLayoutEngine::getValue(const SkPaint* paint, const jchar* text,
-        jint start, jint count, jint contextCount) {
+        jint start, jint count, jint contextCount, jint dirFlags) {
     sp<TextLayoutValue> value;
 #if USE_TEXT_LAYOUT_CACHE
     value = mTextLayoutCache->getValue(paint, text, start, count,
-            contextCount);
+            contextCount, dirFlags);
     if (value == NULL) {
         ALOGE("Cannot get TextLayoutCache value for text = '%s'",
                 String8(text + start, count).string());
@@ -909,7 +930,7 @@ sp<TextLayoutValue> TextLayoutEngine::getValue(const SkPaint* paint, const jchar
 #else
     value = new TextLayoutValue(count);
     mShaper->computeValues(value.get(), paint,
-            reinterpret_cast<const UChar*>(text), start, count, contextCount);
+            reinterpret_cast<const UChar*>(text), start, count, contextCount, dirFlags);
 #endif
     return value;
 }
