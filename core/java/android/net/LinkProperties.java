@@ -197,7 +197,7 @@ public class LinkProperties implements Parcelable {
         for (LinkProperties stacked: mStackedLinks.values()) {
             routes.addAll(stacked.getAllRoutes());
         }
-        return Collections.unmodifiableCollection(routes);
+        return routes;
     }
 
     public void setHttpProxy(ProxyProperties proxy) {
