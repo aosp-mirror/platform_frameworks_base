@@ -153,6 +153,7 @@ int main(int argc, char* const argv[])
             return -1;
         }
     }
+    unsetenv("NO_ADDR_COMPAT_LAYOUT_FIXUP");
 #endif
 
     // These are global variables in ProcessState.cpp
