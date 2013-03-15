@@ -711,7 +711,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         InetAddress gatewayAddr =
                                 NetworkUtils.intToInetAddress((int)Long.parseLong(gate, 16));
 
-                        RouteInfo route = new RouteInfo(linkAddress, gatewayAddr, iface);
+                        RouteInfo route = new RouteInfo(linkAddress, gatewayAddr);
                         routes.add(route);
                     } catch (Exception e) {
                         Log.e(TAG, "Error parsing route " + s + " : " + e);
@@ -743,7 +743,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
                         InetAddress gateAddr = NetworkUtils.hexToInet6Address(gate);
 
-                        RouteInfo route = new RouteInfo(linkAddress, gateAddr, iface);
+                        RouteInfo route = new RouteInfo(linkAddress, gateAddr);
                         routes.add(route);
                     } catch (Exception e) {
                         Log.e(TAG, "Error parsing route " + s + " : " + e);

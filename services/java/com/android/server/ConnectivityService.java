@@ -2306,20 +2306,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         boolean routesChanged = (routeDiff.removed.size() != 0 || routeDiff.added.size() != 0);
 
-        // look for a radio-added default route (v4-only for now TODO)
-        RouteInfo[] routes = new RouteInfo[0];
-        try {
-            routes = mNetd.getRoutes(newLp.getInterfaceName());
-        } catch (Exception e) {}
-
-        for (RouteInfo route : routes) {
-            if (route.isDefaultRoute() && route.getGateway() instanceof Inet4Address &&
-                    mAddedRoutes.contains(route) == false) {
-                throw new IllegalStateException("Unexpected default route found for interface "
-                        + newLp.getInterfaceName());
-            }
-        }
-
         for (RouteInfo r : routeDiff.removed) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
                 removeRoute(curLp, r, TO_DEFAULT_TABLE);
