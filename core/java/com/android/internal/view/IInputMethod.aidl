@@ -33,28 +33,26 @@ import com.android.internal.view.IInputMethodSession;
  * Service).
  * {@hide}
  */
-interface IInputMethod {
-    oneway void attachToken(IBinder token);
-    
-    oneway void bindInput(in InputBinding binding);
-    
-    oneway void unbindInput();
+oneway interface IInputMethod {
+    void attachToken(IBinder token);
 
-    oneway void startInput(in IInputContext inputContext, in EditorInfo attribute);
+    void bindInput(in InputBinding binding);
 
-    oneway void restartInput(in IInputContext inputContext, in EditorInfo attribute);
+    void unbindInput();
 
-    oneway void createSession(IInputMethodCallback callback);
-    
-    oneway void setSessionEnabled(IInputMethodSession session, boolean enabled);
-    
-    oneway void revokeSession(IInputMethodSession session);
-    
-    oneway void showSoftInput(int flags, in ResultReceiver resultReceiver);
-    
-    oneway void hideSoftInput(int flags, in ResultReceiver resultReceiver);
+    void startInput(in IInputContext inputContext, in EditorInfo attribute);
 
-    void removeSoftInputMessages();
+    void restartInput(in IInputContext inputContext, in EditorInfo attribute);
 
-    oneway void changeInputMethodSubtype(in InputMethodSubtype subtype);
+    void createSession(IInputMethodCallback callback);
+
+    void setSessionEnabled(IInputMethodSession session, boolean enabled);
+
+    void revokeSession(IInputMethodSession session);
+
+    void showSoftInput(int flags, in ResultReceiver resultReceiver);
+
+    void hideSoftInput(int flags, in ResultReceiver resultReceiver);
+
+    void changeInputMethodSubtype(in InputMethodSubtype subtype);
 }

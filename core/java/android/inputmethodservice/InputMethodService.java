@@ -39,7 +39,6 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
-import android.util.Slog;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -49,6 +48,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManager.BadTokenException;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
@@ -352,7 +352,6 @@ public class InputMethodService extends AbstractInputMethodService {
          * Take care of attaching the given window token provided by the system.
          */
         public void attachToken(IBinder token) {
-            Slog.i(TAG, "attachToken: Existing token=" + mToken + " new token=" + token);
             if (mToken == null) {
                 mToken = token;
                 mWindow.setToken(token);
@@ -419,11 +418,16 @@ public class InputMethodService extends AbstractInputMethodService {
          * Handle a request by the system to show the soft input area.
          */
         public void showSoftInput(int flags, ResultReceiver resultReceiver) {
-            if (true || DEBUG) Slog.v(TAG, "showSoftInput()");
+            if (DEBUG) Log.v(TAG, "showSoftInput()");
             boolean wasVis = isInputViewShown();
             mShowInputFlags = 0;
             if (onShowInputRequested(flags, false)) {
-                showWindow(true);
+                try {
+                    showWindow(true);
+                } catch (BadTokenException e) {
+                    if (DEBUG) Log.v(TAG, "BadTokenException: IME is done.");
+                    mWindowVisible = false;
+                }
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
@@ -1390,7 +1394,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     public void showWindow(boolean showInput) {
-        if (true || DEBUG) Slog.v(TAG, "Showing window: showInput=" + showInput
+        if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
                 + " mWindowAdded=" + mWindowAdded
                 + " mWindowCreated=" + mWindowCreated
