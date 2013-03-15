@@ -50,16 +50,10 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     private Camera mCamera;
 
     private static final int CAMERA_ID = 0;
-    private static final int NUMBER_OF_CAMERA_STRESS_LOOPS = 100;
-    private static final int NUMBER_OF_RECORDER_STRESS_LOOPS = 100;
-    private static final int NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS = 50;
-    private static final int NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER = 200;
-    private static final int NUMBER_OF_TIME_LAPSE_LOOPS = 25;
-    private static final int TIME_LAPSE_PLAYBACK_WAIT_TIME = 5* 1000; // 5 seconds
+    private static final int NUMBER_OF_TIME_LAPSE_LOOPS = 1;
+    private static final int TIME_LAPSE_PLAYBACK_WAIT_TIME = 30 * 1000; // 30 seconds
     private static final int USE_TEST_RUNNER_PROFILE = -1;
     private static final long WAIT_TIMEOUT = 10 * 1000; // 10 seconds
-    private static final long WAIT_TIME_CAMERA_TEST = 3 * 1000; // 3 seconds
-    private static final long WAIT_TIME_RECORDER_TEST = 6 * 1000; // 6 seconds
     private static final String OUTPUT_FILE_EXT = ".3gp";
     private static final String MEDIA_STRESS_OUTPUT = "mediaStressOutput.txt";
 
@@ -147,158 +141,6 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     private final class RecorderErrorCallback implements MediaRecorder.OnErrorListener {
         public void onError(MediaRecorder mr, int what, int extra) {
             fail(String.format("Media recorder error, code: %d\textra: %d", what, extra));
-        }
-    }
-
-    //Test case for stressing the camera preview.
-    @LargeTest
-    public void testStressCamera() throws Exception {
-        SurfaceHolder mSurfaceHolder;
-        mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-        Log.v(TAG, "Camera start preview stress test");
-        mOutput.write("Total number of loops:" + NUMBER_OF_CAMERA_STRESS_LOOPS + "\n");
-        try {
-            Log.v(TAG, "Start preview");
-            mOutput.write("No of loop: ");
-
-            for (int i = 0; i< NUMBER_OF_CAMERA_STRESS_LOOPS; i++) {
-                runOnLooper(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCamera = Camera.open(CAMERA_ID);
-                    }
-                });
-                mCamera.setErrorCallback(mCameraErrorCallback);
-                mCamera.setPreviewDisplay(mSurfaceHolder);
-                mCamera.startPreview();
-                Thread.sleep(WAIT_TIME_CAMERA_TEST);
-                mCamera.stopPreview();
-                mCamera.release();
-                if (i == 0) {
-                    mOutput.write(i + 1);
-                } else {
-                    mOutput.write(String.format(", %d", (i + 1)));
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-            fail("Camera startup preview stress test");
-        }
-    }
-
-    //Test case for stressing the camera preview.
-    @LargeTest
-    public void testStressRecorder() throws Exception {
-        SurfaceHolder mSurfaceHolder;
-        mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-        Log.v(TAG, "H263 video record: reset after prepare Stress test");
-        mOutput.write("Total number of loops:" + NUMBER_OF_RECORDER_STRESS_LOOPS + "\n");
-        try {
-            mOutput.write("No of loop: ");
-            Log.v(TAG, "Start preview");
-            for (int i = 0; i < NUMBER_OF_RECORDER_STRESS_LOOPS; i++) {
-                runOnLooper(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRecorder = new MediaRecorder();
-                    }
-                });
-                Log.v(TAG, "counter = " + i);
-                String fileName = String.format("%s/temp%d%s",
-                        Environment.getExternalStorageDirectory(),
-                        i, OUTPUT_FILE_EXT);
-
-                Log.v(TAG, fileName);
-                mRecorder.setOnErrorListener(mRecorderErrorCallback);
-                mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                mRecorder.setOutputFile(fileName);
-                mRecorder.setVideoFrameRate(MediaRecorderStressTestRunner.mFrameRate);
-                mRecorder.setVideoSize(176,144);
-                Log.v(TAG, "setEncoder");
-                mRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
-                mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-                Log.v(TAG, "setPreview");
-                mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
-                Log.v(TAG, "prepare");
-                mRecorder.prepare();
-                Log.v(TAG, "before release");
-                Thread.sleep(WAIT_TIME_RECORDER_TEST);
-                mRecorder.reset();
-                mRecorder.release();
-                if (i == 0) {
-                    mOutput.write(i + 1);
-                } else {
-                    mOutput.write(String.format(", %d", (i + 1)));
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-            fail("H263 video recording stress test");
-        }
-    }
-
-    //Stress test case for switching camera and video recorder preview.
-    @LargeTest
-    public void testStressCameraSwitchRecorder() throws Exception {
-        SurfaceHolder mSurfaceHolder;
-        mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-        Log.v(TAG, "Camera and video recorder preview switching");
-        mOutput.write("Total number of loops: " +
-                NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER + "\n");
-        try {
-            Log.v(TAG, "Start preview");
-            mOutput.write("No of loop: ");
-            for (int i = 0; i < NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER; i++) {
-                runOnLooper(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCamera = Camera.open(CAMERA_ID);
-                    }
-                });
-                mCamera.setErrorCallback(mCameraErrorCallback);
-                mCamera.setPreviewDisplay(mSurfaceHolder);
-                mCamera.startPreview();
-                Thread.sleep(WAIT_TIME_CAMERA_TEST);
-                mCamera.stopPreview();
-                mCamera.release();
-                mCamera = null;
-                Log.v(TAG, "release camera");
-                String fileName = String.format("%s/temp%d%s",
-                        Environment.getExternalStorageDirectory(),
-                        i, OUTPUT_FILE_EXT);
-                Log.v(TAG, fileName);
-                runOnLooper(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRecorder = new MediaRecorder();
-                    }
-                });
-                mRecorder.setOnErrorListener(mRecorderErrorCallback);
-                mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                mRecorder.setOutputFile(fileName);
-                mRecorder.setVideoFrameRate(MediaRecorderStressTestRunner.mFrameRate);
-                mRecorder.setVideoSize(176,144);
-                Log.v(TAG, "Media recorder setEncoder");
-                mRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
-                Log.v(TAG, "mediaRecorder setPreview");
-                mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
-                Log.v(TAG, "prepare");
-                mRecorder.prepare();
-                Log.v(TAG, "before release");
-                Thread.sleep(WAIT_TIME_CAMERA_TEST);
-                mRecorder.release();
-                Log.v(TAG, "release video recorder");
-                if (i == 0) {
-                    mOutput.write(i + 1);
-                } else {
-                    mOutput.write(String.format(", %d", (i + 1)));
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-            fail("Camera and recorder switch mode");
         }
     }
 
