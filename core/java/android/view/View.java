@@ -5038,7 +5038,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             if ((mAttachInfo.mAccessibilityFetchFlags
-                    & AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS) != 0) {
+                    & AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS) != 0
+                    && Resources.resourceHasPackage(mID)) {
                 try {
                     String viewId = getResources().getResourceName(mID);
                     info.setViewIdResourceName(viewId);
@@ -11552,7 +11553,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 final int scrollY = mScrollY;
                 final int inside = (viewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
 
-                int left, top, right, bottom;
+                int left;
+                int top;
+                int right;
+                int bottom;
 
                 if (drawHorizontalScrollBar) {
                     int size = scrollBar.getSize(false);
