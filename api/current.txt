@@ -6159,6 +6159,7 @@ package android.content {
     ctor public Loader(android.content.Context);
     method public void abandon();
     method public boolean cancelLoad();
+    method public void commitContentChanged();
     method public java.lang.String dataToString(D);
     method public void deliverCancellation();
     method public void deliverResult(D);
@@ -6179,6 +6180,7 @@ package android.content {
     method public void registerListener(int, android.content.Loader.OnLoadCompleteListener<D>);
     method public void registerOnLoadCanceledListener(android.content.Loader.OnLoadCanceledListener<D>);
     method public void reset();
+    method public void rollbackContentChanged();
     method public final void startLoading();
     method public void stopLoading();
     method public boolean takeContentChanged();
