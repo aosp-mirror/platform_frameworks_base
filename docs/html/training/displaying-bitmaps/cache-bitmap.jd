@@ -3,10 +3,6 @@ parent.title=Displaying Bitmaps Efficiently
 parent.link=index.html
 
 trainingnavtop=true
-next.title=Displaying Bitmaps in Your UI
-next.link=display-bitmap.html
-previous.title=Processing Bitmaps Off the UI Thread
-previous.link=process-bitmap.html
 
 @jd:body
 

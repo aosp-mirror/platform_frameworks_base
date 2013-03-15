@@ -3,8 +3,6 @@ parent.title=Displaying Bitmaps Efficiently
 parent.link=index.html
 
 trainingnavtop=true
-previous.title=Caching Bitmaps
-previous.link=cache-bitmap.html
 
 @jd:body
 
