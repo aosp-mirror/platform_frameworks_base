@@ -42,6 +42,17 @@ namespace android {
 #define USE_TEXT_LAYOUT_CACHE 1
 
 enum {
+    kBidi_LTR = 0,
+    kBidi_RTL = 1,
+    kBidi_Default_LTR = 2,
+    kBidi_Default_RTL = 3,
+    kBidi_Force_LTR = 4,
+    kBidi_Force_RTL = 5,
+
+    kBidi_Mask = 0x7
+};
+
+enum {
     kDirection_LTR = 0,
     kDirection_RTL = 1,
 
@@ -52,18 +63,28 @@ class TextLayout {
 public:
 
     static void getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
-                                   jint count, jint contextCount,
+                                   jint count, jint contextCount, jint dirFlags,
                                    jfloat* resultAdvances, jfloat* resultTotalAdvance);
 
+    static void getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint start,
+                                   jint count, jint contextCount, jint dirFlags,
+                                   jfloat* resultAdvances, jfloat& resultTotalAdvance);
+
     static void getTextPath(SkPaint* paint, const jchar* text, jsize len,
-                            jfloat x, jfloat y, SkPath* path);
+                            jint bidiFlags, jfloat x, jfloat y, SkPath* path);
 
     static void drawTextOnPath(SkPaint* paint, const jchar* text, jsize len,
-                               jfloat hOffset, jfloat vOffset,
+                               int bidiFlags, jfloat hOffset, jfloat vOffset,
                                SkPath* path, SkCanvas* canvas);
 
 private:
+    static bool needsLayout(const jchar* text, jint len, jint bidiFlags);
+
     static void handleText(SkPaint* paint, const jchar* text, jsize len,
-                           jfloat x, jfloat y, SkPath* path);
+                           int bidiFlags, jfloat x, jfloat y, SkPath* path);
+
+    static void computeAdvancesWithICU(SkPaint* paint, const UChar* chars,
+            size_t start, size_t count, size_t contextCount, int dirFlags,
+            jfloat* outAdvances, jfloat* outTotalAdvance);
 };
 } // namespace android
