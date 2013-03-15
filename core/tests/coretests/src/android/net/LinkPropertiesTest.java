@@ -22,6 +22,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.TestCase;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 public class LinkPropertiesTest extends TestCase {
     private static String ADDRV4 = "75.208.6.1";
@@ -255,5 +256,30 @@ public class LinkPropertiesTest extends TestCase {
         assertAllRoutesHaveInterface("p2p0", lp2);
         assertEquals(3, lp.compareRoutes(lp2).added.size());
         assertEquals(3, lp.compareRoutes(lp2).removed.size());
+
+    @SmallTest
+    public void testStackedInterfaces() {
+        LinkProperties rmnet0 = new LinkProperties();
+        rmnet0.setInterfaceName("rmnet0");
+
+        LinkProperties clat4 = new LinkProperties();
+        clat4.setInterfaceName("clat4");
+
+        assertEquals(0, rmnet0.getStackedLinks().size());
+        rmnet0.addStackedLink(clat4);
+        assertEquals(1, rmnet0.getStackedLinks().size());
+        rmnet0.addStackedLink(clat4);
+        assertEquals(1, rmnet0.getStackedLinks().size());
+        assertEquals(0, clat4.getStackedLinks().size());
+
+        // Modify an item in the returned collection to see what happens.
+        for (LinkProperties link : rmnet0.getStackedLinks()) {
+            if (link.getInterfaceName().equals("clat4")) {
+               link.setInterfaceName("newname");
+            }
+        }
+        for (LinkProperties link : rmnet0.getStackedLinks()) {
+            assertFalse("newname".equals(link.getInterfaceName()));
+        }
     }
 }
