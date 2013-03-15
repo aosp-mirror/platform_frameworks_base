@@ -359,7 +359,7 @@ public class DhcpStateMachine extends StateMachine {
         } else if (dhcpAction == DhcpAction.RENEW) {
             if (DBG) Log.d(TAG, "DHCP renewal on " + mInterfaceName);
             success = NetworkUtils.runDhcpRenew(mInterfaceName, dhcpResults);
-            dhcpResults.updateFromDhcpRequest(mDhcpResults);
+            if (success) dhcpResults.updateFromDhcpRequest(mDhcpResults);
         }
         if (success) {
             if (DBG) Log.d(TAG, "DHCP succeeded on " + mInterfaceName);
