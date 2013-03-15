@@ -70,7 +70,7 @@ public:
     TextLayoutCacheKey();
 
     TextLayoutCacheKey(const SkPaint* paint, const UChar* text, size_t start, size_t count,
-            size_t contextCount);
+            size_t contextCount, int dirFlags);
 
     TextLayoutCacheKey(const TextLayoutCacheKey& other);
 
@@ -97,6 +97,7 @@ private:
     size_t start;
     size_t count;
     size_t contextCount;
+    int dirFlags;
     SkTypeface* typeface;
     SkScalar textSize;
     SkScalar textSkewX;
@@ -180,7 +181,7 @@ public:
     virtual ~TextLayoutShaper();
 
     void computeValues(TextLayoutValue* value, const SkPaint* paint, const UChar* chars,
-            size_t start, size_t count, size_t contextCount);
+            size_t start, size_t count, size_t contextCount, int dirFlags);
 
     void purgeCaches();
 
@@ -214,7 +215,7 @@ private:
     size_t shapeFontRun(const SkPaint* paint);
 
     void computeValues(const SkPaint* paint, const UChar* chars,
-            size_t start, size_t count, size_t contextCount,
+            size_t start, size_t count, size_t contextCount, int dirFlags,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos);
 
@@ -251,7 +252,7 @@ public:
     void operator()(TextLayoutCacheKey& text, sp<TextLayoutValue>& desc);
 
     sp<TextLayoutValue> getValue(const SkPaint* paint, const jchar* text, jint start,
-            jint count, jint contextCount);
+            jint count, jint contextCount, jint dirFlags);
 
     /**
      * Clear the cache
@@ -303,7 +304,7 @@ public:
      * the call. Be careful of this when doing optimization.
      **/
     sp<TextLayoutValue> getValue(const SkPaint* paint, const jchar* text, jint start,
-            jint count, jint contextCount);
+            jint count, jint contextCount, jint dirFlags);
 
     void purgeCaches();
 

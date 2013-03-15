@@ -401,7 +401,7 @@ public:
         jfloat result = 0;
 
         TextLayout::getTextRunAdvances(paint, textArray, index, count, textLength,
-                NULL /* dont need all advances */, &result);
+                paint->getFlags(), NULL /* dont need all advances */, &result);
 
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
         return result;
@@ -426,7 +426,7 @@ public:
         jfloat width = 0;
 
         TextLayout::getTextRunAdvances(paint, textArray, start, count, textLength,
-                NULL /* dont need all advances */, &width);
+                paint->getFlags(), NULL /* dont need all advances */, &width);
 
         env->ReleaseStringChars(text, textArray);
         return width;
@@ -446,7 +446,7 @@ public:
         jfloat width = 0;
 
         TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
-                NULL /* dont need all advances */, &width);
+                paint->getFlags(), NULL /* dont need all advances */, &width);
 
         env->ReleaseStringChars(text, textArray);
         return width;
@@ -473,7 +473,7 @@ public:
         jfloat* widthsArray = autoWidths.ptr();
 
         TextLayout::getTextRunAdvances(paint, text, 0, count, count,
-                widthsArray, NULL /* dont need totalAdvance */);
+                paint->getFlags(), widthsArray, NULL /* dont need totalAdvance */);
 
         return count;
     }
@@ -494,8 +494,48 @@ public:
         return count;
     }
 
+    static int doTextGlyphs(JNIEnv* env, SkPaint* paint, const jchar* text, jint start, jint count,
+            jint contextCount, jint flags, jcharArray glyphs) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        NPE_CHECK_RETURN_ZERO(env, text);
+
+        if ((start | count | contextCount) < 0 || contextCount < count || !glyphs) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+        if (count == 0) {
+            return 0;
+        }
+        size_t glypthsLength = env->GetArrayLength(glyphs);
+        if ((size_t)count > glypthsLength) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+
+        jchar* glyphsArray = env->GetCharArrayElements(glyphs, NULL);
+
+        sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+                text, start, count, contextCount, flags);
+        const jchar* shapedGlyphs = value->getGlyphs();
+        size_t glyphsCount = value->getGlyphsCount();
+        memcpy(glyphsArray, shapedGlyphs, sizeof(jchar) * glyphsCount);
+
+        env->ReleaseCharArrayElements(glyphs, glyphsArray, JNI_ABORT);
+        return glyphsCount;
+    }
+
+    static int getTextGlyphs__StringIIIII_C(JNIEnv* env, jobject clazz, SkPaint* paint,
+            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
+            jcharArray glyphs) {
+        const jchar* textArray = env->GetStringChars(text, NULL);
+        int count = doTextGlyphs(env, paint, textArray + contextStart, start - contextStart,
+                end - start, contextEnd - contextStart, flags, glyphs);
+        env->ReleaseStringChars(text, textArray);
+        return count;
+    }
+
     static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, const jchar *text,
-                                    jint start, jint count, jint contextCount,
+                                    jint start, jint count, jint contextCount, jint flags,
                                     jfloatArray advances, jint advancesIndex) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         NPE_CHECK_RETURN_ZERO(env, text);
@@ -517,7 +557,7 @@ public:
         jfloat advancesArray[count];
         jfloat totalAdvance = 0;
 
-        TextLayout::getTextRunAdvances(paint, text, start, count, contextCount,
+        TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
                                        advancesArray, &totalAdvance);
 
         if (advances != NULL) {
@@ -526,23 +566,61 @@ public:
         return totalAdvance;
     }
 
-    static float getTextRunAdvances___CIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
+    static jfloat doTextRunAdvancesICU(JNIEnv *env, SkPaint *paint, const jchar *text,
+                                    jint start, jint count, jint contextCount, jint flags,
+                                    jfloatArray advances, jint advancesIndex) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        NPE_CHECK_RETURN_ZERO(env, text);
+
+        if ((start | count | contextCount | advancesIndex) < 0 || contextCount < count) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+        if (count == 0) {
+            return 0;
+        }
+        if (advances) {
+            size_t advancesLength = env->GetArrayLength(advances);
+            if ((size_t)count > advancesLength) {
+                doThrowAIOOBE(env);
+                return 0;
+            }
+        }
+
+        jfloat advancesArray[count];
+        jfloat totalAdvance = 0;
+
+        TextLayout::getTextRunAdvancesICU(paint, text, start, count, contextCount, flags,
+                                       advancesArray, totalAdvance);
+
+        if (advances != NULL) {
+            env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
+        }
+        return totalAdvance;
+    }
+
+    static float getTextRunAdvances___CIIIII_FII(JNIEnv* env, jobject clazz, SkPaint* paint,
             jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
-            jfloatArray advances, jint advancesIndex) {
+            jint flags, jfloatArray advances, jint advancesIndex, jint reserved) {
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, textArray + contextIndex,
-                index - contextIndex, count, contextCount, advances, advancesIndex);
+        jfloat result = (reserved == 0) ?
+                doTextRunAdvances(env, paint, textArray + contextIndex, index - contextIndex,
+                        count, contextCount, flags, advances, advancesIndex) :
+                doTextRunAdvancesICU(env, paint, textArray + contextIndex, index - contextIndex,
+                        count, contextCount, flags, advances, advancesIndex);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
 
-    static float getTextRunAdvances__StringIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
-            jstring text, jint start, jint end, jint contextStart, jint contextEnd,
-            jfloatArray advances, jint advancesIndex) {
+    static float getTextRunAdvances__StringIIIII_FII(JNIEnv* env, jobject clazz, SkPaint* paint,
+            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
+            jfloatArray advances, jint advancesIndex, jint reserved) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, textArray + contextStart,
-                start - contextStart, end - start, contextEnd - contextStart,
-                advances, advancesIndex);
+        jfloat result = (reserved == 0) ?
+                doTextRunAdvances(env, paint, textArray + contextStart, start - contextStart,
+                        end - start, contextEnd - contextStart, flags, advances, advancesIndex) :
+                doTextRunAdvancesICU(env, paint, textArray + contextStart, start - contextStart,
+                        end - start, contextEnd - contextStart, flags, advances, advancesIndex);
         env->ReleaseStringChars(text, textArray);
         return result;
     }
@@ -551,7 +629,7 @@ public:
             jint count, jint flags, jint offset, jint opt) {
         jfloat scalarArray[count];
 
-        TextLayout::getTextRunAdvances(paint, text, start, count, start + count,
+        TextLayout::getTextRunAdvances(paint, text, start, count, start + count, flags,
                 scalarArray, NULL /* dont need totalAdvance */);
 
         jint pos = offset - start;
@@ -610,21 +688,21 @@ public:
     }
 
     static void getTextPath(JNIEnv* env, SkPaint* paint, const jchar* text, jint count,
-                            jfloat x, jfloat y, SkPath *path) {
-        TextLayout::getTextPath(paint, text, count, x, y, path);
+                            jint bidiFlags, jfloat x, jfloat y, SkPath *path) {
+        TextLayout::getTextPath(paint, text, count, bidiFlags, x, y, path);
     }
 
-    static void getTextPath___C(JNIEnv* env, jobject clazz, SkPaint* paint,
+    static void getTextPath___C(JNIEnv* env, jobject clazz, SkPaint* paint, jint bidiFlags,
             jcharArray text, int index, int count, jfloat x, jfloat y, SkPath* path) {
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        getTextPath(env, paint, textArray + index, count, x, y, path);
+        getTextPath(env, paint, textArray + index, count, bidiFlags, x, y, path);
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
     }
 
-    static void getTextPath__String(JNIEnv* env, jobject clazz, SkPaint* paint,
+    static void getTextPath__String(JNIEnv* env, jobject clazz, SkPaint* paint, jint bidiFlags,
             jstring text, int start, int end, jfloat x, jfloat y, SkPath* path) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-        getTextPath(env, paint, textArray + start, end - start, x, y, path);
+        getTextPath(env, paint, textArray + start, end - start, bidiFlags, x, y, path);
         env->ReleaseStringChars(text, textArray);
     }
 
@@ -648,7 +726,7 @@ public:
                          int count, float maxWidth, jfloatArray jmeasured,
                          SkPaint::TextBufferDirection tbd) {
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
-                text, 0, count, count);
+                text, 0, count, count, paint.getFlags());
         if (value == NULL) {
             return 0;
         }
@@ -720,7 +798,7 @@ public:
         SkIRect ir;
 
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
-                text, 0, count, count);
+                text, 0, count, count, paint.getFlags());
         if (value == NULL) {
             return;
         }
@@ -808,15 +886,19 @@ static JNINativeMethod methods[] = {
     {"native_breakText","(Ljava/lang/String;ZF[F)I", (void*) SkPaintGlue::breakTextS},
     {"native_getTextWidths","(I[CII[F)I", (void*) SkPaintGlue::getTextWidths___CII_F},
     {"native_getTextWidths","(ILjava/lang/String;II[F)I", (void*) SkPaintGlue::getTextWidths__StringII_F},
-    {"native_getTextRunAdvances","(I[CIIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvances___CIIII_FI},
-    {"native_getTextRunAdvances","(ILjava/lang/String;IIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvances__StringIIII_FI},
-    {"native_getTextRunCursor", "(I[CIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
-    {"native_getTextRunCursor", "(ILjava/lang/String;IIII)I",
+    {"native_getTextRunAdvances","(I[CIIIII[FII)F",
+        (void*) SkPaintGlue::getTextRunAdvances___CIIIII_FII},
+    {"native_getTextRunAdvances","(ILjava/lang/String;IIIII[FII)F",
+        (void*) SkPaintGlue::getTextRunAdvances__StringIIIII_FII},
+
+
+    {"native_getTextGlyphs","(ILjava/lang/String;IIIII[C)I",
+        (void*) SkPaintGlue::getTextGlyphs__StringIIIII_C},
+    {"native_getTextRunCursor", "(I[CIIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
+    {"native_getTextRunCursor", "(ILjava/lang/String;IIIII)I",
         (void*) SkPaintGlue::getTextRunCursor__String},
-    {"native_getTextPath","(I[CIIFFI)V", (void*) SkPaintGlue::getTextPath___C},
-    {"native_getTextPath","(ILjava/lang/String;IIFFI)V", (void*) SkPaintGlue::getTextPath__String},
+    {"native_getTextPath","(II[CIIFFI)V", (void*) SkPaintGlue::getTextPath___C},
+    {"native_getTextPath","(IILjava/lang/String;IIFFI)V", (void*) SkPaintGlue::getTextPath__String},
     {"nativeGetStringBounds", "(ILjava/lang/String;IILandroid/graphics/Rect;)V",
                                         (void*) SkPaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(I[CIILandroid/graphics/Rect;)V",

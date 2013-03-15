@@ -568,9 +568,9 @@ static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject claz
 // ----------------------------------------------------------------------------
 
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
-        jfloat x, jfloat y, SkPaint* paint) {
+        jfloat x, jfloat y, int flags, SkPaint* paint) {
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, 0, count, count);
+            text, 0, count, count, flags);
     if (value == NULL) {
         return;
     }
@@ -584,9 +584,9 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 }
 
 static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
-        SkPath* path, jfloat hOffset, jfloat vOffset, SkPaint* paint) {
+        SkPath* path, jfloat hOffset, jfloat vOffset, int flags, SkPaint* paint) {
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, 0, count, count);
+            text, 0, count, count, flags);
     if (value == NULL) {
         return;
     }
@@ -599,9 +599,9 @@ static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int co
 
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
-        SkPaint* paint) {
+        int flags, SkPaint* paint) {
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, start, count, contextCount);
+            text, start, count, contextCount, flags);
     if (value == NULL) {
         return;
     }
@@ -616,62 +616,64 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jcharArray text, jint index, jint count,
-        jfloat x, jfloat y, SkPaint* paint) {
+        jfloat x, jfloat y, jint flags, SkPaint* paint) {
     jchar* textArray = env->GetCharArrayElements(text, NULL);
-    renderText(renderer, textArray + index, count, x, y, paint);
+    renderText(renderer, textArray + index, count, x, y, flags, paint);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
 }
 
 static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jstring text, jint start, jint end,
-        jfloat x, jfloat y, SkPaint* paint) {
+        jfloat x, jfloat y, jint flags, SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
-    renderText(renderer, textArray + start, end - start, x, y, paint);
+    renderText(renderer, textArray + start, end - start, x, y, flags, paint);
     env->ReleaseStringChars(text, textArray);
 }
 
 static void android_view_GLES20Canvas_drawTextArrayOnPath(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jcharArray text, jint index, jint count,
-        SkPath* path, jfloat hOffset, jfloat vOffset, SkPaint* paint) {
+        SkPath* path, jfloat hOffset, jfloat vOffset, jint flags, SkPaint* paint) {
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     renderTextOnPath(renderer, textArray + index, count, path,
-            hOffset, vOffset, paint);
+            hOffset, vOffset, flags, paint);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
 }
 
 static void android_view_GLES20Canvas_drawTextOnPath(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jstring text, jint start, jint end,
-        SkPath* path, jfloat hOffset, jfloat vOffset, SkPaint* paint) {
+        SkPath* path, jfloat hOffset, jfloat vOffset, jint flags, SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
     renderTextOnPath(renderer, textArray + start, end - start, path,
-            hOffset, vOffset, paint);
+            hOffset, vOffset, flags, paint);
     env->ReleaseStringChars(text, textArray);
 }
 
 static void android_view_GLES20Canvas_drawTextRunArray(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jcharArray text, jint index, jint count,
-        jint contextIndex, jint contextCount, jfloat x, jfloat y, SkPaint* paint) {
+        jint contextIndex, jint contextCount, jfloat x, jfloat y, jint dirFlags,
+        SkPaint* paint) {
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     renderTextRun(renderer, textArray + contextIndex, index - contextIndex,
-            count, contextCount, x, y, paint);
+            count, contextCount, x, y, dirFlags, paint);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
  }
 
 static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jstring text, jint start, jint end,
-        jint contextStart, int contextEnd, jfloat x, jfloat y, SkPaint* paint) {
+        jint contextStart, int contextEnd, jfloat x, jfloat y, jint dirFlags,
+        SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     renderTextRun(renderer, textArray + contextStart, start - contextStart,
-            count, contextCount, x, y, paint);
+            count, contextCount, x, y, dirFlags, paint);
     env->ReleaseStringChars(text, textArray);
 }
 
 static void renderPosText(OpenGLRenderer* renderer, const jchar* text, int count,
-        const jfloat* positions, SkPaint* paint) {
+        const jfloat* positions, jint dirFlags, SkPaint* paint) {
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, 0, count, count);
+            text, 0, count, count, dirFlags);
     if (value == NULL) {
         return;
     }
@@ -689,7 +691,7 @@ static void android_view_GLES20Canvas_drawPosTextArray(JNIEnv* env, jobject claz
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     jfloat* positions = env->GetFloatArrayElements(pos, NULL);
 
-    renderPosText(renderer, textArray + index, count, positions, paint);
+    renderPosText(renderer, textArray + index, count, positions, kBidi_LTR, paint);
 
     env->ReleaseFloatArrayElements(pos, positions, JNI_ABORT);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
@@ -701,7 +703,7 @@ static void android_view_GLES20Canvas_drawPosText(JNIEnv* env, jobject clazz,
     const jchar* textArray = env->GetStringChars(text, NULL);
     jfloat* positions = env->GetFloatArrayElements(pos, NULL);
 
-    renderPosText(renderer, textArray + start, end - start, positions, paint);
+    renderPosText(renderer, textArray + start, end - start, positions, kBidi_LTR, paint);
 
     env->ReleaseFloatArrayElements(pos, positions, JNI_ABORT);
     env->ReleaseStringChars(text, textArray);
@@ -1005,16 +1007,16 @@ static JNINativeMethod gMethods[] = {
     { "nSetupPaintFilter",  "(III)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },
     { "nResetPaintFilter",  "(I)V",            (void*) android_view_GLES20Canvas_resetPaintFilter },
 
-    { "nDrawText",          "(I[CIIFFI)V",    (void*) android_view_GLES20Canvas_drawTextArray },
-    { "nDrawText",          "(ILjava/lang/String;IIFFI)V",
+    { "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
+    { "nDrawText",          "(ILjava/lang/String;IIFFII)V",
             (void*) android_view_GLES20Canvas_drawText },
 
-    { "nDrawTextOnPath",    "(I[CIIIFFI)V",   (void*) android_view_GLES20Canvas_drawTextArrayOnPath },
-    { "nDrawTextOnPath",    "(ILjava/lang/String;IIIFFI)V",
+    { "nDrawTextOnPath",    "(I[CIIIFFII)V",   (void*) android_view_GLES20Canvas_drawTextArrayOnPath },
+    { "nDrawTextOnPath",    "(ILjava/lang/String;IIIFFII)V",
             (void*) android_view_GLES20Canvas_drawTextOnPath },
 
-    { "nDrawTextRun",       "(I[CIIIIFFI)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
-    { "nDrawTextRun",       "(ILjava/lang/String;IIIIFFI)V",
+    { "nDrawTextRun",       "(I[CIIIIFFII)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
+    { "nDrawTextRun",       "(ILjava/lang/String;IIIIFFII)V",
             (void*) android_view_GLES20Canvas_drawTextRun },
 
     { "nDrawPosText",       "(I[CII[FI)V",     (void*) android_view_GLES20Canvas_drawPosTextArray },

@@ -1130,20 +1130,20 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * {@hide}
      */
     public void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
-            float x, float y, Paint p) {
+            float x, float y, int flags, Paint p) {
         checkRange("drawTextRun", start, end);
 
         int contextLen = contextEnd - contextStart;
         int len = end - start;
         if (contextEnd <= mGapStart) {
-            c.drawTextRun(mText, start, len, contextStart, contextLen, x, y, p);
+            c.drawTextRun(mText, start, len, contextStart, contextLen, x, y, flags, p);
         } else if (contextStart >= mGapStart) {
             c.drawTextRun(mText, start + mGapLength, len, contextStart + mGapLength,
-                    contextLen, x, y, p);
+                    contextLen, x, y, flags, p);
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
-            c.drawTextRun(buf, start - contextStart, len, 0, contextLen, x, y, p);
+            c.drawTextRun(buf, start - contextStart, len, 0, contextLen, x, y, flags, p);
             TextUtils.recycle(buf);
         }
     }
@@ -1200,7 +1200,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Paint to use internally.
      * {@hide}
      */
-    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd,
+    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, int flags,
             float[] advances, int advancesPos, Paint p) {
 
         float ret;
@@ -1210,15 +1210,44 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         if (end <= mGapStart) {
             ret = p.getTextRunAdvances(mText, start, len, contextStart, contextLen,
-                    advances, advancesPos);
+                    flags, advances, advancesPos);
         } else if (start >= mGapStart) {
             ret = p.getTextRunAdvances(mText, start + mGapLength, len,
-                    contextStart + mGapLength, contextLen, advances, advancesPos);
+                    contextStart + mGapLength, contextLen, flags, advances, advancesPos);
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
             ret = p.getTextRunAdvances(buf, start - contextStart, len,
-                    0, contextLen, advances, advancesPos);
+                    0, contextLen, flags, advances, advancesPos);
+            TextUtils.recycle(buf);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Don't call this yourself -- exists for Paint to use internally.
+     * {@hide}
+     */
+    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, int flags,
+            float[] advances, int advancesPos, Paint p, int reserved) {
+
+        float ret;
+
+        int contextLen = contextEnd - contextStart;
+        int len = end - start;
+
+        if (end <= mGapStart) {
+            ret = p.getTextRunAdvances(mText, start, len, contextStart, contextLen,
+                    flags, advances, advancesPos, reserved);
+        } else if (start >= mGapStart) {
+            ret = p.getTextRunAdvances(mText, start + mGapLength, len,
+                    contextStart + mGapLength, contextLen, flags, advances, advancesPos, reserved);
+        } else {
+            char[] buf = TextUtils.obtain(contextLen);
+            getChars(contextStart, contextEnd, buf, 0);
+            ret = p.getTextRunAdvances(buf, start - contextStart, len,
+                    0, contextLen, flags, advances, advancesPos, reserved);
             TextUtils.recycle(buf);
         }
 
@@ -1241,7 +1270,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      *
      * @param contextStart the start index of the context
      * @param contextEnd the (non-inclusive) end index of the context
-     * @param flags reserved
+     * @param flags either DIRECTION_RTL or DIRECTION_LTR
      * @param offset the cursor position to move from
      * @param cursorOpt how to move the cursor, one of CURSOR_AFTER,
      * CURSOR_AT_OR_AFTER, CURSOR_BEFORE,
@@ -1252,30 +1281,22 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      */
     @Deprecated
     public int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
-                                int cursorOpt, Paint p) {
-        return getTextRunCursor(contextStart, contextEnd, offset, cursorOpt, p);
-    }
-
-    /**
-     * @hide
-     */
-    public int getTextRunCursor(int contextStart, int contextEnd, int offset,
-                                int cursorOpt, Paint p) {
+            int cursorOpt, Paint p) {
 
         int ret;
 
         int contextLen = contextEnd - contextStart;
         if (contextEnd <= mGapStart) {
             ret = p.getTextRunCursor(mText, contextStart, contextLen,
-                    offset, cursorOpt);
+                    flags, offset, cursorOpt);
         } else if (contextStart >= mGapStart) {
             ret = p.getTextRunCursor(mText, contextStart + mGapLength, contextLen,
-                    offset + mGapLength, cursorOpt) - mGapLength;
+                    flags, offset + mGapLength, cursorOpt) - mGapLength;
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
             ret = p.getTextRunCursor(buf, 0, contextLen,
-                    offset - contextStart, cursorOpt) + contextStart;
+                    flags, offset - contextStart, cursorOpt) + contextStart;
             TextUtils.recycle(buf);
         }
 
