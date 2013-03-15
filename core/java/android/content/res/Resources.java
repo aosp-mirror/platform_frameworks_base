@@ -1739,6 +1739,15 @@ public class Resources {
     }
 
     /**
+     * Return true if given resource identifier includes a package.
+     *
+     * @hide
+     */
+    public static boolean resourceHasPackage(int resid) {
+        return (resid >>> 24) != 0;
+    }
+
+    /**
      * Return the full name for a given resource identifier.  This name is
      * a single string of the form "package:type/entry".
      * 
