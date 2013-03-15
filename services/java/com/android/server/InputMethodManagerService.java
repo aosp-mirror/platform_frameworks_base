@@ -1242,24 +1242,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void onServiceConnected(ComponentName name, IBinder service) {
         synchronized (mMethodMap) {
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
-                IInputMethod prevMethod = mCurMethod;
                 mCurMethod = IInputMethod.Stub.asInterface(service);
                 if (mCurToken == null) {
                     Slog.w(TAG, "Service connected without a token!");
                     unbindCurrentMethodLocked(false, false);
                     return;
                 }
-                // Remove messages relating to the previous service. Otherwise WindowManagerService
-                // will throw a BadTokenException because the old token is being removed.
-                if (prevMethod != null) {
-                    try {
-                        prevMethod.removeSoftInputMessages();
-                    } catch (RemoteException e) {
-                    }
-                }
-                mCaller.removeMessages(MSG_SHOW_SOFT_INPUT);
-                mCaller.removeMessages(MSG_HIDE_SOFT_INPUT);
-                if (true || DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
+                if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                 executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                         MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
                 if (mCurClient != null) {
@@ -1705,7 +1694,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
 
-                if (true || DEBUG) Slog.v(TAG, "Client requesting input be shown");
+                if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(flags, resultReceiver);
             }
         } finally {
@@ -1729,8 +1718,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         boolean res = false;
         if (mCurMethod != null) {
-            if (true ||DEBUG) Slog.d(TAG, "showCurrentInputLocked: mCurToken=" + mCurToken,
-                    new RuntimeException("here").fillInStackTrace());
+            if (DEBUG) Slog.d(TAG, "showCurrentInputLocked: mCurToken=" + mCurToken);
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(
                     MSG_SHOW_SOFT_INPUT, getImeShowFlags(), mCurMethod,
                     resultReceiver));
@@ -1802,13 +1790,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     boolean hideCurrentInputLocked(int flags, ResultReceiver resultReceiver) {
         if ((flags&InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
                 && (mShowExplicitlyRequested || mShowForced)) {
-            if (true ||DEBUG) Slog.v(TAG,
-                    "Not hiding: explicit show not cancelled by non-explicit hide");
+            if (DEBUG) Slog.v(TAG, "Not hiding: explicit show not cancelled by non-explicit hide");
             return false;
         }
         if (mShowForced && (flags&InputMethodManager.HIDE_NOT_ALWAYS) != 0) {
-            if (true ||DEBUG) Slog.v(TAG,
-                    "Not hiding: forced show not cancelled by not-always hide");
+            if (DEBUG) Slog.v(TAG, "Not hiding: forced show not cancelled by not-always hide");
             return false;
         }
         boolean res;
@@ -2319,7 +2305,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_SHOW_SOFT_INPUT:
                 args = (SomeArgs)msg.obj;
                 try {
-                    if (true || DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".showSoftInput("
+                    if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".showSoftInput("
                             + msg.arg1 + ", " + args.arg2 + ")");
                     ((IInputMethod)args.arg1).showSoftInput(msg.arg1, (ResultReceiver)args.arg2);
                 } catch (RemoteException e) {
@@ -2329,7 +2315,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_HIDE_SOFT_INPUT:
                 args = (SomeArgs)msg.obj;
                 try {
-                    if (true || DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".hideSoftInput(0, "
+                    if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".hideSoftInput(0, "
                             + args.arg2 + ")");
                     ((IInputMethod)args.arg1).hideSoftInput(0, (ResultReceiver)args.arg2);
                 } catch (RemoteException e) {
@@ -2339,7 +2325,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_ATTACH_TOKEN:
                 args = (SomeArgs)msg.obj;
                 try {
-                    if (true || DEBUG) Slog.v(TAG, "Sending attach of token: " + args.arg2);
+                    if (DEBUG) Slog.v(TAG, "Sending attach of token: " + args.arg2);
                     ((IInputMethod)args.arg1).attachToken((IBinder)args.arg2);
                 } catch (RemoteException e) {
                 }
