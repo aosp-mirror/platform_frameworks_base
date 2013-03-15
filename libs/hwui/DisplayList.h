@@ -24,6 +24,8 @@
 #include <SkCamera.h>
 #include <SkMatrix.h>
 
+#include <private/hwui/DrawGlInfo.h>
+
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
@@ -57,10 +59,33 @@ class Layer;
 class SkiaColorFilter;
 class SkiaShader;
 
+class ClipRectOp;
+class SaveLayerOp;
+class SaveOp;
+class RestoreToCountOp;
+
+struct DeferStateStruct {
+    DeferStateStruct(DeferredDisplayList& deferredList, OpenGLRenderer& renderer, int replayFlags)
+            : mDeferredList(deferredList), mRenderer(renderer), mReplayFlags(replayFlags) {}
+    DeferredDisplayList& mDeferredList;
+    OpenGLRenderer& mRenderer;
+    const int mReplayFlags;
+};
+
+struct ReplayStateStruct {
+    ReplayStateStruct(OpenGLRenderer& renderer, Rect& dirty, int replayFlags)
+            : mRenderer(renderer), mDirty(dirty), mReplayFlags(replayFlags),
+            mDrawGlStatus(DrawGlInfo::kStatusDone) {}
+    OpenGLRenderer& mRenderer;
+    Rect& mDirty;
+    const int mReplayFlags;
+    status_t mDrawGlStatus;
+};
+
 /**
  * Refcounted structure that holds data used in display list stream
  */
-class DisplayListData: public LightRefBase<DisplayListData> {
+class DisplayListData : public LightRefBase<DisplayListData> {
 public:
     LinearAllocator allocator;
     Vector<DisplayListOp*> displayListOps;
@@ -79,9 +104,6 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    status_t setViewProperties(OpenGLRenderer& renderer, Rect& dirty,
-            int32_t flags, uint32_t level, DeferredDisplayList* deferredList);
-    void outputViewProperties(uint32_t level);
 
     ANDROID_API size_t getSize();
     ANDROID_API static void destroyDisplayListDeferred(DisplayList* displayList);
@@ -89,8 +111,9 @@ public:
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
-    status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0,
-            DeferredDisplayList* deferredList = NULL);
+
+    void defer(DeferStateStruct& deferStruct, const int level);
+    void replay(ReplayStateStruct& replayStruct, const int level);
 
     void output(uint32_t level = 0);
 
@@ -426,6 +449,14 @@ public:
     }
 
 private:
+    void outputViewProperties(const int level);
+
+    template <class T>
+    inline void setViewProperties(OpenGLRenderer& renderer, T& handler, const int level);
+
+    template <class T>
+    inline void iterate(OpenGLRenderer& renderer, T& handler, const int level);
+
     void init();
 
     void clearResources();
@@ -490,6 +521,22 @@ private:
     SkMatrix* mStaticMatrix;
     SkMatrix* mAnimationMatrix;
     bool mCaching;
+
+    /**
+     * State operations - needed to defer displayList property operations (for example, when setting
+     * an alpha causes a SaveLayerAlpha to occur). These operations point into mDisplayListData's
+     * allocation, or null if uninitialized.
+     *
+     * These are initialized (via friend constructors) when a displayList is issued in either replay
+     * or deferred mode. If replaying, the ops are not used until the next frame. If deferring, the
+     * ops may be stored in the DeferredDisplayList to be played back a second time.
+     *
+     * They should be used at most once per frame (one call to iterate)
+     */
+    ClipRectOp* mClipRectOp;
+    SaveLayerOp* mSaveLayerOp;
+    SaveOp* mSaveOp;
+    RestoreToCountOp* mRestoreToCountOp;
 }; // class DisplayList
 
 }; // namespace uirenderer

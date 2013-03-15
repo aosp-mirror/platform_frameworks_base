@@ -26,10 +26,13 @@
 namespace android {
 namespace uirenderer {
 
+class ClipOp;
 class DrawOp;
+class SaveOp;
+class SaveLayerOp;
+class StateOp;
 class DrawOpBatch;
 class OpenGLRenderer;
-class SkiaShader;
 
 class DeferredDisplayList {
 public:
@@ -55,18 +58,42 @@ public:
      * Plays back all of the draw ops recorded into batches to the renderer.
      * Adjusts the state of the renderer as necessary, and restores it when complete
      */
-    status_t flush(OpenGLRenderer& renderer, Rect& dirty, int32_t flags,
-            uint32_t level);
+    status_t flush(OpenGLRenderer& renderer, Rect& dirty);
+
+    void addClip(OpenGLRenderer& renderer, ClipOp* op);
+    void addSaveLayer(OpenGLRenderer& renderer, SaveLayerOp* op, int newSaveCount);
+    void addSave(OpenGLRenderer& renderer, SaveOp* op, int newSaveCount);
+    void addRestoreToCount(OpenGLRenderer& renderer, int newSaveCount);
 
     /**
      * Add a draw op into the DeferredDisplayList, reordering as needed (for performance) if
      * disallowReorder is false, respecting draw order when overlaps occur
      */
-    void add(DrawOp* op, bool disallowReorder);
+    void addDrawOp(OpenGLRenderer& renderer, DrawOp* op);
 
 private:
+    /*
+     * Resets the batching back-pointers, creating a barrier in the operation stream so that no ops
+     * added in the future will be inserted into a batch that already exist.
+     */
+    void resetBatchingState();
+
     void clear();
 
+    void storeStateOpBarrier(OpenGLRenderer& renderer, StateOp* op);
+    void storeRestoreToCountBarrier(int newSaveCount);
+
+    bool recordingComplexClip() const { return mComplexClipStackStart >= 0; }
+
+    int getStateOpDeferFlags() const;
+    int getDrawOpDeferFlags() const;
+
+    /*
+     *
+     * at defer time, stores the savecount of save/saveLayer ops that were 
+     */
+    Vector<int> mSaveStack;
+    int mComplexClipStackStart;
 
     Vector<DrawOpBatch*> mBatches;
     int mBatchIndices[kOpBatch_Count];

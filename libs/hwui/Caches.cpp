@@ -103,14 +103,9 @@ void Caches::initFont() {
 void Caches::initExtensions() {
     if (mExtensions.hasDebugMarker()) {
         eventMark = glInsertEventMarkerEXT;
-        if ((drawDeferDisabled || drawReorderDisabled)) {
-            startMark = glPushGroupMarkerEXT;
-            endMark = glPopGroupMarkerEXT;
-        } else {
-            startMark = startMarkNull;
-            endMark = endMarkNull;
-        }
 
+        startMark = glPushGroupMarkerEXT;
+        endMark = glPopGroupMarkerEXT;
     } else {
         eventMark = eventMarkNull;
         startMark = startMarkNull;

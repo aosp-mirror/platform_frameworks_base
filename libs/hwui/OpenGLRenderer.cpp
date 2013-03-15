@@ -635,36 +635,15 @@ bool OpenGLRenderer::restoreSnapshot() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
-        SkPaint* p, int flags) {
+        int alpha, SkXfermode::Mode mode, int flags) {
     const GLuint previousFbo = mSnapshot->fbo;
     const int count = saveSnapshot(flags);
 
     if (!mSnapshot->isIgnored()) {
-        int alpha = 255;
-        SkXfermode::Mode mode;
-
-        if (p) {
-            alpha = p->getAlpha();
-            mode = getXfermode(p->getXfermode());
-        } else {
-            mode = SkXfermode::kSrcOver_Mode;
-        }
-
         createLayer(left, top, right, bottom, alpha, mode, flags, previousFbo);
     }
 
     return count;
-}
-
-int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
-        int alpha, int flags) {
-    if (alpha >= 255) {
-        return saveLayer(left, top, right, bottom, NULL, flags);
-    } else {
-        SkPaint paint;
-        paint.setAlpha(alpha);
-        return saveLayer(left, top, right, bottom, &paint, flags);
-    }
 }
 
 /**
@@ -1225,36 +1204,48 @@ void OpenGLRenderer::clearLayerRegions() {
 // State Deferral
 ///////////////////////////////////////////////////////////////////////////////
 
-bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state) {
+bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDeferFlags) {
     const Rect& currentClip = *(mSnapshot->clipRect);
     const mat4& currentMatrix = *(mSnapshot->transform);
 
-    // state only has bounds initialized in local coordinates
-    if (!state.mBounds.isEmpty()) {
-        currentMatrix.mapRect(state.mBounds);
-        if (!state.mBounds.intersect(currentClip)) {
-            // quick rejected
-            return true;
+    if (stateDeferFlags & kStateDeferFlag_Draw) {
+        // state has bounds initialized in local coordinates
+        if (!state.mBounds.isEmpty()) {
+            currentMatrix.mapRect(state.mBounds);
+            if (!state.mBounds.intersect(currentClip)) {
+                // quick rejected
+                return true;
+            }
+        } else {
+            state.mBounds.set(currentClip);
         }
-    } else {
-        state.mBounds.set(currentClip);
+        state.mDrawModifiers = mDrawModifiers;
+        state.mAlpha = mSnapshot->alpha;
     }
 
-    state.mClip.set(currentClip);
+    if (stateDeferFlags & kStateDeferFlag_Clip) {
+        state.mClip.set(currentClip);
+    } else {
+        state.mClip.setEmpty();
+    }
+
+    // transform always deferred
     state.mMatrix.load(currentMatrix);
-    state.mDrawModifiers = mDrawModifiers;
     return false;
 }
 
-void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state) {
+void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, int stateDeferFlags) {
     currentTransform().load(state.mMatrix);
 
-    // NOTE: a clip RECT will be saved and restored, but DeferredDisplayState doesn't support
-    // complex clips. In the future, we should add support for deferral of operations clipped by
-    // these. for now, we don't defer with complex clips (see OpenGLRenderer::disallowDeferral())
-    mSnapshot->setClip(state.mClip.left, state.mClip.top, state.mClip.right, state.mClip.bottom);
-    dirtyClip();
-    mDrawModifiers = state.mDrawModifiers;
+    if (stateDeferFlags & kStateDeferFlag_Draw) {
+        mDrawModifiers = state.mDrawModifiers;
+        mSnapshot->alpha = state.mAlpha;
+    }
+
+    if (!state.mClip.isEmpty()) { //stateDeferFlags & kStateDeferFlag_Clip) {
+        mSnapshot->setClip(state.mClip.left, state.mClip.top, state.mClip.right, state.mClip.bottom);
+        dirtyClip();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1805,16 +1796,21 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags) {
+status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
+        int32_t replayFlags) {
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
-            return displayList->replay(*this, dirty, flags, 0);
+            ReplayStateStruct replayStruct(*this, dirty, replayFlags);
+            displayList->replay(replayStruct, 0);
+            return replayStruct.mDrawGlStatus;
         }
 
         DeferredDisplayList deferredList;
-        return displayList->replay(*this, dirty, flags, 0, &deferredList);
+        DeferStateStruct deferStruct(deferredList, *this, replayFlags);
+        displayList->defer(deferStruct, 0);
+        return deferredList.flush(*this, dirty);
     }
 
     return DrawGlInfo::kStatusDone;

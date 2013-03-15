@@ -79,9 +79,7 @@ public:
     virtual void restoreToCount(int saveCount);
 
     virtual int saveLayer(float left, float top, float right, float bottom,
-            SkPaint* p, int flags);
-    virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-                int alpha, int flags);
+            int alpha, SkXfermode::Mode mode, int flags);
 
     virtual void translate(float dx, float dy);
     virtual void rotate(float degrees);

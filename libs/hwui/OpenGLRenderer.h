@@ -65,6 +65,11 @@ struct DrawModifiers {
     int mPaintFilterSetBits;
 };
 
+enum StateDeferFlags {
+    kStateDeferFlag_Draw = 0x1,
+    kStateDeferFlag_Clip = 0x2
+};
+
 struct DeferredDisplayState {
     Rect mBounds; // local bounds, mapped with matrix to be in screen space coordinates, clipped.
     int mMultipliedAlpha; // -1 if invalid (because caching not set)
@@ -72,8 +77,8 @@ struct DeferredDisplayState {
     // the below are set and used by the OpenGLRenderer at record and deferred playback
     Rect mClip;
     mat4 mMatrix;
-    SkiaShader* mShader;
     DrawModifiers mDrawModifiers;
+    float mAlpha;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -188,10 +193,18 @@ public:
     virtual void restore();
     virtual void restoreToCount(int saveCount);
 
+    ANDROID_API int saveLayer(float left, float top, float right, float bottom,
+            SkPaint* paint, int flags) {
+        SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode;
+        if (paint) mode = getXfermode(paint->getXfermode());
+        return saveLayer(left, top, right, bottom, paint ? paint->getAlpha() : 255, mode, flags);
+    }
+    ANDROID_API int saveLayerAlpha(float left, float top, float right, float bottom,
+            int alpha, int flags) {
+        return saveLayer(left, top, right, bottom, alpha, SkXfermode::kSrcOver_Mode, flags);
+    }
     virtual int saveLayer(float left, float top, float right, float bottom,
-            SkPaint* p, int flags);
-    virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, int flags);
+            int alpha, SkXfermode::Mode mode, int flags);
 
     virtual void translate(float dx, float dy);
     virtual void rotate(float degrees);
@@ -211,7 +224,7 @@ public:
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
     virtual Rect* getClipRect();
 
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags);
+    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags);
     virtual void outputDisplayList(DisplayList* displayList);
     virtual status_t drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
@@ -261,27 +274,21 @@ public:
 
     SkPaint* filterPaint(SkPaint* paint, bool alwaysCopy = false);
 
-    bool disallowDeferral() {
-        // returns true if the OpenGLRenderer's state can be completely represented by
-        // a DeferredDisplayState object
-        return !mSnapshot->clipRegion->isEmpty() ||
-                mSnapshot->alpha < 1.0 ||
-                (mSnapshot->flags & Snapshot::kFlagIsLayer) ||
-                (mSnapshot->flags & Snapshot::kFlagFboTarget); // ensure we're not in a layer
-    }
+    bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
+    void restoreDisplayState(const DeferredDisplayState& state, int stateDeferFlags);
 
-    bool storeDisplayState(DeferredDisplayState& state);
-    void restoreDisplayState(const DeferredDisplayState& state);
-
-    const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
-    void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
-
+    // TODO: what does this mean? no perspective? no rotate?
     ANDROID_API bool isCurrentTransformSimple() {
         return mSnapshot->transform->isSimple();
     }
 
     Caches& getCaches() {
         return mCaches;
+    }
+
+    // simple rect clip
+    bool isCurrentClipSimple() {
+        return mSnapshot->clipRegion->isEmpty();
     }
 
     /**

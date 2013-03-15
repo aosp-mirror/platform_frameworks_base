@@ -175,14 +175,8 @@ void DisplayListRenderer::restoreToCount(int saveCount) {
 }
 
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
-        SkPaint* p, int flags) {
-    addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, p, flags));
-    return OpenGLRenderer::save(flags);
-}
-
-int DisplayListRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
-        int alpha, int flags) {
-    addStateOp(new (alloc()) SaveLayerAlphaOp(left, top, right, bottom, alpha, flags));
+        int alpha, SkXfermode::Mode mode, int flags) {
+    addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, alpha, mode, flags));
     return OpenGLRenderer::save(flags);
 }
 
