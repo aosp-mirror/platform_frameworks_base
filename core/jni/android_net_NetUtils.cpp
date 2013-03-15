@@ -136,6 +136,10 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
         result = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
                 dns, server, &lease, vendorInfo, domains);
     }
+    if (result != 0) {
+        ALOGD("dhcp_do_request failed");
+    }
+
     env->ReleaseStringUTFChars(ifname, nameStr);
     if (result == 0) {
         env->CallVoidMethod(dhcpResults, dhcpResultsFieldIds.clear);
