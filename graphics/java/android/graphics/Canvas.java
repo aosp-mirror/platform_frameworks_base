@@ -62,6 +62,18 @@ public class Canvas {
     @SuppressWarnings({"UnusedDeclaration"})
     private int mSurfaceFormat;
 
+    /**
+     * Flag for drawTextRun indicating left-to-right run direction.
+     * @hide
+     */
+    public static final int DIRECTION_LTR = 0;
+    
+    /**
+     * Flag for drawTextRun indicating right-to-left run direction.
+     * @hide
+     */
+    public static final int DIRECTION_RTL = 1;
+
     // Maximum bitmap size as defined in Skia's native code
     // (see SkCanvas.cpp, SkDraw.cpp)
     private static final int MAXMIMUM_BITMAP_SIZE = 32766;
@@ -1333,7 +1345,8 @@ public class Canvas {
             (text.length - index - count)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, index, count, x, y, paint.mNativePaint);
+        native_drawText(mNativeCanvas, text, index, count, x, y, paint.mBidiFlags,
+                paint.mNativePaint);
     }
 
     /**
@@ -1346,7 +1359,8 @@ public class Canvas {
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(String text, float x, float y, Paint paint) {
-        native_drawText(mNativeCanvas, text, 0, text.length(), x, y, paint.mNativePaint);
+        native_drawText(mNativeCanvas, text, 0, text.length(), x, y, paint.mBidiFlags,
+                paint.mNativePaint);
     }
 
     /**
@@ -1364,7 +1378,8 @@ public class Canvas {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, start, end, x, y, paint.mNativePaint);
+        native_drawText(mNativeCanvas, text, start, end, x, y, paint.mBidiFlags,
+                paint.mNativePaint);
     }
 
     /**
@@ -1383,14 +1398,16 @@ public class Canvas {
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
-            native_drawText(mNativeCanvas, text.toString(), start, end, x, y, paint.mNativePaint);
+            native_drawText(mNativeCanvas, text.toString(), start, end, x, y,
+                            paint.mBidiFlags, paint.mNativePaint);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
                                                      paint);
         } else {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
-            native_drawText(mNativeCanvas, buf, 0, end - start, x, y, paint.mNativePaint);
+            native_drawText(mNativeCanvas, buf, 0, end - start, x, y,
+                    paint.mBidiFlags, paint.mNativePaint);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1411,11 +1428,13 @@ public class Canvas {
      *         + count.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
+     * @param dir the run direction, either {@link #DIRECTION_LTR} or
+     *         {@link #DIRECTION_RTL}.
      * @param paint the paint
      * @hide
      */
     public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,
-            float x, float y, Paint paint) {
+            float x, float y, int dir, Paint paint) {
 
         if (text == null) {
             throw new NullPointerException("text is null");
@@ -1426,9 +1445,12 @@ public class Canvas {
         if ((index | count | text.length - index - count) < 0) {
             throw new IndexOutOfBoundsException();
         }
+        if (dir != DIRECTION_LTR && dir != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown dir: " + dir);
+        }
 
         native_drawTextRun(mNativeCanvas, text, index, count,
-                contextIndex, contextCount, x, y, paint.mNativePaint);
+                contextIndex, contextCount, x, y, dir, paint.mNativePaint);
     }
 
     /**
@@ -1444,11 +1466,12 @@ public class Canvas {
      *            position can be used for shaping context.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
+     * @param dir the run direction, either 0 for LTR or 1 for RTL.
      * @param paint the paint
      * @hide
      */
     public void drawTextRun(CharSequence text, int start, int end, int contextStart, int contextEnd,
-            float x, float y, Paint paint) {
+            float x, float y, int dir, Paint paint) {
 
         if (text == null) {
             throw new NullPointerException("text is null");
@@ -1460,20 +1483,22 @@ public class Canvas {
             throw new IndexOutOfBoundsException();
         }
 
+        int flags = dir == 0 ? 0 : 1;
+
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             native_drawTextRun(mNativeCanvas, text.toString(), start, end,
-                    contextStart, contextEnd, x, y, paint.mNativePaint);
+                    contextStart, contextEnd, x, y, flags, paint.mNativePaint);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
-                    contextStart, contextEnd, x, y, paint);
+                    contextStart, contextEnd, x, y, flags, paint);
         } else {
             int contextLen = contextEnd - contextStart;
             int len = end - start;
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             native_drawTextRun(mNativeCanvas, buf, start - contextStart, len,
-                    0, contextLen, x, y, paint.mNativePaint);
+                    0, contextLen, x, y, flags, paint.mNativePaint);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1539,7 +1564,8 @@ public class Canvas {
             throw new ArrayIndexOutOfBoundsException();
         }
         native_drawTextOnPath(mNativeCanvas, text, index, count,
-                              path.ni(), hOffset, vOffset, paint.mNativePaint);
+                              path.ni(), hOffset, vOffset,
+                              paint.mBidiFlags, paint.mNativePaint);
     }
 
     /**
@@ -1558,7 +1584,7 @@ public class Canvas {
     public void drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint) {
         if (text.length() > 0) {
             native_drawTextOnPath(mNativeCanvas, text, path.ni(), hOffset, vOffset,
-                    paint.mNativePaint);
+                    paint.mBidiFlags, paint.mNativePaint);
         }
     }
 
@@ -1720,18 +1746,18 @@ public class Canvas {
     
     private static native void native_drawText(int nativeCanvas, char[] text,
                                                int index, int count, float x,
-                                               float y, int paint);
+                                               float y, int flags, int paint);
     private static native void native_drawText(int nativeCanvas, String text,
                                                int start, int end, float x,
-                                               float y, int paint);
+                                               float y, int flags, int paint);
 
     private static native void native_drawTextRun(int nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
-            float x, float y, int paint);
+            float x, float y, int flags, int paint);
 
     private static native void native_drawTextRun(int nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
-            float x, float y, int paint);
+            float x, float y, int flags, int paint);
 
     private static native void native_drawPosText(int nativeCanvas,
                                                   char[] text, int index,
@@ -1744,13 +1770,13 @@ public class Canvas {
                                                      char[] text, int index,
                                                      int count, int path,
                                                      float hOffset,
-                                                     float vOffset,
+                                                     float vOffset, int bidiFlags,
                                                      int paint);
     private static native void native_drawTextOnPath(int nativeCanvas,
                                                      String text, int path,
                                                      float hOffset, 
                                                      float vOffset, 
-                                                     int paint);
+                                                     int flags, int paint);
     private static native void native_drawPicture(int nativeCanvas,
                                                   int nativePicture);
     private static native void finalizer(int nativeCanvas);

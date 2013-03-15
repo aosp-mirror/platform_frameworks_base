@@ -664,13 +664,14 @@ class TextLine {
             }
         }
 
+        int flags = runIsRtl ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR;
         int cursorOpt = after ? Paint.CURSOR_AFTER : Paint.CURSOR_BEFORE;
         if (mCharsValid) {
             return wp.getTextRunCursor(mChars, spanStart, spanLimit - spanStart,
-                    offset, cursorOpt);
+                    flags, offset, cursorOpt);
         } else {
             return wp.getTextRunCursor(mText, mStart + spanStart,
-                    mStart + spanLimit, mStart + offset, cursorOpt) - mStart;
+                    mStart + spanLimit, flags, mStart + offset, cursorOpt) - mStart;
         }
     }
 
@@ -737,13 +738,15 @@ class TextLine {
 
         int contextLen = contextEnd - contextStart;
         if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineColor != 0 || runIsRtl))) {
+            int flags = runIsRtl ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR;
             if (mCharsValid) {
                 ret = wp.getTextRunAdvances(mChars, start, runLen,
-                        contextStart, contextLen, null, 0);
+                        contextStart, contextLen, flags, null, 0);
             } else {
                 int delta = mStart;
-                ret = wp.getTextRunAdvances(mText, delta + start, delta + end,
-                        delta + contextStart, delta + contextEnd, null, 0);
+                ret = wp.getTextRunAdvances(mText, delta + start,
+                        delta + end, delta + contextStart, delta + contextEnd,
+                        flags, null, 0);
             }
         }
 
@@ -783,7 +786,8 @@ class TextLine {
                 wp.setAntiAlias(previousAntiAlias);
             }
 
-            drawTextRun(c, wp, start, end, contextStart, contextEnd, x, y + wp.baselineShift);
+            drawTextRun(c, wp, start, end, contextStart, contextEnd, runIsRtl,
+                    x, y + wp.baselineShift);
         }
 
         return runIsRtl ? -ret : ret;
@@ -966,21 +970,23 @@ class TextLine {
      * @param end the end of the run
      * @param contextStart the start of context for the run
      * @param contextEnd the end of the context for the run
+     * @param runIsRtl true if the run is right-to-left
      * @param x the x position of the left edge of the run
      * @param y the baseline of the run
      */
     private void drawTextRun(Canvas c, TextPaint wp, int start, int end,
-            int contextStart, int contextEnd, float x, int y) {
+            int contextStart, int contextEnd, boolean runIsRtl, float x, int y) {
 
+        int flags = runIsRtl ? Canvas.DIRECTION_RTL : Canvas.DIRECTION_LTR;
         if (mCharsValid) {
             int count = end - start;
             int contextCount = contextEnd - contextStart;
             c.drawTextRun(mChars, start, count, contextStart, contextCount,
-                    x, y, wp);
+                    x, y, flags, wp);
         } else {
             int delta = mStart;
             c.drawTextRun(mText, delta + start, delta + end,
-                    delta + contextStart, delta + contextEnd, x, y, wp);
+                    delta + contextStart, delta + contextEnd, x, y, flags, wp);
         }
     }
 
