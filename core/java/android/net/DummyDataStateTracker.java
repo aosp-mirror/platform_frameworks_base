@@ -203,6 +203,16 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         // not supported on this network
     }
 
+    @Override
+    public void addStackedLink(LinkProperties link) {
+        mLinkProperties.addStackedLink(link);
+    }
+
+    @Override
+    public void removeStackedLink(LinkProperties link) {
+        mLinkProperties.removeStackedLink(link);
+    }
+
     static private void log(String s) {
         Slog.d(TAG, s);
     }

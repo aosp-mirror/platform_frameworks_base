@@ -522,6 +522,16 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     }
 
     @Override
+    public void addStackedLink(LinkProperties link) {
+        mLinkProperties.addStackedLink(link);
+    }
+
+    @Override
+    public void removeStackedLink(LinkProperties link) {
+        mLinkProperties.removeStackedLink(link);
+    }
+
+    @Override
     public String toString() {
         final CharArrayWriter writer = new CharArrayWriter();
         final PrintWriter pw = new PrintWriter(writer);

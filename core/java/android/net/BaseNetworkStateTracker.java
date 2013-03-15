@@ -155,4 +155,14 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     public void setDependencyMet(boolean met) {
         // Base tracker doesn't handle dependencies
     }
+
+    @Override
+    public void addStackedLink(LinkProperties link) {
+        mLinkProperties.addStackedLink(link);
+    }
+
+    @Override
+    public void removeStackedLink(LinkProperties link) {
+        mLinkProperties.removeStackedLink(link);
+    }
 }
