@@ -78,17 +78,26 @@ public:
         kOpLogFlag_JSON = 0x2 // TODO: add?
     };
 
-    // If a DeferredDisplayList is supplied, DrawOps will be stored until the list is flushed
-    // NOTE: complex clips and layers prevent deferral
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha,
-            DeferredDisplayList* deferredList) = 0;
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) = 0;
 
-    virtual void output(int level, uint32_t flags = 0) = 0;
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount,
+            int level, int multipliedAlpha) = 0;
+
+    virtual void output(int level, uint32_t logFlags = 0) = 0;
 
     // NOTE: it would be nice to declare constants and overriding the implementation in each op to
     // point at the constants, but that seems to require a .cpp file
     virtual const char* name() = 0;
+
+    /**
+     * Stores the relevant canvas state of the object between deferral and replay (if the canvas
+     * state supports being stored) See OpenGLRenderer::simpleClipAndState()
+     *
+     * TODO: don't reserve space for StateOps that won't be deferred
+     */
+    DeferredDisplayState state;
+
 };
 
 class StateOp : public DisplayListOp {
@@ -97,28 +106,22 @@ public:
 
     virtual ~StateOp() {}
 
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        // default behavior only affects immediate, deferrable state, issue directly to renderer
+        applyState(deferStruct.mRenderer, saveCount);
+    }
+
     /**
      * State operations are applied directly to the renderer, but can cause the deferred drawing op
      * list to flush
      */
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList* deferredList) {
-        status_t status = DrawGlInfo::kStatusDone;
-        if (deferredList && requiresDrawOpFlush(renderer)) {
-            // will be setting renderer state that affects ops in deferredList, so flush list first
-            status |= deferredList->flush(renderer, dirty, flags, level);
-        }
-        applyState(renderer, saveCount);
-        return status;
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        applyState(replayStruct.mRenderer, saveCount);
     }
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) = 0;
-
-    /**
-     * Returns true if it affects renderer drawing state in such a way to break deferral
-     * see OpenGLRenderer::disallowDeferral()
-     */
-    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return false; }
 };
 
 class DrawOp : public DisplayListOp {
@@ -126,36 +129,35 @@ public:
     DrawOp(SkPaint* paint)
             : mPaint(paint), mQuickRejected(false) {}
 
-    /** Draw operations are stored in the deferredList with information necessary for playback */
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList* deferredList) {
-        if (mQuickRejected && CC_LIKELY(flags & DisplayList::kReplayFlag_ClipChildren)) {
-            return DrawGlInfo::kStatusDone;
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        if (mQuickRejected &&
+                CC_LIKELY(deferStruct.mReplayFlags & DisplayList::kReplayFlag_ClipChildren)) {
+            return;
         }
 
-        if (!deferredList || renderer.disallowDeferral()) {
-            // dispatch draw immediately, since the renderer's state is too complex for deferral
-            return applyDraw(renderer, dirty, level, caching, multipliedAlpha);
-        }
-
-        if (!caching) multipliedAlpha = -1;
         state.mMultipliedAlpha = multipliedAlpha;
         if (!getLocalBounds(state.mBounds)) {
             // empty bounds signify bounds can't be calculated
             state.mBounds.setEmpty();
         }
 
-        if (!renderer.storeDisplayState(state)) {
-            // op wasn't quick-rejected, so defer
-            deferredList->add(this, renderer.getCaches().drawReorderDisabled);
-            onDrawOpDeferred(renderer);
-        }
-
-        return DrawGlInfo::kStatusDone;
+        deferStruct.mDeferredList.addDrawOp(deferStruct.mRenderer, this);
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) = 0;
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        if (mQuickRejected &&
+                CC_LIKELY(replayStruct.mReplayFlags & DisplayList::kReplayFlag_ClipChildren)) {
+            return;
+        }
+
+        replayStruct.mDrawGlStatus |= applyDraw(replayStruct.mRenderer, replayStruct.mDirty,
+                level, multipliedAlpha);
+    }
+
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) = 0;
 
     virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
     }
@@ -174,11 +176,6 @@ public:
 
     float strokeWidthOutset() { return mPaint->getStrokeWidth() * 0.5f; }
 
-    /**
-     * Stores the relevant canvas state of the object between deferral and replay (if the canvas
-     * state supports being stored) See OpenGLRenderer::simpleClipAndState()
-     */
-    DeferredDisplayState state;
 protected:
     SkPaint* getPaint(OpenGLRenderer& renderer, bool alwaysCopy = false) {
         return renderer.filterPaint(mPaint, alwaysCopy);
@@ -225,88 +222,113 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 
 class SaveOp : public StateOp {
+    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
     SaveOp(int flags)
             : mFlags(flags) {}
+
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        int newSaveCount = deferStruct.mRenderer.save(mFlags);
+        deferStruct.mDeferredList.addSave(deferStruct.mRenderer, this, newSaveCount);
+    }
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
         renderer.save(mFlags);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Save flags %x", mFlags);
     }
 
     virtual const char* name() { return "Save"; }
 
+    int getFlags() const { return mFlags; }
 private:
+    SaveOp() {}
+    DisplayListOp* reinit(int flags) {
+        mFlags = flags;
+        return this;
+    }
+
     int mFlags;
 };
 
 class RestoreToCountOp : public StateOp {
+    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
     RestoreToCountOp(int count)
             : mCount(count) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
-        renderer.restoreToCount(saveCount + mCount);
-
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        deferStruct.mDeferredList.addRestoreToCount(deferStruct.mRenderer, saveCount + mCount);
+        deferStruct.mRenderer.restoreToCount(saveCount + mCount);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+        renderer.restoreToCount(saveCount + mCount);
+    }
+
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Restore to count %d", mCount);
     }
 
     virtual const char* name() { return "RestoreToCount"; }
-    // Note: don't have to return true for requiresDrawOpFlush - even though restore can create a
-    // complex clip, the clip and matrix are overridden by DeferredDisplayList::flush()
 
 private:
+    RestoreToCountOp() {}
+    DisplayListOp* reinit(int count) {
+        mCount = count;
+        return this;
+    }
+
     int mCount;
 };
 
 class SaveLayerOp : public StateOp {
+    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
-    SaveLayerOp(float left, float top, float right, float bottom, SkPaint* paint, int flags)
-            : mArea(left, top, right, bottom), mPaint(paint), mFlags(flags) {}
+    SaveLayerOp(float left, float top, float right, float bottom,
+            int alpha, SkXfermode::Mode mode, int flags)
+            : mArea(left, top, right, bottom), mAlpha(alpha), mMode(mode), mFlags(flags) {}
+
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        // NOTE: don't bother with actual saveLayer, instead issuing it at flush time
+        int newSaveCount = deferStruct.mRenderer.save(mFlags);
+        deferStruct.mDeferredList.addSaveLayer(deferStruct.mRenderer, this, newSaveCount);
+    }
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
-        SkPaint* paint = renderer.filterPaint(mPaint);
-        renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom, paint, mFlags);
+        renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom, mAlpha, mMode, mFlags);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
-        OP_LOG("SaveLayer of area " RECT_STRING, RECT_ARGS(mArea));
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("SaveLayer%s of area " RECT_STRING,
+                (isSaveLayerAlpha() ? "Alpha" : ""),RECT_ARGS(mArea));
     }
 
-    virtual const char* name() { return "SaveLayer"; }
-    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
+    virtual const char* name() { return isSaveLayerAlpha() ? "SaveLayerAlpha" : "SaveLayer"; }
+
+    int getFlags() { return mFlags; }
 
 private:
-    Rect mArea;
-    SkPaint* mPaint;
-    int mFlags;
-};
-
-class SaveLayerAlphaOp : public StateOp {
-public:
-    SaveLayerAlphaOp(float left, float top, float right, float bottom, int alpha, int flags)
-            : mArea(left, top, right, bottom), mAlpha(alpha), mFlags(flags) {}
-
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
-        renderer.saveLayerAlpha(mArea.left, mArea.top, mArea.right, mArea.bottom, mAlpha, mFlags);
+    // Special case, reserved for direct DisplayList usage
+    SaveLayerOp() {}
+    DisplayListOp* reinit(float left, float top, float right, float bottom,
+            int alpha, SkXfermode::Mode mode, int flags) {
+        mArea.set(left, top, right, bottom);
+        mAlpha = alpha;
+        mMode = mode;
+        mFlags = flags;
+        return this;
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
-        OP_LOG("SaveLayerAlpha of area " RECT_STRING, RECT_ARGS(mArea));
-    }
-
-    virtual const char* name() { return "SaveLayerAlpha"; }
-    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
-
-private:
+    bool isSaveLayerAlpha() { return mAlpha < 255 && mMode == SkXfermode::kSrcOver_Mode; }
     Rect mArea;
     int mAlpha;
+    SkXfermode::Mode mMode;
     int mFlags;
 };
 
@@ -319,7 +341,7 @@ public:
         renderer.translate(mDx, mDy);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Translate by %f %f", mDx, mDy);
     }
 
@@ -339,7 +361,7 @@ public:
         renderer.rotate(mDegrees);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Rotate by %f degrees", mDegrees);
     }
 
@@ -358,7 +380,7 @@ public:
         renderer.scale(mSx, mSy);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Scale by %f %f", mSx, mSy);
     }
 
@@ -378,7 +400,7 @@ public:
         renderer.skew(mSx, mSy);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Skew by %f %f", mSx, mSy);
     }
 
@@ -398,7 +420,7 @@ public:
         renderer.setMatrix(mMatrix);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
     }
 
@@ -417,7 +439,7 @@ public:
         renderer.concatMatrix(mMatrix);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("ConcatMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
     }
 
@@ -427,75 +449,97 @@ private:
     SkMatrix* mMatrix;
 };
 
-class ClipRectOp : public StateOp {
+class ClipOp : public StateOp {
+public:
+    ClipOp(SkRegion::Op op) : mOp(op) {}
+
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        // NOTE: must defer op BEFORE applying state, since it may read clip
+        deferStruct.mDeferredList.addClip(deferStruct.mRenderer, this);
+
+        // TODO: Can we avoid applying complex clips at defer time?
+        applyState(deferStruct.mRenderer, saveCount);
+    }
+
+    bool canCauseComplexClip() {
+        return ((mOp != SkRegion::kIntersect_Op) && (mOp != SkRegion::kReplace_Op)) || !isRect();
+    }
+
+protected:
+    ClipOp() {}
+    virtual bool isRect() { return false; }
+
+    SkRegion::Op mOp;
+};
+
+class ClipRectOp : public ClipOp {
+    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
     ClipRectOp(float left, float top, float right, float bottom, SkRegion::Op op)
-            : mArea(left, top, right, bottom), mOp(op) {}
+            : ClipOp(op), mArea(left, top, right, bottom) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
         renderer.clipRect(mArea.left, mArea.top, mArea.right, mArea.bottom, mOp);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("ClipRect " RECT_STRING, RECT_ARGS(mArea));
     }
 
     virtual const char* name() { return "ClipRect"; }
 
-    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) {
-        // TODO: currently, we flush when we *might* cause a clip region to exist. Ideally, we
-        // should only flush when a non-rectangular clip would result
-        return !renderer.hasRectToRectTransform() || !hasRectToRectOp();
-    }
+protected:
+    virtual bool isRect() { return true; }
 
 private:
-    inline bool hasRectToRectOp() {
-        return mOp == SkRegion::kIntersect_Op || mOp == SkRegion::kReplace_Op;
+    ClipRectOp() {}
+    DisplayListOp* reinit(float left, float top, float right, float bottom, SkRegion::Op op) {
+        mOp = op;
+        mArea.set(left, top, right, bottom);
+        return this;
     }
+
     Rect mArea;
-    SkRegion::Op mOp;
 };
 
-class ClipPathOp : public StateOp {
+class ClipPathOp : public ClipOp {
 public:
     ClipPathOp(SkPath* path, SkRegion::Op op)
-            : mPath(path), mOp(op) {}
+            : ClipOp(op), mPath(path) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
         renderer.clipPath(mPath, mOp);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         SkRect bounds = mPath->getBounds();
         OP_LOG("ClipPath bounds " RECT_STRING,
                 bounds.left(), bounds.top(), bounds.right(), bounds.bottom());
     }
 
     virtual const char* name() { return "ClipPath"; }
-    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
 
 private:
     SkPath* mPath;
-    SkRegion::Op mOp;
 };
 
-class ClipRegionOp : public StateOp {
+class ClipRegionOp : public ClipOp {
 public:
     ClipRegionOp(SkRegion* region, SkRegion::Op op)
-            : mRegion(region), mOp(op) {}
+            : ClipOp(op), mRegion(region) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
         renderer.clipRegion(mRegion, mOp);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         SkIRect bounds = mRegion->getBounds();
         OP_LOG("ClipRegion bounds %d %d %d %d",
                 bounds.left(), bounds.top(), bounds.right(), bounds.bottom());
     }
 
     virtual const char* name() { return "ClipRegion"; }
-    virtual bool requiresDrawOpFlush(OpenGLRenderer& renderer) { return true; }
 
 private:
     SkRegion* mRegion;
@@ -508,7 +552,7 @@ public:
         renderer.resetShader();
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetShader");
     }
 
@@ -523,7 +567,7 @@ public:
         renderer.setupShader(mShader);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupShader, shader %p", mShader);
     }
 
@@ -539,7 +583,7 @@ public:
         renderer.resetColorFilter();
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetColorFilter");
     }
 
@@ -555,7 +599,7 @@ public:
         renderer.setupColorFilter(mColorFilter);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupColorFilter, filter %p", mColorFilter);
     }
 
@@ -571,7 +615,7 @@ public:
         renderer.resetShadow();
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetShadow");
     }
 
@@ -587,7 +631,7 @@ public:
         renderer.setupShadow(mRadius, mDx, mDy, mColor);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupShadow, radius %f, %f, %f, color %#x", mRadius, mDx, mDy, mColor);
     }
 
@@ -606,7 +650,7 @@ public:
         renderer.resetPaintFilter();
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetPaintFilter");
     }
 
@@ -622,7 +666,7 @@ public:
         renderer.setupPaintFilter(mClearBits, mSetBits);
     }
 
-    virtual void output(int level, uint32_t flags = 0) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupPaintFilter, clear %#x, set %#x", mClearBits, mSetBits);
     }
 
@@ -645,9 +689,9 @@ public:
                     paint),
             mBitmap(bitmap) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
-        bool makeCopy = caching && multipliedAlpha < 255;
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
+        bool makeCopy = multipliedAlpha >= 0 && multipliedAlpha < 255;
         SkPaint* paint = getPaint(renderer, makeCopy);
         if (makeCopy) {
             // The paint is safe to modify since we're working on a copy
@@ -657,7 +701,7 @@ public:
         return ret;
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p at %f %f", mBitmap, mLocalBounds.left, mLocalBounds.top);
     }
 
@@ -679,12 +723,12 @@ public:
         transform.mapRect(mLocalBounds);
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawBitmap(mBitmap, mMatrix, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p matrix " MATRIX_STRING, mBitmap, MATRIX_ARGS(mMatrix));
     }
 
@@ -705,14 +749,14 @@ public:
             : DrawBoundedOp(dstLeft, dstTop, dstRight, dstBottom, paint),
             mBitmap(bitmap), mSrc(srcLeft, srcTop, srcRight, srcBottom) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawBitmap(mBitmap, mSrc.left, mSrc.top, mSrc.right, mSrc.bottom,
                 mLocalBounds.left, mLocalBounds.top, mLocalBounds.right, mLocalBounds.bottom,
                 getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p src="RECT_STRING", dst="RECT_STRING,
                 mBitmap, RECT_ARGS(mSrc), RECT_ARGS(mLocalBounds));
     }
@@ -732,13 +776,13 @@ public:
     DrawBitmapDataOp(SkBitmap* bitmap, float left, float top, SkPaint* paint)
             : DrawBitmapOp(bitmap, left, top, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawBitmapData(mBitmap, mLocalBounds.left,
                 mLocalBounds.top, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p", mBitmap);
     }
 
@@ -756,13 +800,13 @@ public:
             mBitmap(bitmap), mMeshWidth(meshWidth), mMeshHeight(meshHeight),
             mVertices(vertices), mColors(colors) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawBitmapMesh(mBitmap, mMeshWidth, mMeshHeight,
                 mVertices, mColors, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p mesh %d x %d", mBitmap, mMeshWidth, mMeshHeight);
     }
 
@@ -790,8 +834,8 @@ public:
             mColors(colors), mxDivsCount(width), myDivsCount(height),
             mNumColors(numColors), mAlpha(alpha), mMode(mode) {};
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         // NOTE: not calling the virtual method, which takes a paint
         return renderer.drawPatch(mBitmap, mxDivs, myDivs, mColors,
                 mxDivsCount, myDivsCount, mNumColors,
@@ -799,7 +843,7 @@ public:
                 mLocalBounds.right, mLocalBounds.bottom, mAlpha, mMode);
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw patch "RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
@@ -825,12 +869,12 @@ public:
     DrawColorOp(int color, SkXfermode::Mode mode)
             : DrawOp(0), mColor(color), mMode(mode) {};
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawColor(mColor, mMode);
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw color %#x, mode %d", mColor, mMode);
     }
 
@@ -869,13 +913,13 @@ public:
     DrawRectOp(float left, float top, float right, float bottom, SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawRect(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Rect "RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
@@ -888,12 +932,12 @@ public:
             : DrawBoundedOp(rects, count, paint),
             mRects(rects), mCount(count) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawRects(mRects, mCount, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Rects count %d", mCount);
     }
 
@@ -914,13 +958,13 @@ public:
             float rx, float ry, SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint), mRx(rx), mRy(ry) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawRoundRect(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, mRx, mRy, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw RoundRect "RECT_STRING", rx %f, ry %f", RECT_ARGS(mLocalBounds), mRx, mRy);
     }
 
@@ -937,12 +981,12 @@ public:
             : DrawStrokableOp(x - radius, y - radius, x + radius, y + radius, paint),
             mX(x), mY(y), mRadius(radius) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawCircle(mX, mY, mRadius, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Circle x %f, y %f, r %f", mX, mY, mRadius);
     }
 
@@ -959,13 +1003,13 @@ public:
     DrawOvalOp(float left, float top, float right, float bottom, SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawOval(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Oval "RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
@@ -979,14 +1023,14 @@ public:
             : DrawStrokableOp(left, top, right, bottom, paint),
             mStartAngle(startAngle), mSweepAngle(sweepAngle), mUseCenter(useCenter) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawArc(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom,
                 mStartAngle, mSweepAngle, mUseCenter, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Arc "RECT_STRING", start %f, sweep %f, useCenter %d",
                 RECT_ARGS(mLocalBounds), mStartAngle, mSweepAngle, mUseCenter);
     }
@@ -1011,8 +1055,8 @@ public:
         mLocalBounds.set(left, top, left + width, top + height);
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawPath(mPath, getPaint(renderer));
     }
 
@@ -1021,7 +1065,7 @@ public:
         renderer.getCaches().pathCache.precache(mPath, paint);
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Path %p in "RECT_STRING, mPath, RECT_ARGS(mLocalBounds));
     }
 
@@ -1042,12 +1086,12 @@ public:
         mLocalBounds.outset(strokeWidthOutset());
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawLines(mPoints, mCount, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Lines count %d", mCount);
     }
 
@@ -1069,12 +1113,12 @@ public:
     DrawPointsOp(float* points, int count, SkPaint* paint)
             : DrawLinesOp(points, count, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawPoints(mPoints, mCount, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Points count %d", mCount);
     }
 
@@ -1086,7 +1130,7 @@ public:
     DrawSomeTextOp(const char* text, int bytesCount, int count, SkPaint* paint)
             : DrawOp(paint), mText(text), mBytesCount(bytesCount), mCount(count) {};
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw some text, %d bytes", mBytesCount);
     }
 
@@ -1116,8 +1160,8 @@ public:
         /* TODO: inherit from DrawBounded and init mLocalBounds */
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawTextOnPath(mText, mBytesCount, mCount, mPath,
                 mHOffset, mVOffset, getPaint(renderer));
     }
@@ -1138,8 +1182,8 @@ public:
         /* TODO: inherit from DrawBounded and init mLocalBounds */
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawPosText(mText, mBytesCount, mCount, mPositions, getPaint(renderer));
     }
 
@@ -1187,13 +1231,13 @@ public:
         }
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         return renderer.drawText(mText, mBytesCount, mCount, mX, mY,
                 mPositions, getPaint(renderer), mLength);
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Text of count %d, bytes %d", mCount, mBytesCount);
     }
 
@@ -1225,15 +1269,15 @@ public:
     DrawFunctorOp(Functor* functor)
             : DrawOp(0), mFunctor(functor) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         renderer.startMark("GL functor");
         status_t ret = renderer.callDrawGLFunction(mFunctor, dirty);
         renderer.endMark();
         return ret;
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Functor %p", mFunctor);
     }
 
@@ -1249,21 +1293,26 @@ public:
             : DrawBoundedOp(0, 0, displayList->getWidth(), displayList->getHeight(), 0),
             mDisplayList(displayList), mFlags(flags) {}
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, int saveCount,
-            uint32_t level, bool caching, int multipliedAlpha, DeferredDisplayList* deferredList) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount,
+            int level, int multipliedAlpha) {
         if (mDisplayList && mDisplayList->isRenderable()) {
-            return mDisplayList->replay(renderer, dirty, mFlags, level + 1, deferredList);
+            mDisplayList->defer(deferStruct, level + 1);
         }
-        return DrawGlInfo::kStatusDone;
     }
 
-    // NOT USED, since replay is overridden
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) { return DrawGlInfo::kStatusDone; }
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount,
+            int level, int multipliedAlpha) {
+        if (mDisplayList && mDisplayList->isRenderable()) {
+            mDisplayList->replay(replayStruct, level + 1);
+        }
+    }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) { return DrawGlInfo::kStatusDone; }
+
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Display List %p, flags %#x", mDisplayList, mFlags);
-        if (mDisplayList && (flags & kOpLogFlag_Recurse)) {
+        if (mDisplayList && (logFlags & kOpLogFlag_Recurse)) {
             mDisplayList->output(level + 1);
         }
     }
@@ -1280,11 +1329,11 @@ public:
     DrawLayerOp(Layer* layer, float x, float y, SkPaint* paint)
             : DrawOp(paint), mLayer(layer), mX(x), mY(y) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, uint32_t level,
-            bool caching, int multipliedAlpha) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level,
+            int multipliedAlpha) {
         int oldAlpha = -1;
 
-        if (caching && multipliedAlpha < 255) {
+        if (multipliedAlpha >= 0 && multipliedAlpha < 255) {
             oldAlpha = mLayer->getAlpha();
             mLayer->setAlpha(multipliedAlpha);
         }
@@ -1295,7 +1344,7 @@ public:
         return ret;
     }
 
-    virtual void output(int level, uint32_t flags) {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Layer %p at %f %f", mLayer, mX, mY);
     }
 
