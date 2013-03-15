@@ -1430,11 +1430,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd,
             boolean toDefaultTable) {
-        String iface = lp.getInterfaceName();
-        RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), addr);
+        RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getAllRoutes(), addr);
         if (bestRoute == null) {
-            bestRoute = RouteInfo.makeHostRoute(addr, iface);
+            bestRoute = RouteInfo.makeHostRoute(addr, lp.getInterfaceName());
         } else {
+            String iface = bestRoute.getInterface();
             if (bestRoute.getGateway().equals(addr)) {
                 // if there is no better route, add the implied hostroute for our gateway
                 bestRoute = RouteInfo.makeHostRoute(addr, iface);
@@ -1449,9 +1449,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean modifyRoute(LinkProperties lp, RouteInfo r, int cycleCount, boolean doAdd,
             boolean toDefaultTable) {
-        String ifaceName = lp.getInterfaceName();
-        if ((ifaceName == null) || (lp == null) || (r == null)) {
-            if (DBG) log("modifyRoute got unexpected null: " + ifaceName + ", " + lp + ", " + r);
+        if ((lp == null) || (r == null)) {
+            if (DBG) log("modifyRoute got unexpected null: " + lp + ", " + r);
             return false;
         }
 
@@ -1460,8 +1459,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return false;
         }
 
+        String ifaceName = r.getInterface();
+        if(ifaceName == null) {
+            loge("Error modifying route - no interface name");
+            return false;
+        }
+
         if (r.isHostRoute() == false) {
-            RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), r.getGateway());
+            RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getAllRoutes(), r.getGateway());
             if (bestRoute != null) {
                 if (bestRoute.getGateway().equals(r.getGateway())) {
                     // if there is no better route, add the implied hostroute for our gateway
@@ -2300,7 +2305,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             routeDiff = curLp.compareRoutes(newLp);
             dnsDiff = curLp.compareDnses(newLp);
         } else if (newLp != null) {
-            routeDiff.added = newLp.getRoutes();
+            routeDiff.added = newLp.getAllRoutes();
             dnsDiff.added = newLp.getDnses();
         }
 
