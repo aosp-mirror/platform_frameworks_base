@@ -20,7 +20,6 @@ import android.net.ProxyProperties;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.net.InetAddress;
 import java.net.Inet4Address;
@@ -66,7 +65,6 @@ public class LinkProperties implements Parcelable {
     private String mDomains;
     private Collection<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
     private ProxyProperties mHttpProxy;
-    public boolean mLogMe;
 
     // Stores the properties of links that are "stacked" above this link.
     // Indexed by interface name to allow modification and to prevent duplicates being added.
@@ -90,7 +88,6 @@ public class LinkProperties implements Parcelable {
 
     public LinkProperties() {
         clear();
-        mLogMe = false;
     }
 
     // copy constructor instead of clone
@@ -110,14 +107,6 @@ public class LinkProperties implements Parcelable {
     }
 
     public void setInterfaceName(String iface) {
-        if (mLogMe) {
-            Log.d("LinkProperties", "setInterfaceName from " + mIfaceName +
-                    " to " + iface);
-            for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
-                Log.d("LinkProperties", "  " + e.toString());
-            }
-        }
-
         mIfaceName = iface;
         ArrayList<RouteInfo> newRoutes = new ArrayList<RouteInfo>(mRoutes.size());
         for (RouteInfo route : mRoutes) {
@@ -248,13 +237,6 @@ public class LinkProperties implements Parcelable {
     }
 
     public void clear() {
-        if (mLogMe) {
-            Log.d("LinkProperties", "clear from " + mIfaceName);
-            for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
-                Log.d("LinkProperties", "  " + e.toString());
-            }
-        }
-
         mIfaceName = null;
         mLinkAddresses.clear();
         mDnses.clear();

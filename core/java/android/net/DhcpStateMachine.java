@@ -349,7 +349,6 @@ public class DhcpStateMachine extends StateMachine {
     private boolean runDhcp(DhcpAction dhcpAction) {
         boolean success = false;
         DhcpResults dhcpResults = new DhcpResults();
-        dhcpResults.linkProperties.mLogMe = true;
 
         if (dhcpAction == DhcpAction.START) {
             /* Stop any existing DHCP daemon before starting new */
