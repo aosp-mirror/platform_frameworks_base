@@ -26,7 +26,7 @@ next.link=load-bitmap.html
 </div>
 </div>
 
-<p>This class covers some common techniques for processing and loading {@link
+<p>Learn how to use common techniques to process and load {@link
 android.graphics.Bitmap} objects in a way that keeps your user interface (UI) components responsive
 and avoids exceeding your application memory limit. If you're not careful, bitmaps can quickly
 consume your available memory budget leading to an application crash due to the dreaded
@@ -69,6 +69,9 @@ exception:<br />{@code java.lang.OutofMemoryError: bitmap size exceeds VM budget
   <dt><b><a href="cache-bitmap.html">Caching Bitmaps</a></b></dt>
     <dd>This lesson walks you through using a memory and disk bitmap cache to improve the
     responsiveness and fluidity of your UI when loading multiple bitmaps.</dd>
+
+  <dt><b><a href="manage-memory.html">Managing Bitmap Memory</a></b></dt>
+    <dd>This lesson explains how to manage bitmap memory to maximize your app's performance.</dd>
 
   <dt><b><a href="display-bitmap.html">Displaying Bitmaps in Your UI</a></b></dt>
     <dd>This lesson brings everything together, showing you how to load multiple bitmaps into

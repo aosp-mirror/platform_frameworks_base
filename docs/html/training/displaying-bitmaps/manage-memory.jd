@@ -1,0 +1,297 @@
+page.title=Managing Bitmap Memory
+parent.title=Displaying Bitmaps Efficiently
+parent.link=index.html
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#recycle">Manage Memory on Android 2.3.3 and Lower</a></li>
+  <li><a href="#inBitmap">Manage Memory on Android 3.0 and Higher</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://android-developers.blogspot.com/2011/03/memory-analysis-for-android.html">Memory Analysis for Android Applications</a> blog post</li>
+  <li><a href="http://www.google.com/events/io/2011/sessions/memory-management-for-android-apps.html">Memory management for Android Apps</a> Google I/O presentation</li>
+  <li><a href="{@docRoot}design/patterns/swipe-views.html">Android Design: Swipe Views</a></li>
+  <li><a href="{@docRoot}design/building-blocks/grid-lists.html">Android Design: Grid Lists</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/BitmapFun.zip" class="button">Download the sample</a>
+  <p class="filename">BitmapFun.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>In addition to the steps described in <a href="cache-bitmap.html">Caching Bitmaps</a>,
+there are  specific things you can do to facilitate garbage collection
+and bitmap reuse. The recommended strategy depends on which version(s)
+of Android you are targeting. The {@code BitmapFun} sample app included with
+this class shows you how to design your app to work efficiently across
+different versions of Android.</p>
+
+<p>To set the stage for this lesson, here is how Android's management of
+bitmap memory has evolved:</p>
+<ul> 
+  <li>
+On Android Android 2.2 (API level 8) and lower, when garbage 
+collection occurs, your app's threads get stopped. This causes a lag that
+can degrade performance. 
+<strong>Android 2.3 adds concurrent garbage collection, which means that
+the memory is reclaimed soon after a bitmap is no longer referenced.</strong>
+</li>
+
+  <li>On Android 2.3.3 (API level 10) and lower, the backing pixel data for a
+bitmap is stored in native memory. It is separate from the bitmap itself,
+which is stored in the Dalvik heap. The pixel data in native memory is
+not released in a predictable manner, potentially causing an application
+to briefly exceed its memory limits and crash.
+<strong>As of Android 3.0 (API Level 11), the pixel data is stored on the
+Dalvik heap along with the associated bitmap.</strong></li>
+
+</ul>
+
+<p>The following sections describe how to optimize bitmap memory
+management for different Android versions.</p>
+
+<h2 id="recycle">Manage Memory on Android 2.3.3 and Lower</h2>
+
+<p>On Android 2.3.3 (API level 10) and lower, using 
+{@link android.graphics.Bitmap#recycle recycle()}
+is recommended. If you're displaying large amounts of bitmap data in your app,
+you're likely to run into
+{@link java.lang.OutOfMemoryError} errors. The
+{@link android.graphics.Bitmap#recycle recycle()} method allows an app
+to reclaim memory as soon as possible.</p>
+
+<p class="note"><strong>Caution:</strong> You should use
+{@link android.graphics.Bitmap#recycle recycle()} only when you are sure that the
+bitmap is no longer being used. If you call {@link android.graphics.Bitmap#recycle recycle()}
+and later attempt to draw the bitmap, you will get the error:
+{@code &quot;Canvas: trying to use a recycled bitmap&quot;}.</p>
+
+<p>The following code snippet gives an example of calling
+{@link android.graphics.Bitmap#recycle recycle()}. It uses reference counting
+(in the variables {@code mDisplayRefCount} and {@code mCacheRefCount}) to track 
+whether a bitmap is currently being displayed or in the cache. The
+code recycles the bitmap when these conditions are met:</p>
+
+<ul>
+<li>The reference count for both {@code mDisplayRefCount} and 
+{@code mCacheRefCount} is 0.</li>
+<li>The bitmap is not {@code null}, and it hasn't been recycled yet.</li>
+</ul>
+
+<pre>private int mCacheRefCount = 0;
+private int mDisplayRefCount = 0;
+...
+// Notify the drawable that the displayed state has changed.
+// Keep a count to determine when the drawable is no longer displayed.
+public void setIsDisplayed(boolean isDisplayed) {
+    synchronized (this) {
+        if (isDisplayed) {
+            mDisplayRefCount++;
+            mHasBeenDisplayed = true;
+        } else {
+            mDisplayRefCount--;
+        }
+    }
+    // Check to see if recycle() can be called.
+    checkState();
+}
+
+// Notify the drawable that the cache state has changed.
+// Keep a count to determine when the drawable is no longer being cached.
+public void setIsCached(boolean isCached) {
+    synchronized (this) {
+        if (isCached) {
+            mCacheRefCount++;
+        } else {
+            mCacheRefCount--;
+        }
+    }
+    // Check to see if recycle() can be called.
+    checkState();
+}
+
+private synchronized void checkState() {
+    // If the drawable cache and display ref counts = 0, and this drawable
+    // has been displayed, then recycle.
+    if (mCacheRefCount <= 0 && mDisplayRefCount <= 0 && mHasBeenDisplayed
+            && hasValidBitmap()) {
+        getBitmap().recycle();
+    }
+}
+
+private synchronized boolean hasValidBitmap() {
+    Bitmap bitmap = getBitmap();
+    return bitmap != null && !bitmap.isRecycled();
+}</pre>
+
+<h2 id="inBitmap">Manage Memory on Android 3.0 and Higher</h2>
+
+<p>Android 3.0 (API Level 11) introduces the
+{@link android.graphics.BitmapFactory.Options#inBitmap BitmapFactory.Options.inBitmap}
+field. If this option is set, decode methods that take the 
+{@link android.graphics.BitmapFactory.Options Options} object
+will attempt to reuse an existing bitmap when loading content. This means
+that the bitmap's memory is reused, resulting in improved performance, and
+removing both memory allocation and de-allocation. There are some caveats in using
+{@link android.graphics.BitmapFactory.Options#inBitmap}:</p>
+<ul>
+  <li>The reused bitmap must be of the same size as the source content (to make
+sure that the same amount of memory is used), and in JPEG or PNG format
+(whether as a resource or as a stream).</li>
+
+
+<li>The {@link android.graphics.Bitmap.Config configuration} of the reused bitmap
+overrides the setting of
+{@link android.graphics.BitmapFactory.Options#inPreferredConfig}, if set. </li>
+
+  <li>You should always use the returned bitmap of the decode method,
+because you can't assume that reusing the bitmap worked (for example, if there is
+a size mismatch).</li>
+
+<h3>Save a bitmap for later use</h3>
+
+<p>The following snippet demonstrates how an existing bitmap is stored for possible
+later use in the sample app. When an app is running on Android 3.0 or higher and 
+a bitmap is evicted from the {@link android.util.LruCache},
+a soft reference to the bitmap is placed
+in a {@link java.util.HashSet}, for possible reuse later with
+{@link android.graphics.BitmapFactory.Options#inBitmap}:
+
+<pre>HashSet&lt;SoftReference&lt;Bitmap&gt;&gt; mReusableBitmaps;
+private LruCache&lt;String, BitmapDrawable&gt; mMemoryCache;
+
+// If you're running on Honeycomb or newer, create
+// a HashSet of references to reusable bitmaps.
+if (Utils.hasHoneycomb()) {
+    mReusableBitmaps = new HashSet&lt;SoftReference&lt;Bitmap&gt;&gt;();
+}
+
+mMemoryCache = new LruCache&lt;String, BitmapDrawable&gt;(mCacheParams.memCacheSize) {
+
+    // Notify the removed entry that is no longer being cached.
+    &#64;Override
+    protected void entryRemoved(boolean evicted, String key,
+            BitmapDrawable oldValue, BitmapDrawable newValue) {
+        if (RecyclingBitmapDrawable.class.isInstance(oldValue)) {
+            // The removed entry is a recycling drawable, so notify it
+            // that it has been removed from the memory cache.
+            ((RecyclingBitmapDrawable) oldValue).setIsCached(false);
+        } else {
+            // The removed entry is a standard BitmapDrawable.
+            if (Utils.hasHoneycomb()) {
+                // We're running on Honeycomb or later, so add the bitmap
+                // to a SoftReference set for possible use with inBitmap later.
+                mReusableBitmaps.add
+                        (new SoftReference&lt;Bitmap&gt;(oldValue.getBitmap()));
+            }
+        }
+    }
+....
+}</pre>
+
+
+<h3>Use an existing bitmap</h3>
+<p>In the running app, decoder methods check to see if there is an existing
+bitmap they can use. For example:</p>
+
+<pre>public static Bitmap decodeSampledBitmapFromFile(String filename,
+        int reqWidth, int reqHeight, ImageCache cache) {
+
+    final BitmapFactory.Options options = new BitmapFactory.Options();
+    ...
+    BitmapFactory.decodeFile(filename, options);
+    ...
+
+    // If we're running on Honeycomb or newer, try to use inBitmap.
+    if (Utils.hasHoneycomb()) {
+        addInBitmapOptions(options, cache);
+    }
+    ...
+    return BitmapFactory.decodeFile(filename, options);
+}</pre
+
+<p>The next snippet shows the {@code addInBitmapOptions()} method that is called in the
+above snippet. It looks for an existing bitmap to set as the value for
+{@link android.graphics.BitmapFactory.Options#inBitmap}. Note that this
+method only sets a value for {@link android.graphics.BitmapFactory.Options#inBitmap}
+if it finds a suitable match (your code should never assume that a match will be found):</p>
+
+<pre>private static void addInBitmapOptions(BitmapFactory.Options options,
+        ImageCache cache) {
+    // inBitmap only works with mutable bitmaps, so force the decoder to
+    // return mutable bitmaps.
+    options.inMutable = true;
+
+    if (cache != null) {
+        // Try to find a bitmap to use for inBitmap.
+        Bitmap inBitmap = cache.getBitmapFromReusableSet(options);
+
+        if (inBitmap != null) {
+            // If a suitable bitmap has been found, set it as the value of
+            // inBitmap.
+            options.inBitmap = inBitmap;
+        }
+    }
+}
+
+// This method iterates through the reusable bitmaps, looking for one 
+// to use for inBitmap:
+protected Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
+        Bitmap bitmap = null;
+
+    if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {
+        final Iterator&lt;SoftReference&lt;Bitmap&gt;&gt; iterator
+                = mReusableBitmaps.iterator();
+        Bitmap item;
+
+        while (iterator.hasNext()) {
+            item = iterator.next().get();
+
+            if (null != item && item.isMutable()) {
+                // Check to see it the item can be used for inBitmap.
+                if (canUseForInBitmap(item, options)) {
+                    bitmap = item;
+
+                    // Remove from reusable set so it can't be used again.
+                    iterator.remove();
+                    break;
+                }
+            } else {
+                // Remove from the set if the reference has been cleared.
+                iterator.remove();
+            }
+        }
+    }
+    return bitmap;
+}</pre>
+
+<p>Finally, this method determines whether a candidate bitmap
+satisfies the size criteria to be used for
+{@link android.graphics.BitmapFactory.Options#inBitmap}:</p>
+
+<pre>private static boolean canUseForInBitmap(
+        Bitmap candidate, BitmapFactory.Options targetOptions) {
+    int width = targetOptions.outWidth / targetOptions.inSampleSize;
+    int height = targetOptions.outHeight / targetOptions.inSampleSize;
+
+    // Returns true if "candidate" can be used for inBitmap re-use with
+    // "targetOptions".
+    return candidate.getWidth() == width && candidate.getHeight() == height;
+}</pre>
+
+</body>
+</html>
