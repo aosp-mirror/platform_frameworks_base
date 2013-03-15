@@ -185,7 +185,7 @@ public class AnimatorInflater {
         TypedArray a =
                 context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Animator);
 
-        long duration = a.getInt(com.android.internal.R.styleable.Animator_duration, 0);
+        long duration = a.getInt(com.android.internal.R.styleable.Animator_duration, 300);
 
         long startDelay = a.getInt(com.android.internal.R.styleable.Animator_startOffset, 0);
 
