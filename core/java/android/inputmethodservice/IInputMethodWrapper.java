@@ -54,7 +54,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         implements HandlerCaller.Callback {
     private static final String TAG = "InputMethodWrapper";
     private static final boolean DEBUG = false;
-    
+
     private static final int DO_DUMP = 1;
     private static final int DO_ATTACH_TOKEN = 10;
     private static final int DO_SET_INPUT_CONTEXT = 20;
@@ -282,12 +282,6 @@ class IInputMethodWrapper extends IInputMethod.Stub
     public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_HIDE_SOFT_INPUT,
                 flags, resultReceiver));
-    }
-
-    @Override
-    public void removeSoftInputMessages() {
-        mCaller.removeMessages(DO_SHOW_SOFT_INPUT);
-        mCaller.removeMessages(DO_HIDE_SOFT_INPUT);
     }
 
     public void changeInputMethodSubtype(InputMethodSubtype subtype) {
