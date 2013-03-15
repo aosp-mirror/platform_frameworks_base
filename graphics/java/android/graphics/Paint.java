@@ -1851,7 +1851,7 @@ public class Paint {
      * @hide
      */
     public int getTextRunCursor(String text, int contextStart, int contextEnd,
-            int offset, int cursorOpt) {
+            int flags, int offset, int cursorOpt) {
         if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
                 | (offset - contextStart) | (contextEnd - offset)
                 | (text.length() - contextEnd) | cursorOpt) < 0)
