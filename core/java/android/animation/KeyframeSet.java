@@ -21,6 +21,7 @@ import java.util.Arrays;
 import android.animation.Keyframe.IntKeyframe;
 import android.animation.Keyframe.FloatKeyframe;
 import android.animation.Keyframe.ObjectKeyframe;
+import android.util.Log;
 
 /**
  * This class holds a collection of Keyframe objects and is called by ValueAnimator to calculate
@@ -56,23 +57,35 @@ class KeyframeSet {
         } else {
             keyframes[0] = (IntKeyframe) Keyframe.ofInt(0f, values[0]);
             for (int i = 1; i < numKeyframes; ++i) {
-                keyframes[i] = (IntKeyframe) Keyframe.ofInt((float) i / (numKeyframes - 1), values[i]);
+                keyframes[i] =
+                        (IntKeyframe) Keyframe.ofInt((float) i / (numKeyframes - 1), values[i]);
             }
         }
         return new IntKeyframeSet(keyframes);
     }
 
     public static KeyframeSet ofFloat(float... values) {
+        boolean badValue = false;
         int numKeyframes = values.length;
         FloatKeyframe keyframes[] = new FloatKeyframe[Math.max(numKeyframes,2)];
         if (numKeyframes == 1) {
             keyframes[0] = (FloatKeyframe) Keyframe.ofFloat(0f);
             keyframes[1] = (FloatKeyframe) Keyframe.ofFloat(1f, values[0]);
+            if (Float.isNaN(values[0])) {
+                badValue = true;
+            }
         } else {
             keyframes[0] = (FloatKeyframe) Keyframe.ofFloat(0f, values[0]);
             for (int i = 1; i < numKeyframes; ++i) {
-                keyframes[i] = (FloatKeyframe) Keyframe.ofFloat((float) i / (numKeyframes - 1), values[i]);
+                keyframes[i] =
+                        (FloatKeyframe) Keyframe.ofFloat((float) i / (numKeyframes - 1), values[i]);
+                if (Float.isNaN(values[i])) {
+                    badValue = true;
+                }
             }
+        }
+        if (badValue) {
+            Log.w("Animator", "Bad value (NaN) in float animator");
         }
         return new FloatKeyframeSet(keyframes);
     }
