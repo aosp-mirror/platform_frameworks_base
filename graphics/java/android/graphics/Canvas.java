@@ -695,8 +695,16 @@ public class Canvas {
     }
 
     public enum EdgeType {
+
+        /**
+         * Black-and-White: Treat edges by just rounding to nearest pixel boundary
+         */
         BW(0),  //!< treat edges by just rounding to nearest pixel boundary
-        AA(1);  //!< treat edges by rounding-out, since they may be antialiased
+
+        /**
+         * Antialiased: Treat edges by rounding-out, since they may be antialiased
+         */
+        AA(1);
         
         EdgeType(int nativeInt) {
             this.nativeInt = nativeInt;
@@ -715,7 +723,9 @@ public class Canvas {
      * therefore you can skip making the draw calls).
      *
      * @param rect  the rect to compare with the current clip
-     * @param type  specifies how to treat the edges (BW or antialiased)
+     * @param type  {@link Canvas.EdgeType#AA} if the path should be considered antialiased,
+     *              since that means it may affect a larger area (more pixels) than
+     *              non-antialiased ({@link Canvas.EdgeType#BW}).
      * @return      true if the rect (transformed by the canvas' matrix)
      *              does not intersect with the canvas' clip
      */
@@ -732,10 +742,9 @@ public class Canvas {
      * (i.e. the bounds of the path intersects, but the path does not).
      *
      * @param path        The path to compare with the current clip
-     * @param type        true if the path should be considered antialiased,
-     *                    since that means it may
-     *                    affect a larger area (more pixels) than
-     *                    non-antialiased.
+     * @param type        {@link Canvas.EdgeType#AA} if the path should be considered antialiased,
+     *                    since that means it may affect a larger area (more pixels) than
+     *                    non-antialiased ({@link Canvas.EdgeType#BW}).
      * @return            true if the path (transformed by the canvas' matrix)
      *                    does not intersect with the canvas' clip
      */
@@ -757,9 +766,9 @@ public class Canvas {
      *                    current clip
      * @param bottom      The bottom of the rectangle to compare with the
      *                    current clip
-     * @param type        true if the rect should be considered antialiased,
-     *                    since that means it may affect a larger area (more
-     *                    pixels) than non-antialiased.
+     * @param type        {@link Canvas.EdgeType#AA} if the path should be considered antialiased,
+     *                    since that means it may affect a larger area (more pixels) than
+     *                    non-antialiased ({@link Canvas.EdgeType#BW}).
      * @return            true if the rect (transformed by the canvas' matrix)
      *                    does not intersect with the canvas' clip
      */
