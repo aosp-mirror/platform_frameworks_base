@@ -256,6 +256,7 @@ public class LinkPropertiesTest extends TestCase {
         assertAllRoutesHaveInterface("p2p0", lp2);
         assertEquals(3, lp.compareRoutes(lp2).added.size());
         assertEquals(3, lp.compareRoutes(lp2).removed.size());
+    }
 
     @SmallTest
     public void testStackedInterfaces() {
