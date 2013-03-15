@@ -373,4 +373,14 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
     public void setDependencyMet(boolean met) {
         // not supported on this network
     }
+
+    @Override
+    public void addStackedLink(LinkProperties link) {
+        mLinkProperties.addStackedLink(link);
+    }
+
+    @Override
+    public void removeStackedLink(LinkProperties link) {
+        mLinkProperties.removeStackedLink(link);
+    }
 }

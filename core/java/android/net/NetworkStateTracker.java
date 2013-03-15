@@ -197,4 +197,14 @@ public interface NetworkStateTracker {
      * An external dependency has been met/unmet
      */
     public void setDependencyMet(boolean met);
+
+    /**
+     * Informs the state tracker that another interface is stacked on top of it.
+     **/
+    public void addStackedLink(LinkProperties link);
+
+    /**
+     * Informs the state tracker that a stacked interface has been removed.
+     **/
+    public void removeStackedLink(LinkProperties link);
 }
