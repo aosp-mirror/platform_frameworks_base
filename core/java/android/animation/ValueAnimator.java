@@ -1015,6 +1015,7 @@ public class ValueAnimator extends Animator {
         mRunning = false;
         mStarted = false;
         mStartListenersCalled = false;
+        mPlayingBackwards = false;
     }
 
     /**
