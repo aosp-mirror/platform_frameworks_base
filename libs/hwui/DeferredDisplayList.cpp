@@ -372,8 +372,8 @@ status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     renderer.eventMark("Flush");
 
     renderer.restoreToCount(1);
-
     status |= replayBatchList(mBatches, renderer, dirty);
+    renderer.resetDrawModifiers();
 
     DEFER_LOGD("--flush complete, returning %x", status);
 

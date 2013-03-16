@@ -274,6 +274,7 @@ public:
 
     SkPaint* filterPaint(SkPaint* paint, bool alwaysCopy = false);
 
+    void resetDrawModifiers();
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
     void restoreDisplayState(const DeferredDisplayState& state, int stateDeferFlags);
 
