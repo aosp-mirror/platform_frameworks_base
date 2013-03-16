@@ -17,6 +17,8 @@
 #define LOG_TAG "OpenGLRenderer"
 #define ATRACE_TAG ATRACE_TAG_VIEW
 
+#include <SkCanvas.h>
+
 #include <utils/Trace.h>
 
 #include "Debug.h"

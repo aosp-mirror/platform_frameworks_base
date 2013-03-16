@@ -34,7 +34,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		ProgramCache.cpp \
 		RenderBufferCache.cpp \
 		ResourceCache.cpp \
-		ShapeCache.cpp \
 		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
 		Snapshot.cpp \

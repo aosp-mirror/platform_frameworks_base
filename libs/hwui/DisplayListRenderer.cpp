@@ -17,6 +17,7 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include <SkCamera.h>
+#include <SkCanvas.h>
 
 #include <private/hwui/DrawGlInfo.h>
 

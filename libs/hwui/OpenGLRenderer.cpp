@@ -2257,9 +2257,11 @@ status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
     // TODO: try clipping large paths to viewport
     PathTessellator::tessellatePath(path, paint, mSnapshot->transform, vertexBuffer);
 
-    SkRect bounds = path.getBounds();
-    PathTessellator::expandBoundsForStroke(bounds, paint, false);
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
+    if (hasLayer()) {
+        SkRect bounds = path.getBounds();
+        PathTessellator::expandBoundsForStroke(bounds, paint, false);
+        dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
+    }
 
     return drawVertexBuffer(vertexBuffer, paint);
 }
@@ -2389,7 +2391,7 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
 
     if (p->getPathEffect() != 0) {
         mCaches.activeTexture(0);
-        const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
+        const PathTexture* texture = mCaches.pathCache.getRoundRect(
                 right - left, bottom - top, rx, ry, p);
         return drawShape(left, top, texture, p);
     }
@@ -2413,7 +2415,7 @@ status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) 
     }
     if (p->getPathEffect() != 0) {
         mCaches.activeTexture(0);
-        const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, p);
+        const PathTexture* texture = mCaches.pathCache.getCircle(radius, p);
         return drawShape(x - radius, y - radius, texture, p);
     }
 
@@ -2434,7 +2436,7 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 
     if (p->getPathEffect() != 0) {
         mCaches.activeTexture(0);
-        const PathTexture* texture = mCaches.ovalShapeCache.getOval(right - left, bottom - top, p);
+        const PathTexture* texture = mCaches.pathCache.getOval(right - left, bottom - top, p);
         return drawShape(left, top, texture, p);
     }
 
@@ -2460,7 +2462,7 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
     if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 || useCenter) {
         mCaches.activeTexture(0);
-        const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
+        const PathTexture* texture = mCaches.pathCache.getArc(right - left, bottom - top,
                 startAngle, sweepAngle, useCenter, p);
         return drawShape(left, top, texture, p);
     }
@@ -2495,7 +2497,7 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
                 p->getStrokeMiter() != SkPaintDefaults_MiterLimit) {
             mCaches.activeTexture(0);
             const PathTexture* texture =
-                    mCaches.rectShapeCache.getRect(right - left, bottom - top, p);
+                    mCaches.pathCache.getRect(right - left, bottom - top, p);
             return drawShape(left, top, texture, p);
         }
 

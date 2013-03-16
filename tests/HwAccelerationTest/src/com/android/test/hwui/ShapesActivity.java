@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.View;
@@ -34,12 +35,13 @@ public class ShapesActivity extends Activity {
     }
 
     static class ShapesView extends View {
-        private Paint mNormalPaint;
-        private Paint mStrokePaint;
-        private Paint mFillPaint;
-        private RectF mRect;
-        private RectF mOval;
-        private RectF mArc;
+        private final Paint mNormalPaint;
+        private final Paint mStrokePaint;
+        private final Paint mFillPaint;
+        private final RectF mRect;
+        private final RectF mOval;
+        private final RectF mArc;
+        private final Path mTriangle;
 
         ShapesView(Context c) {
             super(c);
@@ -65,6 +67,12 @@ public class ShapesActivity extends Activity {
 
             mOval = new RectF(0.0f, 0.0f, 80.0f, 45.0f);
             mArc = new RectF(0.0f, 0.0f, 100.0f, 120.0f);
+
+            mTriangle = new Path();
+            mTriangle.moveTo(0.0f, 90.0f);
+            mTriangle.lineTo(45.0f, 0.0f);
+            mTriangle.lineTo(90.0f, 90.0f);
+            mTriangle.close();
         }
 
         @Override
@@ -135,6 +143,17 @@ public class ShapesActivity extends Activity {
 
             canvas.translate(0.0f, 110.0f);
             canvas.drawArc(mArc, 30.0f, 100.0f, false, mFillPaint);
+            canvas.restore();
+
+            canvas.save();
+            canvas.translate(50.0f, 400.0f);
+            canvas.drawPath(mTriangle, mNormalPaint);
+
+            canvas.translate(110.0f, 0.0f);
+            canvas.drawPath(mTriangle, mStrokePaint);
+
+            canvas.translate(110.0f, 0.0f);
+            canvas.drawPath(mTriangle, mFillPaint);
             canvas.restore();
         }
     }

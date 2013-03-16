@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <SkCanvas.h>
+
 #include "Debug.h"
 #include "DisplayList.h"
 #include "DisplayListOp.h"
@@ -121,9 +123,7 @@ void DisplayList::clearResources() {
     }
 
     for (size_t i = 0; i < mPaths.size(); i++) {
-        SkPath* path = mPaths.itemAt(i);
-        caches.pathCache.remove(path);
-        delete path;
+        delete mPaths.itemAt(i);
     }
 
     for (size_t i = 0; i < mMatrices.size(); i++) {

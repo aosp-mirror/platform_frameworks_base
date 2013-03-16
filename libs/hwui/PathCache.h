@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,21 @@
 #ifndef ANDROID_HWUI_PATH_CACHE_H
 #define ANDROID_HWUI_PATH_CACHE_H
 
-#include <utils/Thread.h>
+#include <GLES2/gl2.h>
+
+#include <utils/LruCache.h>
+#include <utils/Mutex.h>
 #include <utils/Vector.h>
 
 #include "Debug.h"
-#include "ShapeCache.h"
-#include "thread/Signal.h"
-#include "thread/Task.h"
-#include "thread/TaskProcessor.h"
+#include "Properties.h"
+#include "Texture.h"
 
+class SkBitmap;
+class SkCanvas;
 class SkPaint;
 class SkPath;
+class SkRect;
 
 namespace android {
 namespace uirenderer {
@@ -35,56 +39,181 @@ namespace uirenderer {
 class Caches;
 
 ///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+// Debug
+#if DEBUG_PATHS
+    #define PATH_LOGD(...) ALOGD(__VA_ARGS__)
+#else
+    #define PATH_LOGD(...)
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-struct PathCacheEntry: public ShapeCacheEntry {
-    PathCacheEntry(SkPath* path, SkPaint* paint):
-            ShapeCacheEntry(ShapeCacheEntry::kShapePath, paint) {
-        this->path = path;
+/**
+ * Alpha texture used to represent a path.
+ */
+struct PathTexture: public Texture {
+    PathTexture(): Texture() {
     }
 
-    PathCacheEntry(): ShapeCacheEntry() {
-        path = NULL;
+    ~PathTexture() {
+        clearTask();
     }
 
-    hash_t hash() const {
-        uint32_t hash = ShapeCacheEntry::hash();
-        hash = JenkinsHashMix(hash, android::hash_type(path));
-        return JenkinsHashWhiten(hash);
+    /**
+     * Left coordinate of the path bounds.
+     */
+    float left;
+    /**
+     * Top coordinate of the path bounds.
+     */
+    float top;
+    /**
+     * Offset to draw the path at the correct origin.
+     */
+    float offset;
+
+    sp<Task<SkBitmap*> > task() const {
+        return mTask;
     }
 
-    int compare(const ShapeCacheEntry& r) const {
-        int deltaInt = ShapeCacheEntry::compare(r);
-        if (deltaInt != 0) return deltaInt;
-
-        const PathCacheEntry& rhs = (const PathCacheEntry&) r;
-        return path - rhs.path;
+    void setTask(const sp<Task<SkBitmap*> >& task) {
+        mTask = task;
     }
 
-    SkPath* path;
+    void clearTask() {
+        if (mTask != NULL) {
+            mTask.clear();
+        }
+    }
 
-}; // PathCacheEntry
+private:
+    sp<Task<SkBitmap*> > mTask;
+}; // struct PathTexture
 
-inline hash_t hash_type(const PathCacheEntry& entry) {
-    return entry.hash();
-}
+enum ShapeType {
+    kShapeNone,
+    kShapeRect,
+    kShapeRoundRect,
+    kShapeCircle,
+    kShapeOval,
+    kShapeArc,
+    kShapePath
+};
+
+struct PathDescription {
+    ShapeType type;
+    SkPaint::Join join;
+    SkPaint::Cap cap;
+    SkPaint::Style style;
+    float miter;
+    float strokeWidth;
+    SkPathEffect* pathEffect;
+    union Shape {
+        struct Path {
+            SkPath* mPath;
+        } path;
+        struct RoundRect {
+            float mWidth;
+            float mHeight;
+            float mRx;
+            float mRy;
+        } roundRect;
+        struct Circle {
+            float mRadius;
+        } circle;
+        struct Oval {
+            float mWidth;
+            float mHeight;
+        } oval;
+        struct Rect {
+            float mWidth;
+            float mHeight;
+        } rect;
+        struct Arc {
+            float mWidth;
+            float mHeight;
+            float mStartAngle;
+            float mSweepAngle;
+            bool mUseCenter;
+        } arc;
+    } shape;
+
+    PathDescription();
+    PathDescription(ShapeType shapeType, SkPaint* paint);
+
+    hash_t hash() const;
+
+    int compare(const PathDescription& rhs) const;
+
+    bool operator==(const PathDescription& other) const {
+        return compare(other) == 0;
+    }
+
+    bool operator!=(const PathDescription& other) const {
+        return compare(other) != 0;
+    }
+
+    friend inline int strictly_order_type(
+            const PathDescription& lhs, const PathDescription& rhs) {
+        return lhs.compare(rhs) < 0;
+    }
+
+    friend inline int compare_type(const PathDescription& lhs, const PathDescription& rhs) {
+        return lhs.compare(rhs);
+    }
+
+    friend inline hash_t hash_type(const PathDescription& entry) {
+        return entry.hash();
+    }
+};
 
 /**
- * A simple LRU path cache. The cache has a maximum size expressed in bytes.
+ * A simple LRU shape cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum
  * allowed size will also cause the oldest texture to be kicked out.
  */
-class PathCache: public ShapeCache<PathCacheEntry> {
+class PathCache: public OnEntryRemoved<PathDescription, PathTexture*> {
 public:
     PathCache();
     ~PathCache();
 
     /**
-     * Returns the texture associated with the specified path. If the texture
-     * cannot be found in the cache, a new texture is generated.
+     * Used as a callback when an entry is removed from the cache.
+     * Do not invoke directly.
      */
+    void operator()(PathDescription& path, PathTexture*& texture);
+
+    /**
+     * Clears the cache. This causes all textures to be deleted.
+     */
+    void clear();
+
+    /**
+     * Sets the maximum size of the cache in bytes.
+     */
+    void setMaxSize(uint32_t maxSize);
+    /**
+     * Returns the maximum size of the cache in bytes.
+     */
+    uint32_t getMaxSize();
+    /**
+     * Returns the current size of the cache in bytes.
+     */
+    uint32_t getSize();
+
+    PathTexture* getRoundRect(float width, float height, float rx, float ry, SkPaint* paint);
+    PathTexture* getCircle(float radius, SkPaint* paint);
+    PathTexture* getOval(float width, float height, SkPaint* paint);
+    PathTexture* getRect(float width, float height, SkPaint* paint);
+    PathTexture* getArc(float width, float height, float startAngle, float sweepAngle,
+            bool useCenter, SkPaint* paint);
     PathTexture* get(SkPath* path, SkPaint* paint);
+
     /**
      * Removes an entry.
      */
@@ -98,10 +227,63 @@ public:
      * Process deferred removals.
      */
     void clearGarbage();
+    /**
+     * Trims the contents of the cache, removing items until it's under its
+     * specified limit.
+     *
+     * Trimming is used for caches that support pre-caching from a worker
+     * thread. During pre-caching the maximum limit of the cache can be
+     * exceeded for the duration of the frame. It is therefore required to
+     * trim the cache at the end of the frame to keep the total amount of
+     * memory used under control.
+     */
+    void trim();
 
+    /**
+     * Precaches the specified path using background threads.
+     */
     void precache(SkPath* path, SkPaint* paint);
 
+    static bool canDrawAsConvexPath(SkPath* path, SkPaint* paint);
+    static void computePathBounds(const SkPath* path, const SkPaint* paint,
+            float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
+    static void computeBounds(const SkRect& bounds, const SkPaint* paint,
+            float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
+
 private:
+    PathTexture* addTexture(const PathDescription& entry,
+            const SkPath *path, const SkPaint* paint);
+    PathTexture* addTexture(const PathDescription& entry, SkBitmap* bitmap);
+    void addTexture(const PathDescription& entry, SkBitmap* bitmap, PathTexture* texture);
+
+    PathTexture* get(const PathDescription& entry) {
+        return mCache.get(entry);
+    }
+
+    /**
+     * Ensures there is enough space in the cache for a texture of the specified
+     * dimensions.
+     */
+    void purgeCache(uint32_t width, uint32_t height);
+
+    void removeTexture(PathTexture* texture);
+
+    bool checkTextureSize(uint32_t width, uint32_t height) {
+        if (width > mMaxTextureSize || height > mMaxTextureSize) {
+            ALOGW("Shape too large to be rendered into a texture (%dx%d, max=%dx%d)",
+                    width, height, mMaxTextureSize, mMaxTextureSize);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Generates the texture from a bitmap into the specified texture structure.
+     */
+    void generateTexture(SkBitmap& bitmap, Texture* texture);
+
+    void init();
+
     class PathTask: public Task<SkBitmap*> {
     public:
         PathTask(SkPath* path, SkPaint* paint, PathTexture* texture):
@@ -127,6 +309,13 @@ private:
     private:
         uint32_t mMaxTextureSize;
     };
+
+    LruCache<PathDescription, PathTexture*> mCache;
+    uint32_t mSize;
+    uint32_t mMaxSize;
+    GLuint mMaxTextureSize;
+
+    bool mDebugEnabled;
 
     sp<PathProcessor> mProcessor;
     Vector<SkPath*> mGarbage;
