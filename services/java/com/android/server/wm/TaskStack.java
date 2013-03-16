@@ -35,6 +35,10 @@ public class TaskStack {
         return mDisplayContent;
     }
 
+    ArrayList<Task> getTasks() {
+        return mTasks;
+    }
+
     ArrayList<Task> merge(TaskStack stack) {
         ArrayList<Task> taskLists = stack.mTasks;
         taskLists.addAll(mTasks);
@@ -45,6 +49,16 @@ public class TaskStack {
     void addTask(Task task, boolean toTop) {
         mParent.makeDirty();
         mTasks.add(toTop ? mTasks.size() : 0, task);
+    }
+
+    void moveTaskToTop(Task task) {
+        mTasks.remove(task);
+        addTask(task, true);
+    }
+
+    void moveTaskToBottom(Task task) {
+        mTasks.remove(task);
+        addTask(task, false);
     }
 
     boolean removeTask(Task task) {

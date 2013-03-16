@@ -31,6 +31,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.AppTransition;
+import com.android.server.wm.StackBox;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
@@ -1456,7 +1457,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
-        wm.createStack(HOME_ACTIVITY_STACK, -1, ActivityManager.TASK_STACK_GOES_OVER, 1.0f);
+        wm.createStack(HOME_ACTIVITY_STACK, -1, StackBox.TASK_STACK_GOES_OVER, 1.0f);
     }
 
     public static final Context main(int factoryTest) {
