@@ -2445,6 +2445,7 @@ package android.animation {
     method public static android.animation.ObjectAnimator ofObject(java.lang.Object, java.lang.String, android.animation.TypeEvaluator, java.lang.Object...);
     method public static android.animation.ObjectAnimator ofObject(T, android.util.Property<T, V>, android.animation.TypeEvaluator<V>, V...);
     method public static android.animation.ObjectAnimator ofPropertyValuesHolder(java.lang.Object, android.animation.PropertyValuesHolder...);
+    method public void setAutoCancel(boolean);
     method public void setProperty(android.util.Property);
     method public void setPropertyName(java.lang.String);
   }
