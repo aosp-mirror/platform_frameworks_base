@@ -233,6 +233,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 mObservers.getBroadcastItem(i).interfaceStatusChanged(iface, up);
             } catch (RemoteException e) {
+            } catch (RuntimeException e) {
             }
         }
         mObservers.finishBroadcast();
@@ -248,6 +249,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 mObservers.getBroadcastItem(i).interfaceLinkStateChanged(iface, up);
             } catch (RemoteException e) {
+            } catch (RuntimeException e) {
             }
         }
         mObservers.finishBroadcast();
@@ -262,6 +264,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 mObservers.getBroadcastItem(i).interfaceAdded(iface);
             } catch (RemoteException e) {
+            } catch (RuntimeException e) {
             }
         }
         mObservers.finishBroadcast();
@@ -281,6 +284,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 mObservers.getBroadcastItem(i).interfaceRemoved(iface);
             } catch (RemoteException e) {
+            } catch (RuntimeException e) {
             }
         }
         mObservers.finishBroadcast();
@@ -295,6 +299,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 mObservers.getBroadcastItem(i).limitReached(limitName, iface);
             } catch (RemoteException e) {
+            } catch (RuntimeException e) {
             }
         }
         mObservers.finishBroadcast();
@@ -309,6 +314,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(label, active);
             } catch (RemoteException e) {
+            } catch (RuntimeException e) {
             }
         }
         mObservers.finishBroadcast();
