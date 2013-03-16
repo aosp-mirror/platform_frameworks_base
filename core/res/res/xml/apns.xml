@@ -20,6 +20,6 @@
 
 <!-- If you edit this version, also edit the version in the partner-supplied
     apns-conf.xml configuration file -->
-<apns version="7">
+<apns version="8">
 
 </apns>
