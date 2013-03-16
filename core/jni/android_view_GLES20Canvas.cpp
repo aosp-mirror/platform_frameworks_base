@@ -867,7 +867,8 @@ static void android_view_GLES20Canvas_destroyLayerDeferred(JNIEnv* env,
 
 static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, Layer* layer, jfloat x, jfloat y, SkPaint* paint) {
-    renderer->drawLayer(layer, x, y, paint);
+    // TODO: don't pass the paint from java
+    renderer->drawLayer(layer, x, y);
 }
 
 static jboolean android_view_GLES20Canvas_copyLayer(JNIEnv* env, jobject clazz,

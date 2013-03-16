@@ -246,12 +246,11 @@ status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
+status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
     mLayers.add(layer);
     mCaches.resourceCache.incrementRefcount(layer);
-    paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawLayerOp(layer, x, y, paint));
+    addDrawOp(new (alloc()) DrawLayerOp(layer, x, y));
     return DrawGlInfo::kStatusDone;
 }
 

@@ -2821,7 +2821,7 @@ status_t OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
+status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
     if (!layer) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2859,7 +2859,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         if (layer->region.isRect()) {
             composeLayerRect(layer, layer->regionRect);
         } else if (layer->mesh) {
-            const float a = layer->getAlpha() / 255.0f;
+            const float a = layer->getAlpha() / 255.0f * mSnapshot->alpha;
             setupDraw();
             setupDrawWithTexture();
             setupDrawColor(a, a, a, a);
@@ -2966,12 +2966,8 @@ void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
     mDrawModifiers.mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
 }
 
-SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint, bool alwaysCopy) {
+SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
     if (CC_LIKELY(!mDrawModifiers.mHasDrawFilter || !paint)) {
-        if (CC_UNLIKELY(alwaysCopy)) {
-            mFilteredPaint = *paint;
-            return &mFilteredPaint;
-        }
         return paint;
     }
 

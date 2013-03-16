@@ -233,7 +233,6 @@ void DisplayList::init() {
     mBottom = 0;
     mClipChildren = true;
     mAlpha = 1;
-    mMultipliedAlpha = 255;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
     mTranslationY = 0;
@@ -362,7 +361,7 @@ void DisplayList::outputViewProperties(const int level) {
             }
             ALOGD("%*sSaveLayerAlpha %.2f, %.2f, %.2f, %.2f, %d, 0x%x", level * 2, "",
                     (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                    mMultipliedAlpha, flags);
+                    (int)(mAlpha * 255), flags);
         }
     }
     if (mClipChildren && !mCaching) {
@@ -400,9 +399,9 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             renderer.concatMatrix(mTransformMatrix);
         }
     }
-    if (mAlpha < 1 && !mCaching) {
-        if (!mHasOverlappingRendering) {
-            renderer.setAlpha(mAlpha);
+    if (mAlpha < 1) {
+        if (mCaching || !mHasOverlappingRendering) {
+            renderer.scaleAlpha(mAlpha);
         } else {
             // TODO: should be able to store the size of a DL at record time and not
             // have to pass it into this call. In fact, this information might be in the
@@ -412,7 +411,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
                 saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
             }
             handler(mSaveLayerOp->reinit(0, 0, mRight - mLeft, mBottom - mTop,
-                    mMultipliedAlpha, SkXfermode::kSrcOver_Mode, saveFlags), PROPERTY_SAVECOUNT);
+                    mAlpha * 255, SkXfermode::kSrcOver_Mode, saveFlags), PROPERTY_SAVECOUNT);
         }
     }
     if (mClipChildren && !mCaching) {
@@ -423,40 +422,38 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
 
 class DeferOperationHandler {
 public:
-    DeferOperationHandler(DeferStateStruct& deferStruct, int multipliedAlpha, int level)
-        : mDeferStruct(deferStruct), mMultipliedAlpha(multipliedAlpha), mLevel(level) {}
+    DeferOperationHandler(DeferStateStruct& deferStruct, int level)
+        : mDeferStruct(deferStruct), mLevel(level) {}
     inline void operator()(DisplayListOp* operation, int saveCount) {
-        operation->defer(mDeferStruct, saveCount, mLevel, mMultipliedAlpha);
+        operation->defer(mDeferStruct, saveCount, mLevel);
     }
 private:
     DeferStateStruct& mDeferStruct;
-    const int mMultipliedAlpha;
     const int mLevel;
 };
 
 void DisplayList::defer(DeferStateStruct& deferStruct, const int level) {
-    DeferOperationHandler handler(deferStruct, mCaching ? mMultipliedAlpha : -1, level);
+    DeferOperationHandler handler(deferStruct, level);
     iterate<DeferOperationHandler>(deferStruct.mRenderer, handler, level);
 }
 
 class ReplayOperationHandler {
 public:
-    ReplayOperationHandler(ReplayStateStruct& replayStruct, int multipliedAlpha, int level)
-        : mReplayStruct(replayStruct), mMultipliedAlpha(multipliedAlpha), mLevel(level) {}
+    ReplayOperationHandler(ReplayStateStruct& replayStruct, int level)
+        : mReplayStruct(replayStruct), mLevel(level) {}
     inline void operator()(DisplayListOp* operation, int saveCount) {
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
         replayStruct.mRenderer.eventMark(operation->name());
 #endif
-        operation->replay(mReplayStruct, saveCount, mLevel, mMultipliedAlpha);
+        operation->replay(mReplayStruct, saveCount, mLevel);
     }
 private:
     ReplayStateStruct& mReplayStruct;
-    const int mMultipliedAlpha;
     const int mLevel;
 };
 
 void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
-    ReplayOperationHandler handler(replayStruct, mCaching ? mMultipliedAlpha : -1, level);
+    ReplayOperationHandler handler(replayStruct, level);
 
     replayStruct.mRenderer.startMark(mName.string());
     iterate<ReplayOperationHandler>(replayStruct.mRenderer, handler, level);
