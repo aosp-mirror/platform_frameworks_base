@@ -1257,6 +1257,15 @@ public class StateMachine {
     }
 
     /**
+     * Constructor creates a StateMachine using the handler.
+     *
+     * @param name of the state machine
+     */
+    protected StateMachine(String name, Handler handler) {
+        initStateMachine(name, handler.getLooper());
+    }
+
+    /**
      * Add a new state to the state machine
      * @param state the state to add
      * @param parent the parent of state
