@@ -368,6 +368,13 @@ class ServiceRecord extends Binder {
                         return;
                     }
                     try {
+                        if (foregroundNoti.icon == 0) {
+                            // Notifications whose icon is 0 are defined to not show
+                            // a notification, silently ignoring it.  We don't want to
+                            // just ignore it, we want to prevent the service from
+                            // being foreground.
+                            throw new RuntimeException("icon must be non-zero");
+                        }
                         int[] outId = new int[1];
                         nm.enqueueNotificationInternal(localPackageName, localPackageName,
                                 appUid, appPid, null, localForegroundId, localForegroundNoti,
