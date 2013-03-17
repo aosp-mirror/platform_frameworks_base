@@ -112,10 +112,7 @@ static const Blender gBlendsSwap[] = {
 
 OpenGLRenderer::OpenGLRenderer():
         mCaches(Caches::getInstance()), mExtensions(Extensions::getInstance()) {
-    mDrawModifiers.mShader = NULL;
-    mDrawModifiers.mColorFilter = NULL;
-    mDrawModifiers.mHasShadow = false;
-    mDrawModifiers.mHasDrawFilter = false;
+    resetDrawModifiers();
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
@@ -1203,6 +1200,13 @@ void OpenGLRenderer::clearLayerRegions() {
 ///////////////////////////////////////////////////////////////////////////////
 // State Deferral
 ///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::resetDrawModifiers() {
+    mDrawModifiers.mShader = NULL;
+    mDrawModifiers.mColorFilter = NULL;
+    mDrawModifiers.mHasShadow = false;
+    mDrawModifiers.mHasDrawFilter = false;
+}
 
 bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDeferFlags) {
     const Rect& currentClip = *(mSnapshot->clipRect);
