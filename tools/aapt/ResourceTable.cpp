@@ -3755,8 +3755,21 @@ sp<ResourceTable::Package> ResourceTable::getPackage(const String16& package)
             mHaveAppPackage = true;
             p = new Package(package, 127);
         } else {
-            p = new Package(package, mNextPackageId);
-        }
+            int extendedPackageId = mBundle->getExtendedPackageId();
+            if (extendedPackageId != 0) {
+                if ((uint32_t)extendedPackageId < mNextPackageId) {
+                    fprintf(stderr, "Package ID %d already in use!\n", mNextPackageId);
+                    return NULL;
+                }
+                p = new Package(package, extendedPackageId);
+            } else {
+                int forcedPackageId = mBundle->getForcedPackageId();
+                if(forcedPackageId != -1)
+                    p = new Package(package, forcedPackageId);
+                else
+                    p = new Package(package, mNextPackageId);
+            }        
+	}
         //printf("*** NEW PACKAGE: \"%s\" id=%d\n",
         //       String8(package).string(), p->getAssignedId());
         mPackages.add(package, p);

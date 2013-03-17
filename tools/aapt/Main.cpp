@@ -58,7 +58,7 @@ void usage(void)
     fprintf(stderr,
         " %s p[ackage] [-d][-f][-m][-u][-v][-x][-z][-M AndroidManifest.xml] \\\n"
         "        [-0 extension [-0 extension ...]] [-g tolerance] [-j jarfile] \\\n"
-        "        [--debug-mode] [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
+        "        [--debug-mode] [--forced-package-id VAL] [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
         "        [--app-version VAL] [--app-version-name TEXT] [--custom-package VAL] \\\n"
         "        [--rename-manifest-package PACKAGE] \\\n"
         "        [--rename-instrumentation-target-package PACKAGE] \\\n"
@@ -138,6 +138,8 @@ void usage(void)
         "   --debug-mode\n"
         "       inserts android:debuggable=\"true\" in to the application node of the\n"
         "       manifest, making the application debuggable even on production devices.\n"
+        "   --forced-package-id\n"
+        "       forces value as package-id\n"
         "   --min-sdk-version\n"
         "       inserts android:minSdkVersion in to manifest.  If the version is 7 or\n"
         "       higher, the default encoding for resources will be in UTF-8.\n"
@@ -474,6 +476,21 @@ int main(int argc, char* const argv[])
             case '-':
                 if (strcmp(cp, "-debug-mode") == 0) {
                     bundle.setDebugMode(true);
+                } else if (strcmp(cp, "-forced-package-id") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--forced-package-id' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    if (!isdigit(argv[0][0])) {
+                        fprintf(stderr, "ERROR: Invalid argument supplied for '--forced-package-id' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    } else {
+                        bundle.setForcedPackageId(atoi(argv[0]));
+                    }
                 } else if (strcmp(cp, "-min-sdk-version") == 0) {
                     argc--;
                     argv++;
