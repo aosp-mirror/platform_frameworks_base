@@ -1112,6 +1112,24 @@ bool AaptGroupEntry::getUiModeTypeName(const char* name,
               (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
               | ResTable_config::UI_MODE_TYPE_TELEVISION;
         return true;
+    } else if (strcmp(name, "smallui") == 0) {
+      if (out) out->uiMode =
+              (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
+              | 0xc;
+        return true;
+    } else if (strcmp(name, "mediumui") == 0) {
+      if (out) out->uiMode =
+              (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
+              | 0xd;
+        return true;
+    } else if (strcmp(name, "largeui") == 0) {
+      if (out) out->uiMode =
+              (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
+              | 0xe;
+        return true;
+    } else if (strcmp(name, "hugeui") == 0) {
+      if (out) out->uiMode |= 0xfu;
+        return true;
     } else if (strcmp(name, "appliance") == 0) {
       if (out) out->uiMode =
               (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
