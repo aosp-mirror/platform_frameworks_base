@@ -17,16 +17,14 @@
 package com.google.android.test.shared_library;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 
 public class SharedLibraryMain {
-    private static String LIBRARY_PACKAGE = "com.google.android.test.shared_library";
+    static String LIBRARY_PACKAGE = "com.google.android.test.shared_library";
 
     /**
      * Base version of the library.
@@ -38,6 +36,9 @@ public class SharedLibraryMain {
      */
     public static int VERSION_SECOND = 2;
 
+    /**
+     * Return the version number of the currently installed library.
+     */
     public static int getVersion(Context context) {
         PackageInfo pi = null;
         try {
@@ -48,40 +49,34 @@ public class SharedLibraryMain {
         }
     }
 
-    public static void ensureVersion(Activity activity, int minVersion) {
+    /**
+     * Check that the library's version is at least the given minimum version,
+     * displaying a dialog to have the user install an update if that is not true.
+     * The dialog is displayed as a DialogFragment in your activity if a newer
+     * version is needed.  If a newer version is needed, false is returned.
+     */
+    public static boolean ensureVersion(final Activity activity, int minVersion) {
+        final FragmentManager fm = activity.getFragmentManager();
+        final String dialogTag = LIBRARY_PACKAGE + ":version";
+        Fragment curDialog = fm.findFragmentByTag(dialogTag);
+
         if (getVersion(activity) >= minVersion) {
-            return;
+            // Library version is sufficient.  Make sure any version dialog
+            // we had shown is removed before returning.
+            if (curDialog != null) {
+                fm.beginTransaction().remove(curDialog).commitAllowingStateLoss();
+            }
+            return true;
         }
 
-        // The current version of the library does not meet the required version.  Show
-        // a dialog to inform the user and have them update to the current version.
-        // Note that updating the library will be necessity mean killing the current
-        // application (so it can be re-started with the new version, so there is no
-        // reason to return a result here.
-        final Context context;
-        try {
-            context = activity.createPackageContext(LIBRARY_PACKAGE, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalStateException("Can't find my package!", e);
+        // The current version of the library does not meet the required version.
+        // If we don't already have a version dialog displayed, display it now.
+        if (curDialog == null) {
+            curDialog = new VersionDialog();
+            fm.beginTransaction().add(curDialog, dialogTag).commitAllowingStateLoss();
         }
 
-        // Display the dialog.  Note that we don't need to deal with activity lifecycle
-        // stuff because if the activity gets recreated, it will first call through to
-        // ensureVersion(), causing us to either re-display the dialog if needed or let
-        // it now proceed.
-        final Resources res = context.getResources();
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(res.getText(R.string.upgrade_title));
-        builder.setMessage(res.getString(R.string.upgrade_body,
-                activity.getApplicationInfo().loadLabel(activity.getPackageManager()),
-                context.getApplicationInfo().loadLabel(context.getPackageManager())));
-        builder.setPositiveButton(res.getText(R.string.upgrade_button),
-                new Dialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Launch play store.
-                    }
-                });
-        builder.show();
+        // Tell the caller that the current version is not sufficient.
+        return false;
     }
 }
