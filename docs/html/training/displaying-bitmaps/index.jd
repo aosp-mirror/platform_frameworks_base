@@ -1,9 +1,8 @@
 page.title=Displaying Bitmaps Efficiently
+page.tags="bitmaps","images","graphics"
 
 trainingnavtop=true
 startpage=true
-next.title=Loading Large Bitmaps Efficiently
-next.link=load-bitmap.html
 
 @jd:body
 
