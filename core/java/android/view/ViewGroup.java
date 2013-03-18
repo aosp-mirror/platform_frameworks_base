@@ -1869,7 +1869,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     removePointersFromTouchTargets(idBitsToAssign);
 
                     final int childrenCount = mChildrenCount;
-                    if (childrenCount != 0) {
+                    if (childrenCount != 0 || mOverlay != null) {
                         // Find a child that can receive the event.
                         // Scan children from front to back.
                         final View[] children = mChildren;
@@ -1904,6 +1904,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 newTouchTarget = addTouchTarget(child, idBitsToAssign);
                                 alreadyDispatchedToNewTouchTarget = true;
                                 break;
+                            }
+                        }
+                        if (mOverlay != null && newTouchTarget == null) {
+                            // Check to see whether the overlay can handle the event
+                            final View child = mOverlay;
+                            if (canViewReceivePointerEvents(child) &&
+                                    isTransformedTouchPointInView(x, y, child, null)) {
+                                newTouchTarget = getTouchTarget(child);
+                                if (newTouchTarget != null) {
+                                    newTouchTarget.pointerIdBits |= idBitsToAssign;
+                                } else {
+                                    resetCancelNextUpFlag(child);
+                                    if (dispatchTransformedTouchEvent(ev, false, child,
+                                            idBitsToAssign)) {
+                                        mLastTouchDownTime = ev.getDownTime();
+                                        mLastTouchDownX = ev.getX();
+                                        mLastTouchDownY = ev.getY();
+                                        newTouchTarget = addTouchTarget(child, idBitsToAssign);
+                                        alreadyDispatchedToNewTouchTarget = true;
+                                    }
+                                }
                             }
                         }
                     }
@@ -3021,6 +3042,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 child.getDisplayList();
                 child.mRecreateDisplayList = false;
             }
+        }
+        if (mOverlay != null) {
+            mOverlay.mRecreateDisplayList = (mOverlay.mPrivateFlags & PFLAG_INVALIDATED)
+                    == PFLAG_INVALIDATED;
+            mOverlay.mPrivateFlags &= ~PFLAG_INVALIDATED;
+            mOverlay.getDisplayList();
+            mOverlay.mRecreateDisplayList = false;
         }
     }
 
