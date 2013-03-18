@@ -898,241 +898,259 @@ public class WindowManagerService extends IWindowManager.Stub
         return -1;
     }
 
-    private void addWindowToListInOrderLocked(final WindowState win, boolean addToToken) {
+    private int addAppWindowToListLocked(final WindowState win) {
         final IWindow client = win.mClient;
         final WindowToken token = win.mToken;
         final DisplayContent displayContent = win.mDisplayContent;
 
         final WindowList windows = win.getWindowList();
         final int N = windows.size();
-        final WindowState attached = win.mAttachedWindow;
         WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
-        if (attached == null) {
-            int tokenWindowsPos = 0;
-            int windowListPos = tokenWindowList.size();
-            if (token.appWindowToken != null) {
-                int index = windowListPos - 1;
-                if (index >= 0) {
-                    // If this application has existing windows, we
-                    // simply place the new window on top of them... but
-                    // keep the starting window on top.
-                    if (win.mAttrs.type == TYPE_BASE_APPLICATION) {
-                        // Base windows go behind everything else.
-                        WindowState lowestWindow = tokenWindowList.get(0);
-                        placeWindowBefore(lowestWindow, win);
-                        tokenWindowsPos = indexOfWinInWindowList(lowestWindow, token.windows);
-                    } else {
-                        AppWindowToken atoken = win.mAppToken;
-                        WindowState lastWindow = tokenWindowList.get(index);
-                        if (atoken != null && lastWindow == atoken.startingWindow) {
-                            placeWindowBefore(lastWindow, win);
-                            tokenWindowsPos = indexOfWinInWindowList(lastWindow, token.windows);
-                        } else {
-                            int newIdx = findIdxBasedOnAppTokens(win);
-                            //there is a window above this one associated with the same
-                            //apptoken note that the window could be a floating window
-                            //that was created later or a window at the top of the list of
-                            //windows associated with this token.
-                            if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
-                                Slog.v(TAG, "Adding window " + win + " at "
-                                        + (newIdx + 1) + " of " + N);
-                            }
-                            windows.add(newIdx + 1, win);
-                            if (newIdx < 0) {
-                                // No window from token found on win's display.
-                                tokenWindowsPos = 0;
-                            } else {
-                                tokenWindowsPos = indexOfWinInWindowList(
-                                        windows.get(newIdx), token.windows) + 1;
-                            }
-                            mWindowsChanged = true;
-                        }
-                    }
+        int tokenWindowsPos = 0;
+        int windowListPos = tokenWindowList.size();
+        if (!tokenWindowList.isEmpty()) {
+            // If this application has existing windows, we
+            // simply place the new window on top of them... but
+            // keep the starting window on top.
+            if (win.mAttrs.type == TYPE_BASE_APPLICATION) {
+                // Base windows go behind everything else.
+                WindowState lowestWindow = tokenWindowList.get(0);
+                placeWindowBefore(lowestWindow, win);
+                tokenWindowsPos = indexOfWinInWindowList(lowestWindow, token.windows);
+            } else {
+                AppWindowToken atoken = win.mAppToken;
+                WindowState lastWindow = tokenWindowList.get(windowListPos - 1);
+                if (atoken != null && lastWindow == atoken.startingWindow) {
+                    placeWindowBefore(lastWindow, win);
+                    tokenWindowsPos = indexOfWinInWindowList(lastWindow, token.windows);
                 } else {
-                    // No windows from this token on this display
-                    if (localLOGV) Slog.v(
-                        TAG, "Figuring out where to add app window "
-                        + client.asBinder() + " (token=" + token + ")");
-                    // Figure out where the window should go, based on the
-                    // order of applications.
-                    WindowState pos = null;
-
-                    final ArrayList<Task> tasks = displayContent.mTasks;
-                    int taskNdx;
-                    int tokenNdx = -1;
-                    for (taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                        AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                        for (tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                            final AppWindowToken t = tokens.get(tokenNdx);
-                            if (t == token) {
-                                --tokenNdx;
-                                if (tokenNdx < 0) {
-                                    --taskNdx;
-                                    if (taskNdx >= 0) {
-                                        tokenNdx = tasks.get(taskNdx).mAppTokens.size() - 1;
-                                    }
-                                }
-                                break;
-                            }
-
-                            // We haven't reached the token yet; if this token
-                            // is not going to the bottom and has windows on this display, we can
-                            // use it as an anchor for when we do reach the token.
-                            tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
-                            if (!t.sendingToBottom && tokenWindowList.size() > 0) {
-                                pos = tokenWindowList.get(0);
-                            }
-                        }
-                        if (tokenNdx >= 0) {
-                            // early exit
-                            break;
-                        }
-                    }
-                    // We now know the index into the apps.  If we found
-                    // an app window above, that gives us the position; else
-                    // we need to look some more.
-                    if (pos != null) {
-                        // Move behind any windows attached to this one.
-                        WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
-                        if (atoken != null) {
-                            tokenWindowList =
-                                    getTokenWindowsOnDisplay(atoken, displayContent);
-                            final int NC = tokenWindowList.size();
-                            if (NC > 0) {
-                                WindowState bottom = tokenWindowList.get(0);
-                                if (bottom.mSubLayer < 0) {
-                                    pos = bottom;
-                                }
-                            }
-                        }
-                        placeWindowBefore(pos, win);
+                    int newIdx = findIdxBasedOnAppTokens(win);
+                    //there is a window above this one associated with the same
+                    //apptoken note that the window could be a floating window
+                    //that was created later or a window at the top of the list of
+                    //windows associated with this token.
+                    if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+                            "Adding window " + win + " at " + (newIdx + 1) + " of " + N);
+                    windows.add(newIdx + 1, win);
+                    if (newIdx < 0) {
+                        // No window from token found on win's display.
+                        tokenWindowsPos = 0;
                     } else {
-                        // Continue looking down until we find the first
-                        // token that has windows on this display.
-                        for ( ; taskNdx >= 0; --taskNdx) {
-                            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                            for ( ; tokenNdx >= 0; --tokenNdx) {
-                                final AppWindowToken t = tokens.get(tokenNdx);
-                                tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
-                                final int NW = tokenWindowList.size();
-                                if (NW > 0) {
-                                    pos = tokenWindowList.get(NW-1);
-                                    break;
-                                }
-                            }
-                            if (tokenNdx >= 0) {
-                                // found
-                                break;
-                            }
-                        }
-                        if (pos != null) {
-                            // Move in front of any windows attached to this
-                            // one.
-                            WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
-                            if (atoken != null) {
-                                final int NC = atoken.windows.size();
-                                if (NC > 0) {
-                                    WindowState top = atoken.windows.get(NC-1);
-                                    if (top.mSubLayer >= 0) {
-                                        pos = top;
-                                    }
-                                }
-                            }
-                            placeWindowAfter(pos, win);
-                        } else {
-                            // Just search for the start of this layer.
-                            final int myLayer = win.mBaseLayer;
-                            int i;
-                            for (i = 0; i < N; i++) {
-                                WindowState w = windows.get(i);
-                                if (w.mBaseLayer > myLayer) {
-                                    break;
-                                }
-                            }
-                            if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
-                                Slog.v(TAG, "Adding window " + win + " at "
-                                        + i + " of " + N);
-                            }
-                            windows.add(i, win);
-                            mWindowsChanged = true;
+                        tokenWindowsPos = indexOfWinInWindowList(
+                                windows.get(newIdx), token.windows) + 1;
+                    }
+                    mWindowsChanged = true;
+                }
+            }
+            return tokenWindowsPos;
+        }
+
+        // No windows from this token on this display
+        if (localLOGV) Slog.v(TAG, "Figuring out where to add app window " + client.asBinder()
+                + " (token=" + token + ")");
+        // Figure out where the window should go, based on the
+        // order of applications.
+        WindowState pos = null;
+
+        final ArrayList<Task> tasks = displayContent.mTasks;
+        int taskNdx;
+        int tokenNdx = -1;
+        for (taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            for (tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                final AppWindowToken t = tokens.get(tokenNdx);
+                if (t == token) {
+                    --tokenNdx;
+                    if (tokenNdx < 0) {
+                        --taskNdx;
+                        if (taskNdx >= 0) {
+                            tokenNdx = tasks.get(taskNdx).mAppTokens.size() - 1;
                         }
                     }
+                    break;
+                }
+
+                // We haven't reached the token yet; if this token
+                // is not going to the bottom and has windows on this display, we can
+                // use it as an anchor for when we do reach the token.
+                tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
+                if (!t.sendingToBottom && tokenWindowList.size() > 0) {
+                    pos = tokenWindowList.get(0);
+                }
+            }
+            if (tokenNdx >= 0) {
+                // early exit
+                break;
+            }
+        }
+
+        // We now know the index into the apps.  If we found
+        // an app window above, that gives us the position; else
+        // we need to look some more.
+        if (pos != null) {
+            // Move behind any windows attached to this one.
+            WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
+            if (atoken != null) {
+                tokenWindowList =
+                        getTokenWindowsOnDisplay(atoken, displayContent);
+                final int NC = tokenWindowList.size();
+                if (NC > 0) {
+                    WindowState bottom = tokenWindowList.get(0);
+                    if (bottom.mSubLayer < 0) {
+                        pos = bottom;
+                    }
+                }
+            }
+            placeWindowBefore(pos, win);
+            return tokenWindowsPos;
+        }
+
+        // Continue looking down until we find the first
+        // token that has windows on this display.
+        for ( ; taskNdx >= 0; --taskNdx) {
+            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            for ( ; tokenNdx >= 0; --tokenNdx) {
+                final AppWindowToken t = tokens.get(tokenNdx);
+                tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
+                final int NW = tokenWindowList.size();
+                if (NW > 0) {
+                    pos = tokenWindowList.get(NW-1);
+                    break;
+                }
+            }
+            if (tokenNdx >= 0) {
+                // found
+                break;
+            }
+        }
+
+        if (pos != null) {
+            // Move in front of any windows attached to this
+            // one.
+            WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
+            if (atoken != null) {
+                final int NC = atoken.windows.size();
+                if (NC > 0) {
+                    WindowState top = atoken.windows.get(NC-1);
+                    if (top.mSubLayer >= 0) {
+                        pos = top;
+                    }
+                }
+            }
+            placeWindowAfter(pos, win);
+            return tokenWindowsPos;
+        }
+
+        // Just search for the start of this layer.
+        final int myLayer = win.mBaseLayer;
+        int i;
+        for (i = 0; i < N; i++) {
+            WindowState w = windows.get(i);
+            if (w.mBaseLayer > myLayer) {
+                break;
+            }
+        }
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+                "Adding window " + win + " at " + i + " of " + N);
+        windows.add(i, win);
+        mWindowsChanged = true;
+        return tokenWindowsPos;
+    }
+
+    private void addFreeWindowToListLocked(final WindowState win) {
+        final WindowList windows = win.getWindowList();
+
+        // Figure out where window should go, based on layer.
+        final int myLayer = win.mBaseLayer;
+        int i;
+        for (i = windows.size() - 1; i >= 0; i--) {
+            if (windows.get(i).mBaseLayer <= myLayer) {
+                break;
+            }
+        }
+        i++;
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+                "Adding window " + win + " at " + i + " of " + windows.size());
+        windows.add(i, win);
+        mWindowsChanged = true;
+    }
+
+    private void addAttachedWindowToListLocked(final WindowState win, boolean addToToken) {
+        final WindowToken token = win.mToken;
+        final DisplayContent displayContent = win.mDisplayContent;
+        final WindowState attached = win.mAttachedWindow;
+
+        WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
+
+        // Figure out this window's ordering relative to the window
+        // it is attached to.
+        final int NA = tokenWindowList.size();
+        final int sublayer = win.mSubLayer;
+        int largestSublayer = Integer.MIN_VALUE;
+        WindowState windowWithLargestSublayer = null;
+        int i;
+        for (i = 0; i < NA; i++) {
+            WindowState w = tokenWindowList.get(i);
+            final int wSublayer = w.mSubLayer;
+            if (wSublayer >= largestSublayer) {
+                largestSublayer = wSublayer;
+                windowWithLargestSublayer = w;
+            }
+            if (sublayer < 0) {
+                // For negative sublayers, we go below all windows
+                // in the same sublayer.
+                if (wSublayer >= sublayer) {
+                    if (addToToken) {
+                        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
+                        token.windows.add(i, win);
+                    }
+                    placeWindowBefore(wSublayer >= 0 ? attached : w, win);
+                    break;
                 }
             } else {
-                // Figure out where window should go, based on layer.
-                final int myLayer = win.mBaseLayer;
-                int i;
-                for (i = N - 1; i >= 0; i--) {
-                    if (windows.get(i).mBaseLayer <= myLayer) {
-                        break;
+                // For positive sublayers, we go above all windows
+                // in the same sublayer.
+                if (wSublayer > sublayer) {
+                    if (addToToken) {
+                        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
+                        token.windows.add(i, win);
                     }
+                    placeWindowBefore(w, win);
+                    break;
                 }
-                i++;
-                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
-                        TAG, "Adding window " + win + " at "
-                        + i + " of " + N);
-                windows.add(i, win);
-                mWindowsChanged = true;
             }
+        }
+        if (i >= NA) {
+            if (addToToken) {
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
+                token.windows.add(win);
+            }
+            if (sublayer < 0) {
+                placeWindowBefore(attached, win);
+            } else {
+                placeWindowAfter(largestSublayer >= 0
+                                 ? windowWithLargestSublayer
+                                 : attached,
+                                 win);
+            }
+        }
+    }
 
+    private void addWindowToListInOrderLocked(final WindowState win, boolean addToToken) {
+        if (win.mAttachedWindow == null) {
+            final WindowToken token = win.mToken;
+            int tokenWindowsPos = 0;
+            if (token.appWindowToken != null) {
+                tokenWindowsPos = addAppWindowToListLocked(win);
+            } else {
+                addFreeWindowToListLocked(win);
+            }
             if (addToToken) {
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
                 token.windows.add(tokenWindowsPos, win);
             }
-
         } else {
-            // Figure out this window's ordering relative to the window
-            // it is attached to.
-            final int NA = tokenWindowList.size();
-            final int sublayer = win.mSubLayer;
-            int largestSublayer = Integer.MIN_VALUE;
-            WindowState windowWithLargestSublayer = null;
-            int i;
-            for (i = 0; i < NA; i++) {
-                WindowState w = tokenWindowList.get(i);
-                final int wSublayer = w.mSubLayer;
-                if (wSublayer >= largestSublayer) {
-                    largestSublayer = wSublayer;
-                    windowWithLargestSublayer = w;
-                }
-                if (sublayer < 0) {
-                    // For negative sublayers, we go below all windows
-                    // in the same sublayer.
-                    if (wSublayer >= sublayer) {
-                        if (addToToken) {
-                            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
-                            token.windows.add(i, win);
-                        }
-                        placeWindowBefore(wSublayer >= 0 ? attached : w, win);
-                        break;
-                    }
-                } else {
-                    // For positive sublayers, we go above all windows
-                    // in the same sublayer.
-                    if (wSublayer > sublayer) {
-                        if (addToToken) {
-                            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
-                            token.windows.add(i, win);
-                        }
-                        placeWindowBefore(w, win);
-                        break;
-                    }
-                }
-            }
-            if (i >= NA) {
-                if (addToToken) {
-                    if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
-                    token.windows.add(win);
-                }
-                if (sublayer < 0) {
-                    placeWindowBefore(attached, win);
-                } else {
-                    placeWindowAfter(largestSublayer >= 0
-                                     ? windowWithLargestSublayer
-                                     : attached,
-                                     win);
-                }
-            }
+            addAttachedWindowToListLocked(win, addToToken);
         }
 
         if (win.mAppToken != null && addToToken) {
@@ -4667,12 +4685,12 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param stackId The unique identifier of the new stack.
      * @param relativeStackId The existing stack that this stack goes before or after.
      * @param position One of:
-     *      {@link android.app.ActivityManager#TASK_STACK_GOES_BEFORE}
-     *      {@link android.app.ActivityManager#TASK_STACK_GOES_AFTER}
-     *      {@link android.app.ActivityManager#TASK_STACK_GOES_ABOVE}
-     *      {@link android.app.ActivityManager#TASK_STACK_GOES_BELOW}
-     *      {@link android.app.ActivityManager#TASK_STACK_GOES_UNDER}
-     *      {@link android.app.ActivityManager#TASK_STACK_GOES_OVER}
+     *      {@link StackBox#TASK_STACK_GOES_BEFORE}
+     *      {@link StackBox#TASK_STACK_GOES_AFTER}
+     *      {@link StackBox#TASK_STACK_GOES_ABOVE}
+     *      {@link StackBox#TASK_STACK_GOES_BELOW}
+     *      {@link StackBox#TASK_STACK_GOES_UNDER}
+     *      {@link StackBox#TASK_STACK_GOES_OVER}
      * @param weight Relative weight for determining how big to make the new TaskStack.
      */
     public void createStack(int stackId, int relativeStackId, int position, float weight) {
