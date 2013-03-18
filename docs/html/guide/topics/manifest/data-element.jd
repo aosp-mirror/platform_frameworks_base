@@ -85,6 +85,9 @@ host names using lowercase letters.</p>
 The subtype can be the asterisk wildcard ({@code *}) to indicate that any 
 subtype matches.
 
+<p>It's common for an intent filter to declare a {@code &lt;data>} that includes
+only the {@code android:mimeType} attribute.</p>
+
 <p class="note">Note: MIME type matching in the Android framework is
 case-sensitive, unlike formal RFC MIME types.  As a result, you should always
 specify MIME types using lowercase letters.</p>

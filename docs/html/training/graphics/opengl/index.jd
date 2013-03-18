@@ -1,7 +1,6 @@
 page.title=Displaying Graphics with OpenGL ES
+page=tags="open gl","graphics"
 trainingnavtop=true
-next.title=Building an OpenGL ES Environment
-next.link=environment.html
 
 @jd:body
 
