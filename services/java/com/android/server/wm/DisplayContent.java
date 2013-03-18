@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import android.util.SparseArray;
+import android.graphics.Rect;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -80,11 +80,12 @@ class DisplayContent {
      */
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
+    ArrayList<StackBox> mStackBoxes = new ArrayList<StackBox>();
+
     /**
      * Sorted most recent at top, oldest at [0].
      */
-    ArrayList<TaskList> mTaskLists = new ArrayList<TaskList>();
-    SparseArray<TaskList> mTaskIdToTaskList = new SparseArray<TaskList>();
+    ArrayList<Task> mTasks = new ArrayList<Task>();
 
     /**
      * @param display May not be null.
@@ -112,67 +113,82 @@ class DisplayContent {
         return mDisplayInfo;
     }
 
+    ArrayList<Task> getTasks() {
+        return mTasks;
+    }
+
     public void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
     }
 
-    /**
-     *  Find the location to insert a new AppWindowToken into the window-ordered app token list.
-     * @param addPos The location the token was inserted into in mAppTokens.
-     * @param wtoken The token to insert.
-     */
-    void addAppToken(final int addPos, final AppWindowToken wtoken) {
-        TaskList task = mTaskIdToTaskList.get(wtoken.groupId);
-        if (task == null) {
-            task = new TaskList(wtoken, this);
-            mTaskIdToTaskList.put(wtoken.groupId, task);
-            mTaskLists.add(task);
-        } else {
-            task.mAppTokens.add(addPos, wtoken);
-        }
-    }
-
-    void removeAppToken(final AppWindowToken wtoken) {
-        final int taskId = wtoken.groupId;
-        final TaskList task = mTaskIdToTaskList.get(taskId);
-        if (task != null) {
-            AppTokenList appTokens = task.mAppTokens;
-            appTokens.remove(wtoken);
-            if (appTokens.size() == 0) {
-                mTaskLists.remove(task);
-                mTaskIdToTaskList.delete(taskId);
-            }
-        }
-    }
-
-    void setAppTaskId(AppWindowToken wtoken, int newTaskId) {
-        final int taskId = wtoken.groupId;
-        TaskList task = mTaskIdToTaskList.get(taskId);
-        if (task != null) {
-            AppTokenList appTokens = task.mAppTokens;
-            appTokens.remove(wtoken);
-            if (appTokens.size() == 0) {
-                mTaskIdToTaskList.delete(taskId);
-            }
-        }
-
-        task = mTaskIdToTaskList.get(newTaskId);
-        if (task == null) {
-            task = new TaskList(wtoken, this);
-            mTaskIdToTaskList.put(newTaskId, task);
-        } else {
-            task.mAppTokens.add(wtoken);
-        }
-
-        wtoken.groupId = newTaskId;
-    }
-
     int numTokens() {
         int count = 0;
-        for (int taskNdx = mTaskLists.size() - 1; taskNdx >= 0; --taskNdx) {
-            count += mTaskLists.get(taskNdx).mAppTokens.size();
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            count += mTasks.get(taskNdx).mAppTokens.size();
         }
         return count;
+    }
+
+    TaskStack createStack(int stackId, int relativeStackId, int position, float weight) {
+        TaskStack newStack = null;
+        if (mStackBoxes.isEmpty()) {
+            StackBox newBox = new StackBox(this, new Rect(0, 0, mDisplayInfo.logicalWidth,
+                    mDisplayInfo.logicalHeight));
+            mStackBoxes.add(newBox);
+            newStack = new TaskStack(stackId, newBox);
+            newBox.mStack = newStack;
+        } else {
+            int stackBoxNdx;
+            for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+                final StackBox box = mStackBoxes.get(stackBoxNdx);
+                if (position == StackBox.TASK_STACK_GOES_OVER
+                        || position == StackBox.TASK_STACK_GOES_UNDER) {
+                    // Position indicates a new box is added at top level only.
+                    final TaskStack stack = box.mStack;
+                    if (stack != null && stack.mStackId == relativeStackId) {
+                        final int offset = position == StackBox.TASK_STACK_GOES_OVER ? 1 : 0;
+                        StackBox newBox = new StackBox(this, box.mBounds);
+                        newStack = new TaskStack(stackId, newBox);
+                        newBox.mStack = newStack;
+                        mStackBoxes.add(stackBoxNdx + offset, newBox);
+                        break;
+                    }
+                } else {
+                    // Remaining position values indicate a box must be split.
+                    newStack = box.split(stackId, relativeStackId, position, weight);
+                    if (newStack != null) {
+                        break;
+                    }
+                }
+            }
+            if (stackBoxNdx >= 0) {
+                throw new IllegalArgumentException("createStack: stackId " + stackId + " not found.");
+            }
+        }
+        return newStack;
+    }
+
+    boolean addTaskToStack(Task task, int stackId, boolean toTop) {
+        int stackBoxNdx;
+        for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            final StackBox box = mStackBoxes.get(stackBoxNdx);
+            if (box.addTaskToStack(task, stackId, toTop)) {
+                layoutNeeded = true;
+                break;
+            }
+        }
+        return false;
+    }
+
+    boolean resizeStack(int stackId, float weight) {
+        int stackBoxNdx;
+        for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            final StackBox box = mStackBoxes.get(stackBoxNdx);
+            if (box.resize(stackId, weight)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -203,8 +219,8 @@ class DisplayContent {
             if (ndx > 0) {
                 pw.println();
                 pw.println("  Application tokens in Z order:");
-                for (int taskNdx = mTaskLists.size() - 1; taskNdx >= 0; --taskNdx) {
-                    AppTokenList tokens = mTaskLists.get(taskNdx).mAppTokens;
+                for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                    AppTokenList tokens = mTasks.get(taskNdx).mAppTokens;
                     for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
                         final AppWindowToken wtoken = tokens.get(tokenNdx);
                         pw.print("  App #"); pw.print(ndx--);
@@ -233,16 +249,6 @@ class DisplayContent {
                       pw.print(' '); pw.print(token);
                       pw.println(':');
                       token.dump(pw, "    ");
-                }
-            }
-            if (mTaskIdToTaskList.size() > 0) {
-                pw.println();
-                for (int i = 0; i < mTaskIdToTaskList.size(); ++i) {
-                    pw.print("  TaskList #"); pw.print(i);
-                      pw.print(" taskId="); pw.println(mTaskIdToTaskList.keyAt(i));
-                    pw.print("    mAppTokens=");
-                      pw.println(mTaskIdToTaskList.valueAt(i).mAppTokens);
-                    pw.println();
                 }
             }
         pw.println();

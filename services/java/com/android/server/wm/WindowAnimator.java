@@ -174,7 +174,7 @@ public class WindowAnimator {
     private void updateAppWindowsLocked(int displayId) {
         int i;
         final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
-        final ArrayList<TaskList> tasks = displayContent.mTaskLists;
+        final ArrayList<Task> tasks = displayContent.mTasks;
         final int numTasks = tasks.size();
         for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
             final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
@@ -462,7 +462,7 @@ public class WindowAnimator {
     private void testTokenMayBeDrawnLocked(int displayId) {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        final ArrayList<TaskList> tasks = mService.getDisplayContentLocked(displayId).mTaskLists;
+        final ArrayList<Task> tasks = mService.getDisplayContentLocked(displayId).mTasks;
         final int numTasks = tasks.size();
         for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
             final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
