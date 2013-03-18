@@ -234,6 +234,7 @@ class ScreenRotationAnimation {
                 mSurfaceControl.setLayer(FREEZE_LAYER + 1);
                 mSurfaceControl.setAlpha(0);
                 mSurfaceControl.show();
+                sur.destroy();
             } catch (SurfaceControl.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
             }
