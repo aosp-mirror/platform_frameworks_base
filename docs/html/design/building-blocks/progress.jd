@@ -1,4 +1,5 @@
 page.title=Progress &amp; Activity
+page.tags="progressbar"
 @jd:body
 
 <p>Progress bars and activity indicators signal to users that something is happening that will take a moment.</p>
