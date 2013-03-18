@@ -6366,7 +6366,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             mTransientStateViewsById = new LongSparseArray<View>();
                         }
                         mTransientStateViewsById.put(lp.itemId, scrap);
-                    } else {
+                    } else if (!mDataChanged) {
+                        // avoid putting views on transient state list during a data change;
+                        // the layout positions may be out of sync with the adapter positions
                         if (mTransientStateViews == null) {
                             mTransientStateViews = new SparseArray<View>();
                         }
