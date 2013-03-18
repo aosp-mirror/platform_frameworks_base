@@ -3584,6 +3584,8 @@ public class WifiStateMachine extends StateMachine {
                     setWifiApState(WIFI_AP_STATE_DISABLING);
                     stopTethering();
                     transitionTo(mUntetheringState);
+                    // More work to do after untethering
+                    deferMessage(message);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -3610,15 +3612,11 @@ public class WifiStateMachine extends StateMachine {
                     if (isWifiTethered(stateChange.active)) break;
 
                     transitionTo(mSoftApStartedState);
-                    // Needs to be first thing handled
-                    sendMessageAtFrontOfQueue(CMD_STOP_AP);
                     break;
                 case CMD_TETHER_NOTIFICATION_TIMED_OUT:
                     if (message.arg1 == mTetherToken) {
                         loge("Failed to get tether update, force stop access point");
                         transitionTo(mSoftApStartedState);
-                        // Needs to be first thing handled
-                        sendMessageAtFrontOfQueue(CMD_STOP_AP);
                     }
                     break;
                 case CMD_START_SUPPLICANT:
