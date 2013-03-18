@@ -1,4 +1,5 @@
 page.title=Switches
+page.tags="switch","checkbox","radiobutton"
 @jd:body
 
 <p>Switches allow the user to select options. There are three kinds of switches: checkboxes, radio
