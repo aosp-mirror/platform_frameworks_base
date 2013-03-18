@@ -1188,7 +1188,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Po włączeniu nośnika USB niektóre używane aplikacje zostaną zatrzymane i mogą być niedostępne do chwili jego wyłączenia."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operacja USB zakończona niepowodzeniem"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Podłączono jako urządzenie multimedialne."</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Podłączono urządzenie multimedialne"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Podłączono jako aparat."</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Podłączono jako nośnik instalacyjny."</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Podłączono akcesorium USB"</string>
@@ -1320,7 +1320,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Usuń elementy."</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Cofnij usunięcia"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Nie wykonuj teraz żadnych czynności."</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Wybierz konto."</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Wybierz konto"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Dodaj konto"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zwiększ"</string>

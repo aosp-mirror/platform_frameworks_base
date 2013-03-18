@@ -40,7 +40,7 @@
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Serviciul a fost activat pentru:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Serviciul a fost dezactivat."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"Înregistrarea a reuşit."</string>
-    <string name="serviceErased" msgid="1288584695297200972">"Ştergerea a reuşit."</string>
+    <string name="serviceErased" msgid="1288584695297200972">"Ștergerea a reuşit."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Parolă incorectă."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI finalizat."</string>
     <string name="badPin" msgid="9015277645546710014">"Codul PIN vechi introdus nu este corect."</string>
@@ -129,8 +129,8 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Sincronizare"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronizare"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Prea multe ştergeri <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Stocarea pe tabletă este plină. Ştergeţi câteva fişiere pentru a elibera spaţiu."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"Stocarea pe telefon este plină. Ştergeţi câteva fişiere pentru a elibera spaţiu."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Stocarea pe tabletă este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Stocarea pe telefon este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opţiuni tablet PC"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opţiuni telefon"</string>
@@ -628,9 +628,9 @@
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Editaţi parola de deblocare a ecranului."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Blocaţi ecranul"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Stabiliţi modul şi timpul în care se blochează ecranul."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Ştergere integrală date"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ştergeţi datele de pe tabletă fără avertisment, efectuând resetarea configurării din fabrică."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ştergeţi datele din telefon fără avertisment, efectuând resetarea configurării din fabrică."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Ștergere integrală date"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ștergeţi datele de pe tabletă fără avertisment, efectuând resetarea configurării din fabrică."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ștergeţi datele din telefon fără avertisment, efectuând resetarea configurării din fabrică."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Setaţi serverul proxy global pentru dispozitiv"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Setaţi serverul proxy global pentru dispozitiv care să fie utilizat cât timp politica este activă. Numai primul administrator al dispozitivului poate seta serverul proxy global activ."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Expirare parolă blocare ecran"</string>
@@ -916,7 +916,7 @@
     <string name="search_go" msgid="8298016669822141719">"Căutaţi"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Căutaţi"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Interogare de căutare"</string>
-    <string name="searchview_description_clear" msgid="1330281990951833033">"Ştergeţi interogarea"</string>
+    <string name="searchview_description_clear" msgid="1330281990951833033">"Ștergeţi interogarea"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Trimiteţi interogarea"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Căutare vocală"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Activaţi Exploraţi prin atingere?"</string>
@@ -1036,12 +1036,12 @@
     <string name="copy" msgid="2681946229533511987">"Copiaţi"</string>
     <string name="paste" msgid="5629880836805036433">"Inseraţi"</string>
     <string name="replace" msgid="5781686059063148930">"Înlocuiţi..."</string>
-    <string name="delete" msgid="6098684844021697789">"Ştergeţi"</string>
+    <string name="delete" msgid="6098684844021697789">"Ștergeţi"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiaţi adresa URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Selectaţi text"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selectare text"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Adăugaţi în dicţionar"</string>
-    <string name="deleteText" msgid="6979668428458199034">"Ştergeţi"</string>
+    <string name="deleteText" msgid="6979668428458199034">"Ștergeţi"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acţiuni pentru text"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spaţiul de stocare aproape ocupat"</string>
@@ -1056,7 +1056,7 @@
     <string name="capital_off" msgid="6815870386972805832">"DEZACTIVAT"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Finalizare acţiune utilizând"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Se utilizează în mod prestabilit pentru această acţiune."</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ştergeţi setările prestabilite din Setări de sistem &gt; Aplicaţii &gt; Descărcate."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ștergeţi setările prestabilite din Setări de sistem &gt; Aplicaţii &gt; Descărcate."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Alegeţi o acţiune"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Alegeţi o aplicaţie pentru dispozitivul USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Această acţiune nu poate fi efectuată de nicio aplicaţie."</string>
@@ -1201,7 +1201,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depanarea USB este conectată"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Atingeţi pentru a dezactiva depanarea USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Alegeți metoda de introducere de text"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Configurați metode introducere"</string>
+    <string name="configure_input_methods" msgid="9091652157722495116">"Setați metode introducere text"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Tastatură fizică"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selectaţi aspectul tastaturii"</string>
@@ -1317,7 +1317,7 @@
     <string name="gpsVerifNo" msgid="1146564937346454865">"Nu"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Limita pentru ştergere a fost depăşită"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Există <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> (de) elemente şterse pentru <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, contul <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Ce doriţi să faceţi?"</string>
-    <string name="sync_really_delete" msgid="2572600103122596243">"Ştergeţi elementele"</string>
+    <string name="sync_really_delete" msgid="2572600103122596243">"Ștergeţi elementele"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Anulaţi aceste ştergeri"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Nu trebuie să luaţi nicio măsură deocamdată"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Alegeţi un cont"</string>
@@ -1341,7 +1341,7 @@
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Reduceţi valoarea pentru an"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Anulaţi"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Ştergeţi"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Ștergeţi"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Terminat"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Schimbarea modului"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
