@@ -6075,8 +6075,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTransientStateCount = 0;
             Log.e(VIEW_LOG_TAG, "hasTransientState decremented below 0: " +
                     "unmatched pair of setHasTransientState calls");
-        }
-        if ((hasTransientState && mTransientStateCount == 1) ||
+        } else if ((hasTransientState && mTransientStateCount == 1) ||
                 (!hasTransientState && mTransientStateCount == 0)) {
             // update flag if we've just incremented up from 0 or decremented down to 0
             mPrivateFlags2 = (mPrivateFlags2 & ~PFLAG2_HAS_TRANSIENT_STATE) |

@@ -6167,6 +6167,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private ArrayList<View> mSkippedScrap;
 
         private SparseArray<View> mTransientStateViews;
+        private LongSparseArray<View> mTransientStateViewsById;
 
         public void setViewTypeCount(int viewTypeCount) {
             if (viewTypeCount < 1) {
@@ -6205,6 +6206,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mTransientStateViews.valueAt(i).forceLayout();
                 }
             }
+            if (mTransientStateViewsById != null) {
+                final int count = mTransientStateViewsById.size();
+                for (int i = 0; i < count; i++) {
+                    mTransientStateViewsById.valueAt(i).forceLayout();
+                }
+            }
         }
 
         public boolean shouldRecycleViewType(int viewType) {
@@ -6233,6 +6240,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             if (mTransientStateViews != null) {
                 mTransientStateViews.clear();
+            }
+            if (mTransientStateViewsById != null) {
+                mTransientStateViewsById.clear();
             }
         }
 
@@ -6281,16 +6291,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         View getTransientStateView(int position) {
-            if (mTransientStateViews == null) {
-                return null;
+            if (mAdapter != null && mAdapterHasStableIds && mTransientStateViewsById != null) {
+                long id = mAdapter.getItemId(position);
+                View result = mTransientStateViewsById.get(id);
+                mTransientStateViewsById.remove(id);
+                return result;
             }
-            final int index = mTransientStateViews.indexOfKey(position);
-            if (index < 0) {
-                return null;
+            if (mTransientStateViews != null) {
+                final int index = mTransientStateViews.indexOfKey(position);
+                if (index >= 0) {
+                    View result = mTransientStateViews.valueAt(index);
+                    mTransientStateViews.removeAt(index);
+                    return result;
+                }
             }
-            final View result = mTransientStateViews.valueAt(index);
-            mTransientStateViews.removeAt(index);
-            return result;
+            return null;
         }
 
         /**
@@ -6299,6 +6314,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         void clearTransientStateViews() {
             if (mTransientStateViews != null) {
                 mTransientStateViews.clear();
+            }
+            if (mTransientStateViewsById != null) {
+                mTransientStateViewsById.clear();
             }
         }
 
@@ -6342,11 +6360,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mSkippedScrap.add(scrap);
                 }
                 if (scrapHasTransientState) {
-                    if (mTransientStateViews == null) {
-                        mTransientStateViews = new SparseArray<View>();
-                    }
                     scrap.dispatchStartTemporaryDetach();
-                    mTransientStateViews.put(position, scrap);
+                    if (mAdapter != null && mAdapterHasStableIds) {
+                        if (mTransientStateViewsById == null) {
+                            mTransientStateViewsById = new LongSparseArray<View>();
+                        }
+                        mTransientStateViewsById.put(lp.itemId, scrap);
+                    } else {
+                        if (mTransientStateViews == null) {
+                            mTransientStateViews = new SparseArray<View>();
+                        }
+                        mTransientStateViews.put(position, scrap);
+                    }
                 }
                 return;
             }
@@ -6405,10 +6430,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             removeDetachedView(victim, false);
                         }
                         if (scrapHasTransientState) {
-                            if (mTransientStateViews == null) {
-                                mTransientStateViews = new SparseArray<View>();
+                            if (mAdapter != null && mAdapterHasStableIds) {
+                                if (mTransientStateViewsById == null) {
+                                    mTransientStateViewsById = new LongSparseArray<View>();
+                                }
+                                long id = mAdapter.getItemId(mFirstActivePosition + i);
+                                mTransientStateViewsById.put(id, victim);
+                            } else {
+                                if (mTransientStateViews == null) {
+                                    mTransientStateViews = new SparseArray<View>();
+                                }
+                                mTransientStateViews.put(mFirstActivePosition + i, victim);
                             }
-                            mTransientStateViews.put(mFirstActivePosition + i, victim);
                         }
                         continue;
                     }
@@ -6453,6 +6486,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final View v = mTransientStateViews.valueAt(i);
                     if (!v.hasTransientState()) {
                         mTransientStateViews.removeAt(i);
+                        i--;
+                    }
+                }
+            }
+            if (mTransientStateViewsById != null) {
+                for (int i = 0; i < mTransientStateViewsById.size(); i++) {
+                    final View v = mTransientStateViewsById.valueAt(i);
+                    if (!v.hasTransientState()) {
+                        mTransientStateViewsById.removeAt(i);
                         i--;
                     }
                 }
