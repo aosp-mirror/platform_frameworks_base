@@ -1553,7 +1553,7 @@ public:
     static bool getIdmapInfo(const void* idmap, size_t size,
                              uint32_t* pOriginalCrc, uint32_t* pOverlayCrc);
 
-#ifndef HAVE_ANDROID_OS
+#ifdef STATIC_ANDROIDFW_FOR_TOOLS
     void print(bool inclValues) const;
     static String8 normalizeForOutput(const char* input);
 #endif

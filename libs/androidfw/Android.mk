@@ -52,6 +52,8 @@ LOCAL_MODULE:= libandroidfw
 
 LOCAL_MODULE_TAGS := optional
 
+LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
+
 LOCAL_C_INCLUDES := \
 	external/zlib
 
@@ -92,6 +94,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 ifeq ($(TARGET_OS),linux)
 include $(CLEAR_VARS)
+LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
 LOCAL_C_INCLUDES += \
 	external/skia/include/core \
 	external/zlib \
