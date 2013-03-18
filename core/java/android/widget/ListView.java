@@ -1550,6 +1550,32 @@ public class ListView extends AbsListView {
 
             setSelectedPositionInt(mNextSelectedPosition);
 
+            // Remember which child, if any, had accessibility focus. This must
+            // occur before recycling any views, since that will clear
+            // accessibility focus.
+            final ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl != null) {
+                final View accessFocusedView = viewRootImpl.getAccessibilityFocusedHost();
+                if (accessFocusedView != null) {
+                    final View accessFocusedChild = findAccessibilityFocusedChild(
+                            accessFocusedView);
+                    if (accessFocusedChild != null) {
+                        if (!dataChanged || isDirectChildHeaderOrFooter(accessFocusedChild)) {
+                            // If the views won't be changing, try to maintain
+                            // focus on the current view host and (if
+                            // applicable) its virtual view.
+                            accessibilityFocusLayoutRestoreView = accessFocusedView;
+                            accessibilityFocusLayoutRestoreNode = viewRootImpl
+                                    .getAccessibilityFocusedVirtualView();
+                        } else {
+                            // Otherwise, try to maintain focus at the same
+                            // position.
+                            accessibilityFocusPosition = getPositionForView(accessFocusedChild);
+                        }
+                    }
+                }
+            }
+
             // Pull all children into the RecycleBin.
             // These views will be reused if possible
             final int firstPosition = mFirstPosition;
@@ -1588,30 +1614,6 @@ public class ListView extends AbsListView {
                     }
                 }
                 requestFocus();
-            }
-
-            // Remember which child, if any, had accessibility focus.
-            final ViewRootImpl viewRootImpl = getViewRootImpl();
-            if (viewRootImpl != null) {
-                final View accessFocusedView = viewRootImpl.getAccessibilityFocusedHost();
-                if (accessFocusedView != null) {
-                    final View accessFocusedChild = findAccessibilityFocusedChild(
-                            accessFocusedView);
-                    if (accessFocusedChild != null) {
-                        if (!dataChanged || isDirectChildHeaderOrFooter(accessFocusedChild)) {
-                            // If the views won't be changing, try to maintain
-                            // focus on the current view host and (if
-                            // applicable) its virtual view.
-                            accessibilityFocusLayoutRestoreView = accessFocusedView;
-                            accessibilityFocusLayoutRestoreNode = viewRootImpl
-                                    .getAccessibilityFocusedVirtualView();
-                        } else {
-                            // Otherwise, try to maintain focus at the same
-                            // position.
-                            accessibilityFocusPosition = getPositionForView(accessFocusedChild);
-                        }
-                    }
-                }
             }
 
             // Clear out old views
