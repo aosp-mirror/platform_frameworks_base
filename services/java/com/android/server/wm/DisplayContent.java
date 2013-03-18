@@ -85,7 +85,7 @@ class DisplayContent {
     /**
      * Sorted most recent at top, oldest at [0].
      */
-    ArrayList<Task> mTasks = new ArrayList<Task>();
+    ArrayList<Task> mTmpTasks = new ArrayList<Task>();
 
     /**
      * @param display May not be null.
@@ -114,7 +114,12 @@ class DisplayContent {
     }
 
     ArrayList<Task> getTasks() {
-        return mTasks;
+        mTmpTasks.clear();
+        int numBoxes = mStackBoxes.size();
+        for (int boxNdx = 0; boxNdx < numBoxes; ++boxNdx) {
+            mTmpTasks.addAll(mStackBoxes.get(boxNdx).getTasks());
+        }
+        return mTmpTasks;
     }
 
     public void updateDisplayInfo() {
@@ -122,9 +127,10 @@ class DisplayContent {
     }
 
     int numTokens() {
+        getTasks();
         int count = 0;
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            count += mTasks.get(taskNdx).mAppTokens.size();
+        for (int taskNdx = mTmpTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            count += mTmpTasks.get(taskNdx).mAppTokens.size();
         }
         return count;
     }
@@ -168,18 +174,6 @@ class DisplayContent {
         return newStack;
     }
 
-    boolean addTaskToStack(Task task, int stackId, boolean toTop) {
-        int stackBoxNdx;
-        for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            final StackBox box = mStackBoxes.get(stackBoxNdx);
-            if (box.addTaskToStack(task, stackId, toTop)) {
-                layoutNeeded = true;
-                break;
-            }
-        }
-        return false;
-    }
-
     boolean resizeStack(int stackId, float weight) {
         int stackBoxNdx;
         for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
@@ -219,8 +213,9 @@ class DisplayContent {
             if (ndx > 0) {
                 pw.println();
                 pw.println("  Application tokens in Z order:");
-                for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                    AppTokenList tokens = mTasks.get(taskNdx).mAppTokens;
+                getTasks();
+                for (int taskNdx = mTmpTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                    AppTokenList tokens = mTmpTasks.get(taskNdx).mAppTokens;
                     for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
                         final AppWindowToken wtoken = tokens.get(tokenNdx);
                         pw.print("  App #"); pw.print(ndx--);

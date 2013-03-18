@@ -685,6 +685,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDisplayContent.getDisplayId();
     }
 
+    TaskStack getStack() {
+        if (mAppToken != null) {
+            return mService.mTaskIdToTask.get(mAppToken.groupId).mStack;
+        }
+        return null;
+    }
+
     public long getInputDispatchingTimeoutNanos() {
         return mAppToken != null
                 ? mAppToken.inputDispatchingTimeoutNanos

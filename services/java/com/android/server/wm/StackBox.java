@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import android.graphics.Rect;
 
+import java.util.ArrayList;
+
 public class StackBox {
     /** For use with {@link WindowManagerService#createStack} */
     public static final int TASK_STACK_GOES_BEFORE = 0;
@@ -36,6 +38,7 @@ public class StackBox {
     TaskStack mStack;
     Rect mBounds;
     boolean layoutNeeded;
+    ArrayList<Task> mTmpTasks = new ArrayList<Task>();
 
     StackBox(DisplayContent displayContent, Rect bounds) {
         mDisplayContent = displayContent;
@@ -163,6 +166,17 @@ public class StackBox {
             }
         }
         return false;
+    }
+
+    ArrayList<Task> getTasks() {
+        mTmpTasks.clear();
+        if (mStack != null) {
+            mTmpTasks.addAll(mStack.getTasks());
+        } else {
+            mTmpTasks.addAll(mFirst.getTasks());
+            mTmpTasks.addAll(mSecond.getTasks());
+        }
+        return mTmpTasks;
     }
 
     void absorb(StackBox box) {
