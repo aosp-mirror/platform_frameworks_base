@@ -1445,6 +1445,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                 Log.i("GLThread", "waiting tid=" + getId()
                                     + " mHaveEglContext: " + mHaveEglContext
                                     + " mHaveEglSurface: " + mHaveEglSurface
+                                    + " mFinishedCreatingEglSurface: " + mFinishedCreatingEglSurface
                                     + " mPaused: " + mPaused
                                     + " mHasSurface: " + mHasSurface
                                     + " mSurfaceIsBad: " + mSurfaceIsBad
@@ -1468,8 +1469,14 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         if (LOG_SURFACE) {
                             Log.w("GLThread", "egl createSurface");
                         }
-                        if (!mEglHelper.createSurface()) {
+                        if (mEglHelper.createSurface()) {
                             synchronized(sGLThreadManager) {
+                                mFinishedCreatingEglSurface = true;
+                                sGLThreadManager.notifyAll();
+                            }
+                        } else {
+                            synchronized(sGLThreadManager) {
+                                mFinishedCreatingEglSurface = true;
                                 mSurfaceIsBad = true;
                                 sGLThreadManager.notifyAll();
                             }
@@ -1595,8 +1602,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     Log.i("GLThread", "surfaceCreated tid=" + getId());
                 }
                 mHasSurface = true;
+                mFinishedCreatingEglSurface = false;
                 sGLThreadManager.notifyAll();
-                while((mWaitingForSurface) && (!mExited)) {
+                while (mWaitingForSurface
+                       && !mFinishedCreatingEglSurface
+                       && !mExited) {
                     try {
                         sGLThreadManager.wait();
                     } catch (InterruptedException e) {
@@ -1735,6 +1745,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private boolean mWaitingForSurface;
         private boolean mHaveEglContext;
         private boolean mHaveEglSurface;
+        private boolean mFinishedCreatingEglSurface;
         private boolean mShouldReleaseEglContext;
         private int mWidth;
         private int mHeight;
