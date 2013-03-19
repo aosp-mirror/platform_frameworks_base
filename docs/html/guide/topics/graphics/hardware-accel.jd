@@ -512,6 +512,13 @@ changed.</li>
         <td class="s7">&#10007;</td>
         <td class="s11">&#10007;</td>
     </tr>
+    <tr>
+        <td class="s10">Local matrix on ComposeShader</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10007;</td>
+        <td class="s7">&#10007;</td>
+        <td class="s11">&#10003;</td>
+    </tr>
     </tbody>
   </table>
 
