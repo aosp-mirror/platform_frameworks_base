@@ -288,36 +288,6 @@ public class DateUtils
     }
 
     /**
-     * Return a localized string for the month of the year, for
-     * contexts where the month is not formatted together with
-     * a day of the month.
-     *
-     * @param month One of {@link Calendar#JANUARY Calendar.JANUARY},
-     *               {@link Calendar#FEBRUARY Calendar.FEBRUARY}, etc.
-     * @param abbrev One of {@link #LENGTH_LONG}, {@link #LENGTH_MEDIUM},
-     *               or {@link #LENGTH_SHORTEST}.
-     *               Undefined lengths will return {@link #LENGTH_MEDIUM}
-     *               but may return something different in the future.
-     * @return Localized month of the year.
-     * @hide Pending API council approval
-     * @deprecated use {@link java.text.SimpleDateFormat} instead.
-     */
-    @Deprecated
-    public static String getStandaloneMonthString(int month, int abbrev) {
-        LocaleData d = LocaleData.get(Locale.getDefault());
-        String[] names;
-        switch (abbrev) {
-            case LENGTH_LONG:       names = d.longStandAloneMonthNames; break;
-            case LENGTH_MEDIUM:     names = d.shortMonthNames; break;
-            case LENGTH_SHORT:      names = d.shortMonthNames; break;
-            case LENGTH_SHORTER:    names = d.shortMonthNames; break;
-            case LENGTH_SHORTEST:   names = d.tinyStandAloneMonthNames; break;
-            default:                names = d.shortMonthNames; break;
-        }
-        return names[month];
-    }
-
-    /**
      * Returns a string describing the elapsed time since startTime.
      * @param startTime some time in the past.
      * @return a String object containing the elapsed time.
@@ -551,18 +521,6 @@ public class DateUtils
     }
 
     /**
-     * Format a time so it appears like it would in the status bar clock.
-     * @deprecated use {@link #DateFormat.getTimeFormat(Context)} instead.
-     * @hide
-     */
-    public static final CharSequence timeString(long millis) {
-        synchronized (sLock) {
-            initFormatStringsLocked();
-            return sStatusTimeFormat.format(millis);
-        }
-    }
-
-    /**
      * Return given duration in a human-friendly format. For example, "4
      * minutes" or "1 second". Returns only largest meaningful unit of time,
      * from seconds up to hours.
@@ -676,18 +634,6 @@ public class DateUtils
     }
 
     /**
-     * @hide
-     * @deprecated use {@link android.text.format.Time}
-     */
-    public static Calendar newCalendar(boolean zulu)
-    {
-        if (zulu)
-            return Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-
-        return Calendar.getInstance();
-    }
-
-    /**
      * @return true if the supplied when is today else false
      */
     public static boolean isToday(long when) {
@@ -702,23 +648,6 @@ public class DateUtils
         return (thenYear == time.year)
                 && (thenMonth == time.month)
                 && (thenMonthDay == time.monthDay);
-    }
-
-    /**
-     * @hide
-     * @deprecated use {@link android.text.format.Time}
-     * Return true if this date string is local time
-     */
-    public static boolean isUTC(String s)
-    {
-        if (s.length() == 16 && s.charAt(15) == 'Z') {
-            return true;
-        }
-        if (s.length() == 9 && s.charAt(8) == 'Z') {
-            // XXX not sure if this case possible/valid
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -812,17 +741,6 @@ public class DateUtils
         sb.setCharAt(13, (char)('0'+n%10));
 
         return sb.toString();
-    }
-
-    /**
-     * @hide
-     * @deprecated use {@link android.text.format.Time}
-     */
-    public static void assign(Calendar lval, Calendar rval)
-    {
-        // there should be a faster way.
-        lval.clear();
-        lval.setTimeInMillis(rval.getTimeInMillis());
     }
 
     /**
