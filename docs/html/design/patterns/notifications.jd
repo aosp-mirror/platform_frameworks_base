@@ -1,4 +1,5 @@
 page.title=Notifications
+page.tags="notification"
 @jd:body
 
 <p>The notification system allows your app to keep the user informed about events, such as new chat messages or a calendar event. Think of notifications as a news channel that alerts the user to important events as they happen or a log that chronicles events while the user is not paying attention.</p>

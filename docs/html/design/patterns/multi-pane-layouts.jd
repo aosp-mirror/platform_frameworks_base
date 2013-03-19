@@ -1,4 +1,5 @@
 page.title=Multi-pane Layouts
+page.tags="tablet","navigation","layout","fragment"
 @jd:body
 
 <p>When writing an app for Android, keep in mind that Android devices come in many different screen
