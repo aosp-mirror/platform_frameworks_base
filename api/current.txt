@@ -29863,8 +29863,8 @@ package android.widget {
     method public void setFormat12Hour(java.lang.CharSequence);
     method public void setFormat24Hour(java.lang.CharSequence);
     method public void setTimeZone(java.lang.String);
-    field public static final java.lang.CharSequence DEFAULT_FORMAT_12_HOUR;
-    field public static final java.lang.CharSequence DEFAULT_FORMAT_24_HOUR;
+    field public static final deprecated java.lang.CharSequence DEFAULT_FORMAT_12_HOUR;
+    field public static final deprecated java.lang.CharSequence DEFAULT_FORMAT_24_HOUR;
   }
 
   public class TextSwitcher extends android.widget.ViewSwitcher {
