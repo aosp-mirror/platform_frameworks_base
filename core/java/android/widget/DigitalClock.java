@@ -39,8 +39,6 @@ public class DigitalClock extends TextView {
     // proportional fonts don't shake rendering
 
     Calendar mCalendar;
-    private final static String m12 = "h:mm:ss aa";
-    private final static String m24 = "k:mm:ss";
     @SuppressWarnings("FieldCanBeLocal") // We must keep a reference to this observer
     private FormatChangeObserver mFormatChangeObserver;
 
@@ -102,19 +100,8 @@ public class DigitalClock extends TextView {
         mTickerStopped = true;
     }
 
-    /**
-     * Pulls 12/24 mode from system settings
-     */
-    private boolean get24HourMode() {
-        return android.text.format.DateFormat.is24HourFormat(getContext());
-    }
-
     private void setFormat() {
-        if (get24HourMode()) {
-            mFormat = m24;
-        } else {
-            mFormat = m12;
-        }
+        mFormat = DateFormat.getTimeFormatString(getContext());
     }
 
     private class FormatChangeObserver extends ContentObserver {
