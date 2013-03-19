@@ -136,6 +136,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
  * is a complete text editor, however the basic class is configured to not
@@ -301,6 +303,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Drawable mDrawableTop, mDrawableBottom, mDrawableLeft, mDrawableRight,
                 mDrawableStart, mDrawableEnd, mDrawableError, mDrawableTemp;
 
+        Drawable mDrawableLeftInitial, mDrawableRightInitial;
+        boolean mIsRtlCompatibilityMode;
+        boolean mOverride;
+
         int mDrawableSizeTop, mDrawableSizeBottom, mDrawableSizeLeft, mDrawableSizeRight,
                 mDrawableSizeStart, mDrawableSizeEnd, mDrawableSizeError, mDrawableSizeTemp;
 
@@ -311,38 +317,64 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int mDrawableSaved = DRAWABLE_NONE;
 
+        public Drawables(Context context) {
+            final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+            mIsRtlCompatibilityMode = (targetSdkVersion < JELLY_BEAN_MR1 ||
+                !context.getApplicationInfo().hasRtlSupport());
+            mOverride = false;
+        }
+
         public void resolveWithLayoutDirection(int layoutDirection) {
-            switch(layoutDirection) {
-                case LAYOUT_DIRECTION_RTL:
-                    if (mDrawableStart != null) {
-                        mDrawableRight = mDrawableStart;
+            // First reset "left" and "right" drawables to their initial values
+            mDrawableLeft = mDrawableLeftInitial;
+            mDrawableRight = mDrawableRightInitial;
 
-                        mDrawableSizeRight = mDrawableSizeStart;
-                        mDrawableHeightRight = mDrawableHeightStart;
-                    }
-                    if (mDrawableEnd != null) {
-                        mDrawableLeft = mDrawableEnd;
+            if (mIsRtlCompatibilityMode) {
+                // Use "start" drawable as "left" drawable if the "left" drawable was not defined
+                if (mDrawableStart != null && mDrawableLeft == null) {
+                    mDrawableLeft = mDrawableStart;
+                    mDrawableSizeLeft = mDrawableSizeStart;
+                    mDrawableHeightLeft = mDrawableHeightStart;
+                }
+                // Use "end" drawable as "right" drawable if the "right" drawable was not defined
+                if (mDrawableEnd != null && mDrawableRight == null) {
+                    mDrawableRight = mDrawableEnd;
+                    mDrawableSizeRight = mDrawableSizeEnd;
+                    mDrawableHeightRight = mDrawableHeightEnd;
+                }
+            } else {
+                // JB-MR1+ normal case: "start" / "end" drawables are overriding "left" / "right"
+                // drawable if and only if they have been defined
+                switch(layoutDirection) {
+                    case LAYOUT_DIRECTION_RTL:
+                        if (mOverride) {
+                            mDrawableRight = mDrawableStart;
+                            mDrawableSizeRight = mDrawableSizeStart;
+                            mDrawableHeightRight = mDrawableHeightStart;
+                        }
 
-                        mDrawableSizeLeft = mDrawableSizeEnd;
-                        mDrawableHeightLeft = mDrawableHeightEnd;
-                    }
-                    break;
+                        if (mOverride) {
+                            mDrawableLeft = mDrawableEnd;
+                            mDrawableSizeLeft = mDrawableSizeEnd;
+                            mDrawableHeightLeft = mDrawableHeightEnd;
+                        }
+                        break;
 
-                case LAYOUT_DIRECTION_LTR:
-                default:
-                    if (mDrawableStart != null) {
-                        mDrawableLeft = mDrawableStart;
+                    case LAYOUT_DIRECTION_LTR:
+                    default:
+                        if (mOverride) {
+                            mDrawableLeft = mDrawableStart;
+                            mDrawableSizeLeft = mDrawableSizeStart;
+                            mDrawableHeightLeft = mDrawableHeightStart;
+                        }
 
-                        mDrawableSizeLeft = mDrawableSizeStart;
-                        mDrawableHeightLeft = mDrawableHeightStart;
-                    }
-                    if (mDrawableEnd != null) {
-                        mDrawableRight = mDrawableEnd;
-
-                        mDrawableSizeRight = mDrawableSizeEnd;
-                        mDrawableHeightRight = mDrawableHeightEnd;
-                    }
-                    break;
+                        if (mOverride) {
+                            mDrawableRight = mDrawableEnd;
+                            mDrawableSizeRight = mDrawableSizeEnd;
+                            mDrawableHeightRight = mDrawableHeightEnd;
+                        }
+                        break;
+                }
             }
             applyErrorDrawableIfNeeded(layoutDirection);
             updateDrawablesLayoutDirection(layoutDirection);
@@ -1161,6 +1193,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 bufferType = BufferType.SPANNABLE;
         }
 
+        // This call will save the initial left/right drawables
         setCompoundDrawablesWithIntrinsicBounds(
             drawableLeft, drawableTop, drawableRight, drawableBottom);
         setRelativeDrawablesIfNeeded(drawableStart, drawableEnd);
@@ -1309,8 +1342,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (hasRelativeDrawables) {
             Drawables dr = mDrawables;
             if (dr == null) {
-                mDrawables = dr = new Drawables();
+                mDrawables = dr = new Drawables(getContext());
             }
+            mDrawables.mOverride = true;
             final Rect compoundRect = dr.mCompoundRect;
             int[] state = getDrawableState();
             if (start != null) {
@@ -1883,8 +1917,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else {
             if (dr == null) {
-                mDrawables = dr = new Drawables();
+                mDrawables = dr = new Drawables(getContext());
             }
+
+            mDrawables.mOverride = false;
 
             if (dr.mDrawableLeft != left && dr.mDrawableLeft != null) {
                 dr.mDrawableLeft.setCallback(null);
@@ -1950,6 +1986,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 dr.mDrawableSizeBottom = dr.mDrawableWidthBottom = 0;
             }
+        }
+
+        // Save initial left/right drawables
+        if (dr != null) {
+            dr.mDrawableLeftInitial = left;
+            dr.mDrawableRightInitial = right;
         }
 
         invalidate();
@@ -2052,8 +2094,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else {
             if (dr == null) {
-                mDrawables = dr = new Drawables();
+                mDrawables = dr = new Drawables(getContext());
             }
+
+            mDrawables.mOverride = true;
 
             if (dr.mDrawableStart != start && dr.mDrawableStart != null) {
                 dr.mDrawableStart.setCallback(null);
@@ -2121,6 +2165,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        resetResolvedDrawables();
         resolveDrawables();
         invalidate();
         requestLayout();
@@ -2145,7 +2190,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @android.view.RemotableViewMethod
     public void setCompoundDrawablesRelativeWithIntrinsicBounds(int start, int top, int end,
             int bottom) {
-        resetResolvedDrawables();
         final Resources resources = getContext().getResources();
         setCompoundDrawablesRelativeWithIntrinsicBounds(
                 start != 0 ? resources.getDrawable(start) : null,
@@ -2168,7 +2212,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setCompoundDrawablesRelativeWithIntrinsicBounds(Drawable start, Drawable top,
             Drawable end, Drawable bottom) {
 
-        resetResolvedDrawables();
         if (start != null) {
             start.setBounds(0, 0, start.getIntrinsicWidth(), start.getIntrinsicHeight());
         }
@@ -2237,7 +2280,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else {
             if (dr == null) {
-                mDrawables = dr = new Drawables();
+                mDrawables = dr = new Drawables(getContext());
             }
             dr.mDrawablePadding = pad;
         }
