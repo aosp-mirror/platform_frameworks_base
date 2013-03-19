@@ -3050,12 +3050,12 @@
         <!-- Specifies the formatting pattern used to show the time and/or date
              in 12-hour mode. Please refer to {@link android.text.format.DateFormat}
              for a complete description of accepted formatting patterns.
-             The default pattern is "h:mm aa". -->
+             The default pattern is a locale-appropriate equivalent of "h:mm a". -->
         <attr name="format12Hour" format="string"/>
         <!-- Specifies the formatting pattern used to show the time and/or date
              in 24-hour mode. Please refer to {@link android.text.format.DateFormat}
              for a complete description of accepted formatting patterns.
-             The default pattern is "k:mm". -->
+             The default pattern is a locale-appropriate equivalent of "H:mm". -->
         <attr name="format24Hour" format="string"/>
         <!-- Specifies the time zone to use. When this attribute is specified, the
              TextClock will ignore the time zone of the system. To use the user's
