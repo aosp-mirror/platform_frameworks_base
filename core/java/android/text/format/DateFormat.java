@@ -170,9 +170,18 @@ public class DateFormat {
      * @return the {@link java.text.DateFormat} object that properly formats the time.
      */
     public static java.text.DateFormat getTimeFormat(Context context) {
+        return new java.text.SimpleDateFormat(getTimeFormatString(context));
+    }
+
+    /**
+     * Returns a String pattern that can be used to format the time according
+     * to the current locale and the user's 12-/24-hour clock preference.
+     * @param context the application context
+     * @hide
+     */
+    public static String getTimeFormatString(Context context) {
         LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        boolean is24 = is24HourFormat(context);
-        return new java.text.SimpleDateFormat(is24 ? d.timeFormat24 : d.timeFormat12);
+        return is24HourFormat(context) ? d.timeFormat24 : d.timeFormat12;
     }
 
     /**
