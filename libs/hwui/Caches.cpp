@@ -224,16 +224,6 @@ void Caches::dumpMemoryUsage(String8 &log) {
             gradientCache.getSize(), gradientCache.getMaxSize());
     log.appendFormat("  PathCache            %8d / %8d\n",
             pathCache.getSize(), pathCache.getMaxSize());
-    log.appendFormat("  CircleShapeCache     %8d / %8d\n",
-            circleShapeCache.getSize(), circleShapeCache.getMaxSize());
-    log.appendFormat("  OvalShapeCache       %8d / %8d\n",
-            ovalShapeCache.getSize(), ovalShapeCache.getMaxSize());
-    log.appendFormat("  RoundRectShapeCache  %8d / %8d\n",
-            roundRectShapeCache.getSize(), roundRectShapeCache.getMaxSize());
-    log.appendFormat("  RectShapeCache       %8d / %8d\n",
-            rectShapeCache.getSize(), rectShapeCache.getMaxSize());
-    log.appendFormat("  ArcShapeCache        %8d / %8d\n",
-            arcShapeCache.getSize(), arcShapeCache.getMaxSize());
     log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
@@ -253,11 +243,6 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += gradientCache.getSize();
     total += pathCache.getSize();
     total += dropShadowCache.getSize();
-    total += roundRectShapeCache.getSize();
-    total += circleShapeCache.getSize();
-    total += ovalShapeCache.getSize();
-    total += rectShapeCache.getSize();
-    total += arcShapeCache.getSize();
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
         total += fontRenderer->getFontRendererSize(i);
     }
@@ -325,11 +310,6 @@ void Caches::flush(FlushMode mode) {
             fontRenderer->flush();
             textureCache.flush();
             pathCache.clear();
-            roundRectShapeCache.clear();
-            circleShapeCache.clear();
-            ovalShapeCache.clear();
-            rectShapeCache.clear();
-            arcShapeCache.clear();
             // fall through
         case kFlushMode_Layers:
             layerCache.clear();
