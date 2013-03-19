@@ -1,9 +1,8 @@
 page.title=Managing Audio Playback
+page.tags="audio","media"
 
 trainingnavtop=true
 startpage=true
-next.title=Controlling Your App's Volume and Playback
-next.link=volume-playback.html
 
 @jd:body
 
