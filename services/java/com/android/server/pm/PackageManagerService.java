@@ -5102,7 +5102,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int N = pkg.requestedPermissions.size();
         for (int i=0; i<N; i++) {
             final String name = pkg.requestedPermissions.get(i);
-            //final boolean required = pkg.requestedPermssionsRequired.get(i);
+            final boolean required = pkg.requestedPermissionsRequired.get(i);
             final BasePermission bp = mSettings.mPermissions.get(name);
             if (DEBUG_INSTALL) {
                 if (gp != ps) {
@@ -5116,7 +5116,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
                 if (level == PermissionInfo.PROTECTION_NORMAL
                         || level == PermissionInfo.PROTECTION_DANGEROUS) {
-                    allowed = true;
+                    // If the permission is required, or it's optional and was previously
+                    // granted to the application, then allow it. Otherwise deny.
+                    allowed = (required || origPermissions.contains(perm));
                 } else if (bp.packageSetting == null) {
                     // This permission is invalid; skip it.
                     allowed = false;
@@ -5166,11 +5168,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
                         // For development permissions, a development permission
                         // is granted only if it was already granted.
-                        if (origPermissions.contains(perm)) {
-                            allowed = true;
-                        } else {
-                            allowed = false;
-                        }
+                        allowed = origPermissions.contains(perm);
                     }
                     if (allowed) {
                         allowedSig = true;
