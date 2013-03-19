@@ -574,7 +574,8 @@ public class SurfaceControl {
      * @param maxLayer The highest (top-most Z order) surface layer to
      * include in the screenshot.
      * @return Returns a Bitmap containing the screen contents, or null
-     * if an error occurs.
+     * if an error occurs. Make sure to call Bitmap.recycle() as soon as
+     * possible, once its content is not needed anymore.
      */
     public static Bitmap screenshot(int width, int height, int minLayer, int maxLayer) {
         // TODO: should take the display as a parameter
@@ -586,6 +587,14 @@ public class SurfaceControl {
     /**
      * Like {@link SurfaceControl#screenshot(int, int, int, int)} but includes all
      * Surfaces in the screenshot.
+     *
+     * @param width The desired width of the returned bitmap; the raw
+     * screen will be scaled down to this size.
+     * @param height The desired height of the returned bitmap; the raw
+     * screen will be scaled down to this size.
+     * @return Returns a Bitmap containing the screen contents, or null
+     * if an error occurs. Make sure to call Bitmap.recycle() as soon as
+     * possible, once its content is not needed anymore.
      */
     public static Bitmap screenshot(int width, int height) {
         // TODO: should take the display as a parameter
