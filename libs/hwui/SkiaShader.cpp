@@ -411,8 +411,14 @@ void SkiaComposeShader::describe(ProgramDescription& description, const Extensio
 
 void SkiaComposeShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
-    mFirst->setupProgram(program, modelView, snapshot, textureUnit);
-    mSecond->setupProgram(program, modelView, snapshot, textureUnit);
+    // Apply this compose shader's local transform and pass it down to
+    // the child shaders. They will in turn apply their local transform
+    // to this matrix.
+    mat4 transform;
+    computeScreenSpaceMatrix(transform, modelView);
+
+    mFirst->setupProgram(program, transform, snapshot, textureUnit);
+    mSecond->setupProgram(program, transform, snapshot, textureUnit);
 }
 
 }; // namespace uirenderer

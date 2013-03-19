@@ -57,6 +57,7 @@ public class MoreShadersActivity extends Activity {
         private Paint mLargePaint;
         private BitmapShader mScaled2Shader;
         private ColorFilter mColorFilter;
+        private final Matrix mMtx1;
 
         ShadersView(Context c) {
             super(c);
@@ -70,7 +71,7 @@ public class MoreShadersActivity extends Activity {
             mScaledShader = new BitmapShader(texture, Shader.TileMode.MIRROR,
                     Shader.TileMode.MIRROR);
             Matrix m2 = new Matrix();
-            m2.setScale(0.5f, 0.5f);
+            m2.setScale(0.1f, 0.1f);
             mScaledShader.setLocalMatrix(m2);
             
             mScaled2Shader = new BitmapShader(texture, Shader.TileMode.MIRROR,
@@ -81,12 +82,20 @@ public class MoreShadersActivity extends Activity {
 
             mHorGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth, 0.0f,
                     Color.RED, 0x7f00ff00, Shader.TileMode.CLAMP);
-            
+            Matrix m4 = new Matrix();
+            m4.setScale(0.5f, 0.5f);
+            mHorGradient.setLocalMatrix(m4);
+
             mVertGradient = new LinearGradient(0.0f, 0.0f, 0.0f, mDrawHeight / 2.0f,
                     Color.YELLOW, Color.MAGENTA, Shader.TileMode.MIRROR);
 
             mComposeShader = new ComposeShader(mScaledShader, mHorGradient,
                     PorterDuff.Mode.SRC_OVER);
+            mMtx1 = new Matrix();
+            mMtx1.setTranslate(mTexWidth / 2.0f, mTexHeight / 2.0f);
+            mMtx1.postRotate(45, 0, 0);
+            mComposeShader.setLocalMatrix(mMtx1);
+
             mCompose2Shader = new ComposeShader(mHorGradient, mScaledShader,
                     PorterDuff.Mode.SRC_OUT);
 
