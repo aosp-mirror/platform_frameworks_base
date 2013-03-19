@@ -86,8 +86,8 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, boolean arg4,
-                            boolean arg5)
+    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
+            boolean arg5, boolean arg6)
             throws RemoteException {
         // TODO Auto-generated method stub
 
