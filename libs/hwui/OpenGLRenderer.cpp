@@ -1805,7 +1805,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
-        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+        if (true || CC_UNLIKELY(mCaches.drawDeferDisabled)) { // NOTE: temporary workaround
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
             displayList->replay(replayStruct, 0);
             return replayStruct.mDrawGlStatus;
