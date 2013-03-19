@@ -52,7 +52,7 @@ public class WebkitTest extends AndroidTestCase {
             date.setTime(time);
             c.setTime(date);
             index = dateSorter.getIndex(time);
-            Log.i(LOGTAG, "time: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", c).toString() +
+            Log.i(LOGTAG, "time: " + DateFormat.format("yyyy/MM/dd HH:mm:ss", c).toString() +
                     " " + index + " " + dateSorter.getLabel(index));
         }
     }
