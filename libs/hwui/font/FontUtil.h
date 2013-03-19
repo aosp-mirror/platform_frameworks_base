@@ -26,7 +26,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #define DEFAULT_TEXT_SMALL_CACHE_WIDTH 1024
-#define DEFAULT_TEXT_SMALL_CACHE_HEIGHT 256
+#define DEFAULT_TEXT_SMALL_CACHE_HEIGHT 512
 #define DEFAULT_TEXT_LARGE_CACHE_WIDTH 2048
 #define DEFAULT_TEXT_LARGE_CACHE_HEIGHT 512
 

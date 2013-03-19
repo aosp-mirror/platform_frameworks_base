@@ -28,6 +28,7 @@
 #include "font/CacheTexture.h"
 #include "font/CachedGlyphInfo.h"
 #include "font/Font.h"
+#include "utils/SortedList.h"
 #include "Matrix.h"
 #include "Properties.h"
 
@@ -180,9 +181,32 @@ private:
 
     bool mLinearFiltering;
 
-    Vector<uint16_t*> mDrawOffsets;
-    Vector<uint32_t> mDrawCounts;
-    Vector<CacheTexture*> mDrawCacheTextures;
+    struct TextBatch {
+        TextBatch(): offset(NULL), count(0), texture(NULL) {
+        }
+
+        TextBatch(uint16_t* offset, uint32_t count, CacheTexture* texture):
+                offset(offset), count(count), texture(texture) {
+        }
+
+        static int compare(const TextBatch& lhs, const TextBatch& rhs) {
+            return lhs.texture->getTextureId() - rhs.texture->getTextureId();
+        }
+
+        friend inline int strictly_order_type(const TextBatch& lhs, const TextBatch& rhs) {
+            return compare(lhs, rhs) < 0;
+        }
+
+        friend inline int compare_type(const TextBatch& lhs, const TextBatch& rhs) {
+            return compare(lhs, rhs);
+        }
+
+        uint16_t* offset;
+        uint32_t count;
+        CacheTexture* texture;
+    };
+
+    SortedList<TextBatch> mDrawBatch;
 
     // RS constructs
     sp<RSC::RS> mRs;
