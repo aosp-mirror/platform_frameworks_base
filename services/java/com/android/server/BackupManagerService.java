@@ -3931,7 +3931,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 b.append(String.format(" %9d ", info.size));
 
                 Date stamp = new Date(info.mtime);
-                b.append(new SimpleDateFormat("MMM dd kk:mm:ss ").format(stamp));
+                b.append(new SimpleDateFormat("MMM dd HH:mm:ss ").format(stamp));
 
                 b.append(info.packageName);
                 b.append(" :: ");
