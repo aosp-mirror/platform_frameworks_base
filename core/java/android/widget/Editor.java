@@ -316,7 +316,7 @@ public class Editor {
     private void setErrorIcon(Drawable icon) {
         Drawables dr = mTextView.mDrawables;
         if (dr == null) {
-            mTextView.mDrawables = dr = new Drawables();
+            mTextView.mDrawables = dr = new Drawables(mTextView.getContext());
         }
         dr.setErrorDrawable(icon, mTextView);
 
