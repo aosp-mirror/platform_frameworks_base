@@ -1,4 +1,5 @@
 page.title=Dialogs
+page.tags="dialog","alert","popup","toast"
 @jd:body
 
 <p>Dialogs prompt the user for decisions or additional information required by the app to continue a
