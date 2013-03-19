@@ -1,9 +1,8 @@
 page.title=Transferring Data Without Draining the Battery
+page.tags="battery","network","wireless"
 
 trainingnavtop=true
 startpage=true
-next.title=Optimizing Downloads for Efficient Network Access
-next.link=efficient-network-access.html
 
 @jd:body
 

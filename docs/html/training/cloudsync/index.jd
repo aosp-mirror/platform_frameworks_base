@@ -1,9 +1,8 @@
 page.title=Syncing to the Cloud
+page.tags="cloud","sync","backup"
 
 trainingnavtop=true
 startpage=true
-next.title=Making the Most of Google Cloud Messaging
-next.link=gcm.html
 
 @jd:body
 
