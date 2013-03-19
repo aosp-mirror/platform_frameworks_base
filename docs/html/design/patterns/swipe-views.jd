@@ -1,4 +1,5 @@
 page.title=Swipe Views
+page.tags="viewpager","navigation"
 @jd:body
 
 <p>Efficient navigation is one of the cornerstones of a well-designed app. While apps are generally
