@@ -166,7 +166,7 @@ class WifiController extends StateMachine {
         registerForStayAwakeModeChange(handler);
         readWifiIdleTime();
         registerForWifiIdleTimeChange(handler);
-        readStayAwakeConditions();
+        readWifiSleepPolicy();
         registerForWifiSleepPolicyChange(handler);
     }
 
