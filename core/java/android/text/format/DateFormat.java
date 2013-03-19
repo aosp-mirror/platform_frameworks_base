@@ -43,11 +43,17 @@ import libcore.icu.LocaleData;
  * for both formatting and parsing dates. For the canonical documentation
  * of format strings, see {@link java.text.SimpleDateFormat}.
  *
- * <p>The format methods in this class implement a subset of Unicode
+ * <p>The {@code format} methods in this class implement a subset of Unicode
  * <a href="http://www.unicode.org/reports/tr35/#Date_Format_Patterns">UTS #35</a> patterns.
- * The subset supported by this class includes the following format characters:
- * {@code acdEHhLKkLMmsyz}. See {@link java.text.SimpleDateFormat} for more documentation
- * about patterns, or if you need a more compete implementation.
+ * The subset currently supported by this class includes the following format characters:
+ * {@code acdEHhLKkLMmsyz}. Up to API level 17, only {@code adEhkMmszy} were supported.
+ * Note that this class incorrectly implements {@code k} as if it were {@code H} for backwards
+ * compatibility.
+ *
+ * <p>See {@link java.text.SimpleDateFormat} for more documentation
+ * about patterns, or if you need a more complete or correct implementation.
+ * Note that the non-{@code format} methods in this class are implemented by
+ * {@code SimpleDateFormat}.
  */
 public class DateFormat {
     /** @deprecated Use a literal {@code '} instead. */
@@ -74,7 +80,11 @@ public class DateFormat {
     @Deprecated
     public  static final char    HOUR                   =    'h';
 
-    /** @deprecated Use a literal {@code 'k'} instead. */
+    /**
+     * @deprecated Use a literal {@code 'H'} (for compatibility with {@link SimpleDateFormat}
+     * and Unicode) or {@code 'k'} (for compatibility with Android releases up to and including
+     * Jelly Bean MR-1) instead. Note that the two are incompatible.
+     */
     @Deprecated
     public  static final char    HOUR_OF_DAY            =    'k';
 
@@ -451,10 +461,13 @@ public class DateFormat {
                     }
                     break;
                 case 'H': // hour in day (0-23)
-                case 'k': // hour in day (1-24)
+                case 'k': // hour in day (1-24) [but see note below]
                     {
                         int hour = inDate.get(Calendar.HOUR_OF_DAY);
-                        if (c == 'k' && hour == 0) {
+                        // Historically on Android 'k' was interpreted as 'H', which wasn't
+                        // implemented, so pretty much all callers that want to format 24-hour
+                        // times are abusing 'k'. http://b/8359981.
+                        if (false && c == 'k' && hour == 0) {
                             hour = 24;
                         }
                         replacement = zeroPad(hour, count);
