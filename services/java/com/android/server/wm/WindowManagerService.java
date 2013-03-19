@@ -1481,7 +1481,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     pos++;
                 }
                 if (pos >= N) {
-                    // All is good!
+                    // Z order is good.
+                    // The IM target window may be changed, so update the mTargetAppToken.
+                    if (imWin != null) {
+                        imWin.mTargetAppToken = mInputMethodTarget.mAppToken;
+                    }
                     return false;
                 }
             }
