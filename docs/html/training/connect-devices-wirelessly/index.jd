@@ -1,9 +1,8 @@
 page.title=Connecting Devices Wirelessly
+page.tags="wifi","network","wireless"
 
 trainingnavtop=true
 startpage=true
-next.title=Using Network Service Discovery
-next.link=nsd.html
 
 @jd:body
 

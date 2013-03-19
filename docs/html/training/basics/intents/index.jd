@@ -1,9 +1,8 @@
 page.title=Interacting with Other Apps
+page.tags="intents","activity"
 
 trainingnavtop=true
 startpage=true
-next.title=Sending the User to Another App
-next.link=sending.html
 
 @jd:body
 

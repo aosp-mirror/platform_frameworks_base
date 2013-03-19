@@ -1,9 +1,8 @@
 page.title=Sharing Content
+page.tags="intents","share"
 
 trainingnavtop=true
 startpage=true
-next.title=Sending Content to Other Apps
-next.link=send.html
 
 @jd:body
 

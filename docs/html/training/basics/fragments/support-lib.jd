@@ -1,10 +1,7 @@
 page.title=Using the Support Library
-parent.title=Building a Dynamic UI with Fragments
-parent.link=index.html
+page.tags="support library"
 
 trainingnavtop=true
-next.title=Creating a Fragment
-next.link=creating.html
 
 @jd:body
 
