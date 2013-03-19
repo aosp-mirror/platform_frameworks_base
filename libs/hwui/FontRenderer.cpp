@@ -378,9 +378,9 @@ void FontRenderer::checkInit() {
 
 void FontRenderer::updateDrawParams() {
     if (mCurrentQuadIndex != mLastQuadIndex) {
-        mDrawOffsets.add((uint16_t*)(mLastQuadIndex * sizeof(uint16_t) * 6));
-        mDrawCounts.add(mCurrentQuadIndex - mLastQuadIndex);
-        mDrawCacheTextures.add(mCurrentCacheTexture);
+        uint16_t* offset = (uint16_t*)(mLastQuadIndex * sizeof(uint16_t) * 6);
+        uint32_t count = mCurrentQuadIndex - mLastQuadIndex;
+        mDrawBatch.add(TextBatch(offset, count, mCurrentCacheTexture));
         mLastQuadIndex = mCurrentQuadIndex;
     }
 }
@@ -438,26 +438,27 @@ void FontRenderer::issueDrawCommand() {
         caches.bindTexCoordsVertexPointer(force, buffer + offset);
     }
 
-    for (uint32_t i = 0; i < mDrawOffsets.size(); i++) {
-        uint16_t* offset = mDrawOffsets[i];
-        uint32_t count = mDrawCounts[i];
-        CacheTexture* texture = mDrawCacheTextures[i];
+    caches.activeTexture(0);
+    GLuint lastId = 0;
 
-        caches.activeTexture(0);
-        glBindTexture(GL_TEXTURE_2D, texture->getTextureId());
+    for (uint32_t i = 0; i < mDrawBatch.size(); i++) {
+        const TextBatch& batch = mDrawBatch[i];
 
-        texture->setLinearFiltering(mLinearFiltering, false);
+        GLuint id = batch.texture->getTextureId();
+        if (id != lastId) {
+            glBindTexture(GL_TEXTURE_2D, id);
+            batch.texture->setLinearFiltering(mLinearFiltering, false);
+            lastId = id;
+        }
 
-        glDrawElements(GL_TRIANGLES, count * 6, GL_UNSIGNED_SHORT, offset);
+        glDrawElements(GL_TRIANGLES, batch.count * 6, GL_UNSIGNED_SHORT, batch.offset);
     }
 
     mDrawn = true;
 
     mCurrentQuadIndex = 0;
     mLastQuadIndex = 0;
-    mDrawOffsets.clear();
-    mDrawCounts.clear();
-    mDrawCacheTextures.clear();
+    mDrawBatch.clear();
 }
 
 void FontRenderer::appendMeshQuadNoClip(float x1, float y1, float u1, float v1,

@@ -119,7 +119,7 @@ enum DebugLevel {
 #define PROPERTY_FBO_CACHE_SIZE "ro.hwui.fbo_cache_size"
 
 // These properties are defined in percentage (range 0..1)
-#define PROPERTY_TEXTURE_CACHE_FLUSH_RATE "ro.hwui.texture_cache_flush_rate"
+#define PROPERTY_TEXTURE_CACHE_FLUSH_RATE "ro.hwui.texture_cache_flushrate"
 
 // These properties are defined in pixels
 #define PROPERTY_TEXT_SMALL_CACHE_WIDTH "ro.hwui.text_small_cache_width"
