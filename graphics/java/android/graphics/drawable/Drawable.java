@@ -146,6 +146,10 @@ public abstract class Drawable {
 
         if (oldBounds.left != left || oldBounds.top != top ||
                 oldBounds.right != right || oldBounds.bottom != bottom) {
+            if (!oldBounds.isEmpty()) {
+                // first invalidate the previous bounds
+                invalidateSelf();
+            }
             mBounds.set(left, top, right, bottom);
             onBoundsChange(mBounds);
         }
