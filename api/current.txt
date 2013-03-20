@@ -13582,6 +13582,7 @@ package android.net.wifi {
     method public deprecated android.net.DhcpInfo getDhcpInfo();
     method public java.util.List<android.net.wifi.ScanResult> getScanResults();
     method public int getWifiState();
+    method public boolean isScanningAlwaysAvailable();
     method public boolean isWifiEnabled();
     method public boolean pingSupplicant();
     method public boolean reassociate();
@@ -13592,6 +13593,7 @@ package android.net.wifi {
     method public boolean startScan();
     method public int updateNetwork(android.net.wifi.WifiConfiguration);
     field public static final java.lang.String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
+    field public static final java.lang.String ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE = "android.net.wifi.action.REQUEST_SCAN_ALWAYS_AVAILABLE";
     field public static final int ERROR_AUTHENTICATING = 1; // 0x1
     field public static final java.lang.String EXTRA_BSSID = "bssid";
     field public static final java.lang.String EXTRA_NETWORK_INFO = "networkInfo";

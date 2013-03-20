@@ -393,6 +393,21 @@ public class WifiManager {
     public static final String NETWORK_IDS_CHANGED_ACTION = "android.net.wifi.NETWORK_IDS_CHANGED";
 
     /**
+     * Activity Action: Show a system activity that allows the user to enable
+     * scans to be available even with Wi-Fi turned off.
+     *
+     * <p>Notification of the result of this activity is posted using the
+     * {@link android.app.Activity#onActivityResult} callback. The
+     * <code>resultCode</code>
+     * will be {@link android.app.Activity#RESULT_OK} if scan always mode has
+     * been turned on or {@link android.app.Activity#RESULT_CANCELED} if the user
+     * has rejected the request or an error has occurred.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE =
+            "android.net.wifi.action.REQUEST_SCAN_ALWAYS_AVAILABLE";
+
+    /**
      * Activity Action: Pick a Wi-Fi network to connect to.
      * <p>Input: Nothing.
      * <p>Output: Nothing.
@@ -759,6 +774,22 @@ public class WifiManager {
             return mService.getScanResults(mContext.getBasePackageName());
         } catch (RemoteException e) {
             return null;
+        }
+    }
+
+    /**
+     * Check if scanning is always available.
+     *
+     * If this return {@code true}, apps can issue {@link #startScan} and fetch scan results
+     * even when Wi-Fi is turned off.
+     *
+     * To change this setting, see {@link #ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE}.
+     */
+    public boolean isScanningAlwaysAvailable() {
+        try {
+            return mService.isScanningAlwaysAvailable();
+        } catch (RemoteException e) {
+            return false;
         }
     }
 
