@@ -237,6 +237,7 @@ public class TimePicker extends FrameLayout {
 
         // update controls to initial state
         updateHourControl();
+        updateMinuteControl();
         updateAmPmControl();
 
         setOnTimeChangedListener(NO_OP_CHANGE_LISTENER);
@@ -428,6 +429,7 @@ public class TimePicker extends FrameLayout {
         updateHourControl();
         // set value after spinner range is updated
         setCurrentHour(currentHour);
+        updateMinuteControl();
         updateAmPmControl();
     }
 
@@ -505,6 +507,14 @@ public class TimePicker extends FrameLayout {
             mHourSpinner.setMinValue(1);
             mHourSpinner.setMaxValue(12);
             mHourSpinner.setFormatter(null);
+        }
+    }
+
+    private void updateMinuteControl() {
+        if (is24HourView()) {
+            mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        } else {
+            mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         }
     }
 
