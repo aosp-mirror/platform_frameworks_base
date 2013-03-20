@@ -256,7 +256,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
             mPerformanceHelper.drawCallback(canvas,
                     left, right, top, bottom, mScrollX, mScrollY,
                     0, 0,
-                    getLeftFadingEdgeStrength(), getRightFadingEdgeStrength());
+                    getLeftFadingEdgeStrength(), getRightFadingEdgeStrength(), mPaddingTop);
         }
     }
 

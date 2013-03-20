@@ -45,7 +45,8 @@
             android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
             android:layout_gravity="bottom|start"
             android:clipToPadding="false"
-            android:clipChildren="false">
+            android:clipChildren="false"
+            android:fitsSystemWindows="true">
 
             <LinearLayout android:id="@+id/recents_linear_layout"
                 android:layout_width="match_parent"
