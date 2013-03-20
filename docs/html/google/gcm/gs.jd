@@ -86,8 +86,15 @@ page.title=GCM: Getting Started
 
 <h2 id="libs">Install the Helper Libraries</h2>
 <p>To perform the steps described in the following sections, you must first install the 
-<a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">helper libraries</a>. 
-From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>. This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
+<a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">helper libraries</a>. Note that while using the helper libraries is recommended, it is not required. See the <a href="gcm.html#writing_apps">GCM Architectural Overview</a> for a description of how to write apps without using the helper libraries.
+
+<p>To install the helper libraries, choose 
+<strong>Extras &gt; Google Cloud Messaging for Android Library</strong>
+from the SDK Manager. This creates a <code>gcm</code> directory under
+<code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these
+subdirectories: <code>gcm-client</code>, <code>gcm-server</code>,
+<code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>,
+and <code>samples/gcm-demo-appengine</code>.</p>
 
 <p class="note"><strong>Note:</strong> If you don't see <strong>Extras &gt; Google Cloud Messaging for Android Library</strong> in the SDK Manager, make sure you are running version 20 or higher. Be sure to restart the SDK Manager after updating it.</p>
 
