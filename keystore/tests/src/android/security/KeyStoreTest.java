@@ -553,6 +553,38 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.ungrant(TEST_KEYNAME, 0));
     }
 
+    public void testMigrate_grantedUid_Wifi_Success() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.generate(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+
+        assertTrue(mKeyStore.migrate(TEST_KEYNAME, Process.WIFI_UID));
+
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+    }
+
+    public void testMigrate_ungrantedUid_Bluetooth_Failure() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.generate(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+
+        assertFalse(mKeyStore.migrate(TEST_KEYNAME, Process.BLUETOOTH_UID));
+
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+    }
+
     /**
      * The amount of time to allow before and after expected time for variance
      * in timing tests.

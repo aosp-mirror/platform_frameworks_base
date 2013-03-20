@@ -287,6 +287,15 @@ public class KeyStore {
         }
     }
 
+    public boolean migrate(String key, int uid) {
+        try {
+            return mBinder.migrate(key, uid) == NO_ERROR;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
     public int getLastError() {
         return mError;
     }
