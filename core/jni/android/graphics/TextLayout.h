@@ -66,10 +66,6 @@ public:
                                    jint count, jint contextCount, jint dirFlags,
                                    jfloat* resultAdvances, jfloat* resultTotalAdvance);
 
-    static void getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint start,
-                                   jint count, jint contextCount, jint dirFlags,
-                                   jfloat* resultAdvances, jfloat& resultTotalAdvance);
-
     static void getTextPath(SkPaint* paint, const jchar* text, jsize len,
                             jint bidiFlags, jfloat x, jfloat y, SkPath* path);
 
@@ -82,9 +78,5 @@ private:
 
     static void handleText(SkPaint* paint, const jchar* text, jsize len,
                            int bidiFlags, jfloat x, jfloat y, SkPath* path);
-
-    static void computeAdvancesWithICU(SkPaint* paint, const UChar* chars,
-            size_t start, size_t count, size_t contextCount, int dirFlags,
-            jfloat* outAdvances, jfloat* outTotalAdvance);
 };
 } // namespace android
