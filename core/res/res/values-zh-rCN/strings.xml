@@ -870,9 +870,9 @@
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="autofill_province" msgid="2231806553863422300">"省/直辖市/自治区"</string>
-    <string name="autofill_postal_code" msgid="4696430407689377108">"邮政编码"</string>
+    <string name="autofill_postal_code" msgid="4696430407689377108">"邮编"</string>
     <string name="autofill_state" msgid="6988894195520044613">"州"</string>
-    <string name="autofill_zip_code" msgid="8697544592627322946">"邮政编码"</string>
+    <string name="autofill_zip_code" msgid="8697544592627322946">"邮编"</string>
     <string name="autofill_county" msgid="237073771020362891">"郡"</string>
     <string name="autofill_island" msgid="4020100875984667025">"岛"</string>
     <string name="autofill_district" msgid="8400735073392267672">"地区"</string>
