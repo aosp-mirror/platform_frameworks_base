@@ -15,6 +15,7 @@
  */
 package com.android.keyguard;
 
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.media.AudioManager;
 
@@ -112,4 +113,17 @@ class KeyguardUpdateMonitorCallback {
      * KeyguardUpdateMonitor.
      */
     void onBootCompleted() { }
+
+    /**
+     * Called when audio client attaches or detaches from AudioManager.
+     */
+    void onMusicClientIdChanged(int clientGeneration, boolean clearing, PendingIntent intent) { }
+
+    /**
+     * Called when the audio playback state changes.
+     * @param playbackState
+     * @param eventTime
+     */
+    public void onMusicPlaybackStateChanged(int playbackState, long eventTime) { }
+
 }

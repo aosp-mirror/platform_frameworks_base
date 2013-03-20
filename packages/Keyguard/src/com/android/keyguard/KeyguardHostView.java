@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.keyguard.KeyguardUpdateMonitor.DisplayClientState;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -38,6 +39,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.media.RemoteControlClient;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -61,9 +63,16 @@ import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardHostView";
+    // transport control states
+    static final int TRANSPORT_GONE = 0;
+    static final int TRANSPORT_INVISIBLE = 1;
+    static final int TRANSPORT_VISIBLE = 2;
+
+    private int mTransportState = TRANSPORT_GONE;
 
     // Use this to debug all of keyguard
     public static boolean DEBUG = KeyguardViewMediator.DEBUG;
+    public static boolean DEBUGXPORT = true; // debug music transport control
 
     // Found in KeyguardAppWidgetPickActivity.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
@@ -108,11 +117,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private KeyguardMultiUserSelectorView mKeyguardMultiUserSelectorView;
 
-    /*package*/ interface TransportCallback {
-        void onListenerDetached();
-        void onListenerAttached();
-        void onPlayStateChanged();
-    }
+    protected int mPlaybackState;
+    protected int mClientGeneration;
 
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
@@ -176,6 +182,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         mUserSetupCompleted = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
 
+        // Ensure we have the current state *before* we call showAppropriateWidgetPage()
+        getInitialTransportState();
+
         if (mSafeModeEnabled) {
             Log.v(TAG, "Keyguard widgets disabled by safe mode");
         }
@@ -185,6 +194,14 @@ public class KeyguardHostView extends KeyguardViewBase {
         if ((mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0) {
             Log.v(TAG, "Keyguard secure camera disabled by DPM");
         }
+    }
+
+    private void getInitialTransportState() {
+        DisplayClientState dcs = KeyguardUpdateMonitor.getInstance(mContext)
+                .getCachedDisplayClientState();
+        mTransportState = (dcs.clearing ? TRANSPORT_GONE :
+            (isMusicPlaying(dcs.playbackState) ? TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE));
+        mPlaybackState = dcs.playbackState;
     }
 
     private void cleanupAppWidgetIds() {
@@ -242,7 +259,43 @@ public class KeyguardHostView extends KeyguardViewBase {
                 mKeyguardMultiUserSelectorView.finalizeActiveUserView(true);
             }
         }
+        @Override
+        void onMusicClientIdChanged(
+                int clientGeneration, boolean clearing, android.app.PendingIntent intent) {
+            // Set transport state to invisible until we know music is playing (below)
+            if (DEBUGXPORT && (mClientGeneration != clientGeneration || clearing)) {
+                Log.v(TAG, (clearing ? "hide" : "show") + " transport, gen:" + clientGeneration);
+            }
+            mClientGeneration = clientGeneration;
+            mTransportState = (clearing ? TRANSPORT_GONE : TRANSPORT_INVISIBLE);
+            KeyguardHostView.this.post(mSwitchPageRunnable);
+        }
+        @Override
+        public void onMusicPlaybackStateChanged(int playbackState, long eventTime) {
+            mPlaybackState = playbackState;
+            if (DEBUGXPORT) Log.v(TAG, "music state changed: " + playbackState);
+            if (mTransportState != TRANSPORT_GONE) {
+                mTransportState = (isMusicPlaying(mPlaybackState) ?
+                        TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE);
+            }
+            KeyguardHostView.this.post(mSwitchPageRunnable);
+        }
     };
+
+    private static final boolean isMusicPlaying(int playbackState) {
+        // This should agree with the list in AudioService.isPlaystateActive()
+        switch (playbackState) {
+            case RemoteControlClient.PLAYSTATE_PLAYING:
+            case RemoteControlClient.PLAYSTATE_BUFFERING:
+            case RemoteControlClient.PLAYSTATE_FAST_FORWARDING:
+            case RemoteControlClient.PLAYSTATE_REWINDING:
+            case RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS:
+            case RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS:
+                return true;
+            default:
+                return false;
+        }
+    }
 
     private SlidingChallengeLayout mSlidingChallengeLayout;
 
@@ -1117,10 +1170,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void addDefaultWidgets() {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        inflater.inflate(R.layout.keyguard_transport_control_view, this, true);
-
         if (!mSafeModeEnabled && !widgetsDisabledByDpm()) {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
             View addWidget = inflater.inflate(R.layout.keyguard_add_widget, this, false);
             mAppWidgetContainer.addWidget(addWidget, 0);
             View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
@@ -1146,66 +1197,19 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         enableUserSelectorIfNecessary();
-        initializeTransportControl();
     }
 
-    private boolean removeTransportFromWidgetPager() {
-        int page = getWidgetPosition(R.id.keyguard_transport_control);
-        if (page != -1) {
-            mAppWidgetContainer.removeWidget(mTransportControl);
-
-            // XXX keep view attached so we still get show/hide events from AudioManager
-            KeyguardHostView.this.addView(mTransportControl);
-            mTransportControl.setVisibility(View.GONE);
-            mViewStateManager.setTransportState(KeyguardViewStateManager.TRANSPORT_GONE);
-            return true;
+    /**
+     * Create KeyguardTransportControlView on demand.
+     * @return
+     */
+    private KeyguardTransportControlView getTransportControlView() {
+        if (mTransportControl == null) {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            mTransportControl = (KeyguardTransportControlView)
+                    inflater.inflate(R.layout.keyguard_transport_control_view, this, false);
         }
-        return false;
-    }
-
-    private void addTransportToWidgetPager() {
-        if (getWidgetPosition(R.id.keyguard_transport_control) == -1) {
-            KeyguardHostView.this.removeView(mTransportControl);
-            // insert to left of camera if it exists, otherwise after right-most widget
-            int lastWidget = mAppWidgetContainer.getChildCount() - 1;
-            int position = 0; // handle no widget case
-            if (lastWidget >= 0) {
-                position = mAppWidgetContainer.isCameraPage(lastWidget) ?
-                        lastWidget : lastWidget + 1;
-            }
-            mAppWidgetContainer.addWidget(mTransportControl, position);
-            mTransportControl.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void initializeTransportControl() {
-        mTransportControl =
-            (KeyguardTransportControlView) findViewById(R.id.keyguard_transport_control);
-        mTransportControl.setVisibility(View.GONE);
-
-        // This code manages showing/hiding the transport control. We keep it around and only
-        // add it to the hierarchy if it needs to be present.
-        if (mTransportControl != null) {
-            mTransportControl.setKeyguardCallback(new TransportCallback() {
-                @Override
-                public void onListenerDetached() {
-                    if (removeTransportFromWidgetPager()) {
-                        mTransportControl.post(mSwitchPageRunnable);
-                    }
-                }
-
-                @Override
-                public void onListenerAttached() {
-                    // Transport will be added when playstate changes...
-                    mTransportControl.post(mSwitchPageRunnable);
-                }
-
-                @Override
-                public void onPlayStateChanged() {
-                    mTransportControl.post(mSwitchPageRunnable);
-                }
-            });
-        }
+        return mTransportControl;
     }
 
     private int getInsertPageIndex() {
@@ -1377,7 +1381,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (DEBUG) Log.d(TAG, "onSaveInstanceState");
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
-        ss.transportState = mViewStateManager.getTransportState();
+        ss.transportState = mTransportState;
         ss.appWidgetToShow = mAppWidgetToShow;
         return ss;
     }
@@ -1391,7 +1395,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-        mViewStateManager.setTransportState(ss.transportState);
+        mTransportState = (ss.transportState);
         mAppWidgetToShow = ss.appWidgetToShow;
         post(mSwitchPageRunnable);
     }
@@ -1412,17 +1416,31 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void showAppropriateWidgetPage() {
-        int state = mViewStateManager.getTransportState();
-        boolean isMusicPlaying = mTransportControl.isMusicPlaying()
-                || state == KeyguardViewStateManager.TRANSPORT_VISIBLE;
-        if (isMusicPlaying) {
-            mViewStateManager.setTransportState(KeyguardViewStateManager.TRANSPORT_VISIBLE);
-            addTransportToWidgetPager();
-        } else if (state == KeyguardViewStateManager.TRANSPORT_VISIBLE) {
-            mViewStateManager.setTransportState(KeyguardViewStateManager.TRANSPORT_INVISIBLE);
-        }
-        int pageToShow = getAppropriateWidgetPage(isMusicPlaying);
+        int state = mTransportState;
+        ensureTransportPresentOrRemoved(state);
+        int pageToShow = getAppropriateWidgetPage(state);
         mAppWidgetContainer.setCurrentPage(pageToShow);
+    }
+
+    private void ensureTransportPresentOrRemoved(int state) {
+        int page = getWidgetPosition(R.id.keyguard_transport_control);
+        if (state == TRANSPORT_INVISIBLE || state == TRANSPORT_VISIBLE) {
+            if (page == -1) {
+                if (DEBUGXPORT) Log.v(TAG, "add transport");
+                // insert to left of camera if it exists, otherwise after right-most widget
+                int lastWidget = mAppWidgetContainer.getChildCount() - 1;
+                int position = 0; // handle no widget case
+                if (lastWidget >= 0) {
+                    position = mAppWidgetContainer.isCameraPage(lastWidget) ?
+                            lastWidget : lastWidget + 1;
+                }
+                mAppWidgetContainer.addWidget(getTransportControlView(), position);
+            }
+        } else if (page != -1) {
+            if (DEBUGXPORT) Log.v(TAG, "remove transport");
+            mAppWidgetContainer.removeWidget(getTransportControlView());
+            mTransportControl = null;
+        }
     }
 
     private CameraWidgetFrame findCameraPage() {
@@ -1438,7 +1456,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         return pageIndex >= 0 && pageIndex == getWidgetPosition(R.id.keyguard_transport_control);
     }
 
-    private int getAppropriateWidgetPage(boolean isMusicPlaying) {
+    private int getAppropriateWidgetPage(int musicTransportState) {
         // assumes at least one widget (besides camera + add)
         if (mAppWidgetToShow != AppWidgetManager.INVALID_APPWIDGET_ID) {
             final int childCount = mAppWidgetContainer.getChildCount();
@@ -1451,9 +1469,9 @@ public class KeyguardHostView extends KeyguardViewBase {
             mAppWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
         }
         // if music playing, show transport
-        if (isMusicPlaying) {
+        if (musicTransportState == TRANSPORT_VISIBLE) {
             if (DEBUG) Log.d(TAG, "Music playing, show transport");
-            return mAppWidgetContainer.getWidgetPageIndex(mTransportControl);
+            return mAppWidgetContainer.getWidgetPageIndex(getTransportControlView());
         }
 
         // else show the right-most widget (except for camera)
