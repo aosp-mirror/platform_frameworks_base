@@ -17,6 +17,7 @@
 package android.security;
 
 import android.app.Activity;
+import android.os.Process;
 import android.security.KeyStore;
 import android.test.ActivityUnitTestCase;
 import android.test.AssertionFailedError;
@@ -128,7 +129,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         super.tearDown();
     }
 
-    public void teststate() throws Exception {
+    public void testState() throws Exception {
         assertEquals(KeyStore.State.UNINITIALIZED, mKeyStore.state());
     }
 
@@ -154,6 +155,24 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
     }
 
+    public void testPut_grantedUid_Wifi() throws Exception {
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+        assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+        mKeyStore.password(TEST_PASSWD);
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+    }
+
+    public void testPut_ungrantedUid_Bluetooth() throws Exception {
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        mKeyStore.password(TEST_PASSWD);
+        assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+    }
+
     public void testI18n() throws Exception {
         assertFalse(mKeyStore.put(TEST_I18N_KEY, TEST_I18N_VALUE));
         assertFalse(mKeyStore.contains(TEST_I18N_KEY));
@@ -167,20 +186,62 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.password(TEST_PASSWD);
         assertFalse(mKeyStore.delete(TEST_KEYNAME));
 
-        mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE);
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE));
         assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
         assertTrue(mKeyStore.delete(TEST_KEYNAME));
         assertNull(mKeyStore.get(TEST_KEYNAME));
     }
 
+    public void testDelete_grantedUid_Wifi() throws Exception {
+        assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.WIFI_UID));
+        mKeyStore.password(TEST_PASSWD);
+        assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.WIFI_UID));
+
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+        assertTrue(mKeyStore.delete(TEST_KEYNAME, Process.WIFI_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+    }
+
+    public void testDelete_ungrantedUid_Bluetooth() throws Exception {
+        assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        mKeyStore.password(TEST_PASSWD);
+        assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.BLUETOOTH_UID));
+
+        assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+    }
+
     public void testContains() throws Exception {
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
-        mKeyStore.password(TEST_PASSWD);
+        assertTrue(mKeyStore.password(TEST_PASSWD));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
-        mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE);
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
+    }
+
+    public void testContains_grantedUid_Wifi() throws Exception {
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+    }
+
+    public void testContains_grantedUid_Bluetooth() throws Exception {
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+
+        assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
     }
 
     public void testSaw() throws Exception {
@@ -196,6 +257,48 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
                                                TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
                      new HashSet(Arrays.asList(results)));
+    }
+
+    public void testSaw_ungrantedUid_Bluetooth() throws Exception {
+        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
+        assertNull(results1);
+
+        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE);
+        mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE);
+
+        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
+        assertNull(results2);
+    }
+
+    public void testSaw_grantedUid_Wifi() throws Exception {
+        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.WIFI_UID);
+        assertNotNull(results1);
+        assertEquals(0, results1.length);
+
+        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, Process.WIFI_UID);
+        mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, Process.WIFI_UID);
+
+        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.WIFI_UID);
+        assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
+                                               TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
+                     new HashSet(Arrays.asList(results2)));
+    }
+
+    public void testSaw_grantedUid_Vpn() throws Exception {
+        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.VPN_UID);
+        assertNotNull(results1);
+        assertEquals(0, results1.length);
+
+        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, Process.VPN_UID);
+        mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, Process.VPN_UID);
+
+        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.VPN_UID);
+        assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
+                                               TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
+                     new HashSet(Arrays.asList(results2)));
     }
 
     public void testLock() throws Exception {
@@ -239,17 +342,57 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testGenerate_Success() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        assertTrue(mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key when unlocked",
                 mKeyStore.generate(TEST_KEYNAME));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+    }
+
+    public void testGenerate_grantedUid_Wifi_Success() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertTrue("Should be able to generate key when unlocked",
+                mKeyStore.generate(TEST_KEYNAME, Process.WIFI_UID));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+    }
+
+    public void testGenerate_ungrantedUid_Bluetooth_Failure() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertFalse(mKeyStore.generate(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
     }
 
     public void testImport_Success() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        assertTrue(mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to import key when unlocked",
                 mKeyStore.importKey(TEST_KEYNAME, PRIVKEY_BYTES));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+    }
+
+    public void testImport_grantedUid_Wifi_Success() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertTrue("Should be able to import key when unlocked",
+                mKeyStore.importKey(TEST_KEYNAME, PRIVKEY_BYTES, Process.WIFI_UID));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+    }
+
+    public void testImport_ungrantedUid_Bluetooth_Failure() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertFalse(mKeyStore.importKey(TEST_KEYNAME, PRIVKEY_BYTES, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
     }
 
     public void testImport_Failure_BadEncoding() throws Exception {
@@ -257,12 +400,15 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertFalse("Invalid DER-encoded key should not be imported",
                 mKeyStore.importKey(TEST_KEYNAME, TEST_DATA));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
     }
 
     public void testSign_Success() throws Exception {
         mKeyStore.password(TEST_PASSWD);
 
         assertTrue(mKeyStore.generate(TEST_KEYNAME));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
 
         assertNotNull("Signature should not be null", signature);
@@ -272,6 +418,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.password(TEST_PASSWD);
 
         assertTrue(mKeyStore.generate(TEST_KEYNAME));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
 
         assertNotNull("Signature should not be null", signature);
@@ -404,6 +551,38 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertFalse("Should fail to ungrant key to other user second time",
                 mKeyStore.ungrant(TEST_KEYNAME, 0));
+    }
+
+    public void testMigrate_grantedUid_Wifi_Success() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.generate(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+
+        assertTrue(mKeyStore.migrate(TEST_KEYNAME, Process.WIFI_UID));
+
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
+    }
+
+    public void testMigrate_ungrantedUid_Bluetooth_Failure() throws Exception {
+        assertTrue(mKeyStore.password(TEST_PASSWD));
+
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.generate(TEST_KEYNAME));
+
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
+
+        assertFalse(mKeyStore.migrate(TEST_KEYNAME, Process.BLUETOOTH_UID));
+
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
     }
 
     /**
