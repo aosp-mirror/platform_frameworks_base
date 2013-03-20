@@ -1322,6 +1322,7 @@
   <java-symbol type="id" name="keyguard_bouncer_frame" />
   <java-symbol type="id" name="app_widget_container" />
   <java-symbol type="id" name="view_flipper" />
+  <java-symbol type="id" name="carrier_text" />
   <java-symbol type="id" name="emergency_call_button" />
   <java-symbol type="id" name="keyguard_host_view" />
   <java-symbol type="id" name="delete_button" />
