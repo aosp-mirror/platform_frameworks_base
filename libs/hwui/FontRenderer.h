@@ -144,7 +144,6 @@ private:
 
     void removeFont(const Font* font);
 
-    void updateDrawParams();
     void checkTextureUpdate();
 
     void setTextureDirty() {
@@ -165,12 +164,7 @@ private:
 
     bool mUploadTexture;
 
-    // Pointer to vertex data to speed up frame to frame work
-    float* mTextMesh;
-    uint32_t mCurrentQuadIndex;
-    uint32_t mLastQuadIndex;
     uint32_t mMaxNumberOfQuads;
-
     uint32_t mIndexBufferID;
 
     const Rect* mClip;
@@ -180,33 +174,6 @@ private:
     bool mInitialized;
 
     bool mLinearFiltering;
-
-    struct TextBatch {
-        TextBatch(): offset(NULL), count(0), texture(NULL) {
-        }
-
-        TextBatch(uint16_t* offset, uint32_t count, CacheTexture* texture):
-                offset(offset), count(count), texture(texture) {
-        }
-
-        static int compare(const TextBatch& lhs, const TextBatch& rhs) {
-            return lhs.texture->getTextureId() - rhs.texture->getTextureId();
-        }
-
-        friend inline int strictly_order_type(const TextBatch& lhs, const TextBatch& rhs) {
-            return compare(lhs, rhs) < 0;
-        }
-
-        friend inline int compare_type(const TextBatch& lhs, const TextBatch& rhs) {
-            return compare(lhs, rhs);
-        }
-
-        uint16_t* offset;
-        uint32_t count;
-        CacheTexture* texture;
-    };
-
-    SortedList<TextBatch> mDrawBatch;
 
     // RS constructs
     sp<RSC::RS> mRs;
