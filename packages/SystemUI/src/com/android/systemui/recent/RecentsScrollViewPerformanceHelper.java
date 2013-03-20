@@ -38,6 +38,10 @@ public class RecentsScrollViewPerformanceHelper {
     private int mFadingEdgeLength;
     private boolean mIsVertical;
     private boolean mSoftwareRendered = false;
+    private Paint mBlackPaint;
+    private Paint mFadePaint;
+    private Matrix mFadeMatrix;
+    private LinearGradient mFade;
 
     public static RecentsScrollViewPerformanceHelper create(Context context,
             AttributeSet attrs, View scrollView, boolean isVertical) {
@@ -81,18 +85,19 @@ public class RecentsScrollViewPerformanceHelper {
     public void drawCallback(Canvas canvas,
             int left, int right, int top, int bottom, int scrollX, int scrollY,
             float topFadingEdgeStrength, float bottomFadingEdgeStrength,
-            float leftFadingEdgeStrength, float rightFadingEdgeStrength) {
+            float leftFadingEdgeStrength, float rightFadingEdgeStrength, int mPaddingTop) {
 
         if ((mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS)
                 || USE_DARK_FADE_IN_HW_ACCELERATED_MODE) {
-            Paint p = new Paint();
-            Matrix matrix = new Matrix();
-            // use use a height of 1, and then wack the matrix each time we
-            // actually use it.
-            Shader fade = new LinearGradient(0, 0, 0, 1, 0xCC000000, 0, Shader.TileMode.CLAMP);
-            // PULL OUT THIS CONSTANT
-
-            p.setShader(fade);
+            if (mFadePaint == null) {
+                mFadePaint = new Paint();
+                mFadeMatrix = new Matrix();
+                // use use a height of 1, and then wack the matrix each time we
+                // actually use it.
+                mFade = new LinearGradient(0, 0, 0, 1, 0xCC000000, 0, Shader.TileMode.CLAMP);
+                // PULL OUT THIS CONSTANT
+                mFadePaint.setShader(mFade);
+            }
 
             // draw the fade effect
             boolean drawTop = false;
@@ -134,34 +139,41 @@ public class RecentsScrollViewPerformanceHelper {
             }
 
             if (drawTop) {
-                matrix.setScale(1, fadeHeight * topFadeStrength);
-                matrix.postTranslate(left, top);
-                fade.setLocalMatrix(matrix);
-                canvas.drawRect(left, top, right, top + length, p);
+                mFadeMatrix.setScale(1, fadeHeight * topFadeStrength);
+                mFadeMatrix.postTranslate(left, top);
+                mFade.setLocalMatrix(mFadeMatrix);
+                canvas.drawRect(left, top, right, top + length, mFadePaint);
+
+                if (mBlackPaint == null) {
+                    // Draw under the status bar at the top
+                    mBlackPaint = new Paint();
+                    mBlackPaint.setColor(0xFF000000);
+                }
+                canvas.drawRect(left, top - mPaddingTop, right, top, mBlackPaint);
             }
 
             if (drawBottom) {
-                matrix.setScale(1, fadeHeight * bottomFadeStrength);
-                matrix.postRotate(180);
-                matrix.postTranslate(left, bottom);
-                fade.setLocalMatrix(matrix);
-                canvas.drawRect(left, bottom - length, right, bottom, p);
+                mFadeMatrix.setScale(1, fadeHeight * bottomFadeStrength);
+                mFadeMatrix.postRotate(180);
+                mFadeMatrix.postTranslate(left, bottom);
+                mFade.setLocalMatrix(mFadeMatrix);
+                canvas.drawRect(left, bottom - length, right, bottom, mFadePaint);
             }
 
             if (drawLeft) {
-                matrix.setScale(1, fadeHeight * leftFadeStrength);
-                matrix.postRotate(-90);
-                matrix.postTranslate(left, top);
-                fade.setLocalMatrix(matrix);
-                canvas.drawRect(left, top, left + length, bottom, p);
+                mFadeMatrix.setScale(1, fadeHeight * leftFadeStrength);
+                mFadeMatrix.postRotate(-90);
+                mFadeMatrix.postTranslate(left, top);
+                mFade.setLocalMatrix(mFadeMatrix);
+                canvas.drawRect(left, top, left + length, bottom, mFadePaint);
             }
 
             if (drawRight) {
-                matrix.setScale(1, fadeHeight * rightFadeStrength);
-                matrix.postRotate(90);
-                matrix.postTranslate(right, top);
-                fade.setLocalMatrix(matrix);
-                canvas.drawRect(right - length, top, right, bottom, p);
+                mFadeMatrix.setScale(1, fadeHeight * rightFadeStrength);
+                mFadeMatrix.postRotate(90);
+                mFadeMatrix.postTranslate(right, top);
+                mFade.setLocalMatrix(mFadeMatrix);
+                canvas.drawRect(right - length, top, right, bottom, mFadePaint);
             }
         }
     }
