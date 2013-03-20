@@ -259,7 +259,7 @@
     <string name="permdesc_getTasks" msgid="7454215995847658102">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 허용합니다. 이 경우 앱이 기기에서 사용되는 다른 앱에 대한 정보를 검색할 수 있습니다."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"여러 사용자와의 상호작용"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"앱이 기기에서 다양한 사용자에 대한 작업을 수행할 수 있도록 허용합니다. 이 경우 악성 앱이 사용자 간의 보호를 위반할 수 있습니다."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"여러 사용자와의 상호작용을 위한 정식 라이센스"</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"여러 사용자와의 상호작용을 위한 정식 라이선스"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"여러 사용자와의 가능한 모든 상호작용을 허용합니다."</string>
     <string name="permlab_manageUsers" msgid="1676150911672282428">"사용자 관리"</string>
     <string name="permdesc_manageUsers" msgid="8409306667645355638">"앱이 기기에서 검색, 생성 및 삭제를 포함한 사용자 관리를 할 수 있도록 허용합니다."</string>
