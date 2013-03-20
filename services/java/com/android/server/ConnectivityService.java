@@ -2256,26 +2256,27 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (resetMask != 0 || resetDns) {
             LinkProperties linkProperties = mNetTrackers[netType].getLinkProperties();
             if (linkProperties != null) {
-                String iface = linkProperties.getInterfaceName();
-                if (TextUtils.isEmpty(iface) == false) {
-                    if (resetMask != 0) {
-                        if (DBG) log("resetConnections(" + iface + ", " + resetMask + ")");
-                        NetworkUtils.resetConnections(iface, resetMask);
+                for (String iface : linkProperties.getAllInterfaceNames()) {
+                    if (TextUtils.isEmpty(iface) == false) {
+                        if (resetMask != 0) {
+                            if (DBG) log("resetConnections(" + iface + ", " + resetMask + ")");
+                            NetworkUtils.resetConnections(iface, resetMask);
 
-                        // Tell VPN the interface is down. It is a temporary
-                        // but effective fix to make VPN aware of the change.
-                        if ((resetMask & NetworkUtils.RESET_IPV4_ADDRESSES) != 0) {
-                            mVpn.interfaceStatusChanged(iface, false);
+                            // Tell VPN the interface is down. It is a temporary
+                            // but effective fix to make VPN aware of the change.
+                            if ((resetMask & NetworkUtils.RESET_IPV4_ADDRESSES) != 0) {
+                                mVpn.interfaceStatusChanged(iface, false);
+                            }
                         }
-                    }
-                    if (resetDns) {
-                        flushVmDnsCache();
-                        if (VDBG) log("resetting DNS cache for " + iface);
-                        try {
-                            mNetd.flushInterfaceDnsCache(iface);
-                        } catch (Exception e) {
-                            // never crash - catch them all
-                            if (DBG) loge("Exception resetting dns cache: " + e);
+                        if (resetDns) {
+                            flushVmDnsCache();
+                            if (VDBG) log("resetting DNS cache for " + iface);
+                            try {
+                                mNetd.flushInterfaceDnsCache(iface);
+                            } catch (Exception e) {
+                                // never crash - catch them all
+                                if (DBG) loge("Exception resetting dns cache: " + e);
+                            }
                         }
                     }
                 }
