@@ -72,7 +72,6 @@ enum StateDeferFlags {
 
 struct DeferredDisplayState {
     Rect mBounds; // local bounds, mapped with matrix to be in screen space coordinates, clipped.
-    int mMultipliedAlpha; // -1 if invalid (because caching not set)
 
     // the below are set and used by the OpenGLRenderer at record and deferred playback
     Rect mClip;
@@ -226,7 +225,7 @@ public:
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags);
     virtual void outputDisplayList(DisplayList* displayList);
-    virtual status_t drawLayer(Layer* layer, float x, float y, SkPaint* paint);
+    virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
@@ -272,7 +271,7 @@ public:
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 
-    SkPaint* filterPaint(SkPaint* paint, bool alwaysCopy = false);
+    SkPaint* filterPaint(SkPaint* paint);
 
     void resetDrawModifiers();
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
@@ -293,11 +292,11 @@ public:
     }
 
     /**
-     * Sets the alpha on the current snapshot. This alpha value will be modulated
+     * Scales the alpha on the current snapshot. This alpha value will be modulated
      * with other alpha values when drawing primitives.
      */
-    void setAlpha(float alpha) {
-        mSnapshot->alpha = alpha;
+    void scaleAlpha(float alpha) {
+        mSnapshot->alpha *= alpha;
     }
 
     /**
