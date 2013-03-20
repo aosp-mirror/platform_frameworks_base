@@ -87,6 +87,7 @@ public class BugreportReceiver extends BroadcastReceiver {
         final Notification.Builder builder = new Notification.Builder(context);
         builder.setSmallIcon(com.android.internal.R.drawable.stat_sys_adb);
         builder.setContentTitle(context.getString(R.string.bugreport_finished_title));
+        builder.setTicker(context.getString(R.string.bugreport_finished_title));
         builder.setContentText(context.getString(R.string.bugreport_finished_text));
         builder.setContentIntent(PendingIntent.getActivity(
                 context, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT));
