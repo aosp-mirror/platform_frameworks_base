@@ -453,17 +453,19 @@ public class AndroidKeyStore extends KeyStoreSpi {
          * convention.
          */
         final String[] certAliases = mKeyStore.saw(Credentials.USER_CERTIFICATE);
-        for (String alias : certAliases) {
-            final byte[] certBytes = mKeyStore.get(Credentials.USER_CERTIFICATE + alias);
-            if (certBytes == null) {
-                continue;
-            }
+        if (certAliases != null) {
+            for (String alias : certAliases) {
+                final byte[] certBytes = mKeyStore.get(Credentials.USER_CERTIFICATE + alias);
+                if (certBytes == null) {
+                    continue;
+                }
 
-            final Certificate c = toCertificate(certBytes);
-            nonCaEntries.add(alias);
+                final Certificate c = toCertificate(certBytes);
+                nonCaEntries.add(alias);
 
-            if (cert.equals(c)) {
-                return alias;
+                if (cert.equals(c)) {
+                    return alias;
+                }
             }
         }
 
@@ -472,19 +474,22 @@ public class AndroidKeyStore extends KeyStoreSpi {
          * PrivateKeyEntry we looked at above.
          */
         final String[] caAliases = mKeyStore.saw(Credentials.CA_CERTIFICATE);
-        for (String alias : caAliases) {
-            if (nonCaEntries.contains(alias)) {
-                continue;
-            }
+        if (certAliases != null) {
+            for (String alias : caAliases) {
+                if (nonCaEntries.contains(alias)) {
+                    continue;
+                }
 
-            final byte[] certBytes = mKeyStore.get(Credentials.CA_CERTIFICATE + alias);
-            if (certBytes == null) {
-                continue;
-            }
+                final byte[] certBytes = mKeyStore.get(Credentials.CA_CERTIFICATE + alias);
+                if (certBytes == null) {
+                    continue;
+                }
 
-            final Certificate c = toCertificate(mKeyStore.get(Credentials.CA_CERTIFICATE + alias));
-            if (cert.equals(c)) {
-                return alias;
+                final Certificate c =
+                        toCertificate(mKeyStore.get(Credentials.CA_CERTIFICATE + alias));
+                if (cert.equals(c)) {
+                    return alias;
+                }
             }
         }
 
