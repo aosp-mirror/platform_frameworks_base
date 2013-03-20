@@ -38,6 +38,8 @@ namespace RSC {
     class ScriptIntrinsicBlur;
 }
 
+class Functor;
+
 namespace android {
 namespace uirenderer {
 
@@ -62,7 +64,8 @@ public:
 
     // bounds is an out parameter
     bool renderPosText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, int x, int y, const float* positions, Rect* bounds);
+            uint32_t len, int numGlyphs, int x, int y, const float* positions, Rect* bounds,
+            Functor* functor);
     // bounds is an out parameter
     bool renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, SkPath* path, float hOffset, float vOffset, Rect* bounds);
@@ -88,13 +91,8 @@ public:
     DropShadow renderDropShadow(SkPaint* paint, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, uint32_t radius, const float* positions);
 
-    GLuint getTexture(bool linearFiltering = false) {
-        checkInit();
-
-        mCurrentCacheTexture->setLinearFiltering(linearFiltering);
+    void setTextureFiltering(bool linearFiltering) {
         mLinearFiltering = linearFiltering;
-
-        return mCurrentCacheTexture->getTextureId();
     }
 
     uint32_t getCacheSize() const {
@@ -125,7 +123,7 @@ private:
     void initVertexArrayBuffers();
 
     void checkInit();
-    void initRender(const Rect* clip, Rect* bounds);
+    void initRender(const Rect* clip, Rect* bounds, Functor* functor);
     void finishRender();
 
     void issueDrawCommand();
@@ -167,6 +165,7 @@ private:
     uint32_t mMaxNumberOfQuads;
     uint32_t mIndexBufferID;
 
+    Functor* mFunctor;
     const Rect* mClip;
     Rect* mBounds;
     bool mDrawn;
