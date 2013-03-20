@@ -596,6 +596,26 @@ class MountService extends IMountService.Stub
         }
     };
 
+    private final BroadcastReceiver mIdleMaintenanceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            waitForReady();
+            String action = intent.getAction();
+            // Since fstrim will be run on a daily basis we do not expect
+            // fstrim to be too long, so it is not interruptible. We will
+            // implement interruption only in case we see issues.
+            if (Intent.ACTION_IDLE_MAINTENANCE_START.equals(action)) {
+                try {
+                    // This method runs on the handler thread,
+                    // so it is safe to directly call into vold.
+                    mConnector.execute("fstrim", "dotrim");
+                } catch (NativeDaemonConnectorException ndce) {
+                    Slog.e(TAG, "Failed to run fstrim!");
+                }
+            }
+        }
+    };
+
     private final class MountServiceBinderListener implements IBinder.DeathRecipient {
         final IMountServiceListener mListener;
 
@@ -1300,6 +1320,12 @@ class MountService extends IMountService.Stub
             mContext.registerReceiver(
                     mUsbReceiver, new IntentFilter(UsbManager.ACTION_USB_STATE), null, mHandler);
         }
+
+        // Watch for idle maintenance changes
+        IntentFilter idleMaintenanceFilter = new IntentFilter();
+        idleMaintenanceFilter.addAction(Intent.ACTION_IDLE_MAINTENANCE_START);
+        mContext.registerReceiverAsUser(mIdleMaintenanceReceiver, UserHandle.ALL,
+                idleMaintenanceFilter, null, mHandler);
 
         // Add OBB Action Handler to MountService thread.
         mObbActionHandler = new ObbActionHandler(mHandlerThread.getLooper());
