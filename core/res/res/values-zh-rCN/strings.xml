@@ -428,9 +428,9 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"允许该应用读取您设备上存储的个人资料信息，例如您的姓名和联系信息。这意味着该应用可以识别您的身份，并可能将您的个人资料信息发送给他人。"</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"修改您自己的名片"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"允许该应用更改或添加您设备上存储的个人资料信息，例如您的姓名和联系信息。这意味着该应用可以识别您的身份，并可能将您的个人资料信息发送给他人。"</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"读取您的社交视频流"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"读取您的社交信息流"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"允许该应用访问并同步您和朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用读取您与社交网络上的朋友之间的交流信息。"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"写入您的社交视频流"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"写入您的社交信息流"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"允许该应用显示您朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用冒充某个朋友编写消息。请注意：此权限可能不适用于所有社交网络。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"读取日历活动和机密信息"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"允许该应用读取您平板电脑上存储的所有日历活动，包括朋友或同事的活动。此权限可让该应用分享或保存您的日历数据，而不论这些数据是否属于机密或敏感内容。"</string>
@@ -870,9 +870,9 @@
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="autofill_province" msgid="2231806553863422300">"省/直辖市/自治区"</string>
-    <string name="autofill_postal_code" msgid="4696430407689377108">"邮政编码"</string>
+    <string name="autofill_postal_code" msgid="4696430407689377108">"邮编"</string>
     <string name="autofill_state" msgid="6988894195520044613">"州"</string>
-    <string name="autofill_zip_code" msgid="8697544592627322946">"邮政编码"</string>
+    <string name="autofill_zip_code" msgid="8697544592627322946">"邮编"</string>
     <string name="autofill_county" msgid="237073771020362891">"郡"</string>
     <string name="autofill_island" msgid="4020100875984667025">"岛"</string>
     <string name="autofill_district" msgid="8400735073392267672">"地区"</string>
