@@ -76,6 +76,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -281,6 +282,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
+
+    private static final int MAX_SCREENSHOT_RETRIES = 3;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
@@ -5277,134 +5280,191 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
-        Bitmap rawss;
+        Bitmap rawss = null;
 
         int maxLayer = 0;
         final Rect frame = new Rect();
 
-        float scale;
+        float scale = 0;
         int dw, dh;
-        int rot;
+        int rot = Surface.ROTATION_0;
 
-        synchronized(mWindowMap) {
-            long ident = Binder.clearCallingIdentity();
+        boolean screenshotReady;
+        int minLayer;
+        if (appToken == null) {
+            screenshotReady = true;
+            minLayer = 0;
+        } else {
+            screenshotReady = false;
+            minLayer = Integer.MAX_VALUE;
+        }
 
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent == null) {
-                return null;
+        int retryCount = 0;
+        WindowState appWin = null;
+
+        do {
+            if (retryCount++ > 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
             }
-            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            dw = displayInfo.logicalWidth;
-            dh = displayInfo.logicalHeight;
-
-            int aboveAppLayer = mPolicy.windowTypeToLayerLw(TYPE_APPLICATION)
-                    * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
-            aboveAppLayer += TYPE_LAYER_MULTIPLIER;
-
-            boolean isImeTarget = mInputMethodTarget != null
-                    && mInputMethodTarget.mAppToken != null
-                    && mInputMethodTarget.mAppToken.appToken != null
-                    && mInputMethodTarget.mAppToken.appToken.asBinder() == appToken;
-
-            // Figure out the part of the screen that is actually the app.
-            boolean including = false;
-            final WindowList windows = displayContent.getWindowList();
-            for (int i = windows.size() - 1; i >= 0; i--) {
-                WindowState ws = windows.get(i);
-                if (!ws.mHasSurface) {
-                    continue;
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent == null) {
+                    return null;
                 }
-                if (ws.mLayer >= aboveAppLayer) {
-                    continue;
-                }
-                // When we will skip windows: when we are not including
-                // ones behind a window we didn't skip, and we are actually
-                // taking a screenshot of a specific app.
-                if (!including && appToken != null) {
-                    // Also, we can possibly skip this window if it is not
-                    // an IME target or the application for the screenshot
-                    // is not the current IME target.
-                    if (!ws.mIsImWindow || !isImeTarget) {
-                        // And finally, this window is of no interest if it
-                        // is not associated with the screenshot app.
-                        if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
-                            continue;
+                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                dw = displayInfo.logicalWidth;
+                dh = displayInfo.logicalHeight;
+
+                int aboveAppLayer = mPolicy.windowTypeToLayerLw(TYPE_APPLICATION)
+                        * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
+                aboveAppLayer += TYPE_LAYER_MULTIPLIER;
+
+                boolean isImeTarget = mInputMethodTarget != null
+                        && mInputMethodTarget.mAppToken != null
+                        && mInputMethodTarget.mAppToken.appToken != null
+                        && mInputMethodTarget.mAppToken.appToken.asBinder() == appToken;
+
+                // Figure out the part of the screen that is actually the app.
+                boolean including = false;
+                appWin = null;
+                final WindowList windows = displayContent.getWindowList();
+                for (int i = windows.size() - 1; i >= 0; i--) {
+                    WindowState ws = windows.get(i);
+                    if (!ws.mHasSurface) {
+                        continue;
+                    }
+                    if (ws.mLayer >= aboveAppLayer) {
+                        continue;
+                    }
+                    // When we will skip windows: when we are not including
+                    // ones behind a window we didn't skip, and we are actually
+                    // taking a screenshot of a specific app.
+                    if (!including && appToken != null) {
+                        // Also, we can possibly skip this window if it is not
+                        // an IME target or the application for the screenshot
+                        // is not the current IME target.
+                        if (!ws.mIsImWindow || !isImeTarget) {
+                            // And finally, this window is of no interest if it
+                            // is not associated with the screenshot app.
+                            if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
+                                continue;
+                            }
+                            appWin = ws;
+                        }
+                    }
+
+                    // We keep on including windows until we go past a full-screen
+                    // window.
+                    boolean fullscreen = ws.isFullscreen(dw, dh);
+                    including = !ws.mIsImWindow && !fullscreen;
+
+                    final WindowStateAnimator winAnim = ws.mWinAnimator;
+                    if (maxLayer < winAnim.mSurfaceLayer) {
+                        maxLayer = winAnim.mSurfaceLayer;
+                    }
+
+                    // Don't include wallpaper in bounds calculation
+                    if (!ws.mIsWallpaper) {
+                        final Rect wf = ws.mFrame;
+                        final Rect cr = ws.mContentInsets;
+                        int left = wf.left + cr.left;
+                        int top = wf.top + cr.top;
+                        int right = wf.right - cr.right;
+                        int bottom = wf.bottom - cr.bottom;
+                        frame.union(left, top, right, bottom);
+                    }
+
+                    if (ws.mAppToken != null && ws.mAppToken.token == appToken) {
+                        if (minLayer > ws.mWinAnimator.mSurfaceLayer) {
+                            minLayer = ws.mWinAnimator.mSurfaceLayer;
+                        }
+                        if (ws.isDisplayedLw()) {
+                            screenshotReady = true;
+                        }
+                        if (fullscreen) {
+                            // No point in continuing down through windows.
+                            break;
                         }
                     }
                 }
 
-                // We keep on including windows until we go past a full-screen
-                // window.
-                including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
-
-                if (maxLayer < ws.mWinAnimator.mSurfaceLayer) {
-                    maxLayer = ws.mWinAnimator.mSurfaceLayer;
+                if (appToken != null && appWin == null) {
+                    // Can't find a window to snapshot.
+                    if (DEBUG_SCREENSHOT) Slog.i(TAG,
+                            "Screenshot: Couldn't find a surface matching " + appToken);
+                    return null;
+                }
+                if (!screenshotReady) {
+                    // Delay and hope that window gets drawn.
+                    if (DEBUG_SCREENSHOT) Slog.i(TAG, "Screenshot: No image ready for " + appToken
+                            + ", " + appWin + " drawState=" + appWin.mWinAnimator.mDrawState);
+                    continue;
                 }
 
-                // Don't include wallpaper in bounds calculation
-                if (!ws.mIsWallpaper) {
-                    final Rect wf = ws.mFrame;
-                    final Rect cr = ws.mContentInsets;
-                    int left = wf.left + cr.left;
-                    int top = wf.top + cr.top;
-                    int right = wf.right - cr.right;
-                    int bottom = wf.bottom - cr.bottom;
-                    frame.union(left, top, right, bottom);
+                // Constrain frame to the screen size.
+                frame.intersect(0, 0, dw, dh);
+
+                if (frame.isEmpty() || maxLayer == 0) {
+                    if (DEBUG_SCREENSHOT) Slog.i(TAG, "Screenshot of " + appToken
+                            + ": returning null frame=" + frame.toShortString() + " maxLayer="
+                            + maxLayer);
+                    return null;
                 }
-            }
-            Binder.restoreCallingIdentity(ident);
 
-            // Constrain frame to the screen size.
-            frame.intersect(0, 0, dw, dh);
+                // The screenshot API does not apply the current screen rotation.
+                rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+                int fw = frame.width();
+                int fh = frame.height();
 
-            if (frame.isEmpty() || maxLayer == 0) {
-                return null;
-            }
-
-            // The screenshot API does not apply the current screen rotation.
-            rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
-            int fw = frame.width();
-            int fh = frame.height();
-
-            // Constrain thumbnail to smaller of screen width or height. Assumes aspect
-            // of thumbnail is the same as the screen (in landscape) or square.
-            float targetWidthScale = width / (float) fw;
-            float targetHeightScale = height / (float) fh;
-            if (dw <= dh) {
-                scale = targetWidthScale;
-                // If aspect of thumbnail is the same as the screen (in landscape),
-                // select the slightly larger value so we fill the entire bitmap
-                if (targetHeightScale > scale && (int) (targetHeightScale * fw) == width) {
-                    scale = targetHeightScale;
-                }
-            } else {
-                scale = targetHeightScale;
-                // If aspect of thumbnail is the same as the screen (in landscape),
-                // select the slightly larger value so we fill the entire bitmap
-                if (targetWidthScale > scale && (int) (targetWidthScale * fh) == height) {
+                // Constrain thumbnail to smaller of screen width or height. Assumes aspect
+                // of thumbnail is the same as the screen (in landscape) or square.
+                float targetWidthScale = width / (float) fw;
+                float targetHeightScale = height / (float) fh;
+                if (dw <= dh) {
                     scale = targetWidthScale;
+                    // If aspect of thumbnail is the same as the screen (in landscape),
+                    // select the slightly larger value so we fill the entire bitmap
+                    if (targetHeightScale > scale && (int) (targetHeightScale * fw) == width) {
+                        scale = targetHeightScale;
+                    }
+                } else {
+                    scale = targetHeightScale;
+                    // If aspect of thumbnail is the same as the screen (in landscape),
+                    // select the slightly larger value so we fill the entire bitmap
+                    if (targetWidthScale > scale && (int) (targetWidthScale * fh) == height) {
+                        scale = targetWidthScale;
+                    }
                 }
-            }
 
-            // The screen shot will contain the entire screen.
-            dw = (int)(dw*scale);
-            dh = (int)(dh*scale);
-            if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-                int tmp = dw;
-                dw = dh;
-                dh = tmp;
-                rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
-            }
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG, "Screenshot: " + dw + "x" + dh + " from 0 to " + maxLayer);
-                for (int i = 0; i < windows.size(); i++) {
-                    WindowState win = windows.get(i);
-                    Slog.i(TAG, win + ": " + win.mLayer
-                            + " animLayer=" + win.mWinAnimator.mAnimLayer
-                            + " surfaceLayer=" + win.mWinAnimator.mSurfaceLayer);
+                // The screen shot will contain the entire screen.
+                dw = (int)(dw*scale);
+                dh = (int)(dh*scale);
+                if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+                    int tmp = dw;
+                    dw = dh;
+                    dh = tmp;
+                    rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
                 }
+                if (DEBUG_SCREENSHOT) {
+                    Slog.i(TAG, "Screenshot: " + dw + "x" + dh + " from " + minLayer + " to "
+                            + maxLayer + " appToken=" + appToken);
+                    for (int i = 0; i < windows.size(); i++) {
+                        WindowState win = windows.get(i);
+                        Slog.i(TAG, win + ": " + win.mLayer
+                                + " animLayer=" + win.mWinAnimator.mAnimLayer
+                                + " surfaceLayer=" + win.mWinAnimator.mSurfaceLayer);
+                    }
+                }
+                rawss = SurfaceControl.screenshot(dw, dh, minLayer, maxLayer);
             }
-            rawss = SurfaceControl.screenshot(dw, dh, 0, maxLayer);
+        } while (!screenshotReady && retryCount <= MAX_SCREENSHOT_RETRIES);
+        if (DEBUG_SCREENSHOT && retryCount > MAX_SCREENSHOT_RETRIES) {
+            Slog.i(TAG, "Screenshot max retries " + retryCount + " of " + appToken + " appWin="
+                    + (appWin == null ? "null" : (appWin + " drawState="
+                            + appWin.mWinAnimator.mDrawState)));
         }
 
         if (rawss == null) {
@@ -5420,6 +5480,23 @@ public class WindowManagerService extends IWindowManager.Stub
         Canvas canvas = new Canvas(bm);
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
+
+        if (DEBUG_SCREENSHOT) {
+            // TEST IF IT's ALL BLACK
+            int[] buffer = new int[bm.getWidth() * bm.getHeight()];
+            bm.getPixels(buffer, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
+            boolean allBlack = true;
+            for (int i = 0; i < buffer.length; i++) {
+                if (buffer[i] != Color.BLACK) {
+                    allBlack = false;
+                    break;
+                }
+            }
+            if (allBlack) {
+                Slog.i(TAG, "Screenshot " + appWin + " was all black! mSurfaceLayer=" +
+                        (appWin != null ? appWin.mWinAnimator.mSurfaceLayer : "null"));
+            }
+        }
 
         rawss.recycle();
         return bm;
@@ -7408,6 +7485,7 @@ public class WindowManagerService extends IWindowManager.Stub
         performLayoutAndPlaceSurfacesLocked();
     }
 
+    @Override
     public void setOverscan(int displayId, int left, int top, int right, int bottom) {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
