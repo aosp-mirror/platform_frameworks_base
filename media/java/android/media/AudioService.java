@@ -776,7 +776,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    /** @see AudioManager#adjustVolume(int, int, int) */
+    /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType);
         int streamType;
@@ -916,7 +916,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
 
-    /** @see AudioManager#adjustMasterVolume(int) */
+    /** @see AudioManager#adjustMasterVolume(int, int) */
     public void adjustMasterVolume(int steps, int flags) {
         ensureValidSteps(steps);
         int volume = Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
@@ -1233,7 +1233,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return (mStreamStates[streamType].muteCount() != 0);
     }
 
-    /** @see AudioManager#setMasterMute(boolean, IBinder) */
+    /** @see AudioManager#setMasterMute(boolean, int) */
     public void setMasterMute(boolean state, int flags, IBinder cb) {
         if (state != AudioSystem.getMasterMute()) {
             AudioSystem.setMasterMute(state);
@@ -1315,7 +1315,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
     }
 
-    /** @see AudioManager#getMasterStreamType(int) */
+    /** @see AudioManager#getMasterStreamType()  */
     public int getMasterStreamType() {
         if (mVoiceCapable) {
             return AudioSystem.STREAM_RING;
@@ -1975,7 +1975,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    /** @see AudioManager#setSpeakerphoneOn() */
+    /** @see AudioManager#setSpeakerphoneOn(boolean) */
     public void setSpeakerphoneOn(boolean on){
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
@@ -1991,7 +1991,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return (mForcedUseForComm == AudioSystem.FORCE_SPEAKER);
     }
 
-    /** @see AudioManager#setBluetoothScoOn() */
+    /** @see AudioManager#setBluetoothScoOn(boolean) */
     public void setBluetoothScoOn(boolean on){
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
@@ -2009,7 +2009,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return (mForcedUseForComm == AudioSystem.FORCE_BT_SCO);
     }
 
-    /** @see AudioManager#setBluetoothA2dpOn() */
+    /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
@@ -4127,7 +4127,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 AudioSystem.setParameters("screen_state=on");
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 AudioSystem.setParameters("screen_state=off");
-            } else if (action.equalsIgnoreCase(Intent.ACTION_CONFIGURATION_CHANGED)) {
+            } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 handleConfigurationChanged(context);
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // attempt to stop music playback for background user
@@ -4296,7 +4296,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * Helper function:
      * Called synchronized on mAudioFocusLock
      * Remove a focus listener from the focus stack.
-     * @param focusListenerToRemove the focus listener
+     * @param clientToRemove the focus listener
      * @param signal if true and the listener was at the top of the focus stack, i.e. it was holding
      *   focus, notify the next item in the stack it gained focus.
      */
@@ -4402,7 +4402,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
 
-    /** @see AudioManager#requestAudioFocus(IAudioFocusDispatcher, int, int) */
+    /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int)  */
     public int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName) {
         Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
@@ -4475,7 +4475,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
-    /** @see AudioManager#abandonAudioFocus(IAudioFocusDispatcher) */
+    /** @see AudioManager#abandonAudioFocus(AudioManager.OnAudioFocusChangeListener)  */
     public int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId) {
         Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
         try {
@@ -4813,8 +4813,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * remote control stack if necessary.
      */
     private class RcClientDeathHandler implements IBinder.DeathRecipient {
-        private IBinder mCb; // To be notified of client's death
-        private PendingIntent mMediaIntent;
+        final private IBinder mCb; // To be notified of client's death
+        final private PendingIntent mMediaIntent;
 
         RcClientDeathHandler(IBinder cb, PendingIntent pi) {
             mCb = cb;
@@ -4879,12 +4879,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
          * The target for the ACTION_MEDIA_BUTTON events.
          * Always non null.
          */
-        public PendingIntent mMediaIntent;
+        final public PendingIntent mMediaIntent;
         /**
          * The registered media button event receiver.
          * Always non null.
          */
-        public ComponentName mReceiverComponent;
+        final public ComponentName mReceiverComponent;
         public String mCallingPackageName;
         public int mCallingUid;
         /**
@@ -5048,7 +5048,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 //  evaluated it, traversal order doesn't matter here)
                 while(stackIterator.hasNext()) {
                     RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
-                    if (packageName.equalsIgnoreCase(rcse.mReceiverComponent.getPackageName())) {
+                    if (packageName.equals(rcse.mMediaIntent.getCreatorPackage())) {
                         // a stack entry is from the package being removed, remove it from the stack
                         stackIterator.remove();
                         rcse.unlinkToRcClientDeath();
@@ -5061,10 +5061,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                     null));
                 } else if (oldTop != mRCStack.peek()) {
                     // the top of the stack has changed, save it in the system settings
-                    // by posting a message to persist it
-                    mAudioHandler.sendMessage(
-                            mAudioHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
-                                    mRCStack.peek().mReceiverComponent));
+                    // by posting a message to persist it; only do this however if it has
+                    // a concrete component name (is not a transient registration)
+                    RemoteControlStackEntry rcse = mRCStack.peek();
+                    if (rcse.mReceiverComponent != null) {
+                        mAudioHandler.sendMessage(
+                                mAudioHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
+                                        rcse.mReceiverComponent));
+                    }
                 }
             }
         }
@@ -5211,7 +5215,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /**
      * Update the displays and clients with the new "focused" client generation and name
      * @param newClientGeneration the new generation value matching a client update
-     * @param newClientEventReceiver the media button event receiver associated with the client.
+     * @param newMediaIntent the media button event receiver associated with the client.
      *    May be null, which implies there is no registered media button event receiver.
      * @param clearing true if the new client generation value maps to a remote control update
      *    where the display should be cleared.
