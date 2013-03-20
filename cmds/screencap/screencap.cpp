@@ -23,7 +23,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
-#include <binder/IMemory.h>
+#include <binder/ProcessState.h>
+
 #include <gui/SurfaceComposerClient.h>
 #include <gui/ISurfaceComposer.h>
 
@@ -89,6 +90,8 @@ static status_t vinfoToPixelFormat(const fb_var_screeninfo& vinfo,
 
 int main(int argc, char** argv)
 {
+    ProcessState::self()->startThreadPool();
+
     const char* pname = argv[0];
     bool png = false;
     int32_t displayId = DEFAULT_DISPLAY_ID;
