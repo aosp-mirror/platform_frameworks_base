@@ -101,7 +101,9 @@ public class MediaTestUtil {
             Log.v(TAG, e.toString());
         }
         String[] poList = memoryUsage.split("\r|\n|\r\n");
-        String memusage = poList[1].concat("\n");
+        // Skip the first two lines since there
+        // is a new media.log introudced recently.
+        String memusage = poList[2].concat("\n");
         return memusage;
     }
 
