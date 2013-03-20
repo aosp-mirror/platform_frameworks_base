@@ -23,6 +23,7 @@ import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.text.InputType;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -660,6 +661,10 @@ public class DatePicker extends FrameLayout {
         mYearSpinner.setValue(mCurrentDate.get(Calendar.YEAR));
         mMonthSpinner.setValue(mCurrentDate.get(Calendar.MONTH));
         mDaySpinner.setValue(mCurrentDate.get(Calendar.DAY_OF_MONTH));
+
+        if (Character.isDigit(displayedValues[0].charAt(0))) {
+            mMonthSpinnerInput.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+        }
     }
 
     /**
