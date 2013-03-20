@@ -164,7 +164,6 @@ public:
         alpha = fminf(1.0f, fmaxf(0.0f, alpha));
         if (alpha != mAlpha) {
             mAlpha = alpha;
-            mMultipliedAlpha = (int) (255 * alpha);
         }
     }
 
@@ -501,7 +500,6 @@ private:
     // View properties
     bool mClipChildren;
     float mAlpha;
-    int mMultipliedAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY;
     float mRotation, mRotationX, mRotationY;
