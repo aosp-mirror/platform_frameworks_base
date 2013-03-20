@@ -55,10 +55,7 @@ FontRenderer::FontRenderer() :
     mGammaTable = NULL;
     mInitialized = false;
     mMaxNumberOfQuads = 1024;
-    mCurrentQuadIndex = 0;
-    mLastQuadIndex = 0;
 
-    mTextMesh = NULL;
     mCurrentCacheTexture = NULL;
 
     mLinearFiltering = false;
@@ -114,8 +111,6 @@ FontRenderer::~FontRenderer() {
         // Unbinding the buffer shouldn't be necessary but it crashes with some drivers
         Caches::getInstance().unbindIndicesBuffer();
         glDeleteBuffers(1, &mIndexBufferID);
-
-        delete[] mTextMesh;
     }
 
     LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
@@ -126,9 +121,7 @@ FontRenderer::~FontRenderer() {
 }
 
 void FontRenderer::flushAllAndInvalidate() {
-    if (mCurrentQuadIndex != 0) {
-        issueDrawCommand();
-    }
+    issueDrawCommand();
 
     LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
     while (it.next()) {
@@ -236,6 +229,9 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
         // Large-glyph texture memory is allocated only as needed
         cacheTexture->allocateTexture();
     }
+    if (!cacheTexture->mesh()) {
+        cacheTexture->allocateMesh();
+    }
 
     // Tells us whether the glyphs is B&W (1 bit per pixel)
     // or anti-aliased (8 bits per pixel)
@@ -307,11 +303,12 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 }
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool allocate) {
-    CacheTexture* cacheTexture = new CacheTexture(width, height);
+    CacheTexture* cacheTexture = new CacheTexture(width, height, mMaxNumberOfQuads);
 
     if (allocate) {
         Caches::getInstance().activeTexture(0);
         cacheTexture->allocateTexture();
+        cacheTexture->allocateMesh();
     }
 
     return cacheTexture;
@@ -356,12 +353,6 @@ void FontRenderer::initVertexArrayBuffers() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSizeBytes, indexBufferData, GL_STATIC_DRAW);
 
     free(indexBufferData);
-
-    uint32_t coordSize = 2;
-    uint32_t uvSize = 2;
-    uint32_t vertsPerQuad = 4;
-    uint32_t vertexBufferSize = mMaxNumberOfQuads * vertsPerQuad * coordSize * uvSize;
-    mTextMesh = new float[vertexBufferSize];
 }
 
 // We don't want to allocate anything unless we actually draw text
@@ -374,15 +365,6 @@ void FontRenderer::checkInit() {
     initVertexArrayBuffers();
 
     mInitialized = true;
-}
-
-void FontRenderer::updateDrawParams() {
-    if (mCurrentQuadIndex != mLastQuadIndex) {
-        uint16_t* offset = (uint16_t*)(mLastQuadIndex * sizeof(uint16_t) * 6);
-        uint32_t count = mCurrentQuadIndex - mLastQuadIndex;
-        mDrawBatch.add(TextBatch(offset, count, mCurrentCacheTexture));
-        mLastQuadIndex = mCurrentQuadIndex;
-    }
 }
 
 void FontRenderer::checkTextureUpdate() {
@@ -424,77 +406,58 @@ void FontRenderer::checkTextureUpdate() {
 }
 
 void FontRenderer::issueDrawCommand() {
-    updateDrawParams();
-    checkTextureUpdate();
+    bool first = true;
+    bool force = false;
 
-    Caches& caches = Caches::getInstance();
-    caches.bindIndicesBuffer(mIndexBufferID);
-    if (!mDrawn) {
-        float* buffer = mTextMesh;
-        int offset = 2;
-
-        bool force = caches.unbindMeshBuffer();
-        caches.bindPositionVertexPointer(force, buffer);
-        caches.bindTexCoordsVertexPointer(force, buffer + offset);
-    }
-
-    caches.activeTexture(0);
     GLuint lastId = 0;
+    Caches& caches = Caches::getInstance();
 
-    for (uint32_t i = 0; i < mDrawBatch.size(); i++) {
-        const TextBatch& batch = mDrawBatch[i];
+    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
+        CacheTexture* texture = mCacheTextures[i];
+        if (texture->canDraw()) {
+            if (first) {
+                checkTextureUpdate();
+                caches.bindIndicesBuffer(mIndexBufferID);
 
-        GLuint id = batch.texture->getTextureId();
-        if (id != lastId) {
-            glBindTexture(GL_TEXTURE_2D, id);
-            batch.texture->setLinearFiltering(mLinearFiltering, false);
-            lastId = id;
+                if (!mDrawn) {
+                    // If returns true, a VBO was bound and we must
+                    // rebind our vertex attrib pointers even if
+                    // they have the same values as the current pointers
+                    force = caches.unbindMeshBuffer();
+                }
+
+                caches.activeTexture(0);
+                first = false;
+            }
+
+            glBindTexture(GL_TEXTURE_2D, texture->getTextureId());
+            texture->setLinearFiltering(mLinearFiltering, false);
+
+            TextureVertex* mesh = texture->mesh();
+            caches.bindPositionVertexPointer(force, &mesh[0].position[0]);
+            caches.bindTexCoordsVertexPointer(force, &mesh[0].texture[0]);
+            force = false;
+
+            glDrawElements(GL_TRIANGLES, texture->meshElementCount(),
+                    GL_UNSIGNED_SHORT, texture->indices());
+
+            texture->resetMesh();
         }
-
-        glDrawElements(GL_TRIANGLES, batch.count * 6, GL_UNSIGNED_SHORT, batch.offset);
     }
 
     mDrawn = true;
-
-    mCurrentQuadIndex = 0;
-    mLastQuadIndex = 0;
-    mDrawBatch.clear();
 }
 
 void FontRenderer::appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
         float x2, float y2, float u2, float v2, float x3, float y3, float u3, float v3,
         float x4, float y4, float u4, float v4, CacheTexture* texture) {
     if (texture != mCurrentCacheTexture) {
-        updateDrawParams();
         // Now use the new texture id
         mCurrentCacheTexture = texture;
     }
 
-    const uint32_t vertsPerQuad = 4;
-    const uint32_t floatsPerVert = 4;
-    float* currentPos = mTextMesh + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
-
-    (*currentPos++) = x1;
-    (*currentPos++) = y1;
-    (*currentPos++) = u1;
-    (*currentPos++) = v1;
-
-    (*currentPos++) = x2;
-    (*currentPos++) = y2;
-    (*currentPos++) = u2;
-    (*currentPos++) = v2;
-
-    (*currentPos++) = x3;
-    (*currentPos++) = y3;
-    (*currentPos++) = u3;
-    (*currentPos++) = v3;
-
-    (*currentPos++) = x4;
-    (*currentPos++) = y4;
-    (*currentPos++) = u4;
-    (*currentPos++) = v4;
-
-    mCurrentQuadIndex++;
+    mCurrentCacheTexture->addQuad(x1, y1, u1, v1, x2, y2, u2, v2,
+            x3, y3, u3, v3, x4, y4, u4, v4);
 }
 
 void FontRenderer::appendMeshQuad(float x1, float y1, float u1, float v1,
@@ -515,7 +478,7 @@ void FontRenderer::appendMeshQuad(float x1, float y1, float u1, float v1,
         mBounds->bottom = fmax(mBounds->bottom, y1);
     }
 
-    if (mCurrentQuadIndex == mMaxNumberOfQuads) {
+    if (mCurrentCacheTexture->endOfMesh()) {
         issueDrawCommand();
     }
 }
@@ -533,7 +496,7 @@ void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
         mBounds->bottom = fmax(mBounds->bottom, fmax(y1, fmax(y2, fmax(y3, y4))));
     }
 
-    if (mCurrentQuadIndex == mMaxNumberOfQuads) {
+    if (mCurrentCacheTexture->endOfMesh()) {
         issueDrawCommand();
     }
 }
@@ -610,9 +573,7 @@ void FontRenderer::finishRender() {
     mBounds = NULL;
     mClip = NULL;
 
-    if (mCurrentQuadIndex != 0) {
-        issueDrawCommand();
-    }
+    issueDrawCommand();
 }
 
 void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix) {

@@ -24,7 +24,8 @@
 #include <utils/Log.h>
 
 #include "FontUtil.h"
-#include "Rect.h"
+#include "../Rect.h"
+#include "../Vertex.h"
 
 namespace android {
 namespace uirenderer {
@@ -55,14 +56,14 @@ struct CacheBlock {
     }
 
     static CacheBlock* insertBlock(CacheBlock* head, CacheBlock* newBlock);
-
     static CacheBlock* removeBlock(CacheBlock* head, CacheBlock* blockToRemove);
 
     void output() {
         CacheBlock* currBlock = this;
         while (currBlock) {
             ALOGD("Block: this, x, y, w, h = %p, %d, %d, %d, %d",
-                    currBlock, currBlock->mX, currBlock->mY, currBlock->mWidth, currBlock->mHeight);
+                    currBlock, currBlock->mX, currBlock->mY,
+                    currBlock->mWidth, currBlock->mHeight);
             currBlock = currBlock->mNext;
         }
     }
@@ -70,72 +71,17 @@ struct CacheBlock {
 
 class CacheTexture {
 public:
-    CacheTexture(uint16_t width, uint16_t height) :
-            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height),
-            mLinearFiltering(false), mDirty(false), mNumGlyphs(0) {
-        mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-                mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
-    }
+    CacheTexture(uint16_t width, uint16_t height, uint32_t maxQuadCount);
+    ~CacheTexture();
 
-    ~CacheTexture() {
-        releaseTexture();
-        reset();
-    }
+    void reset();
+    void init();
 
-    void reset() {
-        // Delete existing cache blocks
-        while (mCacheBlocks != NULL) {
-            CacheBlock* tmpBlock = mCacheBlocks;
-            mCacheBlocks = mCacheBlocks->mNext;
-            delete tmpBlock;
-        }
-        mNumGlyphs = 0;
-    }
+    void releaseMesh();
+    void releaseTexture();
 
-    void init() {
-        // reset, then create a new remainder space to start again
-        reset();
-        mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-                mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
-    }
-
-    void releaseTexture() {
-        if (mTexture) {
-            delete[] mTexture;
-            mTexture = NULL;
-        }
-        if (mTextureId) {
-            glDeleteTextures(1, &mTextureId);
-            mTextureId = 0;
-        }
-        mDirty = false;
-    }
-
-    /**
-     * This method assumes that the proper texture unit is active.
-     */
-    void allocateTexture() {
-        if (!mTexture) {
-            mTexture = new uint8_t[mWidth * mHeight];
-        }
-
-        if (!mTextureId) {
-            glGenTextures(1, &mTextureId);
-
-            glBindTexture(GL_TEXTURE_2D, mTextureId);
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            // Initialize texture dimensions
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mWidth, mHeight, 0,
-                    GL_ALPHA, GL_UNSIGNED_BYTE, 0);
-
-            const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        }
-    }
+    void allocateTexture();
+    void allocateMesh();
 
     bool fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY);
 
@@ -193,6 +139,42 @@ public:
         return mNumGlyphs;
     }
 
+    TextureVertex* mesh() const {
+        return mMesh;
+    }
+
+    uint32_t meshElementCount() const {
+        return mCurrentQuad * 6;
+    }
+
+    uint16_t* indices() const {
+        return (uint16_t*) 0;
+    }
+
+    void resetMesh() {
+        mCurrentQuad = 0;
+    }
+
+    inline void addQuad(float x1, float y1, float u1, float v1,
+            float x2, float y2, float u2, float v2,
+            float x3, float y3, float u3, float v3,
+            float x4, float y4, float u4, float v4) {
+        TextureVertex* mesh = mMesh + mCurrentQuad * 4;
+        TextureVertex::set(mesh++, x1, y1, u1, v1);
+        TextureVertex::set(mesh++, x2, y2, u2, v2);
+        TextureVertex::set(mesh++, x3, y3, u3, v3);
+        TextureVertex::set(mesh++, x4, y4, u4, v4);
+        mCurrentQuad++;
+    }
+
+    bool canDraw() const {
+        return mCurrentQuad > 0;
+    }
+
+    bool endOfMesh() const {
+        return mCurrentQuad == mMaxQuadCount;
+    }
+
 private:
     uint8_t* mTexture;
     GLuint mTextureId;
@@ -201,6 +183,9 @@ private:
     bool mLinearFiltering;
     bool mDirty;
     uint16_t mNumGlyphs;
+    TextureVertex* mMesh;
+    uint32_t mCurrentQuad;
+    uint32_t mMaxQuadCount;
     CacheBlock* mCacheBlocks;
     Rect mDirtyRect;
 };

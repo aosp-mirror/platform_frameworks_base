@@ -106,6 +106,84 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove)
 // CacheTexture
 ///////////////////////////////////////////////////////////////////////////////
 
+CacheTexture::CacheTexture(uint16_t width, uint16_t height, uint32_t maxQuadCount) :
+            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height),
+            mLinearFiltering(false), mDirty(false), mNumGlyphs(0),
+            mMesh(NULL), mCurrentQuad(0), mMaxQuadCount(maxQuadCount) {
+    mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
+            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
+}
+
+CacheTexture::~CacheTexture() {
+    releaseMesh();
+    releaseTexture();
+    reset();
+}
+
+void CacheTexture::reset() {
+    // Delete existing cache blocks
+    while (mCacheBlocks != NULL) {
+        CacheBlock* tmpBlock = mCacheBlocks;
+        mCacheBlocks = mCacheBlocks->mNext;
+        delete tmpBlock;
+    }
+    mNumGlyphs = 0;
+    mCurrentQuad = 0;
+}
+
+void CacheTexture::init() {
+    // reset, then create a new remainder space to start again
+    reset();
+    mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
+            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
+}
+
+void CacheTexture::releaseMesh() {
+    delete[] mMesh;
+}
+
+void CacheTexture::releaseTexture() {
+    if (mTexture) {
+        delete[] mTexture;
+        mTexture = NULL;
+    }
+    if (mTextureId) {
+        glDeleteTextures(1, &mTextureId);
+        mTextureId = 0;
+    }
+    mDirty = false;
+    mCurrentQuad = 0;
+}
+
+void CacheTexture::allocateMesh() {
+    if (!mMesh) {
+        mMesh = new TextureVertex[mMaxQuadCount * 4];
+    }
+}
+
+void CacheTexture::allocateTexture() {
+    if (!mTexture) {
+        mTexture = new uint8_t[mWidth * mHeight];
+    }
+
+    if (!mTextureId) {
+        glGenTextures(1, &mTextureId);
+
+        glBindTexture(GL_TEXTURE_2D, mTextureId);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        // Initialize texture dimensions
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mWidth, mHeight, 0,
+                GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+
+        const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+}
+
 bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY) {
     if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mHeight) {
         return false;
