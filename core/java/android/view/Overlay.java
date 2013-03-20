@@ -20,11 +20,7 @@ import android.graphics.drawable.Drawable;
 /**
  * An overlay is an extra layer that sits on top of a View (the "host view") which is drawn after
  * all other content in that view (including children, if the view is a ViewGroup). Interaction
- * with the overlay layer is done in terms of adding/removing views and drawables. Invalidation and
- * redrawing of the overlay layer (and its host view) is handled differently for views versus
- * drawables in the overlay. Views invalidate themselves as usual, causing appropriate redrawing
- * to occur automatically. Drawables, on the other hand, do not manage invalidation, so changes to
- * drawable objects should be accompanied by appropriate calls to invalidate() on the host view.
+ * with the overlay layer is done in terms of adding/removing views and drawables.
  *
  * @see android.view.View#getOverlay()
  */
@@ -33,9 +29,7 @@ public interface Overlay {
     /**
      * Adds a Drawable to the overlay. The bounds of the drawable should be relative to
      * the host view. Any drawable added to the overlay should be removed when it is no longer
-     * needed or no longer visible. There is no automatic invalidation of the host view; changes to
-     * the drawable should be accompanied by appropriate invalidation calls to the host view
-     * to cause the proper area of the view, and the overlay, to be redrawn.
+     * needed or no longer visible.
      *
      * @param drawable The Drawable to be added to the overlay. This drawable will be
      * drawn when the view redraws its overlay.

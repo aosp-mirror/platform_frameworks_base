@@ -26,8 +26,8 @@ import java.util.ArrayList;
  * ViewOverlay is a container that View uses to host all objects (views and drawables) that
  * are added to its "overlay", gotten through {@link View#getOverlay()}. Views and drawables are
  * added to the overlay via the add/remove methods in this class. These views and drawables are
- * then drawn whenever the view itself is drawn, after which it will draw its overlay (if it
- * exists).
+ * drawn whenever the view itself is drawn; first the view draws its own content (and children,
+ * if it is a ViewGroup), then it draws its overlay (if it has one).
  *
  * Besides managing and drawing the list of drawables, this class serves two purposes:
  * (1) it noops layout calls because children are absolutely positioned and
@@ -65,6 +65,7 @@ class ViewOverlay extends ViewGroup implements Overlay {
             // Make each drawable unique in the overlay; can't add it more than once
             mDrawables.add(drawable);
             invalidate(drawable.getBounds());
+            drawable.setCallback(this);
         }
     }
 
@@ -73,7 +74,13 @@ class ViewOverlay extends ViewGroup implements Overlay {
         if (mDrawables != null) {
             mDrawables.remove(drawable);
             invalidate(drawable.getBounds());
+            drawable.setCallback(null);
         }
+    }
+
+    @Override
+    public void invalidateDrawable(Drawable drawable) {
+        invalidate(drawable.getBounds());
     }
 
     @Override
