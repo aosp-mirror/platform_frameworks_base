@@ -67,7 +67,9 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         assertTrue(mAndroidKeyStore.password("1111"));
         assertTrue(mAndroidKeyStore.isUnlocked());
 
-        assertEquals(0, mAndroidKeyStore.saw("").length);
+        String[] aliases = mAndroidKeyStore.saw("");
+        assertNotNull(aliases);
+        assertEquals(0, aliases.length);
 
         mGenerator = java.security.KeyPairGenerator.getInstance(AndroidKeyPairGenerator.NAME);
     }
