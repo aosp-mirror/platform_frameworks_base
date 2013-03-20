@@ -427,6 +427,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 } catch (BadTokenException e) {
                     if (DEBUG) Log.v(TAG, "BadTokenException: IME is done.");
                     mWindowVisible = false;
+                    mWindowAdded = false;
                 }
             }
             // If user uses hard keyboard, IME button should always be shown.
