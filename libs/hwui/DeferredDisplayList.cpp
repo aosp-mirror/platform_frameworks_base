@@ -80,7 +80,7 @@ public:
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
             renderer.eventMark(strlen(op->name()), op->name());
 #endif
-            status |= op->applyDraw(renderer, dirty, 0, op->state.mMultipliedAlpha);
+            status |= op->applyDraw(renderer, dirty, 0);
             logBuffer.writeCommand(0, op->name());
         }
         return status;

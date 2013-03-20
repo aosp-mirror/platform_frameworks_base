@@ -94,7 +94,7 @@ public:
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags);
-    virtual status_t drawLayer(Layer* layer, float x, float y, SkPaint* paint);
+    virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
