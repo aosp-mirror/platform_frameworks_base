@@ -149,7 +149,16 @@ it to receive messages. Once the Android application has the registration ID, it
 it to the 3rd-party application server, which uses it to identify each device 
 that has registered to receive messages for a given Android application. In other words,
 a registration ID is tied to a particular Android application running on a particular
-device.</td>
+device.
+<br/>
+<br/>
+<strong>Note:</strong> If you use 
+<a href="https://developer.android.com/google/backup/index.html">backup and restore</a>,
+you should explicitly avoid backing up registration IDs. When you back up
+a device, apps back up shared prefs indiscriminately. If you don't explicitly
+exclude the GCM registration ID, it could get reused on a new device,
+which would cause delivery errors.
+</td>
   </tr>
   <tr>
     <td><strong>Google User Account</strong></td>
@@ -294,6 +303,13 @@ include:
     </ul>
   </li>
 </ul>
+
+<p class="note"><strong>Note:</strong> This section describes how to
+write an app without using the 
+<a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">helper libraries</a>. 
+For details on writing
+an app that uses the helper libraries (which is the recommended and
+simpler approach), see <a href="gs.html">GCM: Getting Started</a>.
 
 <h3 id="manifest">Creating the Manifest</h3>
 
@@ -585,6 +601,7 @@ ensures that the Android application cannot be installed in an environment in wh
 could not run properly. </li>
 </ul>
 
+
 <h2 id="server">Role of the 3rd-party Application Server</h2>
 
 <p>Before you can write client Android applications that use the GCM feature, you must
@@ -758,9 +775,14 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
   <pre class="prettyprint">collapse_key=score_update&amp;time_to_live=108&amp;delay_while_idle=1&amp;data.score=4x8&amp;data.time=15:16.2342&amp;registration_id=42
   </pre>
 
-  <p class="note"><strong>Note:</strong> If your organization has a firewall that restricts the traffic to or from the Internet, you'll need to configure it to allow connectivity with GCM. The ports to open are: 5228, 5229, and 5230. GCM typically only uses 5228, but it sometimes uses 5229 and 5230.
-GCM doesn't provide specific IPs. It changes IPs frequently. We recommend against using ACLs but if you must use them, take a broad approach such as the method suggested in <a href="http://support.google.com/code/bin/answer.py?hl=en&answer=62464">this support link</a>.
-</p>
+<p class="note"><strong>Note:</strong> If your organization has a firewall 
+that restricts the traffic to or 
+from the Internet, you need to configure it to allow connectivity with GCM. 
+The ports to open are: 5228, 5229, and 5230. GCM typically only uses 5228, but 
+it sometimes uses 5229 and 5230. GCM doesn't provide specific IPs, so you should 
+allow your server to accept incoming connections from all IP addresses 
+contained in the IP blocks listed in Google's ASN of 15169.</p>
+
 
 <h4 id="response">Response format</h4>
 
@@ -770,7 +792,7 @@ GCM doesn't provide specific IPs. It changes IPs frequently. We recommend agains
   <li>The GCM server rejects the request.</li>
 </ul>
 
-<p>When the messge is processed successfully, the HTTP response has a 200 status and the body contains more information about the status of the message (including possible errors). When the request is rejected, 
+<p>When the message is processed successfully, the HTTP response has a 200 status and the body contains more information about the status of the message (including possible errors). When the request is rejected, 
 the HTTP response contains a non-200 status code (such as 400, 401, or 503).</p>
 
 <p>The following table summarizes the statuses that the HTTP response header might contain. Click the troubleshoot link for advice on how to deal with each type of error.</p>
@@ -825,7 +847,7 @@ the HTTP response contains a non-200 status code (such as 400, 401, or 503).</p>
     <td>Array of objects representing the status of the messages processed. The objects are listed in the same order as the request (i.e., for each registration ID in the request, its result is listed in the same index in the response) and they can have these fields:<br>
       <ul>
         <li><code>message_id</code>: String representing the message when it was successfully processed.</li>
-        <li><code>registration_id</code>: If set,  means that GCM processed the message but it has another canonical registration ID for that device, so sender should replace the IDs on future requests (otherwise they might be rejected). This field is never set if there is an error in the request.<br />
+        <li><code>registration_id</code>: If set,  means that GCM processed the message but it has another canonical registration ID for that device, so sender should replace the IDs on future requests (otherwise they might be rejected). This field is never set if there is an error in the request.
         </li>
         <li><code>error</code>: String describing an error that occurred while processing the message for that recipient. The possible values are the same as documented in the above table, plus &quot;Unavailable&quot;  (meaning GCM servers were busy and could not process the message for that  particular recipient, so it could be retried).</li>
     </ul></td>
