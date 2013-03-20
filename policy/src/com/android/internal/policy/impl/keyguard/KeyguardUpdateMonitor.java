@@ -18,12 +18,15 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.app.ActivityManagerNative;
 import android.app.IUserSwitchObserver;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
@@ -32,7 +35,9 @@ import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_HEALTH;
 import android.media.AudioManager;
+import android.media.IRemoteControlDisplay;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
@@ -84,6 +89,8 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
     protected static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
+    private static final int MSG_SET_CURRENT_CLIENT_ID = 315;
+    protected static final int MSG_SET_PLAYBACK_STATE = 316;
 
 
     private static KeyguardUpdateMonitor sInstance;
@@ -163,8 +170,63 @@ public class KeyguardUpdateMonitor {
                 case MSG_BOOT_COMPLETED:
                     handleBootCompleted();
                     break;
-
+                case MSG_SET_CURRENT_CLIENT_ID:
+                    handleSetGenerationId(msg.arg1, msg.arg2 != 0, (PendingIntent) msg.obj);
+                    break;
+                case MSG_SET_PLAYBACK_STATE:
+                    handleSetPlaybackState(msg.arg1, msg.arg2, (Long) msg.obj);
+                    break;
             }
+        }
+    };
+
+    private AudioManager mAudioManager;
+
+    static class DisplayClientState {
+        public int clientGeneration;
+        public boolean clearing;
+        public PendingIntent intent;
+        public int playbackState;
+        public long playbackEventTime;
+    }
+
+    private DisplayClientState mDisplayClientState = new DisplayClientState();
+
+    /**
+     * This currently implements the bare minimum required to enable showing and hiding
+     * KeyguardTransportControl.  There's a lot of client state to maintain which is why
+     * KeyguardTransportControl maintains an independent connection while it's showing.
+     */
+    private final IRemoteControlDisplay.Stub mRemoteControlDisplay =
+                new IRemoteControlDisplay.Stub() {
+
+        public void setPlaybackState(int generationId, int state, long stateChangeTimeMs) {
+            Message msg = mHandler.obtainMessage(MSG_SET_PLAYBACK_STATE,
+                    generationId, state, stateChangeTimeMs);
+            mHandler.sendMessage(msg);
+        }
+
+        public void setMetadata(int generationId, Bundle metadata) {
+
+        }
+
+        public void setTransportControlFlags(int generationId, int flags) {
+
+        }
+
+        public void setArtwork(int generationId, Bitmap bitmap) {
+
+        }
+
+        public void setAllMetadata(int generationId, Bundle metadata, Bitmap bitmap) {
+
+        }
+
+        public void setCurrentClientId(int clientGeneration, PendingIntent mediaIntent,
+                boolean clearing) throws RemoteException {
+            Message msg = mHandler.obtainMessage(MSG_SET_CURRENT_CLIENT_ID,
+                        clientGeneration, (clearing ? 1 : 0), mediaIntent);
+            mHandler.sendMessage(msg);
         }
     };
 
@@ -324,6 +386,32 @@ public class KeyguardUpdateMonitor {
         return sInstance;
     }
 
+
+    protected void handleSetGenerationId(int clientGeneration, boolean clearing, PendingIntent p) {
+        mDisplayClientState.clientGeneration = clientGeneration;
+        mDisplayClientState.clearing = clearing;
+        mDisplayClientState.intent = p;
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onMusicClientIdChanged(clientGeneration, clearing, p);
+            }
+        }
+    }
+
+    protected void handleSetPlaybackState(int generationId, int playbackState, long eventTime) {
+        if (generationId == mDisplayClientState.clientGeneration) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onMusicPlaybackStateChanged(playbackState, eventTime);
+                }
+            }
+        } else {
+            Log.w(TAG, "Ignoring generation id " + generationId + " because it's not current");
+        }
+    }
+
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
 
@@ -457,6 +545,8 @@ public class KeyguardUpdateMonitor {
      */
     protected void handleBootCompleted() {
         mBootCompleted = true;
+        mAudioManager = new AudioManager(mContext);
+        mAudioManager.registerRemoteControlDisplay(mRemoteControlDisplay);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -466,7 +556,7 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * We need to store this state in the KeyguardUpdateMonitor since this class will not be 
+     * We need to store this state in the KeyguardUpdateMonitor since this class will not be
      * destroyed.
      */
     public boolean hasBootCompleted() {
@@ -735,6 +825,12 @@ public class KeyguardUpdateMonitor {
         callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         callback.onClockVisibilityChanged();
         callback.onSimStateChanged(mSimState);
+        callback.onMusicClientIdChanged(
+                mDisplayClientState.clientGeneration,
+                mDisplayClientState.clearing,
+                mDisplayClientState.intent);
+        callback.onMusicPlaybackStateChanged(mDisplayClientState.playbackState,
+                mDisplayClientState.playbackEventTime);
     }
 
     public void sendKeyguardVisibilityChanged(boolean showing) {
@@ -837,5 +933,9 @@ public class KeyguardUpdateMonitor {
         return (simState == IccCardConstants.State.PIN_REQUIRED
                 || simState == IccCardConstants.State.PUK_REQUIRED
                 || simState == IccCardConstants.State.PERM_DISABLED);
+    }
+
+    public DisplayClientState getCachedDisplayClientState() {
+        return mDisplayClientState;
     }
 }

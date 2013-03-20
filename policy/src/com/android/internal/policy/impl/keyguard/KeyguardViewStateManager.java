@@ -15,7 +15,6 @@
  */
 package com.android.internal.policy.impl.keyguard;
 
-import android.appwidget.AppWidgetManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -34,13 +33,6 @@ public class KeyguardViewStateManager implements
     private static final int SCREEN_ON_HINT_DURATION = 1000;
     private static final int SCREEN_ON_RING_HINT_DELAY = 300;
     Handler mMainQueue = new Handler(Looper.myLooper());
-
-    // transport control states
-    static final int TRANSPORT_GONE = 0;
-    static final int TRANSPORT_INVISIBLE = 1;
-    static final int TRANSPORT_VISIBLE = 2;
-
-    private int mTransportState = TRANSPORT_GONE;
 
     int mLastScrollState = SlidingChallengeLayout.SCROLL_STATE_IDLE;
 
@@ -308,14 +300,6 @@ public class KeyguardViewStateManager implements
         if (mHideHintsRunnable != null) {
             mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
         }
-    }
-
-    public void setTransportState(int state) {
-        mTransportState = state;
-    }
-
-    public int getTransportState() {
-        return mTransportState;
     }
 
     // ChallengeLayout.OnBouncerStateChangedListener
