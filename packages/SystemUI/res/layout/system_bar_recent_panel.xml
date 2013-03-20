@@ -49,7 +49,8 @@
             android:fadingEdgeLength="20dip"
             android:layout_gravity="bottom|start"
             android:clipToPadding="false"
-            android:clipChildren="false">
+            android:clipChildren="false"
+            android:fitsSystemWindows="true">
 
             <LinearLayout android:id="@+id/recents_linear_layout"
                 android:layout_width="wrap_content"
