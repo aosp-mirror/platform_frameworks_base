@@ -13,10 +13,6 @@ parent.link=index.html
     <li><a href="#HandlingFocus">Handling Focus</a></li>
   </ol>
 
-  <h2>Related tutorials</h2>
-  <ol>
-    <li><a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Form Stuff</a></li>
-  </ol>
 </div>
 </div>
 

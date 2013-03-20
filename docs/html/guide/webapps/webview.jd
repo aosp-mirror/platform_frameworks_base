@@ -33,11 +33,6 @@ layout</li>
   <li>{@link android.webkit.WebViewClient}</li>
 </ol>
 
-<h2>Related tutorials</h2>
-<ol>
-  <li><a href="{@docRoot}resources/tutorials/views/hello-webview.html">Web View</a></li>
-</ol>
-
 </div>
 </div>
 
