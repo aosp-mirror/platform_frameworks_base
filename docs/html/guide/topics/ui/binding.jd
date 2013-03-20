@@ -10,13 +10,6 @@ parent.link=index.html
     <li><a href="#FillingTheLayout">Filling the Layout with Data</a></li>
     <li><a href="#HandlingUserSelections">Handling User Selections</a></li>
   </ol>
-  
-  <h2>Related tutorials</h2>
-  <ol>
-    <li><a href="{@docRoot}resources/tutorials/views/hello-spinner.html">Spinner</a></li>
-    <li><a href="{@docRoot}resources/tutorials/views/hello-listview.html">List View</a></li>
-    <li><a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Grid View</a></li>
-  </ol>
 </div>
 </div>
 
@@ -81,8 +74,8 @@ mHistoryView.setOnItemClickListener(mMessageClickedHandler);
 </pre>
 
 <div class="special">
-<p>For more discussion on how to create different AdapterViews, read the following tutorials:
-<a href="{@docRoot}resources/tutorials/views/hello-spinner.html">Hello Spinner</a>,
-<a href="{@docRoot}resources/tutorials/views/hello-listview.html">Hello ListView</a>, and
-<a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Hello GridView</a>.
+<p>For more discussion on how to create different AdapterViews, read the following guides:
+<a href="{@docRoot}guide/topics/ui/controls/spinner.html">Spinner</a>,
+<a href="{@docRoot}guide/topics/ui/layout/listview.html">List View</a>, and
+<a href="{@docRoot}guide/topics/ui/layout/gridview.html">Grid View</a>.
 </div>
