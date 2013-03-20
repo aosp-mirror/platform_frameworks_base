@@ -55,6 +55,7 @@ static const char* const OutOfResourcesException =
 static struct {
     jclass clazz;
     jfieldID mNativeObject;
+    jfieldID mNativeObjectLock;
     jfieldID mCanvas;
     jmethodID ctor;
 } gSurfaceClassInfo;
@@ -90,8 +91,15 @@ sp<ANativeWindow> android_view_Surface_getNativeWindow(JNIEnv* env, jobject surf
 }
 
 sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
-    return reinterpret_cast<Surface *>(
-            env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeObject));
+    sp<Surface> sur;
+    jobject lock = env->GetObjectField(surfaceObj,
+            gSurfaceClassInfo.mNativeObjectLock);
+    if (env->MonitorEnter(lock) == JNI_OK) {
+        sur = reinterpret_cast<Surface *>(
+                env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeObject));
+        env->MonitorExit(lock);
+    }
+    return sur;
 }
 
 jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
@@ -399,6 +407,8 @@ int register_android_view_Surface(JNIEnv* env)
     gSurfaceClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
     gSurfaceClassInfo.mNativeObject =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "I");
+    gSurfaceClassInfo.mNativeObjectLock =
+            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObjectLock", "Ljava/lang/Object;");
     gSurfaceClassInfo.mCanvas =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvas", "Landroid/graphics/Canvas;");
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");
