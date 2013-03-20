@@ -1226,35 +1226,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     /**
-     * Don't call this yourself -- exists for Paint to use internally.
-     * {@hide}
-     */
-    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, int flags,
-            float[] advances, int advancesPos, Paint p, int reserved) {
-
-        float ret;
-
-        int contextLen = contextEnd - contextStart;
-        int len = end - start;
-
-        if (end <= mGapStart) {
-            ret = p.getTextRunAdvances(mText, start, len, contextStart, contextLen,
-                    flags, advances, advancesPos, reserved);
-        } else if (start >= mGapStart) {
-            ret = p.getTextRunAdvances(mText, start + mGapLength, len,
-                    contextStart + mGapLength, contextLen, flags, advances, advancesPos, reserved);
-        } else {
-            char[] buf = TextUtils.obtain(contextLen);
-            getChars(contextStart, contextEnd, buf, 0);
-            ret = p.getTextRunAdvances(buf, start - contextStart, len,
-                    0, contextLen, flags, advances, advancesPos, reserved);
-            TextUtils.recycle(buf);
-        }
-
-        return ret;
-    }
-
-    /**
      * Returns the next cursor position in the run.  This avoids placing the cursor between
      * surrogates, between characters that form conjuncts, between base characters and combining
      * marks, or within a reordering cluster.
