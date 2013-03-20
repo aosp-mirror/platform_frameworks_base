@@ -58,13 +58,6 @@ extends CharSequence
             int flags, float[] advances, int advancesIndex, Paint paint);
 
     /**
-     * Just like {@link Paint#getTextRunAdvances}.
-     * @hide
-     */
-    float getTextRunAdvances(int start, int end, int contextStart, int contextEnd,
-            int flags, float[] advances, int advancesIndex, Paint paint, int reserved);
-
-    /**
      * Just like {@link Paint#getTextRunCursor}.
      * @hide
      */
