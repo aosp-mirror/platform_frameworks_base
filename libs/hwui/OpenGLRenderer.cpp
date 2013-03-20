@@ -900,7 +900,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 }
 
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
-    float alpha = layer->getAlpha() / 255.0f;
+    float alpha = layer->getAlpha() / 255.0f * mSnapshot->alpha;
 
     setupDraw();
     if (layer->getRenderTarget() == GL_TEXTURE_2D) {
@@ -964,9 +964,10 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
             layer->setFilter(GL_LINEAR, true);
         }
 
+        float alpha = layer->getAlpha() / 255.0f * mSnapshot->alpha;
+        bool blend = layer->isBlend() || alpha < 1.0f;
         drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
-                layer->getTexture(), layer->getAlpha() / 255.0f,
-                layer->getMode(), layer->isBlend(),
+                layer->getTexture(), alpha, layer->getMode(), blend,
                 &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
                 GL_TRIANGLE_STRIP, gMeshCount, swap, swap || simpleTransform);
 
@@ -1001,7 +1002,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             rects = safeRegion.getArray(&count);
         }
 
-        const float alpha = layer->getAlpha() / 255.0f;
+        const float alpha = layer->getAlpha() / 255.0f * mSnapshot->alpha;
         const float texX = 1.0f / float(layer->getWidth());
         const float texY = 1.0f / float(layer->getHeight());
         const float height = rect.getHeight();
