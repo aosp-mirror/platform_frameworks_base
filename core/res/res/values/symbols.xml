@@ -326,6 +326,8 @@
   <java-symbol type="string" name="addToDictionary" />
   <java-symbol type="string" name="action_bar_home_description" />
   <java-symbol type="string" name="action_bar_up_description" />
+  <java-symbol type="string" name="app_running_notification_title" />
+  <java-symbol type="string" name="app_running_notification_text" />
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
   <java-symbol type="string" name="ellipsis_two_dots" />
