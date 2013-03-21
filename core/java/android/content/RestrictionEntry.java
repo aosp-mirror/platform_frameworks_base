@@ -27,7 +27,7 @@ import java.lang.annotation.Inherited;
  * applied to the restricted user. Each RestrictionsEntry is one configurable restriction.
  * <p/>
  * Any application that chooses to expose such restrictions does so by implementing a
- * receiver that handles the {@link Intent.ACTION_GET_RESTRICTION_ENTRIES} action.
+ * receiver that handles the {@link Intent#ACTION_GET_RESTRICTION_ENTRIES} action.
  * The receiver then returns a result bundle that contains an entry called "restrictions", whose
  * value is an ArrayList<RestrictionsEntry>.
  */
