@@ -21,6 +21,7 @@
 
 #include <cutils/properties.h>
 
+#include <utils/Functor.h>
 #include <utils/Log.h>
 
 #include <RenderScript.h>
@@ -416,6 +417,8 @@ void FontRenderer::issueDrawCommand() {
         CacheTexture* texture = mCacheTextures[i];
         if (texture->canDraw()) {
             if (first) {
+                if (mFunctor) (*mFunctor)(0, NULL);
+
                 checkTextureUpdate();
                 caches.bindIndicesBuffer(mIndexBufferID);
 
@@ -561,11 +564,12 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     return image;
 }
 
-void FontRenderer::initRender(const Rect* clip, Rect* bounds) {
+void FontRenderer::initRender(const Rect* clip, Rect* bounds, Functor* functor) {
     checkInit();
 
     mDrawn = false;
     mBounds = bounds;
+    mFunctor = functor;
     mClip = clip;
 }
 
@@ -583,13 +587,13 @@ void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs, con
 
 bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
-        const float* positions, Rect* bounds) {
+        const float* positions, Rect* bounds, Functor* functor) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
     }
 
-    initRender(clip, bounds);
+    initRender(clip, bounds, functor);
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y, positions);
     finishRender();
 
@@ -604,7 +608,7 @@ bool FontRenderer::renderTextOnPath(SkPaint* paint, const Rect* clip, const char
         return false;
     }
 
-    initRender(clip, bounds);
+    initRender(clip, bounds, NULL);
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, path, hOffset, vOffset);
     finishRender();
 
