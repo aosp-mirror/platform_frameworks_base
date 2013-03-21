@@ -83,7 +83,10 @@ public class ValueAnimator extends Animator {
 
     // The static sAnimationHandler processes the internal timing loop on which all animations
     // are based
-    private static ThreadLocal<AnimationHandler> sAnimationHandler =
+    /**
+     * @hide
+     */
+    protected static ThreadLocal<AnimationHandler> sAnimationHandler =
             new ThreadLocal<AnimationHandler>();
 
     // The time interpolator to be used if none is set on the animation
@@ -531,22 +534,27 @@ public class ValueAnimator extends Animator {
      * animations possible.
      *
      * The handler uses the Choreographer for executing periodic callbacks.
+     *
+     * @hide
      */
-    private static class AnimationHandler implements Runnable {
+    protected static class AnimationHandler implements Runnable {
         // The per-thread list of all active animations
-        private final ArrayList<ValueAnimator> mAnimations = new ArrayList<ValueAnimator>();
+        /** @hide */
+        protected final ArrayList<ValueAnimator> mAnimations = new ArrayList<ValueAnimator>();
 
         // Used in doAnimationFrame() to avoid concurrent modifications of mAnimations
         private final ArrayList<ValueAnimator> mTmpAnimations = new ArrayList<ValueAnimator>();
 
         // The per-thread set of animations to be started on the next animation frame
-        private final ArrayList<ValueAnimator> mPendingAnimations = new ArrayList<ValueAnimator>();
+        /** @hide */
+        protected final ArrayList<ValueAnimator> mPendingAnimations = new ArrayList<ValueAnimator>();
 
         /**
          * Internal per-thread collections used to avoid set collisions as animations start and end
          * while being processed.
+         * @hide
          */
-        private final ArrayList<ValueAnimator> mDelayedAnims = new ArrayList<ValueAnimator>();
+        protected final ArrayList<ValueAnimator> mDelayedAnims = new ArrayList<ValueAnimator>();
         private final ArrayList<ValueAnimator> mEndingAnims = new ArrayList<ValueAnimator>();
         private final ArrayList<ValueAnimator> mReadyAnims = new ArrayList<ValueAnimator>();
 
