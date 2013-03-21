@@ -48,6 +48,12 @@ bool TaskManager::canRunTasks() const {
     return mThreads.size() > 0;
 }
 
+void TaskManager::stop() {
+    for (size_t i = 0; i < mThreads.size(); i++) {
+        mThreads[i]->exit();
+    }
+}
+
 bool TaskManager::addTaskBase(const sp<TaskBase>& task, const sp<TaskProcessorBase>& processor) {
     if (mThreads.size() > 0) {
         TaskWrapper wrapper(task, processor);

@@ -347,14 +347,15 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 // Paths
 ///////////////////////////////////////////////////////////////////////////////
 
-void PathCache::remove(SkPath* path) {
+void PathCache::remove(const path_pair_t& pair) {
     Vector<PathDescription> pathsToRemove;
     LruCache<PathDescription, PathTexture*>::Iterator i(mCache);
 
     while (i.next()) {
         const PathDescription& key = i.key();
         if (key.type == kShapePath &&
-                (key.shape.path.mPath == path || key.shape.path.mPath == path->getSourcePath())) {
+                (key.shape.path.mPath == pair.getFirst() ||
+                        key.shape.path.mPath == pair.getSecond())) {
             pathsToRemove.push(key);
         }
     }
@@ -366,7 +367,7 @@ void PathCache::remove(SkPath* path) {
 
 void PathCache::removeDeferred(SkPath* path) {
     Mutex::Autolock l(mLock);
-    mGarbage.push(path);
+    mGarbage.push(path_pair_t(path, const_cast<SkPath*>(path->getSourcePath())));
 }
 
 void PathCache::clearGarbage() {
