@@ -289,6 +289,7 @@ public class PackageParser {
         pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.installLocation = p.installLocation;
+        pi.requiredForAllUsers = p.mRequiredForAllUsers;
         pi.firstInstallTime = firstInstallTime;
         pi.lastUpdateTime = lastUpdateTime;
         if ((flags&PackageManager.GET_GIDS) != 0) {
@@ -1759,6 +1760,11 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestApplication_persistent,
                     false)) {
                 ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
+            }
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestApplication_requiredForAllUsers,
+                    false)) {
+                owner.mRequiredForAllUsers = true;
             }
         }
 
@@ -3270,6 +3276,9 @@ public class PackageParser {
         public ArrayList<FeatureInfo> reqFeatures = null;
 
         public int installLocation;
+
+        /* An app that's required for all users and cannot be uninstalled for a user */
+        public boolean mRequiredForAllUsers;
 
         /**
          * Digest suitable for comparing whether this package's manifest is the

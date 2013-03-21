@@ -2042,6 +2042,7 @@
       <eat-comment />
 
   <public type="attr" name="windowOverscan" />
+  <public type="attr" name="requiredForAllUsers" />
   <public type="style" name="Theme.NoTitleBar.Overscan" />
   <public type="style" name="Theme.Light.NoTitleBar.Overscan" />
   <public type="style" name="Theme.Black.NoTitleBar.Overscan" />
