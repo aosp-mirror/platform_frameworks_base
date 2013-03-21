@@ -147,6 +147,16 @@ public class KeyguardHostView extends KeyguardViewBase {
         // In other words, mUserId should never change - hence it's marked final.
         mUserId = mLockPatternUtils.getCurrentUser();
 
+        DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (dpm != null) {
+            mDisabledFeatures = getDisabledFeatures(dpm);
+            mCameraDisabled = dpm.getCameraDisabled(null);
+        }
+
+        mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
+
+        // These need to be created with the user context...
         Context userContext = null;
         try {
             final String packageName = "system";
@@ -159,29 +169,13 @@ public class KeyguardHostView extends KeyguardViewBase {
             userContext = context;
         }
 
-        // These need to be created with the user context...
         mAppWidgetHost = new AppWidgetHost(userContext, APPWIDGET_HOST_ID, mOnClickHandler,
                 Looper.myLooper());
+
+        cleanupAppWidgetIds();
+
         mAppWidgetManager = AppWidgetManager.getInstance(userContext);
 
-        cleanupAppWidgetIds();
-
-        mSecurityModel = new KeyguardSecurityModel(context);
-
-        mViewStateManager = new KeyguardViewStateManager(this);
-
-        DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null) {
-            mDisabledFeatures = getDisabledFeatures(dpm);
-            mCameraDisabled = dpm.getCameraDisabled(null);
-        }
-
-        mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
-
-        cleanupAppWidgetIds();
-
-        mAppWidgetManager = AppWidgetManager.getInstance(mContext);
         mSecurityModel = new KeyguardSecurityModel(context);
 
         mViewStateManager = new KeyguardViewStateManager(this);
