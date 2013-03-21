@@ -947,7 +947,7 @@ private:
     // Current state
     sp<Snapshot> mSnapshot;
     // State used to define the clipping region
-    sp<Snapshot> mTilingSnapshot;
+    Rect mTilingClip;
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
