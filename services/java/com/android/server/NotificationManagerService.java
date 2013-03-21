@@ -50,12 +50,11 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -124,6 +123,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     final Context mContext;
     final IActivityManager mAm;
+    final UserManager mUserManager;
     final IBinder mForegroundToken = new Binder();
 
     private WorkerHandler mHandler;
@@ -164,6 +164,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     private final AppOpsManager mAppOps;
 
     private ArrayList<NotificationListenerInfo> mListeners = new ArrayList<NotificationListenerInfo>();
+    private ArrayList<String> mEnabledListenersForCurrentUser = new ArrayList<String>();
 
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
@@ -180,20 +181,27 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     private class NotificationListenerInfo implements DeathRecipient {
         INotificationListener listener;
+        String pkg;
         int userid;
-        public NotificationListenerInfo(INotificationListener listener, int userid) {
+        boolean isSystem;
+
+        public NotificationListenerInfo(INotificationListener listener, String pkg, int userid,
+                boolean isSystem) {
             this.listener = listener;
+            this.pkg = pkg;
             this.userid = userid;
+            this.isSystem = isSystem;
         }
 
-        boolean userMatches(StatusBarNotification sbn) {
+        boolean enabledAndUserMatches(StatusBarNotification sbn) {
+            final int nid = sbn.getUserId();
+            if (!(isSystem || isEnabledForUser(nid))) return false;
             if (this.userid == UserHandle.USER_ALL) return true;
-            int nid = sbn.getUserId();
             return (nid == UserHandle.USER_ALL || nid == this.userid);
         }
 
         public void notifyPostedIfUserMatch(StatusBarNotification sbn) {
-            if (!userMatches(sbn)) return;
+            if (!enabledAndUserMatches(sbn)) return;
             try {
                 listener.onNotificationPosted(sbn);
             } catch (RemoteException ex) {
@@ -202,7 +210,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         public void notifyRemovedIfUserMatch(StatusBarNotification sbn) {
-            if (!userMatches(sbn)) return;
+            if (!enabledAndUserMatches(sbn)) return;
             try {
                 listener.onNotificationRemoved(sbn);
             } catch (RemoteException ex) {
@@ -213,6 +221,14 @@ public class NotificationManagerService extends INotificationManager.Stub
         @Override
         public void binderDied() {
             unregisterListener(this.listener, this.userid);
+        }
+
+        /** convenience method for looking in mEnabledListenersForCurrentUser */
+        public boolean isEnabledForUser(int userid) {
+            for (int i=0; i<mEnabledListenersForCurrentUser.size(); i++) {
+                if (this.pkg.equals(mEnabledListenersForCurrentUser.get(i))) return true;
+            }
+            return false;
         }
     }
 
@@ -413,12 +429,14 @@ public class NotificationManagerService extends INotificationManager.Stub
     }
 
     public StatusBarNotification[] getActiveNotifications(String callingPkg) {
+        // enforce() will ensure the calling uid has the correct permission
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS,
                 "NotificationManagerService.getActiveNotifications");
 
         StatusBarNotification[] tmp = null;
         int uid = Binder.getCallingUid();
 
+        // noteOp will check to make sure the callingPkg matches the uid
         if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
                 == AppOpsManager.MODE_ALLOWED) {
             synchronized (mNotificationList) {
@@ -433,12 +451,14 @@ public class NotificationManagerService extends INotificationManager.Stub
     }
 
     public StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count) {
+        // enforce() will ensure the calling uid has the correct permission
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS,
                 "NotificationManagerService.getHistoricalNotifications");
 
         StatusBarNotification[] tmp = null;
         int uid = Binder.getCallingUid();
 
+        // noteOp will check to make sure the callingPkg matches the uid
         if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
                 == AppOpsManager.MODE_ALLOWED) {
             synchronized (mArchive) {
@@ -448,12 +468,27 @@ public class NotificationManagerService extends INotificationManager.Stub
         return tmp;
     }
 
+    boolean packageCanTapNotificationsForUser(final int uid, final String pkg) {
+        // Make sure the package and uid match, and that the package is allowed access
+        return (AppOpsManager.MODE_ALLOWED
+            == mAppOps.checkOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, pkg));
+    }
+
     @Override
-    public void registerListener(final INotificationListener listener, final int userid) {
-        checkCallerIsSystem();
+    public void registerListener(final INotificationListener listener,
+            final String pkg, final int userid) {
+        // ensure system or allowed pkg
+        int uid = Binder.getCallingUid();
+        boolean isSystem = (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0);
+        if (!(isSystem || packageCanTapNotificationsForUser(uid, pkg))) {
+            throw new SecurityException("Package " + pkg
+                    + " may not listen for notifications");
+        }
+
         synchronized (mNotificationList) {
             try {
-                NotificationListenerInfo info = new NotificationListenerInfo(listener, userid);
+                NotificationListenerInfo info
+                        = new NotificationListenerInfo(listener, pkg, userid, isSystem);
                 listener.asBinder().linkToDeath(info, 0);
                 mListeners.add(info);
             } catch (RemoteException e) {
@@ -464,7 +499,9 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     @Override
     public void unregisterListener(INotificationListener listener, int userid) {
-        checkCallerIsSystem();
+        // no need to check permissions; if your listener binder is in the list,
+        // that's proof that you had permission to add it in the first place
+
         synchronized (mNotificationList) {
             final int N = mListeners.size();
             for (int i=N-1; i>=0; i--) {
@@ -740,36 +777,66 @@ public class NotificationManagerService extends INotificationManager.Stub
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
+            } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                // reload per-user settings
+                mSettingsObserver.update(null);
             }
         }
     };
 
     class SettingsObserver extends ContentObserver {
+        private final Uri NOTIFICATION_LIGHT_PULSE_URI
+                = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
+
+        private final Uri ENABLED_NOTIFICATION_LISTENERS_URI
+                = Settings.System.getUriFor(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+
         SettingsObserver(Handler handler) {
             super(handler);
         }
 
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NOTIFICATION_LIGHT_PULSE), false, this);
-            update();
+            resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
+                    false, this);
+            resolver.registerContentObserver(ENABLED_NOTIFICATION_LISTENERS_URI,
+                    false, this);
+            update(null);
         }
 
-        @Override public void onChange(boolean selfChange) {
-            update();
+        @Override public void onChange(boolean selfChange, Uri uri) {
+            update(uri);
         }
 
-        public void update() {
+        public void update(Uri uri) {
             ContentResolver resolver = mContext.getContentResolver();
-            boolean pulseEnabled = Settings.System.getInt(resolver,
-                        Settings.System.NOTIFICATION_LIGHT_PULSE, 0) != 0;
-            if (mNotificationPulseEnabled != pulseEnabled) {
-                mNotificationPulseEnabled = pulseEnabled;
-                updateNotificationPulse();
+            if (uri == null || NOTIFICATION_LIGHT_PULSE_URI.equals(uri)) {
+                boolean pulseEnabled = Settings.System.getInt(resolver,
+                            Settings.System.NOTIFICATION_LIGHT_PULSE, 0) != 0;
+                if (mNotificationPulseEnabled != pulseEnabled) {
+                    mNotificationPulseEnabled = pulseEnabled;
+                    updateNotificationPulse();
+                }
+            }
+            if (uri == null || ENABLED_NOTIFICATION_LISTENERS_URI.equals(uri)) {
+                String pkglist = Settings.Secure.getString(
+                        mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+                mEnabledListenersForCurrentUser.clear();
+                if (pkglist != null) {
+                    String[] pkgs = pkglist.split(";");
+                    for (int i=0; i<pkgs.length; i++) {
+                        final String pkg = pkgs[i];
+                        if (pkg != null && ! "".equals(pkg)) {
+                            mEnabledListenersForCurrentUser.add(pkgs[i]);
+                        }
+                    }
+                }
             }
         }
     }
+
+    private SettingsObserver mSettingsObserver;
 
     static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
         int[] ar = r.getIntArray(resid);
@@ -791,6 +858,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         mContext = context;
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mAm = ActivityManagerNative.getDefault();
+        mUserManager = (UserManager)context.getSystemService(Context.USER_SERVICE);
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
 
@@ -838,6 +906,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_USER_STOPPED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mIntentReceiver, filter);
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -849,8 +918,8 @@ public class NotificationManagerService extends INotificationManager.Stub
         IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mIntentReceiver, sdFilter);
 
-        SettingsObserver observer = new SettingsObserver(mHandler);
-        observer.observe();
+        mSettingsObserver = new SettingsObserver(mHandler);
+        mSettingsObserver.observe();
     }
 
     /**
@@ -1705,6 +1774,18 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         pw.println("Current Notification Manager state:");
+
+        pw.print("  Enabled listeners: [");
+        for (String pkg : mEnabledListenersForCurrentUser) {
+            pw.print(" " + pkg);
+        }
+        pw.println(" ]");
+
+        pw.println("  Live listeners:");
+        for (NotificationListenerInfo info : mListeners) {
+            pw.println("    " + info.pkg + " (user " + info.userid + "): " + info.listener
+                + (info.isSystem?" SYSTEM":""));
+        }
 
         int N;
 
