@@ -474,6 +474,11 @@
     <string name="permgroupdesc_camera">Direct access to camera for image or video capture.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_screenlock">Lock screen</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_screenlock">Ability to affect behavior of the lock screen on your device.</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_appInfo">Your applications information</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_appInfo">Ability to affect behavior of other applications on your device.</string>
