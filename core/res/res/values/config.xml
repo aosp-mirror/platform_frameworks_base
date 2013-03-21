@@ -1041,4 +1041,6 @@
     <string name="config_chooseTypeAndAccountActivity"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
 
+    <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
+    <string name="config_appsAuthorizedForSharedAccounts"></string>
 </resources>

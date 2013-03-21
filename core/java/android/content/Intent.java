@@ -2414,6 +2414,15 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.PRE_BOOT_COMPLETED";
 
     /**
+     * Broadcast to a specific application to query any supported restrictions to impose
+     * on restricted users. The response should contain an extra {@link #EXTRA_RESTRICTIONS}
+     * which is of type <code>ArrayList&lt;RestrictionEntry&gt;</code>.
+     * @see RestrictionEntry
+     */
+    public static final String ACTION_GET_RESTRICTION_ENTRIES =
+            "android.intent.action.GET_RESTRICTION_ENTRIES";
+
+    /**
      * Sent the first time a user is starting, to allow system apps to
      * perform one time initialization.  (This will not be seen by third
      * party applications because a newly initialized user does not have any
@@ -3144,6 +3153,12 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_USER_HANDLE =
             "android.intent.extra.user_handle";
+
+    /**
+     * Extra used in the response from a BroadcastReceiver that handles
+     * {@link #ACTION_GET_RESTRICTION_ENTRIES}.
+     */
+    public static final String EXTRA_RESTRICTIONS = "android.intent.extra.restrictions";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

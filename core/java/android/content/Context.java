@@ -45,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Interface to global information about an application environment.  This is
@@ -284,6 +285,15 @@ public abstract class Context {
      * </ul>
      */
     public abstract Context getApplicationContext();
+
+    /**
+     * Returns the list of restrictions for the application, or null if there are no
+     * restrictions.
+     * @return
+     */
+    public List<RestrictionEntry> getApplicationRestrictions() {
+        return getApplicationContext().getApplicationRestrictions();
+    }
 
     /**
      * Add a new {@link ComponentCallbacks} to the base application of the

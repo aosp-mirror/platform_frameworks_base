@@ -17,6 +17,7 @@ package android.os;
 
 import android.app.ActivityManagerNative;
 import android.content.Context;
+import android.content.RestrictionEntry;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -126,7 +127,19 @@ public class UserManager {
     public boolean isUserAGoat() {
         return false;
     }
- 
+
+    /**
+     * @hide
+     */
+    public boolean isUserRestricted() {
+        try {
+            return mService.getUserInfo(getUserHandle()).isRestricted();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not check if user restricted ", re);
+            return false;
+        }
+    }
+
     /**
      * Return whether the given user is actively running.  This means that
      * the user is in the "started" state, not "stopped" -- it is currently
@@ -450,10 +463,34 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the current user is allow to toggle location sharing settings.
+     * Returns whether the current user is allowed to toggle location sharing settings.
      * @hide
      */
     public boolean isLocationSharingToggleAllowed() {
         return getUserRestrictions().getBoolean(ALLOW_CONFIG_LOCATION_ACCESS);
+    }
+
+    /**
+     * @hide
+     */
+    public List<RestrictionEntry> getApplicationRestrictions(String packageName, UserHandle user) {
+        try {
+            return mService.getApplicationRestrictions(packageName, user.getIdentifier());
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get application restrictions for user " + user.getIdentifier());
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    public void setApplicationRestrictions(String packageName, List<RestrictionEntry> entries,
+            UserHandle user) {
+        try {
+            mService.setApplicationRestrictions(packageName, entries, user.getIdentifier());
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set application restrictions for user " + user.getIdentifier());
+        }
     }
 }

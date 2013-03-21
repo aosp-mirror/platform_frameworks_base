@@ -152,6 +152,9 @@ public class AccountManager {
     public static final int ERROR_CODE_BAD_ARGUMENTS = 7;
     public static final int ERROR_CODE_BAD_REQUEST = 8;
 
+    /** @hide */
+    public static final int ERROR_CODE_USER_RESTRICTED = 100;
+
     /**
      * Bundle key used for the {@link String} account name in results
      * from methods which return information about a particular account.
@@ -1526,7 +1529,7 @@ public class AccountManager {
             }
 
             public void onError(int code, String message) {
-                if (code == ERROR_CODE_CANCELED) {
+                if (code == ERROR_CODE_CANCELED || code == ERROR_CODE_USER_RESTRICTED) {
                     // the authenticator indicated that this request was canceled, do so now
                     cancel(true /* mayInterruptIfRunning */);
                     return;

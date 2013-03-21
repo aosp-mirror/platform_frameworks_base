@@ -847,6 +847,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int required = 16843406; // 0x101028e
+    field public static final int requiredForAllUsers = 16843728; // 0x10103d0
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
@@ -5406,6 +5407,7 @@ package android.content {
     method public abstract java.lang.String[] fileList();
     method public abstract android.content.Context getApplicationContext();
     method public abstract android.content.pm.ApplicationInfo getApplicationInfo();
+    method public java.util.List<android.content.RestrictionEntry> getApplicationRestrictions();
     method public abstract android.content.res.AssetManager getAssets();
     method public abstract java.io.File getCacheDir();
     method public abstract java.lang.ClassLoader getClassLoader();
@@ -5849,6 +5851,7 @@ package android.content {
     field public static final java.lang.String ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE = "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE";
     field public static final java.lang.String ACTION_FACTORY_TEST = "android.intent.action.FACTORY_TEST";
     field public static final java.lang.String ACTION_GET_CONTENT = "android.intent.action.GET_CONTENT";
+    field public static final java.lang.String ACTION_GET_RESTRICTION_ENTRIES = "android.intent.action.GET_RESTRICTION_ENTRIES";
     field public static final java.lang.String ACTION_GTALK_SERVICE_CONNECTED = "android.intent.action.GTALK_CONNECTED";
     field public static final java.lang.String ACTION_GTALK_SERVICE_DISCONNECTED = "android.intent.action.GTALK_DISCONNECTED";
     field public static final java.lang.String ACTION_HEADSET_PLUG = "android.intent.action.HEADSET_PLUG";
@@ -5991,6 +5994,7 @@ package android.content {
     field public static final java.lang.String EXTRA_REFERRER = "android.intent.extra.REFERRER";
     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
     field public static final java.lang.String EXTRA_REPLACING = "android.intent.extra.REPLACING";
+    field public static final java.lang.String EXTRA_RESTRICTIONS = "android.intent.extra.restrictions";
     field public static final java.lang.String EXTRA_RETURN_RESULT = "android.intent.extra.RETURN_RESULT";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON = "android.intent.extra.shortcut.ICON";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON_RESOURCE = "android.intent.extra.shortcut.ICON_RESOURCE";
@@ -6231,6 +6235,33 @@ package android.content {
 
   public class ReceiverCallNotAllowedException extends android.util.AndroidRuntimeException {
     ctor public ReceiverCallNotAllowedException(java.lang.String);
+  }
+
+  public class RestrictionEntry implements android.os.Parcelable {
+    ctor public RestrictionEntry(java.lang.String, java.lang.String);
+    ctor public RestrictionEntry(java.lang.String, boolean);
+    ctor public RestrictionEntry(java.lang.String, java.lang.String[]);
+    ctor public RestrictionEntry(android.os.Parcel);
+    method public int describeContents();
+    method public boolean getBooleanValue();
+    method public java.lang.String[] getMultipleValues();
+    method public java.lang.String getStringValue();
+    method public void setMultipleValues(java.lang.String[]);
+    method public void setValue(java.lang.String);
+    method public void setValue(boolean);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int TYPE_BOOLEAN = 1; // 0x1
+    field public static final int TYPE_CHOICE = 2; // 0x2
+    field public static final int TYPE_CHOICE_LEVEL = 3; // 0x3
+    field public static final int TYPE_MULTI_SELECT = 4; // 0x4
+    field public static final int TYPE_NULL = 0; // 0x0
+    field public java.lang.String[] choices;
+    field public java.lang.String description;
+    field public java.lang.String key;
+    field public java.lang.String title;
+    field public int type;
+    field public java.lang.String[] values;
   }
 
   public class SearchRecentSuggestionsProvider extends android.content.ContentProvider {

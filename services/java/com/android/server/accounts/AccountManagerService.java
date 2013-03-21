@@ -455,7 +455,6 @@ public class AccountManagerService
 
     @Override
     public void onServiceChanged(AuthenticatorDescription desc, int userId, boolean removed) {
-        Slog.d(TAG, "onServiceChanged() for userId " + userId);
         validateAccountsInternal(getUserAccounts(userId), false /* invalidateAuthenticatorCache */);
     }
 
@@ -588,16 +587,12 @@ public class AccountManagerService
                     if (result != null) {
                         if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
                             // Create a Session for the target user and pass in the bundle
-                            Slog.i(TAG, "getAccountCredentialsForCloning returned success, "
-                                    + "sending result to target user");
                             completeCloningAccount(result, account, toAccounts);
                         } else {
-                            Slog.e(TAG, "getAccountCredentialsForCloning returned failure");
                             clonePassword(fromAccounts, toAccounts, account);
                         }
                         return;
                     } else {
-                        Slog.e(TAG, "getAccountCredentialsForCloning returned null");
                         clonePassword(fromAccounts, toAccounts, account);
                         super.onResult(result);
                     }
@@ -645,15 +640,12 @@ public class AccountManagerService
                     if (result != null) {
                         if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
                             // TODO: Anything?
-                            Slog.i(TAG, "addAccount returned success");
                         } else {
                             // TODO: Show error notification
                             // TODO: Should we remove the shadow account to avoid retries?
-                            Slog.e(TAG, "addAccountFromCredentials returned failure");
                         }
                         return;
                     } else {
-                        Slog.e(TAG, "addAccountFromCredentials returned null");
                         super.onResult(result);
                     }
                 }
@@ -1433,6 +1425,17 @@ public class AccountManagerService
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         checkManageAccountsPermission();
 
+        // Is user allowed to modify accounts?
+        if (!getUserManager().getUserRestrictions(Binder.getCallingUserHandle())
+                .getBoolean(UserManager.ALLOW_MODIFY_ACCOUNTS)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
+                        "User is not allowed to add an account!");
+            } catch (RemoteException re) {
+            }
+            return;
+        }
+
         UserAccounts accounts = getUserAccountsForCaller();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -1576,17 +1579,19 @@ public class AccountManagerService
         private volatile Account[] mAccountsOfType = null;
         private volatile ArrayList<Account> mAccountsWithFeatures = null;
         private volatile int mCurrentAccount = 0;
+        private int mCallingUid;
 
         public GetAccountsByTypeAndFeatureSession(UserAccounts accounts,
-                IAccountManagerResponse response, String type, String[] features) {
+                IAccountManagerResponse response, String type, String[] features, int callingUid) {
             super(accounts, response, type, false /* expectActivityLaunch */,
                     true /* stripAuthTokenFromResult */);
+            mCallingUid = callingUid;
             mFeatures = features;
         }
 
         public void run() throws RemoteException {
             synchronized (mAccounts.cacheLock) {
-                mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType);
+                mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType, mCallingUid);
             }
             // check whether each account matches the requested features
             mAccountsWithFeatures = new ArrayList<Account>(mAccountsOfType.length);
@@ -1671,10 +1676,11 @@ public class AccountManagerService
     public Account[] getAccounts(int userId) {
         checkReadAccountsPermission();
         UserAccounts accounts = getUserAccounts(userId);
+        int callingUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
             synchronized (accounts.cacheLock) {
-                return getAccountsFromCacheLocked(accounts, null);
+                return getAccountsFromCacheLocked(accounts, null, callingUid);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1714,7 +1720,8 @@ public class AccountManagerService
                 UserAccounts userAccounts = getUserAccounts(userId);
                 if (userAccounts == null) continue;
                 synchronized (userAccounts.cacheLock) {
-                    Account[] accounts = getAccountsFromCacheLocked(userAccounts, null);
+                    Account[] accounts = getAccountsFromCacheLocked(userAccounts, null,
+                            Binder.getCallingUid());
                     for (int a = 0; a < accounts.length; a++) {
                         runningAccounts.add(new AccountAndUser(accounts[a], userId));
                     }
@@ -1728,9 +1735,10 @@ public class AccountManagerService
 
     @Override
     public Account[] getAccountsAsUser(String type, int userId) {
+        final int callingUid = Binder.getCallingUid();
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && Binder.getCallingUid() != android.os.Process.myUid()
+                && callingUid != android.os.Process.myUid()
                 && mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1748,7 +1756,7 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             synchronized (accounts.cacheLock) {
-                return getAccountsFromCacheLocked(accounts, type);
+                return getAccountsFromCacheLocked(accounts, type, callingUid);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1832,19 +1840,21 @@ public class AccountManagerService
         if (type == null) throw new IllegalArgumentException("accountType is null");
         checkReadAccountsPermission();
         UserAccounts userAccounts = getUserAccountsForCaller();
+        int callingUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
             if (features == null || features.length == 0) {
                 Account[] accounts;
                 synchronized (userAccounts.cacheLock) {
-                    accounts = getAccountsFromCacheLocked(userAccounts, type);
+                    accounts = getAccountsFromCacheLocked(userAccounts, type, callingUid);
                 }
                 Bundle result = new Bundle();
                 result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
                 onResult(response, result);
                 return;
             }
-            new GetAccountsByTypeAndFeatureSession(userAccounts, response, type, features).bind();
+            new GetAccountsByTypeAndFeatureSession(userAccounts, response, type, features,
+                    callingUid).bind();
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -2358,7 +2368,8 @@ public class AccountManagerService
                     }
                 }
             } else {
-                Account[] accounts = getAccountsFromCacheLocked(userAccounts, null /* type */);
+                Account[] accounts = getAccountsFromCacheLocked(userAccounts, null /* type */,
+                        android.os.Process.myUid());
                 fout.println("Accounts: " + accounts.length);
                 for (Account account : accounts) {
                     fout.println("  " + account);
@@ -2697,13 +2708,56 @@ public class AccountManagerService
         accounts.accountCache.put(account.type, newAccountsForType);
     }
 
-    protected Account[] getAccountsFromCacheLocked(UserAccounts userAccounts, String accountType) {
+    private Account[] filterSharedAccounts(UserAccounts userAccounts, Account[] unfiltered,
+            int callingUid) {
+        if (getUserManager() == null || userAccounts == null || userAccounts.userId < 0
+                || callingUid == android.os.Process.myUid()) {
+            return unfiltered;
+        }
+        if (mUserManager.getUserInfo(userAccounts.userId).isRestricted()) {
+            String[] packages = mPackageManager.getPackagesForUid(callingUid);
+            // If any of the packages includes a white listed package, return the full set,
+            // otherwise return non-shared accounts only.
+            // This might be a temporary way to specify a whitelist
+            String whiteList = mContext.getResources().getString(
+                    com.android.internal.R.string.config_appsAuthorizedForSharedAccounts);
+            for (String packageName : packages) {
+                if (whiteList.contains(";" + packageName + ";")) {
+                    return unfiltered;
+                }
+            }
+            ArrayList<Account> allowed = new ArrayList<Account>();
+            Account[] sharedAccounts = getSharedAccountsAsUser(userAccounts.userId);
+            if (sharedAccounts == null || sharedAccounts.length == 0) return unfiltered;
+            for (Account account : unfiltered) {
+                boolean found = false;
+                for (Account shared : sharedAccounts) {
+                    if (shared.equals(account)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    allowed.add(account);
+                }
+            }
+            Account[] filtered = new Account[allowed.size()];
+            allowed.toArray(filtered);
+            return filtered;
+        } else {
+            return unfiltered;
+        }
+    }
+
+    protected Account[] getAccountsFromCacheLocked(UserAccounts userAccounts, String accountType,
+            int callingUid) {
         if (accountType != null) {
             final Account[] accounts = userAccounts.accountCache.get(accountType);
             if (accounts == null) {
                 return EMPTY_ACCOUNT_ARRAY;
             } else {
-                return Arrays.copyOf(accounts, accounts.length);
+                return filterSharedAccounts(userAccounts, Arrays.copyOf(accounts, accounts.length),
+                        callingUid);
             }
         } else {
             int totalLength = 0;
@@ -2720,7 +2774,7 @@ public class AccountManagerService
                         accountsOfType.length);
                 totalLength += accountsOfType.length;
             }
-            return accounts;
+            return filterSharedAccounts(userAccounts, accounts, callingUid);
         }
     }
 
