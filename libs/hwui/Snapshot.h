@@ -228,6 +228,8 @@ public:
      */
     float alpha;
 
+    void dump() const;
+
 private:
     void ensureClipRegion();
     void copyClipRectFromRegion();

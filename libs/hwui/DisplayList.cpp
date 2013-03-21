@@ -351,9 +351,9 @@ void DisplayList::outputViewProperties(const int level) {
                     level * 2, "", mTransformMatrix, MATRIX_ARGS(mTransformMatrix));
         }
     }
-    if (mAlpha < 1 && !mCaching) {
-        if (!mHasOverlappingRendering) {
-            ALOGD("%*sSetAlpha %.2f", level * 2, "", mAlpha);
+    if (mAlpha < 1) {
+        if (mCaching || !mHasOverlappingRendering) {
+            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mAlpha);
         } else {
             int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
             if (mClipChildren) {

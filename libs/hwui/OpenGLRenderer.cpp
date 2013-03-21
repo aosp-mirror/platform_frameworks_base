@@ -193,6 +193,7 @@ status_t OpenGLRenderer::prepareDirty(float left, float top,
     mSaveCount = 1;
 
     mSnapshot->setClip(left, top, right, bottom);
+    mTilingClip.set(left, top, right, bottom);
     mDirtyClip = true;
 
     updateLayers();
@@ -206,8 +207,7 @@ status_t OpenGLRenderer::prepareDirty(float left, float top,
     // invoked during the frame
     mSuppressTiling = mCaches.hasRegisteredFunctors();
 
-    mTilingSnapshot = mSnapshot;
-    startTiling(mTilingSnapshot, true);
+    startTiling(mSnapshot, true);
 
     debugOverdraw(true, true);
 
@@ -252,9 +252,9 @@ void OpenGLRenderer::syncState() {
 
 void OpenGLRenderer::startTiling(const sp<Snapshot>& s, bool opaque) {
     if (!mSuppressTiling) {
-        Rect* clip = mTilingSnapshot->clipRect;
+        Rect* clip = &mTilingClip;
         if (s->flags & Snapshot::kFlagFboTarget) {
-            clip = &s->layer->clipRect;
+            clip = &(s->layer->clipRect);
         }
 
         startTiling(*clip, s->height, opaque);
@@ -480,10 +480,10 @@ void OpenGLRenderer::debugOverdraw(bool enable, bool clear) {
 
 void OpenGLRenderer::renderOverdraw() {
     if (mCaches.debugOverdraw && getTargetFbo() == 0) {
-        const Rect* clip = mTilingSnapshot->clipRect;
+        const Rect* clip = &mTilingClip;
 
         mCaches.enableScissor();
-        mCaches.setScissor(clip->left, mTilingSnapshot->height - clip->bottom,
+        mCaches.setScissor(clip->left, mFirstSnapshot->height - clip->bottom,
                 clip->right - clip->left, clip->bottom - clip->top);
 
         mCaches.stencil.enableDebugTest(2);
