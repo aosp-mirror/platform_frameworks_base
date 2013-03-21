@@ -4794,7 +4794,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean hasOverlappingRendering() {
-        return (getBackground() != null || mText instanceof Spannable || hasSelection());
+        return ((getBackground() != null && getBackground().getCurrent() != null)
+                || mText instanceof Spannable || hasSelection());
     }
 
     /**
