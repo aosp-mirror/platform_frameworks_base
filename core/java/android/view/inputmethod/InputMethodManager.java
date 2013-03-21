@@ -1577,13 +1577,13 @@ public final class InputMethodManager {
                     final long startTime = SystemClock.uptimeMillis();
                     enqueuePendingEventLocked(startTime, seq, mCurId, callback);
                     mCurMethod.dispatchKeyEvent(seq, key, mInputMethodCallback);
-                    return ViewRootImpl.EVENT_IN_PROGRESS;
+                    return ViewRootImpl.EVENT_PENDING_IME;
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId + " dropping: " + key, e);
                 }
             }
         }
-        return ViewRootImpl.EVENT_NOT_HANDLED;
+        return ViewRootImpl.EVENT_POST_IME;
     }
 
     /**
@@ -1600,13 +1600,13 @@ public final class InputMethodManager {
                     final long startTime = SystemClock.uptimeMillis();
                     enqueuePendingEventLocked(startTime, seq, mCurId, callback);
                     mCurMethod.dispatchTrackballEvent(seq, motion, mInputMethodCallback);
-                    return ViewRootImpl.EVENT_IN_PROGRESS;
+                    return ViewRootImpl.EVENT_PENDING_IME;
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId + " dropping trackball: " + motion, e);
                 }
             }
         }
-        return ViewRootImpl.EVENT_NOT_HANDLED;
+        return ViewRootImpl.EVENT_POST_IME;
     }
 
     /**
@@ -1623,13 +1623,13 @@ public final class InputMethodManager {
                     final long startTime = SystemClock.uptimeMillis();
                     enqueuePendingEventLocked(startTime, seq, mCurId, callback);
                     mCurMethod.dispatchGenericMotionEvent(seq, motion, mInputMethodCallback);
-                    return ViewRootImpl.EVENT_IN_PROGRESS;
+                    return ViewRootImpl.EVENT_PENDING_IME;
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId + " dropping generic motion: " + motion, e);
                 }
             }
         }
-        return ViewRootImpl.EVENT_NOT_HANDLED;
+        return ViewRootImpl.EVENT_POST_IME;
     }
 
     void finishedEvent(int seq, boolean handled) {
