@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
 #include "Snapshot.h"
 
 #include <SkCanvas.h>
@@ -197,6 +199,15 @@ void Snapshot::resetTransform(float x, float y, float z) {
 
 bool Snapshot::isIgnored() const {
     return invisible || empty;
+}
+
+void Snapshot::dump() const {
+    ALOGD("Snapshot %p, flags %x, prev %p, height %d, ignored %d, hasComplexClip %d",
+            this, flags, previous.get(), height, isIgnored(), clipRegion && !clipRegion->isEmpty());
+    ALOGD("  ClipRect (at %p) %.1f %.1f %.1f %.1f",
+            clipRect, clipRect->left, clipRect->top, clipRect->right, clipRect->bottom);
+    ALOGD("  Transform (at %p):", transform);
+    transform->dump();
 }
 
 }; // namespace uirenderer
