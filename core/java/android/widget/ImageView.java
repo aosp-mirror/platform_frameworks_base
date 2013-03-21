@@ -204,7 +204,7 @@ public class ImageView extends View {
 
     @Override
     public boolean hasOverlappingRendering() {
-        return (getBackground() != null);
+        return (getBackground() != null && getBackground().getCurrent() != null);
     }
 
     @Override
