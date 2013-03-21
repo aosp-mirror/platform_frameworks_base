@@ -47,6 +47,12 @@ public:
      */
     bool canRunTasks() const;
 
+    /**
+     * Stops all allocated threads. Adding tasks will start
+     * the threads again as necessary.
+     */
+    void stop();
+
 private:
     template <typename T>
     friend class TaskProcessor;
