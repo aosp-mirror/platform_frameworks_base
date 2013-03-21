@@ -4049,7 +4049,7 @@
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->
     <string name="safe_media_volume_warning" product="default">
-       "Raise volume above safe level?\nListening at high volume for long periods may damage your hearing."
+       "Raise volume above recommended level?\nListening at high volume for long periods may damage your hearing."
     </string>
 
     <!-- Text spoken when the user is performing a gesture that will enable accessibility. [CHAR LIMIT=none] -->
