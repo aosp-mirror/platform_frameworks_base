@@ -25,7 +25,10 @@ import android.app.IStopUserCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.RestrictionEntry;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -83,10 +86,16 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
     private static final String TAG_RESTRICTIONS = "restrictions";
+    private static final String TAG_ENTRY = "entry";
+    private static final String TAG_VALUE = "value";
+    private static final String ATTR_KEY = "key";
+    private static final String ATTR_MULTIPLE = "m";
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
     private static final String USER_PHOTO_FILENAME = "photo.png";
+
+    private static final String RESTRICTIONS_FILE_PREFIX = "res_";
 
     private static final int MIN_USER_ID = 10;
 
@@ -944,6 +953,151 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         parent.delete();
+    }
+
+    @Override
+    public List<RestrictionEntry> getApplicationRestrictions(String packageName, int userId) {
+        if (UserHandle.getCallingUserId() != userId
+                || Binder.getCallingUid() != getUidForPackage(packageName)) {
+            checkManageUsersPermission("Only system can get restrictions for other users/apps");
+        }
+        synchronized (mPackagesLock) {
+            // Read the restrictions from XML
+            return readApplicationRestrictionsLocked(packageName, userId);
+        }
+    }
+
+    @Override
+    public void setApplicationRestrictions(String packageName, List<RestrictionEntry> entries,
+            int userId) {
+        if (UserHandle.getCallingUserId() != userId
+                || Binder.getCallingUid() != getUidForPackage(packageName)) {
+            checkManageUsersPermission("Only system can set restrictions for other users/apps");
+        }
+        synchronized (mPackagesLock) {
+            // Write the restrictions to XML
+            writeApplicationRestrictionsLocked(packageName, entries, userId);
+        }
+    }
+
+    private int getUidForPackage(String packageName) {
+        try {
+            return mContext.getPackageManager().getApplicationInfo(packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES).uid;
+        } catch (NameNotFoundException nnfe) {
+            return -1;
+        }
+    }
+
+    private List<RestrictionEntry> readApplicationRestrictionsLocked(String packageName,
+            int userId) {
+        final ArrayList<RestrictionEntry> entries = new ArrayList<RestrictionEntry>();
+        final ArrayList<String> values = new ArrayList<String>();
+
+        FileInputStream fis = null;
+        try {
+            AtomicFile restrictionsFile =
+                    new AtomicFile(new File(Environment.getUserSystemDirectory(userId),
+                            RESTRICTIONS_FILE_PREFIX + packageName + ".xml"));
+            fis = restrictionsFile.openRead();
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(fis, null);
+            int type;
+            while ((type = parser.next()) != XmlPullParser.START_TAG
+                    && type != XmlPullParser.END_DOCUMENT) {
+                ;
+            }
+
+            if (type != XmlPullParser.START_TAG) {
+                Slog.e(LOG_TAG, "Unable to read restrictions file "
+                        + restrictionsFile.getBaseFile());
+                return entries;
+            }
+
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
+                    String key = parser.getAttributeValue(null, ATTR_KEY);
+                    String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
+                    if (multiple != null) {
+                        int count = Integer.parseInt(multiple);
+                        while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                            if (type == XmlPullParser.START_TAG
+                                    && parser.getName().equals(TAG_VALUE)) {
+                                values.add(parser.nextText().trim());
+                                count--;
+                            }
+                        }
+                        String [] valueStrings = new String[values.size()];
+                        values.toArray(valueStrings);
+                        Slog.d(LOG_TAG, "Got RestrictionEntry " + key + "," + valueStrings);
+                        RestrictionEntry entry = new RestrictionEntry(key, valueStrings);
+                        entries.add(entry);
+                    } else {
+                        String value = parser.nextText().trim();
+                        Slog.d(LOG_TAG, "Got RestrictionEntry " + key + "," + value);
+                        RestrictionEntry entry = new RestrictionEntry(key, value);
+                        entries.add(entry);
+                    }
+                }
+            }
+
+        } catch (IOException ioe) {
+        } catch (XmlPullParserException pe) {
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+        return entries;
+    }
+
+    private void writeApplicationRestrictionsLocked(String packageName,
+            List<RestrictionEntry> entries, int userId) {
+        FileOutputStream fos = null;
+        AtomicFile restrictionsFile = new AtomicFile(
+                new File(Environment.getUserSystemDirectory(userId),
+                        RESTRICTIONS_FILE_PREFIX + packageName + ".xml"));
+        try {
+            fos = restrictionsFile.startWrite();
+            final BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+            // XmlSerializer serializer = XmlUtils.serializerInstance();
+            final XmlSerializer serializer = new FastXmlSerializer();
+            serializer.setOutput(bos, "utf-8");
+            serializer.startDocument(null, true);
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+
+            serializer.startTag(null, TAG_RESTRICTIONS);
+
+            for (RestrictionEntry entry : entries) {
+                serializer.startTag(null, TAG_ENTRY);
+                serializer.attribute(null, ATTR_KEY, entry.key);
+                if (entry.getStringValue() != null || entry.getMultipleValues() == null) {
+                    String value = entry.getStringValue();
+                    serializer.text(value != null ? value : "");
+                } else {
+                    String[] values = entry.getMultipleValues();
+                    serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
+                    for (String value : values) {
+                        serializer.startTag(null, TAG_VALUE);
+                        serializer.text(value != null ? value : "");
+                        serializer.endTag(null, TAG_VALUE);
+                    }
+                }
+                serializer.endTag(null, TAG_ENTRY);
+            }
+
+            serializer.endTag(null, TAG_RESTRICTIONS);
+
+            serializer.endDocument();
+            restrictionsFile.finishWrite(fos);
+        } catch (Exception e) {
+            restrictionsFile.failWrite(fos);
+            Slog.e(LOG_TAG, "Error writing application restrictions list");
+        }
     }
 
     @Override

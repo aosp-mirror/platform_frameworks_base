@@ -865,6 +865,7 @@
   <java-symbol type="string" name="owner_name" />
   <java-symbol type="string" name="config_chooseAccountActivity" />
   <java-symbol type="string" name="config_chooseTypeAndAccountActivity" />
+  <java-symbol type="string" name="config_appsAuthorizedForSharedAccounts" />
 
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
