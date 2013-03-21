@@ -1073,10 +1073,10 @@
 
     <!-- Group of permissions that are related to the screenlock. -->
     <permission-group android:name="android.permission-group.SCREENLOCK"
-        android:label="@string/permgrouplab_storage"
+        android:label="@string/permgrouplab_screenlock"
         android:icon="@drawable/perm_group_screenlock"
         android:permissionGroupFlags="personalInfo"
-        android:description="@string/permgroupdesc_storage"
+        android:description="@string/permgroupdesc_screenlock"
         android:priority="230" />
 
     <!-- Allows applications to disable the keyguard -->
