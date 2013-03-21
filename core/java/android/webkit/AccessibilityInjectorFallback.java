@@ -438,7 +438,6 @@ class AccessibilityInjectorFallback {
             event.setFromIndex(0);
             event.setToIndex(selection.length());
             sendAccessibilityEvent(event);
-            event.recycle();
         }
     }
 
