@@ -287,9 +287,9 @@ public class KeyStore {
         }
     }
 
-    public boolean migrate(String key, int uid) {
+    public boolean duplicate(String srcKey, int srcUid, String destKey, int destUid) {
         try {
-            return mBinder.migrate(key, uid) == NO_ERROR;
+            return mBinder.duplicate(srcKey, srcUid, destKey, destUid) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;

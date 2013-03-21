@@ -407,15 +407,18 @@ public interface IKeystoreService extends IInterface {
             }
 
             @Override
-            public int migrate(String name, int targetUid) throws RemoteException {
+            public int duplicate(String srcKey, int srcUid, String destKey, int destUid)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeString(name);
-                    _data.writeInt(targetUid);
-                    mRemote.transact(Stub.TRANSACTION_migrate, _data, _reply, 0);
+                    _data.writeString(srcKey);
+                    _data.writeInt(srcUid);
+                    _data.writeString(destKey);
+                    _data.writeInt(destUid);
+                    mRemote.transact(Stub.TRANSACTION_duplicate, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
                 } finally {
@@ -448,7 +451,7 @@ public interface IKeystoreService extends IInterface {
         static final int TRANSACTION_grant = IBinder.FIRST_CALL_TRANSACTION + 17;
         static final int TRANSACTION_ungrant = IBinder.FIRST_CALL_TRANSACTION + 18;
         static final int TRANSACTION_getmtime = IBinder.FIRST_CALL_TRANSACTION + 19;
-        static final int TRANSACTION_migrate = IBinder.FIRST_CALL_TRANSACTION + 20;
+        static final int TRANSACTION_duplicate = IBinder.FIRST_CALL_TRANSACTION + 20;
 
         /**
          * Cast an IBinder object into an IKeystoreService interface, generating
@@ -534,5 +537,6 @@ public interface IKeystoreService extends IInterface {
 
     public long getmtime(String name) throws RemoteException;
 
-    public int migrate(String name, int targetUid) throws RemoteException;
+    public int duplicate(String srcKey, int srcUid, String destKey, int destUid)
+            throws RemoteException;
 }
