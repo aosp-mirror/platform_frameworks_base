@@ -112,7 +112,10 @@ static const Blender gBlendsSwap[] = {
 
 OpenGLRenderer::OpenGLRenderer():
         mCaches(Caches::getInstance()), mExtensions(Extensions::getInstance()) {
-    resetDrawModifiers();
+    mDrawModifiers.mShader = NULL;
+    mDrawModifiers.mColorFilter = NULL;
+    mDrawModifiers.mHasShadow = false;
+    mDrawModifiers.mHasDrawFilter = false;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
@@ -643,6 +646,63 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
     return count;
 }
 
+void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool fboLayer) {
+    const Rect untransformedBounds(bounds);
+
+    currentTransform().mapRect(bounds);
+
+    // Layers only make sense if they are in the framebuffer's bounds
+    if (bounds.intersect(*mSnapshot->clipRect)) {
+        // We cannot work with sub-pixels in this case
+        bounds.snapToPixelBoundaries();
+
+        // When the layer is not an FBO, we may use glCopyTexImage so we
+        // need to make sure the layer does not extend outside the bounds
+        // of the framebuffer
+        if (!bounds.intersect(mSnapshot->previous->viewport)) {
+            bounds.setEmpty();
+        } else if (fboLayer) {
+            clip.set(bounds);
+            mat4 inverse;
+            inverse.loadInverse(currentTransform());
+            inverse.mapRect(clip);
+            clip.snapToPixelBoundaries();
+            if (clip.intersect(untransformedBounds)) {
+                clip.translate(-untransformedBounds.left, -untransformedBounds.top);
+                bounds.set(untransformedBounds);
+            } else {
+                clip.setEmpty();
+            }
+        }
+    } else {
+        bounds.setEmpty();
+    }
+}
+
+int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float bottom,
+        int alpha, SkXfermode::Mode mode, int flags) {
+    const GLuint previousFbo = mSnapshot->fbo;
+    const int count = saveSnapshot(flags);
+
+    if (!mSnapshot->isIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
+        // initialize the snapshot as though it almost represents an FBO layer so deferred draw
+        // operations will be able to store and restore the current clip and transform info, and
+        // quick rejection will be correct (for display lists)
+
+        Rect bounds(left, top, right, bottom);
+        Rect clip;
+        calculateLayerBoundsAndClip(bounds, clip, true);
+
+        if (!bounds.isEmpty() && !clip.isEmpty()) {
+            mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
+            mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
+        }
+    }
+
+    return count;
+}
+
+
 /**
  * Layers are viewed by Skia are slightly different than layers in image editing
  * programs (for instance.) When a layer is created, previously created layers
@@ -704,35 +764,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     // Window coordinates of the layer
     Rect clip;
     Rect bounds(left, top, right, bottom);
-    Rect untransformedBounds(bounds);
-    currentTransform().mapRect(bounds);
-
-    // Layers only make sense if they are in the framebuffer's bounds
-    if (bounds.intersect(*mSnapshot->clipRect)) {
-        // We cannot work with sub-pixels in this case
-        bounds.snapToPixelBoundaries();
-
-        // When the layer is not an FBO, we may use glCopyTexImage so we
-        // need to make sure the layer does not extend outside the bounds
-        // of the framebuffer
-        if (!bounds.intersect(mSnapshot->previous->viewport)) {
-            bounds.setEmpty();
-        } else if (fboLayer) {
-            clip.set(bounds);
-            mat4 inverse;
-            inverse.loadInverse(currentTransform());
-            inverse.mapRect(clip);
-            clip.snapToPixelBoundaries();
-            if (clip.intersect(untransformedBounds)) {
-                clip.translate(-left, -top);
-                bounds.set(untransformedBounds);
-            } else {
-                clip.setEmpty();
-            }
-        }
-    } else {
-        bounds.setEmpty();
-    }
+    calculateLayerBoundsAndClip(bounds, clip, fboLayer);
 
     if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
             bounds.getHeight() > mCaches.maxTextureSize ||
@@ -1201,13 +1233,6 @@ void OpenGLRenderer::clearLayerRegions() {
 // State Deferral
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::resetDrawModifiers() {
-    mDrawModifiers.mShader = NULL;
-    mDrawModifiers.mColorFilter = NULL;
-    mDrawModifiers.mHasShadow = false;
-    mDrawModifiers.mHasDrawFilter = false;
-}
-
 bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDeferFlags) {
     const Rect& currentClip = *(mSnapshot->clipRect);
     const mat4& currentMatrix = *(mSnapshot->transform);
@@ -1246,7 +1271,7 @@ void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, int 
         mSnapshot->alpha = state.mAlpha;
     }
 
-    if (!state.mClip.isEmpty()) { //stateDeferFlags & kStateDeferFlag_Clip) {
+    if (!state.mClip.isEmpty()) {
         mSnapshot->setClip(state.mClip.left, state.mClip.top, state.mClip.right, state.mClip.bottom);
         dirtyClip();
     }
@@ -1805,7 +1830,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
-        if (true || CC_UNLIKELY(mCaches.drawDeferDisabled)) { // NOTE: temporary workaround
+        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
             displayList->replay(replayStruct, 0);
             return replayStruct.mDrawGlStatus;
