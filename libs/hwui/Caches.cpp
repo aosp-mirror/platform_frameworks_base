@@ -310,6 +310,7 @@ void Caches::flush(FlushMode mode) {
             fontRenderer->flush();
             textureCache.flush();
             pathCache.clear();
+            tasks.stop();
             // fall through
         case kFlushMode_Layers:
             layerCache.clear();

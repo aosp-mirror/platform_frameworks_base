@@ -26,6 +26,7 @@
 #include "Debug.h"
 #include "Properties.h"
 #include "Texture.h"
+#include "utils/Pair.h"
 
 class SkBitmap;
 class SkCanvas;
@@ -215,10 +216,6 @@ public:
     PathTexture* get(SkPath* path, SkPaint* paint);
 
     /**
-     * Removes an entry.
-     */
-    void remove(SkPath* path);
-    /**
      * Removes the specified path. This is meant to be called from threads
      * that are not the EGL context thread.
      */
@@ -251,6 +248,8 @@ public:
             float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
 
 private:
+    typedef Pair<SkPath*, SkPath*> path_pair_t;
+
     PathTexture* addTexture(const PathDescription& entry,
             const SkPath *path, const SkPaint* paint);
     PathTexture* addTexture(const PathDescription& entry, SkBitmap* bitmap);
@@ -259,6 +258,12 @@ private:
     PathTexture* get(const PathDescription& entry) {
         return mCache.get(entry);
     }
+
+    /**
+     * Removes an entry.
+     * The pair must define first=path, second=sourcePath
+     */
+    void remove(const path_pair_t& pair);
 
     /**
      * Ensures there is enough space in the cache for a texture of the specified
@@ -318,7 +323,8 @@ private:
     bool mDebugEnabled;
 
     sp<PathProcessor> mProcessor;
-    Vector<SkPath*> mGarbage;
+
+    Vector<path_pair_t> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache
 
