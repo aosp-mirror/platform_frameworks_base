@@ -205,6 +205,9 @@ public:
     virtual int saveLayer(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags);
 
+    int saveLayerDeferred(float left, float top, float right, float bottom,
+            int alpha, SkXfermode::Mode mode, int flags);
+
     virtual void translate(float dx, float dy);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
@@ -273,9 +276,11 @@ public:
 
     SkPaint* filterPaint(SkPaint* paint);
 
-    void resetDrawModifiers();
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
     void restoreDisplayState(const DeferredDisplayState& state, int stateDeferFlags);
+
+    const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
+    void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
 
     // TODO: what does this mean? no perspective? no rotate?
     ANDROID_API bool isCurrentTransformSimple() {
@@ -536,6 +541,11 @@ private:
      * Performs a quick reject but adjust the bounds to account for stroke width if necessary
      */
     bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
+
+    /**
+     * given the local bounds of the layer, calculates ...
+     */
+    void calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool fboLayer);
 
     /**
      * Creates a new layer stored in the specified snapshot.

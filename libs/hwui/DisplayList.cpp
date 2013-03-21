@@ -443,7 +443,7 @@ public:
         : mReplayStruct(replayStruct), mLevel(level) {}
     inline void operator()(DisplayListOp* operation, int saveCount) {
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
-        replayStruct.mRenderer.eventMark(operation->name());
+        mReplayStruct.mRenderer.eventMark(operation->name());
 #endif
         operation->replay(mReplayStruct, saveCount, mLevel);
     }
