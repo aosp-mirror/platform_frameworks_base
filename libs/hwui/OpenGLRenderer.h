@@ -85,6 +85,7 @@ struct DeferredDisplayState {
 ///////////////////////////////////////////////////////////////////////////////
 
 class DisplayList;
+class TextSetupFunctor;
 class VertexBuffer;
 
 /**
@@ -995,6 +996,7 @@ private:
     String8 mName;
 
     friend class DisplayListRenderer;
+    friend class TextSetupFunctor;
 
 }; // class OpenGLRenderer
 

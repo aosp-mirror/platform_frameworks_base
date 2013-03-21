@@ -1752,7 +1752,7 @@ void OpenGLRenderer::setupDrawSimpleMesh() {
 }
 
 void OpenGLRenderer::setupDrawTexture(GLuint texture) {
-    bindTexture(texture);
+    if (texture) bindTexture(texture);
     mTextureUnit++;
     mCaches.enableTexCoordsVertexArray();
 }
@@ -2411,7 +2411,8 @@ status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* tex
 
 status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2436,7 +2437,8 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
 
 status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) {
     if (mSnapshot->isIgnored() || quickRejectPreStroke(x - radius, y - radius,
-            x + radius, y + radius, p)) {
+            x + radius, y + radius, p) ||
+            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
     if (p->getPathEffect() != 0) {
@@ -2456,7 +2458,8 @@ status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) 
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
         SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2477,7 +2480,8 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2513,7 +2517,8 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
 #define SkPaintDefaults_MiterLimit SkIntToScalar(4)
 
 status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2589,6 +2594,48 @@ bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
     return alpha == 0.0f && getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
 }
 
+class TextSetupFunctor: public Functor {
+public:
+    TextSetupFunctor(OpenGLRenderer& renderer, float x, float y, bool pureTranslate,
+            int alpha, SkXfermode::Mode mode, SkPaint* paint): Functor(),
+            renderer(renderer), x(x), y(y), pureTranslate(pureTranslate),
+            alpha(alpha), mode(mode), paint(paint) {
+    }
+    ~TextSetupFunctor() { }
+
+    status_t operator ()(int what, void* data) {
+        renderer.setupDraw();
+        renderer.setupDrawTextGamma(paint);
+        renderer.setupDrawDirtyRegionsDisabled();
+        renderer.setupDrawWithTexture(true);
+        renderer.setupDrawAlpha8Color(paint->getColor(), alpha);
+        renderer.setupDrawColorFilter();
+        renderer.setupDrawShader();
+        renderer.setupDrawBlending(true, mode);
+        renderer.setupDrawProgram();
+        renderer.setupDrawModelView(x, y, x, y, pureTranslate, true);
+        // Calling setupDrawTexture with the name 0 will enable the
+        // uv attributes and increase the texture unit count
+        // texture binding will be performed by the font renderer as
+        // needed
+        renderer.setupDrawTexture(0);
+        renderer.setupDrawPureColorUniforms();
+        renderer.setupDrawColorFilterUniforms();
+        renderer.setupDrawShaderUniforms(pureTranslate);
+        renderer.setupDrawTextGammaUniforms();
+
+        return NO_ERROR;
+    }
+
+    OpenGLRenderer& renderer;
+    float x;
+    float y;
+    bool pureTranslate;
+    int alpha;
+    SkXfermode::Mode mode;
+    SkPaint* paint;
+};
+
 status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
@@ -2625,31 +2672,16 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     if (pureTranslate && !linearFilter) {
         linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
     }
-
-    mCaches.activeTexture(0);
-    setupDraw();
-    setupDrawTextGamma(paint);
-    setupDrawDirtyRegionsDisabled();
-    setupDrawWithTexture(true);
-    setupDrawAlpha8Color(paint->getColor(), alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(true, mode);
-    setupDrawProgram();
-    setupDrawModelView(x, y, x, y, pureTranslate, true);
-    setupDrawTexture(fontRenderer.getTexture(linearFilter));
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms(pureTranslate);
-    setupDrawTextGammaUniforms();
+    fontRenderer.setTextureFiltering(linearFilter);
 
     const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     const bool hasActiveLayer = hasLayer();
 
+    TextSetupFunctor functor(*this, x, y, pureTranslate, alpha, mode, paint);
     if (fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
-            positions, hasActiveLayer ? &bounds : NULL)) {
+            positions, hasActiveLayer ? &bounds : NULL, &functor)) {
         if (hasActiveLayer) {
             if (!pureTranslate) {
                 currentTransform().mapRect(bounds);
@@ -2742,40 +2774,22 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     // Pick the appropriate texture filtering
     bool linearFilter = !pureTranslate || fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
-
-    // The font renderer will always use texture unit 0
-    mCaches.activeTexture(0);
-    setupDraw();
-    setupDrawTextGamma(paint);
-    setupDrawDirtyRegionsDisabled();
-    setupDrawWithTexture(true);
-    setupDrawAlpha8Color(paint->getColor(), alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(true, mode);
-    setupDrawProgram();
-    setupDrawModelView(x, y, x, y, pureTranslate, true);
-    // See comment above; the font renderer must use texture unit 0
-    // assert(mTextureUnit == 0)
-    setupDrawTexture(fontRenderer.getTexture(linearFilter));
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms(pureTranslate);
-    setupDrawTextGammaUniforms();
+    fontRenderer.setTextureFiltering(linearFilter);
 
     // TODO: Implement better clipping for scaled/rotated text
     const Rect* clip = !pureTranslate ? NULL : mSnapshot->clipRect;
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;
+    TextSetupFunctor functor(*this, x, y, pureTranslate, alpha, mode, paint);
     if (CC_UNLIKELY(paint->getTextAlign() != SkPaint::kLeft_Align)) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
         status = fontRenderer.renderPosText(&paintCopy, clip, text, 0, bytesCount, count, x, y,
-                positions, hasActiveLayer ? &bounds : NULL);
+                positions, hasActiveLayer ? &bounds : NULL, &functor);
     } else {
         status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
-                positions, hasActiveLayer ? &bounds : NULL);
+                positions, hasActiveLayer ? &bounds : NULL, &functor);
     }
 
     if (status && hasActiveLayer) {
@@ -2798,12 +2812,12 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
     fontRenderer.setFont(paint, mat4::identity());
+    fontRenderer.setTextureFiltering(true);
 
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    mCaches.activeTexture(0);
     setupDraw();
     setupDrawTextGamma(paint);
     setupDrawDirtyRegionsDisabled();
@@ -2814,7 +2828,11 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     setupDrawBlending(true, mode);
     setupDrawProgram();
     setupDrawModelView(0.0f, 0.0f, 0.0f, 0.0f, false, true);
-    setupDrawTexture(fontRenderer.getTexture(true));
+    // Calling setupDrawTexture with the name 0 will enable the
+    // uv attributes and increase the texture unit count
+    // texture binding will be performed by the font renderer as
+    // needed
+    setupDrawTexture(0);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderUniforms(false);
