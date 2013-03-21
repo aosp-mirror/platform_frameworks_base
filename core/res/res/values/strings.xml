@@ -2984,6 +2984,15 @@
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
     <string name="low_internal_storage_view_text">Some system functions may not work</string>
 
+    <!-- [CHAR LIMIT=NONE] Stub notification title for an app running a service that has provided
+         a bad bad notification for itself. -->
+    <string name="app_running_notification_title"><xliff:g id="app_name">%1$s</xliff:g>
+        running</string>
+    <!-- [CHAR LIMIT=NONE] Stub notification text for an app running a service that has provided
+         a bad bad notification for itself. -->
+    <string name="app_running_notification_text"><xliff:g id="app_name">%1$s</xliff:g>
+        is currently running</string>
+
     <!-- Preference framework strings. -->
     <string name="ok">OK</string>
     <!-- Preference framework strings. -->
