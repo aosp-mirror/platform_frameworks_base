@@ -42,6 +42,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -70,10 +72,14 @@ import android.view.KeyEvent;
 import android.view.VolumePanel;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
@@ -197,28 +203,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /* Sound effect file names  */
     private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
-    private static final String[] SOUND_EFFECT_FILES = new String[] {
-        "Effect_Tick.ogg",
-        "KeypressStandard.ogg",
-        "KeypressSpacebar.ogg",
-        "KeypressDelete.ogg",
-        "KeypressReturn.ogg"
-    };
+    private static final List<String> SOUND_EFFECT_FILES = new ArrayList<String>();
 
     /* Sound effect file name mapping sound effect id (AudioManager.FX_xxx) to
      * file index in SOUND_EFFECT_FILES[] (first column) and indicating if effect
      * uses soundpool (second column) */
-    private final int[][] SOUND_EFFECT_FILES_MAP = new int[][] {
-        {0, -1},  // FX_KEY_CLICK
-        {0, -1},  // FX_FOCUS_NAVIGATION_UP
-        {0, -1},  // FX_FOCUS_NAVIGATION_DOWN
-        {0, -1},  // FX_FOCUS_NAVIGATION_LEFT
-        {0, -1},  // FX_FOCUS_NAVIGATION_RIGHT
-        {1, -1},  // FX_KEYPRESS_STANDARD
-        {2, -1},  // FX_KEYPRESS_SPACEBAR
-        {3, -1},  // FX_FOCUS_DELETE
-        {4, -1}   // FX_FOCUS_RETURN
-    };
+    private final int[][] SOUND_EFFECT_FILES_MAP = new int[AudioManager.NUM_SOUND_EFFECTS][2];
 
    /** @hide Maximum volume index values for audio streams */
     private final int[] MAX_STREAM_VOLUME = new int[] {
@@ -1634,6 +1624,99 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return mMode;
     }
 
+    //==========================================================================================
+    // Sound Effects
+    //==========================================================================================
+
+    private static final String TAG_AUDIO_ASSETS = "audio_assets";
+    private static final String ATTR_VERSION = "version";
+    private static final String TAG_GROUP = "group";
+    private static final String ATTR_GROUP_NAME = "name";
+    private static final String TAG_ASSET = "asset";
+    private static final String ATTR_ASSET_ID = "id";
+    private static final String ATTR_ASSET_FILE = "file";
+
+    private static final String ASSET_FILE_VERSION = "1.0";
+    private static final String GROUP_TOUCH_SOUNDS = "touch_sounds";
+
+    private void loadTouchSoundAssetDefaults() {
+        SOUND_EFFECT_FILES.add("Effect_Tick.ogg");
+        for (int i = 0; i < AudioManager.NUM_SOUND_EFFECTS; i++) {
+            SOUND_EFFECT_FILES_MAP[i][0] = 0;
+            SOUND_EFFECT_FILES_MAP[i][1] = -1;
+        }
+    }
+
+    private void loadTouchSoundAssets() {
+        XmlResourceParser parser = null;
+
+        loadTouchSoundAssetDefaults();
+
+        try {
+            parser = mContext.getResources().getXml(com.android.internal.R.xml.audio_assets);
+
+            XmlUtils.beginDocument(parser, TAG_AUDIO_ASSETS);
+            String version = parser.getAttributeValue(null, ATTR_VERSION);
+            boolean inTouchSoundsGroup = false;
+
+            if (ASSET_FILE_VERSION.equals(version)) {
+                while (true) {
+                    XmlUtils.nextElement(parser);
+                    String element = parser.getName();
+                    if (element == null) {
+                        break;
+                    }
+                    if (element.equals(TAG_GROUP)) {
+                        String name = parser.getAttributeValue(null, ATTR_GROUP_NAME);
+                        if (GROUP_TOUCH_SOUNDS.equals(name)) {
+                            inTouchSoundsGroup = true;
+                            break;
+                        }
+                    }
+                }
+                while (inTouchSoundsGroup) {
+                    XmlUtils.nextElement(parser);
+                    String element = parser.getName();
+                    if (element == null) {
+                        break;
+                    }
+                    if (element.equals(TAG_ASSET)) {
+                        String id = parser.getAttributeValue(null, ATTR_ASSET_ID);
+                        String file = parser.getAttributeValue(null, ATTR_ASSET_FILE);
+                        int fx;
+
+                        try {
+                            Field field = AudioManager.class.getField(id);
+                            fx = field.getInt(null);
+                        } catch (Exception e) {
+                            Log.w(TAG, "Invalid touch sound ID: "+id);
+                            continue;
+                        }
+
+                        int i = SOUND_EFFECT_FILES.indexOf(file);
+                        if (i == -1) {
+                            i = SOUND_EFFECT_FILES.size();
+                            SOUND_EFFECT_FILES.add(file);
+                        }
+                        SOUND_EFFECT_FILES_MAP[fx][0] = i;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.w(TAG, "audio assets file not found", e);
+        } catch (XmlPullParserException e) {
+            Log.w(TAG, "XML parser exception reading touch sound assets", e);
+        } catch (IOException e) {
+            Log.w(TAG, "I/O exception reading touch sound assets", e);
+        } finally {
+            if (parser != null) {
+                parser.close();
+            }
+        }
+    }
+
     /** @see AudioManager#playSoundEffect(int) */
     public void playSoundEffect(int effectType) {
         sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SENDMSG_NOOP,
@@ -1653,6 +1736,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      */
     public boolean loadSoundEffects() {
         int status;
+
+        loadTouchSoundAssets();
 
         synchronized (mSoundEffectsLock) {
             if (!mBootCompleted) {
@@ -1692,8 +1777,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
              * Once loaded, the value in poolId is the sample ID and the same
              * sample can be reused for another effect using the same file.
              */
-            int[] poolId = new int[SOUND_EFFECT_FILES.length];
-            for (int fileIdx = 0; fileIdx < SOUND_EFFECT_FILES.length; fileIdx++) {
+            int[] poolId = new int[SOUND_EFFECT_FILES.size()];
+            for (int fileIdx = 0; fileIdx < SOUND_EFFECT_FILES.size(); fileIdx++) {
                 poolId[fileIdx] = -1;
             }
             /*
@@ -1711,7 +1796,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 if (poolId[SOUND_EFFECT_FILES_MAP[effect][0]] == -1) {
                     String filePath = Environment.getRootDirectory()
                             + SOUND_EFFECTS_PATH
-                            + SOUND_EFFECT_FILES[SOUND_EFFECT_FILES_MAP[effect][0]];
+                            + SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effect][0]);
                     int sampleId = mSoundPool.load(filePath, 0);
                     if (sampleId <= 0) {
                         Log.w(TAG, "Soundpool could not load file: "+filePath);
@@ -1776,8 +1861,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mAudioHandler.removeMessages(MSG_LOAD_SOUND_EFFECTS);
             mAudioHandler.removeMessages(MSG_PLAY_SOUND_EFFECT);
 
-            int[] poolId = new int[SOUND_EFFECT_FILES.length];
-            for (int fileIdx = 0; fileIdx < SOUND_EFFECT_FILES.length; fileIdx++) {
+            int[] poolId = new int[SOUND_EFFECT_FILES.size()];
+            for (int fileIdx = 0; fileIdx < SOUND_EFFECT_FILES.size(); fileIdx++) {
                 poolId[fileIdx] = 0;
             }
 
@@ -3279,7 +3364,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 } else {
                     MediaPlayer mediaPlayer = new MediaPlayer();
                     try {
-                        String filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH + SOUND_EFFECT_FILES[SOUND_EFFECT_FILES_MAP[effectType][0]];
+                        String filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH +
+                                    SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effectType][0]);
                         mediaPlayer.setDataSource(filePath);
                         mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
                         mediaPlayer.prepare();
