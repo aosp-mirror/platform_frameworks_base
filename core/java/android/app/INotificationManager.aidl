@@ -41,7 +41,7 @@ interface INotificationManager
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
 
-    void registerListener(in INotificationListener listener, int userid);
+    void registerListener(in INotificationListener listener, String pkg, int userid);
     void unregisterListener(in INotificationListener listener, int userid);
 }
 
