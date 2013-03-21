@@ -396,6 +396,18 @@ public final class WifiService extends IWifiManager.Stub {
 
         long ident = Binder.clearCallingIdentity();
         try {
+
+            /* Turning off Wi-Fi when scans are still available */
+            if (!enable && isScanningAlwaysAvailable()) {
+                /* This can be changed by user in the app to not be notified again */
+                boolean notifyUser = (Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.WIFI_NOTIFY_SCAN_ALWAYS_AVAILABLE, 1) == 1);
+                if (notifyUser) {
+                    Intent intent = new Intent(WifiManager.ACTION_NOTIFY_SCAN_ALWAYS_AVAILABLE);
+                    mContext.startActivityAsUser(intent, null, UserHandle.CURRENT);
+                }
+            }
+
             if (! mSettingsStore.handleWifiToggled(enable)) {
                 // Nothing to do if wifi cannot be toggled
                 return true;
