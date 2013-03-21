@@ -23,14 +23,21 @@ import com.google.common.util.concurrent.AbstractFuture;
  * {@link com.google.common.util.concurrent.AbstractFuture#set(Object)} method internally. It
  * also exposes the protected {@link AbstractFuture#setException(Throwable)} method.
  */
-public class FutureWaiter extends AbstractFuture<Void> {
+public class FutureWaiter extends AbstractFuture<Boolean> {
 
     /**
      * Release the Future currently waiting on
      * {@link com.google.common.util.concurrent.AbstractFuture#get()}.
      */
     public void release() {
-        super.set(null);
+        super.set(true);
+    }
+
+    /**
+     * Used to indicate failure (when the result value is false).
+     */
+    public void set(boolean result) {
+        super.set(result);
     }
 
     @Override
