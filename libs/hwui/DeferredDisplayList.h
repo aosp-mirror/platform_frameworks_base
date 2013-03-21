@@ -72,7 +72,7 @@ public:
     void addDrawOp(OpenGLRenderer& renderer, DrawOp* op);
 
 private:
-    /*
+    /**
      * Resets the batching back-pointers, creating a barrier in the operation stream so that no ops
      * added in the future will be inserted into a batch that already exist.
      */
@@ -88,9 +88,10 @@ private:
     int getStateOpDeferFlags() const;
     int getDrawOpDeferFlags() const;
 
-    /*
-     *
-     * at defer time, stores the savecount of save/saveLayer ops that were 
+    /**
+     * At defer time, stores the *defer time* savecount of save/saveLayer ops that were deferred, so
+     * that when an associated restoreToCount is deferred, it can be recorded as a
+     * RestoreToCountBatch
      */
     Vector<int> mSaveStack;
     int mComplexClipStackStart;

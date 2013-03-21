@@ -78,7 +78,7 @@ public:
             renderer.restoreDisplayState(op->state, kStateDeferFlag_Draw);
 
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
-            renderer.eventMark(strlen(op->name()), op->name());
+            renderer.eventMark(op->name());
 #endif
             status |= op->applyDraw(renderer, dirty, 0);
             logBuffer.writeCommand(0, op->name());
@@ -134,7 +134,6 @@ public:
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty) {
         DEFER_LOGD("batch %p restoring to count %d", this, mRestoreCount);
         renderer.restoreToCount(mRestoreCount);
-
         return DrawGlInfo::kStatusDone;
     }
 
@@ -373,9 +372,10 @@ status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     DEFER_LOGD("--flushing");
     renderer.eventMark("Flush");
 
+    DrawModifiers restoreDrawModifiers = renderer.getDrawModifiers();
     renderer.restoreToCount(1);
     status |= replayBatchList(mBatches, renderer, dirty);
-    renderer.resetDrawModifiers();
+    renderer.setDrawModifiers(restoreDrawModifiers);
 
     DEFER_LOGD("--flush complete, returning %x", status);
 

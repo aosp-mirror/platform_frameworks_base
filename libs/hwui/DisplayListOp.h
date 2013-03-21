@@ -284,8 +284,13 @@ public:
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
         // NOTE: don't bother with actual saveLayer, instead issuing it at flush time
-        int newSaveCount = deferStruct.mRenderer.save(mFlags);
+        int newSaveCount = deferStruct.mRenderer.getSaveCount();
         deferStruct.mDeferredList.addSaveLayer(deferStruct.mRenderer, this, newSaveCount);
+
+        // NOTE: don't issue full saveLayer, since that has side effects/is costly. instead just
+        // setup the snapshot for deferral, and re-issue the op at flush time
+        deferStruct.mRenderer.saveLayerDeferred(mArea.left, mArea.top, mArea.right, mArea.bottom,
+                mAlpha, mMode, mFlags);
     }
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
