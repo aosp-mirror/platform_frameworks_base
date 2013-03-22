@@ -338,8 +338,8 @@ public class AppWidgetHost {
      */
     public final AppWidgetHostView createView(Context context, int appWidgetId,
             AppWidgetProviderInfo appWidget) {
-        final int userId = context.getUserId();
-        AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
+        final int userId = mContext.getUserId();
+        AppWidgetHostView view = onCreateView(mContext, appWidgetId, appWidget);
         view.setUserId(userId);
         view.setOnClickHandler(mOnClickHandler);
         view.setAppWidget(appWidgetId, appWidget);
