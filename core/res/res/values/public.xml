@@ -2033,14 +2033,8 @@
      =============================================================== -->
   <eat-comment />
 
-  <public type="attr" name="mipMap" id="0x010103cd" />
-  <public type="attr" name="mirrorForRtl" id="0x010103ce" />
-
-    <!-- ===============================================================
-         Resources added in version 19 of the platform
-         =============================================================== -->
-      <eat-comment />
-
+  <public type="attr" name="mipMap" />
+  <public type="attr" name="mirrorForRtl" />
   <public type="attr" name="windowOverscan" />
   <public type="attr" name="requiredForAllUsers" />
   <public type="style" name="Theme.NoTitleBar.Overscan" />
