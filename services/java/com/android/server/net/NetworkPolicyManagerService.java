@@ -63,13 +63,13 @@ import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.XmlUtils.readBooleanAttribute;
+import static com.android.internal.util.XmlUtils.readIntAttribute;
+import static com.android.internal.util.XmlUtils.readLongAttribute;
+import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
+import static com.android.internal.util.XmlUtils.writeIntAttribute;
+import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readBooleanAttribute;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readIntAttribute;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readLongAttribute;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeBooleanAttribute;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeIntAttribute;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeLongAttribute;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -149,7 +149,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.ProtocolException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2087,45 +2086,5 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (i < size - 1) fout.print(",");
         }
         fout.print("]");
-    }
-
-    public static class XmlUtils {
-        public static int readIntAttribute(XmlPullParser in, String name) throws IOException {
-            final String value = in.getAttributeValue(null, name);
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                throw new ProtocolException("problem parsing " + name + "=" + value + " as int");
-            }
-        }
-
-        public static void writeIntAttribute(XmlSerializer out, String name, int value)
-                throws IOException {
-            out.attribute(null, name, Integer.toString(value));
-        }
-
-        public static long readLongAttribute(XmlPullParser in, String name) throws IOException {
-            final String value = in.getAttributeValue(null, name);
-            try {
-                return Long.parseLong(value);
-            } catch (NumberFormatException e) {
-                throw new ProtocolException("problem parsing " + name + "=" + value + " as long");
-            }
-        }
-
-        public static void writeLongAttribute(XmlSerializer out, String name, long value)
-                throws IOException {
-            out.attribute(null, name, Long.toString(value));
-        }
-
-        public static boolean readBooleanAttribute(XmlPullParser in, String name) {
-            final String value = in.getAttributeValue(null, name);
-            return Boolean.parseBoolean(value);
-        }
-
-        public static void writeBooleanAttribute(XmlSerializer out, String name, boolean value)
-                throws IOException {
-            out.attribute(null, name, Boolean.toString(value));
-        }
     }
 }
