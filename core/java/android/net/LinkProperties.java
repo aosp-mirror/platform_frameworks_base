@@ -121,7 +121,7 @@ public class LinkProperties implements Parcelable {
 
     public Collection<String> getAllInterfaceNames() {
         Collection interfaceNames = new ArrayList<String>(mStackedLinks.size() + 1);
-        interfaceNames.add(new String(mIfaceName));
+        if (mIfaceName != null) interfaceNames.add(new String(mIfaceName));
         for (LinkProperties stacked: mStackedLinks.values()) {
             interfaceNames.addAll(stacked.getAllInterfaceNames());
         }
