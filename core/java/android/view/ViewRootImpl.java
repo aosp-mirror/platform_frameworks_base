@@ -107,6 +107,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_FPS = false;
+    private static final boolean DEBUG_INPUT_PROCESSING = false || LOCAL_LOGV;
 
     private static final boolean USE_RENDER_THREAD = false;
 
@@ -231,24 +232,38 @@ public final class ViewRootImpl implements ViewParent,
     int mClientWindowLayoutFlags;
     boolean mLastOverscanRequested;
 
-    /** @hide */
+     /** Event was not handled and is finished.
+      * @hide */
     public static final int EVENT_NOT_HANDLED = 0;
-    /** @hide */
+     /** Event was handled and is finished.
+      * @hide */
     public static final int EVENT_HANDLED = 1;
-    /** @hide */
-    public static final int EVENT_IN_PROGRESS = 2;
+    /** Event is waiting on the IME.
+     * @hide */
+    public static final int EVENT_PENDING_IME = 2;
+    /** Event requires post-IME dispatch.
+     * @hide */
+    public static final int EVENT_POST_IME = 3;
 
     // Pool of queued input events.
     private static final int MAX_QUEUED_INPUT_EVENT_POOL_SIZE = 10;
     private QueuedInputEvent mQueuedInputEventPool;
     private int mQueuedInputEventPoolSize;
 
-    // Input event queue.
-    QueuedInputEvent mFirstPendingInputEvent;
+    /* Input event queue.
+     * Pending input events are input events waiting to be handled by the application. Current
+     * input events are input events which are being handled but are waiting on some action by the
+     * IME, even if they themselves may not need to be handled by the IME.
+     */
+    QueuedInputEvent mPendingInputEventHead;
+    QueuedInputEvent mPendingInputEventTail;
     int mPendingInputEventCount;
-    QueuedInputEvent mCurrentInputEvent;
+    QueuedInputEvent mCurrentInputEventHead;
+    QueuedInputEvent mCurrentInputEventTail;
+    int mCurrentInputEventCount;
     boolean mProcessInputEventsScheduled;
     String mPendingInputEventQueueLengthCounterName = "pq";
+    String mCurrentInputEventQueueLengthCounterName = "cq";
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -646,6 +661,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 mPendingInputEventQueueLengthCounterName = "pq:" + attrs.getTitle();
+                mCurrentInputEventQueueLengthCounterName = "cq:" + attrs.getTitle();
             }
         }
     }
@@ -3438,17 +3454,13 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_IMF)
                         Log.v(TAG, "Sending trackball event to IME: seq="
                                 + seq + " event=" + event);
-                    int result = imm.dispatchTrackballEvent(mView.getContext(), seq, event,
+                    return imm.dispatchTrackballEvent(mView.getContext(), seq, event,
                             mInputMethodCallback);
-                    if (result != EVENT_NOT_HANDLED) {
-                        return result;
-                    }
                 }
             }
         }
 
-        // Not dispatching to IME, continue with post IME actions.
-        return deliverTrackballEventPostIme(q);
+        return EVENT_POST_IME;
     }
 
     private int deliverTrackballEventPostIme(QueuedInputEvent q) {
@@ -3596,17 +3608,13 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_IMF)
                         Log.v(TAG, "Sending generic motion event to IME: seq="
                                 + seq + " event=" + event);
-                    int result = imm.dispatchGenericMotionEvent(mView.getContext(), seq, event,
+                    return imm.dispatchGenericMotionEvent(mView.getContext(), seq, event,
                             mInputMethodCallback);
-                    if (result != EVENT_NOT_HANDLED) {
-                        return result;
-                    }
                 }
             }
         }
 
-        // Not dispatching to IME, continue with post IME actions.
-        return deliverGenericMotionEventPostIme(q);
+        return EVENT_POST_IME;
     }
 
     private int deliverGenericMotionEventPostIme(QueuedInputEvent q) {
@@ -3811,17 +3819,13 @@ public final class ViewRootImpl implements ViewParent,
                     final int seq = event.getSequenceNumber();
                     if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
                             + seq + " event=" + event);
-                    int result = imm.dispatchKeyEvent(mView.getContext(), seq, event,
+                    return imm.dispatchKeyEvent(mView.getContext(), seq, event,
                             mInputMethodCallback);
-                    if (result != EVENT_NOT_HANDLED) {
-                        return result;
-                    }
                 }
             }
         }
 
-        // Not dispatching to IME, continue with post IME actions.
-        return deliverKeyEventPostIme(q);
+        return EVENT_POST_IME;
     }
 
     private int deliverKeyEventPostIme(QueuedInputEvent q) {
@@ -4422,14 +4426,13 @@ public final class ViewRootImpl implements ViewParent,
         // in response to touch events and we want to ensure that the injected keys
         // are processed in the order they were received and we cannot trust that
         // the time stamp of injected events are monotonic.
-        QueuedInputEvent last = mFirstPendingInputEvent;
+        QueuedInputEvent last = mPendingInputEventTail;
         if (last == null) {
-            mFirstPendingInputEvent = q;
+            mPendingInputEventHead = q;
+            mPendingInputEventTail = q;
         } else {
-            while (last.mNext != null) {
-                last = last.mNext;
-            }
             last.mNext = q;
+            mPendingInputEventTail = q;
         }
         mPendingInputEventCount += 1;
         Trace.traceCounter(Trace.TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
@@ -4452,19 +4455,44 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void doProcessInputEvents() {
-        while (mCurrentInputEvent == null && mFirstPendingInputEvent != null) {
-            QueuedInputEvent q = mFirstPendingInputEvent;
-            mFirstPendingInputEvent = q.mNext;
+        // Handle all of the available pending input events. Currently this will immediately
+        // process all of the events it can until it encounters one that must go through the IME.
+        // After that it will continue adding events to the current input queue but will wait for a
+        // response from the IME, regardless of whether that particular event needs it or not, in
+        // order to guarantee ordering consistency. This could be slightly improved by only
+        // queueing events whose source has previously encountered something that needs to be
+        // handled by the IME, and otherwise handling them immediately since we only need to
+        // guarantee ordering within a given source.
+        while (mPendingInputEventHead != null) {
+            QueuedInputEvent q = mPendingInputEventHead;
+            mPendingInputEventHead = q.mNext;
+            if (mPendingInputEventHead == null) {
+                mPendingInputEventTail = null;
+            }
             q.mNext = null;
-            mCurrentInputEvent = q;
 
             mPendingInputEventCount -= 1;
             Trace.traceCounter(Trace.TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
                     mPendingInputEventCount);
 
-            final int result = deliverInputEvent(q);
-            if (result != EVENT_IN_PROGRESS) {
-                finishCurrentInputEvent(result == EVENT_HANDLED);
+            int result = deliverInputEvent(q);
+
+            if (result == EVENT_HANDLED || result == EVENT_NOT_HANDLED) {
+                finishInputEvent(q, result == EVENT_HANDLED);
+            } else if (result == EVENT_PENDING_IME) {
+                enqueueCurrentInputEvent(q);
+            } else {
+                q.mFlags |= QueuedInputEvent.FLAG_DELIVER_POST_IME;
+                // If the IME decided not to handle this event, and we have no events already being
+                // handled by the IME, go ahead and handle this one and then continue to the next
+                // input event. Otherwise, queue it up and handle it after whatever in front of it
+                // in the queue has been handled.
+                if (mCurrentInputEventHead == null) {
+                    result = deliverInputEventPostIme(q);
+                    finishInputEvent(q, result == EVENT_HANDLED);
+                } else {
+                    enqueueCurrentInputEvent(q);
+                }
             }
         }
 
@@ -4476,9 +4504,36 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private void enqueueCurrentInputEvent(QueuedInputEvent q) {
+        if (mCurrentInputEventHead == null) {
+            mCurrentInputEventHead = q;
+            mCurrentInputEventTail = q;
+        } else {
+            mCurrentInputEventTail.mNext = q;
+            mCurrentInputEventTail = q;
+        }
+        mCurrentInputEventCount += 1;
+        Trace.traceCounter(Trace.TRACE_TAG_INPUT, mCurrentInputEventQueueLengthCounterName,
+                mCurrentInputEventCount);
+    }
+
+    private QueuedInputEvent dequeueCurrentInputEvent() {
+        QueuedInputEvent q = mCurrentInputEventHead;
+        mCurrentInputEventHead = q.mNext;
+        if (mCurrentInputEventHead == null) {
+            mCurrentInputEventTail = null;
+        }
+        q.mNext = null;
+        mCurrentInputEventCount -= 1;
+        Trace.traceCounter(Trace.TRACE_TAG_INPUT, mCurrentInputEventQueueLengthCounterName,
+                mCurrentInputEventCount);
+        return q;
+    }
+
     void handleImeFinishedEvent(int seq, boolean handled) {
-        final QueuedInputEvent q = mCurrentInputEvent;
+        QueuedInputEvent q = mCurrentInputEventHead;
         if (q != null && q.mEvent.getSequenceNumber() == seq) {
+            dequeueCurrentInputEvent();
             if (DEBUG_IMF) {
                 Log.v(TAG, "IME finished event: seq=" + seq
                         + " handled=" + handled + " event=" + q);
@@ -4497,22 +4552,26 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
             }
-            finishCurrentInputEvent(handled);
 
-            // Immediately start processing the next input event.
-            doProcessInputEvents();
+            finishInputEvent(q, handled);
+
+            // Flush all of the input events that are no longer waiting on the IME
+            while (mCurrentInputEventHead != null && (mCurrentInputEventHead.mFlags &
+                        QueuedInputEvent.FLAG_DELIVER_POST_IME) != 0) {
+                q = dequeueCurrentInputEvent();
+                final int result = deliverInputEventPostIme(q);
+                finishInputEvent(q, result == EVENT_HANDLED);
+            }
         } else {
             if (DEBUG_IMF) {
                 Log.v(TAG, "IME finished event: seq=" + seq
                         + " handled=" + handled + ", event not found!");
             }
         }
+
     }
 
-    private void finishCurrentInputEvent(boolean handled) {
-        final QueuedInputEvent q = mCurrentInputEvent;
-        mCurrentInputEvent = null;
-
+    private void finishInputEvent(QueuedInputEvent q, boolean handled) {
         if (q.mReceiver != null) {
             q.mReceiver.finishInputEvent(q.mEvent, handled);
         } else {
