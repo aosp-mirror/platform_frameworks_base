@@ -16,17 +16,14 @@
 
 package com.android.internal.view;
 
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.ResultReceiver;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.IInputSessionCallback;
 
 /**
  * Top-level interface to an input method component (implemented in a
@@ -44,7 +41,7 @@ oneway interface IInputMethod {
 
     void restartInput(in IInputContext inputContext, in EditorInfo attribute);
 
-    void createSession(IInputMethodCallback callback);
+    void createSession(IInputSessionCallback  callback);
 
     void setSessionEnabled(IInputMethodSession session, boolean enabled);
 

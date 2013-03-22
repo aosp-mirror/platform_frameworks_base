@@ -20,8 +20,8 @@ import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
-import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputConnectionWrapper;
 
 import android.content.Context;
@@ -80,8 +80,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
     // NOTE: we should have a cache of these.
     static class InputMethodSessionCallbackWrapper implements InputMethod.SessionCallback {
         final Context mContext;
-        final IInputMethodCallback mCb;
-        InputMethodSessionCallbackWrapper(Context context, IInputMethodCallback cb) {
+        final IInputSessionCallback mCb;
+        InputMethodSessionCallbackWrapper(Context context, IInputSessionCallback cb) {
             mContext = context;
             mCb = cb;
         }
@@ -175,7 +175,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             case DO_CREATE_SESSION: {
                 inputMethod.createSession(new InputMethodSessionCallbackWrapper(
-                        mCaller.mContext, (IInputMethodCallback)msg.obj));
+                        mCaller.mContext, (IInputSessionCallback)msg.obj));
                 return;
             }
             case DO_SET_SESSION_ENABLED:
@@ -249,7 +249,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 inputContext, attribute));
     }
 
-    public void createSession(IInputMethodCallback callback) {
+    public void createSession(IInputSessionCallback callback) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_CREATE_SESSION, callback));
     }
 

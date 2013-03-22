@@ -525,11 +525,6 @@ public final class InputMethodManager {
         public void finishedEvent(int seq, boolean handled) {
             InputMethodManager.this.finishedEvent(seq, handled);
         }
-
-        @Override
-        public void sessionCreated(IInputMethodSession session) {
-            // Stub -- not for use in the client.
-        }
     };
     
     InputMethodManager(IInputMethodManager service, Looper looper) {
