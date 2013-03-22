@@ -79,6 +79,10 @@ public class ArrayUtils
      * @return true if they're equal, false otherwise
      */
     public static boolean equals(byte[] array1, byte[] array2, int length) {
+        if (length < 0) {
+            throw new IllegalArgumentException();
+        }
+
         if (array1 == array2) {
             return true;
         }
