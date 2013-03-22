@@ -2417,6 +2417,34 @@ public class ListView extends AbsListView {
     }
 
     /**
+     * Used by {@link #arrowScrollImpl(int)} to help determine the next selected position
+     * to move to. This can return a position currently not represented by a view on screen
+     * but only in the direction given.
+     *
+     * @param selectedPos Current selected position to move from
+     * @param direction Direction to move in
+     * @return Desired selected position after moving in the given direction
+     */
+    private final int nextSelectedPositionForDirection(int selectedPos, int direction) {
+        int nextSelected;
+        if (direction == View.FOCUS_DOWN) {
+            nextSelected = selectedPos != INVALID_POSITION && selectedPos >= mFirstPosition ?
+                    selectedPos + 1 :
+                    mFirstPosition;
+        } else {
+            final int lastPos = mFirstPosition + getChildCount() - 1;
+            nextSelected = selectedPos != INVALID_POSITION && selectedPos < lastPos?
+                    selectedPos - 1 :
+                    lastPos;
+        }
+
+        if (nextSelected < 0 || nextSelected >= mAdapter.getCount()) {
+            return INVALID_POSITION;
+        }
+        return lookForSelectablePosition(nextSelected, direction == View.FOCUS_DOWN);
+    }
+
+    /**
      * Handle an arrow scroll going up or down.  Take into account whether items are selectable,
      * whether there are focusable items etc.
      *
@@ -2431,9 +2459,7 @@ public class ListView extends AbsListView {
         View selectedView = getSelectedView();
         int selectedPos = mSelectedPosition;
 
-        int nextSelectedPosition = (direction == View.FOCUS_DOWN) ?
-                lookForSelectablePosition(selectedPos + 1, true) :
-                lookForSelectablePosition(selectedPos - 1, false);
+        int nextSelectedPosition = nextSelectedPositionForDirection(selectedPos, direction);
         int amountToScroll = amountToScroll(direction, nextSelectedPosition);
 
         // if we are moving focus, we may OVERRIDE the default behavior
