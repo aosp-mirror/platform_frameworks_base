@@ -15,6 +15,8 @@
  */
 package com.android.tests.applaunch;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManagerNative;
@@ -33,9 +35,11 @@ import android.test.InstrumentationTestRunner;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This test is intended to measure the time it takes for the apps to start.
@@ -52,6 +56,9 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String TAG = AppLaunch.class.getSimpleName();
     private static final String KEY_APPS = "apps";
     private static final String KEY_LAUNCH_ITERATIONS = "launch_iterations";
+    // optional parameter: comma separated list of required account types before proceeding
+    // with the app launch
+    private static final String KEY_REQUIRED_ACCOUNTS = "required_accounts";
     private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 7500; //7.5s to allow app to idle
     private static final int POST_LAUNCH_IDLE_TIMEOUT = 750; //750ms idle for non initial launches
     private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 2000; //2s between launching apps
@@ -63,6 +70,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private IActivityManager mAm;
     private int mLaunchIterations = 10;
     private Bundle mResult = new Bundle();
+    private Set<String> mRequiredAccounts;
 
     public void testMeasureStartUpTime() throws RemoteException, NameNotFoundException {
         InstrumentationTestRunner instrumentation =
@@ -72,6 +80,7 @@ public class AppLaunch extends InstrumentationTestCase {
 
         createMappings();
         parseArgs(args);
+        checkAccountSignIn();
 
         // do initial app launch, without force stopping
         for (String app : mNameToResultKey.keySet()) {
@@ -140,6 +149,13 @@ public class AppLaunch extends InstrumentationTestCase {
             mNameToResultKey.put(parts[0], parts[1]);
             mNameToLaunchTime.put(parts[0], 0L);
         }
+        String requiredAccounts = args.getString(KEY_REQUIRED_ACCOUNTS);
+        if (requiredAccounts != null) {
+            mRequiredAccounts = new HashSet<String>();
+            for (String accountType : requiredAccounts.split(",")) {
+                mRequiredAccounts.add(accountType);
+            }
+        }
     }
 
     private void createMappings() {
@@ -202,6 +218,37 @@ public class AppLaunch extends InstrumentationTestCase {
             return -1;
         }
         return result.thisTime;
+    }
+
+    private void checkAccountSignIn() {
+        // ensure that the device has the required account types before starting test
+        // e.g. device must have a valid Google account sign in to measure a meaningful launch time
+        // for Gmail
+        if (mRequiredAccounts == null || mRequiredAccounts.isEmpty()) {
+            return;
+        }
+        final AccountManager am =
+                (AccountManager) getInstrumentation().getTargetContext().getSystemService(
+                        Context.ACCOUNT_SERVICE);
+        Account[] accounts = am.getAccounts();
+        // use set here in case device has multiple accounts of the same type
+        Set<String> foundAccounts = new HashSet<String>();
+        for (Account account : accounts) {
+            if (mRequiredAccounts.contains(account.type)) {
+                foundAccounts.add(account.type);
+            }
+        }
+        // check if account type matches, if not, fail test with message on what account types
+        // are missing
+        if (mRequiredAccounts.size() != foundAccounts.size()) {
+            mRequiredAccounts.removeAll(foundAccounts);
+            StringBuilder sb = new StringBuilder("Device missing these accounts:");
+            for (String account : mRequiredAccounts) {
+                sb.append(' ');
+                sb.append(account);
+            }
+            fail(sb.toString());
+        }
     }
 
     private void closeApp(String appName, boolean forceStopApp) {
