@@ -368,13 +368,18 @@ status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     status_t status = DrawGlInfo::kStatusDone;
 
     if (isEmpty()) return status; // nothing to flush
+    renderer.restoreToCount(1);
 
     DEFER_LOGD("--flushing");
     renderer.eventMark("Flush");
 
+    // save and restore (with draw modifiers) so that reordering doesn't affect final state
     DrawModifiers restoreDrawModifiers = renderer.getDrawModifiers();
-    renderer.restoreToCount(1);
+    renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+
     status |= replayBatchList(mBatches, renderer, dirty);
+
+    renderer.restoreToCount(1);
     renderer.setDrawModifiers(restoreDrawModifiers);
 
     DEFER_LOGD("--flush complete, returning %x", status);
