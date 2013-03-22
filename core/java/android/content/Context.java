@@ -2443,7 +2443,7 @@ public abstract class Context {
      * Remove all permissions to access a particular content provider Uri
      * that were previously added with {@link #grantUriPermission}.  The given
      * Uri will match all previously granted Uris that are the same or a
-     * sub-path of the given Uri.  That is, revoking "content://foo/one" will
+     * sub-path of the given Uri.  That is, revoking "content://foo/target" will
      * revoke both "content://foo/target" and "content://foo/target/sub", but not
      * "content://foo".
      *

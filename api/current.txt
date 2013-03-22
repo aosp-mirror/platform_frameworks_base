@@ -6251,6 +6251,7 @@ package android.content {
     field public static final int FLAG_GRANT_READ_URI_PERMISSION = 1; // 0x1
     field public static final int FLAG_GRANT_WRITE_URI_PERMISSION = 2; // 0x2
     field public static final int FLAG_INCLUDE_STOPPED_PACKAGES = 32; // 0x20
+    field public static final int FLAG_PERSIST_GRANT_URI_PERMISSION = 64; // 0x40
     field public static final int FLAG_RECEIVER_FOREGROUND = 268435456; // 0x10000000
     field public static final int FLAG_RECEIVER_REGISTERED_ONLY = 1073741824; // 0x40000000
     field public static final int FLAG_RECEIVER_REPLACE_PENDING = 536870912; // 0x20000000

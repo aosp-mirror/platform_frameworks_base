@@ -17,14 +17,20 @@
 package com.android.server.am;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static com.android.internal.util.XmlUtils.readIntAttribute;
+import static com.android.internal.util.XmlUtils.writeIntAttribute;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.app.AppOpsManager;
 import android.appwidget.AppWidgetManager;
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
@@ -37,8 +43,16 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.StackBox;
 import com.android.server.wm.WindowManagerService;
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 import dalvik.system.Zygote;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -129,6 +143,7 @@ import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.Time;
+import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
@@ -136,6 +151,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.Xml;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -623,10 +639,27 @@ public final class ActivityManagerService extends ActivityManagerNative
             = new ArrayList<ContentProviderRecord>();
 
     /**
-     * Global set of specific Uri permissions that have been granted.
+     * File storing persisted {@link #mGrantedUriPermissions}.
      */
-    final private SparseArray<HashMap<Uri, UriPermission>> mGrantedUriPermissions
-            = new SparseArray<HashMap<Uri, UriPermission>>();
+    private final AtomicFile mGrantFile;
+
+    /** XML constants used in {@link #mGrantFile} */
+    private static final String TAG_URI_GRANTS = "uri-grants";
+    private static final String TAG_URI_GRANT = "uri-grant";
+    private static final String ATTR_USER_HANDLE = "userHandle";
+    private static final String ATTR_SOURCE_PKG = "sourcePkg";
+    private static final String ATTR_TARGET_PKG = "targetPkg";
+    private static final String ATTR_URI = "uri";
+    private static final String ATTR_MODE_FLAGS = "modeFlags";
+
+    /**
+     * Global set of specific {@link Uri} permissions that have been granted.
+     * This optimized lookup structure maps from {@link UriPermission#targetUid}
+     * to {@link UriPermission#uri} to {@link UriPermission}.
+     */
+    @GuardedBy("this")
+    private final SparseArray<HashMap<Uri, UriPermission>>
+            mGrantedUriPermissions = new SparseArray<HashMap<Uri, UriPermission>>();
 
     CoreSettingsObserver mCoreSettingsObserver;
 
@@ -923,6 +956,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int CONTINUE_USER_SWITCH_MSG = 35;
     static final int USER_SWITCH_TIMEOUT_MSG = 36;
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
+    static final int PERSIST_URI_GRANTS = 38;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1406,6 +1440,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 break;
             }
+            case PERSIST_URI_GRANTS: {
+                writeGrantedUriPermissions();
+                break;
+            }
             }
         }
     };
@@ -1654,6 +1692,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mUsageStatsService = new UsageStatsService(new File(
                 systemDir, "usagestats").toString());
         mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"));
+
+        mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
+
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
         // User 0 is the first and only user that runs at boot.
@@ -3552,8 +3593,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             
             try {
-                //clear application user data
+                // Clear application user data
                 pm.clearApplicationUserData(packageName, observer, userId);
+
+                // Remove all permissions granted from/to this package
+                removeUriPermissionsForPackageLocked(packageName, userId, true);
+
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
                 intent.putExtra(Intent.EXTRA_UID, pkgUid);
@@ -4003,6 +4048,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (i=0; i<N; i++) {
             removeDyingProviderLocked(null, providers.get(i), true);
         }
+
+        // Remove transient permissions granted from/to this package/user
+        removeUriPermissionsForPackageLocked(name, userId, false);
 
         if (name == null) {
             // Remove pending intents.  For now we only do this when force
@@ -5128,6 +5176,38 @@ public final class ActivityManagerService extends ActivityManagerNative
         return readMet && writeMet;
     }
 
+    private ProviderInfo getProviderInfoLocked(String authority, int userHandle) {
+        ProviderInfo pi = null;
+        ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userHandle);
+        if (cpr != null) {
+            pi = cpr.info;
+        } else {
+            try {
+                pi = AppGlobals.getPackageManager().resolveContentProvider(
+                        authority, PackageManager.GET_URI_PERMISSION_PATTERNS, userHandle);
+            } catch (RemoteException ex) {
+            }
+        }
+        return pi;
+    }
+
+    private UriPermission findOrCreateUriPermissionLocked(
+            String sourcePkg, String targetPkg, int targetUid, Uri uri) {
+        HashMap<Uri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
+        if (targetUris == null) {
+            targetUris = Maps.newHashMap();
+            mGrantedUriPermissions.put(targetUid, targetUris);
+        }
+
+        UriPermission perm = targetUris.get(uri);
+        if (perm == null) {
+            perm = new UriPermission(sourcePkg, targetPkg, targetUid, uri);
+            targetUris.put(uri, perm);
+        }
+
+        return perm;
+    }
+
     private final boolean checkUriPermissionLocked(Uri uri, int uid,
             int modeFlags) {
         // Root gets to do everything.
@@ -5174,6 +5254,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     int checkGrantUriPermissionLocked(int callingUid, String targetPkg,
             Uri uri, int modeFlags, int lastTargetUid) {
+        final boolean persist = (modeFlags & Intent.FLAG_PERSIST_GRANT_URI_PERMISSION) != 0;
         modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         if (modeFlags == 0) {
@@ -5194,20 +5275,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             return -1;
         }
 
-        String name = uri.getAuthority();
-        ProviderInfo pi = null;
-        ContentProviderRecord cpr = mProviderMap.getProviderByName(name,
-                UserHandle.getUserId(callingUid));
-        if (cpr != null) {
-            pi = cpr.info;
-        } else {
-            try {
-                pi = pm.resolveContentProvider(name,
-                        PackageManager.GET_URI_PERMISSION_PATTERNS,
-                        UserHandle.getUserId(callingUid));
-            } catch (RemoteException ex) {
-            }
-        }
+        final String authority = uri.getAuthority();
+        final ProviderInfo pi = getProviderInfoLocked(authority, UserHandle.getUserId(callingUid));
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission check: " + uri.toSafeString());
             return -1;
@@ -5229,7 +5298,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (targetUid >= 0) {
             // First...  does the target actually need this permission?
-            if (checkHoldingPermissionsLocked(pm, pi, uri, targetUid, modeFlags)) {
+            if (checkHoldingPermissionsLocked(pm, pi, uri, targetUid, modeFlags) && !persist) {
                 // No need to grant the target this permission.
                 if (DEBUG_URI_PERMISSION) Slog.v(TAG,
                         "Target " + targetPkg + " already has full permission to " + uri);
@@ -5248,7 +5317,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     allowed = false;
                 }
             }
-            if (allowed) {
+            if (allowed && !persist) {
                 return -1;
             }
         }
@@ -5300,8 +5369,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void grantUriPermissionUncheckedLocked(int targetUid, String targetPkg,
-            Uri uri, int modeFlags, UriPermissionOwner owner) {
+    void grantUriPermissionUncheckedLocked(
+            int targetUid, String targetPkg, Uri uri, int modeFlags, UriPermissionOwner owner) {
+        final boolean persist = (modeFlags & Intent.FLAG_PERSIST_GRANT_URI_PERMISSION) != 0;
         modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         if (modeFlags == 0) {
@@ -5314,32 +5384,20 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
                 "Granting " + targetPkg + "/" + targetUid + " permission to " + uri);
-        
-        HashMap<Uri, UriPermission> targetUris
-                = mGrantedUriPermissions.get(targetUid);
-        if (targetUris == null) {
-            targetUris = new HashMap<Uri, UriPermission>();
-            mGrantedUriPermissions.put(targetUid, targetUris);
+
+        final String authority = uri.getAuthority();
+        final ProviderInfo pi = getProviderInfoLocked(authority, UserHandle.getUserId(targetUid));
+        if (pi == null) {
+            Slog.w(TAG, "No content provider found for grant: " + uri.toSafeString());
+            return;
         }
 
-        UriPermission perm = targetUris.get(uri);
-        if (perm == null) {
-            perm = new UriPermission(targetUid, uri);
-            targetUris.put(uri, perm);
-        }
-
-        perm.modeFlags |= modeFlags;
-        if (owner == null) {
-            perm.globalModeFlags |= modeFlags;
-        } else {
-            if ((modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
-                 perm.readOwners.add(owner);
-                 owner.addReadPermission(perm);
-            }
-            if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
-                 perm.writeOwners.add(owner);
-                 owner.addWritePermission(perm);
-            }
+        final UriPermission perm = findOrCreateUriPermissionLocked(
+                pi.packageName, targetPkg, targetUid, uri);
+        final boolean persistChanged = perm.grantModes(modeFlags, persist, owner);
+        if (persistChanged) {
+            mHandler.removeMessages(PERSIST_URI_GRANTS);
+            mHandler.obtainMessage(PERSIST_URI_GRANTS).sendToTarget();
         }
     }
 
@@ -5362,10 +5420,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         final int targetUid;
         final int flags;
 
-        NeededUriGrants(String _targetPkg, int _targetUid, int _flags) {
-            targetPkg = _targetPkg;
-            targetUid = _targetUid;
-            flags = _flags;
+        NeededUriGrants(String targetPkg, int targetUid, int flags) {
+            this.targetPkg = targetPkg;
+            this.targetUid = targetUid;
+            this.flags = flags;
         }
     }
 
@@ -5393,11 +5451,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             return null;
         }
         if (data != null) {
-            int target = checkGrantUriPermissionLocked(callingUid, targetPkg, data,
+            int targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, data,
                 mode, needed != null ? needed.targetUid : -1);
-            if (target > 0) {
+            if (targetUid > 0) {
                 if (needed == null) {
-                    needed = new NeededUriGrants(targetPkg, target, mode);
+                    needed = new NeededUriGrants(targetPkg, targetUid, mode);
                 }
                 needed.add(data);
             }
@@ -5406,12 +5464,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<clip.getItemCount(); i++) {
                 Uri uri = clip.getItemAt(i).getUri();
                 if (uri != null) {
-                    int target = -1;
-                    target = checkGrantUriPermissionLocked(callingUid, targetPkg, uri,
+                    int targetUid = -1;
+                    targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, uri,
                             mode, needed != null ? needed.targetUid : -1);
-                    if (target > 0) {
+                    if (targetUid > 0) {
                         if (needed == null) {
-                            needed = new NeededUriGrants(targetPkg, target, mode);
+                            needed = new NeededUriGrants(targetPkg, targetUid, mode);
                         }
                         needed.add(uri);
                     }
@@ -5481,44 +5539,25 @@ public final class ActivityManagerService extends ActivityManagerNative
         if ((perm.modeFlags&(Intent.FLAG_GRANT_READ_URI_PERMISSION
                 |Intent.FLAG_GRANT_WRITE_URI_PERMISSION)) == 0) {
             HashMap<Uri, UriPermission> perms
-                    = mGrantedUriPermissions.get(perm.uid);
+                    = mGrantedUriPermissions.get(perm.targetUid);
             if (perms != null) {
                 if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
-                        "Removing " + perm.uid + " permission to " + perm.uri);
+                        "Removing " + perm.targetUid + " permission to " + perm.uri);
                 perms.remove(perm.uri);
                 if (perms.size() == 0) {
-                    mGrantedUriPermissions.remove(perm.uid);
+                    mGrantedUriPermissions.remove(perm.targetUid);
                 }
             }
         }
     }
 
-    private void revokeUriPermissionLocked(int callingUid, Uri uri,
-            int modeFlags) {
-        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        if (modeFlags == 0) {
-            return;
-        }
+    private void revokeUriPermissionLocked(
+            int callingUid, Uri uri, int modeFlags, boolean persist) {
+        if (DEBUG_URI_PERMISSION) Slog.v(TAG, "Revoking all granted permissions to " + uri);
 
-        if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
-                "Revoking all granted permissions to " + uri);
-        
         final IPackageManager pm = AppGlobals.getPackageManager();
-
         final String authority = uri.getAuthority();
-        ProviderInfo pi = null;
-        int userId = UserHandle.getUserId(callingUid);
-        ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userId);
-        if (cpr != null) {
-            pi = cpr.info;
-        } else {
-            try {
-                pi = pm.resolveContentProvider(authority,
-                        PackageManager.GET_URI_PERMISSION_PATTERNS, userId);
-            } catch (RemoteException ex) {
-            }
-        }
+        final ProviderInfo pi = getProviderInfoLocked(authority, UserHandle.getUserId(callingUid));
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission revoke: " + uri.toSafeString());
             return;
@@ -5533,6 +5572,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " does not have permission to uri " + uri);
             //}
         }
+
+        boolean persistChanged = false;
 
         // Go through all of the permissions and remove any that match.
         final List<String> SEGMENTS = uri.getPathSegments();
@@ -5563,8 +5604,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
-                            "Revoking " + perm.uid + " permission to " + perm.uri);
-                    perm.clearModes(modeFlags);
+                            "Revoking " + perm.targetUid + " permission to " + perm.uri);
+                    persistChanged |= perm.clearModes(modeFlags, persist);
                     if (perm.modeFlags == 0) {
                         it.remove();
                     }
@@ -5576,6 +5617,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     i--;
                 }
             }
+        }
+
+        if (persistChanged) {
+            mHandler.removeMessages(PERSIST_URI_GRANTS);
+            mHandler.obtainMessage(PERSIST_URI_GRANTS).sendToTarget();
         }
     }
 
@@ -5594,6 +5640,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
+            final boolean persist = (modeFlags & Intent.FLAG_PERSIST_GRANT_URI_PERMISSION) != 0;
             modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             if (modeFlags == 0) {
@@ -5601,26 +5648,64 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             final IPackageManager pm = AppGlobals.getPackageManager();
-
             final String authority = uri.getAuthority();
-            ProviderInfo pi = null;
-            ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, r.userId);
-            if (cpr != null) {
-                pi = cpr.info;
-            } else {
-                try {
-                    pi = pm.resolveContentProvider(authority,
-                            PackageManager.GET_URI_PERMISSION_PATTERNS, r.userId);
-                } catch (RemoteException ex) {
-                }
-            }
+            final ProviderInfo pi = getProviderInfoLocked(authority, r.userId);
             if (pi == null) {
                 Slog.w(TAG, "No content provider found for permission revoke: "
                         + uri.toSafeString());
                 return;
             }
 
-            revokeUriPermissionLocked(r.uid, uri, modeFlags);
+            revokeUriPermissionLocked(r.uid, uri, modeFlags, persist);
+        }
+    }
+
+    /**
+     * Remove any {@link UriPermission} granted <em>from</em> or <em>to</em> the
+     * given package.
+     *
+     * @param packageName Package name to match, or {@code null} to apply to all
+     *            packages.
+     * @param userHandle User to match, or {@link UserHandle#USER_ALL} to apply
+     *            to all users.
+     * @param persist If persistent grants should be removed.
+     */
+    private void removeUriPermissionsForPackageLocked(
+            String packageName, int userHandle, boolean persist) {
+        if (userHandle == UserHandle.USER_ALL && packageName == null) {
+            throw new IllegalArgumentException("Must narrow by either package or user");
+        }
+
+        boolean persistChanged = false;
+
+        final int size = mGrantedUriPermissions.size();
+        for (int i = 0; i < size; i++) {
+            // Only inspect grants matching user
+            if (userHandle == UserHandle.USER_ALL
+                    || userHandle == UserHandle.getUserId(mGrantedUriPermissions.keyAt(i))) {
+                final Iterator<UriPermission> it = mGrantedUriPermissions.valueAt(i)
+                        .values().iterator();
+                while (it.hasNext()) {
+                    final UriPermission perm = it.next();
+
+                    // Only inspect grants matching package
+                    if (packageName == null || perm.sourcePkg.equals(packageName)
+                            || perm.targetPkg.equals(packageName)) {
+                        persistChanged |= perm.clearModes(~0, persist);
+
+                        // Only remove when no modes remain; any persisted grants
+                        // will keep this alive.
+                        if (perm.modeFlags == 0) {
+                            it.remove();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (persistChanged) {
+            mHandler.removeMessages(PERSIST_URI_GRANTS);
+            mHandler.obtainMessage(PERSIST_URI_GRANTS).sendToTarget();
         }
     }
 
@@ -5672,6 +5757,103 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 owner.removeUriPermissionLocked(uri, mode);
             }
+        }
+    }
+
+    private void writeGrantedUriPermissions() {
+        if (DEBUG_URI_PERMISSION) Slog.v(TAG, "writeGrantedUriPermissions()");
+
+        // Snapshot permissions so we can persist without lock
+        ArrayList<UriPermission.Snapshot> persist = Lists.newArrayList();
+        synchronized (this) {
+            final int size = mGrantedUriPermissions.size();
+            for (int i = 0 ; i < size; i++) {
+                for (UriPermission perm : mGrantedUriPermissions.valueAt(i).values()) {
+                    if (perm.persistedModeFlags != 0) {
+                        persist.add(perm.snapshot());
+                    }
+                }
+            }
+        }
+
+        FileOutputStream fos = null;
+        try {
+            fos = mGrantFile.startWrite();
+
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, "utf-8");
+            out.startDocument(null, true);
+            out.startTag(null, TAG_URI_GRANTS);
+            for (UriPermission.Snapshot perm : persist) {
+                out.startTag(null, TAG_URI_GRANT);
+                writeIntAttribute(out, ATTR_USER_HANDLE, perm.userHandle);
+                out.attribute(null, ATTR_SOURCE_PKG, perm.sourcePkg);
+                out.attribute(null, ATTR_TARGET_PKG, perm.targetPkg);
+                out.attribute(null, ATTR_URI, String.valueOf(perm.uri));
+                writeIntAttribute(out, ATTR_MODE_FLAGS, perm.persistedModeFlags);
+                out.endTag(null, TAG_URI_GRANT);
+            }
+            out.endTag(null, TAG_URI_GRANTS);
+            out.endDocument();
+
+            mGrantFile.finishWrite(fos);
+        } catch (IOException e) {
+            if (fos != null) {
+                mGrantFile.failWrite(fos);
+            }
+        }
+    }
+
+    private void readGrantedUriPermissionsLocked() {
+        if (DEBUG_URI_PERMISSION) Slog.v(TAG, "readGrantedUriPermissions()");
+
+        FileInputStream fis = null;
+        try {
+            fis = mGrantFile.openRead();
+            final XmlPullParser in = Xml.newPullParser();
+            in.setInput(fis, null);
+
+            int type;
+            while ((type = in.next()) != END_DOCUMENT) {
+                final String tag = in.getName();
+                if (type == START_TAG) {
+                    if (TAG_URI_GRANT.equals(tag)) {
+                        final int userHandle = readIntAttribute(in, ATTR_USER_HANDLE);
+                        final String sourcePkg = in.getAttributeValue(null, ATTR_SOURCE_PKG);
+                        final String targetPkg = in.getAttributeValue(null, ATTR_TARGET_PKG);
+                        final Uri uri = Uri.parse(in.getAttributeValue(null, ATTR_URI));
+                        final int modeFlags = readIntAttribute(in, ATTR_MODE_FLAGS);
+
+                        // Sanity check that provider still belongs to source package
+                        final ProviderInfo pi = getProviderInfoLocked(
+                                uri.getAuthority(), userHandle);
+                        if (pi != null && sourcePkg.equals(pi.packageName)) {
+                            int targetUid = -1;
+                            try {
+                                targetUid = AppGlobals.getPackageManager()
+                                        .getPackageUid(targetPkg, userHandle);
+                            } catch (RemoteException e) {
+                            }
+                            if (targetUid != -1) {
+                                final UriPermission perm = findOrCreateUriPermissionLocked(
+                                        sourcePkg, targetPkg, targetUid, uri);
+                                perm.grantModes(modeFlags, true, null);
+                            }
+                        } else {
+                            Slog.w(TAG, "Persisted grant for " + uri + " had source " + sourcePkg
+                                    + " but instead found " + pi);
+                        }
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // Missing grants is okay
+        } catch (IOException e) {
+            Log.wtf(TAG, "Failed reading Uri grants", e);
+        } catch (XmlPullParserException e) {
+            Log.wtf(TAG, "Failed reading Uri grants", e);
+        } finally {
+            IoUtils.closeQuietly(fis);
         }
     }
 
@@ -7959,6 +8141,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         retrieveSettings();
+
+        synchronized (this) {
+            readGrantedUriPermissionsLocked();
+        }
 
         if (goingCallback != null) goingCallback.run();
         
@@ -11634,6 +11820,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                                     mAppOpsService.packageRemoved(
                                             intent.getIntExtra(Intent.EXTRA_UID, -1), ssp);
+
+                                    // Remove all permissions granted from/to this package
+                                    removeUriPermissionsForPackageLocked(ssp, userId, true);
                                 }
                             }
                         }

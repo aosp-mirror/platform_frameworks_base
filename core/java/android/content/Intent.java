@@ -3228,6 +3228,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_INCLUDE_STOPPED_PACKAGES = 0x00000020;
 
     /**
+     * When combined with {@link #FLAG_GRANT_READ_URI_PERMISSION} and/or
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, the grant will be remembered
+     * until explicitly revoked with
+     * {@link Context#revokeUriPermission(Uri, int)}. These grants persist
+     * across device reboots.
+     */
+    public static final int FLAG_PERSIST_GRANT_URI_PERMISSION = 0x00000040;
+
+    /**
      * If set, the new activity is not kept in the history stack.  As soon as
      * the user navigates away from it, the activity is finished.  This may also
      * be set with the {@link android.R.styleable#AndroidManifestActivity_noHistory
@@ -7016,7 +7025,8 @@ public class Intent implements Parcelable, Cloneable {
                     // and flags to ourselves to grant.
                     setClipData(target.getClipData());
                     addFlags(target.getFlags()
-                            & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION));
+                            & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION
+                                    | FLAG_PERSIST_GRANT_URI_PERMISSION));
                     return true;
                 } else {
                     return false;
