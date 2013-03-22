@@ -288,6 +288,9 @@ public class ExpandableListView extends ListView {
             // Get more expandable list-related info for this item
             pos = mConnector.getUnflattenedPos(childFlPos);
 
+            final boolean isLayoutRtl = isLayoutRtl();
+            final int width = getWidth();
+
             // If this item type and the previous item type are different, then we need to change
             // the left & right bounds
             if (pos.position.type != lastItemType) {
@@ -300,9 +303,18 @@ public class ExpandableListView extends ListView {
                     indicatorRect.left = mIndicatorLeft;
                     indicatorRect.right = mIndicatorRight;
                 }
-                
-                indicatorRect.left += mPaddingLeft;
-                indicatorRect.right += mPaddingLeft;
+
+                if (isLayoutRtl) {
+                    final int temp = indicatorRect.left;
+                    indicatorRect.left = width - indicatorRect.right;
+                    indicatorRect.right = width - temp;
+
+                    indicatorRect.left -= mPaddingRight;
+                    indicatorRect.right -= mPaddingRight;
+                } else {
+                    indicatorRect.left += mPaddingLeft;
+                    indicatorRect.right += mPaddingLeft;
+                }
 
                 lastItemType = pos.position.type; 
             }
