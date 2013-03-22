@@ -620,7 +620,7 @@ package android {
     field public static final int keyboardLayout = 16843691; // 0x10103ab
     field public static final int keyboardMode = 16843341; // 0x101024d
     field public static final int keycode = 16842949; // 0x10100c5
-    field public static final int keyset = 16843727; // 0x10103cf
+    field public static final int keyset = 16843729; // 0x10103d1
     field public static final int killAfterRestore = 16843420; // 0x101029c
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
@@ -847,7 +847,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int required = 16843406; // 0x101028e
-    field public static final int requiredForAllUsers = 16843729; // 0x10103d1
+    field public static final int requiredForAllUsers = 16843728; // 0x10103d0
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeMode = 16843619; // 0x1010363
@@ -1176,7 +1176,7 @@ package android {
     field public static final int windowMinWidthMinor = 16843607; // 0x1010357
     field public static final int windowNoDisplay = 16843294; // 0x101021e
     field public static final int windowNoTitle = 16842838; // 0x1010056
-    field public static final int windowOverscan = 16843728; // 0x10103d0
+    field public static final int windowOverscan = 16843727; // 0x10103cf
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
