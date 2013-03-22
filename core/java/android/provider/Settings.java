@@ -4411,6 +4411,14 @@ public final class Settings {
        public static final String DATA_ROAMING = "data_roaming";
 
        /**
+        * The value passed to a Mobile DataConnection via bringUp which defines the
+        * number of retries to preform when setting up the initial connection. The default
+        * value defined in DataConnectionTrackerBase#DEFAULT_MDC_INITIAL_RETRY is currently 1.
+        * @hide
+        */
+       public static final String MDC_INITIAL_MAX_RETRY = "mdc_initial_max_retry";
+
+       /**
         * Whether user has enabled development settings.
         */
        public static final String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
