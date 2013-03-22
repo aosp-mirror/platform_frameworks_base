@@ -2709,6 +2709,16 @@
              below and above child items.) The height of this will be the same as
              the height of the normal list item divider. -->
         <attr name="childDivider" format="reference|color" />
+        <!-- The start bound for an item's indicator. To specify a start bound specific to children,
+             use childIndicatorStart. -->
+        <attr name="indicatorStart" format="dimension" />
+        <!-- The end bound for an item's indicator. To specify a right bound specific to children,
+             use childIndicatorEnd. -->
+        <attr name="indicatorEnd" format="dimension" />
+        <!-- The start bound for a child's indicator. -->
+        <attr name="childIndicatorStart" format="dimension" />
+        <!-- The end bound for a child's indicator. -->
+        <attr name="childIndicatorEnd" format="dimension" />
     </declare-styleable>
     <declare-styleable name="Gallery">
         <attr name="gravity" />
