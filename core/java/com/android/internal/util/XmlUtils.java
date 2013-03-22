@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -24,6 +25,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ProtocolException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,11 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import android.util.Xml;
-
 /** {@hide} */
-public class XmlUtils
-{
+public class XmlUtils {
 
     public static void skipCurrentTag(XmlPullParser parser)
             throws XmlPullParserException, IOException {
@@ -899,5 +898,43 @@ public class XmlUtils
                 return true;
             }
         }
+    }
+
+    public static int readIntAttribute(XmlPullParser in, String name) throws IOException {
+        final String value = in.getAttributeValue(null, name);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new ProtocolException("problem parsing " + name + "=" + value + " as int");
+        }
+    }
+
+    public static void writeIntAttribute(XmlSerializer out, String name, int value)
+            throws IOException {
+        out.attribute(null, name, Integer.toString(value));
+    }
+
+    public static long readLongAttribute(XmlPullParser in, String name) throws IOException {
+        final String value = in.getAttributeValue(null, name);
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            throw new ProtocolException("problem parsing " + name + "=" + value + " as long");
+        }
+    }
+
+    public static void writeLongAttribute(XmlSerializer out, String name, long value)
+            throws IOException {
+        out.attribute(null, name, Long.toString(value));
+    }
+
+    public static boolean readBooleanAttribute(XmlPullParser in, String name) {
+        final String value = in.getAttributeValue(null, name);
+        return Boolean.parseBoolean(value);
+    }
+
+    public static void writeBooleanAttribute(XmlSerializer out, String name, boolean value)
+            throws IOException {
+        out.attribute(null, name, Boolean.toString(value));
     }
 }
