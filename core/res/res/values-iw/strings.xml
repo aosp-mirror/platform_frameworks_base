@@ -200,6 +200,10 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"גישה ישירה אל המיקרופון להקלטת אודיו."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"מצלמה"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"גישה ישירה למצלמה לצילום תמונות או וידאו."</string>
+    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
+    <skip />
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"מידע על היישומים שלך"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"יכולת להשפיע על התנהגותם של יישומים אחרים במכשיר."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"טפט"</string>
@@ -1046,6 +1050,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"פעולות טקסט"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"שטח האחסון אוזל"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ייתכן שפונקציות מערכת מסוימות לא יפעלו"</string>
+    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"אישור"</string>
     <string name="cancel" msgid="6442560571259935130">"ביטול"</string>
     <string name="yes" msgid="5362982303337969312">"אישור"</string>
@@ -1467,7 +1475,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"הסר"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"האם להעלות את עוצמת הקול מעל לרמה הבטוחה?"\n"האזנה בעוצמת קול גבוהה למשך זמן ארוך עלולה לפגוע בשמיעה."</string>
+    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"המשך לגעת בשתי אצבעות כדי להפעיל נגישות."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"נגישות הופעלה."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"נגישות בוטלה."</string>

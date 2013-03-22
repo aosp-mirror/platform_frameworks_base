@@ -200,6 +200,10 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Accès direct au microphone pour enregistrer du contenu audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Accès direct à la caméra pour la capture d\'images ou de vidéos"</string>
+    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
+    <skip />
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informations relatives à vos applications"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Possibilité de modifier le comportement des autres applications sur votre appareil"</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Fond d\'écran"</string>
@@ -918,7 +922,7 @@
     <string name="searchview_description_query" msgid="5911778593125355124">"Requête de recherche"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Effacer la requête"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Envoyer la requête"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"Recherche vocale"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Recherche vocale"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Activer \"Explorer au toucher\" ?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> souhaite activer la fonctionnalité \"Explorer au toucher\". Lorsque celle-ci est activée, vous pouvez entendre ou voir les descriptions des éléments que vous sélectionnez, ou bien interagir avec la tablette en effectuant certains gestes."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> souhaite activer la fonctionnalité \"Explorer au toucher\". Lorsque celle-ci est activée, vous pouvez entendre ou voir les descriptions des éléments que vous sélectionnez, ou bien interagir avec le téléphone en effectuant certains gestes."</string>
@@ -1046,6 +1050,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Actions sur le texte"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Espace de stockage bientôt saturé"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Il est possible que certaines fonctionnalités du système ne soient pas opérationnelles."</string>
+    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Annuler"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1467,7 +1475,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Supprimer"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Augmenter le volume au-dessus du niveau de sécurité ?"\n"L\'écoute à un volume élevé pendant des périodes prolongées peut endommager votre audition."</string>
+    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Pour activer l\'accessibilité, appuyez de manière prolongée avec deux doigts."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilité annulée."</string>
