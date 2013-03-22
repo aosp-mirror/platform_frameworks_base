@@ -399,12 +399,13 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
     
     void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint) {
+        layer.setLayerPaint(paint);
+
         final GLES20Layer glLayer = (GLES20Layer) layer;
-        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawLayer(mRenderer, glLayer.getLayer(), x, y, nativePaint);
+        nDrawLayer(mRenderer, glLayer.getLayer(), x, y);
     }
 
-    private static native void nDrawLayer(int renderer, int layer, float x, float y, int paint);
+    private static native void nDrawLayer(int renderer, int layer, float x, float y);
 
     void interrupt() {
         nInterrupt(mRenderer);
