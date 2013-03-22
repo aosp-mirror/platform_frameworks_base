@@ -30,10 +30,11 @@ public class DctConstants {
      * DISCONNECTING: Connection.disconnect() has been called, but PDP
      *                context is not yet deactivated
      * FAILED: data connection fail for all apns settings
+     * RETRYING: data connection failed but we're going to retry.
      *
      * getDataConnectionState() maps State to DataState
      *      FAILED or IDLE : DISCONNECTED
-     *      CONNECTING or SCANNING: CONNECTING
+     *      RETRYING or CONNECTING or SCANNING: CONNECTING
      *      CONNECTED : CONNECTED or DISCONNECTING
      */
     public enum State {
@@ -42,7 +43,8 @@ public class DctConstants {
         SCANNING,
         CONNECTED,
         DISCONNECTING,
-        FAILED
+        FAILED,
+        RETRYING
     }
 
     public enum Activity {
@@ -89,6 +91,8 @@ public class DctConstants {
     public static final int CMD_SET_DEPENDENCY_MET = BASE + 31;
     public static final int CMD_SET_POLICY_DATA_ENABLE = BASE + 32;
     public static final int EVENT_ICC_CHANGED = BASE + 33;
+    public static final int EVENT_DISCONNECT_DC_RETRYING = BASE + 34;
+    public static final int EVENT_DATA_SETUP_COMPLETE_ERROR = BASE + 35;
 
     /***** Constants *****/
 
