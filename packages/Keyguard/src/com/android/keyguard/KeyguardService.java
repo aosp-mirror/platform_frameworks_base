@@ -21,7 +21,11 @@ import java.io.PrintWriter;
 
 import android.app.Service;
 import android.content.Intent;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -32,6 +36,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";
+    static final String PERMISSION = android.Manifest.permission.CONTROL_KEYGUARD;
     private KeyguardViewMediator mKeyguardViewMediator;
 
     @Override
@@ -53,6 +58,14 @@ public class KeyguardService extends Service {
         // TODO
     }
 
+    void checkPermission() {
+        if (getBaseContext().checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
+            Log.w(TAG, "Caller needs permission '" + PERMISSION + "' to call " + Debug.getCaller());
+            throw new SecurityException("Access denied to process: " + Binder.getCallingPid()
+                    + ", must have permission " + PERMISSION);
+        }
+    }
+
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
         public boolean isShowing() {
             return mKeyguardViewMediator.isShowing();
@@ -70,48 +83,61 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.verifyUnlock(callback);
         }
         public void keyguardDone(boolean authenticated, boolean wakeup) {
+            checkPermission();
             mKeyguardViewMediator.keyguardDone(authenticated, wakeup);
         }
         public void setHidden(boolean isHidden) {
+            checkPermission();
             mKeyguardViewMediator.setHidden(isHidden);
         }
         public void dismiss() {
             mKeyguardViewMediator.dismiss();
         }
         public void onWakeKeyWhenKeyguardShowing(int keyCode) {
+            checkPermission();
             mKeyguardViewMediator.onWakeKeyWhenKeyguardShowing(keyCode);
         }
         public void onWakeMotionWhenKeyguardShowing() {
+            checkPermission();
             mKeyguardViewMediator.onWakeMotionWhenKeyguardShowing();
         }
         public void onDreamingStarted() {
+            checkPermission();
             mKeyguardViewMediator.onDreamingStarted();
         }
         public void onDreamingStopped() {
+            checkPermission();
             mKeyguardViewMediator.onDreamingStopped();
         }
         public void onScreenTurnedOff(int reason) {
+            checkPermission();
             mKeyguardViewMediator.onScreenTurnedOff(reason);
         }
         public void onScreenTurnedOn(IKeyguardShowCallback callback) {
+            checkPermission();
             mKeyguardViewMediator.onScreenTurnedOn(callback);
         }
         public void setKeyguardEnabled(boolean enabled) {
+            checkPermission();
             mKeyguardViewMediator.setKeyguardEnabled(enabled);
         }
         public boolean isDismissable() {
             return mKeyguardViewMediator.isDismissable();
         }
         public void onSystemReady() {
+            checkPermission();
             mKeyguardViewMediator.onSystemReady();
         }
         public void doKeyguardTimeout(Bundle options) {
+            checkPermission();
             mKeyguardViewMediator.doKeyguardTimeout(options);
         }
         public void setCurrentUser(int userId) {
+            checkPermission();
             mKeyguardViewMediator.setCurrentUser(userId);
         }
         public void showAssistant() {
+            checkPermission();
             mKeyguardViewMediator.showAssistant();
         }
     };

@@ -3474,6 +3474,11 @@
     <!-- Description of an application permission that lets an application access keyguard secure storage. -->
     <string name="permdesc_access_keyguard_secure_storage">Allows an application to access keguard secure storage.</string>
 
+    <!-- Title of an application permission that lets it control keyguard. -->
+    <string name="permlab_control_keyguard">Control displaying and hiding keyguard</string>
+    <!-- Description of an application permission that lets it control keyguard. -->
+    <string name="permdesc_control_keyguard">Allows an application to control keguard.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 

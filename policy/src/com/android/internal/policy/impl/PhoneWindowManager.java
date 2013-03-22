@@ -1722,7 +1722,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 mKeyguard = win;
-                hideKeyguardScrim();
                 break;
             case TYPE_KEYGUARD_SCRIM:
                 if (mKeyguardScrim != null) {
@@ -1742,21 +1741,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (mKeyguard == win) {
             Log.v(TAG, "Removing keyguard window (Did it crash?)");
             mKeyguard = null;
-            showKeyguardScrimLw();
+            mKeyguardDelegate.showScrim();
         } else if (mKeyguardScrim == win) {
             Log.v(TAG, "Removing keyguard scrim");
             mKeyguardScrim = null;
         } if (mNavigationBar == win) {
             mNavigationBar = null;
         }
-    }
-
-    private void showKeyguardScrimLw() {
-        Log.v(TAG, "*** SHOWING KEYGUARD SCRIM ***");
-    }
-    
-    private void hideKeyguardScrim() {
-        Log.v(TAG, "*** HIDING KEYGUARD SCRIM ***");
     }
 
     static final boolean PRINT_ANIM = false;

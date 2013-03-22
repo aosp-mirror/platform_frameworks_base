@@ -16,16 +16,13 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-subdir-Iaidl-files)
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_JAVA_LIBRARIES := services
+LOCAL_PACKAGE_NAME := KeyguardTest
 
-LOCAL_PACKAGE_NAME := Keyguard
-
+# Remove this to verify permission checks are working correctly
 LOCAL_CERTIFICATE := platform
 
-LOCAL_PROGUARD_FLAG_FILES := proguard.flags
+# LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
 include $(BUILD_PACKAGE)
-
-#include $(call all-makefiles-under,$(LOCAL_PATH))

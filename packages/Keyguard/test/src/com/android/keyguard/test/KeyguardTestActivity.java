@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.keyguard;
+package com.android.keyguard.test;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -56,6 +57,7 @@ public class KeyguardTestActivity extends Activity implements OnClickListener {
     private static final int MODE_SIM_PIN = 4;
     private static final int MODE_SIM_PUK = 5;
     private static final String SECURITY_MODE = "security_mode";
+    Handler mHandler = new Handler();
 
     IKeyguardService mService = null;
 
@@ -76,13 +78,17 @@ public class KeyguardTestActivity extends Activity implements OnClickListener {
     class KeyguardExitCallback extends IKeyguardExitCallback.Stub {
 
         @Override
-        public void onKeyguardExitResult(boolean success) throws RemoteException {
-            new AlertDialog.Builder(KeyguardTestActivity.this)
-                .setMessage("Result: " + success)
-                .setPositiveButton("OK", null)
-                .show();
+        public void onKeyguardExitResult(final boolean success) throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    new AlertDialog.Builder(KeyguardTestActivity.this)
+                    .setMessage("Result: " + success)
+                    .setPositiveButton("OK", null)
+                    .show();
+                }
+            });
         }
-
     };
 
     private class RemoteServiceConnection implements ServiceConnection {
@@ -158,12 +164,13 @@ public class KeyguardTestActivity extends Activity implements OnClickListener {
         setMode(savedInstanceState.getInt(SECURITY_MODE));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.optionmenu, menu);
-        return true;
-    }
+// TODO: Find a secure way to inject mock into keyguard...
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.optionmenu, menu);
+//        return true;
+//    }
 
     private void setMode(int mode) {
         mTestSimPin = false;
@@ -255,12 +262,22 @@ public class KeyguardTestActivity extends Activity implements OnClickListener {
                 mService.doKeyguardTimeout(null);
                 break;
             case R.id.verify_unlock:
-                mService.verifyUnlock(mKeyguardExitCallback);
+                mService.doKeyguardTimeout(null);
+                // Wait for keyguard to lock and then try this...
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mService.verifyUnlock(mKeyguardExitCallback);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Failed verifyUnlock()", e);
+                        }
+                    }
+                }, 5000);
                 break;
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote service died");
-            e.printStackTrace();
+            Log.e(TAG, "onClick(): Failed due to remote exeption", e);
         }
     }
 

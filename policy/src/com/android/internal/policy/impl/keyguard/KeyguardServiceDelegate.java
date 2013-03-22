@@ -4,12 +4,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.WindowManagerPolicy.OnKeyguardExitResult;
 
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -29,6 +34,7 @@ public class KeyguardServiceDelegate {
     private static final String TAG = "KeyguardServiceDelegate";
     private static final boolean DEBUG = true;
     protected KeyguardServiceWrapper mKeyguardService;
+    private View mScrim; // shown if keyguard crashes
     private KeyguardState mKeyguardState = new KeyguardState();
 
     /* package */ static final class KeyguardState {
@@ -64,6 +70,7 @@ public class KeyguardServiceDelegate {
             if (mShowListener != null) {
                 mShowListener.onShown(windowToken);
             }
+            hideScrim();
         }
     };
 
@@ -87,6 +94,7 @@ public class KeyguardServiceDelegate {
     public KeyguardServiceDelegate(Context context, LockPatternUtils lockPatternUtils) {
         Intent intent = new Intent();
         intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
+        mScrim = createScrim(context);
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
             if (DEBUG) Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
@@ -102,7 +110,10 @@ public class KeyguardServiceDelegate {
             mKeyguardService = new KeyguardServiceWrapper(
                     IKeyguardService.Stub.asInterface(service));
             if (mKeyguardState.systemIsReady) {
+                // If the system is ready, it means keyguard crashed and restarted.
                 mKeyguardService.onSystemReady();
+                // This is used to hide the scrim once keyguard displays.
+                mKeyguardService.onScreenTurnedOn(new KeyguardShowDelegate(null));
             }
         }
 
@@ -255,6 +266,53 @@ public class KeyguardServiceDelegate {
             mKeyguardService.setCurrentUser(newUserId);
         }
         mKeyguardState.currentUser = newUserId;
+    }
+
+    private static final View createScrim(Context context) {
+        View view = new View(context);
+
+        int flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                | WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
+                | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
+                ;
+
+        final int stretch = ViewGroup.LayoutParams.MATCH_PARENT;
+        final int type = WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                stretch, stretch, type, flags, PixelFormat.TRANSLUCENT);
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+        lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        lp.setTitle("KeyguardScrim");
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        wm.addView(view, lp);
+        view.setVisibility(View.GONE);
+        // Disable pretty much everything in statusbar until keyguard comes back and we know
+        // the state of the world.
+        view.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME
+                | View.STATUS_BAR_DISABLE_BACK
+                | View.STATUS_BAR_DISABLE_RECENT
+                | View.STATUS_BAR_DISABLE_EXPAND
+                | View.STATUS_BAR_DISABLE_SEARCH);
+        return view;
+    }
+
+    public void showScrim() {
+        mScrim.post(new Runnable() {
+            @Override
+            public void run() {
+                mScrim.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    public void hideScrim() {
+        mScrim.post(new Runnable() {
+            @Override
+            public void run() {
+                mScrim.setVisibility(View.GONE);
+            }
+        });
     }
 
 }
