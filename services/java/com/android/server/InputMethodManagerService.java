@@ -23,7 +23,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
-import com.android.internal.view.IInputMethodCallback;
+import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
@@ -554,17 +554,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static class MethodCallback extends IInputMethodCallback.Stub {
+    private static class MethodCallback extends IInputSessionCallback.Stub {
         private final IInputMethod mMethod;
         private final InputMethodManagerService mParentIMMS;
 
         MethodCallback(final IInputMethod method, final InputMethodManagerService imms) {
             mMethod = method;
             mParentIMMS = imms;
-        }
-
-        @Override
-        public void finishedEvent(int seq, boolean handled) throws RemoteException {
         }
 
         @Override
@@ -2335,7 +2331,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 args = (SomeArgs)msg.obj;
                 try {
                     ((IInputMethod)args.arg1).createSession(
-                            (IInputMethodCallback)args.arg2);
+                            (IInputSessionCallback)args.arg2);
                 } catch (RemoteException e) {
                 }
                 args.recycle();

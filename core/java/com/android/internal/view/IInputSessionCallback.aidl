@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package com.android.internal.view;
 
+import com.android.internal.view.IInputMethodSession;
+
 /**
- * Helper interface for IInputMethod to allow the input method to call back
- * to its client with results from incoming calls.
+ * Helper interface for IInputMethod to allow the input method to notify the client when a new
+ * session has been created.
  * {@hide}
  */
-oneway interface IInputMethodCallback {
-    void finishedEvent(int seq, boolean handled);
+
+oneway interface IInputSessionCallback {
+    void sessionCreated(IInputMethodSession session);
 }
