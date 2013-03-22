@@ -21,6 +21,7 @@ import android.net.wifi.BatchedScanSettings;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiChannel;
 import android.net.DhcpInfo;
 
 import android.os.Messenger;
@@ -70,6 +71,8 @@ interface IWifiManager
     boolean isDualBandSupported();
 
     boolean isIbssSupported();
+
+    List<WifiChannel> getSupportedChannels();
 
     boolean saveConfiguration();
 
