@@ -868,8 +868,7 @@ static void android_view_GLES20Canvas_destroyLayerDeferred(JNIEnv* env,
 }
 
 static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, Layer* layer, jfloat x, jfloat y, SkPaint* paint) {
-    // TODO: don't pass the paint from java
+        OpenGLRenderer* renderer, Layer* layer, jfloat x, jfloat y) {
     renderer->drawLayer(layer, x, y);
 }
 
@@ -1051,7 +1050,7 @@ static JNINativeMethod gMethods[] = {
     { "nClearLayerTexture",      "(I)V",       (void*) android_view_GLES20Canvas_clearLayerTexture },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
-    { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },
+    { "nDrawLayer",              "(IIFF)V",    (void*) android_view_GLES20Canvas_drawLayer },
     { "nCopyLayer",              "(II)Z",      (void*) android_view_GLES20Canvas_copyLayer },
     { "nClearLayerUpdates",      "(I)V",       (void*) android_view_GLES20Canvas_clearLayerUpdates },
     { "nPushLayerUpdate",        "(II)V",      (void*) android_view_GLES20Canvas_pushLayerUpdate },
