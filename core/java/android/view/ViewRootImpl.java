@@ -1233,6 +1233,7 @@ public final class ViewRootImpl implements ViewParent,
                 host.setLayoutDirection(mLastConfiguration.getLayoutDirection());
             }
             host.dispatchAttachedToWindow(attachInfo, 0);
+            attachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
             mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
             host.fitSystemWindows(mFitSystemWindowsInsets);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
@@ -2827,6 +2828,7 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mHardwareRenderer.isEnabled()) {
                 mAttachInfo.mHardwareRenderer.validate();
             }
+            mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(false);
             mView.dispatchDetachedFromWindow();
         }
 
@@ -3127,6 +3129,7 @@ public final class ViewRootImpl implements ViewParent,
                         }
                         mAttachInfo.mKeyDispatchState.reset();
                         mView.dispatchWindowFocusChanged(hasWindowFocus);
+                        mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
                     }
 
                     // Note: must be done after the focus change callbacks,

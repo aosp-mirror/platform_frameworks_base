@@ -10956,6 +10956,7 @@ package android.media {
     method public void playSoundEffect(int);
     method public void playSoundEffect(int, float);
     method public void registerMediaButtonEventReceiver(android.content.ComponentName);
+    method public void registerMediaButtonEventReceiver(android.app.PendingIntent);
     method public void registerRemoteControlClient(android.media.RemoteControlClient);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public deprecated void setBluetoothA2dpOn(boolean);
@@ -10976,6 +10977,7 @@ package android.media {
     method public void stopBluetoothSco();
     method public void unloadSoundEffects();
     method public void unregisterMediaButtonEventReceiver(android.content.ComponentName);
+    method public void unregisterMediaButtonEventReceiver(android.app.PendingIntent);
     method public void unregisterRemoteControlClient(android.media.RemoteControlClient);
     field public static final java.lang.String ACTION_AUDIO_BECOMING_NOISY = "android.media.AUDIO_BECOMING_NOISY";
     field public static final deprecated java.lang.String ACTION_SCO_AUDIO_STATE_CHANGED = "android.media.SCO_AUDIO_STATE_CHANGED";
@@ -26132,6 +26134,8 @@ package android.view {
     method public void addOnPreDrawListener(android.view.ViewTreeObserver.OnPreDrawListener);
     method public void addOnScrollChangedListener(android.view.ViewTreeObserver.OnScrollChangedListener);
     method public void addOnTouchModeChangeListener(android.view.ViewTreeObserver.OnTouchModeChangeListener);
+    method public void addOnWindowAttachListener(android.view.ViewTreeObserver.OnWindowAttachListener);
+    method public void addOnWindowFocusChangeListener(android.view.ViewTreeObserver.OnWindowFocusChangeListener);
     method public final void dispatchOnDraw();
     method public final void dispatchOnGlobalLayout();
     method public final boolean dispatchOnPreDraw();
@@ -26143,6 +26147,8 @@ package android.view {
     method public void removeOnPreDrawListener(android.view.ViewTreeObserver.OnPreDrawListener);
     method public void removeOnScrollChangedListener(android.view.ViewTreeObserver.OnScrollChangedListener);
     method public void removeOnTouchModeChangeListener(android.view.ViewTreeObserver.OnTouchModeChangeListener);
+    method public void removeOnWindowAttachListener(android.view.ViewTreeObserver.OnWindowAttachListener);
+    method public void removeOnWindowFocusChangeListener(android.view.ViewTreeObserver.OnWindowFocusChangeListener);
   }
 
   public static abstract interface ViewTreeObserver.OnDrawListener {
@@ -26167,6 +26173,15 @@ package android.view {
 
   public static abstract interface ViewTreeObserver.OnTouchModeChangeListener {
     method public abstract void onTouchModeChanged(boolean);
+  }
+
+  public static abstract interface ViewTreeObserver.OnWindowAttachListener {
+    method public abstract void onWindowAttached();
+    method public abstract void onWindowDetached();
+  }
+
+  public static abstract interface ViewTreeObserver.OnWindowFocusChangeListener {
+    method public abstract void onWindowFocusChanged(boolean);
   }
 
   public abstract class Window {
