@@ -62,13 +62,16 @@ static struct {
 class ScreenshotPixelRef : public SkPixelRef {
 public:
     ScreenshotPixelRef(SkColorTable* ctable) {
-        fCTable = ctable;
+        mCTable = ctable;
+        mPixels = NULL;
+        mFormat = 0;
         SkSafeRef(ctable);
         setImmutable();
     }
 
     virtual ~ScreenshotPixelRef() {
-        SkSafeUnref(fCTable);
+        SkSafeUnref(mCTable);
+        delete [] mPixels;
     }
 
     status_t update(const sp<IBinder>& display, int width, int height,
@@ -78,34 +81,78 @@ public:
                         ? mScreenshot.update(display, width, height)
                         : mScreenshot.update(display, width, height, minLayer, maxLayer))
                 : mScreenshot.update(display);
-        if (res != NO_ERROR) {
-            return res;
-        }
+        if (res == NO_ERROR) {
+            mWidth = mScreenshot.getWidth();
+            mHeight = mScreenshot.getHeight();
+            mStride = mScreenshot.getStride();
+            mFormat = mScreenshot.getFormat();
+            switch (mFormat) {
+                case HAL_PIXEL_FORMAT_RGBA_8888:
+                case HAL_PIXEL_FORMAT_RGBX_8888:
+                case HAL_PIXEL_FORMAT_RGB_565:
+                    break;
 
-        return NO_ERROR;
+                case HAL_PIXEL_FORMAT_BGRA_8888: {
+                    // common format not supported by Bitmap.java
+                    size_t w = mScreenshot.getWidth();
+                    size_t h = mScreenshot.getHeight();
+                    size_t s = mScreenshot.getStride();
+
+                    mPixels = new uint32_t[s*h];
+                    if (mPixels == NULL) {
+                        res = NO_MEMORY;
+                        break;
+                    }
+
+                    uint32_t const* src = (uint32_t const*)mScreenshot.getPixels();
+                    uint32_t* dst = mPixels;
+                    for (size_t y=0 ; y<h ; y++) {
+                        for (size_t x=0 ; x<w ; x++) {
+                            // convert BGRA (0xARGB) to RGBA (0xABGR)
+                            uint32_t pixel =  src[x];
+                            dst[x] = (pixel & 0xFF00FF00) |
+                                    ((pixel >> 16) & 0xFF) |
+                                    ((pixel << 16) & 0xFF0000);
+                        }
+                        src += s;
+                        dst += s;
+                    }
+
+                    mFormat = HAL_PIXEL_FORMAT_RGBA_8888;
+                    mScreenshot.release();
+                } break;
+
+                default:
+                    // ugh. that's a real problem
+                    res = BAD_VALUE;
+                    mScreenshot.release();
+                    break;
+            }
+        }
+        return res;
     }
 
     uint32_t getWidth() const {
-        return mScreenshot.getWidth();
+        return mWidth;
     }
 
     uint32_t getHeight() const {
-        return mScreenshot.getHeight();
+        return mHeight;
     }
 
     uint32_t getStride() const {
-        return mScreenshot.getStride();
+        return mStride;
     }
 
     uint32_t getFormat() const {
-        return mScreenshot.getFormat();
+        return mFormat;
     }
 
 protected:
     // overrides from SkPixelRef
     virtual void* onLockPixels(SkColorTable** ct) {
-        *ct = fCTable;
-        return (void*)mScreenshot.getPixels();
+        *ct = mCTable;
+        return mPixels ? (void*)mPixels : (void*)mScreenshot.getPixels();
     }
 
     virtual void onUnlockPixels() {
@@ -114,7 +161,12 @@ protected:
     SK_DECLARE_UNFLATTENABLE_OBJECT()
 private:
     ScreenshotClient mScreenshot;
-    SkColorTable*    fCTable;
+    SkColorTable* mCTable;
+    uint32_t* mPixels;
+    uint32_t mWidth;
+    uint32_t mHeight;
+    uint32_t mStride;
+    uint32_t mFormat;
 
     typedef SkPixelRef INHERITED;
 };
