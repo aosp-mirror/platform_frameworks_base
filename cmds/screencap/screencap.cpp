@@ -179,7 +179,7 @@ int main(int argc, char** argv)
     if (base) {
         if (png) {
             SkBitmap b;
-            b.setConfig(flinger2skia(f), w, h);
+            b.setConfig(flinger2skia(f), w, h, s*bytesPerPixel(f));
             b.setPixels((void*)base);
             SkDynamicMemoryWStream stream;
             SkImageEncoder::EncodeStream(&stream, b,
