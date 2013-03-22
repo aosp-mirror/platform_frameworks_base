@@ -2047,11 +2047,28 @@ public class AudioManager {
     }
 
     /**
+     * Register a component to be the sole receiver of MEDIA_BUTTON intents.  This is like
+     * {@link #registerMediaButtonEventReceiver(android.content.ComponentName)}, but allows
+     * the buttons to go to any PendingIntent.  Note that you should only use this form if
+     * you know you will continue running for the full time until unregistering the
+     * PendingIntent.
+     * @param eventReceiver target that will receive media button intents.  The PendingIntent
+     * will be sent as-is when a media button action occurs, with {@link Intent#EXTRA_KEY_EVENT}
+     * added and holding the key code of the media button that was pressed.
+     */
+    public void registerMediaButtonEventReceiver(PendingIntent eventReceiver) {
+        if (eventReceiver == null) {
+            return;
+        }
+        registerMediaButtonIntent(eventReceiver, null);
+    }
+
+    /**
      * @hide
      * no-op if (pi == null) or (eventReceiver == null)
      */
     public void registerMediaButtonIntent(PendingIntent pi, ComponentName eventReceiver) {
-        if ((pi == null) || (eventReceiver == null)) {
+        if (pi == null) {
             Log.e(TAG, "Cannot call registerMediaButtonIntent() with a null parameter");
             return;
         }
@@ -2111,6 +2128,18 @@ public class AudioManager {
         PendingIntent pi = PendingIntent.getBroadcast(mContext,
                 0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
         unregisterMediaButtonIntent(pi, eventReceiver);
+    }
+
+    /**
+     * Unregister the receiver of MEDIA_BUTTON intents.
+     * @param eventReceiver same PendingIntent that was registed with
+     *      {@link #registerMediaButtonEventReceiver(PendingIntent)}.
+     */
+    public void unregisterMediaButtonEventReceiver(PendingIntent eventReceiver) {
+        if (eventReceiver == null) {
+            return;
+        }
+        unregisterMediaButtonIntent(eventReceiver, null);
     }
 
     /**
