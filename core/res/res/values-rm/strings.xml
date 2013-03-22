@@ -271,6 +271,10 @@
     <skip />
     <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
     <skip />
+    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
+    <skip />
     <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
     <skip />
     <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
@@ -1630,6 +1634,10 @@
     <skip />
     <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
     <skip />
+    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Interrumper"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -2372,7 +2380,7 @@
     <skip />
     <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
     <skip />
-    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
+    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
     <skip />
     <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
     <skip />

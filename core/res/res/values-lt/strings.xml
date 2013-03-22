@@ -200,6 +200,10 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Tiesioginė prieiga prie mikrofono, kad būtų galima įrašyti garsą."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparatas"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Tiesioginė prieiga prie fotoaparato, kad būtų galima fotografuoti vaizdus arba įrašyti vaizdo įrašus."</string>
+    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
+    <skip />
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Programų informacija"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Galimybė paveikti kitų įrenginio programų veikimą."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Ekrano fonas"</string>
@@ -1046,6 +1050,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksto veiksmai"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Mažėja laisvos saugyklos vietos"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kai kurios sistemos funkcijos gali neveikti"</string>
+    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"Gerai"</string>
     <string name="cancel" msgid="6442560571259935130">"Atšaukti"</string>
     <string name="yes" msgid="5362982303337969312">"Gerai"</string>
@@ -1467,7 +1475,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Pašalinti"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Padidinti garsumą viršijant saugų lygį?"\n"Ilgai klausantis dideliu garsumu gali sutrikti klausa."</string>
+    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Laikykite palietę dviem pirštais, kad įgalintumėte pritaikymo neįgaliesiems režimą."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pritaikymas neįgaliesiems įgalintas."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pritaikymo neįgaliesiems režimas atšauktas."</string>

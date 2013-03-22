@@ -200,6 +200,10 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Accés directe al micròfon per enregistrar àudio."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Accés directe a la càmera per a la captura d\'imatges o de vídeos."</string>
+    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
+    <skip />
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informació de les aplicacions"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Capacitat d\'afectar el rendiment d\'altres aplicacions del dispositiu."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Fons de pantalla"</string>
@@ -1046,6 +1050,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"S\'està acabant l\'espai d\'emmagatzematge"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"És possible que algunes funcions del sistema no funcionin"</string>
+    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"D\'acord"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel·la"</string>
     <string name="yes" msgid="5362982303337969312">"D\'acord"</string>
@@ -1467,7 +1475,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Elimina"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vols augmentar el volum per sobre del nivell de seguretat?"\n"Escoltar música a un volum alt durant períodes llargs pot perjudicar l\'oïda."</string>
+    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
+    <skip />
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén premuts els dos dits per activar l\'accessibilitat."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"S\'ha activat l\'accessibilitat."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilitat cancel·lada."</string>
