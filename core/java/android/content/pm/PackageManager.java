@@ -1145,6 +1145,29 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports app widgets.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_APP_WIDGETS = "android.software.app_widgets";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports a home screen that is replaceable
+     * by third party applications.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_HOME_SCREEN = "android.software.home_screen";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports adding new input methods implemented
+     * with the {@link android.inputmethodservice.InputMethodService} API.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_INPUT_METHODS = "android.software.input_methods";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports WiFi (802.11) networking.
      */
     @SdkConstant(SdkConstantType.FEATURE)
