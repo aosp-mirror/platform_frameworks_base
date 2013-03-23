@@ -3562,7 +3562,7 @@ public final class ViewRootImpl implements ViewParent,
                     + " accelMovement=" + accelMovement
                     + " accel=" + accel);
             if (accelMovement > movement) {
-                if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
+                if (DEBUG_TRACKBALL) Log.v(TAG, "Delivering fake DPAD: "
                         + keycode);
                 movement--;
                 int repeatCount = accelMovement - movement;
@@ -3572,7 +3572,7 @@ public final class ViewRootImpl implements ViewParent,
                         InputDevice.SOURCE_KEYBOARD));
             }
             while (movement > 0) {
-                if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
+                if (DEBUG_TRACKBALL) Log.v(TAG, "Delivering fake DPAD: "
                         + keycode);
                 movement--;
                 curTime = SystemClock.uptimeMillis();
