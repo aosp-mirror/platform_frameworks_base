@@ -21,9 +21,9 @@ import java.util.Arrays;
 import android.animation.LayoutTransition;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.service.notification.StatusBarNotification;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -37,11 +37,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
