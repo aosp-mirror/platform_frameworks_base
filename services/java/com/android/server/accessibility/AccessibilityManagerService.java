@@ -1070,14 +1070,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (userState.mBindingServices.contains(componentName)) {
                     continue;
                 }
-                // No enabled installed services => disable accessibility to avoid
-                // sending accessibility events with no recipient across processes.
-                if (userState.mEnabledServices.isEmpty()) {
-                    userState.mIsAccessibilityEnabled = false;
-                    Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                            Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId);
-                    return;
-                }
                 if (userState.mEnabledServices.contains(componentName)) {
                     if (service == null) {
                         service = new Service(userState.mUserId, componentName, installedService);
@@ -1097,6 +1089,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userState.mBindingServices.remove(componentName);
                 }
             }
+        }
+
+        // No enabled installed services => disable accessibility to avoid
+        // sending accessibility events with no recipient across processes.
+        if (isEnabled && userState.mEnabledServices.isEmpty()) {
+            userState.mIsAccessibilityEnabled = false;
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId);
         }
     }
 
