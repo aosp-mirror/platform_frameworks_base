@@ -609,7 +609,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         // selection statement with a dummy one that will always be false.
         // This way we will get a cursor back that has the correct structure
         // but contains no rows.
-        if (selection == null) {
+        if (selection == null || selection.isEmpty()) {
             selection = "'A' = 'B'";
         } else {
             selection = "'A' = 'B' AND (" + selection + ")";
