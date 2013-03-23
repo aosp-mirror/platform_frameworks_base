@@ -6728,6 +6728,7 @@ package android.content.pm {
     field public static final int DONT_KILL_APP = 1; // 0x1
     field public static final java.lang.String EXTRA_VERIFICATION_ID = "android.content.pm.extra.VERIFICATION_ID";
     field public static final java.lang.String EXTRA_VERIFICATION_RESULT = "android.content.pm.extra.VERIFICATION_RESULT";
+    field public static final java.lang.String FEATURE_APP_WIDGETS = "android.software.app_widgets";
     field public static final java.lang.String FEATURE_AUDIO_LOW_LATENCY = "android.hardware.audio.low_latency";
     field public static final java.lang.String FEATURE_BLUETOOTH = "android.hardware.bluetooth";
     field public static final java.lang.String FEATURE_CAMERA = "android.hardware.camera";
@@ -6738,6 +6739,8 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_FAKETOUCH = "android.hardware.faketouch";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND = "android.hardware.faketouch.multitouch.jazzhand";
+    field public static final java.lang.String FEATURE_HOME_SCREEN = "android.software.home_screen";
+    field public static final java.lang.String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final java.lang.String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
     field public static final java.lang.String FEATURE_LOCATION = "android.hardware.location";
     field public static final java.lang.String FEATURE_LOCATION_GPS = "android.hardware.location.gps";

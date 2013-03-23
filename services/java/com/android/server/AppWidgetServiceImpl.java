@@ -180,18 +180,20 @@ class AppWidgetServiceImpl {
     // Manages persistent references to RemoteViewsServices from different App Widgets
     private final HashMap<FilterComparison, HashSet<Integer>> mRemoteViewsServicesAppWidgets = new HashMap<FilterComparison, HashSet<Integer>>();
 
-    Context mContext;
+    final Context mContext;
+    final IPackageManager mPm;
+    final AlarmManager mAlarmManager;
+    final ArrayList<Provider> mInstalledProviders = new ArrayList<Provider>();
+    final int mUserId;
+    final boolean mHasFeature;
+
     Locale mLocale;
-    IPackageManager mPm;
-    AlarmManager mAlarmManager;
-    ArrayList<Provider> mInstalledProviders = new ArrayList<Provider>();
     int mNextAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID + 1;
     final ArrayList<AppWidgetId> mAppWidgetIds = new ArrayList<AppWidgetId>();
-    ArrayList<Host> mHosts = new ArrayList<Host>();
+    final ArrayList<Host> mHosts = new ArrayList<Host>();
     // set of package names
-    HashSet<String> mPackagesWithBindWidgetPermission = new HashSet<String>();
+    final HashSet<String> mPackagesWithBindWidgetPermission = new HashSet<String>();
     boolean mSafeMode;
-    int mUserId;
     boolean mStateLoaded;
     int mMaxWidgetBitmapMemory;
 
@@ -207,6 +209,8 @@ class AppWidgetServiceImpl {
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mUserId = userId;
         mSaveStateHandler = saveStateHandler;
+        mHasFeature = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_APP_WIDGETS);
         computeMaximumWidgetBitmapMemory();
     }
 
@@ -429,6 +433,9 @@ class AppWidgetServiceImpl {
 
     private void ensureStateLoadedLocked() {
         if (!mStateLoaded) {
+            if (!mHasFeature) {
+                return;
+            }
             loadAppWidgetListLocked();
             loadStateLocked();
             mStateLoaded = true;
@@ -438,6 +445,9 @@ class AppWidgetServiceImpl {
     public int allocateAppWidgetId(String packageName, int hostId) {
         int callingUid = enforceSystemOrCallingUid(packageName);
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return -1;
+            }
             ensureStateLoadedLocked();
             int appWidgetId = mNextAppWidgetId++;
 
@@ -459,6 +469,9 @@ class AppWidgetServiceImpl {
 
     public void deleteAppWidgetId(int appWidgetId) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return;
+            }
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null) {
@@ -470,6 +483,9 @@ class AppWidgetServiceImpl {
 
     public void deleteHost(int hostId) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return;
+            }
             ensureStateLoadedLocked();
             int callingUid = Binder.getCallingUid();
             Host host = lookupHostLocked(callingUid, hostId);
@@ -482,6 +498,9 @@ class AppWidgetServiceImpl {
 
     public void deleteAllHosts() {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return;
+            }
             ensureStateLoadedLocked();
             int callingUid = Binder.getCallingUid();
             final int N = mHosts.size();
@@ -564,6 +583,9 @@ class AppWidgetServiceImpl {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mAppWidgetIds) {
+                if (!mHasFeature) {
+                    return;
+                }
                 options = cloneIfLocalBinder(options);
                 ensureStateLoadedLocked();
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
@@ -625,6 +647,9 @@ class AppWidgetServiceImpl {
 
     public boolean bindAppWidgetIdIfAllowed(
             String packageName, int appWidgetId, ComponentName provider, Bundle options) {
+        if (!mHasFeature) {
+            return false;
+        }
         try {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BIND_APPWIDGET, null);
         } catch (SecurityException se) {
@@ -652,6 +677,9 @@ class AppWidgetServiceImpl {
     }
 
     public boolean hasBindAppWidgetPermission(String packageName) {
+        if (!mHasFeature) {
+            return false;
+        }
         mContext.enforceCallingPermission(
                 android.Manifest.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS,
                 "hasBindAppWidgetPermission packageName=" + packageName);
@@ -663,6 +691,9 @@ class AppWidgetServiceImpl {
     }
 
     public void setBindAppWidgetPermission(String packageName, boolean permission) {
+        if (!mHasFeature) {
+            return;
+        }
         mContext.enforceCallingPermission(
                 android.Manifest.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS,
                 "setBindAppWidgetPermission packageName=" + packageName);
@@ -681,6 +712,9 @@ class AppWidgetServiceImpl {
     // Binds to a specific RemoteViewsService
     public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return;
+            }
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id == null) {
@@ -738,6 +772,9 @@ class AppWidgetServiceImpl {
     // Unbinds from a specific RemoteViewsService
     public void unbindRemoteViewsService(int appWidgetId, Intent intent) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return;
+            }
             ensureStateLoadedLocked();
             // Unbind from the RemoteViewsService (which will trigger a callback to the bound
             // RemoteViewsAdapter)
@@ -849,6 +886,9 @@ class AppWidgetServiceImpl {
 
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return null;
+            }
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null && id.provider != null && !id.provider.zombie) {
@@ -861,6 +901,9 @@ class AppWidgetServiceImpl {
     public RemoteViews getAppWidgetViews(int appWidgetId) {
         if (DBG) log("getAppWidgetViews id=" + appWidgetId);
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return null;
+            }
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null) {
@@ -873,6 +916,9 @@ class AppWidgetServiceImpl {
 
     public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return new ArrayList<AppWidgetProviderInfo>(0);
+            }
             ensureStateLoadedLocked();
             final int N = mInstalledProviders.size();
             ArrayList<AppWidgetProviderInfo> result = new ArrayList<AppWidgetProviderInfo>(N);
@@ -887,6 +933,9 @@ class AppWidgetServiceImpl {
     }
 
     public void updateAppWidgetIds(int[] appWidgetIds, RemoteViews views) {
+        if (!mHasFeature) {
+            return;
+        }
         if (appWidgetIds == null) {
             return;
         }
@@ -932,6 +981,9 @@ class AppWidgetServiceImpl {
 
     public void updateAppWidgetOptions(int appWidgetId, Bundle options) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return;
+            }
             options = cloneIfLocalBinder(options);
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
@@ -956,6 +1008,9 @@ class AppWidgetServiceImpl {
 
     public Bundle getAppWidgetOptions(int appWidgetId) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return Bundle.EMPTY;
+            }
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null && id.options != null) {
@@ -967,6 +1022,9 @@ class AppWidgetServiceImpl {
     }
 
     public void partiallyUpdateAppWidgetIds(int[] appWidgetIds, RemoteViews views) {
+        if (!mHasFeature) {
+            return;
+        }
         if (appWidgetIds == null) {
             return;
         }
@@ -990,6 +1048,9 @@ class AppWidgetServiceImpl {
     }
 
     public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
+        if (!mHasFeature) {
+            return;
+        }
         if (appWidgetIds == null) {
             return;
         }
@@ -1008,6 +1069,9 @@ class AppWidgetServiceImpl {
     }
 
     public void updateAppWidgetProvider(ComponentName provider, RemoteViews views) {
+        if (!mHasFeature) {
+            return;
+        }
         synchronized (mAppWidgetIds) {
             ensureStateLoadedLocked();
             Provider p = lookupProviderLocked(provider);
@@ -1150,6 +1214,9 @@ class AppWidgetServiceImpl {
 
     public int[] startListening(IAppWidgetHost callbacks, String packageName, int hostId,
             List<RemoteViews> updatedViews) {
+        if (!mHasFeature) {
+            return new int[0];
+        }
         int callingUid = enforceCallingUid(packageName);
         synchronized (mAppWidgetIds) {
             ensureStateLoadedLocked();
@@ -1172,6 +1239,9 @@ class AppWidgetServiceImpl {
 
     public void stopListening(int hostId) {
         synchronized (mAppWidgetIds) {
+            if (!mHasFeature) {
+                return;
+            }
             ensureStateLoadedLocked();
             Host host = lookupHostLocked(Binder.getCallingUid(), hostId);
             if (host != null) {
@@ -1561,6 +1631,9 @@ class AppWidgetServiceImpl {
     }
 
     void saveStateLocked() {
+        if (!mHasFeature) {
+            return;
+        }
         AtomicFile file = savedStateFile();
         FileOutputStream stream;
         try {
