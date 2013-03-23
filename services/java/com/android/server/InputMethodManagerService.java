@@ -164,6 +164,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final SettingsObserver mSettingsObserver;
     final IWindowManager mIWindowManager;
     final HandlerCaller mCaller;
+    final boolean mHasFeature;
     private InputMethodFileManager mFileManager;
     private InputMethodAndSubtypeListManager mImListManager;
     private final HardKeyboardListener mHardKeyboardListener;
@@ -608,6 +609,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }, true /*asyncHandler*/);
         mWindowManagerService = windowManager;
         mHardKeyboardListener = new HardKeyboardListener();
+        mHasFeature = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_INPUT_METHODS);
 
         mImeSwitcherNotification = new Notification();
         mImeSwitcherNotification.icon = com.android.internal.R.drawable.ic_notification_ime_default;
