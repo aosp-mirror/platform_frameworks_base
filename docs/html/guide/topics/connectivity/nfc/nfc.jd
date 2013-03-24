@@ -477,7 +477,7 @@ tag from the intent. Intents can contain the following extras depending on the t
   <li>{@link android.nfc.NfcAdapter#EXTRA_TAG} (required): A {@link android.nfc.Tag} object
 representing the scanned tag.</li>
   <li>{@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES} (optional): An array of NDEF messages
-parsed from the tag. This extra is mandatory on {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED
+parsed from the tag. This extra is mandatory on {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED}
 intents.</li>
   <li>{@link android.nfc.NfcAdapter#EXTRA_ID} (optional): The low-level ID of the tag.</li></ul>
 
