@@ -3169,7 +3169,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Application Window Tokens
     // -------------------------------------------------------------
 
-    public void validateAppTokens(List<TaskGroup> tasks) {
+    public void validateAppTokens(int stackId, List<TaskGroup> tasks) {
         synchronized (mWindowMap) {
             int t = tasks.size() - 1;
             if (t < 0) {
@@ -3186,7 +3186,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            final ArrayList<Task> localTasks = displayContent.getTasks();
+            final ArrayList<Task> localTasks = mStackIdToStack.get(stackId).getTasks();
             int taskNdx;
             for (taskNdx = localTasks.size() - 1; taskNdx >= 0 && t >= 0; --taskNdx, --t) {
                 AppTokenList localTokens = localTasks.get(taskNdx).mAppTokens;
@@ -3228,6 +3228,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "validateAppTokens: Mismatch! Callers=" + Debug.getCallers(4));
             }
         }
+    }
+
+    public void validateStackOrder(Integer[] remoteStackIds) {
+        // TODO:
     }
 
     boolean checkCallingPermission(String permission, String func) {
@@ -4685,8 +4689,16 @@ public class WindowManagerService extends IWindowManager.Stub
             TaskStack stack = getDefaultDisplayContentLocked().createStack(stackId,
                     relativeStackId, position, weight);
             mStackIdToStack.put(stackId, stack);
-            performLayoutAndPlaceSurfacesLocked();
         }
+    }
+
+    public int removeStack(int stackId) {
+        final TaskStack stack = mStackIdToStack.get(stackId);
+        if (stack != null) {
+            mStackIdToStack.delete(stackId);
+            return stack.remove();
+        }
+        return -1;
     }
 
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {

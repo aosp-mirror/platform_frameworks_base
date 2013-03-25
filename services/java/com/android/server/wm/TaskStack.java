@@ -16,14 +16,22 @@
 
 package com.android.server.wm;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class TaskStack {
+    /** Unique identifier */
     final int mStackId;
-    final DisplayContent mDisplayContent;
+
+    /** The display this stack sits under. */
+    private final DisplayContent mDisplayContent;
+
+    /** The Tasks that define this stack. Oldest Tasks are at the bottom. The ordering must match
+     * mTaskHistory in the ActivityStack with the same mStackId */
     private ArrayList<Task> mTasks = new ArrayList<Task>();
-    int mLayer;
-    StackBox mParent;
+
+    /** The StackBox this sits in. */
+    private final StackBox mParent;
 
     TaskStack(int stackId, StackBox parent) {
         mStackId = stackId;
@@ -46,9 +54,15 @@ public class TaskStack {
         return taskLists;
     }
 
+    /**
+     * Put a Task in this stack. Used for adding and moving.
+     * @param task The task to add.
+     * @param toTop Whether to add it to the top or bottom.
+     */
     void addTask(Task task, boolean toTop) {
         mParent.makeDirty();
         mTasks.add(toTop ? mTasks.size() : 0, task);
+        mDisplayContent.moveStackBox(mStackId, toTop);
     }
 
     void moveTaskToTop(Task task) {
@@ -61,6 +75,12 @@ public class TaskStack {
         addTask(task, false);
     }
 
+    /**
+     * Delete a Task from this stack. If it is the last Task in the stack, remove this stack from
+     * its parent StackBox and merge the parent.
+     * @param task The Task to delete.
+     * @return True if #task was in this stack.
+     */
     boolean removeTask(Task task) {
         mParent.makeDirty();
         if (mTasks.remove(task)) {
@@ -72,11 +92,22 @@ public class TaskStack {
         return false;
     }
 
+    int remove() {
+        return mParent.removeStack();
+    }
+
     int numTokens() {
         int count = 0;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             count += mTasks.get(taskNdx).mAppTokens.size();
         }
         return count;
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("mStackId="); pw.println(mStackId);
+        for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
+            pw.print(prefix); pw.println(mTasks.get(taskNdx));
+        }
     }
 }
