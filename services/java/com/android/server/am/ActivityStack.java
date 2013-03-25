@@ -1991,7 +1991,7 @@ final class ActivityStack {
                 group.tokens.add(r.appToken);
             }
         }
-        mService.mWindowManager.validateAppTokens(mValidateAppTokens);
+        mService.mWindowManager.validateAppTokens(mStackId, mValidateAppTokens);
     }
 
     /**

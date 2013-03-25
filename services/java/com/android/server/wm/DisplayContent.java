@@ -80,7 +80,7 @@ class DisplayContent {
      */
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
-    ArrayList<StackBox> mStackBoxes = new ArrayList<StackBox>();
+    private ArrayList<StackBox> mStackBoxes = new ArrayList<StackBox>();
 
     /**
      * Sorted most recent at top, oldest at [0].
@@ -113,6 +113,11 @@ class DisplayContent {
         return mDisplayInfo;
     }
 
+    /**
+     * Retrieve the tasks on this display in stack order from the topmost TaskStack down.
+     * Note that the order of TaskStacks in the same StackBox is defined within StackBox.
+     * @return All the Tasks, in order, on this display.
+     */
     ArrayList<Task> getTasks() {
         mTmpTasks.clear();
         int numBoxes = mStackBoxes.size();
@@ -126,6 +131,7 @@ class DisplayContent {
         mDisplay.getDisplayInfo(mDisplayInfo);
     }
 
+    /** @return The number of tokens in all of the Tasks on this display. */
     int numTokens() {
         getTasks();
         int count = 0;
@@ -135,6 +141,7 @@ class DisplayContent {
         return count;
     }
 
+    /** Refer to {@link WindowManagerService#createStack(int, int, int, float)} */
     TaskStack createStack(int stackId, int relativeStackId, int position, float weight) {
         TaskStack newStack = null;
         if (mStackBoxes.isEmpty()) {
@@ -150,8 +157,7 @@ class DisplayContent {
                 if (position == StackBox.TASK_STACK_GOES_OVER
                         || position == StackBox.TASK_STACK_GOES_UNDER) {
                     // Position indicates a new box is added at top level only.
-                    final TaskStack stack = box.mStack;
-                    if (stack != null && stack.mStackId == relativeStackId) {
+                    if (box.contains(relativeStackId)) {
                         final int offset = position == StackBox.TASK_STACK_GOES_OVER ? 1 : 0;
                         StackBox newBox = new StackBox(this, box.mBounds);
                         newStack = new TaskStack(stackId, newBox);
@@ -167,13 +173,15 @@ class DisplayContent {
                     }
                 }
             }
-            if (stackBoxNdx >= 0) {
-                throw new IllegalArgumentException("createStack: stackId " + stackId + " not found.");
+            if (stackBoxNdx < 0) {
+                throw new IllegalArgumentException("createStack: stackId " + relativeStackId
+                        + " not found.");
             }
         }
         return newStack;
     }
 
+    /** Refer to {@link WindowManagerService#resizeStack(int, float)} */
     boolean resizeStack(int stackId, float weight) {
         int stackBoxNdx;
         for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
@@ -183,6 +191,24 @@ class DisplayContent {
             }
         }
         return false;
+    }
+
+    /**
+     * Reorder a StackBox within mStackBox. The StackBox to reorder is the one containing the
+     * specified TaskStack.
+     * @param stackId The TaskStack to reorder.
+     * @param toTop Move to the top of all StackBoxes if true, to the bottom if false. Only the
+     * topmost layer of StackBoxes, those in mStackBoxes can be reordered.
+     */
+    void moveStackBox(int stackId, boolean toTop) {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            final StackBox box = mStackBoxes.get(stackBoxNdx);
+            if (box.contains(stackId)) {
+                mStackBoxes.remove(box);
+                mStackBoxes.add(toTop ? mStackBoxes.size() : 0, box);
+                return;
+            }
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -209,6 +235,10 @@ class DisplayContent {
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
             pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
+            for (int boxNdx = 0; boxNdx < mStackBoxes.size(); ++boxNdx) {
+                pw.print(prefix); pw.print("StackBox #"); pw.println(boxNdx);
+                mStackBoxes.get(boxNdx).dump(prefix + "  ", pw);
+            }
             int ndx = numTokens();
             if (ndx > 0) {
                 pw.println();

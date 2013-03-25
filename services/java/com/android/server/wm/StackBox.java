@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.graphics.Rect;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class StackBox {
@@ -29,15 +30,32 @@ public class StackBox {
     public static final int TASK_STACK_GOES_OVER = 4;
     public static final int TASK_STACK_GOES_UNDER = 5;
 
+    /** The display this box sits in. */
     final DisplayContent mDisplayContent;
+
+    /** Non-null indicates this is mFirst or mSecond of a parent StackBox. Null indicates this
+     * is this entire size of mDisplayContent. */
     StackBox mParent;
-    boolean mVertical;
+
+    /** First child, this is null exactly when mStack is non-null. */
     StackBox mFirst;
+
+    /** Second child, this is null exactly when mStack is non-null. */
     StackBox mSecond;
-    float mWeight;
+
+    /** Stack of Tasks, this is null exactly when mFirst and mSecond are non-null. */
     TaskStack mStack;
+
+    /** Content limits relative to the DisplayContent this sits in. */
     Rect mBounds;
+
+    /** Relative orientation of mFirst and mSecond. */
+    boolean mVertical;
+
+    /** Dirty flag. Something inside this or some descendant of this has changed. */
     boolean layoutNeeded;
+
+    /** Used to keep from reallocating a temporary array to hold the list of Tasks below */
     ArrayList<Task> mTmpTasks = new ArrayList<Task>();
 
     StackBox(DisplayContent displayContent, Rect bounds) {
@@ -62,6 +80,28 @@ public class StackBox {
         }
     }
 
+    /**
+     * Detremine if a particular TaskStack is in this StackBox or any of its descendants.
+     * @param stackId The TaskStack being considered.
+     * @return true if the specified TaskStack is in this box or its descendants. False otherwise.
+     */
+    boolean contains(int stackId) {
+        if (mStack != null) {
+            return mStack.mStackId == stackId;
+        }
+        return mFirst.contains(stackId) || mSecond.contains(stackId);
+    }
+
+    /**
+     * Create a new TaskStack relative to a specified one by splitting the StackBox containing
+     * the specified TaskStack into two children. The size and position each of the new StackBoxes
+     * is determined by the passed parameters.
+     * @param stackId The id of the new TaskStack to create.
+     * @param relativeStackId The id of the TaskStack to place the new one next to.
+     * @param position One of the static TASK_STACK_GOES_xxx positions defined in this class.
+     * @param weight The percentage size of the parent StackBox to devote to the new TaskStack.
+     * @return The new TaskStack.
+     */
     TaskStack split(int stackId, int relativeStackId, int position, float weight) {
         if (mStack != null) {
             if (mStack.mStackId == relativeStackId) {
@@ -112,6 +152,7 @@ public class StackBox {
                 mStack = null;
                 return stack;
             }
+            // Not the intended TaskStack.
             return null;
         }
 
@@ -123,51 +164,11 @@ public class StackBox {
         return mSecond.split(stackId, relativeStackId, position, weight);
     }
 
-    TaskStack merge(int position) {
-        TaskStack stack = null;
-        if (mFirst != null) {
-            switch (position) {
-                default:
-                case TASK_STACK_GOES_BEFORE:
-                case TASK_STACK_GOES_ABOVE:
-                    stack = mFirst.merge(position);
-                    stack.merge(mSecond.merge(position));
-                    break;
-                case TASK_STACK_GOES_AFTER:
-                case TASK_STACK_GOES_BELOW:
-                    stack = mSecond.merge(position);
-                    stack.merge(mFirst.merge(position));
-                    break;
-            }
-            return stack;
-        }
-        return mStack;
-    }
-
-    boolean merge(int stackId, int position, StackBox primary, StackBox secondary) {
-        TaskStack stack = primary.mStack;
-        if (stack != null && stack.mStackId == stackId) {
-            stack.merge(secondary.merge(position));
-            mStack = stack;
-            mFirst = null;
-            mSecond = null;
-            return true;
-        }
-        return false;
-    }
-
-    boolean merge(int stackId, int position) {
-        if (mFirst != null) {
-            if (merge(stackId, position, mFirst, mSecond)
-                    || merge(stackId, position, mSecond, mFirst)
-                    || mFirst.merge(stackId, position)
-                    || mSecond.merge(stackId, position)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * @return List of all Tasks underneath this StackBox. The order is currently mFirst followed
+     * by mSecond putting mSecond Tasks more recent than mFirst Tasks.
+     * TODO: Change to MRU ordering.
+     */
     ArrayList<Task> getTasks() {
         mTmpTasks.clear();
         if (mStack != null) {
@@ -179,37 +180,55 @@ public class StackBox {
         return mTmpTasks;
     }
 
-    void absorb(StackBox box) {
-        mFirst = box.mFirst;
-        mSecond = box.mSecond;
-        mStack = box.mStack;
+    /** Combine a child StackBox into its parent.
+     * @param child The surviving child to be merge up into this StackBox. */
+    void absorb(StackBox child) {
+        mFirst = child.mFirst;
+        mSecond = child.mSecond;
+        mStack = child.mStack;
         layoutNeeded = true;
     }
 
-    void removeStack() {
-        if (mParent != null) {
-            if (mParent.mFirst == this) {
-                mParent.absorb(mParent.mSecond);
-            } else {
-                mParent.absorb(mParent.mFirst);
-            }
-            mParent.makeDirty();
-        }
-    }
-
-    boolean addTaskToStack(Task task, int stackId, boolean toTop) {
+    /** Return the stackId of the first mFirst StackBox with a non-null mStack */
+    int getStackId() {
         if (mStack != null) {
-            if (mStack.mStackId == stackId) {
-                mStack.addTask(task, toTop);
-                return true;
-            }
-            return false;
+            return mStack.mStackId;
         }
-        return mFirst.addTaskToStack(task, stackId, toTop)
-                || mSecond.addTaskToStack(task, stackId, toTop);
+        return mFirst.getStackId();
     }
 
+    /** Remove this box and propagate its sibling's content up to their parent.
+     * @return The first stackId of the resulting StackBox. */
+    int removeStack() {
+        if (mParent.mFirst == this) {
+            mParent.absorb(mParent.mSecond);
+        } else {
+            mParent.absorb(mParent.mFirst);
+        }
+        mParent.makeDirty();
+        return getStackId();
+    }
+
+    /** TODO: */
     boolean resize(int stackId, float weight) {
         return false;
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("mParent="); pw.println(mParent);
+        pw.print(prefix); pw.print("mFirst="); pw.println(mFirst);
+        pw.print(prefix); pw.print("mSecond="); pw.println(mSecond);
+        pw.print(prefix); pw.print("mBounds="); pw.print(mBounds.toShortString());
+            pw.print("mVertical="); pw.print(mVertical);
+            pw.print("layoutNeeded="); pw.println(layoutNeeded);
+        if (mStack != null) {
+            pw.print(prefix); pw.print("mStack="); pw.println(mStack);
+            mStack.dump(prefix + "  ", pw);
+        } else {
+            pw.print(prefix); pw.print("mFirst="); pw.println(mStack);
+            mFirst.dump(prefix + "  ", pw);
+            pw.print(prefix); pw.print("mSecond="); pw.println(mStack);
+            mSecond.dump(prefix + "  ", pw);
+        }
     }
 }
