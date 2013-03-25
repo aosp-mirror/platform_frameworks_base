@@ -257,6 +257,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     };
     private int[] mStreamVolumeAlias;
 
+    private final boolean mUseFixedVolume;
+
     // stream names used by dumpStreamStates()
     private final String[] STREAM_NAMES = new String[] {
             "STREAM_VOICE_CALL",
@@ -487,6 +489,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_safe_media_volume_index) * 10;
 
+        mUseFixedVolume = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useFixedVolume);
+
         readPersistedSettings();
         mSettingsObserver = new SettingsObserver();
         updateStreamVolumeAlias(false /*updateVolumes*/);
@@ -678,6 +683,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         if (ringerMode != ringerModeFromSettings) {
             Settings.Global.putInt(cr, Settings.Global.MODE_RINGER, ringerMode);
         }
+        if (mUseFixedVolume) {
+            ringerMode = AudioManager.RINGER_MODE_NORMAL;
+        }
         synchronized(mSettingsLock) {
             mRingerMode = ringerMode;
 
@@ -736,6 +744,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         boolean masterMute = System.getIntForUser(cr, System.VOLUME_MASTER_MUTE,
                                                   0, UserHandle.USER_CURRENT) == 1;
+        if (mUseFixedVolume) {
+            masterMute = false;
+            AudioSystem.setMasterVolume(1.0f);
+        }
         AudioSystem.setMasterMute(masterMute);
         broadcastMasterMuteStatus(masterMute);
 
@@ -806,6 +818,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
     public void adjustStreamVolume(int streamType, int direction, int flags) {
+        if (mUseFixedVolume) {
+            return;
+        }
         if (DEBUG_VOL) Log.d(TAG, "adjustStreamVolume() stream="+streamType+", dir="+direction);
 
         ensureValidDirection(direction);
@@ -918,6 +933,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#adjustMasterVolume(int, int) */
     public void adjustMasterVolume(int steps, int flags) {
+        if (mUseFixedVolume) {
+            return;
+        }
         ensureValidSteps(steps);
         int volume = Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
         int delta = 0;
@@ -972,6 +990,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
     public void setStreamVolume(int streamType, int index, int flags) {
+        if (mUseFixedVolume) {
+            return;
+        }
+
         ensureValidStreamType(streamType);
         VolumeStreamState streamState = mStreamStates[mStreamVolumeAlias[streamType]];
 
@@ -1214,6 +1236,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setStreamSolo(int, boolean) */
     public void setStreamSolo(int streamType, boolean state, IBinder cb) {
+        if (mUseFixedVolume) {
+            return;
+        }
+
         for (int stream = 0; stream < mStreamStates.length; stream++) {
             if (!isStreamAffectedByMute(stream) || stream == streamType) continue;
             // Bring back last audible volume
@@ -1223,6 +1249,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setStreamMute(int, boolean) */
     public void setStreamMute(int streamType, boolean state, IBinder cb) {
+        if (mUseFixedVolume) {
+            return;
+        }
+
         if (isStreamAffectedByMute(streamType)) {
             mStreamStates[streamType].mute(cb, state);
         }
@@ -1235,6 +1265,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setMasterMute(boolean, int) */
     public void setMasterMute(boolean state, int flags, IBinder cb) {
+        if (mUseFixedVolume) {
+            return;
+        }
+
         if (state != AudioSystem.getMasterMute()) {
             AudioSystem.setMasterMute(state);
             // Post a persist master volume msg
@@ -1268,6 +1302,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     public void setMasterVolume(int volume, int flags) {
+        if (mUseFixedVolume) {
+            return;
+        }
+
         if (volume < 0) {
             volume = 0;
         } else if (volume > MAX_MASTER_VOLUME) {
@@ -1339,6 +1377,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setRingerMode(int) */
     public void setRingerMode(int ringerMode) {
+        if (mUseFixedVolume) {
+            return;
+        }
+
         if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
             ringerMode = AudioManager.RINGER_MODE_SILENT;
         }
@@ -1398,6 +1440,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     private void restoreMasterVolume() {
+        if (mUseFixedVolume) {
+            AudioSystem.setMasterVolume(1.0f);
+            return;
+        }
         if (mUseMasterVolume) {
             float volume = Settings.System.getFloatForUser(mContentResolver,
                     Settings.System.VOLUME_MASTER, -1.0f, UserHandle.USER_CURRENT);
@@ -1951,8 +1997,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 streamState.readSettings();
 
                 // unmute stream that was muted but is not affect by mute anymore
-                if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType) &&
-                        !isStreamMutedByRingerMode(streamType)) {
+                if (streamState.muteCount() != 0 && ((!isStreamAffectedByMute(streamType) &&
+                        !isStreamMutedByRingerMode(streamType)) || mUseFixedVolume)) {
                     int size = streamState.mDeathHandlers.size();
                     for (int i = 0; i < size; i++) {
                         streamState.mDeathHandlers.get(i).mMuteCount = 1;
@@ -2833,8 +2879,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         public synchronized void readSettings() {
-            int remainingDevices = AudioSystem.DEVICE_OUT_ALL;
-
+            // force maximum volume on all streams if fixed volume property is set
+            if (mUseFixedVolume) {
+                mIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, mIndexMax);
+                mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, mIndexMax);
+                return;
+            }
             // do not read system stream volume from settings: this stream is always aliased
             // to another stream type and its volume is never persisted. Values in settings can
             // only be stale values
@@ -2854,6 +2904,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, index);
                 return;
             }
+
+            int remainingDevices = AudioSystem.DEVICE_OUT_ALL;
 
             for (int i = 0; remainingDevices != 0; i++) {
                 int device = (1 << i);
@@ -2972,7 +3024,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     index = mIndexMax;
                 }
             }
-            mIndex.put(device, getValidIndex(index));
+            mIndex.put(device, index);
 
             if (oldIndex != index) {
                 if (lastAudible) {
@@ -3106,7 +3158,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         private int getValidIndex(int index) {
             if (index < 0) {
                 return 0;
-            } else if (index > mIndexMax) {
+            } else if (mUseFixedVolume || index > mIndexMax) {
                 return mIndexMax;
             }
 
@@ -3328,6 +3380,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         private void persistVolume(VolumeStreamState streamState,
                                    int persistType,
                                    int device) {
+            if (mUseFixedVolume) {
+                return;
+            }
             if ((persistType & PERSIST_CURRENT) != 0) {
                 System.putIntForUser(mContentResolver,
                           streamState.getSettingNameForDevice(false /* lastAudible */, device),
@@ -3343,6 +3398,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         private void persistRingerMode(int ringerMode) {
+            if (mUseFixedVolume) {
+                return;
+            }
             Settings.Global.putInt(mContentResolver, Settings.Global.MODE_RINGER, ringerMode);
         }
 
@@ -3439,6 +3497,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     break;
 
                 case MSG_PERSIST_MASTER_VOLUME:
+                    if (mUseFixedVolume) {
+                        return;
+                    }
                     Settings.System.putFloatForUser(mContentResolver,
                                                     Settings.System.VOLUME_MASTER,
                                                     (float)msg.arg1 / (float)1000.0,
@@ -3446,6 +3507,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     break;
 
                 case MSG_PERSIST_MASTER_VOLUME_MUTE:
+                    if (mUseFixedVolume) {
+                        return;
+                    }
                     Settings.System.putIntForUser(mContentResolver,
                                                  Settings.System.VOLUME_MASTER_MUTE,
                                                  msg.arg1,
