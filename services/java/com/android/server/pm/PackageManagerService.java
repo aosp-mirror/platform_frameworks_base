@@ -352,6 +352,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     final HashMap<String, FeatureInfo> mAvailableFeatures =
             new HashMap<String, FeatureInfo>();
 
+    // If mac_permissions.xml was found for seinfo labeling.
+    boolean mFoundPolicyFile;
+
     // All available activities, for your resolving pleasure.
     final ActivityIntentResolver mActivities =
             new ActivityIntentResolver();
@@ -1019,6 +1022,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mInstallLock, mPackages);
 
             readPermissions();
+
+            mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
 
             mRestoredSettings = mSettings.readLPw(sUserManager.getUsers(false),
                     mSdkVersion, mOnlyCore);
@@ -3582,9 +3587,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private int createDataDirsLI(String packageName, int uid) {
+    private int createDataDirsLI(String packageName, int uid, String seinfo) {
         int[] users = sUserManager.getUserIds();
-        int res = mInstaller.install(packageName, uid, uid);
+        int res = mInstaller.install(packageName, uid, uid, seinfo);
         if (res < 0) {
             return res;
         }
@@ -3847,6 +3852,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
 
+            if (mFoundPolicyFile) {
+                SELinuxMMAC.assignSeinfoValue(pkg);
+            }
+
             pkg.applicationInfo.uid = pkgSetting.appId;
             pkg.mExtras = pkgSetting;
 
@@ -3985,7 +3994,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             recovered = true;
 
                             // And now re-install the app.
-                            ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
+                            ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid,
+                                                   pkg.applicationInfo.seinfo);
                             if (ret == -1) {
                                 // Ack should not happen!
                                 msg = prefix + pkg.packageName
@@ -4031,7 +4041,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.v(TAG, "Want this data dir: " + dataPath);
                 }
                 //invoke installer to do the actual installation
-                int ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
+                int ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid,
+                                           pkg.applicationInfo.seinfo);
                 if (ret < 0) {
                     // Error from installer
                     mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
