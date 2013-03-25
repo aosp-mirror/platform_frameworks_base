@@ -641,7 +641,7 @@
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Dhibiti ni mara ngapi nenosiri la kufunga skrini linafaa libadilishwe."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Weka msimbo fiche wa hifadhi"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Inahitaji kwamba data ya programu iliyohifadhiwa iwe na msimbo fiche."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Lemaza kamera"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Zima kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zuia matumizi yote ya kamera za kifaa."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Lemaza vipengele kwenye kilinzi cha kitufe."</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Inazuia matumizi ya baadhi ya vipengele kwenye kilinzi cha kitufe."</string>
