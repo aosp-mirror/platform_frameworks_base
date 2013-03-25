@@ -16,17 +16,39 @@
 
 package com.android.server.am;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.os.Looper;
+
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public class ActivityStackSupervisor {
+    public static final int HOME_STACK_ID = 0;
 
     final ActivityManagerService mService;
+    final Context mContext;
+    final Looper mLooper;
 
     /** Dismiss the keyguard after the next activity is displayed? */
     private boolean mDismissKeyguardOnNextActivity = false;
 
-    public ActivityStackSupervisor(ActivityManagerService service) {
+    private ActivityStack mHomeStack;
+    private ActivityStack mMainStack;
+    private ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
+
+    public ActivityStackSupervisor(ActivityManagerService service, Context context,
+            Looper looper) {
         mService = service;
+        mContext = context;
+        mLooper = looper;
+    }
+
+    void init() {
+        mHomeStack = new ActivityStack(mService, mContext, mLooper, HOME_STACK_ID, this);
+        setMainStack(mHomeStack);
+        mService.mFocusedStack = mHomeStack;
     }
 
     void dismissKeyguard() {
@@ -36,8 +58,21 @@ public class ActivityStackSupervisor {
         }
     }
 
+    boolean isMainStack(ActivityStack stack) {
+        return stack == mMainStack;
+    }
+
+    void setMainStack(ActivityStack stack) {
+        mMainStack = stack;
+    }
+
     void setDismissKeyguard(boolean dismiss) {
         mDismissKeyguardOnNextActivity = dismiss;
+    }
+
+    void startHomeActivity(Intent intent, ActivityInfo aInfo) {
+        mHomeStack.startActivityLocked(null, intent, null, aInfo, null, null, 0, 0, 0, null, 0,
+                null, false, null);
     }
 
     public void dump(PrintWriter pw, String prefix) {

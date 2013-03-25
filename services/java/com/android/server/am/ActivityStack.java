@@ -152,7 +152,6 @@ final class ActivityStack {
     }
 
     final ActivityManagerService mService;
-    final boolean mMainStack;
 
     final Context mContext;
 
@@ -450,12 +449,11 @@ final class ActivityStack {
         return count;
     }
 
-    ActivityStack(ActivityManagerService service, Context context, boolean mainStack, Looper looper,
-            int stackId, ActivityStackSupervisor supervisor) {
+    ActivityStack(ActivityManagerService service, Context context, Looper looper, int stackId,
+            ActivityStackSupervisor supervisor) {
         mHandler = new ActivityStackHandler(looper);
         mService = service;
         mContext = context;
-        mMainStack = mainStack;
         PowerManager pm =
             (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
@@ -836,7 +834,7 @@ final class ActivityStack {
         // launching the initial activity (that is, home), so that it can have
         // a chance to initialize itself while in the background, making the
         // switch back to it faster and look better.
-        if (mMainStack) {
+        if (mStackSupervisor.isMainStack(this)) {
             mService.startSetupActivityLocked();
         }
 
@@ -1035,7 +1033,7 @@ final class ActivityStack {
                         prev.shortComponentName);
                 prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
                         userLeaving, prev.configChangeFlags);
-                if (mMainStack) {
+                if (mStackSupervisor.isMainStack(this)) {
                     mService.updateUsageStats(prev, false);
                 }
             } catch (Exception e) {
@@ -1273,11 +1271,11 @@ final class ActivityStack {
             mHandler.sendMessage(msg);
         }
 
-        if (mMainStack) {
+        if (mStackSupervisor.isMainStack(this)) {
             mService.reportResumedActivityLocked(next);
         }
 
-        if (mMainStack) {
+        if (mStackSupervisor.isMainStack(this)) {
             mService.setFocusedActivityLocked(next);
         }
         next.resumeKeyDispatchingLocked();
@@ -1462,7 +1460,7 @@ final class ActivityStack {
         if (next == null) {
             // There are no more activities!  Let's just start up the
             // Launcher...
-            if (mMainStack) {
+            if (mStackSupervisor.isMainStack(this)) {
                 ActivityOptions.abort(options);
                 return mService.startHomeActivityLocked(mCurrentUser);
             }
@@ -1703,7 +1701,7 @@ final class ActivityStack {
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
             boolean updated = false;
-            if (mMainStack) {
+            if (mStackSupervisor.isMainStack(this)) {
                 synchronized (mService) {
                     Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
                             mService.mConfiguration,
@@ -1728,7 +1726,7 @@ final class ActivityStack {
                     // Do over!
                     mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
                 }
-                if (mMainStack) {
+                if (mStackSupervisor.isMainStack(this)) {
                     mService.setFocusedActivityLocked(next);
                 }
                 ensureActivitiesVisibleLocked(null, 0);
@@ -1776,7 +1774,7 @@ final class ActivityStack {
                 if (!next.hasBeenLaunched) {
                     next.hasBeenLaunched = true;
                 } else {
-                    if (SHOW_APP_STARTING_PREVIEW && mMainStack) {
+                    if (SHOW_APP_STARTING_PREVIEW && mStackSupervisor.isMainStack(this)) {
                         mService.mWindowManager.setAppStartingWindow(
                                 next.appToken, next.packageName, next.theme,
                                 mService.compatibilityInfoForPackageLocked(
@@ -2549,7 +2547,7 @@ final class ActivityStack {
             throw new SecurityException(msg);
         }
 
-        if (mMainStack) {
+        if (mStackSupervisor.isMainStack(this)) {
             if (mService.mController != null) {
                 boolean abort = false;
                 try {
@@ -2584,7 +2582,7 @@ final class ActivityStack {
             outActivity[0] = r;
         }
 
-        if (mMainStack) {
+        if (mStackSupervisor.isMainStack(this)) {
             if (mResumedActivity == null
                     || mResumedActivity.info.applicationInfo.uid != callingUid) {
                 if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
@@ -3086,7 +3084,7 @@ final class ActivityStack {
 
             final long origId = Binder.clearCallingIdentity();
 
-            if (mMainStack && aInfo != null &&
+            if (mStackSupervisor.isMainStack(this) && aInfo != null &&
                     (aInfo.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
@@ -3160,7 +3158,7 @@ final class ActivityStack {
                     aInfo, resultTo, resultWho, requestCode, callingPid, callingUid,
                     callingPackage, startFlags, options, componentSpecified, null);
 
-            if (mConfigWillChange && mMainStack) {
+            if (mConfigWillChange && mStackSupervisor.isMainStack(this)) {
                 // If the caller also wants to switch to a new configuration,
                 // do so now.  This allows a clean switch, as we are waiting
                 // for the current activity to pause (so we will not destroy
@@ -3259,7 +3257,7 @@ final class ActivityStack {
                     // TODO: New, check if this is correct
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
-                    if (mMainStack && aInfo != null && (aInfo.applicationInfo.flags
+                    if (mStackSupervisor.isMainStack(this) && aInfo != null && (aInfo.applicationInfo.flags
                             & ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                         throw new IllegalArgumentException(
                                 "FLAG_CANT_SAVE_STATE not supported here");
@@ -3361,7 +3359,7 @@ final class ActivityStack {
         }
 
         if (r.app != null && r.app.thread != null) {
-            if (mMainStack) {
+            if (mStackSupervisor.isMainStack(this)) {
                 if (mService.mFocusedActivity == r) {
                     mService.setFocusedActivityLocked(topRunningActivityLocked(null));
                 }
@@ -3512,13 +3510,12 @@ final class ActivityStack {
                 ensureActivitiesVisibleLocked(null, 0);
 
                 //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
-                if (mMainStack) {
+                if (mStackSupervisor.isMainStack(this)) {
                     if (!mService.mBooted) {
                         mService.mBooted = true;
                         enableScreen = true;
                     }
                 }
-                
             } else if (fromTimeout) {
                 reportActivityLaunchedLocked(fromTimeout, null, -1, -1);
             }
@@ -3535,7 +3532,7 @@ final class ActivityStack {
                 mCancelledThumbnails.clear();
             }
 
-            if (mMainStack) {
+            if (mStackSupervisor.isMainStack(this)) {
                 booting = mService.mBooting;
                 mService.mBooting = false;
             }
@@ -3763,7 +3760,7 @@ final class ActivityStack {
         }
 
         r.pauseKeyDispatchingLocked();
-        if (mMainStack) {
+        if (mStackSupervisor.isMainStack(this)) {
             if (mService.mFocusedActivity == r) {
                 mService.setFocusedActivityLocked(topRunningActivityLocked(null));
             }
@@ -4429,7 +4426,7 @@ final class ActivityStack {
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
-        if (mMainStack && mService.mController != null) {
+        if (mStackSupervisor.isMainStack(this) && mService.mController != null) {
             ActivityRecord next = topRunningActivityLocked(null, task);
             if (next == null) {
                 next = topRunningActivityLocked(null, 0);
@@ -4770,7 +4767,7 @@ final class ActivityStack {
         if (andResume) {
             r.results = null;
             r.newIntents = null;
-            if (mMainStack) {
+            if (mStackSupervisor.isMainStack(this)) {
                 mService.reportResumedActivityLocked(r);
             }
             r.state = ActivityState.RESUMED;

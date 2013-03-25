@@ -200,7 +200,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static final boolean DEBUG_IMMERSIVE = localLOGV || false;
     static final boolean VALIDATE_TOKENS = true;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
-    
+
     // Control over CPU and battery monitoring.
     static final long BATTERY_STATS_TIME = 30*60*1000;      // write battery stats every 30 minutes.
     static final boolean MONITOR_CPU_USAGE = true;
@@ -212,14 +212,14 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     // The flags that are set for all calls we make to the package manager.
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
-    
+
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
     static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
     // Maximum number of recent tasks that we can remember.
     static final int MAX_RECENT_TASKS = 20;
-    
+
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
     static final long APP_SWITCH_DELAY_TIME = 5*1000;
@@ -286,7 +286,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     /** The current stack for manipulating */
     public ActivityStack mFocusedStack;
-    public ActivityStack mHomeStack;
 
     private final boolean mHeadless;
 
@@ -313,10 +312,9 @@ public final class ActivityManagerService  extends ActivityManagerNative
             stack = _stack;
         }
     }
-    
+
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
             = new ArrayList<PendingActivityLaunch>();
-    
 
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
@@ -402,7 +400,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * The currently running heavy-weight process, if any.
      */
     ProcessRecord mHeavyWeightProcess = null;
-    
+
     /**
      * The last time that various processes have crashed.
      */
@@ -438,7 +436,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     }
     final SparseArray<ForegroundToken> mForegroundProcesses
             = new SparseArray<ForegroundToken>();
-    
+
     /**
      * List of records for processes that someone had tried to start before the
      * system was ready.  We don't start them at that point, but ensure they
@@ -480,7 +478,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * the "home" activity.
      */
     ProcessRecord mHomeProcess;
-    
+
     /**
      * This is the process holding the activity the user last visited that
      * is in a different process from the one they are currently in.
@@ -658,12 +656,12 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * any user id that can impact battery performance.
      */
     final BatteryStatsService mBatteryStatsService;
-    
+
     /**
      * Information about component usage
      */
     final UsageStatsService mUsageStatsService;
-    
+
     /**
      * Information about and control over application operations
      */
@@ -681,7 +679,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * configurations.
      */
     int mConfigurationSeq = 0;
-    
+
     /**
      * Hardware-reported OpenGLES version.
      */
@@ -697,7 +695,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * Temporary to avoid allocations.  Protected by main lock.
      */
     final StringBuilder mStringBuilder = new StringBuilder(256);
-    
+
     /**
      * Used to control how we initialize the service.
      */
@@ -718,7 +716,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     int mFactoryTest;
 
     boolean mCheckedForSetup;
-    
+
     /**
      * The time at which we will allow normal application switches again,
      * after a call to {@link #stopAppSwitches()}.
@@ -730,7 +728,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * is set; any switches after that will clear the time.
      */
     boolean mDidAppSwitch;
-    
+
     /**
      * Last time (in realtime) at which we checked for power usage.
      */
@@ -804,13 +802,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * N procs were started.
      */
     int[] mProcDeaths = new int[20];
-    
+
     /**
      * This is set if we had to do a delayed dexopt of an app before launching
      * it, to increasing the ANR timeouts in that case.
      */
     boolean mDidDexOpt;
-    
+
     String mDebugApp = null;
     boolean mWaitForDebugger = false;
     boolean mDebugTransient = false;
@@ -850,7 +848,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
      * protect all related state.
      */
     final Thread mProcessStatsThread;
-    
+
     /**
      * Used to collect process stats when showing not responding dialog.
      * Protected by mProcessStatsThread.
@@ -1486,9 +1484,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         m.mFactoryTest = factoryTest;
         m.mLooper = thr.mLooper;
 
-        m.mStackSupervisor = new ActivityStackSupervisor(m);
-        m.mHomeStack = m.mFocusedStack = new ActivityStack(m, context, true, thr.mLooper,
-                HOME_ACTIVITY_STACK, m.mStackSupervisor);
+        m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
+        m.mStackSupervisor.init();
         m.mStacks.add(m.mFocusedStack);
 
         m.mBatteryStatsService.publish(context);
@@ -2322,8 +2319,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     aInfo.applicationInfo.uid);
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mHomeStack.startActivityLocked(null, intent, null, aInfo,
-                        null, null, 0, 0, 0, null, 0, null, false, null);
+                mStackSupervisor.startHomeActivity(intent, aInfo);
             }
         }
 
@@ -6147,7 +6143,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     break;
                 }
             }
-            mStacks.add(new ActivityStack(this, mContext, false, mLooper, mLastStackId,
+            mStacks.add(new ActivityStack(this, mContext, mLooper, mLastStackId,
                     mStackSupervisor));
             mWindowManager.createStack(mLastStackId, position, relativeStackId, weight);
             return mLastStackId;
