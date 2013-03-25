@@ -28,7 +28,7 @@ dir_rec_t android_app_lib_dir;
 dir_rec_t android_media_dir;
 dir_rec_array_t android_system_dirs;
 
-int install(const char *pkgname, uid_t uid, gid_t gid)
+int install(const char *pkgname, uid_t uid, gid_t gid, const char *seinfo)
 {
     char pkgdir[PKG_PATH_MAX];
     char libsymlink[PKG_PATH_MAX];
@@ -91,7 +91,7 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
         return -1;
     }
 
-    if (selinux_android_setfilecon(pkgdir, pkgname, uid) < 0) {
+    if (selinux_android_setfilecon2(pkgdir, pkgname, seinfo, uid) < 0) {
         ALOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(libsymlink);
         unlink(pkgdir);

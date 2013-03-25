@@ -192,7 +192,7 @@ int ensure_media_user_dirs(userid_t userid);
 
 /* commands.c */
 
-int install(const char *pkgname, uid_t uid, gid_t gid);
+int install(const char *pkgname, uid_t uid, gid_t gid, const char *seinfo);
 int uninstall(const char *pkgname, uid_t persona);
 int renamepkg(const char *oldpkgname, const char *newpkgname);
 int fix_uid(const char *pkgname, uid_t uid, gid_t gid);
