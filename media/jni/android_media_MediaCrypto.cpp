@@ -74,7 +74,7 @@ sp<ICrypto> JCrypto::MakeCrypto() {
 
     sp<ICrypto> crypto = service->makeCrypto();
 
-    if (crypto == NULL || crypto->initCheck() != OK) {
+    if (crypto == NULL || (crypto->initCheck() != OK && crypto->initCheck() != NO_INIT)) {
         return NULL;
     }
 
