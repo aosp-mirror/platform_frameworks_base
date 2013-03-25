@@ -2240,6 +2240,34 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private static void checkGrantRevokePermissions(PackageParser.Package pkg, BasePermission bp) {
+        int index = pkg.requestedPermissions.indexOf(bp.name);
+        if (index == -1) {
+            throw new SecurityException("Package " + pkg.packageName
+                    + " has not requested permission " + bp.name);
+        }
+        boolean isNormal =
+                ((bp.protectionLevel&PermissionInfo.PROTECTION_MASK_BASE)
+                        == PermissionInfo.PROTECTION_NORMAL);
+        boolean isDangerous =
+                ((bp.protectionLevel&PermissionInfo.PROTECTION_MASK_BASE)
+                        == PermissionInfo.PROTECTION_DANGEROUS);
+        boolean isDevelopment =
+                ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0);
+
+        if (!isNormal && !isDangerous && !isDevelopment) {
+            throw new SecurityException("Permission " + bp.name
+                    + " is not a changeable permission type");
+        }
+
+        if (isNormal || isDangerous) {
+            if (pkg.requestedPermissionsRequired.get(index)) {
+                throw new SecurityException("Can't change " + bp.name
+                        + ". It is required by the application");
+            }
+        }
+    }
+
     public void grantPermission(String packageName, String permissionName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.GRANT_REVOKE_PERMISSIONS, null);
@@ -2250,21 +2278,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             final BasePermission bp = mSettings.mPermissions.get(permissionName);
             if (bp == null) {
-                throw new IllegalArgumentException("Unknown permission: " + packageName);
+                throw new IllegalArgumentException("Unknown permission: " + permissionName);
             }
-            if (!pkg.requestedPermissions.contains(permissionName)) {
-                throw new SecurityException("Package " + packageName
-                        + " has not requested permission " + permissionName);
-            }
-            if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) == 0) {
-                throw new SecurityException("Permission " + permissionName
-                        + " is not a development permission");
-            }
+
+            checkGrantRevokePermissions(pkg, bp);
+
             final PackageSetting ps = (PackageSetting) pkg.mExtras;
             if (ps == null) {
                 return;
             }
-            final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
+            final GrantedPermissions gp = (ps.sharedUser != null) ? ps.sharedUser : ps;
             if (gp.grantedPermissions.add(permissionName)) {
                 if (ps.haveGids) {
                     gp.gids = appendInts(gp.gids, bp.gids);
@@ -2286,21 +2309,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             final BasePermission bp = mSettings.mPermissions.get(permissionName);
             if (bp == null) {
-                throw new IllegalArgumentException("Unknown permission: " + packageName);
+                throw new IllegalArgumentException("Unknown permission: " + permissionName);
             }
-            if (!pkg.requestedPermissions.contains(permissionName)) {
-                throw new SecurityException("Package " + packageName
-                        + " has not requested permission " + permissionName);
-            }
-            if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) == 0) {
-                throw new SecurityException("Permission " + permissionName
-                        + " is not a development permission");
-            }
+
+            checkGrantRevokePermissions(pkg, bp);
+
             final PackageSetting ps = (PackageSetting) pkg.mExtras;
             if (ps == null) {
                 return;
             }
-            final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
+            final GrantedPermissions gp = (ps.sharedUser != null) ? ps.sharedUser : ps;
             if (gp.grantedPermissions.remove(permissionName)) {
                 gp.grantedPermissions.remove(permissionName);
                 if (ps.haveGids) {
