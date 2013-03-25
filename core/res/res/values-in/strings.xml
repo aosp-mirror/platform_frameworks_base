@@ -355,7 +355,7 @@
     <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"meminta aksesibilitas web yang disempurnakan"</string>
     <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Memungkinkan pemegang meminta pengaktifan penyempurnaan aksesibilitas web. Contohnya, memasang skrip agar konten aplikasi lebih mudah diakses."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"mengikat ke layanan SMS"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan teks (mis. SpellCheckerService). Tidak pernah diperlukan oleh apl normal."</string>
+    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan teks (misal: SpellCheckerService). Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"mengikat ke layanan VPN"</string>
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan Vpn. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"mengikat ke wallpaper"</string>
