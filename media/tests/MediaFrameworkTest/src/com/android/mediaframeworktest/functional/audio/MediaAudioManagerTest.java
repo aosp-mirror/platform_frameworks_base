@@ -42,6 +42,7 @@ public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<Medi
     private final static int WAIT_FOR_LOOPER_TO_INITIALIZE_MS = 60000;  // 60s
     private int[] ringtoneMode = {AudioManager.RINGER_MODE_NORMAL,
              AudioManager.RINGER_MODE_SILENT, AudioManager.RINGER_MODE_VIBRATE};
+    private boolean mUseFixedVolume;
 
     public MediaAudioManagerTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -65,6 +66,10 @@ public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<Medi
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        mUseFixedVolume = getActivity().getResources().getBoolean(
+                com.android.internal.R.bool.config_useFixedVolume);
+
         synchronized(mLooperLock) {
             initializeAudioManagerWithLooper();
             try {
@@ -91,10 +96,12 @@ public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<Medi
 
      public boolean validateSetRingTone(int i) {
          int getRingtone = mAudioManager.getRingerMode();
-         if (i != getRingtone)
-             return false;
-         else
-             return true;
+
+         if (mUseFixedVolume) {
+             return (getRingtone == AudioManager.RINGER_MODE_NORMAL);
+         } else {
+             return (getRingtone == i);
+         }
      }
 
      // Test case 1: Simple test case to validate the set ringtone mode
