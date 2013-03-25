@@ -507,16 +507,25 @@ public class AppSecurityPermissions {
     private boolean isDisplayablePermission(PermissionInfo pInfo, int newReqFlags,
             int existingReqFlags) {
         final int base = pInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
-        // Dangerous and normal permissions are always shown to the user.
-        if (base == PermissionInfo.PROTECTION_DANGEROUS ||
-                base == PermissionInfo.PROTECTION_NORMAL) {
+        final boolean isNormal = (base == PermissionInfo.PROTECTION_NORMAL);
+        final boolean isDangerous = (base == PermissionInfo.PROTECTION_DANGEROUS);
+        final boolean isRequired =
+                ((newReqFlags&PackageInfo.REQUESTED_PERMISSION_REQUIRED) != 0);
+        final boolean isDevelopment =
+                ((pInfo.protectionLevel&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0);
+        final boolean wasGranted =
+                ((existingReqFlags&PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0);
+
+        // Dangerous and normal permissions are always shown to the user if the permission
+        // is required, or it was previously granted
+        if ((isNormal || isDangerous) && (isRequired || wasGranted)) {
             return true;
         }
+
         // Development permissions are only shown to the user if they are already
         // granted to the app -- if we are installing an app and they are not
         // already granted, they will not be granted as part of the install.
-        if ((existingReqFlags&PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
-                && (pInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
+        if (isDevelopment && wasGranted) {
             if (localLOGV) Log.i(TAG, "Special perm " + pInfo.name
                     + ": protlevel=0x" + Integer.toHexString(pInfo.protectionLevel));
             return true;
