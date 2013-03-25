@@ -228,14 +228,6 @@ public class AppSecurityPermissions {
         mNewPermPrefix = mContext.getText(R.string.perms_new_perm_prefix);
     }
 
-    public AppSecurityPermissions(Context context, List<PermissionInfo> permList) {
-        this(context);
-        for (PermissionInfo pi : permList) {
-            mPermsList.add(new MyPermissionInfo(pi));
-        }
-        setPermissions(mPermsList);
-    }
-    
     public AppSecurityPermissions(Context context, String packageName) {
         this(context);
         Set<MyPermissionInfo> permSet = new HashSet<MyPermissionInfo>();
