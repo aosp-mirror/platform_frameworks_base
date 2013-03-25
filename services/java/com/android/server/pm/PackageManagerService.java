@@ -5933,7 +5933,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 null);
 
         final int uid = Binder.getCallingUid();
-        if (!isUserAllowed(UserHandle.getUserId(uid), UserManager.ALLOW_INSTALL_APPS)) {
+        if (isUserRestricted(UserHandle.getUserId(uid), UserManager.DISALLOW_INSTALL_APPS)) {
             try {
                 observer.packageInstalled("", PackageManager.INSTALL_FAILED_USER_RESTRICTED);
             } catch (RemoteException re) {
@@ -5981,7 +5981,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "installExistingPackage for user " + userId);
         }
-        if (!isUserAllowed(userId, UserManager.ALLOW_INSTALL_APPS)) {
+        if (isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
         }
 
@@ -6015,13 +6015,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private boolean isUserAllowed(int userId, String restrictionKey) {
+    private boolean isUserRestricted(int userId, String restrictionKey) {
         Bundle restrictions = sUserManager.getUserRestrictions(userId);
-        if (!restrictions.getBoolean(UserManager.ALLOW_INSTALL_APPS)) {
-            Log.w(TAG, "User does not have permission to: " + restrictionKey);
-            return false;
+        if (restrictions.getBoolean(restrictionKey, false)) {
+            Log.w(TAG, "User is restricted: " + restrictionKey);
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -8418,7 +8418,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "deletePackage for user " + userId);
         }
-        if (!isUserAllowed(userId, UserManager.ALLOW_UNINSTALL_APPS)) {
+        if (isUserRestricted(userId, UserManager.DISALLOW_UNINSTALL_APPS)) {
             try {
                 observer.packageDeleted(packageName, PackageManager.DELETE_FAILED_USER_RESTRICTED);
             } catch (RemoteException re) {
@@ -8464,7 +8464,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
         try {
-            if (dpm != null && dpm.packageHasActiveAdmins(packageName, userId)) {
+            if (dpm != null && (dpm.packageHasActiveAdmins(packageName, userId)
+                    || dpm.isDeviceOwner(packageName))) {
                 Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
                 return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
             }
