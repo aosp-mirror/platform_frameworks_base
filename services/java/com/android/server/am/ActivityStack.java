@@ -286,11 +286,6 @@ final class ActivityStack {
     boolean mSleepTimeout = false;
 
     /**
-     * Dismiss the keyguard after the next activity is displayed?
-     */
-    boolean mDismissKeyguardOnNextActivity = false;
-
-    /**
      * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
      * screenshots, one for the Recents thumbnail and one for the pauseActivity thumbnail.
      */
@@ -309,6 +304,9 @@ final class ActivityStack {
     private int mCurrentUser;
 
     final int mStackId;
+
+    /** Run all ActivityStacks through this */
+    final ActivityStackSupervisor mStackSupervisor;
 
     static final int SLEEP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG;
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
@@ -453,7 +451,7 @@ final class ActivityStack {
     }
 
     ActivityStack(ActivityManagerService service, Context context, boolean mainStack, Looper looper,
-            int stackId) {
+            int stackId, ActivityStackSupervisor supervisor) {
         mHandler = new ActivityStackHandler(looper);
         mService = service;
         mContext = context;
@@ -464,6 +462,7 @@ final class ActivityStack {
         mLaunchingActivity = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
         mLaunchingActivity.setReferenceCounted(false);
         mStackId = stackId;
+        mStackSupervisor = supervisor;
     }
 
     private boolean okToShow(ActivityRecord r) {
@@ -2518,7 +2517,7 @@ final class ActivityStack {
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
-            mDismissKeyguardOnNextActivity = false;
+            mStackSupervisor.setDismissKeyguard(false);
             ActivityOptions.abort(options);
             return err;
         }
@@ -2533,7 +2532,7 @@ final class ActivityStack {
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
-            mDismissKeyguardOnNextActivity = false;
+            mStackSupervisor.setDismissKeyguard(false);
             String msg;
             if (!aInfo.exported) {
                 msg = "Permission Denial: starting " + intent.toString()
@@ -2571,7 +2570,7 @@ final class ActivityStack {
                     }
                     // We pretend to the caller that it was really started, but
                     // they will just get a cancel result.
-                    mDismissKeyguardOnNextActivity = false;
+                    mStackSupervisor.setDismissKeyguard(false);
                     ActivityOptions.abort(options);
                     return ActivityManager.START_SUCCESS;
                 }
@@ -2592,7 +2591,7 @@ final class ActivityStack {
                     PendingActivityLaunch pal =
                             new PendingActivityLaunch(r, sourceRecord, startFlags, this);
                     mService.mPendingActivityLaunches.add(pal);
-                    mDismissKeyguardOnNextActivity = false;
+                    mStackSupervisor.setDismissKeyguard(false);
                     ActivityOptions.abort(options);
                     return ActivityManager.START_SWITCHES_CANCELED;
                 }
@@ -2614,13 +2613,12 @@ final class ActivityStack {
 
         err = startActivityUncheckedLocked(r, sourceRecord,
                 startFlags, true, options);
-        if (mDismissKeyguardOnNextActivity && mPausingActivity == null) {
+        if (mPausingActivity == null) {
             // Someone asked to have the keyguard dismissed on the next
             // activity start, but we are not actually doing an activity
             // switch...  just dismiss the keyguard now, because we
             // probably want to see whatever is behind it.
-            mDismissKeyguardOnNextActivity = false;
-            mService.mWindowManager.dismissKeyguard();
+            mStackSupervisor.dismissKeyguard();
         }
         return err;
     }
@@ -3080,14 +3078,14 @@ final class ActivityStack {
             } else {
                 callingPid = callingUid = -1;
             }
-            
+
             mConfigWillChange = config != null
                     && mService.mConfiguration.diff(config) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG,
                     "Starting activity when config will change = " + mConfigWillChange);
-            
+
             final long origId = Binder.clearCallingIdentity();
-            
+
             if (mMainStack && aInfo != null &&
                     (aInfo.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Check to see if we already
@@ -3111,13 +3109,13 @@ final class ActivityStack {
                                 return ActivityManager.START_PERMISSION_DENIED;
                             }
                         }
-                        
+
                         IIntentSender target = mService.getIntentSenderLocked(
                                 ActivityManager.INTENT_SENDER_ACTIVITY, "android",
                                 realCallingUid, userId, null, null, 0, new Intent[] { intent },
                                 new String[] { resolvedType }, PendingIntent.FLAG_CANCEL_CURRENT
                                 | PendingIntent.FLAG_ONE_SHOT, null);
-                        
+
                         Intent newIntent = new Intent();
                         if (requestCode >= 0) {
                             // Caller is requesting a result.
@@ -3157,11 +3155,11 @@ final class ActivityStack {
                     }
                 }
             }
-            
+
             int res = startActivityLocked(caller, intent, resolvedType,
                     aInfo, resultTo, resultWho, requestCode, callingPid, callingUid,
                     callingPackage, startFlags, options, componentSpecified, null);
-            
+
             if (mConfigWillChange && mMainStack) {
                 // If the caller also wants to switch to a new configuration,
                 // do so now.  This allows a clean switch, as we are waiting
@@ -3174,9 +3172,9 @@ final class ActivityStack {
                         "Updating to new configuration after starting activity.");
                 mService.updateConfigurationLocked(config, null, false, false);
             }
-            
+
             Binder.restoreCallingIdentity(origId);
-            
+
             if (outResult != null) {
                 outResult.result = res;
                 if (res == ActivityManager.START_SUCCESS) {
@@ -3206,11 +3204,11 @@ final class ActivityStack {
                     }
                 }
             }
-            
+
             return res;
         }
     }
-    
+
     final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
             Bundle options, int userId) {
@@ -3315,11 +3313,7 @@ final class ActivityStack {
             w.thisTime = w.totalTime;
         }
         mService.notifyAll();
-
-        if (mDismissKeyguardOnNextActivity) {
-            mDismissKeyguardOnNextActivity = false;
-            mService.mWindowManager.dismissKeyguard();
-        }
+        mStackSupervisor.dismissKeyguard();
     }
 
     void sendActivityResultLocked(int callingUid, ActivityRecord r,
@@ -4786,10 +4780,6 @@ final class ActivityStack {
         }
 
         return true;
-    }
-    
-    public void dismissKeyguardOnNextActivityLocked() {
-        mDismissKeyguardOnNextActivity = true;
     }
 
     boolean willActivityBeVisibleLocked(IBinder token) {

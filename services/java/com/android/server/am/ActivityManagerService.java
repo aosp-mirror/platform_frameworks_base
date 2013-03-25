@@ -281,6 +281,9 @@ public final class ActivityManagerService  extends ActivityManagerNative
     /** Identifier counter for all ActivityStacks */
     private int mLastStackId = 0;
 
+    /** Run all ActivityStacks through this */
+    ActivityStackSupervisor mStackSupervisor;
+
     /** The current stack for manipulating */
     public ActivityStack mFocusedStack;
     public ActivityStack mHomeStack;
@@ -1483,8 +1486,9 @@ public final class ActivityManagerService  extends ActivityManagerNative
         m.mFactoryTest = factoryTest;
         m.mLooper = thr.mLooper;
 
-        m.mHomeStack = m.mFocusedStack
-                = new ActivityStack(m, context, true, thr.mLooper, HOME_ACTIVITY_STACK);
+        m.mStackSupervisor = new ActivityStackSupervisor(m);
+        m.mHomeStack = m.mFocusedStack = new ActivityStack(m, context, true, thr.mLooper,
+                HOME_ACTIVITY_STACK, m.mStackSupervisor);
         m.mStacks.add(m.mFocusedStack);
 
         m.mBatteryStatsService.publish(context);
@@ -1680,6 +1684,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         Watchdog.getInstance().addMonitor(this);
 
         mProcessStatsThread = new Thread("ProcessStats") {
+            @Override
             public void run() {
                 while (true) {
                     try {
@@ -2046,12 +2051,12 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 // If this is a new package in the process, add the package to the list
                 app.addPackage(info.packageName);
                 return app;
-            } else {
-                // An application record is attached to a previous process,
-                // clean it up now.
-                if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG, "App died: " + app);
-                handleAppDiedLocked(app, true, true);
             }
+
+            // An application record is attached to a previous process,
+            // clean it up now.
+            if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG, "App died: " + app);
+            handleAppDiedLocked(app, true, true);
         }
 
         String hostingNameStr = hostingName != null
@@ -4432,11 +4437,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public void showBootMessage(final CharSequence msg, final boolean always) {
         enforceNotIsolatedCaller("showBootMessage");
         mWindowManager.showBootMessage(msg, always);
     }
 
+    @Override
     public void dismissKeyguardOnNextActivity() {
         enforceNotIsolatedCaller("dismissKeyguardOnNextActivity");
         final long token = Binder.clearCallingIdentity();
@@ -4446,7 +4453,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     mLockScreenShown = false;
                     comeOutOfSleepIfNeededLocked();
                 }
-                mFocusedStack.dismissKeyguardOnNextActivityLocked();
+                mStackSupervisor.setDismissKeyguard(true);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -6140,7 +6147,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     break;
                 }
             }
-            mStacks.add(new ActivityStack(this, mContext, false, mLooper, mLastStackId));
+            mStacks.add(new ActivityStack(this, mContext, false, mLooper, mLastStackId,
+                    mStackSupervisor));
             mWindowManager.createStack(mLastStackId, position, relativeStackId, weight);
             return mLastStackId;
         }
@@ -9289,10 +9297,10 @@ public final class ActivityManagerService  extends ActivityManagerNative
             if (dumpAll) {
                 pw.println("  mLastPausedActivity: " + stack.mLastPausedActivity);
                 pw.println("  mSleepTimeout: " + stack.mSleepTimeout);
-                pw.println("  mDismissKeyguardOnNextActivity: "
-                        + stack.mDismissKeyguardOnNextActivity);
             }
         }
+
+        mStackSupervisor.dump(pw, "  ");
 
         if (mRecentTasks.size() > 0) {
             pw.println();
