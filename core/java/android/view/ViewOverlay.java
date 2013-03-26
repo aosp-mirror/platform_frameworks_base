@@ -23,17 +23,21 @@ import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 
 /**
- * ViewOverlay is a container that View uses to host all objects (views and drawables) that
- * are added to its "overlay", gotten through {@link View#getOverlay()}. Views and drawables are
- * added to the overlay via the add/remove methods in this class. These views and drawables are
- * drawn whenever the view itself is drawn; first the view draws its own content (and children,
- * if it is a ViewGroup), then it draws its overlay (if it has one).
+ * ViewOverlay is a container that View uses to host all objects (views and
+ * drawables) that are added to its "overlay", gotten through
+ * {@link View#getOverlay()}. Views and drawables are added to the overlay
+ * via the add/remove methods in this class. These views and drawables are
+ * drawn whenever the view itself is drawn; first the view draws its own
+ * content (and children, if it is a ViewGroup), then it draws its overlay
+ * (if it has one).
  *
- * Besides managing and drawing the list of drawables, this class serves two purposes:
+ * Besides managing and drawing the list of drawables, this class serves
+ * two purposes:
  * (1) it noops layout calls because children are absolutely positioned and
- * (2) it forwards all invalidation calls to its host view. The invalidation redirect is
- * necessary because the overlay is not a child of the host view and invalidation cannot
- * therefore follow the normal path up through the parent hierarchy.
+ * (2) it forwards all invalidation calls to its host view. The invalidation
+ * redirect is necessary because the overlay is not a child of the host view
+ * and invalidation cannot therefore follow the normal path up through the
+ * parent hierarchy.
  *
  * @hide
  */
@@ -85,6 +89,22 @@ class ViewOverlay extends ViewGroup implements Overlay {
 
     @Override
     public void add(View child) {
+        int deltaX = 0;
+        int deltaY = 0;
+        if (child.getParent() instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) child.getParent();
+            if (parent != mHostView) {
+                // Moving to different container; figure out how to position child such that
+                // it is in the same location on the screen
+                int[] parentLocation = new int[2];
+                int[] hostViewLocation = new int[2];
+                parent.getLocationOnScreen(parentLocation);
+                mHostView.getLocationOnScreen(hostViewLocation);
+                child.offsetLeftAndRight(parentLocation[0] - hostViewLocation[0]);
+                child.offsetTopAndBottom(parentLocation[1] - hostViewLocation[1]);
+            }
+            parent.removeView(child);
+        }
         super.addView(child);
     }
 
@@ -133,7 +153,6 @@ class ViewOverlay extends ViewGroup implements Overlay {
     public void invalidate(Rect dirty) {
         super.invalidate(dirty);
         if (mHostView != null) {
-            dirty.offset(getLeft(), getTop());
             mHostView.invalidate(dirty);
         }
     }
@@ -203,7 +222,15 @@ class ViewOverlay extends ViewGroup implements Overlay {
     @Override
     public ViewParent invalidateChildInParent(int[] location, Rect dirty) {
         if (mHostView != null) {
-            mHostView.invalidate(dirty);
+            dirty.offset(location[0], location[1]);
+            if (mHostView instanceof ViewGroup) {
+                location[0] = 0;
+                location[1] = 0;
+                super.invalidateChildInParent(location, dirty);
+                return ((ViewGroup) mHostView).invalidateChildInParent(location, dirty);
+            } else {
+                invalidate(dirty);
+            }
         }
         return null;
     }
