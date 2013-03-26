@@ -835,6 +835,8 @@ public class ActionBarView extends AbsActionBarView {
                 (TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle))) {
             // Don't show while in expanded mode or with empty text
             mTitleLayout.setVisibility(GONE);
+        } else {
+            mTitleLayout.setVisibility(VISIBLE);
         }
     }
 
@@ -1587,15 +1589,10 @@ public class ActionBarView extends AbsActionBarView {
                     mTitleLayout.setVisibility(VISIBLE);
                 }
             }
-            if (mTabScrollView != null && mNavigationMode == ActionBar.NAVIGATION_MODE_TABS) {
-                mTabScrollView.setVisibility(VISIBLE);
-            }
-            if (mSpinner != null && mNavigationMode == ActionBar.NAVIGATION_MODE_LIST) {
-                mSpinner.setVisibility(VISIBLE);
-            }
-            if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
-                mCustomNavView.setVisibility(VISIBLE);
-            }
+            if (mTabScrollView != null) mTabScrollView.setVisibility(VISIBLE);
+            if (mSpinner != null) mSpinner.setVisibility(VISIBLE);
+            if (mCustomNavView != null) mCustomNavView.setVisibility(VISIBLE);
+
             mExpandedHomeLayout.setIcon(null);
             mCurrentExpandedItem = null;
             setHomeButtonEnabled(mWasHomeEnabled); // Set by expandItemActionView above
