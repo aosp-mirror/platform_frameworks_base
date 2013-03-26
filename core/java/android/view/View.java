@@ -12098,7 +12098,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         //System.out.println("Attached! " + this);
         mAttachInfo = info;
         if (mOverlay != null) {
-            mOverlay.mAttachInfo = info;
+            mOverlay.dispatchAttachedToWindow(info, visibility);
         }
         mWindowAttachCount++;
         // We will need to evaluate the drawable state at least once.
@@ -12169,7 +12169,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mAttachInfo = null;
         if (mOverlay != null) {
-            mOverlay.mAttachInfo = null;
+            mOverlay.dispatchDetachedFromWindow();
         }
     }
 
