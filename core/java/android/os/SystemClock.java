@@ -138,8 +138,6 @@ public final class SystemClock {
 
     /**
      * Returns milliseconds since boot, not counting time spent in deep sleep.
-     * <b>Note:</b> This value may get reset occasionally (before it would
-     * otherwise wrap around).
      *
      * @return milliseconds of non-sleep uptime since boot.
      */
