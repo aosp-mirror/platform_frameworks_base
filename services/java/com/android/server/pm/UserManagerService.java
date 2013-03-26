@@ -226,6 +226,13 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @Override
+    public boolean isRestricted() {
+        synchronized (mPackagesLock) {
+            return getUserInfoLocked(UserHandle.getCallingUserId()).isRestricted();
+        }
+    }
+
     /*
      * Should be locked on mUsers before calling this.
      */
@@ -558,7 +565,6 @@ public class UserManagerService extends IUserManager.Stub {
         mNextSerialNumber = MIN_USER_ID;
 
         Bundle restrictions = new Bundle();
-        initRestrictionsToDefaults(restrictions);
         mUserRestrictions.append(UserHandle.USER_OWNER, restrictions);
 
         updateUserIdsLocked();
@@ -608,11 +614,11 @@ public class UserManagerService extends IUserManager.Stub {
             Bundle restrictions = mUserRestrictions.get(userInfo.id);
             if (restrictions != null) {
                 serializer.startTag(null, TAG_RESTRICTIONS);
-                writeBoolean(serializer, restrictions, UserManager.ALLOW_CONFIG_WIFI);
-                writeBoolean(serializer, restrictions, UserManager.ALLOW_MODIFY_ACCOUNTS);
-                writeBoolean(serializer, restrictions, UserManager.ALLOW_INSTALL_APPS);
-                writeBoolean(serializer, restrictions, UserManager.ALLOW_UNINSTALL_APPS);
-                writeBoolean(serializer, restrictions, UserManager.ALLOW_CONFIG_LOCATION_ACCESS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_MODIFY_ACCOUNTS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_INSTALL_APPS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -676,7 +682,6 @@ public class UserManagerService extends IUserManager.Stub {
         long lastLoggedInTime = 0L;
         boolean partial = false;
         Bundle restrictions = new Bundle();
-        initRestrictionsToDefaults(restrictions);
 
         FileInputStream fis = null;
         try {
@@ -725,11 +730,11 @@ public class UserManagerService extends IUserManager.Stub {
                             name = parser.getText();
                         }
                     } else if (TAG_RESTRICTIONS.equals(tag)) {
-                        readBoolean(parser, restrictions, UserManager.ALLOW_CONFIG_WIFI);
-                        readBoolean(parser, restrictions, UserManager.ALLOW_MODIFY_ACCOUNTS);
-                        readBoolean(parser, restrictions, UserManager.ALLOW_INSTALL_APPS);
-                        readBoolean(parser, restrictions, UserManager.ALLOW_UNINSTALL_APPS);
-                        readBoolean(parser, restrictions, UserManager.ALLOW_CONFIG_LOCATION_ACCESS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_MODIFY_ACCOUNTS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_INSTALL_APPS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
                     }
                 }
             }
@@ -758,7 +763,9 @@ public class UserManagerService extends IUserManager.Stub {
     private void readBoolean(XmlPullParser parser, Bundle restrictions,
             String restrictionKey) {
         String value = parser.getAttributeValue(null, restrictionKey);
-        restrictions.putBoolean(restrictionKey, value == null ? true : Boolean.parseBoolean(value));
+        if (value != null) {
+            restrictions.putBoolean(restrictionKey, Boolean.parseBoolean(value));
+        }
     }
 
     private void writeBoolean(XmlSerializer xml, Bundle restrictions, String restrictionKey)
@@ -767,14 +774,6 @@ public class UserManagerService extends IUserManager.Stub {
             xml.attribute(null, restrictionKey,
                     Boolean.toString(restrictions.getBoolean(restrictionKey)));
         }
-    }
-
-    private void initRestrictionsToDefaults(Bundle restrictions) {
-        restrictions.putBoolean(UserManager.ALLOW_CONFIG_WIFI, true);
-        restrictions.putBoolean(UserManager.ALLOW_MODIFY_ACCOUNTS, true);
-        restrictions.putBoolean(UserManager.ALLOW_INSTALL_APPS, true);
-        restrictions.putBoolean(UserManager.ALLOW_UNINSTALL_APPS, true);
-        restrictions.putBoolean(UserManager.ALLOW_CONFIG_LOCATION_ACCESS, true);
     }
 
     private int readIntAttribute(XmlPullParser parser, String attr, int defaultValue) {
@@ -823,7 +822,6 @@ public class UserManagerService extends IUserManager.Stub {
                     writeUserLocked(userInfo);
                     updateUserIdsLocked();
                     Bundle restrictions = new Bundle();
-                    initRestrictionsToDefaults(restrictions);
                     mUserRestrictions.append(userId, restrictions);
                 }
             }
