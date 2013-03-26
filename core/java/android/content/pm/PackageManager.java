@@ -1754,7 +1754,6 @@ public abstract class PackageManager {
     /**
      * Returns an {@link Intent} suitable for passing to {@code startActivityForResult}
      * which prompts the user to grant {@code permissions} to this application.
-     * @hide
      *
      * @throws NullPointerException if {@code permissions} is {@code null}.
      * @throws IllegalArgumentException if {@code permissions} contains {@code null}.
