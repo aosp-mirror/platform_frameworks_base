@@ -605,7 +605,7 @@ ContentValues values = new ContentValues();
 Uri updateUri = null;
 // The new title for the event
 values.put(Events.TITLE, &quot;Kickboxing&quot;); 
-myUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().update(updateUri, values, null, null);
 Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
 
