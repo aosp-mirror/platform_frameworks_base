@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -23,20 +23,17 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <utils/Log.h>
+#include <utils/String8.h>
 
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(__arm__)
-extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize, 
-        size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
-        
-extern "C" void free_malloc_leak_info(uint8_t* info);
-#endif
+extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
+                                     size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
 
-#define MAPS_FILE_SIZE 65 * 1024
+extern "C" void free_malloc_leak_info(uint8_t* info);
 
 struct Header {
     size_t mapSize;
@@ -48,96 +45,57 @@ struct Header {
 
 namespace android {
 
+static void ReadFile(const char* path, String8& s) {
+    int fd = open(path, O_RDONLY);
+    if (fd != -1) {
+        char bytes[1024];
+        ssize_t byteCount;
+        while ((byteCount = TEMP_FAILURE_RETRY(read(fd, bytes, sizeof(bytes)))) > 0) {
+            s.append(bytes, byteCount);
+        }
+        close(fd);
+    }
+}
+
 /*
- * Retrieve the native heap information and the info from /proc/<self>/maps,
+ * Retrieve the native heap information and the info from /proc/self/maps,
  * copy them into a byte[] with a "struct Header" that holds data offsets,
  * and return the array.
  */
-static jbyteArray getLeakInfo(JNIEnv *env, jobject clazz)
-{
-#if defined(__arm__)
-    // get the info in /proc/[pid]/map
+static jbyteArray DdmHandleNativeHeap_getLeakInfo(JNIEnv* env, jobject) {
     Header header;
     memset(&header, 0, sizeof(header));
 
-    pid_t pid = getpid();
-
-    char path[FILENAME_MAX];
-    sprintf(path, "/proc/%d/maps", pid);
-
-    struct stat sb;
-    int ret = stat(path, &sb);
-
-    uint8_t* mapsFile = NULL;
-    if (ret == 0) {
-        mapsFile = (uint8_t*)malloc(MAPS_FILE_SIZE);
-        int fd = open(path, O_RDONLY);
-    
-        if (mapsFile != NULL && fd != -1) {
-            int amount = 0;
-            do {
-                uint8_t* ptr = mapsFile + header.mapSize;
-                amount = read(fd, ptr, MAPS_FILE_SIZE);
-                if (amount <= 0) {
-                    if (errno != EINTR)
-                        break; 
-                    else
-                        continue;
-                }
-                header.mapSize += amount;
-            } while (header.mapSize < MAPS_FILE_SIZE);
-            
-            ALOGD("**** read %d bytes from '%s'", (int) header.mapSize, path);
-        }
-    }
+    String8 maps;
+    ReadFile("/proc/self/maps", maps);
+    header.mapSize = maps.size();
 
     uint8_t* allocBytes;
-    get_malloc_leak_info(&allocBytes, &header.allocSize, &header.allocInfoSize, 
-            &header.totalMemory, &header.backtraceSize);
+    get_malloc_leak_info(&allocBytes, &header.allocSize, &header.allocInfoSize,
+                         &header.totalMemory, &header.backtraceSize);
 
-    jbyte* bytes = NULL;
-    jbyte* ptr = NULL;
+    ALOGD("*** mapSize: %d allocSize: %d allocInfoSize: %d totalMemory: %d",
+          header.mapSize, header.allocSize, header.allocInfoSize, header.totalMemory);
+
     jbyteArray array = env->NewByteArray(sizeof(Header) + header.mapSize + header.allocSize);
-    if (array == NULL) {
-        goto done;
+    if (array != NULL) {
+        env->SetByteArrayRegion(array, 0,
+                                sizeof(header), reinterpret_cast<jbyte*>(&header));
+        env->SetByteArrayRegion(array, sizeof(header),
+                                maps.size(), reinterpret_cast<const jbyte*>(maps.string()));
+        env->SetByteArrayRegion(array, sizeof(header) + maps.size(),
+                                header.allocSize, reinterpret_cast<jbyte*>(allocBytes));
     }
 
-    bytes = env->GetByteArrayElements(array, NULL);
-    ptr = bytes;
-
-//    ALOGD("*** mapSize: %d allocSize: %d allocInfoSize: %d totalMemory: %d", 
-//            header.mapSize, header.allocSize, header.allocInfoSize, header.totalMemory);
-
-    memcpy(ptr, &header, sizeof(header));
-    ptr += sizeof(header);
-    
-    if (header.mapSize > 0 && mapsFile != NULL) {
-        memcpy(ptr, mapsFile, header.mapSize);
-        ptr += header.mapSize;
-    }
-    
-    memcpy(ptr, allocBytes, header.allocSize);
-    env->ReleaseByteArrayElements(array, bytes, 0);
-
-done:
-    if (mapsFile != NULL) {
-        free(mapsFile);
-    }
-    // free the info up!
     free_malloc_leak_info(allocBytes);
-
     return array;
-#else
-    return NULL;
-#endif
 }
 
 static JNINativeMethod method_table[] = {
-    { "getLeakInfo", "()[B", (void*)getLeakInfo },
+    { "getLeakInfo", "()[B", (void*) DdmHandleNativeHeap_getLeakInfo },
 };
 
-int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env)
-{
+int register_android_ddm_DdmHandleNativeHeap(JNIEnv* env) {
     return AndroidRuntime::registerNativeMethods(env, "android/ddm/DdmHandleNativeHeap", method_table, NELEM(method_table));
 }
 
