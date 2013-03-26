@@ -95,16 +95,12 @@ public final class Formatter {
     }
 
     /**
-     * Returns a string in the canonical IP format ###.###.###.### from a packed integer containing
-     * the IP address.  The IP address is expected to be in little-endian format (LSB first). That
-     * is, 0x01020304 will return "4.3.2.1".
+     * Returns a string in the canonical IPv4 format ###.###.###.### from a packed integer
+     * containing the IP address. The IPv4 address is expected to be in little-endian
+     * format (LSB first). That is, 0x01020304 will return "4.3.2.1".
      *
-     * @param ipv4Address the IP address as a packed integer with LSB first.
-     * @return string with canonical IP address format.
-     *
-     * @deprecated this method doesn't support IPv6 addresses. Prefer {@link
-     *     java.net.InetAddress#getHostAddress()}, which supports both IPv4 and
-     *     IPv6 addresses.
+     * @deprecated Use {@link java.net.InetAddress#getHostAddress()}, which supports both IPv4 and
+     *     IPv6 addresses. This method does not support IPv6 addresses.
      */
     @Deprecated
     public static String formatIpAddress(int ipv4Address) {
