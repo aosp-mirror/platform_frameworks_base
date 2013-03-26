@@ -1677,11 +1677,11 @@ public class WifiStateMachine extends StateMachine {
         setNetworkDetailedState(DetailedState.DISCONNECTED);
         mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.DISCONNECTED);
 
-        /* send event to CM & network change broadcast */
-        sendNetworkStateChangeBroadcast(mLastBssid);
-
         /* Clear network properties */
         mLinkProperties.clear();
+
+        /* send event to CM & network change broadcast */
+        sendNetworkStateChangeBroadcast(mLastBssid);
 
         /* Clear IP settings if the network used DHCP */
         if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
