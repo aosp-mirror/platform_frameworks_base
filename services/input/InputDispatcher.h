@@ -165,6 +165,8 @@ struct InputTarget {
  * Input dispatcher configuration.
  *
  * Specifies various options that modify the behavior of the input dispatcher.
+ * The values provided here are merely defaults. The actual values will come from ViewConfiguration
+ * and are passed into the dispatcher during initialization.
  */
 struct InputDispatcherConfiguration {
     // The key repeat initial timeout.
