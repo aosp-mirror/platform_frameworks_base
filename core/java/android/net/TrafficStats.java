@@ -119,6 +119,8 @@ public class TrafficStats {
      * Tags between {@code 0xFFFFFF00} and {@code 0xFFFFFFFF} are reserved and
      * used internally by system services like {@link DownloadManager} when
      * performing traffic on behalf of an application.
+     *
+     * @see #clearThreadStatsTag()
      */
     public static void setThreadStatsTag(int tag) {
         NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
@@ -128,11 +130,19 @@ public class TrafficStats {
      * Get the active tag used when accounting {@link Socket} traffic originating
      * from the current thread. Only one active tag per thread is supported.
      * {@link #tagSocket(Socket)}.
+     *
+     * @see #setThreadStatsTag(int)
      */
     public static int getThreadStatsTag() {
         return NetworkManagementSocketTagger.getThreadSocketStatsTag();
     }
 
+    /**
+     * Clear any active tag set to account {@link Socket} traffic originating
+     * from the current thread.
+     *
+     * @see #setThreadStatsTag(int)
+     */
     public static void clearThreadStatsTag() {
         NetworkManagementSocketTagger.setThreadSocketStatsTag(-1);
     }
@@ -148,7 +158,7 @@ public class TrafficStats {
      * To take effect, caller must hold
      * {@link android.Manifest.permission#UPDATE_DEVICE_STATS} permission.
      *
-     * {@hide}
+     * @hide
      */
     public static void setThreadStatsUid(int uid) {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
@@ -260,10 +270,13 @@ public class TrafficStats {
     }
 
     /**
-     * Get the total number of packets transmitted through the mobile interface.
-     *
-     * @return number of packets.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of packets transmitted across mobile networks since device
+     * boot. Counts packets across all mobile network interfaces, and always
+     * increases monotonically since device boot. Statistics are measured at the
+     * network layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getMobileTxPackets() {
         long total = 0;
@@ -274,10 +287,13 @@ public class TrafficStats {
     }
 
     /**
-     * Get the total number of packets received through the mobile interface.
-     *
-     * @return number of packets.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of packets received across mobile networks since device
+     * boot. Counts packets across all mobile network interfaces, and always
+     * increases monotonically since device boot. Statistics are measured at the
+     * network layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getMobileRxPackets() {
         long total = 0;
@@ -288,10 +304,13 @@ public class TrafficStats {
     }
 
     /**
-     * Get the total number of bytes transmitted through the mobile interface.
-     *
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of bytes transmitted across mobile networks since device
+     * boot. Counts packets across all mobile network interfaces, and always
+     * increases monotonically since device boot. Statistics are measured at the
+     * network layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getMobileTxBytes() {
         long total = 0;
@@ -302,10 +321,13 @@ public class TrafficStats {
     }
 
     /**
-     * Get the total number of bytes received through the mobile interface.
-     *
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of bytes received across mobile networks since device boot.
+     * Counts packets across all mobile network interfaces, and always increases
+     * monotonically since device boot. Statistics are measured at the network
+     * layer, so they include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getMobileRxBytes() {
         long total = 0;
@@ -339,85 +361,73 @@ public class TrafficStats {
         return total;
     }
 
-    /**
-     * Get the total number of packets transmitted through the specified interface.
-     *
-     * @return number of packets.  If the statistics are not supported by this interface,
-     * {@link #UNSUPPORTED} will be returned.
-     * @hide
-     */
+    /** {@hide} */
     public static long getTxPackets(String iface) {
         return nativeGetIfaceStat(iface, TYPE_TX_PACKETS);
     }
 
-    /**
-     * Get the total number of packets received through the specified interface.
-     *
-     * @return number of packets.  If the statistics are not supported by this interface,
-     * {@link #UNSUPPORTED} will be returned.
-     * @hide
-     */
+    /** {@hide} */
     public static long getRxPackets(String iface) {
         return nativeGetIfaceStat(iface, TYPE_RX_PACKETS);
     }
 
-    /**
-     * Get the total number of bytes transmitted through the specified interface.
-     *
-     * @return number of bytes.  If the statistics are not supported by this interface,
-     * {@link #UNSUPPORTED} will be returned.
-     * @hide
-     */
+    /** {@hide} */
     public static long getTxBytes(String iface) {
         return nativeGetIfaceStat(iface, TYPE_TX_BYTES);
     }
 
-    /**
-     * Get the total number of bytes received through the specified interface.
-     *
-     * @return number of bytes.  If the statistics are not supported by this interface,
-     * {@link #UNSUPPORTED} will be returned.
-     * @hide
-     */
+    /** {@hide} */
     public static long getRxBytes(String iface) {
         return nativeGetIfaceStat(iface, TYPE_RX_BYTES);
     }
 
     /**
-     * Get the total number of packets sent through all network interfaces.
-     *
-     * @return the number of packets.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of packets transmitted since device boot. Counts packets
+     * across all network interfaces, and always increases monotonically since
+     * device boot. Statistics are measured at the network layer, so they
+     * include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getTotalTxPackets() {
         return nativeGetTotalStat(TYPE_TX_PACKETS);
     }
 
     /**
-     * Get the total number of packets received through all network interfaces.
-     *
-     * @return number of packets.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of packets received since device boot. Counts packets
+     * across all network interfaces, and always increases monotonically since
+     * device boot. Statistics are measured at the network layer, so they
+     * include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getTotalRxPackets() {
         return nativeGetTotalStat(TYPE_RX_PACKETS);
     }
 
     /**
-     * Get the total number of bytes sent through all network interfaces.
-     *
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of bytes transmitted since device boot. Counts packets
+     * across all network interfaces, and always increases monotonically since
+     * device boot. Statistics are measured at the network layer, so they
+     * include both TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getTotalTxBytes() {
         return nativeGetTotalStat(TYPE_TX_BYTES);
     }
 
     /**
-     * Get the total number of bytes received through all network interfaces.
-     *
-     * @return number of bytes.  If the statistics are not supported by this device,
-     * {@link #UNSUPPORTED} will be returned.
+     * Return number of bytes received since device boot. Counts packets across
+     * all network interfaces, and always increases monotonically since device
+     * boot. Statistics are measured at the network layer, so they include both
+     * TCP and UDP usage.
+     * <p>
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
      */
     public static long getTotalRxBytes() {
         return nativeGetTotalStat(TYPE_RX_BYTES);
@@ -580,6 +590,7 @@ public class TrafficStats {
      * special permission.
      */
     private static NetworkStats getDataLayerSnapshotForUid(Context context) {
+        // TODO: take snapshot locally, since proc file is now visible
         final int uid = android.os.Process.myUid();
         try {
             return getStatsService().getDataLayerSnapshotForUid(uid);
