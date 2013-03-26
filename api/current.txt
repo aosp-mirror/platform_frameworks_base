@@ -624,7 +624,7 @@ package android {
     field public static final int keyboardLayout = 16843691; // 0x10103ab
     field public static final int keyboardMode = 16843341; // 0x101024d
     field public static final int keycode = 16842949; // 0x10100c5
-    field public static final int keyset = 16843729; // 0x10103d1
+    field public static final int keyset = 16843733; // 0x10103d5
     field public static final int killAfterRestore = 16843420; // 0x101029c
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
