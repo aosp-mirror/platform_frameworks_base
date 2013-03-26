@@ -66,8 +66,8 @@ public class UserManagerTest extends AndroidTestCase {
                     && !user.isPrimary()) {
                 found = true;
                 Bundle restrictions = mUserManager.getUserRestrictions(user.getUserHandle());
-                assertTrue("New user should have ALLOW_CONFIG_WIFI =true by default",
-                        restrictions.getBoolean(UserManager.ALLOW_CONFIG_WIFI));
+                assertFalse("New user should have DISALLOW_CONFIG_WIFI =false by default",
+                        restrictions.getBoolean(UserManager.DISALLOW_CONFIG_WIFI));
             }
         }
         assertTrue(found);
@@ -147,13 +147,13 @@ public class UserManagerTest extends AndroidTestCase {
         List<UserInfo> users = mUserManager.getUsers();
         if (users.size() > 1) {
             Bundle restrictions = new Bundle();
-            restrictions.putBoolean(UserManager.ALLOW_INSTALL_APPS, false);
-            restrictions.putBoolean(UserManager.ALLOW_CONFIG_WIFI, true);
+            restrictions.putBoolean(UserManager.DISALLOW_INSTALL_APPS, true);
+            restrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, false);
             mUserManager.setUserRestrictions(restrictions, new UserHandle(users.get(1).id));
             Bundle stored = mUserManager.getUserRestrictions(new UserHandle(users.get(1).id));
-            assertEquals(stored.getBoolean(UserManager.ALLOW_CONFIG_WIFI), true);
-            assertEquals(stored.getBoolean(UserManager.ALLOW_UNINSTALL_APPS), true);
-            assertEquals(stored.getBoolean(UserManager.ALLOW_INSTALL_APPS), false);
+            assertEquals(stored.getBoolean(UserManager.DISALLOW_CONFIG_WIFI), false);
+            assertEquals(stored.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS), false);
+            assertEquals(stored.getBoolean(UserManager.DISALLOW_INSTALL_APPS), true);
         }
     }
 
