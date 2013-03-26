@@ -224,7 +224,7 @@ public class UserManager {
 
     /**
      * Sets all the user-wide restrictions for this user.
-     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Requires the MANAGE_USERS permission.
      * @param restrictions the Bundle containing all the restrictions.
      */
     public void setUserRestrictions(Bundle restrictions) {
@@ -233,7 +233,7 @@ public class UserManager {
 
     /**
      * Sets all the user-wide restrictions for the specified user.
-     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Requires the MANAGE_USERS permission.
      * @param restrictions the Bundle containing all the restrictions.
      * @param userHandle the UserHandle of the user for whom to set the restrictions.
      */
@@ -247,10 +247,9 @@ public class UserManager {
 
     /**
      * Sets the value of a specific restriction.
-     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Requires the MANAGE_USERS permission.
      * @param key the key of the restriction
      * @param value the value for the restriction
-     * @param userHandle the user whose restriction is to be changed.
      */
     public void setUserRestriction(String key, boolean value) {
         Bundle bundle = getUserRestrictions();
