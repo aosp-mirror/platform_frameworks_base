@@ -110,6 +110,16 @@ public class Type extends BaseObj {
     }
 
     /**
+     * Get the YUV format
+     *
+     * @hide
+     * @return int
+     */
+    public int getYuv() {
+        return mDimYuv;
+    }
+
+    /**
      * Return if the Type has a mipmap chain.
      *
      * @return boolean
