@@ -1,0 +1,815 @@
+page.title=Retrieving a List of Contacts
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Permissions">Request Permission to Read the Provider</a>
+  <li><a href="#NameMatch">Match a Contact by Name and List the Results</a></li>
+  <li><a href="#TypeMatch">Match a Contact By a Specific Type of Data</a></li>
+  <li><a href="#GeneralMatch">Match a Contact By Any Type of Data</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Content Provider Basics</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        Contacts Provider</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/loaders.html">Loaders</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface</a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+    <a href="http://developer.android.com/shareables/training/ContactsList.zip" class="button">
+    Download the sample
+    </a>
+ <p class="filename">ContactsList.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    This lesson shows you how to retrieve a list of contacts whose data matches all or part of a
+    search string, using the following techniques:
+</p>
+<dl>
+    <dt>Match contact names</dt>
+    <dd>
+        Retrieve a list of contacts by matching the search string to all or part of the contact
+        name data. The Contacts Provider allows multiple instances of the same name, so this
+        technique can return a list of matches.
+    </dd>
+    <dt>Match a specific type of data, such as a phone number</dt>
+    <dd>
+        Retrieve a list of contacts by matching the search string to a particular type of detail
+        data such as an email address. For example, this technique allows you to list all of the
+        contacts whose email address matches the search string.
+    </dd>
+    <dt>Match any type of data</dt>
+    <dd>
+        Retrieve a list of contacts by matching the search string to any type of detail data,
+        including name, phone number, street address, email address, and so forth. For example,
+        this technique allows you to accept any type of data for a search string and then list the
+        contacts for which the data matches the string.
+    </dd>
+</dl>
+<p class="note">
+    <strong>Note:</strong> All the examples in this lesson use a
+    {@link android.support.v4.content.CursorLoader} to retrieve data from the Contacts
+    Provider. A {@link android.support.v4.content.CursorLoader} runs its query on a
+    thread that's separate from the UI thread. This ensures that the query doesn't slow down UI
+    response times and cause a poor user experience. For more information, see the Android
+    training class <a href="{@docRoot}training/load-data-background/index.html">
+    Loading Data in the Background</a>.
+</p>
+<h2 id="Permissions">Request Permission to Read the Provider</h2>
+<p>
+    To do any type of search of the Contacts Provider, your app must have
+    {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS} permission.
+    To request this, add this
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    element to your manifest file as a child element of
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_CONTACTS" /&gt;
+</pre>
+<h2 id="NameMatch">Match a Contact by Name and List the Results</h2>
+<p>
+    This technique tries to match a search string to the name of a contact or contacts in the
+    Contact Provider's {@link android.provider.ContactsContract.Contacts} table. You usually want
+    to display the results in a {@link android.widget.ListView}, to allow the user to choose among
+    the matched contacts.
+</p>
+<h3 id="DefineListView">Define ListView and item layouts</h3>
+<p>
+    To display the search results in a {@link android.widget.ListView}, you need a main layout file
+    that defines the entire UI including the {@link android.widget.ListView}, and an item layout
+    file that defines one line of the {@link android.widget.ListView}. For example, you can define
+    the main layout file <code>res/layout/contacts_list_view.xml</code> that contains the
+    following XML:
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ListView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="&#64;android:id/list"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"/&gt;
+</pre>
+<p>
+    This XML uses the built-in Android {@link android.widget.ListView} widget
+    {@link android.R.id#list android:id/list}.
+</p>
+<p>
+    Define the item layout file <code>contacts_list_item.xml</code> with the following XML:
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="&#64;android:id/text1"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:clickable="true"/&gt;
+</pre>
+<p>
+    This XML uses the built-in Android {@link android.widget.TextView} widget
+    {@link android.R.id#text1 android:text1}.
+</p>
+<p class="note">
+    <strong>Note:</strong> This lesson doesn't describe the UI for getting a search string from the
+    user, because you may want to get the string indirectly. For example, you can give the user
+    an option to search for contacts whose name matches a string in an incoming text message.
+</p>
+<p>
+    The two layout files you've written define a user interface that shows a
+    {@link android.widget.ListView}. The next step is to write code that uses this UI to display a
+    list of contacts.
+</p>
+<h3 id="Fragment">Define a Fragment that displays the list of contacts</h3>
+<p>
+    To display the list of contacts, start by defining a {@link android.support.v4.app.Fragment}
+    that's loaded by an {@link android.app.Activity}. Using a
+    {@link android.support.v4.app.Fragment} is a more flexible technique, because you can use
+    one {@link android.support.v4.app.Fragment} to display the list and a second
+    {@link android.support.v4.app.Fragment} to display the details for a contact that the user
+    chooses from the list. Using this approach, you can combine one of the techniques presented in
+    this lesson with one from the lesson <a href="retrieve-details.html">
+    Retrieving Details for a Contact</a>.
+</p>
+<p>
+    To learn how to use one or more {@link android.support.v4.app.Fragment} objects from an
+    an {@link android.app.Activity}, read the training class
+    <a href="{@docRoot}training/basics/fragments/index.html">
+    Building a Dynamic UI with Fragments</a>.
+</p>
+<p>
+    To help you write queries against the Contacts Provider, the Android framework provides a
+    contracts class called {@link android.provider.ContactsContract}, which defines useful
+    constants and methods for accessing the provider. When you use this class, you don't have to
+    define your own constants for content URIs, table names, or columns. To use this class,
+    include the following statement:
+</p>
+<pre>
+import android.provider.ContactsContract;
+</pre>
+<p>
+    Since the code uses a {@link android.support.v4.content.CursorLoader} to retrieve data
+    from the provider, you must specify that it implements the loader interface
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks}. Also, to help detect which contact
+    the user selects from the list of search results, implement the adapter interface
+    {@link android.widget.AdapterView.OnItemClickListener}. For example:
+</p>
+<pre>
+...
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.widget.AdapterView;
+...
+public class ContactsFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks&lt;Cursor&gt;,
+        AdapterView.OnItemClickListener {
+</pre>
+<h3 id="DefineVariables">Define global variables</h3>
+<p>
+    Define global variables that are used in other parts of the code:
+</p>
+<pre>
+    ...
+    /*
+     * Defines an array that contains column names to move from
+     * the Cursor to the ListView.
+     */
+    &#64;SuppressLint("InlinedApi")
+    private final static String[] FROM_COLUMNS = {
+            Build.VERSION.SDK_INT
+                    &gt;= Build.VERSION_CODES.HONEYCOMB ?
+                    Contacts.DISPLAY_NAME_PRIMARY :
+                    Contacts.DISPLAY_NAME
+    };
+    /*
+     * Defines an array that contains resource ids for the layout views
+     * that get the Cursor column contents. The id is pre-defined in
+     * the Android framework, so it is prefaced with "android.R.id"
+     */
+    private final static int[] TO_IDS = {
+           android.R.id.text1
+    };
+    // Define global mutable variables
+    // Define a ListView object
+    ListView mContactsList;
+    // Define variables for the contact the user selects
+    // The contact's _ID value
+    long mContactId;
+    // The contact's LOOKUP_KEY
+    String mContactKey;
+    // A content URI for the selected contact
+    Uri mContactUri;
+    // An adapter that binds the result Cursor to the ListView
+    private SimpleCursorAdapter mCursorAdapter;
+    ...
+</pre>
+<p class="note">
+    <strong>Note:</strong> Since
+    {@link android.provider.ContactsContract.Contacts#DISPLAY_NAME_PRIMARY
+    Contacts.DISPLAY_NAME_PRIMARY} requires Android 3.0 (API version 11) or later, setting your
+    app's <code>minSdkVersion</code> to 10 or below generates an Android Lint warning in
+    Eclipse with ADK. To turn off this warning, add the annotation
+    <code>@SuppressLint("InlinedApi")</code> before the definition of <code>FROM_COLUMNS</code>.
+</p>
+<h3 id="InitializeFragment">Initialize the Fragment</h3>
+<p>
+
+    Initialize the {@link android.support.v4.app.Fragment}. Add the empty, public constructor
+    required by the Android system, and inflate the {@link android.support.v4.app.Fragment} object's
+    UI in the callback method {@link android.support.v4.app.Fragment#onCreateView onCreateView()}.
+    For example:
+</p>
+<pre>
+    // Empty public constructor, required by the system
+    public ContactsFragment() {}
+
+    // A UI Fragment must inflate its View
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        // Inflate the fragment layout
+        return inflater.inflate(R.layout.contacts_list_layout, container, false);
+    }
+</pre>
+<h3 id="DefineAdapter">Set up the CursorAdapter for the ListView</h3>
+<p>
+    Set up the {@link android.support.v4.widget.SimpleCursorAdapter} that binds the results of the
+    search to the {@link android.widget.ListView}. To get the {@link android.widget.ListView} object
+    that displays the contacts, you need to call {@link android.app.Activity#findViewById
+    Activity.findViewById()} using the parent activity of the
+    {@link android.support.v4.app.Fragment}. Use the {@link android.content.Context} of the
+    parent activity when you call {@link android.widget.ListView#setAdapter setAdapter()}.
+    For example:
+</p>
+<pre>
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        ...
+        // Gets the ListView from the View list of the parent activity
+        mContactsList = (ListView) getActivity().findViewById(R.layout.contact_list_view);
+        // Gets a CursorAdapter
+        mCursorAdapter = new SimpleCursorAdapter(
+                getActivity(),
+                R.layout.contact_list_item,
+                null,
+                FROM_COLUMNS, TO_IDS,
+                0);
+        // Sets the adapter for the ListView
+        mContactsList.setAdapter(mCursorAdapter);
+    }
+</pre>
+<h3 id="SetListener">Set the selected contact listener</h3>
+<p>
+    When you display the results of a search, you usually want to allow the user to select a
+    single contact for further processing. For example, when the user clicks a contact you can
+    display the contact's address on a map. To provide this feature, you first defined the current
+    {@link android.support.v4.app.Fragment} as the click listener by specifying that the class
+    implements {@link android.widget.AdapterView.OnItemClickListener}, as shown in the section
+    <a href="#Fragment">Define a Fragment that displays the list of contacts</a>.
+</p>
+<p>
+    To continue setting up the listener, bind it to the {@link android.widget.ListView} by
+    calling the method {@link android.widget.ListView#setOnItemClickListener
+    setOnItemClickListener()} in {@link android.support.v4.app.Fragment#onActivityCreated
+    onActivityCreated()}. For example:
+</p>
+<pre>
+    public void onActivityCreated(Bundle savedInstanceState) {
+        ...
+        // Set the item click listener to be the current fragment.
+        mContactsList.setOnItemClickListener(this);
+        ...
+    }
+</pre>
+<p>
+    Since you specified that the current {@link android.support.v4.app.Fragment} is the
+    {@link android.widget.AdapterView.OnItemClickListener OnItemClickListener} for the
+    {@link android.widget.ListView}, you now need to implement its required method
+    {@link android.widget.AdapterView.OnItemClickListener#onItemClick onItemClick()}, which
+    handles the click event. This is described in a succeeding section.
+</p>
+<h3 id="DefineProjection">Define a projection</h3>
+<p>
+    Define a constant that contains the columns you want to return from your query. Each item in
+    the {@link android.widget.ListView} displays the contact's display name,
+    which contains the main form of the contact's name. In Android 3.0 (API version 11) and later,
+    the name of this column is
+    {@link android.provider.ContactsContract.Contacts#DISPLAY_NAME_PRIMARY
+    Contacts.DISPLAY_NAME_PRIMARY}; in versions previous to that, its name is
+    {@link android.provider.ContactsContract.Contacts#DISPLAY_NAME Contacts.DISPLAY_NAME}.
+</p>
+<p>
+    The column {@link android.provider.ContactsContract.Contacts#_ID Contacts._ID} is used by the
+    {@link android.support.v4.widget.SimpleCursorAdapter} binding process.
+    {@link android.provider.ContactsContract.Contacts#_ID Contacts._ID} and
+    {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY} are used together to
+    construct a content URI for the contact the user selects.
+</p>
+<pre>
+...
+&#64;SuppressLint("InlinedApi")
+private static final String[] PROJECTION =
+        {
+            Contacts._ID,
+            Contacts.LOOKUP_KEY,
+            Build.VERSION.SDK_INT
+                    &gt;= Build.VERSION_CODES.HONEYCOMB ?
+                    Contacts.DISPLAY_NAME_PRIMARY :
+                    Contacts.DISPLAY_NAME
+
+        };
+</pre>
+<h3 id="DefineConstants">Define constants for the Cursor column indexes</h3>
+<p>
+    To get data from an individual column in a {@link android.database.Cursor}, you need
+    the column's index within the {@link android.database.Cursor}. You can define constants
+    for the indexes of the {@link android.database.Cursor} columns, because the indexes are
+    the same as the order of the column names in your projection. For example:
+</p>
+<pre>
+// The column index for the _ID column
+private static final int CONTACT_ID_INDEX = 0;
+// The column index for the LOOKUP_KEY column
+private static final int LOOKUP_KEY_INDEX = 1;
+</pre>
+<h3 id="SelectionCriteria">Specify the selection criteria</h3>
+<p>
+    To specify the data you want, create a combination of text expressions and variables
+    that tell the provider the data columns to search and the values to find.
+</p>
+<p>
+    For the text expression, define a constant that lists the search columns. Although this
+    expression can contain values as well, the preferred practice is to represent the values with
+    a "?" placeholder. During retrieval, the placeholder is replaced with values from an
+    array. Using "?" as a placeholder ensures that the search specification is generated by binding
+    rather than by SQL compilation. This practice eliminates the possibility of malicious SQL
+    injection. For example:
+</p>
+<pre>
+    // Defines the text expression
+    &#64;SuppressLint("InlinedApi")
+    private static final String SELECTION =
+            Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.HONEYCOMB ?
+            Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?" :
+            Contacts.DISPLAY_NAME + " LIKE ?";
+    // Defines a variable for the search string
+    private String mSearchString;
+    // Defines the array to hold values that replace the ?
+    private String[] mSelectionArgs = { mSearchString };
+</pre>
+<h3 id="OnItemClick">Define the onItemClick() method</h3>
+<p>
+    In a previous section, you set the item click listener for the {@link android.widget.ListView}.
+    Now implement the action for the listener by defining the method
+    {@link android.widget.AdapterView.OnItemClickListener#onItemClick
+    AdapterView.OnItemClickListener.onItemClick()}:
+</p>
+<pre>
+    &#64;Override
+    public void onItemClick(
+        AdapterView&lt;?&gt; parent, View item, int position, long rowID) {
+        // Get the Cursor
+        Cursor cursor = parent.getAdapter().getCursor();
+        // Move to the selected contact
+        cursor.moveToPosition(position);
+        // Get the _ID value
+        mContactId = getLong(CONTACT_ID_INDEX);
+        // Get the selected LOOKUP KEY
+        mContactKey = getString(CONTACT_KEY_INDEX);
+        // Create the contact's content Uri
+        mContactUri = Contacts.getLookupUri(mContactId, mContactKey);
+        /*
+         * You can use mContactUri as the content URI for retrieving
+         * the details for a contact.
+         */
+    }
+</pre>
+<h3 id="InitializeLoader">Initialize the loader</h3>
+<p>
+    Since you're using a {@link android.support.v4.content.CursorLoader} to retrieve data,
+    you must initialize the background thread and other variables that control asynchronous
+    retrieval. Do the initialization in
+    {@link android.support.v4.app.Fragment#onActivityCreated onActivityCreated()}, which
+    is invoked immediately before the {@link android.support.v4.app.Fragment} UI appears, as
+    shown in the following example:
+</p>
+<pre>
+public class ContactsFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks&lt;Cursor&gt; {
+    ...
+    // Called just before the Fragment displays its UI
+    &#64;Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        // Always call the super method first
+        super.onActivityCreated(savedInstanceState);
+        ...
+        // Initializes the loader
+        getLoaderManager().initLoader(0, null, this);
+</pre>
+<h3 id="OnCreateLoader">Implement onCreateLoader()</h3>
+<p>
+    Implement the method
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()},
+    which is called by the loader framework immediately after you call
+    {@link android.support.v4.app.LoaderManager#initLoader initLoader()}.
+<p>
+    In {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()},
+    set up the search string pattern. To make a string into a pattern, insert "%"
+    (percent) characters to represent a sequence of zero or more characters, or "_" (underscore)
+    characters to represent a single character, or both. For example, the pattern "%Jefferson%"
+    would match both "Thomas Jefferson" and "Jefferson Davis".
+</p>
+<p>
+    Return a new {@link android.support.v4.content.CursorLoader} from the method. For the content
+    URI, use {@link android.provider.ContactsContract.Contacts#CONTENT_URI Contacts.CONTENT_URI}.
+    This URI refers to the entire table, as shown in the following example:
+</p>
+<pre>
+    ...
+    &#64;Override
+    public Loader&lt;Cursor&gt; onCreateLoader(int loaderId, Bundle args) {
+        /*
+         * Makes search string into pattern and
+         * stores it in the selection array
+         */
+        mSelectionArgs[0] = "%" + mSearchString + "%";
+        // Starts the query
+        return new CursorLoader(
+                getActivity(),
+                Contacts.CONTENT_URI,
+                PROJECTION,
+                SELECTION,
+                mSelectionArgs,
+                null
+        );
+    }
+</pre>
+<h3 id="FinishedReset">Implement onLoadFinished() and onLoaderReset()</h3>
+<p>
+    Implement the
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+    method. The loader framework calls
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+    when the Contacts Provider returns the results of the query. In this method, put the
+    result {@link android.database.Cursor} in the
+    {@link android.support.v4.widget.SimpleCursorAdapter}. This automatically updates the
+    {@link android.widget.ListView} with the search results:
+</p>
+<pre>
+    public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+        // Put the result Cursor in the adapter for the ListView
+        mCursorAdapter.swapCursor(cursor);
+    }
+</pre>
+<p>
+    The method {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset
+    onLoaderReset()} is invoked when the loader framework detects that the
+    result {@link android.database.Cursor} contains stale data. Delete the
+    {@link android.support.v4.widget.SimpleCursorAdapter} reference to the existing
+    {@link android.database.Cursor}. If you don't, the loader framework will not
+    recycle the {@link android.database.Cursor}, which causes a memory leak. For example:
+</p>
+<pre>
+    &#64;Override
+    public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+        // Delete the reference to the existing Cursor
+        mCursorAdapter.swapCursor(null);
+
+    }
+</pre>
+
+<p>
+    You now have the key pieces of an app that matches a search string to contact names and returns
+    the result in a {@link android.widget.ListView}. The user can click a contact name to select it.
+    This triggers a listener, in which you can work further with the contact's data. For example,
+    you can retrieve the contact's details. To learn how to do this, continue with the next
+    lesson, <a href="#retrieve-details.html">Retrieving Details for a Contact</a>.
+</p>
+<p>
+    To learn more about search user interfaces, read the API guide
+    <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface</a>.
+</p>
+<p>
+    The remaining sections in this lesson demonstrate other ways of finding contacts in the
+    Contacts Provider.
+</p>
+<h2 id="TypeMatch">Match a Contact By a Specific Type of Data</h2>
+<p>
+    This technique allows you to specify the type of data you want to match. Retrieving
+    by name is a specific example of this type of query, but you can also do it for any of the types
+    of detail data associated with a contact. For example, you can retrieve contacts that have a
+    specific postal code; in this case, the search string has to match data stored in a postal code
+    row.
+</p>
+<p>
+    To implement this type of retrieval, first implement the following code, as listed in
+    previous sections:
+</p>
+<ul>
+    <li>
+        Request Permission to Read the Provider.
+    </li>
+    <li>
+        Define ListView and item layouts.
+    </li>
+    <li>
+        Define a Fragment that displays the list of contacts.
+    </li>
+    <li>
+        Define global variables.
+    </li>
+    <li>
+        Initialize the Fragment.
+    </li>
+    <li>
+        Set up the CursorAdapter for the ListView.
+    </li>
+    <li>
+        Set the selected contact listener.
+    </li>
+    <li>
+        Define constants for the Cursor column indexes.
+        <p>
+            Although you're retrieving data from a different table, the order of the columns in
+            the projection is the same, so you can use the same indexes for the Cursor.
+        </p>
+    </li>
+    <li>
+        Define the onItemClick() method.
+    </li>
+    <li>
+        Initialize the loader.
+    </li>
+    <li>
+
+        Implement onLoadFinished() and onLoaderReset().
+    </li>
+</ul>
+<p>
+    The following steps show you the additional code you need to match a search string to
+    a particular type of detail data and display the results.
+</p>
+<h3>Choose the data type and table</h3>
+<p>
+    To search for a particular type of detail data, you have to know the custom MIME type value
+    for the data type. Each data type has a unique MIME type
+    value defined by a constant <code>CONTENT_ITEM_TYPE</code> in the subclass of
+    {@link android.provider.ContactsContract.CommonDataKinds} associated with the data type.
+    The subclasses have names that indicate their data type; for example, the subclass for email
+    data is {@link android.provider.ContactsContract.CommonDataKinds.Email}, and the custom MIME
+    type for email data is defined by the constant
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE}.
+</p>
+<p>
+    Use the {@link android.provider.ContactsContract.Data} table for your search. All of the
+    constants you need for your projection, selection clause, and sort order are defined in or
+    inherited by this table.
+</p>
+<h3 id="SpecificProjection">Define a projection</h3>
+<p>
+    To define a projection, choose one or more of the columns defined in
+    {@link android.provider.ContactsContract.Data} or the classes from which it inherits. The
+    Contacts Provider does an implicit join between {@link android.provider.ContactsContract.Data}
+    and other tables before it returns rows. For example:
+</p>
+<pre>
+    &#64;SuppressLint("InlinedApi")
+    private static final String[] PROJECTION =
+        {
+            /*
+             * The detail data row ID. To make a ListView work,
+             * this column is required.
+             */
+            Data._ID,
+            // The primary display name
+            Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.HONEYCOMB ?
+                    Data.DISPLAY_NAME_PRIMARY :
+                    Data.DISPLAY_NAME,
+            // The contact's _ID, to construct a content URI
+            Data.CONTACT_ID
+            // The contact's LOOKUP_KEY, to construct a content URI
+            Data.LOOKUP_KEY (a permanent link to the contact
+        };
+</pre>
+<h3 id="SpecificCriteria">Define search criteria</h3>
+<p>
+    To search for a string within a particular type of data, construct a selection clause from
+    the following:
+</p>
+<ul>
+    <li>
+        The name of the column that contains your search string. This name varies by data type,
+        so you need to find the subclass of
+        {@link android.provider.ContactsContract.CommonDataKinds} that corresponds to the data type
+        and then choose the column name from that subclass. For example, to search for
+        email addresses, use the column
+        {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS Email.ADDRESS}.
+    </li>
+    <li>
+        The search string itself, represented as the "?" character in the selection clause.
+    </li>
+    <li>
+        The name of the column that contains the custom MIME type value. This name is always
+        {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE}.
+    </li>
+    <li>
+        The custom MIME type value for the data type. As described previously, this is the constant
+        <code>CONTENT_ITEM_TYPE</code> in the
+        {@link android.provider.ContactsContract.CommonDataKinds} subclass. For example, the MIME
+        type value for email data is
+        {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+        Email.CONTENT_ITEM_TYPE}. Enclose the value in single quotes by concatenating a
+        "<code>'</code>" (single quote) character to the start and end of the constant; otherwise,
+        the provider interprets the value as a variable name rather than as a string value.
+        You don't need to use a placeholder for this value, because you're using a constant
+        rather than a user-supplied value.
+    </li>
+</ul>
+<p>
+    For example:
+</p>
+<pre>
+    /*
+     * Constructs search criteria from the search string
+     * and email MIME type
+     */
+    private static final String SELECTION =
+            /*
+             * Searches for an email address
+             * that matches the search string
+             */
+            Email.ADDRESS + " LIKE ? " + "AND " +
+            /*
+             * Searches for a MIME type that matches
+             * the value of the constant
+             * Email.CONTENT_ITEM_TYPE. Note the
+             * single quotes surrounding Email.CONTENT_ITEM_TYPE.
+             */
+            Data.MIMETYPE + " = '" + Email.CONTENT_ITEM_TYPE + "'";
+</pre>
+<p>
+    Next, define variables to contain the selection argument:
+</p>
+<pre>
+    String mSearchString;
+    String[] mSelectionArgs = { "" };
+</pre>
+<h3 id="SpecificLoader">Implement onCreateLoader()</h3>
+<p>
+    Now that you've specified the data you want and how to find it, define a query in your
+    implementation of {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader
+    onCreateLoader()}. Return a new {@link android.support.v4.content.CursorLoader} from this
+    method, using your projection, selection text expression, and selection array as
+    arguments. For a content URI, use
+    {@link android.provider.ContactsContract.Data#CONTENT_URI Data.CONTENT_URI}. For example:
+</p>
+<pre>
+    &#64;Override
+    public Loader&lt;Cursor&gt; onCreateLoader(int loaderId, Bundle args) {
+        // OPTIONAL: Makes search string into pattern
+        mSearchString = "%" + mSearchString + "%";
+        // Puts the search string into the selection criteria
+        mSelectionArgs[0] = mSearchString;
+        // Starts the query
+        return new CursorLoader(
+                getActivity(),
+                Data.CONTENT_URI,
+                PROJECTION,
+                SELECTION,
+                mSelectionArgs,
+                null
+        );
+    }
+</pre>
+<p>
+    These code snippets are the basis of a simple reverse lookup based on a specific type of detail
+    data. This is the best technique to use if your app focuses on a particular type of data, such
+    as emails, and you want allow users to get the names associated with a piece of data.
+</p>
+<h2 id="GeneralMatch">Match a Contact By Any Type of Data</h2>
+<p>
+    Retrieving a contact based on any type of data returns contacts if any of their data matches a
+    the search string, including name, email address, postal address, phone number, and so forth.
+    This results in a broad set of search results. For example, if the search string
+    is "Doe", then searching for any data type returns the contact "John Doe"; it also returns
+    contacts who live on "Doe Street".
+</p>
+<p>
+    To implement this type of retrieval, first implement the following code, as listed in
+    previous sections:
+</p>
+<ul>
+    <li>
+        Request Permission to Read the Provider.
+    </li>
+    <li>
+        Define ListView and item layouts.
+    </li>
+    <li>
+    <li>
+        Define a Fragment that displays the list of contacts.
+    </li>
+    <li>
+        Define global variables.
+    </li>
+    <li>
+        Initialize the Fragment.
+    </li>
+    <li>
+        Set up the CursorAdapter for the ListView.
+    </li>
+    <li>
+        Set the selected contact listener.
+    </li>
+    <li>
+        Define a projection.
+    </li>
+    <li>
+        Define constants for the Cursor column indexes.
+        <p>
+            For this type of retrieval, you're using the same table you used in the section
+            <a href="#NameMatch">Match a Contact by Name and List the Results</a>. Use the
+            same column indexes as well.
+        </p>
+    </li>
+    <li>
+        Define the onItemClick() method.
+    </li>
+    <li>
+        Initialize the loader.
+    </li>
+    <li>
+
+        Implement onLoadFinished() and onLoaderReset().
+    </li>
+</ul>
+<p>
+    The following steps show you the additional code you need to match a search string to
+    any type of data and display the results.
+</p>
+<h3 id="NoSelection">Remove selection criteria</h3>
+<p>
+    Don't define the <code>SELECTION</code> constants or the <code>mSelectionArgs</code> variable.
+    These aren't used in this type of retrieval.
+</p>
+<h3 id="CreateLoaderAny">Implement onCreateLoader()</h3>
+<p>
+    Implement the {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader
+    onCreateLoader()} method, returning a new {@link android.support.v4.content.CursorLoader}.
+    You don't need to convert the search string into a pattern, because the Contacts Provider does
+    that automatically. Use
+    {@link android.provider.ContactsContract.Contacts#CONTENT_FILTER_URI
+    Contacts.CONTENT_FILTER_URI} as the base URI, and append your search string to it by calling
+    {@link android.net.Uri#withAppendedPath Uri.withAppendedPath()}. Using this URI
+    automatically triggers searching for any data type, as shown in the following example:
+</p>
+<pre>
+    &#64;Override
+    public Loader&lt;Cursor&gt; onCreateLoader(int loaderId, Bundle args) {
+        /*
+         * Appends the search string to the base URI. Always
+         * encode search strings to ensure they're in proper
+         * format.
+         */
+        Uri contentUri = Uri.withAppendedPath(
+                Contacts.CONTENT_FILTER_URI,
+                Uri.encode(mSearchString));
+        // Starts the query
+        return new CursorLoader(
+                getActivity(),
+                contentUri,
+                PROJECTION,
+                null,
+                null,
+                null
+        );
+    }
+</pre>
+<p>
+    These code snippets are the basis of an app that does a broad search of the Contacts Provider.
+    The technique is useful for apps that want to implement functionality similar to the
+    People app's contact list screen.
+</p>

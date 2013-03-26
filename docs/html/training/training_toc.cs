@@ -484,7 +484,37 @@
       </a>
     </div>
     <ul>
-    
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/contacts-provider/index.html"
+             description=
+             "How to use Android's central address book, the Contacts Provider, to
+             display contacts and their details and modify contact information.">
+          Accessing Contacts Data</a>
+        </div>
+        <ul>
+          <li>
+                <a href="<?cs var:toroot ?>training/contacts-provider/retrieve-names.html">
+                Retrieving a List of Contacts
+                </a>
+          </li>
+          <li>
+                <a href="<?cs var:toroot ?>training/contacts-provider/retrieve-details.html">
+                Retrieving Details for a Contact
+                </a>
+          </li>
+          <li>
+                <a href="<?cs var:toroot ?>training/contacts-provider/modify-data.html">
+                Modifying Contacts Using Intents
+                </a>
+          </li>
+          <li>
+                <a href="<?cs var:toroot ?>training/contacts-provider/display-contact-badge.html">
+                Displaying the Quick Contact Badge
+                </a>
+          </li>
+        </ul>
+      </li>
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/id-auth/index.html"
@@ -879,7 +909,7 @@
         </ul>
       </li>
     </ul>
-  </li> <!-- end of User Input -->    
+  </li> <!-- end of User Input -->
 
   <li class="nav-section">
     <div class="nav-section-header">
