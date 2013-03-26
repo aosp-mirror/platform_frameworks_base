@@ -19,6 +19,7 @@
 package com.android.commands.wm;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -87,9 +88,22 @@ public class Wm {
     }
 
     private void runDisplaySize() throws Exception {
-        String size = nextArgRequired();
+        String size = nextArg();
         int w, h;
-        if ("reset".equals(size)) {
+        if (size == null) {
+            Point initialSize = new Point();
+            Point baseSize = new Point();
+            try {
+                mWm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, initialSize);
+                mWm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
+                System.out.println("Physical size: " + initialSize.x + "x" + initialSize.y);
+                if (!initialSize.equals(baseSize)) {
+                    System.out.println("Override size: " + baseSize.x + "x" + baseSize.y);
+                }
+            } catch (RemoteException e) {
+            }
+            return;
+        } else if ("reset".equals(size)) {
             w = h = -1;
         } else {
             int div = size.indexOf('x');
@@ -120,9 +134,20 @@ public class Wm {
     }
 
     private void runDisplayDensity() throws Exception {
-        String densityStr = nextArgRequired();
+        String densityStr = nextArg();
         int density;
-        if ("reset".equals(densityStr)) {
+        if (densityStr == null) {
+            try {
+                int initialDensity = mWm.getInitialDisplayDensity(Display.DEFAULT_DISPLAY);
+                int baseDensity = mWm.getBaseDisplayDensity(Display.DEFAULT_DISPLAY);
+                System.out.println("Physical density: " + initialDensity);
+                if (initialDensity != baseDensity) {
+                    System.out.println("Override density: " + baseDensity);
+                }
+            } catch (RemoteException e) {
+            }
+            return;
+        } else if ("reset".equals(densityStr)) {
             density = -1;
         } else {
             try {
@@ -231,7 +256,7 @@ public class Wm {
                 "       wm density [reset|DENSITY]\n" +
                 "       wm overscan [reset|LEFT,TOP,RIGHT,BOTTOM]\n" +
                 "\n" +
-                "wm size: override display size.\n" +
+                "wm size: return or override display size.\n" +
                 "\n" +
                 "wm density: override display density.\n" +
                 "\n" +
