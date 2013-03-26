@@ -36,6 +36,8 @@ import android.widget.ExpandableListConnector.PositionMetadata;
 
 import java.util.ArrayList;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 /**
  * A view that shows items in a vertically scrolling two-level list. This
  * differs from the {@link ListView} by allowing two levels: groups which can
@@ -76,6 +78,10 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ExpandableListView_childIndicatorLeft
  * @attr ref android.R.styleable#ExpandableListView_childIndicatorRight
  * @attr ref android.R.styleable#ExpandableListView_childDivider
+ * @attr ref android.R.styleable#ExpandableListView_indicatorStart
+ * @attr ref android.R.styleable#ExpandableListView_indicatorEnd
+ * @attr ref android.R.styleable#ExpandableListView_childIndicatorStart
+ * @attr ref android.R.styleable#ExpandableListView_childIndicatorEnd
  */
 public class ExpandableListView extends ListView {
 
@@ -134,6 +140,12 @@ public class ExpandableListView extends ListView {
     /** Right bound for drawing the indicator. */
     private int mIndicatorRight;
 
+    /** Start bound for drawing the indicator. */
+    private int mIndicatorStart;
+
+    /** End bound for drawing the indicator. */
+    private int mIndicatorEnd;
+
     /**
      * Left bound for drawing the indicator of a child. Value of
      * {@link #CHILD_INDICATOR_INHERIT} means use mIndicatorLeft.
@@ -147,11 +159,28 @@ public class ExpandableListView extends ListView {
     private int mChildIndicatorRight;
 
     /**
+     * Start bound for drawing the indicator of a child. Value of
+     * {@link #CHILD_INDICATOR_INHERIT} means use mIndicatorStart.
+     */
+    private int mChildIndicatorStart;
+
+    /**
+     * End bound for drawing the indicator of a child. Value of
+     * {@link #CHILD_INDICATOR_INHERIT} means use mIndicatorEnd.
+     */
+    private int mChildIndicatorEnd;
+
+    /**
      * Denotes when a child indicator should inherit this bound from the generic
      * indicator bounds
      */
     public static final int CHILD_INDICATOR_INHERIT = -1;
-    
+
+    /**
+     * Denotes an undefined value for an indicator
+     */
+    private static final int INDICATOR_UNDEFINED = -2;
+
     /** The indicator drawn next to a group. */
     private Drawable mGroupIndicator;
 
@@ -202,30 +231,118 @@ public class ExpandableListView extends ListView {
         super(context, attrs, defStyle);
 
         TypedArray a =
-            context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.ExpandableListView, defStyle,
-                    0);
+            context.obtainStyledAttributes(attrs,
+                    com.android.internal.R.styleable.ExpandableListView, defStyle, 0);
 
-        mGroupIndicator = a
-                .getDrawable(com.android.internal.R.styleable.ExpandableListView_groupIndicator);
-        mChildIndicator = a
-                .getDrawable(com.android.internal.R.styleable.ExpandableListView_childIndicator);
-        mIndicatorLeft = a
-                .getDimensionPixelSize(com.android.internal.R.styleable.ExpandableListView_indicatorLeft, 0);
-        mIndicatorRight = a
-                .getDimensionPixelSize(com.android.internal.R.styleable.ExpandableListView_indicatorRight, 0);
+        mGroupIndicator = a.getDrawable(
+                com.android.internal.R.styleable.ExpandableListView_groupIndicator);
+        mChildIndicator = a.getDrawable(
+                com.android.internal.R.styleable.ExpandableListView_childIndicator);
+        mIndicatorLeft = a.getDimensionPixelSize(
+                com.android.internal.R.styleable.ExpandableListView_indicatorLeft, 0);
+        mIndicatorRight = a.getDimensionPixelSize(
+                com.android.internal.R.styleable.ExpandableListView_indicatorRight, 0);
         if (mIndicatorRight == 0 && mGroupIndicator != null) {
             mIndicatorRight = mIndicatorLeft + mGroupIndicator.getIntrinsicWidth();
         }
         mChildIndicatorLeft = a.getDimensionPixelSize(
-                com.android.internal.R.styleable.ExpandableListView_childIndicatorLeft, CHILD_INDICATOR_INHERIT);
+                com.android.internal.R.styleable.ExpandableListView_childIndicatorLeft,
+                CHILD_INDICATOR_INHERIT);
         mChildIndicatorRight = a.getDimensionPixelSize(
-                com.android.internal.R.styleable.ExpandableListView_childIndicatorRight, CHILD_INDICATOR_INHERIT);
-        mChildDivider = a.getDrawable(com.android.internal.R.styleable.ExpandableListView_childDivider);
-        
+                com.android.internal.R.styleable.ExpandableListView_childIndicatorRight,
+                CHILD_INDICATOR_INHERIT);
+        mChildDivider = a.getDrawable(
+                com.android.internal.R.styleable.ExpandableListView_childDivider);
+
+        if (!isRtlCompatibilityMode()) {
+            mIndicatorStart = a.getDimensionPixelSize(
+                    com.android.internal.R.styleable.ExpandableListView_indicatorStart,
+                    INDICATOR_UNDEFINED);
+            mIndicatorEnd = a.getDimensionPixelSize(
+                    com.android.internal.R.styleable.ExpandableListView_indicatorEnd,
+                    INDICATOR_UNDEFINED);
+
+            mChildIndicatorStart = a.getDimensionPixelSize(
+                    com.android.internal.R.styleable.ExpandableListView_childIndicatorStart,
+                    CHILD_INDICATOR_INHERIT);
+            mChildIndicatorEnd = a.getDimensionPixelSize(
+                    com.android.internal.R.styleable.ExpandableListView_childIndicatorEnd,
+                    CHILD_INDICATOR_INHERIT);
+        }
+
         a.recycle();
     }
-    
-    
+
+    /**
+     * Return true if we are in RTL compatibility mode (either before Jelly Bean MR1 or
+     * RTL not supported)
+     */
+    private boolean isRtlCompatibilityMode() {
+        final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        return targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport();
+    }
+
+    /**
+     * Return true if the application tag in the AndroidManifest has set "supportRtl" to true
+     */
+    private boolean hasRtlSupport() {
+        return mContext.getApplicationInfo().hasRtlSupport();
+    }
+
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        resolveIndicator();
+        resolveChildIndicator();
+    }
+
+    /**
+     * Resolve start/end indicator. start/end indicator always takes precedence over left/right
+     * indicator when defined.
+     */
+    private void resolveIndicator() {
+        final boolean isLayoutRtl = isLayoutRtl();
+        if (isLayoutRtl) {
+            if (mIndicatorStart >= 0) {
+                mIndicatorRight = mIndicatorStart;
+            }
+            if (mIndicatorEnd >= 0) {
+                mIndicatorLeft = mIndicatorEnd;
+            }
+        } else {
+            if (mIndicatorStart >= 0) {
+                mIndicatorLeft = mIndicatorStart;
+            }
+            if (mIndicatorEnd >= 0) {
+                mIndicatorRight = mIndicatorEnd;
+            }
+        }
+        if (mIndicatorRight == 0 && mGroupIndicator != null) {
+            mIndicatorRight = mIndicatorLeft + mGroupIndicator.getIntrinsicWidth();
+        }
+    }
+
+    /**
+     * Resolve start/end child indicator. start/end child indicator always takes precedence over
+     * left/right child indicator when defined.
+     */
+    private void resolveChildIndicator() {
+        final boolean isLayoutRtl = isLayoutRtl();
+        if (isLayoutRtl) {
+            if (mChildIndicatorStart >= CHILD_INDICATOR_INHERIT) {
+                mChildIndicatorRight = mChildIndicatorStart;
+            }
+            if (mChildIndicatorEnd >= CHILD_INDICATOR_INHERIT) {
+                mChildIndicatorLeft = mChildIndicatorEnd;
+            }
+        } else {
+            if (mChildIndicatorStart >= CHILD_INDICATOR_INHERIT) {
+                mChildIndicatorLeft = mChildIndicatorStart;
+            }
+            if (mChildIndicatorEnd >= CHILD_INDICATOR_INHERIT) {
+                mChildIndicatorRight = mChildIndicatorEnd;
+            }
+        }
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
         // Draw children, etc.
@@ -1053,8 +1170,26 @@ public class ExpandableListView extends ListView {
     public void setChildIndicatorBounds(int left, int right) {
         mChildIndicatorLeft = left;
         mChildIndicatorRight = right;
+        resolveChildIndicator();
     }
-    
+
+    /**
+     * Sets the relative drawing bounds for the child indicator. For either, you can
+     * specify {@link #CHILD_INDICATOR_INHERIT} to use inherit from the general
+     * indicator's bounds.
+     *
+     * @see #setIndicatorBounds(int, int)
+     * @param start The start position (relative to the start bounds of this View)
+     *            to start drawing the indicator.
+     * @param end The end position (relative to the end bounds of this
+     *            View) to end the drawing of the indicator.
+     */
+    public void setChildIndicatorBoundsRelative(int start, int end) {
+        mChildIndicatorStart = start;
+        mChildIndicatorEnd = end;
+        resolveChildIndicator();
+    }
+
     /**
      * Sets the indicator to be drawn next to a group.
      * 
@@ -1084,8 +1219,26 @@ public class ExpandableListView extends ListView {
     public void setIndicatorBounds(int left, int right) {
         mIndicatorLeft = left;
         mIndicatorRight = right;
+        resolveIndicator();
     }
-    
+
+    /**
+     * Sets the relative drawing bounds for the indicators (at minimum, the group indicator
+     * is affected by this; the child indicator is affected by this if the
+     * child indicator bounds are set to inherit).
+     *
+     * @see #setChildIndicatorBounds(int, int)
+     * @param start The start position (relative to the start bounds of this View)
+     *            to start drawing the indicator.
+     * @param end The end position (relative to the end bounds of this
+     *            View) to end the drawing of the indicator.
+     */
+    public void setIndicatorBoundsRelative(int start, int end) {
+        mIndicatorStart = start;
+        mIndicatorEnd = end;
+        resolveIndicator();
+    }
+
     /**
      * Extra menu information specific to an {@link ExpandableListView} provided
      * to the
