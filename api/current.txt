@@ -28616,8 +28616,10 @@ package android.widget {
     method public void setChildDivider(android.graphics.drawable.Drawable);
     method public void setChildIndicator(android.graphics.drawable.Drawable);
     method public void setChildIndicatorBounds(int, int);
+    method public void setChildIndicatorBoundsRelative(int, int);
     method public void setGroupIndicator(android.graphics.drawable.Drawable);
     method public void setIndicatorBounds(int, int);
+    method public void setIndicatorBoundsRelative(int, int);
     method public void setOnChildClickListener(android.widget.ExpandableListView.OnChildClickListener);
     method public void setOnGroupClickListener(android.widget.ExpandableListView.OnGroupClickListener);
     method public void setOnGroupCollapseListener(android.widget.ExpandableListView.OnGroupCollapseListener);
