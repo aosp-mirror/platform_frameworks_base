@@ -2952,6 +2952,8 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_DONE_ANIMATING = 22;
     private final static int MSG_INVALIDATE_WORLD = 23;
     private final static int MSG_WINDOW_MOVED = 24;
+    private final static int MSG_ENQUEUE_X_AXIS_KEY_REPEAT = 25;
+    private final static int MSG_ENQUEUE_Y_AXIS_KEY_REPEAT = 26;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3003,6 +3005,10 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DISPATCH_DONE_ANIMATING";
                 case MSG_WINDOW_MOVED:
                     return "MSG_WINDOW_MOVED";
+                case MSG_ENQUEUE_X_AXIS_KEY_REPEAT:
+                    return "MSG_ENQUEUE_X_AXIS_KEY_REPEAT";
+                case MSG_ENQUEUE_Y_AXIS_KEY_REPEAT:
+                    return "MSG_ENQUEUE_Y_AXIS_KEY_REPEAT";
             }
             return super.getMessageName(message);
         }
@@ -3227,6 +3233,18 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_INVALIDATE_WORLD: {
                 if (mView != null) {
                     invalidateWorld(mView);
+                }
+            } break;
+            case MSG_ENQUEUE_X_AXIS_KEY_REPEAT:
+            case MSG_ENQUEUE_Y_AXIS_KEY_REPEAT: {
+                KeyEvent oldEvent = (KeyEvent)msg.obj;
+                KeyEvent e = KeyEvent.changeTimeRepeat(oldEvent, SystemClock.uptimeMillis(),
+                        oldEvent.getRepeatCount() + 1);
+                if (mAttachInfo.mHasWindowFocus) {
+                    enqueueInputEvent(e);
+                    Message m = obtainMessage(msg.what, e);
+                    m.setAsynchronous(true);
+                    sendMessageDelayed(m, mViewConfiguration.getKeyRepeatDelay());
                 }
             } break;
             }
@@ -3677,6 +3695,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (xDirection != mLastJoystickXDirection) {
             if (mLastJoystickXKeyCode != 0) {
+                mHandler.removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
                 enqueueInputEvent(new KeyEvent(time, time,
                         KeyEvent.ACTION_UP, mLastJoystickXKeyCode, 0, metaState,
                         deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
@@ -3688,14 +3707,19 @@ public final class ViewRootImpl implements ViewParent,
             if (xDirection != 0 && synthesizeNewKeys) {
                 mLastJoystickXKeyCode = xDirection > 0
                         ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
-                enqueueInputEvent(new KeyEvent(time, time,
+                final KeyEvent e = new KeyEvent(time, time,
                         KeyEvent.ACTION_DOWN, mLastJoystickXKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
+                enqueueInputEvent(e);
+                Message m = mHandler.obtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e);
+                m.setAsynchronous(true);
+                mHandler.sendMessageDelayed(m, mViewConfiguration.getKeyRepeatTimeout());
             }
         }
 
         if (yDirection != mLastJoystickYDirection) {
             if (mLastJoystickYKeyCode != 0) {
+                mHandler.removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
                 enqueueInputEvent(new KeyEvent(time, time,
                         KeyEvent.ACTION_UP, mLastJoystickYKeyCode, 0, metaState,
                         deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
@@ -3707,9 +3731,13 @@ public final class ViewRootImpl implements ViewParent,
             if (yDirection != 0 && synthesizeNewKeys) {
                 mLastJoystickYKeyCode = yDirection > 0
                         ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
-                enqueueInputEvent(new KeyEvent(time, time,
+                final KeyEvent e = new KeyEvent(time, time,
                         KeyEvent.ACTION_DOWN, mLastJoystickYKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
+                enqueueInputEvent(e);
+                Message m = mHandler.obtainMessage(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT, e);
+                m.setAsynchronous(true);
+                mHandler.sendMessageDelayed(m, mViewConfiguration.getKeyRepeatTimeout());
             }
         }
     }
