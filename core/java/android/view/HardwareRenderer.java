@@ -428,6 +428,8 @@ public abstract class HardwareRenderer {
     interface HardwareDrawCallbacks {
         /**
          * Invoked before a view is drawn by a hardware renderer.
+         * This method can be used to apply transformations to the
+         * canvas but no drawing command should be issued.
          * 
          * @param canvas The Canvas used to render the view.
          */
@@ -435,6 +437,7 @@ public abstract class HardwareRenderer {
 
         /**
          * Invoked after a view is drawn by a hardware renderer.
+         * It is safe to invoke drawing commands from this method.
          * 
          * @param canvas The Canvas used to render the view.
          */

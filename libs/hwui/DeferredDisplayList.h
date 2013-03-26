@@ -52,6 +52,8 @@ public:
         kOpBatch_Count, // Add other batch ids before this
     };
 
+    void clear();
+
     bool isEmpty() { return mBatches.isEmpty(); }
 
     /**
@@ -77,8 +79,6 @@ private:
      * added in the future will be inserted into a batch that already exist.
      */
     void resetBatchingState();
-
-    void clear();
 
     void storeStateOpBarrier(OpenGLRenderer& renderer, StateOp* op);
     void storeRestoreToCountBarrier(int newSaveCount);

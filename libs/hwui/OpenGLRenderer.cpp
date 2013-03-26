@@ -120,6 +120,7 @@ OpenGLRenderer::OpenGLRenderer():
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
     mFirstSnapshot = new Snapshot;
+    mFrameStarted = false;
 
     mScissorOptimizationDisabled = false;
 }
@@ -179,14 +180,11 @@ void OpenGLRenderer::initViewport(int width, int height) {
     mFirstSnapshot->viewport.set(0, 0, width, height);
 }
 
-status_t OpenGLRenderer::prepare(bool opaque) {
-    return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
-}
-
-status_t OpenGLRenderer::prepareDirty(float left, float top,
+void OpenGLRenderer::setupFrameState(float left, float top,
         float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
 
+    mOpaque = opaque;
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSnapshot->fbo = getTargetFbo();
@@ -194,13 +192,17 @@ status_t OpenGLRenderer::prepareDirty(float left, float top,
 
     mSnapshot->setClip(left, top, right, bottom);
     mTilingClip.set(left, top, right, bottom);
+}
+
+status_t OpenGLRenderer::startFrame() {
+    if (mFrameStarted) return DrawGlInfo::kStatusDone;
+    mFrameStarted = true;
+
     mDirtyClip = true;
 
-    updateLayers();
+    discardFramebuffer(mTilingClip.left, mTilingClip.top, mTilingClip.right, mTilingClip.bottom);
 
-    discardFramebuffer(left, top, right, bottom);
-
-    syncState();
+    glViewport(0, 0, mWidth, mHeight);
 
     // Functors break the tiling extension in pretty spectacular ways
     // This ensures we don't use tiling when a functor is going to be
@@ -211,7 +213,30 @@ status_t OpenGLRenderer::prepareDirty(float left, float top,
 
     debugOverdraw(true, true);
 
-    return clear(left, top, right, bottom, opaque);
+    return clear(mTilingClip.left, mTilingClip.top,
+            mTilingClip.right, mTilingClip.bottom, mOpaque);
+}
+
+status_t OpenGLRenderer::prepare(bool opaque) {
+    return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
+}
+
+status_t OpenGLRenderer::prepareDirty(float left, float top,
+        float right, float bottom, bool opaque) {
+    setupFrameState(left, top, right, bottom, opaque);
+
+    // Layer renderers will start the frame immediately
+    // The framebuffer renderer will first defer the display list
+    // for each layer and wait until the first drawing command
+    // to start the frame
+    if (mSnapshot->fbo == 0) {
+        syncState();
+        updateLayers();
+    } else {
+        return startFrame();
+    }
+
+    return DrawGlInfo::kStatusDone;
 }
 
 void OpenGLRenderer::discardFramebuffer(float left, float top, float right, float bottom) {
@@ -241,8 +266,6 @@ status_t OpenGLRenderer::clear(float left, float top, float right, float bottom,
 }
 
 void OpenGLRenderer::syncState() {
-    glViewport(0, 0, mWidth, mHeight);
-
     if (mCaches.blend) {
         glEnable(GL_BLEND);
     } else {
@@ -312,6 +335,8 @@ void OpenGLRenderer::finish() {
         }
 #endif
     }
+
+    mFrameStarted = false;
 }
 
 void OpenGLRenderer::interrupt() {
@@ -503,8 +528,8 @@ void OpenGLRenderer::renderOverdraw() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
-    if (layer->deferredUpdateScheduled && layer->renderer && layer->displayList) {
-        OpenGLRenderer* renderer = layer->renderer;
+    if (layer->deferredUpdateScheduled && layer->renderer &&
+            layer->displayList && layer->displayList->isRenderable()) {
         Rect& dirty = layer->dirtyRect;
 
         if (inFrame) {
@@ -512,19 +537,29 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
             debugOverdraw(false, false);
         }
 
-        renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
-        renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
-        renderer->drawDisplayList(layer->displayList, dirty, DisplayList::kReplayFlag_ClipChildren);
-        renderer->finish();
+        if (CC_UNLIKELY(inFrame || mCaches.drawDeferDisabled)) {
+            OpenGLRenderer* renderer = layer->renderer;
+            renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
+            renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom,
+                    !layer->isBlend());
+            renderer->drawDisplayList(layer->displayList, dirty,
+                    DisplayList::kReplayFlag_ClipChildren);
+            renderer->finish();
+        } else {
+            layer->defer();
+        }
 
         if (inFrame) {
             resumeAfterLayer();
             startTiling(mSnapshot);
         }
 
-        dirty.setEmpty();
+        if (CC_UNLIKELY(inFrame || mCaches.drawDeferDisabled)) {
+            dirty.setEmpty();
+            layer->renderer = NULL;
+        }
+
         layer->deferredUpdateScheduled = false;
-        layer->renderer = NULL;
         layer->displayList = NULL;
         layer->debugDrawUpdate = mCaches.debugLayersUpdates;
 
@@ -535,19 +570,54 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
 }
 
 void OpenGLRenderer::updateLayers() {
+    // If draw deferring is enabled this method will simply defer
+    // the display list of each individual layer. The layers remain
+    // in the layer updates list which will be cleared by flushLayers().
     int count = mLayerUpdates.size();
     if (count > 0) {
-        startMark("Layer Updates");
+        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+            startMark("Layer Updates");
+        } else {
+            startMark("Defer Layer Updates");
+        }
 
         // Note: it is very important to update the layers in reverse order
         for (int i = count - 1; i >= 0; i--) {
             Layer* layer = mLayerUpdates.itemAt(i);
             updateLayer(layer, false);
-            mCaches.resourceCache.decrementRefcount(layer);
+            if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+                mCaches.resourceCache.decrementRefcount(layer);
+            }
         }
-        mLayerUpdates.clear();
 
+        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+            mLayerUpdates.clear();
+            glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo());
+        }
+        endMark();
+    }
+}
+
+void OpenGLRenderer::flushLayers() {
+    int count = mLayerUpdates.size();
+    if (count > 0) {
+        startMark("Apply Layer Updates");
+        char layerName[12];
+
+        // Note: it is very important to update the layers in reverse order
+        for (int i = count - 1; i >= 0; i--) {
+            sprintf(layerName, "Layer #%d", i);
+            startMark(layerName); {
+                Layer* layer = mLayerUpdates.itemAt(i);
+                layer->flush();
+                mCaches.resourceCache.decrementRefcount(layer);
+            }
+            endMark();
+        }
+
+        mLayerUpdates.clear();
         glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo());
+
         endMark();
     }
 }
@@ -1832,6 +1902,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+            startFrame();
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
             displayList->replay(replayStruct, 0);
             return replayStruct.mDrawGlStatus;
@@ -1840,6 +1911,10 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         DeferredDisplayList deferredList;
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         displayList->defer(deferStruct, 0);
+
+        flushLayers();
+        startFrame();
+
         return deferredList.flush(*this, dirty);
     }
 
