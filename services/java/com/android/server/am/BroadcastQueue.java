@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1080,6 +1079,9 @@ public class BroadcastQueue {
                 pw.print("  #"); pw.print(i); pw.print(": "); pw.println(r);
                 pw.print("    ");
                 pw.println(r.intent.toShortString(false, true, true, false));
+                if (r.targetComp != null && r.targetComp != r.intent.getComponent()) {
+                    pw.print("    targetComp: "); pw.println(r.targetComp.toShortString());
+                }
                 Bundle bundle = r.intent.getExtras();
                 if (bundle != null) {
                     pw.print("    extras: "); pw.println(bundle.toString());
