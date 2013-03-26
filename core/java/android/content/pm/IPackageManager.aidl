@@ -239,7 +239,8 @@ interface IPackageManager {
     /**
      * As per {@link android.content.pm.PackageManager#setApplicationEnabledSetting}.
      */
-    void setApplicationEnabledSetting(in String packageName, in int newState, int flags, int userId);
+    void setApplicationEnabledSetting(in String packageName, in int newState, int flags,
+            int userId, String callingPackage);
     
     /**
      * As per {@link android.content.pm.PackageManager#getApplicationEnabledSetting}.
