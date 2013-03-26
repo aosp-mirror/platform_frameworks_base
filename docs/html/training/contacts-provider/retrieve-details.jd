@@ -1,0 +1,378 @@
+page.title=Retrieving Details for a Contact
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#RetrieveAll">Retrieve All Details for a Contact</a></li>
+  <li><a href="#RetrieveSpecific">Retrieve Specific Details for a Contact</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Content Provider Basics</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        Contacts Provider</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/loaders.html">Loaders</a>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+    <a href="http://developer.android.com/shareables/training/ContactsList.zip" class="button">
+    Download the sample
+    </a>
+ <p class="filename">ContactsList.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    This lesson shows how to retrieve detail data for a contact, such as email addresses, phone
+    numbers, and so forth. It's the details that users are looking for when they retrieve a contact.
+    You can give them all the details for a contact, or only display details of a particular type,
+    such as email addresses.
+</p>
+<p>
+    The steps in this lesson assume that you already have a
+    {@link android.provider.ContactsContract.Contacts} row for a contact the user has picked.
+    The <a href="retrieve-names.html">Retrieving Contact Names</a> lesson shows how to
+    retrieve a list of contacts.
+</p>
+<h2 id="RetrieveAll">Retrieve All Details for a Contact</h2>
+<p>
+    To retrieve all the details for a contact, search the
+    {@link android.provider.ContactsContract.Data} table for any rows that contain the contact's
+    {@link android.provider.ContactsContract.Data#LOOKUP_KEY}. This column is available in
+    the {@link android.provider.ContactsContract.Data} table, because the Contacts
+    Provider makes an implicit join between the {@link android.provider.ContactsContract.Contacts}
+    table and the {@link android.provider.ContactsContract.Data} table. The
+    {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY} column is described
+    in more detail in the <a href="retrieve-names.html">Retrieving Contact Names</a> lesson.
+</p>
+<p class="note">
+    <strong>Note:</strong> Retrieving all the details for a contact reduces the performance of a
+    device, because it needs to retrieve all of the columns in the
+    {@link android.provider.ContactsContract.Data} table. Consider the performance impact before
+    you use this technique.
+</p>
+<h3>Request permissions</h3>
+<p>
+    To read from the Contacts Provider, your app must have
+    {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS} permission.
+    To request this permission, add the following child element of
+    <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">
+    &lt;manifest&gt;</a></code> to your manifest file:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_CONTACTS" /&gt;
+</pre>
+<h3>Set up a projection</h3>
+<p>
+    Depending on the data type a row contains, it may use only a few columns or many. In addition,
+    the data is in different columns depending on the data type.
+    To ensure you get all the possible columns for all possible data types, you need to add all the
+    column names to your projection. Always retrieve
+    {@link android.provider.ContactsContract.Data#_ID Data._ID} if you're binding the result
+    {@link android.database.Cursor} to a {@link android.widget.ListView}; otherwise, the binding
+    won't work. Also retrieve {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE}
+    so you can identify the data type of each row you retrieve. For example:
+</p>
+<pre>
+    private static final String PROJECTION =
+            {
+                Data._ID,
+                Data.MIMETYPE,
+                Data.DATA1,
+                Data.DATA2,
+                Data.DATA3,
+                Data.DATA4,
+                Data.DATA5,
+                Data.DATA6,
+                Data.DATA7,
+                Data.DATA8,
+                Data.DATA9,
+                Data.DATA10,
+                Data.DATA11,
+                Data.DATA12,
+                Data.DATA13,
+                Data.DATA14,
+                Data.DATA15
+            };
+</pre>
+<p>
+    This projection retrieves all the columns for a row in the
+    {@link android.provider.ContactsContract.Data} table, using the column names defined in
+    the {@link android.provider.ContactsContract.Data} class.
+</p>
+<p>
+    Optionally, you can also use any other column constants defined in or inherited by the
+    {@link android.provider.ContactsContract.Data} class. Notice, however, that the columns
+    {@link android.provider.ContactsContract.DataColumns#SYNC1} through
+    {@link android.provider.ContactsContract.DataColumns#SYNC4} are meant to be used by sync
+    adapters, so their data is not useful.
+</p>
+<h3>Define the selection criteria</h3>
+<p>
+    Define a constant for your selection clause, an array to hold selection arguments, and a
+    variable to hold the selection value. Use
+    the {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY Contacts.LOOKUP_KEY} column to
+    find the contact. For example:
+</p>
+<pre>
+    // Defines the selection clause
+    private static final String SELECTION = Data.LOOKUP_KEY + " = ?";
+    // Defines the array to hold the search criteria
+    private String[] mSelectionArgs = { "" };
+    /*
+     * Defines a variable to contain the selection value. Once you
+     * have the Cursor from the Contacts table, and you've selected
+     * the desired row, move the row's LOOKUP_KEY value into this
+     * variable.
+     */
+    private String mLookupKey;
+</pre>
+<p>
+    Using "?" as a placeholder in your selection text expression ensures that the resulting search
+    is generated by binding rather than SQL compilation. This approach eliminates the
+    possibility of malicious SQL injection.
+</p>
+<h3>Define the sort order</h3>
+<p>
+    Define the sort order you want in the resulting {@link android.database.Cursor}. To
+    keep all rows for a particular data type together, sort by
+    {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE}. This query argument
+    groups all email rows together, all phone rows together, and so forth. For example:
+</p>
+<pre>
+    /*
+     * Defines a string that specifies a sort order of MIME type
+     */
+    private static final String SORT_ORDER = Data.MIMETYPE;
+</pre>
+<p class="note">
+    <strong>Note:</strong> Some data types don't use a subtype, so you can't sort on subtype.
+    Instead, you have to iterate through the returned {@link android.database.Cursor},
+    determine the data type of the current row, and store data for rows that use a subtype. When
+    you finish reading the cursor, you can then sort each data type by subtype and display the
+    results.
+</p>
+<h3>Initialize the Loader</h3>
+<p>
+   Always do retrievals from the Contacts Provider (and all other content providers) in a
+   background thread. Use the Loader framework defined by the
+   {@link android.support.v4.app.LoaderManager} class and the
+   {@link android.support.v4.app.LoaderManager.LoaderCallbacks} interface to do background
+   retrievals.
+</p>
+<p>
+    When you're ready to retrieve the rows, initialize the loader framework by
+    calling {@link android.support.v4.app.LoaderManager#initLoader initLoader()}. Pass an
+    integer identifier to the method; this identifier is passed to
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks} methods. The identifier helps you
+    use multiple loaders in an app by allowing you to differentiate between them.
+</p>
+<p>
+    The following snippet shows how to initialize the loader framework:
+</p>
+<pre>
+public class DetailsFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks&lt;Cursor&gt; {
+    ...
+    // Defines a constant that identifies the loader
+    DETAILS_QUERY_ID = 0;
+    ...
+    /*
+     * Invoked when the parent Activity is instantiated
+     * and the Fragment's UI is ready. Put final initialization
+     * steps here.
+     */
+    &#64;Override
+    onActivityCreated(Bundle savedInstanceState) {
+        ...
+        // Initializes the loader framework
+        getLoaderManager().initLoader(DETAILS_QUERY_ID, null, this);
+</pre>
+<h3>Implement onCreateLoader()</h3>
+<p>
+    Implement the {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader
+    onCreateLoader()} method, which is called by the loader framework immediately after you call
+    {@link android.support.v4.app.LoaderManager#initLoader initLoader()}. Return a
+    {@link android.support.v4.content.CursorLoader} from this method. Since you're searching
+    the {@link android.provider.ContactsContract.Data} table, use the constant
+    {@link android.provider.ContactsContract.Data#CONTENT_URI Data.CONTENT_URI} as the content URI.
+    For example:
+</p>
+<pre>
+    &#64;Override
+    public Loader&lt;Cursor&gt; onCreateLoader(int loaderId, Bundle args) {
+        // Choose the proper action
+        switch (loaderId) {
+            case DETAILS_QUERY_ID:
+            // Assigns the selection parameter
+            mSelectionArgs[0] = mLookupKey;
+            // Starts the query
+            CursorLoader mLoader =
+                    new CursorLoader(
+                            getActivity(),
+                            Data.CONTENT_URI,
+                            PROJECTION,
+                            SELECTION,
+                            mSelectionArgs,
+                            SORT_ORDER
+                    );
+            ...
+    }
+</pre>
+<h3>Implement onLoadFinished() and onLoaderReset()</h3>
+<p>
+    Implement the
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+    method. The loader framework calls
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+    when the Contacts Provider returns the results of the query. For example:
+</p>
+<pre>
+    public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+        switch (loader.getId()) {
+            case DETAILS_QUERY_ID:
+                    /*
+                     * Process the resulting Cursor here.
+                     */
+                }
+                break;
+            ...
+        }
+    }
+</pre>
+<p>
+<p>
+    The method {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset
+    onLoaderReset()} is invoked when the loader framework detects that the data backing the result
+    {@link android.database.Cursor} has changed. At this point, remove any existing references
+    to the {@link android.database.Cursor} by setting them to null. If you don't, the loader
+    framework won't destroy the old {@link android.database.Cursor}, and you'll get a memory
+    leak. For example:
+<pre>
+    &#64;Override
+    public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+        switch (loader.getId()) {
+            case DETAILS_QUERY_ID:
+                /*
+                 * If you have current references to the Cursor,
+                 * remove them here.
+                 */
+                }
+                break;
+    }
+</pre>
+<h2 id="RetrieveSpecific">Retrieve Specific Details for a Contact</h2>
+<p>
+    Retrieving a specific data type for a contact, such as all the emails, follows the same pattern
+    as retrieving all details. These are the only changes you need to make to the code
+    listed in <a href="#RetrieveAll">Retrieve All Details for a Contact</a>:
+</p>
+<dl>
+    <dt>
+        Projection
+    </dt>
+    <dd>
+        Modify your projection to retrieve the columns that are specific to the
+        data type. Also modify the projection to use the column name constants defined in the
+        {@link android.provider.ContactsContract.CommonDataKinds} subclass corresponding to the
+        data type.
+    </dd>
+    <dt>
+        Selection
+    </dt>
+    <dd>
+        Modify the selection text to search for the
+        {@link android.provider.ContactsContract.Data#MIMETYPE MIMETYPE} value that's specific to
+        your data type.
+    </dd>
+    <dt>
+        Sort order
+    </dt>
+    <dd>
+        Since you're only selecting a single detail type, don't group the returned
+        {@link android.database.Cursor} by {@link android.provider.ContactsContract.Data#MIMETYPE
+        Data.MIMETYPE}.
+    </dd>
+</dl>
+<p>
+    These modifications are described in the following sections.
+</p>
+<h3>Define a projection</h3>
+<p>
+    Define the columns you want to retrieve, using the column name constants in the subclass
+    of {@link android.provider.ContactsContract.CommonDataKinds} for the data type.
+    If you plan to bind your {@link android.database.Cursor} to a {@link android.widget.ListView},
+    be sure to retrieve the <code>_ID</code> column. For example, to retrieve email data, define the
+    following projection:
+</p>
+<pre>
+    private static final String[] PROJECTION =
+            {
+                Email._ID,
+                Email.ADDRESS,
+                Email.TYPE,
+                Email.LABEL
+            };
+</pre>
+<p>
+    Notice that this projection uses the column names defined in the class
+    {@link android.provider.ContactsContract.CommonDataKinds.Email}, instead of the column names
+    defined in the class {@link android.provider.ContactsContract.Data}. Using the email-specific
+    column names makes the code more readable.
+</p>
+<p>
+    In the projection, you can also use any of the other columns defined in the
+    {@link android.provider.ContactsContract.CommonDataKinds} subclass.
+</p>
+<h3>Define selection criteria</h3>
+<p>
+    Define a search text expression that retrieves rows for a specific contact's
+    {@link android.provider.ContactsContract.Data#LOOKUP_KEY} and the
+    {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE} of the details you
+    want. Enclose the {@link android.provider.ContactsContract.Data#MIMETYPE MIMETYPE} value in
+    single quotes by concatenating a "<code>'</code>" (single-quote) character to the start and end
+    of the constant; otherwise, the provider interprets the constant as a variable name rather
+    than as a string value. You don't need to use a placeholder for this value, because you're
+    using a constant rather than a user-supplied value. For example:
+</p>
+<pre>
+    /*
+     * Defines the selection clause. Search for a lookup key
+     * and the Email MIME type
+     */
+    private static final String SELECTION =
+            Data.LOOKUP_KEY + " = ?" +
+            " AND " +
+            Data.MIMETYPE + " = " +
+            "'" + Email.CONTENT_ITEM_TYPE + "'";
+    // Defines the array to hold the search criteria
+    private String[] mSelectionArgs = { "" };
+</pre>
+<h3>Define a sort order</h3>
+<p>
+    Define a sort order for the returned {@link android.database.Cursor}. Since you're retrieving a
+    specific data type, omit the sort on {@link android.provider.ContactsContract.Data#MIMETYPE}.
+    Instead, if the type of detail data you're searching includes a subtype, sort on it.
+    For example, for email data you can sort on
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE Email.TYPE}:
+</p>
+<pre>
+    private static final String SORT_ORDER = Email.TYPE + " ASC ";
+</pre>
