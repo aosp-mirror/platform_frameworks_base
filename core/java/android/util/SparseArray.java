@@ -118,7 +118,7 @@ public class SparseArray<E> implements Cloneable {
             mGarbage = true;
         }
     }
-    
+
     private void gc() {
         // Log.e("SparseArray", "gc start with " + mSize);
 
@@ -214,7 +214,7 @@ public class SparseArray<E> implements Cloneable {
     /**
      * Given an index in the range <code>0...size()-1</code>, returns
      * the key from the <code>index</code>th key-value mapping that this
-     * SparseArray stores.  
+     * SparseArray stores.
      */
     public int keyAt(int index) {
         if (mGarbage) {
@@ -223,11 +223,11 @@ public class SparseArray<E> implements Cloneable {
 
         return mKeys[index];
     }
-    
+
     /**
      * Given an index in the range <code>0...size()-1</code>, returns
      * the value from the <code>index</code>th key-value mapping that this
-     * SparseArray stores.  
+     * SparseArray stores.
      */
     @SuppressWarnings("unchecked")
     public E valueAt(int index) {
@@ -241,7 +241,7 @@ public class SparseArray<E> implements Cloneable {
     /**
      * Given an index in the range <code>0...size()-1</code>, sets a new
      * value for the <code>index</code>th key-value mapping that this
-     * SparseArray stores.  
+     * SparseArray stores.
      */
     public void setValueAt(int index, E value) {
         if (mGarbage) {
@@ -250,7 +250,7 @@ public class SparseArray<E> implements Cloneable {
 
         mValues[index] = value;
     }
-    
+
     /**
      * Returns the index for which {@link #keyAt} would return the
      * specified key, or a negative number if the specified
@@ -268,9 +268,11 @@ public class SparseArray<E> implements Cloneable {
      * Returns an index for which {@link #valueAt} would return the
      * specified key, or a negative number if no keys map to the
      * specified value.
-     * Beware that this is a linear search, unlike lookups by key,
+     * <p>Beware that this is a linear search, unlike lookups by key,
      * and that multiple keys can map to the same value and this will
      * find only one of them.
+     * <p>Note also that unlike most collections' {@code indexOf} methods,
+     * this method compares values using {@code ==} rather than {@code equals}.
      */
     public int indexOfValue(E value) {
         if (mGarbage) {
@@ -332,7 +334,7 @@ public class SparseArray<E> implements Cloneable {
         mValues[pos] = value;
         mSize = pos + 1;
     }
-    
+
     private static int binarySearch(int[] a, int start, int len, int key) {
         int high = start + len, low = start - 1, guess;
 
