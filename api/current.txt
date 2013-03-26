@@ -24966,14 +24966,6 @@ package android.view {
     field public static final int ORIENTATION_UNKNOWN = -1; // 0xffffffff
   }
 
-  public abstract interface Overlay {
-    method public abstract void add(android.graphics.drawable.Drawable);
-    method public abstract void add(android.view.View);
-    method public abstract void clear();
-    method public abstract void remove(android.graphics.drawable.Drawable);
-    method public abstract void remove(android.view.View);
-  }
-
   public class ScaleGestureDetector {
     ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener);
     method public float getCurrentSpan();
@@ -25278,7 +25270,7 @@ package android.view {
     method public int getNextFocusUpId();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
     method public int getOverScrollMode();
-    method public android.view.Overlay getOverlay();
+    method public android.view.ViewOverlay getOverlay();
     method public int getPaddingBottom();
     method public int getPaddingEnd();
     method public int getPaddingLeft();
@@ -26019,10 +26011,21 @@ package android.view {
     method public abstract void onChildViewRemoved(android.view.View, android.view.View);
   }
 
+  public class ViewGroupOverlay extends android.view.ViewOverlay {
+    method public void add(android.view.View);
+    method public void remove(android.view.View);
+  }
+
   public abstract interface ViewManager {
     method public abstract void addView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public abstract void removeView(android.view.View);
     method public abstract void updateViewLayout(android.view.View, android.view.ViewGroup.LayoutParams);
+  }
+
+  public class ViewOverlay {
+    method public void add(android.graphics.drawable.Drawable);
+    method public void clear();
+    method public void remove(android.graphics.drawable.Drawable);
   }
 
   public abstract interface ViewParent {
