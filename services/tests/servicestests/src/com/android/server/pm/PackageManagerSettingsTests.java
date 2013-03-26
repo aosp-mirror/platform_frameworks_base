@@ -111,9 +111,9 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
 
     private void writePackagesList() {
         writeFile(new File(getContext().getFilesDir(), "system/packages.list"),
-                ( "com.google.app1 11000 0 /data/data/com.google.app1"
-                + "com.google.app2 11001 0 /data/data/com.google.app2"
-                + "com.android.app3 11030 0 /data/data/com.android.app3")
+                ( "com.google.app1 11000 0 /data/data/com.google.app1 seinfo1"
+                + "com.google.app2 11001 0 /data/data/com.google.app2 seinfo2"
+                + "com.android.app3 11030 0 /data/data/com.android.app3 seinfo3")
                 .getBytes());
     }
 
