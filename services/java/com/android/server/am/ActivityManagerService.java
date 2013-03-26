@@ -275,12 +275,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    /** All of the stacks in the system */
-    final ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
-
-    /** Identifier counter for all ActivityStacks */
-    private int mLastStackId = 0;
-
     /** Run all ActivityStacks through this */
     ActivityStackSupervisor mStackSupervisor;
 
@@ -761,14 +755,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
     boolean mShuttingDown = false;
 
     /**
-     * Task identifier that activities are currently being started
-     * in.  Incremented each time a new task is created.
-     * todo: Replace this with a TokenSpace class that generates non-repeating
-     * integers that won't wrap.
-     */
-    private int mCurTask = 0;
-
-    /**
      * Current sequence id for oom_adj computation traversal.
      */
     int mAdjSeq = 0;
@@ -991,7 +977,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                         }
                     }
                 }
-                
+
                 ensureBootCompleted();
             } break;
             case SHOW_NOT_RESPONDING_MSG: {
@@ -1002,7 +988,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                         Slog.e(TAG, "App already has anr dialog: " + proc);
                         return;
                     }
-                    
+
                     Intent intent = new Intent("android.intent.action.ANR");
                     if (!mProcessesReady) {
                         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -1023,7 +1009,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                         killAppAtUsersRequest(proc, null);
                     }
                 }
-                
+
                 ensureBootCompleted();
             } break;
             case SHOW_STRICT_MODE_VIOLATION_MSG: {
@@ -1208,13 +1194,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 if (inm == null) {
                     return;
                 }
-                
+
                 ActivityRecord root = (ActivityRecord)msg.obj;
                 ProcessRecord process = root.app;
                 if (process == null) {
                     return;
                 }
-                
+
                 try {
                     Context context = mContext.createPackageContext(process.info.packageName, 0);
                     String text = mContext.getString(R.string.heavy_weight_notification,
@@ -1232,7 +1218,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                             PendingIntent.getActivityAsUser(mContext, 0, root.intent,
                                     PendingIntent.FLAG_CANCEL_CURRENT, null,
                                     new UserHandle(root.userId)));
-                    
+
                     try {
                         int[] outId = new int[1];
                         inm.enqueueNotificationWithTag("android", "android", null,
@@ -1486,7 +1472,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
         m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
         m.mStackSupervisor.init();
-        m.mStacks.add(m.mFocusedStack);
 
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
@@ -2413,6 +2398,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public int getFrontActivityScreenCompatMode() {
         enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
         synchronized (this) {
@@ -2420,6 +2406,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public void setFrontActivityScreenCompatMode(int mode) {
         enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
                 "setFrontActivityScreenCompatMode");
@@ -2428,6 +2415,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public int getPackageScreenCompatMode(String packageName) {
         enforceNotIsolatedCaller("getPackageScreenCompatMode");
         synchronized (this) {
@@ -2435,6 +2423,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public void setPackageScreenCompatMode(String packageName, int mode) {
         enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
                 "setPackageScreenCompatMode");
@@ -2443,6 +2432,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public boolean getPackageAskScreenCompat(String packageName) {
         enforceNotIsolatedCaller("getPackageAskScreenCompat");
         synchronized (this) {
@@ -2450,6 +2440,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public void setPackageAskScreenCompat(String packageName, boolean ask) {
         enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
                 "setPackageAskScreenCompat");
@@ -3017,35 +3008,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             clearProfilerLocked();
         }
 
-        // Just in case...
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.mPausingActivity != null && stack.mPausingActivity.app == app) {
-                if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG,
-                        "App died while pausing: " + stack.mPausingActivity);
-                stack.mPausingActivity = null;
-            }
-            if (stack.mLastPausedActivity != null && stack.mLastPausedActivity.app == app) {
-                stack.mLastPausedActivity = null;
-            }
-
-            // Remove this application's activities from active lists.
-            boolean hasVisibleActivities = stack.removeHistoryRecordsForAppLocked(app);
-
-            if (!restarting) {
-                if (!stack.resumeTopActivityLocked(null)) {
-                    // If there was nothing to resume, and we are not already
-                    // restarting this process, but there is a visible activity that
-                    // is hosted by the process...  then make sure all visible
-                    // activities are running, taking care of restarting this
-                    // process.
-                    if (hasVisibleActivities) {
-                        stack.ensureActivitiesVisibleLocked(null, 0);
-                    }
-                }
-            }
-        }
+        mStackSupervisor.handleAppDiedLocked(app, restarting);
 
         app.activities.clear();
 
@@ -3761,11 +3724,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
         mWindowManager.closeSystemDialogs(reason);
 
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            stack.closeSystemDialogsLocked();
-        }
+        mStackSupervisor.closeSystemDialogsLocked();
 
         broadcastIntentLocked(null, null, intent, null,
                 null, 0, null, null, null, AppOpsManager.OP_NONE, false, false, -1,
@@ -3973,15 +3932,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 -100, callerWillRestart, true, doit, evenPersistent,
                 name == null ? ("force stop user " + userId) : ("force stop " + name));
 
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.forceStopPackageLocked(name, doit, evenPersistent, userId)) {
-                if (!doit) {
-                    return true;
-                }
-                didSomething = true;
+        if (mStackSupervisor.forceStopPackageLocked(name, doit, evenPersistent, userId)) {
+            if (!doit) {
+                return true;
             }
+            didSomething = true;
         }
 
         if (mServices.forceStopLocked(name, userId, evenPersistent, doit)) {
@@ -4069,14 +4024,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 }
             }
             if (mBooted) {
-                for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                    final ActivityStack stack = mStacks.get(stackNdx);
-                    stack.resumeTopActivityLocked(null);
-                    stack.scheduleIdleLocked();
-                }
+                mStackSupervisor.resumeTopActivityLocked();
+                mStackSupervisor.scheduleIdleLocked();
             }
         }
-        
+
         return didSomething;
     }
 
@@ -5867,27 +5819,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
             return null;
     }
 
-    TaskRecord anyTaskForIdLocked(int id) {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            ActivityStack stack = mStacks.get(stackNdx);
-            TaskRecord task = stack.taskForIdLocked(id);
-            if (task != null) {
-                return task;
-            }
-        }
-        return null;
-    }
-
-    int getNextTaskId() {
-        do {
-            mCurTask++;
-            if (mCurTask <= 0) {
-                mCurTask = 1;
-            }
-        } while (anyTaskForIdLocked(mCurTask) != null);
-        return mCurTask;
-    }
-
     @Override
     public ActivityManager.TaskThumbnails getTaskThumbnails(int id) {
         synchronized (this) {
@@ -6030,26 +5961,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
             final long origId = Binder.clearCallingIdentity();
             try {
-                TaskRecord tr = recentTaskForIdLocked(task);
-                if (tr != null) {
-                    ActivityStack stack = tr.stack;
-                    if ((flags&ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
-                        stack.mUserLeaving = true;
-                    }
-                    if ((flags&ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
-                        // Caller wants the home activity moved with it.  To accomplish this,
-                        // we'll just move the home task to the top first.
-                        stack.moveHomeToFrontLocked();
-                    }
-                    stack.moveTaskToFrontLocked(tr, null, options);
-                    return;
-                }
-                // Failed to find the task in the recents list. Look in all stacks.
-                for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    if (mStacks.get(stackNdx).findTaskToMoveToFrontLocked(task, flags, options)) {
-                        return;
-                    }
-                }
+                mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -6122,43 +6034,21 @@ public final class ActivityManagerService  extends ActivityManagerNative
         Slog.e(TAG, "moveTaskBackwards not yet implemented!");
     }
 
-    private ActivityStack getStack(int stackId) {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.getStackId() == stackId) {
-                return stack;
-            }
-        }
-        return null;
-    }
-
     @Override
     public int createStack(int relativeStackId, int position, float weight) {
         synchronized (this) {
-            while (true) {
-                if (++mLastStackId <= HOME_ACTIVITY_STACK) {
-                    mLastStackId = HOME_ACTIVITY_STACK + 1;
-                }
-                if (getStack(mLastStackId) == null) {
-                    break;
-                }
-            }
-            mStacks.add(new ActivityStack(this, mContext, mLooper, mLastStackId,
-                    mStackSupervisor));
-            mWindowManager.createStack(mLastStackId, position, relativeStackId, weight);
-            return mLastStackId;
+            int stackId = mStackSupervisor.createStack(relativeStackId, position, weight);
+            mWindowManager.createStack(stackId, position, relativeStackId, weight);
+            return stackId;
         }
     }
 
     @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        final ActivityStack stack = getStack(stackId);
-        if (stack == null) {
-            Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
-            return;
+        synchronized (this) {
+            mStackSupervisor.moveTaskToStack(taskId, stackId, toTop);
+            mWindowManager.moveTaskToStack(taskId, stackId, toTop);
         }
-        stack.moveTask(taskId, toTop);
-        mWindowManager.moveTaskToStack(taskId, stackId, toTop);
     }
 
     @Override
@@ -7139,11 +7029,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
             if (!mSleeping) {
                 mSleeping = true;
-                final int numStacks = mStacks.size();
-                for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                    final ActivityStack stack = mStacks.get(stackNdx);
-                    stack.stopIfSleepingLocked();
-                }
+                mStackSupervisor.goingToSleepLocked();
 
                 // Initialize the wake times of all processes.
                 checkExcessivePowerUsageLocked(false);
@@ -7167,28 +7053,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         synchronized(this) {
             mShuttingDown = true;
             updateEventDispatchingLocked();
-
-            final int numStacks = mStacks.size();
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                final ActivityStack stack = mStacks.get(stackNdx);
-                if (stack.mResumedActivity != null) {
-                    stack.stopIfSleepingLocked();
-                    final long endTime = System.currentTimeMillis() + timeout;
-                    while (stack.mResumedActivity != null
-                            || stack.mPausingActivity != null) {
-                        long delay = endTime - System.currentTimeMillis();
-                        if (delay <= 0) {
-                            Slog.w(TAG, "Activity manager shutdown timed out");
-                            timedout = true;
-                            break;
-                        }
-                        try {
-                            this.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-            }
+            timedout = mStackSupervisor.shutdownLocked(timeout);
         }
 
         mAppOpsService.shutdown();
@@ -7220,12 +7085,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         if (!mWentToSleep && !mLockScreenShown) {
             if (mSleeping) {
                 mSleeping = false;
-                final int numStacks = mStacks.size();
-                for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                    final ActivityStack stack = mStacks.get(stackNdx);
-                    stack.awakeFromSleepingLocked();
-                    stack.resumeTopActivityLocked(null);
-                }
+                mStackSupervisor.comeOutOfSleepIfNeededLocked();
             }
         }
     }
@@ -8183,17 +8043,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
         } else {
             crashTime = null;
         }
-        final int numStacks = mStacks.size();
         if (crashTime != null && now < crashTime+ProcessList.MIN_CRASH_INTERVAL) {
             // This process loses!
             Slog.w(TAG, "Process " + app.info.processName
                     + " has crashed too many times: killing!");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
                     app.userId, app.info.processName, app.uid);
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                final ActivityStack stack = mStacks.get(stackNdx);
-                stack.handleAppCrashLocked(app);
-            }
+            mStackSupervisor.handleAppCrashLocked(app);
             if (!app.persistent) {
                 // We don't want to start this process again until the user
                 // explicitly does so...  but for persistent process, we really
@@ -8213,21 +8069,12 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
                 removeProcessLocked(app, false, false, "crash");
-                for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                    final ActivityStack stack = mStacks.get(stackNdx);
-                    stack.resumeTopActivityLocked(null);
-                }
+                mStackSupervisor.resumeTopActivityLocked();
                 return false;
             }
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                final ActivityStack stack = mStacks.get(stackNdx);
-                stack.resumeTopActivityLocked(null);
-            }
+            mStackSupervisor.resumeTopActivityLocked();
         } else {
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                final ActivityStack stack = mStacks.get(stackNdx);
-                stack.finishTopRunningActivityLocked(app);
-            }
+            mStackSupervisor.finishTopRunningActivityLocked(app);
         }
 
         // Bump up the crash count of any services currently running in the proc.
@@ -9245,56 +9092,12 @@ public final class ActivityManagerService  extends ActivityManagerNative
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
         pw.println("ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)");
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            pw.print("  Stack #"); pw.print(mStacks.indexOf(stack)); pw.println(":");
-            stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage);
-            pw.println(" ");
-            pw.println("  Running activities (most recent first):");
-            dumpHistoryList(fd, pw, stack.mLRUActivities, "  ", "Run", false, !dumpAll, false,
-                    dumpPackage);
-            if (stack.mWaitingVisibleActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting for another to become visible:");
-                dumpHistoryList(fd, pw, stack.mWaitingVisibleActivities, "  ", "Wait", false,
-                        !dumpAll, false, dumpPackage);
-            }
-            if (stack.mStoppingActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting to stop:");
-                dumpHistoryList(fd, pw, stack.mStoppingActivities, "  ", "Stop", false,
-                        !dumpAll, false, dumpPackage);
-            }
-            if (stack.mGoingToSleepActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting to sleep:");
-                dumpHistoryList(fd, pw, stack.mGoingToSleepActivities, "  ", "Sleep", false,
-                        !dumpAll, false, dumpPackage);
-            }
-            if (stack.mFinishingActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting to finish:");
-                dumpHistoryList(fd, pw, stack.mFinishingActivities, "  ", "Fin", false,
-                        !dumpAll, false, dumpPackage);
-            }
-        }
+
+        mStackSupervisor.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage);
 
         pw.println(" ");
         pw.println("  mFocusedActivity: " + mFocusedActivity);
         pw.println(" ");
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            pw.print("  Stack #"); pw.println(mStacks.indexOf(stack));
-            if (stack.mPausingActivity != null) {
-                pw.println("  mPausingActivity: " + stack.mPausingActivity);
-            }
-            pw.println("  mResumedActivity: " + stack.mResumedActivity);
-            if (dumpAll) {
-                pw.println("  mLastPausedActivity: " + stack.mLastPausedActivity);
-                pw.println("  mSleepTimeout: " + stack.mSleepTimeout);
-            }
-        }
 
         mStackSupervisor.dump(pw, "  ");
 
@@ -9318,12 +9121,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 }
             }
         }
-        
-        if (dumpAll) {
-            pw.println(" ");
-            pw.println("  mCurTask: " + mCurTask);
-        }
-        
+
         return true;
     }
 
@@ -10038,75 +9836,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
         
         return needSep;
-    }
-
-    static final void dumpHistoryList(FileDescriptor fd, PrintWriter pw, List list,
-            String prefix, String label, boolean complete, boolean brief, boolean client,
-            String dumpPackage) {
-        TaskRecord lastTask = null;
-        boolean needNL = false;
-        final String innerPrefix = prefix + "      ";
-        final String[] args = new String[0];
-        for (int i=list.size()-1; i>=0; i--) {
-            final ActivityRecord r = (ActivityRecord)list.get(i);
-            if (dumpPackage != null && !dumpPackage.equals(r.packageName)) {
-                continue;
-            }
-            final boolean full = !brief && (complete || !r.isInHistory());
-            if (needNL) {
-                pw.println(" ");
-                needNL = false;
-            }
-            if (lastTask != r.task) {
-                lastTask = r.task;
-                pw.print(prefix);
-                pw.print(full ? "* " : "  ");
-                pw.println(lastTask);
-                if (full) {
-                    lastTask.dump(pw, prefix + "  ");
-                } else if (complete) {
-                    // Complete + brief == give a summary.  Isn't that obvious?!?
-                    if (lastTask.intent != null) {
-                        pw.print(prefix); pw.print("  ");
-                                pw.println(lastTask.intent.toInsecureStringWithClip());
-                    }
-                }
-            }
-            pw.print(prefix); pw.print(full ? "  * " : "    "); pw.print(label);
-            pw.print(" #"); pw.print(i); pw.print(": ");
-            pw.println(r);
-            if (full) {
-                r.dump(pw, innerPrefix);
-            } else if (complete) {
-                // Complete + brief == give a summary.  Isn't that obvious?!?
-                pw.print(innerPrefix); pw.println(r.intent.toInsecureString());
-                if (r.app != null) {
-                    pw.print(innerPrefix); pw.println(r.app);
-                }
-            }
-            if (client && r.app != null && r.app.thread != null) {
-                // flush anything that is already in the PrintWriter since the thread is going
-                // to write to the file descriptor directly
-                pw.flush();
-                try {
-                    TransferPipe tp = new TransferPipe();
-                    try {
-                        r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(),
-                                r.appToken, innerPrefix, args);
-                        // Short timeout, since blocking here can
-                        // deadlock with the application.
-                        tp.go(fd, 2000);
-                    } finally {
-                        tp.kill();
-                    }
-                } catch (IOException e) {
-                    pw.println(innerPrefix + "Failure while dumping the activity: " + e);
-                } catch (RemoteException e) {
-                    pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
-                }
-                needNL = true;
-            }
-        }
     }
 
     private static String buildOomTag(String prefix, String space, int val, int base) {
@@ -12519,23 +12248,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
         }
 
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (changes != 0 && starting == null) {
-                // If the configuration changed, and the caller is not already
-                // in the process of starting an activity, then find the top
-                // activity to check if its configuration needs to change.
-                starting = stack.topRunningActivityLocked(null);
-            }
-
-            if (starting != null) {
-                kept = stack.ensureActivityConfigurationLocked(starting, changes);
-                // And we need to make sure at this point that all other activities
-                // are made visible with the correct configuration.
-                stack.ensureActivitiesVisibleLocked(starting, changes);
-            }
-        }
+        kept = mStackSupervisor.updateConfigurationLocked(changes, starting);
 
         if (values != null && mWindowManager != null) {
             mWindowManager.setNewConfiguration(mConfiguration);
@@ -13864,11 +13577,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                                 // be in a consistent state at this point.
                                 // For these apps we will also finish their activities
                                 // to help them free memory.
-                                final int numStacks = mStacks.size();
-                                for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                                    final ActivityStack stack = mStacks.get(stackNdx);
-                                    stack.scheduleDestroyActivities(app, false, "trim");
-                                }
+                                mStackSupervisor.scheduleDestroyAllActivities(app, "trim");
                             }
                         }
                     }
@@ -13942,11 +13651,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         if (mAlwaysFinishActivities) {
             // Need to do this on its own message because the stack may not
             // be in a consistent state at this point.
-            final int numStacks = mStacks.size();
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                final ActivityStack stack = mStacks.get(stackNdx);
-                stack.scheduleDestroyActivities(null, false, "always-finish");
-            }
+            mStackSupervisor.scheduleDestroyAllActivities(null, "always-finish");
         }
     }
 
@@ -14311,12 +14016,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     }
                 }
 
-                boolean haveActivities = false;
-                final int numStacks = mStacks.size();
-                for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                    final ActivityStack stack = mStacks.get(stackNdx);
-                    haveActivities |= stack.switchUserLocked(userId, uss);
-                }
+                boolean haveActivities = mStackSupervisor.switchUserLocked(userId, uss);
                 if (!haveActivities) {
                     startHomeActivityLocked(userId);
                 }
