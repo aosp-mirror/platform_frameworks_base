@@ -34,6 +34,7 @@ interface IUserManager {
     Bitmap getUserIcon(int userHandle);
     List<UserInfo> getUsers(boolean excludeDying);
     UserInfo getUserInfo(int userHandle);
+    boolean isRestricted();
     void setGuestEnabled(boolean enable);
     boolean isGuestEnabled();
     void wipeUser(int userHandle);

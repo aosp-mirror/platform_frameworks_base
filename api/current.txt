@@ -4337,6 +4337,7 @@ package android.app.admin {
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
+    method public boolean isDeviceOwner(java.lang.String);
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
@@ -16788,9 +16789,20 @@ package android.os {
     method public int getUserCount();
     method public android.os.UserHandle getUserForSerialNumber(long);
     method public java.lang.String getUserName();
+    method public android.os.Bundle getUserRestrictions();
+    method public android.os.Bundle getUserRestrictions(android.os.UserHandle);
     method public boolean isUserAGoat();
+    method public boolean isUserRestricted();
     method public boolean isUserRunning(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);
+    method public void setUserRestriction(java.lang.String, boolean);
+    method public void setUserRestrictions(android.os.Bundle);
+    method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
+    field public static final java.lang.String DISALLOW_CONFIG_WIFI = "no_config_wifi";
+    field public static final java.lang.String DISALLOW_INSTALL_APPS = "no_install_apps";
+    field public static final java.lang.String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
+    field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
+    field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
   }
 
   public abstract class Vibrator {

@@ -1425,9 +1425,9 @@ public class AccountManagerService
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         checkManageAccountsPermission();
 
-        // Is user allowed to modify accounts?
-        if (!getUserManager().getUserRestrictions(Binder.getCallingUserHandle())
-                .getBoolean(UserManager.ALLOW_MODIFY_ACCOUNTS)) {
+        // Is user disallowed from modifying accounts?
+        if (getUserManager().getUserRestrictions(Binder.getCallingUserHandle())
+                .getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
@@ -2572,7 +2572,7 @@ public class AccountManagerService
         if (callingUid != android.os.Process.myUid()) {
             Bundle restrictions = getUserManager().getUserRestrictions(
                     new UserHandle(UserHandle.getUserId(callingUid)));
-            if (!restrictions.getBoolean(UserManager.ALLOW_MODIFY_ACCOUNTS)) {
+            if (restrictions.getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false)) {
                 return false;
             }
         }
