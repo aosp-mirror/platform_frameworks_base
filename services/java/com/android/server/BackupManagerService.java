@@ -63,6 +63,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -746,6 +747,9 @@ class BackupManagerService extends IBackupManager.Stub {
         // correct directory.
         mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
         mBaseStateDir.mkdirs();
+        if (!SELinux.restorecon(mBaseStateDir)) {
+            Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);
+        }
         mDataDir = Environment.getDownloadCacheDirectory();
 
         mPasswordHashFile = new File(mBaseStateDir, "pwhash");
@@ -2135,6 +2139,10 @@ class BackupManagerService extends IBackupManager.Stub {
                         ParcelFileDescriptor.MODE_READ_WRITE |
                         ParcelFileDescriptor.MODE_CREATE |
                         ParcelFileDescriptor.MODE_TRUNCATE);
+
+                if (!SELinux.restorecon(mBackupDataName)) {
+                    Slog.e(TAG, "SELinux restorecon failed on " + mBackupDataName);
+                }
 
                 mNewState = ParcelFileDescriptor.open(mNewStateName,
                         ParcelFileDescriptor.MODE_READ_WRITE |
@@ -4696,6 +4704,10 @@ class BackupManagerService extends IBackupManager.Stub {
                             ParcelFileDescriptor.MODE_READ_WRITE |
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE);
+
+                if (!SELinux.restorecon(mBackupDataName)) {
+                    Slog.e(TAG, "SElinux restorecon failed for " + mBackupDataName);
+                }
 
                 if (mTransport.getRestoreData(mBackupData) != BackupConstants.TRANSPORT_OK) {
                     // Transport-level failure, so we wind everything up and
