@@ -1513,4 +1513,57 @@ public class DevicePolicyManager {
             }
         }
     }
+
+    /**
+     * @hide
+     * Sets the given package as the device owner. The package must already be installed and there
+     * shouldn't be an existing device owner registered, for this call to succeed. Also, this
+     * method must be called before the device is provisioned.
+     * @param packageName the package name of the application to be registered as the device owner.
+     * @return whether the package was successfully registered as the device owner.
+     * @throws IllegalArgumentException if the package name is null or invalid
+     * @throws IllegalStateException if a device owner is already registered or the device has
+     *         already been provisioned.
+     */
+    public boolean setDeviceOwner(String packageName) throws IllegalArgumentException,
+            IllegalStateException {
+        if (mService != null) {
+            try {
+                return mService.setDeviceOwner(packageName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to set device owner");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Used to determine if a particular package has been registered as a Device Owner admin.
+     * Device Owner admins cannot be deactivated by the user unless the Device Owner itself allows
+     * it. And Device Owner packages cannot be uninstalled, once registered.
+     * @param packageName the package name to check against the registered device owner.
+     * @return whether or not the package is registered as the Device Owner.
+     */
+    public boolean isDeviceOwner(String packageName) {
+        if (mService != null) {
+            try {
+                return mService.isDeviceOwner(packageName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to check device owner");
+            }
+        }
+        return false;
+    }
+
+    /** @hide */
+    public String getDeviceOwner() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwner();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get device owner");
+            }
+        }
+        return null;
+    }
 }

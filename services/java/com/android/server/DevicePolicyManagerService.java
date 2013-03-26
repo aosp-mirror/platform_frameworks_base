@@ -41,10 +41,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -62,6 +66,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.AtomicFile;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -88,9 +93,10 @@ import java.util.Set;
  * Implementation of the device policy APIs.
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
-    private static final String DEVICE_POLICIES_XML = "device_policies.xml";
 
     private static final String TAG = "DevicePolicyManagerService";
+
+    private static final String DEVICE_POLICIES_XML = "device_policies.xml";
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
@@ -108,6 +114,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     IPowerManager mIPowerManager;
     IWindowManager mIWindowManager;
+
+    private DeviceOwner mDeviceOwner;
 
     public static class DevicePolicyData {
         int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -507,6 +515,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addDataScheme("package");
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
     }
@@ -542,6 +551,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     DEVICE_POLICIES_XML);
             policyFile.delete();
             Slog.i(TAG, "Removed device policy file " + policyFile.getAbsolutePath());
+        }
+    }
+
+    void loadDeviceOwner() {
+        synchronized (this) {
+            if (DeviceOwner.isRegistered()) {
+                mDeviceOwner = new DeviceOwner();
+            }
         }
     }
 
@@ -709,7 +726,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Intent resolveIntent = new Intent();
         resolveIntent.setComponent(adminName);
         List<ResolveInfo> infos = mContext.getPackageManager().queryBroadcastReceivers(
-                resolveIntent, PackageManager.GET_META_DATA, userHandle);
+                resolveIntent,
+                PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
+                userHandle);
         if (infos == null || infos.size() <= 0) {
             throw new IllegalArgumentException("Unknown admin: " + adminName);
         }
@@ -994,6 +1013,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void systemReady() {
         synchronized (this) {
             loadSettingsLocked(getUserData(UserHandle.USER_OWNER), UserHandle.USER_OWNER);
+            loadDeviceOwner();
         }
     }
 
@@ -1052,6 +1072,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 if (replaceIndex == -1) {
                     policy.mAdminList.add(newAdmin);
+                    enableIfNecessary(info.getPackageName(), userHandle);
                 } else {
                     policy.mAdminList.set(replaceIndex, newAdmin);
                 }
@@ -1119,6 +1140,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
             if (admin.getUid() != Binder.getCallingUid()) {
+                // If trying to remove device owner, refuse when the caller is not the owner.
+                if (mDeviceOwner != null
+                        && adminReceiver.getPackageName().equals(mDeviceOwner.getPackageName())) {
+                    return;
+                }
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.BIND_DEVICE_ADMIN, null);
             }
@@ -2351,6 +2377,49 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean setDeviceOwner(String packageName) {
+        if (packageName == null
+                || !DeviceOwner.isInstalled(packageName, mContext.getPackageManager())) {
+            throw new IllegalArgumentException("Invalid package name " + packageName
+                    + " for device owner");
+        }
+        synchronized (this) {
+            if (mDeviceOwner == null && !isDeviceProvisioned()) {
+                mDeviceOwner = new DeviceOwner(packageName);
+                mDeviceOwner.writeOwnerFile();
+                return true;
+            } else {
+                throw new IllegalStateException("Trying to set device owner to " + packageName
+                        + ", owner=" + mDeviceOwner.getPackageName()
+                        + ", device_provisioned=" + isDeviceProvisioned());
+            }
+        }
+    }
+
+    @Override
+    public boolean isDeviceOwner(String packageName) {
+        synchronized (this) {
+            return mDeviceOwner != null
+                    && mDeviceOwner.getPackageName().equals(packageName);
+        }
+    }
+
+    @Override
+    public String getDeviceOwner() {
+        synchronized (this) {
+            if (mDeviceOwner != null) {
+                return mDeviceOwner.getPackageName();
+            }
+        }
+        return null;
+    }
+
+    private boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) > 0;
+    }
+
     private void enforceCrossUserPermission(int userHandle) {
         if (userHandle < 0) {
             throw new IllegalArgumentException("Invalid userId " + userHandle);
@@ -2361,6 +2430,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, "Must be system or have"
                     + " INTERACT_ACROSS_USERS_FULL permission");
+        }
+    }
+
+    private void enableIfNecessary(String packageName, int userId) {
+        try {
+            IPackageManager ipm = AppGlobals.getPackageManager();
+            ApplicationInfo ai = ipm.getApplicationInfo(packageName,
+                    PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
+                    userId);
+            if (ai.enabledSetting
+                    == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                ipm.setApplicationEnabledSetting(packageName,
+                        PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                        PackageManager.DONT_KILL_APP, userId);
+            }
+        } catch (RemoteException e) {
         }
     }
 
@@ -2396,6 +2481,94 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                 pw.println(" ");
                 pw.print("  mPasswordOwner="); pw.println(policy.mPasswordOwner);
+            }
+        }
+    }
+
+    static class DeviceOwner {
+        private static final String DEVICE_OWNER_XML = "device_owner.xml";
+        private static final String TAG_DEVICE_OWNER = "device-owner";
+        private static final String ATTR_PACKAGE = "package";
+        private String mPackageName;
+
+        DeviceOwner() {
+            readOwnerFile();
+        }
+
+        DeviceOwner(String packageName) {
+            this.mPackageName = packageName;
+        }
+
+        static boolean isRegistered() {
+            return new File(Environment.getSystemSecureDirectory(),
+                    DEVICE_OWNER_XML).exists();
+        }
+
+        String getPackageName() {
+            return mPackageName;
+        }
+
+        static boolean isInstalled(String packageName, PackageManager pm) {
+            try {
+                PackageInfo pi;
+                if ((pi = pm.getPackageInfo(packageName, 0)) != null) {
+                    if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        return true;
+                    }
+                }
+            } catch (NameNotFoundException nnfe) {
+                Slog.w(TAG, "Device Owner package " + packageName + " not installed.");
+            }
+            return false;
+        }
+
+        void readOwnerFile() {
+            AtomicFile file = new AtomicFile(new File(Environment.getSystemSecureDirectory(),
+                    DEVICE_OWNER_XML));
+            try {
+                FileInputStream input = file.openRead();
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(input, null);
+                int type;
+                while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                        && type != XmlPullParser.START_TAG) {
+                }
+                String tag = parser.getName();
+                if (!TAG_DEVICE_OWNER.equals(tag)) {
+                    throw new XmlPullParserException(
+                            "Device Owner file does not start with device-owner tag: found " + tag);
+                }
+                mPackageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                input.close();
+            } catch (XmlPullParserException xppe) {
+                Slog.e(TAG, "Error parsing device-owner file\n" + xppe);
+            } catch (IOException ioe) {
+                Slog.e(TAG, "IO Exception when reading device-owner file\n" + ioe);
+            }
+        }
+
+        void writeOwnerFile() {
+            synchronized (this) {
+                writeOwnerFileLocked();
+            }
+        }
+
+        private void writeOwnerFileLocked() {
+            AtomicFile file = new AtomicFile(new File(Environment.getSystemSecureDirectory(),
+                    DEVICE_OWNER_XML));
+            try {
+                FileOutputStream output = file.startWrite();
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(output, "utf-8");
+                out.startDocument(null, true);
+                out.startTag(null, TAG_DEVICE_OWNER);
+                out.attribute(null, ATTR_PACKAGE, mPackageName);
+                out.endTag(null, TAG_DEVICE_OWNER);
+                out.endDocument();
+                out.flush();
+                file.finishWrite(output);
+            } catch (IOException ioe) {
+                Slog.e(TAG, "IO Exception when writing device-owner file\n" + ioe);
             }
         }
     }

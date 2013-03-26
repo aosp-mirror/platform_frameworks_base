@@ -37,48 +37,56 @@ public class UserManager {
     private final Context mContext;
 
     /**
-     * @hide
-     * Key for user restrictions. Specifies if a user is allowed to add or remove accounts.
+     * Key for user restrictions. Specifies if a user is disallowed from adding and removing
+     * accounts.
+     * The default value is <code>false</code>.
+     * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-    public static final String ALLOW_MODIFY_ACCOUNTS = "modify_accounts";
+    public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
 
     /**
-     * @hide
-     * Key for user restrictions. Specifies if a user is allowed to change Wi-Fi access points.
+     * Key for user restrictions. Specifies if a user is disallowed from changing Wi-Fi
+     * access points.
+     * The default value is <code>false</code>.
+     * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-    public static final String ALLOW_CONFIG_WIFI = "config_wifi";
+    public static final String DISALLOW_CONFIG_WIFI = "no_config_wifi";
 
     /**
-     * @hide
-     * Key for user restrictions. Specifies if a user is allowed to install applications.
+     * Key for user restrictions. Specifies if a user is disallowed from installing applications.
+     * The default value is <code>false</code>.
+     * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-    public static final String ALLOW_INSTALL_APPS = "install_apps";
+    public static final String DISALLOW_INSTALL_APPS = "no_install_apps";
 
     /**
-     * @hide
-     * Key for user restrictions. Specifies if a user is allowed to uninstall applications.
+     * Key for user restrictions. Specifies if a user is disallowed from uninstalling applications.
+     * The default value is <code>false</code>.
+     * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-    public static final String ALLOW_UNINSTALL_APPS = "uninstall_apps";
+    public static final String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
 
-    /** @hide *
-     * Key for user restrictions. Specifies if a user is allowed to toggle location sharing.
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from toggling location sharing.
+     * The default value is <code>false</code>.
+     * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
-    public static final String ALLOW_CONFIG_LOCATION_ACCESS = "config_location_access";
+    public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
 
     /** @hide */
     public UserManager(Context context, IUserManager service) {
@@ -129,11 +137,14 @@ public class UserManager {
     }
 
     /**
-     * @hide
+     * Used to check if the user making this call is a restricted user. Restricted users may have
+     * application restrictions imposed on them. All apps should default to the most restrictive
+     * version, unless they have specific restrictions available through a call to
+     * {@link Context#getApplicationRestrictions()}.
      */
     public boolean isUserRestricted() {
         try {
-            return mService.getUserInfo(getUserHandle()).isRestricted();
+            return mService.isRestricted();
         } catch (RemoteException re) {
             Log.w(TAG, "Could not check if user restricted ", re);
             return false;
@@ -189,12 +200,19 @@ public class UserManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Returns the user-wide restrictions imposed on this user.
+     * @return a Bundle containing all the restrictions.
+     */
     public Bundle getUserRestrictions() {
         return getUserRestrictions(Process.myUserHandle());
     }
 
-    /** @hide */
+    /**
+     * Returns the user-wide restrictions imposed on the user specified by <code>userHandle</code>.
+     * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+     * @return a Bundle containing all the restrictions.
+     */
     public Bundle getUserRestrictions(UserHandle userHandle) {
         try {
             return mService.getUserRestrictions(userHandle.getIdentifier());
@@ -204,12 +222,21 @@ public class UserManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Sets all the user-wide restrictions for this user.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param restrictions the Bundle containing all the restrictions.
+     */
     public void setUserRestrictions(Bundle restrictions) {
         setUserRestrictions(restrictions, Process.myUserHandle());
     }
 
-    /** @hide */
+    /**
+     * Sets all the user-wide restrictions for the specified user.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param restrictions the Bundle containing all the restrictions.
+     * @param userHandle the UserHandle of the user for whom to set the restrictions.
+     */
     public void setUserRestrictions(Bundle restrictions, UserHandle userHandle) {
         try {
             mService.setUserRestrictions(restrictions, userHandle.getIdentifier());
@@ -218,7 +245,27 @@ public class UserManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Sets the value of a specific restriction.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param key the key of the restriction
+     * @param value the value for the restriction
+     * @param userHandle the user whose restriction is to be changed.
+     */
+    public void setUserRestriction(String key, boolean value) {
+        Bundle bundle = getUserRestrictions();
+        bundle.putBoolean(key, value);
+        setUserRestrictions(bundle);
+    }
+
+    /**
+     * @hide
+     * Sets the value of a specific restriction on a specific user.
+     * Requires the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param key the key of the restriction
+     * @param value the value for the restriction
+     * @param userHandle the user whose restriction is to be changed.
+     */
     public void setUserRestriction(String key, boolean value, UserHandle userHandle) {
         Bundle bundle = getUserRestrictions(userHandle);
         bundle.putBoolean(key, value);
@@ -467,7 +514,7 @@ public class UserManager {
      * @hide
      */
     public boolean isLocationSharingToggleAllowed() {
-        return getUserRestrictions().getBoolean(ALLOW_CONFIG_LOCATION_ACCESS);
+        return !getUserRestrictions().getBoolean(DISALLOW_SHARE_LOCATION, false);
     }
 
     /**
