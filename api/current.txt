@@ -12241,6 +12241,14 @@ package android.media.audiofx {
     field public static final int CONTENT_TYPE_VOICE = 3; // 0x3
     field public static final java.lang.String EFFECT_AUXILIARY = "Auxiliary";
     field public static final java.lang.String EFFECT_INSERT = "Insert";
+    field public static final java.util.UUID EFFECT_TYPE_AEC;
+    field public static final java.util.UUID EFFECT_TYPE_AGC;
+    field public static final java.util.UUID EFFECT_TYPE_BASS_BOOST;
+    field public static final java.util.UUID EFFECT_TYPE_ENV_REVERB;
+    field public static final java.util.UUID EFFECT_TYPE_EQUALIZER;
+    field public static final java.util.UUID EFFECT_TYPE_NS;
+    field public static final java.util.UUID EFFECT_TYPE_PRESET_REVERB;
+    field public static final java.util.UUID EFFECT_TYPE_VIRTUALIZER;
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_BAD_VALUE = -4; // 0xfffffffc
     field public static final int ERROR_DEAD_OBJECT = -7; // 0xfffffff9
