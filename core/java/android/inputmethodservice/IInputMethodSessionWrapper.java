@@ -18,15 +18,20 @@ package android.inputmethodservice;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
 
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.InputChannel;
+import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.CompletionInfo;
@@ -36,14 +41,10 @@ import android.view.inputmethod.InputMethodSession;
 class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
     private static final String TAG = "InputMethodWrapper";
-    private static final boolean DEBUG = false;
     
     private static final int DO_FINISH_INPUT = 60;
     private static final int DO_DISPLAY_COMPLETIONS = 65;
     private static final int DO_UPDATE_EXTRACTED_TEXT = 67;
-    private static final int DO_DISPATCH_KEY_EVENT = 70;
-    private static final int DO_DISPATCH_TRACKBALL_EVENT = 80;
-    private static final int DO_DISPATCH_GENERIC_MOTION_EVENT = 85;
     private static final int DO_UPDATE_SELECTION = 90;
     private static final int DO_UPDATE_CURSOR = 95;
     private static final int DO_APP_PRIVATE_COMMAND = 100;
@@ -53,34 +54,30 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
 
     HandlerCaller mCaller;
     InputMethodSession mInputMethodSession;
-    
-    // NOTE: we should have a cache of these.
-    static class InputMethodEventCallbackWrapper implements InputMethodSession.EventCallback {
-        final IInputMethodCallback mCb;
-        InputMethodEventCallbackWrapper(IInputMethodCallback cb) {
-            mCb = cb;
-        }
-        public void finishedEvent(int seq, boolean handled) {
-            try {
-                mCb.finishedEvent(seq, handled);
-            } catch (RemoteException e) {
-            }
-        }
-    }
-    
+    InputChannel mChannel;
+    ImeInputEventReceiver mReceiver;
+
     public IInputMethodSessionWrapper(Context context,
-            InputMethodSession inputMethodSession) {
+            InputMethodSession inputMethodSession, InputChannel channel) {
         mCaller = new HandlerCaller(context, null,
                 this, true /*asyncHandler*/);
         mInputMethodSession = inputMethodSession;
+        mChannel = channel;
+        if (channel != null) {
+            mReceiver = new ImeInputEventReceiver(channel, context.getMainLooper());
+        }
     }
 
     public InputMethodSession getInternalInputMethodSession() {
         return mInputMethodSession;
     }
 
+    @Override
     public void executeMessage(Message msg) {
-        if (mInputMethodSession == null) return;
+        if (mInputMethodSession == null) {
+            // The session has been finished.
+            return;
+        }
 
         switch (msg.what) {
             case DO_FINISH_INPUT:
@@ -93,33 +90,6 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.updateExtractedText(msg.arg1,
                         (ExtractedText)msg.obj);
                 return;
-            case DO_DISPATCH_KEY_EVENT: {
-                SomeArgs args = (SomeArgs)msg.obj;
-                mInputMethodSession.dispatchKeyEvent(msg.arg1,
-                        (KeyEvent)args.arg1,
-                        new InputMethodEventCallbackWrapper(
-                                (IInputMethodCallback)args.arg2));
-                args.recycle();
-                return;
-            }
-            case DO_DISPATCH_TRACKBALL_EVENT: {
-                SomeArgs args = (SomeArgs)msg.obj;
-                mInputMethodSession.dispatchTrackballEvent(msg.arg1,
-                        (MotionEvent)args.arg1,
-                        new InputMethodEventCallbackWrapper(
-                                (IInputMethodCallback)args.arg2));
-                args.recycle();
-                return;
-            }
-            case DO_DISPATCH_GENERIC_MOTION_EVENT: {
-                SomeArgs args = (SomeArgs)msg.obj;
-                mInputMethodSession.dispatchGenericMotionEvent(msg.arg1,
-                        (MotionEvent)args.arg1,
-                        new InputMethodEventCallbackWrapper(
-                                (IInputMethodCallback)args.arg2));
-                args.recycle();
-                return;
-            }
             case DO_UPDATE_SELECTION: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 mInputMethodSession.updateSelection(args.argi1, args.argi2,
@@ -143,7 +113,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 return;
             }
             case DO_FINISH_SESSION: {
-                mInputMethodSession = null;
+                doFinishSession();
                 return;
             }
             case DO_VIEW_CLICKED: {
@@ -153,37 +123,37 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
-    
+
+    private void doFinishSession() {
+        mInputMethodSession = null;
+        if (mReceiver != null) {
+            mReceiver.dispose();
+            mReceiver = null;
+        }
+        if (mChannel != null) {
+            mChannel.dispose();
+            mChannel = null;
+        }
+    }
+
+    @Override
     public void finishInput() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_INPUT));
     }
 
+    @Override
     public void displayCompletions(CompletionInfo[] completions) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
                 DO_DISPLAY_COMPLETIONS, completions));
     }
-    
+
+    @Override
     public void updateExtractedText(int token, ExtractedText text) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIO(
                 DO_UPDATE_EXTRACTED_TEXT, token, text));
     }
-    
-    public void dispatchKeyEvent(int seq, KeyEvent event, IInputMethodCallback callback) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_DISPATCH_KEY_EVENT, seq,
-                event, callback));
-    }
 
-    public void dispatchTrackballEvent(int seq, MotionEvent event, IInputMethodCallback callback) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_DISPATCH_TRACKBALL_EVENT, seq,
-                event, callback));
-    }
-
-    public void dispatchGenericMotionEvent(int seq, MotionEvent event,
-            IInputMethodCallback callback) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_DISPATCH_GENERIC_MOTION_EVENT, seq,
-                event, callback));
-    }
-
+    @Override
     public void updateSelection(int oldSelStart, int oldSelEnd,
             int newSelStart, int newSelEnd, int candidatesStart, int candidatesEnd) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIIIIII(DO_UPDATE_SELECTION,
@@ -191,24 +161,74 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 candidatesStart, candidatesEnd));
     }
 
+    @Override
     public void viewClicked(boolean focusChanged) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_VIEW_CLICKED, focusChanged ? 1 : 0));
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageI(DO_VIEW_CLICKED, focusChanged ? 1 : 0));
     }
 
+    @Override
     public void updateCursor(Rect newCursor) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_UPDATE_CURSOR,
-                newCursor));
-    }
-    
-    public void appPrivateCommand(String action, Bundle data) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_APP_PRIVATE_COMMAND, action, data));
-    }
-    
-    public void toggleSoftInput(int showFlags, int hideFlags) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageII(DO_TOGGLE_SOFT_INPUT, showFlags, hideFlags));
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_UPDATE_CURSOR, newCursor));
     }
 
+    @Override
+    public void appPrivateCommand(String action, Bundle data) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_APP_PRIVATE_COMMAND, action, data));
+    }
+
+    @Override
+    public void toggleSoftInput(int showFlags, int hideFlags) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageII(DO_TOGGLE_SOFT_INPUT, showFlags, hideFlags));
+    }
+
+    @Override
     public void finishSession() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_SESSION));
+    }
+
+    private final class ImeInputEventReceiver extends InputEventReceiver
+            implements InputMethodSession.EventCallback {
+        private final SparseArray<InputEvent> mPendingEvents = new SparseArray<InputEvent>();
+
+        public ImeInputEventReceiver(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
+        }
+
+        @Override
+        public void onInputEvent(InputEvent event) {
+            if (mInputMethodSession == null) {
+                // The session has been finished.
+                finishInputEvent(event, false);
+                return;
+            }
+
+            final int seq = event.getSequenceNumber();
+            mPendingEvents.put(seq, event);
+            if (event instanceof KeyEvent) {
+                KeyEvent keyEvent = (KeyEvent)event;
+                mInputMethodSession.dispatchKeyEvent(seq, keyEvent, this);
+            } else {
+                MotionEvent motionEvent = (MotionEvent)event;
+                if (motionEvent.isFromSource(InputDevice.SOURCE_CLASS_TRACKBALL)) {
+                    mInputMethodSession.dispatchTrackballEvent(seq, motionEvent, this);
+                } else {
+                    mInputMethodSession.dispatchGenericMotionEvent(seq, motionEvent, this);
+                }
+            }
+        }
+
+        @Override
+        public void finishedEvent(int seq, boolean handled) {
+            int index = mPendingEvents.indexOfKey(seq);
+            if (index >= 0) {
+                InputEvent event = mPendingEvents.valueAt(index);
+                mPendingEvents.removeAt(index);
+                finishInputEvent(event, handled);
+            }
+        }
     }
 }

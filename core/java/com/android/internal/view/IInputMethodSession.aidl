@@ -22,7 +22,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.ExtractedText;
-import com.android.internal.view.IInputMethodCallback;
 
 /**
  * Sub-interface of IInputMethod which is safe to give to client applications.
@@ -40,14 +39,8 @@ oneway interface IInputMethodSession {
     void viewClicked(boolean focusChanged);
 
     void updateCursor(in Rect newCursor);
-    
+
     void displayCompletions(in CompletionInfo[] completions);
-    
-    void dispatchKeyEvent(int seq, in KeyEvent event, IInputMethodCallback callback);
-
-    void dispatchTrackballEvent(int seq, in MotionEvent event, IInputMethodCallback callback);
-
-    void dispatchGenericMotionEvent(int seq, in MotionEvent event, IInputMethodCallback callback);
 
     void appPrivateCommand(String action, in Bundle data);
 

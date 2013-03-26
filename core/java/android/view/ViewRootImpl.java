@@ -2937,7 +2937,6 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_KEY = 7;
     private final static int MSG_DISPATCH_APP_VISIBILITY = 8;
     private final static int MSG_DISPATCH_GET_NEW_SURFACE = 9;
-    private final static int MSG_IME_FINISHED_EVENT = 10;
     private final static int MSG_DISPATCH_KEY_FROM_IME = 11;
     private final static int MSG_FINISH_INPUT_CONNECTION = 12;
     private final static int MSG_CHECK_FOCUS = 13;
@@ -2975,8 +2974,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DISPATCH_APP_VISIBILITY";
                 case MSG_DISPATCH_GET_NEW_SURFACE:
                     return "MSG_DISPATCH_GET_NEW_SURFACE";
-                case MSG_IME_FINISHED_EVENT:
-                    return "MSG_IME_FINISHED_EVENT";
                 case MSG_DISPATCH_KEY_FROM_IME:
                     return "MSG_DISPATCH_KEY_FROM_IME";
                 case MSG_FINISH_INPUT_CONNECTION:
@@ -3017,9 +3014,6 @@ public final class ViewRootImpl implements ViewParent,
                 final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
                 info.target.invalidate(info.left, info.top, info.right, info.bottom);
                 info.recycle();
-                break;
-            case MSG_IME_FINISHED_EVENT:
-                handleImeFinishedEvent(msg.arg1, msg.arg2 != 0);
                 break;
             case MSG_PROCESS_INPUT_EVENTS:
                 mProcessInputEventsScheduled = false;
@@ -3444,26 +3438,15 @@ public final class ViewRootImpl implements ViewParent,
             mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
         }
 
+        int result = EVENT_POST_IME;
         if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
             if (LOCAL_LOGV)
                 Log.v(TAG, "Dispatching trackball " + event + " to " + mView);
 
             // Dispatch to the IME before propagating down the view hierarchy.
-            // The IME will eventually call back into handleImeFinishedEvent.
-            if (mLastWasImTarget) {
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    final int seq = event.getSequenceNumber();
-                    if (DEBUG_IMF)
-                        Log.v(TAG, "Sending trackball event to IME: seq="
-                                + seq + " event=" + event);
-                    return imm.dispatchTrackballEvent(mView.getContext(), seq, event,
-                            mInputMethodCallback);
-                }
-            }
+            result = dispatchImeInputEvent(q);
         }
-
-        return EVENT_POST_IME;
+        return result;
     }
 
     private int deliverTrackballEventPostIme(QueuedInputEvent q) {
@@ -3598,26 +3581,16 @@ public final class ViewRootImpl implements ViewParent,
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
         }
+
+        int result = EVENT_POST_IME;
         if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
             if (LOCAL_LOGV)
                 Log.v(TAG, "Dispatching generic motion " + event + " to " + mView);
 
             // Dispatch to the IME before propagating down the view hierarchy.
-            // The IME will eventually call back into handleImeFinishedEvent.
-            if (mLastWasImTarget) {
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    final int seq = event.getSequenceNumber();
-                    if (DEBUG_IMF)
-                        Log.v(TAG, "Sending generic motion event to IME: seq="
-                                + seq + " event=" + event);
-                    return imm.dispatchGenericMotionEvent(mView.getContext(), seq, event,
-                            mInputMethodCallback);
-                }
-            }
+            result = dispatchImeInputEvent(q);
         }
-
-        return EVENT_POST_IME;
+        return result;
     }
 
     private int deliverGenericMotionEventPostIme(QueuedInputEvent q) {
@@ -3806,6 +3779,7 @@ public final class ViewRootImpl implements ViewParent,
             mInputEventConsistencyVerifier.onKeyEvent(event, 0);
         }
 
+        int result = EVENT_POST_IME;
         if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
             if (LOCAL_LOGV) Log.v(TAG, "Dispatching key " + event + " to " + mView);
 
@@ -3815,20 +3789,9 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             // Dispatch to the IME before propagating down the view hierarchy.
-            // The IME will eventually call back into handleImeFinishedEvent.
-            if (mLastWasImTarget) {
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    final int seq = event.getSequenceNumber();
-                    if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
-                            + seq + " event=" + event);
-                    return imm.dispatchKeyEvent(mView.getContext(), seq, event,
-                            mInputMethodCallback);
-                }
-            }
+            result = dispatchImeInputEvent(q);
         }
-
-        return EVENT_POST_IME;
+        return result;
     }
 
     private int deliverKeyEventPostIme(QueuedInputEvent q) {
@@ -4317,14 +4280,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void dispatchImeFinishedEvent(int seq, boolean handled) {
-        Message msg = mHandler.obtainMessage(MSG_IME_FINISHED_EVENT);
-        msg.arg1 = seq;
-        msg.arg2 = handled ? 1 : 0;
-        msg.setAsynchronous(true);
-        mHandler.sendMessage(msg);
-    }
-
     public void dispatchFinishInputConnection(InputConnection connection) {
         Message msg = mHandler.obtainMessage(MSG_FINISH_INPUT_CONNECTION, connection);
         mHandler.sendMessage(msg);
@@ -4531,6 +4486,21 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceCounter(Trace.TRACE_TAG_INPUT, mCurrentInputEventQueueLengthCounterName,
                 mCurrentInputEventCount);
         return q;
+    }
+
+    int dispatchImeInputEvent(QueuedInputEvent q) {
+        if (mLastWasImTarget) {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                final InputEvent event = q.mEvent;
+                final int seq = event.getSequenceNumber();
+                if (DEBUG_IMF)
+                    Log.v(TAG, "Sending input event to IME: seq=" + seq + " event=" + event);
+                return imm.dispatchInputEvent(mView.getContext(), seq, event,
+                        mInputMethodCallback);
+            }
+        }
+        return EVENT_POST_IME;
     }
 
     void handleImeFinishedEvent(int seq, boolean handled) {
@@ -5132,7 +5102,7 @@ public final class ViewRootImpl implements ViewParent,
         public void finishedEvent(int seq, boolean handled) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchImeFinishedEvent(seq, handled);
+                viewAncestor.handleImeFinishedEvent(seq, handled);
             }
         }
     }
