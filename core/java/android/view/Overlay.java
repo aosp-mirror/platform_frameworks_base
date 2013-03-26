@@ -18,9 +18,10 @@ package android.view;
 import android.graphics.drawable.Drawable;
 
 /**
- * An overlay is an extra layer that sits on top of a View (the "host view") which is drawn after
- * all other content in that view (including children, if the view is a ViewGroup). Interaction
- * with the overlay layer is done in terms of adding/removing views and drawables.
+ * An overlay is an extra layer that sits on top of a View (the "host view")
+ * which is drawn after all other content in that view (including children,
+ * if the view is a ViewGroup). Interaction with the overlay layer is done in
+ * terms of adding/removing views and drawables.
  *
  * @see android.view.View#getOverlay()
  */
@@ -47,10 +48,16 @@ public interface Overlay {
     void remove(Drawable drawable);
 
     /**
-     * Adds a View to the overlay. The bounds of the added view should be relative to
-     * the host view. Any view added to the overlay should be removed when it is no longer
-     * needed or no longer visible. The view must not be parented elsewhere when it is added
-     * to the overlay.
+     * Adds a View to the overlay. The bounds of the added view should be
+     * relative to the host view. Any view added to the overlay should be
+     * removed when it is no longer needed or no longer visible.
+     *
+     * <p>If the view has a parent, the view will be removed from that parent
+     * before being added to the overlay. Also, the view will be repositioned
+     * such that it is in the same relative location inside the activity. For
+     * example, if the view's current parent lies 100 pixels to the right
+     * and 200 pixels down from the origin of the overlay's
+     * host view, then the view will be offset by (100, 200).</p>
      *
      * @param view The View to be added to the overlay. The added view will be
      * drawn when the overlay is drawn.

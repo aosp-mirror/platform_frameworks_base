@@ -1868,13 +1868,37 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     // have become out of sync.
                     removePointersFromTouchTargets(idBitsToAssign);
 
+                    final float x = ev.getX(actionIndex);
+                    final float y = ev.getY(actionIndex);
+
+                    if (mOverlay != null) {
+                        ViewOverlay overlay = (ViewOverlay) mOverlay;
+                        // Check to see whether the overlay can handle the event
+                        final View child = mOverlay;
+                        if (canViewReceivePointerEvents(child) &&
+                                isTransformedTouchPointInView(x, y, child, null)) {
+                            newTouchTarget = getTouchTarget(child);
+                            if (newTouchTarget != null) {
+                                newTouchTarget.pointerIdBits |= idBitsToAssign;
+                            } else {
+                                resetCancelNextUpFlag(child);
+                                if (dispatchTransformedTouchEvent(ev, false, child,
+                                        idBitsToAssign)) {
+                                    mLastTouchDownTime = ev.getDownTime();
+                                    mLastTouchDownX = ev.getX();
+                                    mLastTouchDownY = ev.getY();
+                                    newTouchTarget = addTouchTarget(child, idBitsToAssign);
+                                    alreadyDispatchedToNewTouchTarget = true;
+                                }
+                            }
+                        }
+                    }
+
                     final int childrenCount = mChildrenCount;
-                    if (childrenCount != 0 || mOverlay != null) {
+                    if (newTouchTarget == null && childrenCount != 0) {
                         // Find a child that can receive the event.
                         // Scan children from front to back.
                         final View[] children = mChildren;
-                        final float x = ev.getX(actionIndex);
-                        final float y = ev.getY(actionIndex);
 
                         final boolean customOrder = isChildrenDrawingOrderEnabled();
                         for (int i = childrenCount - 1; i >= 0; i--) {
@@ -1904,27 +1928,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 newTouchTarget = addTouchTarget(child, idBitsToAssign);
                                 alreadyDispatchedToNewTouchTarget = true;
                                 break;
-                            }
-                        }
-                        if (mOverlay != null && newTouchTarget == null) {
-                            // Check to see whether the overlay can handle the event
-                            final View child = mOverlay;
-                            if (canViewReceivePointerEvents(child) &&
-                                    isTransformedTouchPointInView(x, y, child, null)) {
-                                newTouchTarget = getTouchTarget(child);
-                                if (newTouchTarget != null) {
-                                    newTouchTarget.pointerIdBits |= idBitsToAssign;
-                                } else {
-                                    resetCancelNextUpFlag(child);
-                                    if (dispatchTransformedTouchEvent(ev, false, child,
-                                            idBitsToAssign)) {
-                                        mLastTouchDownTime = ev.getDownTime();
-                                        mLastTouchDownX = ev.getX();
-                                        mLastTouchDownY = ev.getY();
-                                        newTouchTarget = addTouchTarget(child, idBitsToAssign);
-                                        alreadyDispatchedToNewTouchTarget = true;
-                                    }
-                                }
                             }
                         }
                     }
@@ -1957,7 +1960,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         handled = true;
                     } else {
                         final boolean cancelChild = resetCancelNextUpFlag(target.child)
-                        || intercepted;
+                                || intercepted;
                         if (dispatchTransformedTouchEvent(ev, cancelChild,
                                 target.child, target.pointerIdBits)) {
                             handled = true;
