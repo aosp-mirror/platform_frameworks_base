@@ -1,0 +1,97 @@
+page.title=Accessing Contacts Data
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.0 (API Level 5) or higher</li>
+  <li>Experience in using {@link android.content.Intent} objects</li>
+  <li>Experience in using content providers</li>
+</ul>
+
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Content Provider Basics</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        Contacts Provider</a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+    <a href="http://developer.android.com/shareables/training/ContactsList.zip" class="button">
+    Download the sample
+    </a>
+ <p class="filename">ContactsList.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>
+    The <a href="{@docRoot}guide/topics/providers/contacts-provider.html">Contacts Provider</a> is
+    the central repository of the user's contacts information, including data from contacts apps and
+    social networking apps. In your apps, you can access Contacts Provider information directly by
+    calling {@link android.content.ContentResolver} methods or by sending intents to a contacts app.
+</p>
+<p>
+    This class focuses on retrieving lists of contacts, displaying the details for a particular
+    contact, and modifying contacts using intents. The basic techniques described
+    here can be extended to perform more complex tasks. In addition, this class helps you
+    understand the overall structure and operation of the
+    <a href="{@docRoot}guide/topics/providers/contacts-provider.html">Contacts Provider</a>.
+</p>
+<h2>Lessons</h2>
+ 
+<dl>
+    <dt>
+        <b><a href="retrieve-names.html">Retrieving a List of Contacts</a></b>
+    </dt>
+    <dd>
+        Learn how to retrieve a list of contacts for which the data matches all or part of a search
+        string, using the following techniques:
+        <ul>
+            <li>Match by contact name</li>
+            <li>Match any type of contact data</li>
+            <li>Match a specific type of contact data, such as a phone number</li>
+        </ul>
+    </dd>
+    <dt>
+        <b><a href="retrieve-details.html">Retrieving Details for a Contact</a></b>
+    </dt>
+    <dd>
+        Learn how to retrieve the details for a single contact. A contact's details are data
+        such as phone numbers and email addresses. You can retrieve all details, or you can
+        retrieve details of a specific type, such as all email addresses.
+    </dd>
+    <dt>
+        <b><a href="modify-data.html">Modifying Contacts Using Intents</a></b>
+    </dt>
+    <dd>
+        Learn how to modify a contact by sending an intent to the People app.
+    </dd>
+    <dt>
+        <b>
+            <a href="display-contact-badge.html">Displaying the Quick Contact Badge</a>
+        </b>
+    </dt>
+    <dd>
+        Learn how to display the {@link android.widget.QuickContactBadge} widget. When the user
+        clicks the contact badge widget, a dialog opens that displays the contact's details and
+        action buttons for apps that can handle the details. For example, if the contact has an
+        email address, the dialog displays an action button for the default email app.
+    </dd>
+</dl>
