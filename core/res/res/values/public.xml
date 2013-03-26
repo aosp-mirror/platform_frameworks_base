@@ -2037,6 +2037,11 @@
   <public type="attr" name="mirrorForRtl" />
   <public type="attr" name="windowOverscan" />
   <public type="attr" name="requiredForAllUsers" />
+  <public type="attr" name="indicatorStart"  />
+  <public type="attr" name="indicatorEnd" />
+  <public type="attr" name="childIndicatorStart" />
+  <public type="attr" name="childIndicatorEnd" />
+
   <public type="style" name="Theme.NoTitleBar.Overscan" />
   <public type="style" name="Theme.Light.NoTitleBar.Overscan" />
   <public type="style" name="Theme.Black.NoTitleBar.Overscan" />

@@ -339,8 +339,10 @@ package android {
     field public static final int checkedTextViewStyle = 16843720; // 0x10103c8
     field public static final int childDivider = 16843025; // 0x1010111
     field public static final int childIndicator = 16843020; // 0x101010c
+    field public static final int childIndicatorEnd = 16843732; // 0x10103d4
     field public static final int childIndicatorLeft = 16843023; // 0x101010f
     field public static final int childIndicatorRight = 16843024; // 0x1010110
+    field public static final int childIndicatorStart = 16843731; // 0x10103d3
     field public static final int choiceMode = 16843051; // 0x101012b
     field public static final int clearTaskOnLaunch = 16842773; // 0x1010015
     field public static final int clickable = 16842981; // 0x10100e5
@@ -574,8 +576,10 @@ package android {
     field public static final int indeterminateDuration = 16843069; // 0x101013d
     field public static final int indeterminateOnly = 16843066; // 0x101013a
     field public static final int indeterminateProgressStyle = 16843544; // 0x1010318
+    field public static final int indicatorEnd = 16843730; // 0x10103d2
     field public static final int indicatorLeft = 16843021; // 0x101010d
     field public static final int indicatorRight = 16843022; // 0x101010e
+    field public static final int indicatorStart = 16843729; // 0x10103d1
     field public static final int inflatedId = 16842995; // 0x10100f3
     field public static final int initOrder = 16842778; // 0x101001a
     field public static final int initialKeyguardLayout = 16843714; // 0x10103c2
