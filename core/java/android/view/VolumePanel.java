@@ -468,7 +468,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         // Force reloading the image resource
         sc.icon.setImageDrawable(null);
         sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
-        if (sc.streamType == AudioManager.STREAM_RING &&
+        if (((sc.streamType == AudioManager.STREAM_RING) ||
+                (sc.streamType == AudioManager.STREAM_NOTIFICATION)) &&
                 mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             sc.icon.setImageResource(R.drawable.ic_audio_ring_notif_vibrate);
         }
