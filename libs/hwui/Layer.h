@@ -42,6 +42,8 @@ namespace uirenderer {
 // Forward declarations
 class OpenGLRenderer;
 class DisplayList;
+class DeferredDisplayList;
+class DeferStateStruct;
 
 /**
  * A layer has dimensions and is backed by an OpenGL texture or FBO.
@@ -271,6 +273,9 @@ struct Layer {
         return transform;
     }
 
+    void defer();
+    void flush();
+
     /**
      * Bounds of the layer.
      */
@@ -378,6 +383,12 @@ private:
      * Optional transform.
      */
     mat4 transform;
+
+    /**
+     * Used to defer display lists when the layer is updated with a
+     * display list.
+     */
+    DeferredDisplayList* deferredList;
 
 }; // struct Layer
 
