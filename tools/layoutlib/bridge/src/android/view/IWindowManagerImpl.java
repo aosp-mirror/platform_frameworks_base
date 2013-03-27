@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Point;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -330,8 +331,28 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void getInitialDisplaySize(int displayId, Point size) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void getBaseDisplaySize(int displayId, Point size) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void setForcedDisplaySize(int displayId, int arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public int getInitialDisplayDensity(int displayId) {
+        return -1;
+    }
+
+    @Override
+    public int getBaseDisplayDensity(int displayId) {
+        return -1;
     }
 
     @Override
