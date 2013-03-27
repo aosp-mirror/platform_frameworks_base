@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * @hide
+ /**
  * <p>The Renderscript vertex program, also known as a vertex shader, describes a stage in
  * the graphics pipeline responsible for manipulating geometric data in a user-defined way.
  * The object is constructed by providing the Renderscript system with the following data:</p>
@@ -44,7 +43,6 @@ import android.util.Log;
 
 
 /**
- * @hide
  * @deprecated in API 16
  * ProgramVertex, also know as a vertex shader, describes a
  * stage in the graphics pipeline responsible for manipulating
@@ -78,15 +76,14 @@ public class ProgramVertex extends Program {
     }
 
     /**
-     * @hide
-     * @deprecated in API 16
-     * Builder class for creating ProgramVertex objects.
-     * The builder starts empty and the user must minimally provide
-     * the GLSL shader code, and the varying inputs. Constant, or
-     * uniform parameters to the shader may optionally be provided as
-     * well.
-     *
-     **/
+    * @deprecated in API 16
+    * Builder class for creating ProgramVertex objects.
+    * The builder starts empty and the user must minimally provide
+    * the GLSL shader code, and the varying inputs. Constant, or
+    * uniform parameters to the shader may optionally be provided as
+    * well.
+    *
+    **/
     public static class Builder extends BaseProgramBuilder {
         /**
          * @deprecated in API 16
