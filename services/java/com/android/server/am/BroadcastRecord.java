@@ -38,6 +38,7 @@ import java.util.List;
  */
 class BroadcastRecord extends Binder {
     final Intent intent;    // the original intent that generated us
+    final ComponentName targetComp; // original component name set on the intent
     final ProcessRecord callerApp; // process that sent this
     final String callerPackage; // who sent this
     final int callingPid;   // the pid of who sent this
@@ -84,9 +85,12 @@ class BroadcastRecord extends Binder {
 
         pw.print(prefix); pw.print(this); pw.print(" to user "); pw.println(userId);
         pw.print(prefix); pw.println(intent.toInsecureString());
+        if (targetComp != null && targetComp != intent.getComponent()) {
+            pw.print(prefix); pw.print("  targetComp: "); pw.println(targetComp.toShortString());
+        }
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
-            pw.print(prefix); pw.print("extras: "); pw.println(bundle.toString());
+            pw.print(prefix); pw.print("  extras: "); pw.println(bundle.toString());
         }
         pw.print(prefix); pw.print("caller="); pw.print(callerPackage); pw.print(" ");
                 pw.print(callerApp != null ? callerApp.toShortString() : "null");
@@ -174,6 +178,7 @@ class BroadcastRecord extends Binder {
             int _userId) {
         queue = _queue;
         intent = _intent;
+        targetComp = _intent.getComponent();
         callerApp = _callerApp;
         callerPackage = _callerPackage;
         callingPid = _callingPid;
