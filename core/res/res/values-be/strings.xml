@@ -1147,7 +1147,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Каму:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Увядзіце патрэбны PIN-код:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-код"</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Тэлефон будзе часова адключаны ад Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
+    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Тэлефон будзе часова адключаны ад Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Уставіць сімвал"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Адпраўка SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Прыкладанне &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; дасылае вялікую колькасць SMS-паведамленняў. Дазволіць гэтаму прыкладанню працягваць адпраўляць паведамленні?"</string>

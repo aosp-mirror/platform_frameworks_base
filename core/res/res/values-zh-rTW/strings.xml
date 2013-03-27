@@ -1147,7 +1147,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件者："</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"請輸入必要的 PIN："</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"手機與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 WiFi 連線"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
+    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手機與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 WiFi 連線"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字元"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"傳送 SMS 簡訊"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在傳送大量簡訊。您要允許這個應用程式繼續傳送簡訊嗎？"</string>
