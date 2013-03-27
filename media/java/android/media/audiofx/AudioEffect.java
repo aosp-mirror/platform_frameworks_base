@@ -72,55 +72,49 @@ public class AudioEffect {
      * specification. The definitions match the corresponding interface IDs in
      * OpenSLES_IID.h
      */
-
     /**
-     * UUID for environmental reverb effect
-     * @hide
+     * UUID for environmental reverberation effect
      */
     public static final UUID EFFECT_TYPE_ENV_REVERB = UUID
             .fromString("c2e5d5f0-94bd-4763-9cac-4e234d06839e");
     /**
-     * UUID for preset reverb effect
-     * @hide
+     * UUID for preset reverberation effect
      */
     public static final UUID EFFECT_TYPE_PRESET_REVERB = UUID
             .fromString("47382d60-ddd8-11db-bf3a-0002a5d5c51b");
     /**
      * UUID for equalizer effect
-     * @hide
      */
     public static final UUID EFFECT_TYPE_EQUALIZER = UUID
             .fromString("0bed4300-ddd6-11db-8f34-0002a5d5c51b");
     /**
      * UUID for bass boost effect
-     * @hide
      */
     public static final UUID EFFECT_TYPE_BASS_BOOST = UUID
             .fromString("0634f220-ddd4-11db-a0fc-0002a5d5c51b");
     /**
      * UUID for virtualizer effect
-     * @hide
      */
     public static final UUID EFFECT_TYPE_VIRTUALIZER = UUID
             .fromString("37cc2c00-dddd-11db-8577-0002a5d5c51b");
 
     /**
-     * UUID for Automatic Gain Control (AGC) audio pre-processing
-     * @hide
+     * UUIDs for effect types not covered by OpenSL ES.
+     */
+    /**
+     * UUID for Automatic Gain Control (AGC)
      */
     public static final UUID EFFECT_TYPE_AGC = UUID
             .fromString("0a8abfe0-654c-11e0-ba26-0002a5d5c51b");
 
     /**
-     * UUID for Acoustic Echo Canceler (AEC) audio pre-processing
-     * @hide
+     * UUID for Acoustic Echo Canceler (AEC)
      */
     public static final UUID EFFECT_TYPE_AEC = UUID
             .fromString("7b491460-8d4d-11e0-bd61-0002a5d5c51b");
 
     /**
-     * UUID for Noise Suppressor (NS) audio pre-processing
-     * @hide
+     * UUID for Noise Suppressor (NS)
      */
     public static final UUID EFFECT_TYPE_NS = UUID
             .fromString("58b4b260-8e06-11e0-aa8e-0002a5d5c51b");
@@ -199,7 +193,7 @@ public class AudioEffect {
      * The effect descriptor contains information on a particular effect implemented in the
      * audio framework:<br>
      * <ul>
-     *  <li>type: UUID corresponding to the OpenSL ES interface implemented by this effect</li>
+     *  <li>type: UUID identifying the effect type</li>
      *  <li>uuid: UUID for this particular implementation</li>
      *  <li>connectMode: {@link #EFFECT_INSERT}, {@link #EFFECT_AUXILIARY} or
      *  {at_link #EFFECT_PRE_PROCESSING}</li>
@@ -224,8 +218,14 @@ public class AudioEffect {
         }
 
         /**
-         *  Indicates the generic type of the effect (Equalizer, Bass boost ...). The UUID
-         *  corresponds to the OpenSL ES Interface ID for this type of effect.
+         *  Indicates the generic type of the effect (Equalizer, Bass boost ...).
+         *  One of {@link AudioEffect#EFFECT_TYPE_AEC},
+         *  {@link AudioEffect#EFFECT_TYPE_AGC}, {@link AudioEffect#EFFECT_TYPE_BASS_BOOST},
+         *  {@link AudioEffect#EFFECT_TYPE_ENV_REVERB}, {@link AudioEffect#EFFECT_TYPE_EQUALIZER},
+         *  {@link AudioEffect#EFFECT_TYPE_NS}, {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB}
+         *   or {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER}.<br>
+         *  For reverberation, bass boost, EQ and virtualizer, the UUID
+         *  corresponds to the OpenSL ES Interface ID.
          */
         public UUID type;
         /**
@@ -440,7 +440,7 @@ public class AudioEffect {
     }
 
     /**
-     * Query all audio pre processing effects applied to the AudioRecord with the supplied
+     * Query all audio pre-processing effects applied to the AudioRecord with the supplied
      * audio session ID. Returns an array of {@link android.media.audiofx.AudioEffect.Descriptor}
      * objects.
      * @param audioSession system wide unique audio session identifier.
