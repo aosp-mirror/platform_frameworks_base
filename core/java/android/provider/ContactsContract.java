@@ -4325,6 +4325,13 @@ public final class ContactsContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
 
         /**
+         * A boolean parameter for {@link Data#CONTENT_URI}.
+         * This specifies whether or not the returned data items should be filtered to show
+         * data items belonging to visible contacts only.
+         */
+        public static final String VISIBLE_CONTACTS_ONLY = "visible_contacts_only";
+
+        /**
          * The MIME type of the results from {@link #CONTENT_URI}.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/data";
@@ -6832,6 +6839,38 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
+        }
+
+        /**
+         * A special class of data items, used to refer to types of data that can be used to attempt
+         * to start communicating with a person ({@link Phone} and {@link Email}). Note that this
+         * is NOT a separate data kind.
+         *
+         * This URI allows the ContactsProvider to return a unified result for data items that users
+         * can use to initiate communications with another contact. {@link Phone} and {@link Email}
+         * are the current data types in this category.
+         */
+        public static final class Contactables implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * The content:// style URI for these data items, which requests a directory of data
+             * rows matching the selection criteria.
+             */
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
+                    "contactables");
+
+            /**
+             * The content:// style URI for these data items, which allows for a query parameter to
+             * be appended onto the end to filter for data items matching the query.
+             */
+            public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(
+                    Contactables.CONTENT_URI, "filter");
+
+            /**
+             * A boolean parameter for {@link Data#CONTENT_URI}.
+             * This specifies whether or not the returned data items should be filtered to show
+             * data items belonging to visible contacts only.
+             */
+            public static final String VISIBLE_CONTACTS_ONLY = "visible_contacts_only";
         }
     }
 
