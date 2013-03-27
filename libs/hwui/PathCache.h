@@ -253,7 +253,13 @@ private:
     PathTexture* addTexture(const PathDescription& entry,
             const SkPath *path, const SkPaint* paint);
     PathTexture* addTexture(const PathDescription& entry, SkBitmap* bitmap);
-    void addTexture(const PathDescription& entry, SkBitmap* bitmap, PathTexture* texture);
+
+    /**
+     * Generates the texture from a bitmap into the specified texture structure.
+     */
+    void generateTexture(SkBitmap& bitmap, Texture* texture);
+    void generateTexture(const PathDescription& entry, SkBitmap* bitmap, PathTexture* texture,
+            bool addToCache = true);
 
     PathTexture* get(const PathDescription& entry) {
         return mCache.get(entry);
@@ -281,11 +287,6 @@ private:
         }
         return true;
     }
-
-    /**
-     * Generates the texture from a bitmap into the specified texture structure.
-     */
-    void generateTexture(SkBitmap& bitmap, Texture* texture);
 
     void init();
 
