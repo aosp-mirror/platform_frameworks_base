@@ -49,8 +49,8 @@ public class AppWidgetManager {
     static final String TAG = "AppWidgetManager";
 
     /**
-     * Send this from your {@link AppWidgetHost} activity when you want to pick an AppWidget to display.
-     * The AppWidget picker activity will be launched.
+     * Activity action to launch from your {@link AppWidgetHost} activity when you want to
+     * pick an AppWidget to display.  The AppWidget picker activity will be launched.
      * <p>
      * You must supply the following extras:
      * <table>
@@ -89,8 +89,8 @@ public class AppWidgetManager {
             ACTION_KEYGUARD_APPWIDGET_PICK = "android.appwidget.action.KEYGUARD_APPWIDGET_PICK";
 
     /**
-     * Send this from your {@link AppWidgetHost} activity when you want to bind an AppWidget to
-     * display and bindAppWidgetIdIfAllowed returns false.
+     * Activity action to launch from your {@link AppWidgetHost} activity when you want to bind
+     * an AppWidget to display and bindAppWidgetIdIfAllowed returns false.
      * <p>
      * You must supply the following extras:
      * <table>
@@ -269,6 +269,9 @@ public class AppWidgetManager {
     /**
      * Sent when the custom extras for an AppWidget change.
      *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
      * @see AppWidgetProvider#onAppWidgetOptionsChanged
      *      AppWidgetProvider.onAppWidgetOptionsChanged(Context context,
      *      AppWidgetManager appWidgetManager, int appWidgetId, Bundle newExtras)
@@ -278,12 +281,18 @@ public class AppWidgetManager {
     /**
      * Sent when an instance of an AppWidget is deleted from its host.
      *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
      * @see AppWidgetProvider#onDeleted AppWidgetProvider.onDeleted(Context context, int[] appWidgetIds)
      */
     public static final String ACTION_APPWIDGET_DELETED = "android.appwidget.action.APPWIDGET_DELETED";
 
     /**
      * Sent when an instance of an AppWidget is removed from the last host.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      *
      * @see AppWidgetProvider#onEnabled AppWidgetProvider.onEnabled(Context context)
      */
@@ -293,6 +302,9 @@ public class AppWidgetManager {
      * Sent when an instance of an AppWidget is added to a host for the first time.
      * This broadcast is sent at boot time if there is a AppWidgetHost installed with
      * an instance for this provider.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      *
      * @see AppWidgetProvider#onEnabled AppWidgetProvider.onEnabled(Context context)
      */

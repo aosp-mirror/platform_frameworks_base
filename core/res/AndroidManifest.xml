@@ -74,6 +74,11 @@
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
 
+    <protected-broadcast android:name="android.appwidget.action.APPWIDGET_UPDATE_OPTIONS" />
+    <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />
+    <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DISABLED" />
+    <protected-broadcast android:name="android.appwidget.action.APPWIDGET_ENABLED" />
+
     <protected-broadcast android:name="android.backup.intent.RUN" />
     <protected-broadcast android:name="android.backup.intent.CLEAR" />
     <protected-broadcast android:name="android.backup.intent.INIT" />
