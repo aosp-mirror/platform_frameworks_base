@@ -5890,6 +5890,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         private boolean mNeedResolution = false;
         private boolean mIsRtlCompatibilityMode = true;
 
+        private static int UNDEFINED_MARGIN = DEFAULT_MARGIN_RELATIVE;
+
+        private boolean mLeftMarginUndefined = false;
+        private boolean mRightMarginUndefined = false;
+
         /**
          * Creates a new set of layout parameters. The values are extracted from
          * the supplied attributes set and context.
@@ -5916,16 +5921,26 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             } else {
                 leftMargin = a.getDimensionPixelSize(
                         R.styleable.ViewGroup_MarginLayout_layout_marginLeft,
-                        DEFAULT_MARGIN_RESOLVED);
-                topMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginTop,
-                        DEFAULT_MARGIN_RESOLVED);
+                        UNDEFINED_MARGIN);
+                if (leftMargin == UNDEFINED_MARGIN) {
+                    mLeftMarginUndefined = true;
+                    leftMargin = DEFAULT_MARGIN_RESOLVED;
+                }
                 rightMargin = a.getDimensionPixelSize(
                         R.styleable.ViewGroup_MarginLayout_layout_marginRight,
+                        UNDEFINED_MARGIN);
+                if (rightMargin == UNDEFINED_MARGIN) {
+                    mRightMarginUndefined = true;
+                    rightMargin = DEFAULT_MARGIN_RESOLVED;
+                }
+
+                topMargin = a.getDimensionPixelSize(
+                        R.styleable.ViewGroup_MarginLayout_layout_marginTop,
                         DEFAULT_MARGIN_RESOLVED);
                 bottomMargin = a.getDimensionPixelSize(
                         R.styleable.ViewGroup_MarginLayout_layout_marginBottom,
                         DEFAULT_MARGIN_RESOLVED);
+
                 startMargin = a.getDimensionPixelSize(
                         R.styleable.ViewGroup_MarginLayout_layout_marginStart,
                         DEFAULT_MARGIN_RELATIVE);
@@ -5949,6 +5964,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public MarginLayoutParams(int width, int height) {
             super(width, height);
 
+            mLeftMarginUndefined = true;
+            mRightMarginUndefined = true;
+
             mNeedResolution = false;
             mIsRtlCompatibilityMode = false;
         }
@@ -5969,6 +5987,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             this.startMargin = source.startMargin;
             this.endMargin = source.endMargin;
 
+            this.mLeftMarginUndefined = source.mLeftMarginUndefined;
+            this.mRightMarginUndefined = source.mRightMarginUndefined;
+
             this.mNeedResolution = source.mNeedResolution;
             this.mIsRtlCompatibilityMode = source.mIsRtlCompatibilityMode;
 
@@ -5980,6 +6001,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public MarginLayoutParams(LayoutParams source) {
             super(source);
+
+            mLeftMarginUndefined = true;
+            mRightMarginUndefined = true;
 
             mNeedResolution = false;
             mIsRtlCompatibilityMode = false;
@@ -6005,6 +6029,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             rightMargin = right;
             bottomMargin = bottom;
+            mLeftMarginUndefined = false;
+            mRightMarginUndefined = false;
             mNeedResolution = isMarginRelative();
         }
 
@@ -6147,30 +6173,42 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // No relative margin or pre JB-MR1 case or no need to resolve, just dont do anything
             // Will use the left and right margins if no relative margin is defined.
-            if (!isMarginRelative() || !mNeedResolution || mIsRtlCompatibilityMode) return;
+            if (!isMarginRelative() || !mNeedResolution) return;
 
             // Proceed with resolution
             doResolveMargins();
         }
 
         private void doResolveMargins() {
-            // We have some relative margins (either the start one or the end one or both). So use
-            // them and override what has been defined for left and right margins. If either start
-            // or end margin is not defined, just set it to default "0".
-            switch(mLayoutDirection) {
-                case View.LAYOUT_DIRECTION_RTL:
-                    leftMargin = (endMargin > DEFAULT_MARGIN_RELATIVE) ?
-                            endMargin : DEFAULT_MARGIN_RESOLVED;
-                    rightMargin = (startMargin > DEFAULT_MARGIN_RELATIVE) ?
-                            startMargin : DEFAULT_MARGIN_RESOLVED;
-                    break;
-                case View.LAYOUT_DIRECTION_LTR:
-                default:
-                    leftMargin = (startMargin > DEFAULT_MARGIN_RELATIVE) ?
-                            startMargin : DEFAULT_MARGIN_RESOLVED;
-                    rightMargin = (endMargin > DEFAULT_MARGIN_RELATIVE) ?
-                            endMargin : DEFAULT_MARGIN_RESOLVED;
-                    break;
+
+            if (mIsRtlCompatibilityMode) {
+                // if left or right margins are not defined and if we have some start or end margin
+                // defined then use those start and end margins.
+                if (mLeftMarginUndefined && startMargin > DEFAULT_MARGIN_RELATIVE) {
+                    leftMargin = startMargin;
+                }
+                if (mRightMarginUndefined && endMargin > DEFAULT_MARGIN_RELATIVE) {
+                    rightMargin = endMargin;
+                }
+            } else {
+                // We have some relative margins (either the start one or the end one or both). So use
+                // them and override what has been defined for left and right margins. If either start
+                // or end margin is not defined, just set it to default "0".
+                switch(mLayoutDirection) {
+                    case View.LAYOUT_DIRECTION_RTL:
+                        leftMargin = (endMargin > DEFAULT_MARGIN_RELATIVE) ?
+                                endMargin : DEFAULT_MARGIN_RESOLVED;
+                        rightMargin = (startMargin > DEFAULT_MARGIN_RELATIVE) ?
+                                startMargin : DEFAULT_MARGIN_RESOLVED;
+                        break;
+                    case View.LAYOUT_DIRECTION_LTR:
+                    default:
+                        leftMargin = (startMargin > DEFAULT_MARGIN_RELATIVE) ?
+                                startMargin : DEFAULT_MARGIN_RESOLVED;
+                        rightMargin = (endMargin > DEFAULT_MARGIN_RELATIVE) ?
+                                endMargin : DEFAULT_MARGIN_RESOLVED;
+                        break;
+                }
             }
             mNeedResolution = false;
         }
