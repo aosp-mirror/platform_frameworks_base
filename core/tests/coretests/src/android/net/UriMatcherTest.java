@@ -19,10 +19,11 @@ package android.net;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
+
 import junit.framework.TestCase;
 
-public class UriMatcherTest extends TestCase
-{
+public class UriMatcherTest extends TestCase {
+
     static final int ROOT = 0;
     static final int PEOPLE = 1;
     static final int PEOPLE_ID = 2;
@@ -37,54 +38,76 @@ public class UriMatcherTest extends TestCase
     static final int CALLERID = 11;
     static final int CALLERID_TEXT = 12;
     static final int FILTERRECENT = 13;
-    
+    static final int ANOTHER_PATH_SEGMENT = 13;
+
     @SmallTest
     public void testContentUris() {
-        check("content://asdf", UriMatcher.NO_MATCH);
-        check("content://people", PEOPLE);
-        check("content://people/1", PEOPLE_ID);
-        check("content://people/asdf", UriMatcher.NO_MATCH);
-        check("content://people/2/phones", PEOPLE_PHONES); 
-        check("content://people/2/phones/3", PEOPLE_PHONES_ID); 
-        check("content://people/2/phones/asdf", UriMatcher.NO_MATCH);
-        check("content://people/2/addresses", PEOPLE_ADDRESSES); 
-        check("content://people/2/addresses/3", PEOPLE_ADDRESSES_ID); 
-        check("content://people/2/addresses/asdf", UriMatcher.NO_MATCH);
-        check("content://people/2/contact-methods", PEOPLE_CONTACTMETH); 
-        check("content://people/2/contact-methods/3", PEOPLE_CONTACTMETH_ID); 
-        check("content://people/2/contact-methods/asdf", UriMatcher.NO_MATCH);
-        check("content://calls", CALLS);
-        check("content://calls/1", CALLS_ID);
-        check("content://calls/asdf", UriMatcher.NO_MATCH);
-        check("content://caller-id", CALLERID);
-        check("content://caller-id/asdf", CALLERID_TEXT);
-        check("content://caller-id/1", CALLERID_TEXT);
-        check("content://filter-recent", FILTERRECENT);
+        UriMatcher matcher = new UriMatcher(ROOT);
+        matcher.addURI("people", null, PEOPLE);
+        matcher.addURI("people", "#", PEOPLE_ID);
+        matcher.addURI("people", "#/phones", PEOPLE_PHONES);
+        matcher.addURI("people", "#/phones/blah", PEOPLE_PHONES_ID);
+        matcher.addURI("people", "#/phones/#", PEOPLE_PHONES_ID);
+        matcher.addURI("people", "#/addresses", PEOPLE_ADDRESSES);
+        matcher.addURI("people", "#/addresses/#", PEOPLE_ADDRESSES_ID);
+        matcher.addURI("people", "#/contact-methods", PEOPLE_CONTACTMETH);
+        matcher.addURI("people", "#/contact-methods/#", PEOPLE_CONTACTMETH_ID);
+        matcher.addURI("calls", null, CALLS);
+        matcher.addURI("calls", "#", CALLS_ID);
+        matcher.addURI("caller-id", null, CALLERID);
+        matcher.addURI("caller-id", "*", CALLERID_TEXT);
+        matcher.addURI("filter-recent", null, FILTERRECENT);
+        matcher.addURI("auth", "another/path/segment", ANOTHER_PATH_SEGMENT);
+        checkAll(matcher);
     }
 
-    private static final UriMatcher mURLMatcher = new UriMatcher(ROOT);
-
-    static
-    {
-        mURLMatcher.addURI("people", null, PEOPLE);
-        mURLMatcher.addURI("people", "#", PEOPLE_ID);
-        mURLMatcher.addURI("people", "#/phones", PEOPLE_PHONES);
-        mURLMatcher.addURI("people", "#/phones/blah", PEOPLE_PHONES_ID);
-        mURLMatcher.addURI("people", "#/phones/#", PEOPLE_PHONES_ID);
-        mURLMatcher.addURI("people", "#/addresses", PEOPLE_ADDRESSES);
-        mURLMatcher.addURI("people", "#/addresses/#", PEOPLE_ADDRESSES_ID);
-        mURLMatcher.addURI("people", "#/contact-methods", PEOPLE_CONTACTMETH);
-        mURLMatcher.addURI("people", "#/contact-methods/#", PEOPLE_CONTACTMETH_ID);
-        mURLMatcher.addURI("calls", null, CALLS);
-        mURLMatcher.addURI("calls", "#", CALLS_ID);
-        mURLMatcher.addURI("caller-id", null, CALLERID);
-        mURLMatcher.addURI("caller-id", "*", CALLERID_TEXT);
-        mURLMatcher.addURI("filter-recent", null, FILTERRECENT);
+    @SmallTest
+    public void testContentUrisWithLeadingSlash() {
+        UriMatcher matcher = new UriMatcher(ROOT);
+        matcher.addURI("people", null, PEOPLE);
+        matcher.addURI("people", "/#", PEOPLE_ID);
+        matcher.addURI("people", "/#/phones", PEOPLE_PHONES);
+        matcher.addURI("people", "/#/phones/blah", PEOPLE_PHONES_ID);
+        matcher.addURI("people", "/#/phones/#", PEOPLE_PHONES_ID);
+        matcher.addURI("people", "/#/addresses", PEOPLE_ADDRESSES);
+        matcher.addURI("people", "/#/addresses/#", PEOPLE_ADDRESSES_ID);
+        matcher.addURI("people", "/#/contact-methods", PEOPLE_CONTACTMETH);
+        matcher.addURI("people", "/#/contact-methods/#", PEOPLE_CONTACTMETH_ID);
+        matcher.addURI("calls", null, CALLS);
+        matcher.addURI("calls", "/#", CALLS_ID);
+        matcher.addURI("caller-id", null, CALLERID);
+        matcher.addURI("caller-id", "/*", CALLERID_TEXT);
+        matcher.addURI("filter-recent", null, FILTERRECENT);
+        matcher.addURI("auth", "/another/path/segment", ANOTHER_PATH_SEGMENT);
+        checkAll(matcher);
     }
 
-    void check(String uri, int expected)
-    {
-        int result = mURLMatcher.match(Uri.parse(uri));
+    private void checkAll(UriMatcher matcher) {
+        check("content://asdf", UriMatcher.NO_MATCH, matcher);
+        check("content://people", PEOPLE, matcher);
+        check("content://people/1", PEOPLE_ID, matcher);
+        check("content://people/asdf", UriMatcher.NO_MATCH, matcher);
+        check("content://people/2/phones", PEOPLE_PHONES, matcher);
+        check("content://people/2/phones/3", PEOPLE_PHONES_ID, matcher);
+        check("content://people/2/phones/asdf", UriMatcher.NO_MATCH, matcher);
+        check("content://people/2/addresses", PEOPLE_ADDRESSES, matcher);
+        check("content://people/2/addresses/3", PEOPLE_ADDRESSES_ID, matcher);
+        check("content://people/2/addresses/asdf", UriMatcher.NO_MATCH, matcher);
+        check("content://people/2/contact-methods", PEOPLE_CONTACTMETH, matcher);
+        check("content://people/2/contact-methods/3", PEOPLE_CONTACTMETH_ID, matcher);
+        check("content://people/2/contact-methods/asdf", UriMatcher.NO_MATCH, matcher);
+        check("content://calls", CALLS, matcher);
+        check("content://calls/1", CALLS_ID, matcher);
+        check("content://calls/asdf", UriMatcher.NO_MATCH, matcher);
+        check("content://caller-id", CALLERID, matcher);
+        check("content://caller-id/asdf", CALLERID_TEXT, matcher);
+        check("content://caller-id/1", CALLERID_TEXT, matcher);
+        check("content://filter-recent", FILTERRECENT, matcher);
+        check("content://auth/another/path/segment", ANOTHER_PATH_SEGMENT, matcher);
+    }
+
+    private void check(String uri, int expected, UriMatcher matcher) {
+        int result = matcher.match(Uri.parse(uri));
         if (result != expected) {
             String msg = "failed on " + uri;
             msg += " expected " + expected + " got " + result;
