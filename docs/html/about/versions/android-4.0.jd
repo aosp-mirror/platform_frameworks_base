@@ -122,7 +122,7 @@ to invoke an action that indicates the user wants to add a contact to a social n
 receiving the app uses it to invite the specified contact to that
 social network. Most apps will be on the receiving-end of this operation. For example, the
 built-in People app invokes the invite intent when the user selects "Add connection" for a specific
-social app that's listed in a person's contact details.</p>
+social app that's listed in a person's contact details.</p> 
 
 <p>To make your app visible as in the "Add connection" list, your app must provide a sync adapter to
 sync contact information from your social network. You must then indicate to the system that your
@@ -327,7 +327,7 @@ image (usually done by calling the {@link android.opengl.GLES20#glTexImage2D glT
 function). You may provide multiple mipmap levels. If the output texture has not been bound to a
 texture image, it will be automatically bound by the effect as a {@link
 android.opengl.GLES20#GL_TEXTURE_2D} and with one mipmap level (0), which will have the same
-size as the input.</p>
+size as the input.</p> 
 
 <p>All effects listed in {@link android.media.effect.EffectFactory} are guaranteed to be supported.
 However, some additional effects available from external libraries are not supported by all devices,
@@ -452,7 +452,7 @@ android.hardware.Camera.Parameters#getMaxNumDetectedFaces()} and ensure the retu
 value is greater than zero. Also, some devices may not support identification of eyes and mouth,
 in which case, those fields in the {@link android.hardware.Camera.Face} object will be null.</p>
 
-
+  
 <h4>Focus and metering areas</h4>
 
 <p>Camera apps can now control the areas that the camera uses for focus and for metering white
@@ -495,7 +495,7 @@ added in API level 9.</p>
 
 <h4>Other camera features</h4>
 
-<ul>
+<ul>  
 <li>While recording video, you can now call {@link android.hardware.Camera#takePicture
 takePicture()} to save a photo without interrupting the video session. Before doing so, you should
 call {@link android.hardware.Camera.Parameters#isVideoSnapshotSupported} to be sure the hardware
@@ -775,7 +775,7 @@ methods that allow the view and its parents to add more contextual information t
   <li>When invoked, the {@link
 android.view.View#sendAccessibilityEvent sendAccessibilityEvent()} and {@link
 android.view.View#sendAccessibilityEventUnchecked sendAccessibilityEventUnchecked()} methods defer
-to {@link android.view.View#onInitializeAccessibilityEvent onInitializeAccessibilityEvent()}.
+to {@link android.view.View#onInitializeAccessibilityEvent onInitializeAccessibilityEvent()}. 
   <p>Custom implementations of {@link android.view.View} might want to implement {@link
 android.view.View#onInitializeAccessibilityEvent onInitializeAccessibilityEvent()} to
 attach additional accessibility information to the {@link
@@ -1014,6 +1014,46 @@ to get the {@link android.net.NetworkInfo} that represents the current network a
 android.net.NetworkInfo#isConnected()} to check whether the device has a
 connection. You can then check other connection properties, such as whether the device is
 roaming or connected to Wi-Fi.</p>
+
+
+
+
+
+
+
+
+<h3 id="RenderScript">RenderScript</h3>
+
+<p>Three major features have been added to RenderScript:</p>
+
+<ul>
+  <li>Off-screen rendering to a framebuffer object</li>
+  <li>Rendering inside a view</li>
+  <li>RS for each from the framework APIs</li>
+</ul>
+
+<p>The {@link android.renderscript.Allocation} class now supports a {@link
+android.renderscript.Allocation#USAGE_GRAPHICS_RENDER_TARGET} memory space, which allows you to
+render things directly into the {@link android.renderscript.Allocation} and use it as a framebuffer
+object.</p>
+
+<p>{@link android.renderscript.RSTextureView} provides a means to display RenderScript graphics
+inside of a {@link android.view.View},  unlike {@link android.renderscript.RSSurfaceView}, which
+creates a separate window. This key difference allows you to do things such as move, transform, or
+animate an {@link android.renderscript.RSTextureView} as well as draw RenderScript graphics inside
+a view that lies within an activity layout.</p>
+
+<p>The {@link android.renderscript.Script#forEach Script.forEach()} method allows you to call
+RenderScript compute scripts from the VM level and have them automatically delegated to available
+cores on the device. You do not use this method directly, but any compute RenderScript that you
+write will have a {@link android.renderscript.Script#forEach forEach()}  method that you can call in
+the reflected RenderScript class. You can call the reflected {@link
+android.renderscript.Script#forEach forEach()} method by passing in an input {@link
+android.renderscript.Allocation} to process, an output {@link android.renderscript.Allocation} to
+write the result to, and a {@link android.renderscript.FieldPacker} data structure in case the
+RenderScript needs more information. Only one of the {@link android.renderscript.Allocation}s is
+necessary and the data structure is optional.</p>
+
 
 
 
@@ -1718,7 +1758,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targe
 notes for more information.</li>
     </ul>
   </dd>
-
+  
   <dt><a href="android-3.1.html">Android 3.1</a></dt>
   <dd>
     <ul>
@@ -1741,7 +1781,7 @@ android.net.rtp} documentation.</li>
 notes for many more new APIs.</li>
     </ul>
   </dd>
-
+  
   <dt><a href="android-3.2.html">Android 3.2</a></dt>
   <dd>
     <ul>

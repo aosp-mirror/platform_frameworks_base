@@ -29,7 +29,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
- * @hide
  * @deprecated in API 16
  * The Graphics derivitive of Renderscript.  Extends the basic context to add a
  * root script which is the display window for graphical output.  When the
