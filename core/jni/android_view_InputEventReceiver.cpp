@@ -118,8 +118,13 @@ status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) 
 
 int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data) {
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
-        ALOGE("channel '%s' ~ Publisher closed input channel or an error occurred.  "
+#if DEBUG_DISPATCH_CYCLE
+        // This error typically occurs when the publisher has closed the input channel
+        // as part of removing a window or finishing an IME session, in which case
+        // the consumer will soon be disposed as well.
+        ALOGD("channel '%s' ~ Publisher closed input channel or an error occurred.  "
                 "events=0x%x", getInputChannelName(), events);
+#endif
         return 0; // remove the callback
     }
 
