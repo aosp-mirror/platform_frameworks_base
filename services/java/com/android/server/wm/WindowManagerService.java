@@ -7304,6 +7304,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return false;
     }
 
+    @Override
     public void getInitialDisplaySize(int displayId, Point size) {
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
@@ -7311,6 +7312,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 synchronized(displayContent.mDisplaySizeLock) {
                     size.x = displayContent.mInitialDisplayWidth;
                     size.y = displayContent.mInitialDisplayHeight;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void getBaseDisplaySize(int displayId, Point size) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = getDisplayContentLocked(displayId);
+            if (displayContent != null) {
+                synchronized(displayContent.mDisplaySizeLock) {
+                    size.x = displayContent.mBaseDisplayWidth;
+                    size.y = displayContent.mBaseDisplayHeight;
                 }
             }
         }
@@ -7416,6 +7430,32 @@ public class WindowManagerService extends IWindowManager.Stub
                         Settings.Global.DISPLAY_SIZE_FORCED, "");
             }
         }
+    }
+
+    @Override
+    public int getInitialDisplayDensity(int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = getDisplayContentLocked(displayId);
+            if (displayContent != null) {
+                synchronized(displayContent.mDisplaySizeLock) {
+                    return displayContent.mInitialDisplayDensity;
+                }
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int getBaseDisplayDensity(int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = getDisplayContentLocked(displayId);
+            if (displayContent != null) {
+                synchronized(displayContent.mDisplaySizeLock) {
+                    return displayContent.mBaseDisplayDensity;
+                }
+            }
+        }
+        return -1;
     }
 
     @Override
