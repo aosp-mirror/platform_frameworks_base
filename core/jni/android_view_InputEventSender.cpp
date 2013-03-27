@@ -151,8 +151,13 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
 
 int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
-        ALOGE("channel '%s' ~ Consumer closed input channel or an error occurred.  "
+#if DEBUG_DISPATCH_CYCLE
+        // This error typically occurs when the consumer has closed the input channel
+        // as part of finishing an IME session, in which case the publisher will
+        // soon be disposed as well.
+        ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  "
                 "events=0x%x", getInputChannelName(), events);
+#endif
         return 0; // remove the callback
     }
 
