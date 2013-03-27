@@ -51,6 +51,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 /**
  * <p>
  * A <code>ViewGroup</code> is a special view that can contain other views
@@ -5864,7 +5866,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
-        private int startMargin = DEFAULT_RELATIVE;
+        private int startMargin = DEFAULT_MARGIN_RELATIVE;
 
         /**
          * The end margin in pixels of the child.
@@ -5872,21 +5874,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
-        private int endMargin = DEFAULT_RELATIVE;
+        private int endMargin = DEFAULT_MARGIN_RELATIVE;
 
         /**
          * The default start and end margin.
          * @hide
          */
-        public static final int DEFAULT_RELATIVE = Integer.MIN_VALUE;
+        public static final int DEFAULT_MARGIN_RELATIVE = Integer.MIN_VALUE;
 
-        private int initialLeftMargin;
-        private int initialRightMargin;
+        // Layout direction is LTR by default
+        private int mLayoutDirection = LAYOUT_DIRECTION_LTR;
 
-        private static int LAYOUT_DIRECTION_UNDEFINED = -1;
+        private static int DEFAULT_MARGIN_RESOLVED = 0;
 
-        // Layout direction undefined by default
-        private int layoutDirection = LAYOUT_DIRECTION_UNDEFINED;
+        private boolean mNeedResolution = false;
+        private boolean mIsRtlCompatibilityMode = true;
 
         /**
          * Creates a new set of layout parameters. The values are extracted from
@@ -5913,21 +5915,30 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 bottomMargin = margin;
             } else {
                 leftMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginLeft, 0);
+                        R.styleable.ViewGroup_MarginLayout_layout_marginLeft,
+                        DEFAULT_MARGIN_RESOLVED);
                 topMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginTop, 0);
+                        R.styleable.ViewGroup_MarginLayout_layout_marginTop,
+                        DEFAULT_MARGIN_RESOLVED);
                 rightMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginRight, 0);
+                        R.styleable.ViewGroup_MarginLayout_layout_marginRight,
+                        DEFAULT_MARGIN_RESOLVED);
                 bottomMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginBottom, 0);
+                        R.styleable.ViewGroup_MarginLayout_layout_marginBottom,
+                        DEFAULT_MARGIN_RESOLVED);
                 startMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginStart, DEFAULT_RELATIVE);
+                        R.styleable.ViewGroup_MarginLayout_layout_marginStart,
+                        DEFAULT_MARGIN_RELATIVE);
                 endMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginEnd, DEFAULT_RELATIVE);
+                        R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
+                        DEFAULT_MARGIN_RELATIVE);
+
+                mNeedResolution = isMarginRelative();
             }
 
-            initialLeftMargin = leftMargin;
-            initialRightMargin = rightMargin;
+            final boolean hasRtlSupport = c.getApplicationInfo().hasRtlSupport();
+            final int targetSdkVersion = c.getApplicationInfo().targetSdkVersion;
+            mIsRtlCompatibilityMode = targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport;
 
             a.recycle();
         }
@@ -5937,6 +5948,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public MarginLayoutParams(int width, int height) {
             super(width, height);
+
+            mNeedResolution = false;
+            mIsRtlCompatibilityMode = false;
         }
 
         /**
@@ -5955,10 +5969,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             this.startMargin = source.startMargin;
             this.endMargin = source.endMargin;
 
-            this.initialLeftMargin = source.leftMargin;
-            this.initialRightMargin = source.rightMargin;
+            this.mNeedResolution = source.mNeedResolution;
+            this.mIsRtlCompatibilityMode = source.mIsRtlCompatibilityMode;
 
-            setLayoutDirection(source.layoutDirection);
+            setLayoutDirection(source.mLayoutDirection);
         }
 
         /**
@@ -5966,6 +5980,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public MarginLayoutParams(LayoutParams source) {
             super(source);
+
+            mNeedResolution = false;
+            mIsRtlCompatibilityMode = false;
         }
 
         /**
@@ -5988,8 +6005,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             rightMargin = right;
             bottomMargin = bottom;
-            initialLeftMargin = left;
-            initialRightMargin = right;
+            mNeedResolution = isMarginRelative();
         }
 
         /**
@@ -6015,8 +6031,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             endMargin = end;
             bottomMargin = bottom;
-            initialLeftMargin = 0;
-            initialRightMargin = 0;
+            mNeedResolution = true;
         }
 
         /**
@@ -6028,6 +6043,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public void setMarginStart(int start) {
             startMargin = start;
+            mNeedResolution = true;
         }
 
         /**
@@ -6038,8 +6054,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @return the start margin in pixels.
          */
         public int getMarginStart() {
-            if (startMargin != DEFAULT_RELATIVE) return startMargin;
-            switch(layoutDirection) {
+            if (startMargin != DEFAULT_MARGIN_RELATIVE) return startMargin;
+            if (mNeedResolution) {
+                doResolveMargins();
+            }
+            switch(mLayoutDirection) {
                 case View.LAYOUT_DIRECTION_RTL:
                     return rightMargin;
                 case View.LAYOUT_DIRECTION_LTR:
@@ -6057,6 +6076,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public void setMarginEnd(int end) {
             endMargin = end;
+            mNeedResolution = true;
         }
 
         /**
@@ -6067,8 +6087,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @return the end margin in pixels.
          */
         public int getMarginEnd() {
-            if (endMargin != DEFAULT_RELATIVE) return endMargin;
-            switch(layoutDirection) {
+            if (endMargin != DEFAULT_MARGIN_RELATIVE) return endMargin;
+            if (mNeedResolution) {
+                doResolveMargins();
+            }
+            switch(mLayoutDirection) {
                 case View.LAYOUT_DIRECTION_RTL:
                     return leftMargin;
                 case View.LAYOUT_DIRECTION_LTR:
@@ -6086,7 +6109,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @return true if either marginStart or marginEnd has been set.
          */
         public boolean isMarginRelative() {
-            return (startMargin != DEFAULT_RELATIVE) || (endMargin != DEFAULT_RELATIVE);
+            return (startMargin != DEFAULT_MARGIN_RELATIVE || endMargin != DEFAULT_MARGIN_RELATIVE);
         }
 
         /**
@@ -6098,7 +6121,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public void setLayoutDirection(int layoutDirection) {
             if (layoutDirection != View.LAYOUT_DIRECTION_LTR &&
                     layoutDirection != View.LAYOUT_DIRECTION_RTL) return;
-            this.layoutDirection = layoutDirection;
+            if (layoutDirection != this.mLayoutDirection) {
+                this.mLayoutDirection = layoutDirection;
+                this.mNeedResolution = isMarginRelative();
+            }
         }
 
         /**
@@ -6108,7 +6134,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @return the layout direction.
          */
         public int getLayoutDirection() {
-            return layoutDirection;
+            return mLayoutDirection;
         }
 
         /**
@@ -6119,26 +6145,41 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public void resolveLayoutDirection(int layoutDirection) {
             setLayoutDirection(layoutDirection);
 
-            if (!isMarginRelative()) return;
+            // No relative margin or pre JB-MR1 case or no need to resolve, just dont do anything
+            // Will use the left and right margins if no relative margin is defined.
+            if (!isMarginRelative() || !mNeedResolution || mIsRtlCompatibilityMode) return;
 
-            switch(layoutDirection) {
+            // Proceed with resolution
+            doResolveMargins();
+        }
+
+        private void doResolveMargins() {
+            // We have some relative margins (either the start one or the end one or both). So use
+            // them and override what has been defined for left and right margins. If either start
+            // or end margin is not defined, just set it to default "0".
+            switch(mLayoutDirection) {
                 case View.LAYOUT_DIRECTION_RTL:
-                    leftMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : initialLeftMargin;
-                    rightMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : initialRightMargin;
+                    leftMargin = (endMargin > DEFAULT_MARGIN_RELATIVE) ?
+                            endMargin : DEFAULT_MARGIN_RESOLVED;
+                    rightMargin = (startMargin > DEFAULT_MARGIN_RELATIVE) ?
+                            startMargin : DEFAULT_MARGIN_RESOLVED;
                     break;
                 case View.LAYOUT_DIRECTION_LTR:
                 default:
-                    leftMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : initialLeftMargin;
-                    rightMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : initialRightMargin;
+                    leftMargin = (startMargin > DEFAULT_MARGIN_RELATIVE) ?
+                            startMargin : DEFAULT_MARGIN_RESOLVED;
+                    rightMargin = (endMargin > DEFAULT_MARGIN_RELATIVE) ?
+                            endMargin : DEFAULT_MARGIN_RESOLVED;
                     break;
             }
+            mNeedResolution = false;
         }
 
         /**
          * @hide
          */
         public boolean isLayoutRtl() {
-            return (layoutDirection == View.LAYOUT_DIRECTION_RTL);
+            return (mLayoutDirection == View.LAYOUT_DIRECTION_RTL);
         }
 
         /**
