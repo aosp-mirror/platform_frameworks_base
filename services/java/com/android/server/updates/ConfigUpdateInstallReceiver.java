@@ -102,6 +102,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
                         Slog.i(TAG, "Found new update, installing...");
                         install(altContent, altVersion);
                         Slog.i(TAG, "Installation successful");
+                        postInstall(context, intent);
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Could not update content!", e);
@@ -256,5 +257,8 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
     protected void install(byte[] content, int version) throws IOException {
         writeUpdate(updateDir, updateContent, content);
         writeUpdate(updateDir, updateVersion, Long.toString(version).getBytes());
+    }
+
+    protected void postInstall(Context context, Intent intent) {
     }
 }
