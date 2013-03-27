@@ -406,6 +406,8 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
 }
 
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+
     interrupt();
     detachFunctor(functor);
 
@@ -679,6 +681,17 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
     }
 }
 
+void OpenGLRenderer::updateSnapshotIgnoreForLayer(const Rect& bounds, const Rect& clip,
+        bool fboLayer, int alpha) {
+    if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
+            bounds.getHeight() > mCaches.maxTextureSize ||
+            (fboLayer && clip.isEmpty())) {
+        mSnapshot->empty = fboLayer;
+    } else {
+        mSnapshot->invisible = mSnapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
+    }
+}
+
 int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float bottom,
         int alpha, SkXfermode::Mode mode, int flags) {
     const GLuint previousFbo = mSnapshot->fbo;
@@ -692,8 +705,9 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         Rect bounds(left, top, right, bottom);
         Rect clip;
         calculateLayerBoundsAndClip(bounds, clip, true);
+        updateSnapshotIgnoreForLayer(bounds, clip, true, alpha);
 
-        if (!bounds.isEmpty() && !clip.isEmpty()) {
+        if (!mSnapshot->isIgnored()) {
             mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
             mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
         }
@@ -765,17 +779,10 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     Rect clip;
     Rect bounds(left, top, right, bottom);
     calculateLayerBoundsAndClip(bounds, clip, fboLayer);
-
-    if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
-            bounds.getHeight() > mCaches.maxTextureSize ||
-            (fboLayer && clip.isEmpty())) {
-        mSnapshot->empty = fboLayer;
-    } else {
-        mSnapshot->invisible = mSnapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
-    }
+    updateSnapshotIgnoreForLayer(bounds, clip, fboLayer, alpha);
 
     // Bail out if we won't draw in this snapshot
-    if (mSnapshot->invisible || mSnapshot->empty) {
+    if (mSnapshot->isIgnored()) {
         return false;
     }
 
