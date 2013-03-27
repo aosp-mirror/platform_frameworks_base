@@ -18,6 +18,8 @@
 
 #include <utils/Log.h>
 
+#include "DisplayList.h"
+#include "DeferredDisplayList.h"
 #include "Layer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
@@ -43,15 +45,18 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
     fbo = 0;
     stencil = NULL;
     debugDrawUpdate = false;
+    deferredList = NULL;
     Caches::getInstance().resourceCache.incrementRefcount(this);
 }
 
 Layer::~Layer() {
-    if (mesh) delete mesh;
-    if (meshIndices) delete meshIndices;
     if (colorFilter) Caches::getInstance().resourceCache.decrementRefcount(colorFilter);
     removeFbo();
     deleteTexture();
+
+    delete[] mesh;
+    delete[] meshIndices;
+    delete deferredList;
 }
 
 uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {
@@ -130,6 +135,44 @@ void Layer::setColorFilter(SkiaColorFilter* filter) {
     colorFilter = filter;
     if (colorFilter) {
         Caches::getInstance().resourceCache.incrementRefcount(colorFilter);
+    }
+}
+
+void Layer::defer() {
+    if (!deferredList) {
+        deferredList = new DeferredDisplayList;
+    }
+    DeferStateStruct deferredState(*deferredList, *renderer,
+            DisplayList::kReplayFlag_ClipChildren);
+
+    const float width = layer.getWidth();
+    const float height = layer.getHeight();
+
+    if (dirtyRect.isEmpty() || (dirtyRect.left <= 0 && dirtyRect.top <= 0 &&
+            dirtyRect.right >= width && dirtyRect.bottom >= height)) {
+        dirtyRect.set(0, 0, width, height);
+    }
+
+    renderer->initViewport(width, height);
+    renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
+            dirtyRect.right, dirtyRect.bottom, !isBlend());
+
+    displayList->defer(deferredState, 0);
+}
+
+void Layer::flush() {
+    if (deferredList && !deferredList->isEmpty()) {
+        renderer->setViewport(layer.getWidth(), layer.getHeight());
+        renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
+                !isBlend());
+
+        deferredList->flush(*renderer, dirtyRect);
+
+        renderer->finish();
+        renderer = NULL;
+
+        dirtyRect.setEmpty();
+        deferredList->clear();
     }
 }
 

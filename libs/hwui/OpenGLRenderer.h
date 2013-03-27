@@ -362,6 +362,18 @@ protected:
     void initViewport(int width, int height);
 
     /**
+     * Perform the setup specific to a frame. This method does not
+     * issue any OpenGL commands.
+     */
+    void setupFrameState(float left, float top, float right, float bottom, bool opaque);
+
+    /**
+     * Indicates the start of rendering. This method will setup the
+     * initial OpenGL state (viewport, clearing the buffer, etc.)
+     */
+    status_t startFrame();
+
+    /**
      * Clears the underlying surface if needed.
      */
     virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
@@ -897,6 +909,7 @@ private:
 
     bool updateLayer(Layer* layer, bool inFrame);
     void updateLayers();
+    void flushLayers();
 
     /**
      * Renders the specified region as a series of rectangles. This method
@@ -948,6 +961,10 @@ private:
     sp<Snapshot> mSnapshot;
     // State used to define the clipping region
     Rect mTilingClip;
+    // Is the target render surface opaque
+    bool mOpaque;
+    // Is a frame currently being rendered
+    bool mFrameStarted;
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
@@ -996,6 +1013,7 @@ private:
     String8 mName;
 
     friend class DisplayListRenderer;
+    friend class Layer;
     friend class TextSetupFunctor;
 
 }; // class OpenGLRenderer
