@@ -104,6 +104,7 @@ final class Settings {
     private static final String ATTR_CODE = "code";
     private static final String ATTR_NOT_LAUNCHED = "nl";
     private static final String ATTR_ENABLED = "enabled";
+    private static final String ATTR_ENABLED_CALLER = "enabledCaller";
     private static final String ATTR_STOPPED = "stopped";
     private static final String ATTR_INSTALLED = "inst";
 
@@ -453,7 +454,7 @@ final class Settings {
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
-                                    null, null);
+                                    null, null, null);
                             writePackageRestrictionsLPr(user.id);
                         }
                     }
@@ -850,7 +851,7 @@ final class Settings {
                                 true,   // installed
                                 false,  // stopped
                                 false,  // notLaunched
-                                null, null);
+                                null, null, null);
                     }
                     return;
                 }
@@ -895,6 +896,8 @@ final class Settings {
                     final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
                     final int enabled = enabledStr == null
                             ? COMPONENT_ENABLED_STATE_DEFAULT : Integer.parseInt(enabledStr);
+                    final String enabledCaller = parser.getAttributeValue(null,
+                            ATTR_ENABLED_CALLER);
                     final String installedStr = parser.getAttributeValue(null, ATTR_INSTALLED);
                     final boolean installed = installedStr == null
                             ? true : Boolean.parseBoolean(installedStr);
@@ -925,7 +928,7 @@ final class Settings {
                     }
 
                     ps.setUserState(userId, enabled, installed, stopped, notLaunched,
-                            enabledComponents, disabledComponents);
+                            enabledCaller, enabledComponents, disabledComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else {
@@ -1052,6 +1055,10 @@ final class Settings {
                     if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
                         serializer.attribute(null, ATTR_ENABLED,
                                 Integer.toString(ustate.enabled));
+                        if (ustate.lastDisableAppCaller != null) {
+                            serializer.attribute(null, ATTR_ENABLED_CALLER,
+                                    ustate.lastDisableAppCaller);
+                        }
                     }
                     if (ustate.enabledComponents != null
                             && ustate.enabledComponents.size() > 0) {
@@ -2239,14 +2246,14 @@ final class Settings {
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
                 try {
-                    packageSetting.setEnabled(Integer.parseInt(enabledStr), 0 /* userId */);
+                    packageSetting.setEnabled(Integer.parseInt(enabledStr), 0 /* userId */, null);
                 } catch (NumberFormatException e) {
                     if (enabledStr.equalsIgnoreCase("true")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 0);
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 0, null);
                     } else if (enabledStr.equalsIgnoreCase("false")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0);
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
                     } else if (enabledStr.equalsIgnoreCase("default")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0);
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
                     } else {
                         PackageManagerService.reportSettingsProblem(Log.WARN,
                                 "Error in package manager settings: package " + name
@@ -2255,7 +2262,7 @@ final class Settings {
                     }
                 }
             } else {
-                packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0);
+                packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
             }
 
             final String installStatusStr = parser.getAttributeValue(null, "installStatus");
@@ -2789,6 +2796,11 @@ final class Settings {
             pw.print(ps.getNotLaunched(user.id));
             pw.print(" enabled=");
             pw.println(ps.getEnabled(user.id));
+            String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
+            if (lastDisabledAppCaller != null) {
+                pw.print(prefix); pw.print("    lastDisabledCaller: ");
+                        pw.println(lastDisabledAppCaller);
+            }
             HashSet<String> cmp = ps.getDisabledComponents(user.id);
             if (cmp != null && cmp.size() > 0) {
                 pw.print(prefix); pw.println("    disabledComponents:");

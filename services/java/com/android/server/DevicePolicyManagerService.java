@@ -2443,7 +2443,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
                 ipm.setApplicationEnabledSetting(packageName,
                         PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-                        PackageManager.DONT_KILL_APP, userId);
+                        PackageManager.DONT_KILL_APP, userId, "DevicePolicyManager");
             }
         } catch (RemoteException e) {
         }

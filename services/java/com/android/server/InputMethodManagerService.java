@@ -1598,7 +1598,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
                         mIPackageManager.setApplicationEnabledSetting(imm.getPackageName(),
                                 PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-                                PackageManager.DONT_KILL_APP, mSettings.getCurrentUserId());
+                                PackageManager.DONT_KILL_APP, mSettings.getCurrentUserId(),
+                                mContext.getBasePackageName());
                     }
                 } catch (RemoteException e) {
                 }
