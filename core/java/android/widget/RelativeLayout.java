@@ -1212,8 +1212,8 @@ public class RelativeLayout extends ViewGroup {
 
         private int mLeft, mTop, mRight, mBottom;
 
-        private int mStart = DEFAULT_RELATIVE;
-        private int mEnd = DEFAULT_RELATIVE;
+        private int mStart = DEFAULT_MARGIN_RELATIVE;
+        private int mEnd = DEFAULT_MARGIN_RELATIVE;
 
         private boolean mRulesChanged = false;
         private boolean mIsRtlCompatibilityMode = false;
@@ -1314,7 +1314,7 @@ public class RelativeLayout extends ViewGroup {
                         break;
                 }
             }
-
+            mRulesChanged = true;
             System.arraycopy(rules, LEFT_OF, initialRules, LEFT_OF, VERB_COUNT);
 
             a.recycle();
@@ -1574,11 +1574,11 @@ public class RelativeLayout extends ViewGroup {
         public void resolveLayoutDirection(int layoutDirection) {
             final boolean isLayoutRtl = isLayoutRtl();
             if (isLayoutRtl) {
-                if (mStart != DEFAULT_RELATIVE) mRight = mStart;
-                if (mEnd != DEFAULT_RELATIVE) mLeft = mEnd;
+                if (mStart != DEFAULT_MARGIN_RELATIVE) mRight = mStart;
+                if (mEnd != DEFAULT_MARGIN_RELATIVE) mLeft = mEnd;
             } else {
-                if (mStart != DEFAULT_RELATIVE) mLeft = mStart;
-                if (mEnd != DEFAULT_RELATIVE) mRight = mEnd;
+                if (mStart != DEFAULT_MARGIN_RELATIVE) mLeft = mStart;
+                if (mEnd != DEFAULT_MARGIN_RELATIVE) mRight = mEnd;
             }
 
             if (hasRelativeRules() && layoutDirection != getLayoutDirection()) {
