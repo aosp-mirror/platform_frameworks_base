@@ -37,7 +37,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -408,10 +407,10 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to write the sync settings");
         int userId = UserHandle.getCallingUserId();
 
-        if (pollFrequency <= DateUtils.MINUTE_IN_MILLIS) {
+        if (pollFrequency < 60) {
             Slog.w(TAG, "Requested poll frequency of " + pollFrequency
-                    + "ms being rounded up to 60 seconds.");
-            pollFrequency = DateUtils.MINUTE_IN_MILLIS;
+                    + " seconds being rounded up to 60 seconds.");
+            pollFrequency = 60;
         }
 
         long identityToken = clearCallingIdentity();
