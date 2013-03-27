@@ -69,6 +69,11 @@ For example:
         sURIMatcher.addURI("call_log", "calls/#", CALLS_ID);
     }
 </pre>
+<p>Starting from API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, paths can start
+ with a leading slash.  For example:
+<pre>
+        sURIMatcher.addURI("contacts", "/people", PEOPLE);
+</pre>
 <p>Then when you need to match against a URI, call {@link #match}, providing
 the URL that you have been given.  You can use the result to build a query,
 return a type, insert or delete a row, or whatever you need, without duplicating
@@ -143,6 +148,9 @@ public class UriMatcher
      * matched. URI nodes may be exact match string, the token "*"
      * that matches any text, or the token "#" that matches only
      * numbers.
+     * <p>
+     * Starting from API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
+     * this method will accept leading slash in the path.
      *
      * @param authority the authority to match
      * @param path the path to match. * may be used as a wild card for
@@ -155,7 +163,17 @@ public class UriMatcher
         if (code < 0) {
             throw new IllegalArgumentException("code " + code + " is invalid: it must be positive");
         }
-        String[] tokens = path != null ? PATH_SPLIT_PATTERN.split(path) : null;
+
+        String[] tokens = null;
+        if (path != null) {
+            String newPath = path;
+            // Strip leading slash if present.
+            if (path.length() > 0 && path.charAt(0) == '/') {
+                newPath = path.substring(1);
+            }
+            tokens = PATH_SPLIT_PATTERN.split(newPath);
+        }
+
         int numTokens = tokens != null ? tokens.length : 0;
         UriMatcher node = this;
         for (int i = -1; i < numTokens; i++) {
