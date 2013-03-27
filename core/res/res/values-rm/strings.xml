@@ -1785,6 +1785,8 @@
     <skip />
     <!-- no translation found for wifi_p2p_show_pin_message (8530563323880921094) -->
     <skip />
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
+    <skip />
     <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
     <skip />
     <string name="select_character" msgid="3365550120617701745">"Inserir in caracter"</string>

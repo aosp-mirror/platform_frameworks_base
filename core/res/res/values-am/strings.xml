@@ -1147,7 +1147,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ለ፦"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"የሚፈለገውን ፒን ተይብ፦"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ፒን፦"</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"ስልኩ ከ<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ጋር ተገናኝቶ ባለበት ጊዜ በጊዜያዊነት ከWi-Fi ጋር ያለው ግንኙነት ይቋረጣል"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
+    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ስልኩ ከ<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ጋር ተገናኝቶ ባለበት ጊዜ በጊዜያዊነት ከWi-Fi ጋር ያለው ግንኙነት ይቋረጣል"</string>
     <string name="select_character" msgid="3365550120617701745">"ቁምፊ አስገባ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"የSMS መልዕክቶች መበላክ ላይ"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ቁጥራቸው ብዙ የሆኑ የኤስ.ኤም.ኤስ. መልዕክቶችን እየላከ ነው። ይሄ መተግበሪያ መልዕክቶችን መላኩን እንዲቀጥል መፍቀድ ትፈልጋለህ?"</string>

@@ -1147,7 +1147,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Ku:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Faka i-PIN edingekayo:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Ifoni izonqamuka okwesikhashana ku-Wi-Fi ngenkathi ixhumeke ku-<xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
+    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Ifoni izonqamuka okwesikhashana ku-Wi-Fi ngenkathi ixhumeke ku-<xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Faka uhlamvu"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Ithumela imiyalezo ye-SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithumela inombolo enkulu yemilayezo ye-SMS. Ufuna ukuvumela lolu hlelo lokusebenza ukuqhubeka ukuthumela imilayezo?"</string>
