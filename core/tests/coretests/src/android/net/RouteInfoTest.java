@@ -149,6 +149,40 @@ public class RouteInfoTest extends TestCase {
         assertAreNotEqual(r1, r3);
     }
 
+    public void testHostRoute() {
+      RouteInfo r;
+
+      r = new RouteInfo(Prefix("0.0.0.0/0"), Address("0.0.0.0"), "wlan0");
+      assertFalse(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("::/0"), Address("::"), "wlan0");
+      assertFalse(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("192.0.2.0/24"), null, "wlan0");
+      assertFalse(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("2001:db8::/48"), null, "wlan0");
+      assertFalse(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("192.0.2.0/32"), Address("0.0.0.0"), "wlan0");
+      assertTrue(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("2001:db8::/128"), Address("::"), "wlan0");
+      assertTrue(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("192.0.2.0/32"), null, "wlan0");
+      assertTrue(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("2001:db8::/128"), null, "wlan0");
+      assertTrue(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("::/128"), Address("fe80::"), "wlan0");
+      assertTrue(r.isHostRoute());
+
+      r = new RouteInfo(Prefix("0.0.0.0/32"), Address("192.0.2.1"), "wlan0");
+      assertTrue(r.isHostRoute());
+    }
+
     public RouteInfo passThroughParcel(RouteInfo r) {
         Parcel p = Parcel.obtain();
         RouteInfo r2 = null;

@@ -132,7 +132,10 @@ public class RouteInfo implements Parcelable {
     }
 
     private boolean isHost() {
-        return (mGateway.equals(Inet4Address.ANY) || mGateway.equals(Inet6Address.ANY));
+        return (mDestination.getAddress() instanceof Inet4Address &&
+                mDestination.getNetworkPrefixLength() == 32) ||
+               (mDestination.getAddress() instanceof Inet6Address &&
+                mDestination.getNetworkPrefixLength() == 128);
     }
 
     private boolean isDefault() {
