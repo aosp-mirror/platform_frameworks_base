@@ -21,7 +21,6 @@ import java.util.Vector;
 import android.util.Log;
 
 /**
- * @hide
  * @deprecated in API 16
  * <p>This class is a container for geometric data displayed with
  * Renderscript. Internally, a mesh is a collection of allocations that

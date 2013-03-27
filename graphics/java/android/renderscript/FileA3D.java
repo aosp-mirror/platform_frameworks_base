@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
- * @hide
  * @deprecated in API 16
  * FileA3D allows users to load Renderscript objects from files
  * or resources stored on disk. It could be used to load items
