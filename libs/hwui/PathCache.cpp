@@ -262,12 +262,13 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
 
     PathTexture* texture = createTexture(left, top, offset, width, height,
             path->getGenerationID());
-    addTexture(entry, &bitmap, texture);
+    generateTexture(entry, &bitmap, texture);
 
     return texture;
 }
 
-void PathCache::addTexture(const PathDescription& entry, SkBitmap* bitmap, PathTexture* texture) {
+void PathCache::generateTexture(const PathDescription& entry, SkBitmap* bitmap,
+        PathTexture* texture, bool addToCache) {
     generateTexture(*bitmap, texture);
 
     uint32_t size = texture->width * texture->height;
@@ -278,7 +279,9 @@ void PathCache::addTexture(const PathDescription& entry, SkBitmap* bitmap, PathT
         if (mDebugEnabled) {
             ALOGD("Shape created, size = %d", size);
         }
-        mCache.put(entry, texture);
+        if (addToCache) {
+            mCache.put(entry, texture);
+        }
     } else {
         texture->cleanup = true;
     }
@@ -414,7 +417,7 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
             // producing the bitmap, so let's wait
             SkBitmap* bitmap = task->getResult();
             if (bitmap) {
-                addTexture(entry, bitmap, texture);
+                generateTexture(entry, bitmap, texture, false);
                 texture->clearTask();
             } else {
                 ALOGW("Path too large to be rendered into a texture");
@@ -423,6 +426,8 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
                 mCache.remove(entry);
             }
         } else if (path->getGenerationID() != texture->generation) {
+            // The size of the path might have changed so we first
+            // remove the entry from the cache
             mCache.remove(entry);
             texture = addTexture(entry, path, paint);
         }
