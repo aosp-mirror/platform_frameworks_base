@@ -556,9 +556,15 @@ private:
     bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
 
     /**
-     * given the local bounds of the layer, calculates ...
+     * Given the local bounds of the layer, calculates ...
      */
     void calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool fboLayer);
+
+    /**
+     * Given the local bounds + clip of the layer, updates current snapshot's empty/invisible
+     */
+    void updateSnapshotIgnoreForLayer(const Rect& bounds, const Rect& clip,
+            bool fboLayer, int alpha);
 
     /**
      * Creates a new layer stored in the specified snapshot.
