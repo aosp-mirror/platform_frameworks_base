@@ -163,6 +163,7 @@ extern int register_android_media_RemoteDisplay(JNIEnv *env);
 extern int register_android_view_InputChannel(JNIEnv* env);
 extern int register_android_view_InputDevice(JNIEnv* env);
 extern int register_android_view_InputEventReceiver(JNIEnv* env);
+extern int register_android_view_InputEventSender(JNIEnv* env);
 extern int register_android_view_KeyCharacterMap(JNIEnv *env);
 extern int register_android_view_KeyEvent(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
@@ -1195,6 +1196,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_app_NativeActivity),
     REG_JNI(register_android_view_InputChannel),
     REG_JNI(register_android_view_InputEventReceiver),
+    REG_JNI(register_android_view_InputEventSender),
     REG_JNI(register_android_view_KeyEvent),
     REG_JNI(register_android_view_MotionEvent),
     REG_JNI(register_android_view_PointerIcon),
