@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.TextureView;
 
 /**
+ * @hide
  * @deprecated in API 16
  * The Texture View for a graphics renderscript (RenderScriptGL)
  * to draw on.

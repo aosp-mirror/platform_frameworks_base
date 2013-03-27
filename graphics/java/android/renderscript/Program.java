@@ -26,6 +26,7 @@ import android.util.Log;
 
 
 /**
+ * @hide
  *
  * Program is a base class for all the objects that modify
  * various stages of the graphics pipeline
