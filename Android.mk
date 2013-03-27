@@ -195,7 +195,6 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
 	core/java/com/android/internal/view/IInputMethod.aidl \
-	core/java/com/android/internal/view/IInputMethodCallback.aidl \
 	core/java/com/android/internal/view/IInputMethodClient.aidl \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
@@ -307,7 +306,6 @@ aidl_files := \
 	frameworks/base/core/java/com/android/internal/textservice/ITextServicesSessionListener.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputContext.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputMethod.aidl \
-	frameworks/base/core/java/com/android/internal/view/IInputMethodCallback.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputMethodClient.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputMethodManager.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputMethodSession.aidl \

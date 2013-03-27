@@ -88,6 +88,7 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.IWindowManager;
+import android.view.InputChannel;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -170,7 +171,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final HardKeyboardListener mHardKeyboardListener;
     private final WindowManagerService mWindowManagerService;
 
-    final InputBindResult mNoBinding = new InputBindResult(null, null, -1);
+    final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1);
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
@@ -202,7 +203,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     class SessionState {
         final ClientState client;
         final IInputMethod method;
-        final IInputMethodSession session;
+
+        IInputMethodSession session;
+        InputChannel channel;
 
         @Override
         public String toString() {
@@ -211,18 +214,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             System.identityHashCode(method))
                     + " session " + Integer.toHexString(
                             System.identityHashCode(session))
+                    + " channel " + channel
                     + "}";
         }
 
         SessionState(ClientState _client, IInputMethod _method,
-                IInputMethodSession _session) {
+                IInputMethodSession _session, InputChannel _channel) {
             client = _client;
             method = _method;
             session = _session;
+            channel = _channel;
         }
     }
 
-    class ClientState {
+    static final class ClientState {
         final IInputMethodClient client;
         final IInputContext inputContext;
         final int uid;
@@ -555,18 +560,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static class MethodCallback extends IInputSessionCallback.Stub {
-        private final IInputMethod mMethod;
+    private static final class MethodCallback extends IInputSessionCallback.Stub {
         private final InputMethodManagerService mParentIMMS;
+        private final IInputMethod mMethod;
+        private final InputChannel mChannel;
 
-        MethodCallback(final IInputMethod method, final InputMethodManagerService imms) {
-            mMethod = method;
+        MethodCallback(InputMethodManagerService imms, IInputMethod method,
+                InputChannel channel) {
             mParentIMMS = imms;
+            mMethod = method;
+            mChannel = channel;
         }
 
         @Override
-        public void sessionCreated(IInputMethodSession session) throws RemoteException {
-            mParentIMMS.onSessionCreated(mMethod, session);
+        public void sessionCreated(IInputMethodSession session) {
+            mParentIMMS.onSessionCreated(mMethod, session, mChannel);
         }
     }
 
@@ -984,7 +992,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            mClients.remove(client.asBinder());
+            ClientState cs = mClients.remove(client.asBinder());
+            if (cs != null) {
+                clearClientSessionLocked(cs);
+            }
         }
     }
 
@@ -1059,7 +1070,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(getAppShowFlags(), null);
         }
-        return new InputBindResult(session.session, mCurId, mCurSeq);
+        return new InputBindResult(session.session, session.channel, mCurId, mCurSeq);
     }
 
     InputBindResult startInputLocked(IInputMethodClient client,
@@ -1137,16 +1148,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (mHaveConnection) {
                 if (mCurMethod != null) {
-                    if (!cs.sessionRequested) {
-                        cs.sessionRequested = true;
-                        if (DEBUG) Slog.v(TAG, "Creating new session for client " + cs);
-                        executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                                MSG_CREATE_SESSION, mCurMethod,
-                                new MethodCallback(mCurMethod, this)));
-                    }
                     // Return to client, and we will get back with it when
                     // we have had a session made for it.
-                    return new InputBindResult(null, mCurId, mCurSeq);
+                    requestClientSessionLocked(cs);
+                    return new InputBindResult(null, null, mCurId, mCurSeq);
                 } else if (SystemClock.uptimeMillis()
                         < (mLastBindTime+TIME_TO_RECONNECT)) {
                     // In this case we have connected to the service, but
@@ -1156,7 +1161,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // we can report back.  If it has been too long, we want
                     // to fall through so we can try a disconnect/reconnect
                     // to see if we can get back in touch with the service.
-                    return new InputBindResult(null, mCurId, mCurSeq);
+                    return new InputBindResult(null, null, mCurId, mCurSeq);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             mCurMethodId, SystemClock.uptimeMillis()-mLastBindTime, 0);
@@ -1175,7 +1180,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mSystemReady) {
             // If the system is not yet ready, we shouldn't be running third
             // party code.
-            return new InputBindResult(null, mCurMethodId, mCurSeq);
+            return new InputBindResult(null, null, mCurMethodId, mCurSeq);
         }
 
         InputMethodInfo info = mMethodMap.get(mCurMethodId);
@@ -1203,7 +1208,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         WindowManager.LayoutParams.TYPE_INPUT_METHOD);
             } catch (RemoteException e) {
             }
-            return new InputBindResult(null, mCurId, mCurSeq);
+            return new InputBindResult(null, null, mCurId, mCurSeq);
         } else {
             mCurIntent = null;
             Slog.w(TAG, "Failure connecting to input method service: "
@@ -1246,32 +1251,34 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                         MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
                 if (mCurClient != null) {
-                    if (DEBUG) Slog.v(TAG, "Creating first session while with client "
-                            + mCurClient);
-                    executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                            MSG_CREATE_SESSION, mCurMethod,
-                            new MethodCallback(mCurMethod, this)));
+                    clearClientSessionLocked(mCurClient);
+                    requestClientSessionLocked(mCurClient);
                 }
             }
         }
     }
 
-    void onSessionCreated(IInputMethod method, IInputMethodSession session) {
+    void onSessionCreated(IInputMethod method, IInputMethodSession session,
+            InputChannel channel) {
         synchronized (mMethodMap) {
             if (mCurMethod != null && method != null
                     && mCurMethod.asBinder() == method.asBinder()) {
                 if (mCurClient != null) {
+                    clearClientSessionLocked(mCurClient);
                     mCurClient.curSession = new SessionState(mCurClient,
-                            method, session);
-                    mCurClient.sessionRequested = false;
+                            method, session, channel);
                     InputBindResult res = attachNewInputLocked(true);
                     if (res.method != null) {
                         executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
                                 MSG_BIND_METHOD, mCurClient.client, res));
                     }
+                    return;
                 }
             }
         }
+
+        // Session abandoned.  Close its associated input channel.
+        channel.dispose();
     }
 
     void unbindCurrentMethodLocked(boolean reportToClient, boolean savePosition) {
@@ -1306,14 +1313,38 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     MSG_UNBIND_METHOD, mCurSeq, mCurClient.client));
         }
     }
-    
-    private void finishSession(SessionState sessionState) {
-        if (sessionState != null && sessionState.session != null) {
-            try {
-                sessionState.session.finishSession();
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Session failed to close due to remote exception", e);
-                setImeWindowVisibilityStatusHiddenLocked();
+
+    void requestClientSessionLocked(ClientState cs) {
+        if (!cs.sessionRequested) {
+            if (DEBUG) Slog.v(TAG, "Creating new session for client " + cs);
+            InputChannel[] channels = InputChannel.openInputChannelPair(cs.toString());
+            cs.sessionRequested = true;
+            executeOrSendMessage(mCurMethod, mCaller.obtainMessageOOO(
+                    MSG_CREATE_SESSION, mCurMethod, channels[1],
+                    new MethodCallback(this, mCurMethod, channels[0])));
+        }
+    }
+
+    void clearClientSessionLocked(ClientState cs) {
+        finishSessionLocked(cs.curSession);
+        cs.curSession = null;
+        cs.sessionRequested = false;
+    }
+
+    private void finishSessionLocked(SessionState sessionState) {
+        if (sessionState != null) {
+            if (sessionState.session != null) {
+                try {
+                    sessionState.session.finishSession();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Session failed to close due to remote exception", e);
+                    setImeWindowVisibilityStatusHiddenLocked();
+                }
+                sessionState.session = null;
+            }
+            if (sessionState.channel != null) {
+                sessionState.channel.dispose();
+                sessionState.channel = null;
             }
         }
     }
@@ -1321,12 +1352,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void clearCurMethodLocked() {
         if (mCurMethod != null) {
             for (ClientState cs : mClients.values()) {
-                cs.sessionRequested = false;
-                finishSession(cs.curSession);
-                cs.curSession = null;
+                clearClientSessionLocked(cs);
             }
 
-            finishSession(mEnabledSession);
+            finishSessionLocked(mEnabledSession);
             mEnabledSession = null;
             mCurMethod = null;
         }
@@ -2325,15 +2354,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 args.recycle();
                 return true;
-            case MSG_CREATE_SESSION:
+            case MSG_CREATE_SESSION: {
                 args = (SomeArgs)msg.obj;
+                InputChannel channel = (InputChannel)args.arg2;
                 try {
-                    ((IInputMethod)args.arg1).createSession(
-                            (IInputSessionCallback)args.arg2);
+                    ((IInputMethod)args.arg1).createSession(channel,
+                            (IInputSessionCallback)args.arg3);
                 } catch (RemoteException e) {
+                } finally {
+                    if (channel != null) {
+                        channel.dispose();
+                    }
                 }
                 args.recycle();
                 return true;
+            }
             // ---------------------------------------------------------
 
             case MSG_START_INPUT:

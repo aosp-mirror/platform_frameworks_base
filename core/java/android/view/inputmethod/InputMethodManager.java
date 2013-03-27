@@ -19,7 +19,6 @@ package android.view.inputmethod;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
@@ -40,8 +39,10 @@ import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.view.InputChannel;
+import android.view.InputEvent;
+import android.view.InputEventSender;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
 
@@ -319,6 +320,8 @@ public final class InputMethodManager {
      * The actual instance of the method to make calls on it.
      */
     IInputMethodSession mCurMethod;
+    InputChannel mCurChannel;
+    ImeInputEventSender mCurSender;
 
     PendingEvent mPendingEventPool;
     int mPendingEventPoolSize;
@@ -363,10 +366,17 @@ public final class InputMethodManager {
                         if (mBindSequence < 0 || mBindSequence != res.sequence) {
                             Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
                                     + ", given seq=" + res.sequence);
+                            if (res.channel != null) {
+                                res.channel.dispose();
+                            }
                             return;
                         }
                         
                         mCurMethod = res.method;
+                        if (mCurChannel != null) {
+                            mCurChannel.dispose();
+                        }
+                        mCurChannel = res.channel;
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                     }
@@ -482,10 +492,10 @@ public final class InputMethodManager {
     }
     
     final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
-        @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
             // No need to check for dump permission, since we only give this
             // interface to the system.
-            
             CountDownLatch latch = new CountDownLatch(1);
             SomeArgs sargs = SomeArgs.obtain();
             sargs.arg1 = fd;
@@ -501,32 +511,29 @@ public final class InputMethodManager {
                 fout.println("Interrupted waiting for dump");
             }
         }
-        
+
+        @Override
         public void setUsingInputMethod(boolean state) {
         }
-        
+
+        @Override
         public void onBindMethod(InputBindResult res) {
             mH.sendMessage(mH.obtainMessage(MSG_BIND, res));
         }
-        
+
+        @Override
         public void onUnbindMethod(int sequence) {
             mH.sendMessage(mH.obtainMessage(MSG_UNBIND, sequence, 0));
         }
-        
+
+        @Override
         public void setActive(boolean active) {
             mH.sendMessage(mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, 0));
         }
-    };    
-    
+    };
+
     final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
 
-    final IInputMethodCallback mInputMethodCallback = new IInputMethodCallback.Stub() {
-        @Override
-        public void finishedEvent(int seq, boolean handled) {
-            InputMethodManager.this.finishedEvent(seq, handled);
-        }
-    };
-    
     InputMethodManager(IInputMethodManager service, Looper looper) {
         mService = service;
         mMainLooper = looper;
@@ -714,6 +721,14 @@ public final class InputMethodManager {
         mBindSequence = -1;
         mCurId = null;
         mCurMethod = null;
+        if (mCurSender != null) {
+            mCurSender.dispose();
+            mCurSender = null;
+        }
+        if (mCurChannel != null) {
+            mCurChannel.dispose();
+            mCurChannel = null;
+        }
     }
     
     /**
@@ -1085,6 +1100,7 @@ public final class InputMethodManager {
             // we need to reschedule our work for over there.
             if (DEBUG) Log.v(TAG, "Starting input: reschedule to view thread");
             vh.post(new Runnable() {
+                @Override
                 public void run() {
                     startInputInner(null, 0, 0, 0);
                 }
@@ -1158,11 +1174,20 @@ public final class InputMethodManager {
                     if (res.id != null) {
                         mBindSequence = res.sequence;
                         mCurMethod = res.method;
+                        if (mCurChannel != null) {
+                            mCurChannel.dispose();
+                        }
+                        mCurChannel = res.channel;
                         mCurId = res.id;
-                    } else if (mCurMethod == null) {
-                        // This means there is no input method available.
-                        if (DEBUG) Log.v(TAG, "ABORT input: no input method!");
-                        return true;
+                    } else {
+                        if (res.channel != null) {
+                            res.channel.dispose();
+                        }
+                        if (mCurMethod == null) {
+                            // This means there is no input method available.
+                            if (DEBUG) Log.v(TAG, "ABORT input: no input method!");
+                            return true;
+                        }
                     }
                 }
                 if (mCurMethod != null && mCompletions != null) {
@@ -1556,76 +1581,39 @@ public final class InputMethodManager {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * @hide
      */
-    public int dispatchKeyEvent(Context context, int seq, KeyEvent key,
+    public int dispatchInputEvent(Context context, int seq, InputEvent event,
             FinishedEventCallback callback) {
         synchronized (mH) {
-            if (DEBUG) Log.d(TAG, "dispatchKeyEvent");
+            if (DEBUG) Log.d(TAG, "dispatchInputEvent");
 
             if (mCurMethod != null) {
-                if (key.getAction() == KeyEvent.ACTION_DOWN
-                        && key.getKeyCode() == KeyEvent.KEYCODE_SYM
-                        && key.getRepeatCount() == 0) {
-                    showInputMethodPickerLocked();
-                    return ViewRootImpl.EVENT_HANDLED;
+                if (event instanceof KeyEvent) {
+                    KeyEvent keyEvent = (KeyEvent)event;
+                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                            && keyEvent.getKeyCode() == KeyEvent.KEYCODE_SYM
+                            && keyEvent.getRepeatCount() == 0) {
+                        showInputMethodPickerLocked();
+                        return ViewRootImpl.EVENT_HANDLED;
+                    }
                 }
-                try {
-                    if (DEBUG) Log.v(TAG, "DISPATCH KEY: " + mCurMethod);
-                    final long startTime = SystemClock.uptimeMillis();
-                    enqueuePendingEventLocked(startTime, seq, mCurId, callback);
-                    mCurMethod.dispatchKeyEvent(seq, key, mInputMethodCallback);
-                    return ViewRootImpl.EVENT_PENDING_IME;
-                } catch (RemoteException e) {
-                    Log.w(TAG, "IME died: " + mCurId + " dropping: " + key, e);
-                }
-            }
-        }
-        return ViewRootImpl.EVENT_POST_IME;
-    }
 
-    /**
-     * @hide
-     */
-    public int dispatchTrackballEvent(Context context, int seq, MotionEvent motion,
-            FinishedEventCallback callback) {
-        synchronized (mH) {
-            if (DEBUG) Log.d(TAG, "dispatchTrackballEvent");
-
-            if (mCurMethod != null && mCurrentTextBoxAttribute != null) {
-                try {
-                    if (DEBUG) Log.v(TAG, "DISPATCH TRACKBALL: " + mCurMethod);
-                    final long startTime = SystemClock.uptimeMillis();
-                    enqueuePendingEventLocked(startTime, seq, mCurId, callback);
-                    mCurMethod.dispatchTrackballEvent(seq, motion, mInputMethodCallback);
-                    return ViewRootImpl.EVENT_PENDING_IME;
-                } catch (RemoteException e) {
-                    Log.w(TAG, "IME died: " + mCurId + " dropping trackball: " + motion, e);
-                }
-            }
-        }
-        return ViewRootImpl.EVENT_POST_IME;
-    }
-
-    /**
-     * @hide
-     */
-    public int dispatchGenericMotionEvent(Context context, int seq, MotionEvent motion,
-            FinishedEventCallback callback) {
-        synchronized (mH) {
-            if (DEBUG) Log.d(TAG, "dispatchGenericMotionEvent");
-
-            if (mCurMethod != null && mCurrentTextBoxAttribute != null) {
-                try {
-                    if (DEBUG) Log.v(TAG, "DISPATCH GENERIC MOTION: " + mCurMethod);
-                    final long startTime = SystemClock.uptimeMillis();
-                    enqueuePendingEventLocked(startTime, seq, mCurId, callback);
-                    mCurMethod.dispatchGenericMotionEvent(seq, motion, mInputMethodCallback);
-                    return ViewRootImpl.EVENT_PENDING_IME;
-                } catch (RemoteException e) {
-                    Log.w(TAG, "IME died: " + mCurId + " dropping generic motion: " + motion, e);
+                if (DEBUG) Log.v(TAG, "DISPATCH INPUT EVENT: " + mCurMethod);
+                final long startTime = SystemClock.uptimeMillis();
+                if (mCurChannel != null) {
+                    if (mCurSender == null) {
+                        mCurSender = new ImeInputEventSender(mCurChannel, mH.getLooper());
+                    }
+                    if (mCurSender.sendInputEvent(seq, event)) {
+                        enqueuePendingEventLocked(startTime, seq, mCurId, callback);
+                        return ViewRootImpl.EVENT_PENDING_IME;
+                    } else {
+                        Log.w(TAG, "Unable to send input event to IME: "
+                                + mCurId + " dropping: " + event);
+                    }
                 }
             }
         }
@@ -1935,6 +1923,17 @@ public final class InputMethodManager {
      */
     public interface FinishedEventCallback {
         public void finishedEvent(int seq, boolean handled);
+    }
+
+    private final class ImeInputEventSender extends InputEventSender {
+        public ImeInputEventSender(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
+        }
+
+        @Override
+        public void onInputEventFinished(int seq, boolean handled) {
+            finishedEvent(seq, handled);
+        }
     }
 
     private static final class PendingEvent {
