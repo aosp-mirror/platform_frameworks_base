@@ -129,8 +129,8 @@ Region* LayerRenderer::getRegion() const {
 void LayerRenderer::generateMesh() {
     if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
         if (mLayer->mesh) {
-            delete mLayer->mesh;
-            delete mLayer->meshIndices;
+            delete[] mLayer->mesh;
+            delete[] mLayer->meshIndices;
 
             mLayer->mesh = NULL;
             mLayer->meshIndices = NULL;
@@ -153,8 +153,8 @@ void LayerRenderer::generateMesh() {
     GLsizei elementCount = count * 6;
 
     if (mLayer->mesh && mLayer->meshElementCount < elementCount) {
-        delete mLayer->mesh;
-        delete mLayer->meshIndices;
+        delete[] mLayer->mesh;
+        delete[] mLayer->meshIndices;
 
         mLayer->mesh = NULL;
         mLayer->meshIndices = NULL;
