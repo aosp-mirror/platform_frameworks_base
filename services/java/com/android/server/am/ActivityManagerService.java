@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.app.AppOpsManager;
+import android.appwidget.AppWidgetManager;
 import com.android.internal.R;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
@@ -11746,6 +11747,32 @@ public final class ActivityManagerService  extends ActivityManagerNative
                             + callingPid + ", uid=" + callingUid;
                     Slog.w(TAG, msg);
                     throw new SecurityException(msg);
+                } else if (AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(intent.getAction())) {
+                    // Special case for compatibility: we don't want apps to send this,
+                    // but historically it has not been protected and apps may be using it
+                    // to poke their own app widget.  So, instead of making it protected,
+                    // just limit it to the caller.
+                    if (callerApp == null) {
+                        String msg = "Permission Denial: not allowed to send broadcast "
+                                + intent.getAction() + " from unknown caller.";
+                        Slog.w(TAG, msg);
+                        throw new SecurityException(msg);
+                    } else if (intent.getComponent() != null) {
+                        // They are good enough to send to an explicit component...  verify
+                        // it is being sent to the calling app.
+                        if (!intent.getComponent().getPackageName().equals(
+                                callerApp.info.packageName)) {
+                            String msg = "Permission Denial: not allowed to send broadcast "
+                                    + intent.getAction() + " to "
+                                    + intent.getComponent().getPackageName() + " from "
+                                    + callerApp.info.packageName;
+                            Slog.w(TAG, msg);
+                            throw new SecurityException(msg);
+                        }
+                    } else {
+                        // Limit broadcast to their own package.
+                        intent.setPackage(callerApp.info.packageName);
+                    }
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
