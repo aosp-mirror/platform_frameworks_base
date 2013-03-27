@@ -1279,7 +1279,8 @@ final class ApplicationPackageManager extends PackageManager {
     public void setApplicationEnabledSetting(String packageName,
                                              int newState, int flags) {
         try {
-            mPM.setApplicationEnabledSetting(packageName, newState, flags, mContext.getUserId());
+            mPM.setApplicationEnabledSetting(packageName, newState, flags,
+                    mContext.getUserId(), mContext.getBasePackageName());
         } catch (RemoteException e) {
             // Should never happen!
         }
