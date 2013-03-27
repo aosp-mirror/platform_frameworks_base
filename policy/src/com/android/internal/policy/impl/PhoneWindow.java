@@ -989,6 +989,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             final Callback cb = getCallback();
             if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
                 if (cb != null && !isDestroyed() && mActionBar.getVisibility() == View.VISIBLE) {
+                    // If we have a menu invalidation pending, do it now.
+                    if (mInvalidatePanelMenuPosted &&
+                            (mInvalidatePanelMenuFeatures & (1 << FEATURE_OPTIONS_PANEL)) != 0) {
+                        mDecor.removeCallbacks(mInvalidatePanelMenuRunnable);
+                        mInvalidatePanelMenuRunnable.run();
+                    }
+
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
 
                     // If we don't have a menu or we're waiting for a full content refresh,
