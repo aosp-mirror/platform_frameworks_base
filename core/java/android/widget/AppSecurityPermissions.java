@@ -515,10 +515,12 @@ public class AppSecurityPermissions {
                 ((pInfo.protectionLevel&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0);
         final boolean wasGranted =
                 ((existingReqFlags&PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0);
+        final boolean isGranted =
+                ((newReqFlags&PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0);
 
         // Dangerous and normal permissions are always shown to the user if the permission
         // is required, or it was previously granted
-        if ((isNormal || isDangerous) && (isRequired || wasGranted)) {
+        if ((isNormal || isDangerous) && (isRequired || wasGranted || isGranted)) {
             return true;
         }
 
