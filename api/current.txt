@@ -18277,7 +18277,7 @@ package android.provider {
     field public static final java.lang.String SYNC4 = "data_sync4";
   }
 
-  protected static abstract interface ContactsContract.DataColumnsWithJoins implements android.provider.BaseColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns android.provider.ContactsContract.StatusColumns {
+  protected static abstract interface ContactsContract.DataColumnsWithJoins implements android.provider.BaseColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.DataUsageStatColumns android.provider.ContactsContract.RawContactsColumns android.provider.ContactsContract.StatusColumns {
   }
 
   public static final class ContactsContract.DataUsageFeedback {
@@ -18288,6 +18288,15 @@ package android.provider {
     field public static final java.lang.String USAGE_TYPE_CALL = "call";
     field public static final java.lang.String USAGE_TYPE_LONG_TEXT = "long_text";
     field public static final java.lang.String USAGE_TYPE_SHORT_TEXT = "short_text";
+  }
+
+  protected static abstract interface ContactsContract.DataUsageStatColumns {
+    field public static final java.lang.String LAST_TIME_USED = "last_time_used";
+    field public static final java.lang.String TIMES_USED = "times_used";
+    field public static final java.lang.String USAGE_TYPE = "usage_type";
+    field public static final int USAGE_TYPE_CALL = 0; // 0x0
+    field public static final int USAGE_TYPE_LONG_TEXT = 1; // 0x1
+    field public static final int USAGE_TYPE_SHORT_TEXT = 2; // 0x2
   }
 
   public static final class ContactsContract.Directory implements android.provider.BaseColumns {

@@ -3793,13 +3793,63 @@ public final class ContactsContract {
     }
 
     /**
+     * Columns in the Data_Usage_Stat table
+     */
+    protected interface DataUsageStatColumns {
+        /** What the referenced {@link Data} was used for.
+         * @see DataUsageStatColumns#USAGE_TYPE_CALL
+         * @see DataUsageStatColumns#USAGE_TYPE_LONG_TEXT
+         * @see DataUsageStatColumns#USAGE_TYPE_SHORT_TEXT
+         */
+        public static final String USAGE_TYPE = "usage_type";
+
+        /** The last time (in milliseconds) this {@link Data} was used. */
+        public static final String LAST_TIME_USED = "last_time_used";
+
+        /** The number of times the referenced {@link Data} has been used for the purpose described
+         * in {@link DataUsageStatColumns#USAGE_TYPE}.
+         */
+        public static final String TIMES_USED = "times_used";
+
+        /**
+         * Integer value for USAGE_TYPE.
+         * This type of usage refers to voice interaction, which includes phone calls, voice chat,
+         * and video chat.
+         *
+         * @see DataUsageFeedback#USAGE_TYPE
+         * @see DataUsageStatColumns#USAGE_TYPE
+         */
+        public static final int USAGE_TYPE_CALL = 0;
+
+        /**
+         * Integer value for USAGE_TYPE.
+         * This type of usage refers to text interaction involving longer messages, which includes
+         * email.
+         *
+         * @see DataUsageFeedback#USAGE_TYPE
+         * @see DataUsageStatColumns#USAGE_TYPE
+         */
+        public static final int USAGE_TYPE_LONG_TEXT = 1;
+
+        /**
+         * Integer value for USAGE_TYPE.
+         * This type of usage for text interaction involving shorter messages, which includes SMS
+         * and text chat with email addresses.
+         *
+         * @see DataUsageFeedback#USAGE_TYPE
+         * @see DataUsageStatColumns#USAGE_TYPE
+         */
+        public static final int USAGE_TYPE_SHORT_TEXT = 2;
+    }
+
+    /**
      * Combines all columns returned by {@link ContactsContract.Data} table queries.
      *
      * @see ContactsContract.Data
      */
     protected interface DataColumnsWithJoins extends BaseColumns, DataColumns, StatusColumns,
             RawContactsColumns, ContactsColumns, ContactNameColumns, ContactOptionsColumns,
-            ContactStatusColumns {
+            ContactStatusColumns, DataUsageStatColumns {
     }
 
     /**
