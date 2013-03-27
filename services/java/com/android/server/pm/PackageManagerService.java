@@ -8757,7 +8757,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         false, //installed
                         true,  //stopped
                         true,  //notLaunched
-                        null, null);
+                        null, null, null);
                 if (!isSystemApp(ps)) {
                     if (ps.isAnyInstalled(sUserManager.getUserIds())) {
                         // Other user still have this package installed, so all
@@ -9333,9 +9333,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void setApplicationEnabledSetting(String appPackageName,
-            int newState, int flags, int userId) {
+            int newState, int flags, int userId, String callingPackage) {
         if (!sUserManager.exists(userId)) return;
-        setEnabledSetting(appPackageName, null, newState, flags, userId);
+        if (callingPackage == null) {
+            callingPackage = Integer.toString(Binder.getCallingUid());
+        }
+        setEnabledSetting(appPackageName, null, newState, flags, userId, callingPackage);
     }
 
     @Override
@@ -9343,11 +9346,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             int newState, int flags, int userId) {
         if (!sUserManager.exists(userId)) return;
         setEnabledSetting(componentName.getPackageName(),
-                componentName.getClassName(), newState, flags, userId);
+                componentName.getClassName(), newState, flags, userId, null);
     }
 
-    private void setEnabledSetting(
-            final String packageName, String className, int newState, final int flags, int userId) {
+    private void setEnabledSetting(final String packageName, String className, int newState,
+            final int flags, int userId, String callingPackage) {
         if (!(newState == COMPONENT_ENABLED_STATE_DEFAULT
               || newState == COMPONENT_ENABLED_STATE_ENABLED
               || newState == COMPONENT_ENABLED_STATE_DISABLED
@@ -9393,7 +9396,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // Nothing to do
                     return;
                 }
-                pkgSetting.setEnabled(newState, userId);
+                if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                    || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                    // Don't care about who enables an app.
+                    callingPackage = null;
+                }
+                pkgSetting.setEnabled(newState, userId, callingPackage);
                 // pkgSetting.pkg.mSetEnabled = newState;
             } else {
                 // We're dealing with a component level state change

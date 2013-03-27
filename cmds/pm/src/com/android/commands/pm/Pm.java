@@ -1218,7 +1218,8 @@ public final class Pm {
         ComponentName cn = ComponentName.unflattenFromString(pkg);
         if (cn == null) {
             try {
-                mPm.setApplicationEnabledSetting(pkg, state, 0, userId);
+                mPm.setApplicationEnabledSetting(pkg, state, 0, userId,
+                        "shell:" + android.os.Process.myUid());
                 System.err.println("Package " + pkg + " new state: "
                         + enabledSettingToString(
                         mPm.getApplicationEnabledSetting(pkg, userId)));
