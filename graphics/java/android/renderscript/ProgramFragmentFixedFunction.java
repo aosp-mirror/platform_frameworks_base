@@ -21,6 +21,7 @@ import android.util.Log;
 
 
 /**
+ * @hide
  * @deprecated in API 16
  * <p>ProgramFragmentFixedFunction is a helper class that provides
  * a way to make a simple fragment shader without writing any

@@ -22,6 +22,7 @@ import android.util.Log;
 
 
 /**
+ * @hide
  * @deprecated in API 16
  * ProgramVertexFixedFunction is a helper class that provides a
  * simple way to create a fixed function emulation vertex shader
