@@ -10,3 +10,10 @@ WifiNotificationController: Controls whether the open network notification is di
 
 WifiStateMachine: Tracks the various states on STA and AP connectivity and handles bring up and shut down.
 
+
+Feature description:
+
+Scan-only mode with Wi-Fi turned off:
+ - Setup wizard opts user into allowing scanning for improved location. We show no further dialogs in setup wizard since the user has just opted into the feature. This is the reason WifiService listens to DEVICE_PROVISIONED setting.
+ - Once the user has his device provisioned, turning off Wi-Fi from settings or from a third party app will show up a dialog reminding the user that scan mode will be on even though Wi-Fi is being turned off. The user has the choice to turn this notification off.
+ - In the scan mode, the device continues to allow scanning from any app with Wi-Fi turned off. This is done by disabling all networks and allowing only scans to be passed.
