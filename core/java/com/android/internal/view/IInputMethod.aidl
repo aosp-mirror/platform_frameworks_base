@@ -18,6 +18,7 @@ package com.android.internal.view;
 
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
@@ -41,7 +42,7 @@ oneway interface IInputMethod {
 
     void restartInput(in IInputContext inputContext, in EditorInfo attribute);
 
-    void createSession(IInputSessionCallback  callback);
+    void createSession(in InputChannel channel, IInputSessionCallback callback);
 
     void setSessionEnabled(IInputMethodSession session, boolean enabled);
 

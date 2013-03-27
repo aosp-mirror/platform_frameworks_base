@@ -18,6 +18,7 @@ package com.android.internal.view;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.InputChannel;
 
 /**
  * Bundle of information returned by input method manager about a successful
@@ -30,7 +31,12 @@ public final class InputBindResult implements Parcelable {
      * The input method service.
      */
     public final IInputMethodSession method;
-    
+
+    /**
+     * The input channel used to send input events to this IME.
+     */
+    public final InputChannel channel;
+
     /**
      * The ID for this input method, as found in InputMethodInfo; null if
      * no input method will be bound.
@@ -42,18 +48,25 @@ public final class InputBindResult implements Parcelable {
      */
     public final int sequence;
     
-    public InputBindResult(IInputMethodSession _method, String _id, int _sequence) {
+    public InputBindResult(IInputMethodSession _method, InputChannel _channel,
+            String _id, int _sequence) {
         method = _method;
+        channel = _channel;
         id = _id;
         sequence = _sequence;
     }
     
     InputBindResult(Parcel source) {
         method = IInputMethodSession.Stub.asInterface(source.readStrongBinder());
+        if (source.readInt() != 0) {
+            channel = InputChannel.CREATOR.createFromParcel(source);
+        } else {
+            channel = null;
+        }
         id = source.readString();
         sequence = source.readInt();
     }
-    
+
     @Override
     public String toString() {
         return "InputBindResult{" + method + " " + id
@@ -62,12 +75,19 @@ public final class InputBindResult implements Parcelable {
 
     /**
      * Used to package this object into a {@link Parcel}.
-     * 
+     *
      * @param dest The {@link Parcel} to be written.
      * @param flags The flags used for parceling.
      */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStrongInterface(method);
+        if (channel != null) {
+            dest.writeInt(1);
+            channel.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeString(id);
         dest.writeInt(sequence);
     }
@@ -75,17 +95,21 @@ public final class InputBindResult implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<InputBindResult> CREATOR = new Parcelable.Creator<InputBindResult>() {
+    public static final Parcelable.Creator<InputBindResult> CREATOR =
+            new Parcelable.Creator<InputBindResult>() {
+        @Override
         public InputBindResult createFromParcel(Parcel source) {
             return new InputBindResult(source);
         }
 
+        @Override
         public InputBindResult[] newArray(int size) {
             return new InputBindResult[size];
         }
     };
 
+    @Override
     public int describeContents() {
-        return 0;
+        return channel != null ? channel.describeContents() : 0;
     }
 }

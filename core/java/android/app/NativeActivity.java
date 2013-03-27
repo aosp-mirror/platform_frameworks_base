@@ -353,8 +353,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     }
     
     void preDispatchKeyEvent(KeyEvent event, int seq) {
-        mIMM.dispatchKeyEvent(this, seq, event,
-                mInputMethodCallback);
+        mIMM.dispatchInputEvent(this, seq, event, mInputMethodCallback);
     }
 
     void setWindowFlags(int flags, int mask) {

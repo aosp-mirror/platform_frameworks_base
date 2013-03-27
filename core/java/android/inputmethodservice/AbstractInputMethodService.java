@@ -126,11 +126,12 @@ public abstract class AbstractInputMethodService extends Service
             mRevoked = true;
             mEnabled = false;
         }
-        
+
         /**
          * Take care of dispatching incoming key events to the appropriate
          * callbacks on the service, and tell the client when this is done.
          */
+        @Override
         public void dispatchKeyEvent(int seq, KeyEvent event, EventCallback callback) {
             boolean handled = event.dispatch(AbstractInputMethodService.this,
                     mDispatcherState, this);
@@ -143,6 +144,7 @@ public abstract class AbstractInputMethodService extends Service
          * Take care of dispatching incoming trackball events to the appropriate
          * callbacks on the service, and tell the client when this is done.
          */
+        @Override
         public void dispatchTrackballEvent(int seq, MotionEvent event, EventCallback callback) {
             boolean handled = onTrackballEvent(event);
             if (callback != null) {
@@ -154,6 +156,7 @@ public abstract class AbstractInputMethodService extends Service
          * Take care of dispatching incoming generic motion events to the appropriate
          * callbacks on the service, and tell the client when this is done.
          */
+        @Override
         public void dispatchGenericMotionEvent(int seq, MotionEvent event, EventCallback callback) {
             boolean handled = onGenericMotionEvent(event);
             if (callback != null) {
