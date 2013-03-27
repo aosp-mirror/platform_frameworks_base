@@ -1147,7 +1147,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"받는사람:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"필수 PIN 입력:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>에 연결되어 있는 동안 일시적으로 휴대전화의 Wi-Fi 연결이 해제됩니다."</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
+    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>에 연결되어 있는 동안 일시적으로 휴대전화의 Wi-Fi 연결이 해제됩니다."</string>
     <string name="select_character" msgid="3365550120617701745">"문자 삽입"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS 메시지를 보내는 중"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) SMS 메시지를 대량으로 보내고 있습니다. 해당 앱이 메시지를 계속 보내도록 하시겠습니까?"</string>
