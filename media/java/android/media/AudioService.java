@@ -1533,7 +1533,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
             // SCO connections not started by the application changing the mode
             if (newModeOwnerPid != 0) {
-                 disconnectBluetoothSco(newModeOwnerPid);
+                final long ident = Binder.clearCallingIdentity();
+                disconnectBluetoothSco(newModeOwnerPid);
+                Binder.restoreCallingIdentity(ident);
             }
         }
 
