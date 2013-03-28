@@ -248,9 +248,7 @@ status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
 }
 
 status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
-    mLayers.add(layer);
-    mCaches.resourceCache.incrementRefcount(layer);
-
+    layer = refLayer(layer);
     addDrawOp(new (alloc()) DrawLayerOp(layer, x, y));
     return DrawGlInfo::kStatusDone;
 }
