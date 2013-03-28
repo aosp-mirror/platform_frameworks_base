@@ -119,7 +119,7 @@ public class UsbDeviceConnection {
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
      *
-     * @deprecate Use {@link #controlTransfer(int, int, int, int, byte[], int, int, int)}
+     * @deprecated Use {@link #controlTransfer(int, int, int, int, byte[], int, int, int)}
      * which accepts a buffer start index.
      */
     @Deprecated
@@ -166,7 +166,7 @@ public class UsbDeviceConnection {
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
      *
-     * @deprecate Use {@link #bulkTransfer(UsbEndpoint, byte[], int, int, int)}
+     * @deprecated Use {@link #bulkTransfer(UsbEndpoint, byte[], int, int, int)}
      * which accepts a buffer start index.
      */
     @Deprecated
