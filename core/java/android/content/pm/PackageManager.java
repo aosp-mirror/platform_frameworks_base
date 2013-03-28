@@ -1264,6 +1264,23 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
 
     /**
+     * The action used to request that the user approve a permission request
+     * from the application.
+     *
+     * @hide
+     */
+    public static final String ACTION_REQUEST_PERMISSION
+            = "android.content.pm.action.REQUEST_PERMISSION";
+
+    /**
+     * Extra field name for the list of permissions, which the user must approve.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REQUEST_PERMISSION_PERMISSION_LIST
+            = "android.content.pm.extra.PERMISSION_LIST";
+
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
      * <p>
@@ -1733,6 +1750,30 @@ public abstract class PackageManager {
      * @see #addPermission(PermissionInfo)
      */
     public abstract void removePermission(String name);
+
+    /**
+     * Returns an {@link Intent} suitable for passing to {@code startActivityForResult}
+     * which prompts the user to grant {@code permissions} to this application.
+     * @hide
+     *
+     * @throws NullPointerException if {@code permissions} is {@code null}.
+     * @throws IllegalArgumentException if {@code permissions} contains {@code null}.
+     */
+    public Intent buildPermissionRequestIntent(String... permissions) {
+        if (permissions == null) {
+            throw new NullPointerException("permissions cannot be null");
+        }
+        for (String permission : permissions) {
+            if (permission == null) {
+                throw new IllegalArgumentException("permissions cannot contain null");
+            }
+        }
+
+        Intent i = new Intent(ACTION_REQUEST_PERMISSION);
+        i.putExtra(EXTRA_REQUEST_PERMISSION_PERMISSION_LIST, permissions);
+        i.setPackage("com.android.packageinstaller");
+        return i;
+    }
 
     /**
      * Grant a permission to an application which the application does not
