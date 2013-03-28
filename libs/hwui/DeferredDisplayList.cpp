@@ -75,7 +75,7 @@ public:
         for (unsigned int i = 0; i < mOps.size(); i++) {
             DrawOp* op = mOps[i];
 
-            renderer.restoreDisplayState(op->state, kStateDeferFlag_Draw);
+            renderer.restoreDisplayState(op->state);
 
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
             renderer.eventMark(op->name());
@@ -106,7 +106,7 @@ public:
 
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty) {
         DEFER_LOGD("replaying state op batch %p", this);
-        renderer.restoreDisplayState(mOp->state, 0);
+        renderer.restoreDisplayState(mOp->state);
 
         // use invalid save count because it won't be used at flush time - RestoreToCountOp is the
         // only one to use it, and we don't use that class at flush time, instead calling
@@ -117,12 +117,12 @@ public:
     }
 
 private:
-    StateOp* mOp;
+    const StateOp* mOp;
 };
 
 class RestoreToCountBatch : public DrawOpBatch {
 public:
-    RestoreToCountBatch(int restoreCount) : mRestoreCount(restoreCount) {}
+    RestoreToCountBatch(StateOp* op, int restoreCount) : mOp(op), mRestoreCount(restoreCount) {}
 
     bool intersects(Rect& rect) {
         // if something checks for intersection, it's trying to go backwards across a state op,
@@ -133,11 +133,15 @@ public:
 
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty) {
         DEFER_LOGD("batch %p restoring to count %d", this, mRestoreCount);
+
+        renderer.restoreDisplayState(mOp->state);
         renderer.restoreToCount(mRestoreCount);
         return DrawGlInfo::kStatusDone;
     }
 
 private:
+    // we use the state storage for the RestoreToCountOp, but don't replay the op itself
+    const StateOp* mOp;
     /*
      * The count used here represents the flush() time saveCount. This is as opposed to the
      * DisplayList record time, or defer() time values (which are RestoreToCountOp's mCount, and
@@ -251,7 +255,8 @@ void DeferredDisplayList::addSave(OpenGLRenderer& renderer, SaveOp* op, int newS
  * Either will act as a barrier to draw operation reordering, as we want to play back layer
  * save/restore and complex canvas modifications (including save/restore) in order.
  */
-void DeferredDisplayList::addRestoreToCount(OpenGLRenderer& renderer, int newSaveCount) {
+void DeferredDisplayList::addRestoreToCount(OpenGLRenderer& renderer, StateOp* op,
+        int newSaveCount) {
     DEFER_LOGD("%p addRestoreToCount %d", this, newSaveCount);
 
     if (recordingComplexClip() && newSaveCount <= mComplexClipStackStart) {
@@ -265,7 +270,7 @@ void DeferredDisplayList::addRestoreToCount(OpenGLRenderer& renderer, int newSav
 
     while (!mSaveStack.isEmpty() && mSaveStack.top() >= newSaveCount) mSaveStack.pop();
 
-    storeRestoreToCountBarrier(mSaveStack.size() + 1);
+    storeRestoreToCountBarrier(renderer, op, mSaveStack.size() + 1);
 }
 
 void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
@@ -338,11 +343,15 @@ void DeferredDisplayList::storeStateOpBarrier(OpenGLRenderer& renderer, StateOp*
     resetBatchingState();
 }
 
-void DeferredDisplayList::storeRestoreToCountBarrier(int newSaveCount) {
+void DeferredDisplayList::storeRestoreToCountBarrier(OpenGLRenderer& renderer, StateOp* op,
+        int newSaveCount) {
     DEFER_LOGD("%p adding restore to count %d barrier, pos %d",
             this, newSaveCount, mBatches.size());
 
-    mBatches.add(new RestoreToCountBatch(newSaveCount));
+    // store displayState for the restore operation, as it may be associated with a saveLayer that
+    // doesn't have kClip_SaveFlag set
+    renderer.storeDisplayState(op->state, getStateOpDeferFlags());
+    mBatches.add(new RestoreToCountBatch(op, newSaveCount));
     resetBatchingState();
 }
 
