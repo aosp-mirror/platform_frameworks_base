@@ -154,7 +154,7 @@ public class PackageInfo implements Parcelable {
     /**
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
      * is required for the application to run; the user can not optionally
-     * disable it.  Currently all permissions are required.
+     * disable it.
      */
     public static final int REQUESTED_PERMISSION_REQUIRED = 1<<0;
 
