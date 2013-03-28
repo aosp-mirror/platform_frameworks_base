@@ -2710,7 +2710,7 @@ public class AccountManagerService
         }
         if (mUserManager.getUserInfo(userAccounts.userId).isRestricted()) {
             String[] packages = mPackageManager.getPackagesForUid(callingUid);
-            // If any of the packages includes a white listed package, return the full set,
+            // If any of the packages is a white listed package, return the full set,
             // otherwise return non-shared accounts only.
             // This might be a temporary way to specify a whitelist
             String whiteList = mContext.getResources().getString(
@@ -2723,16 +2723,30 @@ public class AccountManagerService
             ArrayList<Account> allowed = new ArrayList<Account>();
             Account[] sharedAccounts = getSharedAccountsAsUser(userAccounts.userId);
             if (sharedAccounts == null || sharedAccounts.length == 0) return unfiltered;
-            for (Account account : unfiltered) {
-                boolean found = false;
-                for (Account shared : sharedAccounts) {
-                    if (shared.equals(account)) {
-                        found = true;
-                        break;
+            String requiredAccountType = "";
+            try {
+                for (String packageName : packages) {
+                    PackageInfo pi = mPackageManager.getPackageInfo(packageName, 0);
+                    if (pi != null && pi.restrictedAccountType != null) {
+                        requiredAccountType = pi.restrictedAccountType;
                     }
                 }
-                if (!found) {
+            } catch (NameNotFoundException nnfe) {
+            }
+            for (Account account : unfiltered) {
+                if (account.type.equals(requiredAccountType)) {
                     allowed.add(account);
+                } else {
+                    boolean found = false;
+                    for (Account shared : sharedAccounts) {
+                        if (shared.equals(account)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        allowed.add(account);
+                    }
                 }
             }
             Account[] filtered = new Account[allowed.size()];

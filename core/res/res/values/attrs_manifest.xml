@@ -889,6 +889,11 @@
         <!-- Declare that your application will be able to deal with RTL (right to left) layouts.
              If set to  false (default value), your application will not care about RTL layouts. -->
         <attr name="supportsRtl" format="boolean" />
+        <!-- Declare that this application requires access to restricted accounts of a certain
+             type. The default value is null and restricted accounts won\'t be visible to this
+             application. The type should correspond to the account authenticator type, such as
+             "com.google" -->
+        <attr name="restrictedAccountType" format="string"/>
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
