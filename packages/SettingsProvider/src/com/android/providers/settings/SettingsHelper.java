@@ -98,11 +98,11 @@ public class SettingsHelper {
 
     private void setGpsLocation(String value) {
         UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        if (! um.isLocationSharingToggleAllowed()) {
+        if (um.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION)) {
             return;
         }
         final String GPS = LocationManager.GPS_PROVIDER;
-        boolean enabled = 
+        boolean enabled =
                 GPS.equals(value) ||
                 value.startsWith(GPS + ",") ||
                 value.endsWith("," + GPS) ||
