@@ -859,6 +859,7 @@ package android {
     field public static final int resource = 16842789; // 0x1010025
     field public static final int restoreAnyVersion = 16843450; // 0x10102ba
     field public static final deprecated int restoreNeedsApplication = 16843421; // 0x101029d
+    field public static final int restrictedAccountType = 16843733; // 0x10103d5
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9

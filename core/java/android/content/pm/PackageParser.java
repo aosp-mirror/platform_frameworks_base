@@ -296,6 +296,7 @@ public class PackageParser {
         pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.installLocation = p.installLocation;
         pi.requiredForAllUsers = p.mRequiredForAllUsers;
+        pi.restrictedAccountType = p.mRestrictedAccountType;
         pi.firstInstallTime = firstInstallTime;
         pi.lastUpdateTime = lastUpdateTime;
         if ((flags&PackageManager.GET_GIDS) != 0) {
@@ -1845,6 +1846,11 @@ public class PackageParser {
                     false)) {
                 owner.mRequiredForAllUsers = true;
             }
+            String accountType = sa.getString(com.android.internal.R.styleable
+                    .AndroidManifestApplication_restrictedAccountType);
+            if (accountType != null && accountType.length() > 0) {
+                owner.mRestrictedAccountType = accountType;
+            }
         }
 
         if (sa.getBoolean(
@@ -3279,6 +3285,7 @@ public class PackageParser {
     }
 
     public final static class Package {
+
         public String packageName;
 
         // For now we only support one application per package.
@@ -3365,6 +3372,9 @@ public class PackageParser {
 
         /* An app that's required for all users and cannot be uninstalled for a user */
         public boolean mRequiredForAllUsers;
+
+        /* The restricted account authenticator type that is used by this application */
+        public String mRestrictedAccountType;
 
         /**
          * Digest suitable for comparing whether this package's manifest is the
