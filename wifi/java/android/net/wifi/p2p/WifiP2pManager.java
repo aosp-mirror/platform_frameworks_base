@@ -1258,6 +1258,21 @@ public class WifiP2pManager {
         c.mAsyncChannel.sendMessage(REQUEST_PERSISTENT_GROUP_INFO, 0, c.putListener(listener));
     }
 
+    /** @hide */
+    public static final int MIRACAST_DISABLED = 0;
+    /** @hide */
+    public static final int MIRACAST_SOURCE   = 1;
+    /** @hide */
+    public static final int MIRACAST_SINK     = 2;
+    /** Internal use only @hide */
+    public void setMiracastMode(int mode) {
+        try {
+            mService.setMiracastMode(mode);
+        } catch(RemoteException e) {
+           // ignore
+        }
+    }
+
     /**
      * Get a reference to WifiP2pService handler. This is used to establish
      * an AsyncChannel communication with WifiService
