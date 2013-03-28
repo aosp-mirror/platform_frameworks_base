@@ -2203,7 +2203,6 @@ public abstract class Context {
      * {@link android.bluetooth.BluetoothAdapter} for using Bluetooth.
      *
      * @see #getSystemService
-     * @hide
      */
     public static final String BLUETOOTH_SERVICE = "bluetooth";
 

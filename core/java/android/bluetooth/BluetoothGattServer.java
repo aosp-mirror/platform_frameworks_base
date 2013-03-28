@@ -38,88 +38,30 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Public API for the Bluetooth Gatt Profile server role.
+ * Public API for the Bluetooth GATT Profile server role.
  *
- * <p>This class provides Bluetooth Gatt server role functionality,
+ * <p>This class provides Bluetooth GATT server role functionality,
  * allowing applications to create and advertise Bluetooth Smart services
  * and characteristics.
  *
  * <p>BluetoothGattServer is a proxy object for controlling the Bluetooth Service
  * via IPC.  Use {@link BluetoothAdapter#getProfileProxy} to get the
  * BluetoothGatt proxy object.
- * @hide
  */
 public final class BluetoothGattServer implements BluetoothProfile {
     private static final String TAG = "BluetoothGattServer";
     private static final boolean DBG = true;
 
-    private Context mContext;
-    private ServiceListener mServiceListener;
+    private final Context mContext;
     private BluetoothAdapter mAdapter;
     private IBluetoothGatt mService;
     private BluetoothGattServerCallback mCallback;
-    private int mServerIf;
 
+    private Object mServerIfLock = new Object();
+    private int mServerIf;
     private List<BluetoothGattService> mServices;
 
-    /**
-     * Bluetooth state change handlers
-     */
-    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
-        new IBluetoothStateChangeCallback.Stub() {
-            public void onBluetoothStateChange(boolean up) {
-                if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
-                if (!up) {
-                    if (DBG) Log.d(TAG,"Unbinding service...");
-                    synchronized (mConnection) {
-                        try {
-                            mService = null;
-                            mContext.unbindService(mConnection);
-                        } catch (Exception re) {
-                            Log.e(TAG,"",re);
-                        }
-                    }
-                } else {
-                    synchronized (mConnection) {
-                        try {
-                            if (mService == null) {
-                                if (DBG) Log.d(TAG,"Binding service...");
-                                if (!mContext.bindService(new
-                                        Intent(IBluetoothGatt.class.getName()),
-                                        mConnection, 0)) {
-                                    Log.e(TAG, "Could not bind to Bluetooth GATT Service");
-                                }
-                            }
-                        } catch (Exception re) {
-                            Log.e(TAG,"",re);
-                        }
-                    }
-                }
-            }
-        };
-
-    /**
-     * Service binder handling
-     */
-    private ServiceConnection mConnection = new ServiceConnection() {
-            public void onServiceConnected(ComponentName className, IBinder service) {
-                if (DBG) Log.d(TAG, "Proxy object connected");
-                mService = IBluetoothGatt.Stub.asInterface(service);
-                ServiceListener serviceListner = mServiceListener;
-                if (serviceListner != null) {
-                    serviceListner.onServiceConnected(BluetoothProfile.GATT_SERVER,
-                                                      BluetoothGattServer.this);
-                }
-            }
-            public void onServiceDisconnected(ComponentName className) {
-                if (DBG) Log.d(TAG, "Proxy object disconnected");
-                mService = null;
-                ServiceListener serviceListner = mServiceListener;
-                if (serviceListner != null) {
-                    serviceListner.onServiceDisconnected(BluetoothProfile.GATT_SERVER);
-                }
-            }
-        };
+    private static final int CALLBACK_REG_TIMEOUT = 10000;
 
     /**
      * Bluetooth GATT interface callbacks
@@ -133,11 +75,14 @@ public final class BluetoothGattServer implements BluetoothProfile {
             public void onServerRegistered(int status, int serverIf) {
                 if (DBG) Log.d(TAG, "onServerRegistered() - status=" + status
                     + " serverIf=" + serverIf);
-                mServerIf = serverIf;
-                try {
-                    mCallback.onAppRegistered(status);
-                } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                synchronized(mServerIfLock) {
+                    if (mCallback != null) {
+                        mServerIf = serverIf;
+                        mServerIfLock.notify();
+                    } else {
+                        // registration timeout
+                        Log.e(TAG, "onServerRegistered: mCallback is null");
+                    }
                 }
             }
 
@@ -147,13 +92,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
              */
             public void onScanResult(String address, int rssi, byte[] advData) {
                 if (DBG) Log.d(TAG, "onScanResult() - Device=" + address + " RSSI=" +rssi);
-
-                try {
-                    mCallback.onScanResult(mAdapter.getRemoteDevice(address),
-                                           rssi, advData);
-                } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
-                }
+                // no op
             }
 
             /**
@@ -209,8 +148,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
                 BluetoothGattService service = getService(srvcUuid, srvcInstId, srvcType);
                 if (service == null) return;
 
-                BluetoothGattCharacteristic characteristic = service.getCharacteristic(
-                    charUuid);
+                BluetoothGattCharacteristic characteristic = service.getCharacteristic(charUuid);
                 if (characteristic == null) return;
 
                 try {
@@ -340,31 +278,13 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Create a BluetoothGattServer proxy object.
      */
-    /*package*/ BluetoothGattServer(Context context, ServiceListener l) {
+    /*package*/ BluetoothGattServer(Context context, IBluetoothGatt iGatt) {
         mContext = context;
-        mServiceListener = l;
+        mService = iGatt;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mCallback = null;
+        mServerIf = 0;
         mServices = new ArrayList<BluetoothGattService>();
-
-        IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE);
-        if (b != null) {
-            IBluetoothManager mgr = IBluetoothManager.Stub.asInterface(b);
-            try {
-                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (RemoteException re) {
-                Log.e(TAG, "Unable to register BluetoothStateChangeCallback", re);
-            }
-        } else {
-            Log.e(TAG, "Unable to get BluetoothManager interface.");
-            throw new RuntimeException("BluetoothManager inactive");
-        }
-
-        //Bind to the service only if the Bluetooth is ON
-        if(mAdapter.isEnabled()){
-            if (!context.bindService(new Intent(IBluetoothGatt.class.getName()), mConnection, 0)) {
-                Log.e(TAG, "Could not bind to Bluetooth Gatt Service");
-            }
-        }
     }
 
     /**
@@ -372,29 +292,75 @@ public final class BluetoothGattServer implements BluetoothProfile {
      */
     /*package*/ void close() {
         if (DBG) Log.d(TAG, "close()");
+        unregisterCallback();
+    }
 
-        unregisterApp();
-        mServiceListener = null;
+    /**
+     * Register an application callback to start using GattServer.
+     *
+     * <p>This is an asynchronous call. The callback is used to notify
+     * success or failure if the function returns true.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param callback GATT callback handler that will receive asynchronous
+     *                 callbacks.
+     * @return true, the callback will be called to notify success or failure,
+     *         false on immediate error
+     */
+    /*package*/ boolean registerCallback(BluetoothGattServerCallback callback) {
+        if (DBG) Log.d(TAG, "registerCallback()");
+        if (mService == null) {
+            Log.e(TAG, "GATT service not available");
+            return false;
+        }
+        UUID uuid = UUID.randomUUID();
+        if (DBG) Log.d(TAG, "registerCallback() - UUID=" + uuid);
 
-        IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE);
-        if (b != null) {
-            IBluetoothManager mgr = IBluetoothManager.Stub.asInterface(b);
+        synchronized(mServerIfLock) {
+            if (mCallback != null) {
+                Log.e(TAG, "App can register callback only once");
+                return false;
+            }
+
+            mCallback = callback;
             try {
-                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (RemoteException re) {
-                Log.e(TAG, "Unable to unregister BluetoothStateChangeCallback", re);
+                mService.registerServer(new ParcelUuid(uuid), mBluetoothGattServerCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG,"",e);
+                mCallback = null;
+                return false;
+            }
+
+            try {
+                mServerIfLock.wait(CALLBACK_REG_TIMEOUT);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "" + e);
+                mCallback = null;
+            }
+
+            if (mServerIf == 0) {
+                mCallback = null;
+                return false;
+            } else {
+                return true;
             }
         }
+    }
 
-        synchronized (mConnection) {
-            if (mService != null) {
-                try {
-                    mService = null;
-                    mContext.unbindService(mConnection);
-                } catch (Exception re) {
-                    Log.e(TAG,"",re);
-                }
-            }
+    /**
+     * Unregister the current application and callbacks.
+     */
+    private void unregisterCallback() {
+        if (DBG) Log.d(TAG, "unregisterCallback() - mServerIf=" + mServerIf);
+        if (mService == null || mServerIf == 0) return;
+
+        try {
+            mCallback = null;
+            mService.unregisterServer(mServerIf);
+            mServerIf = 0;
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
         }
     }
 
@@ -414,123 +380,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     }
 
     /**
-     * Register an application callback to start using Gatt.
-     *
-     * <p>This is an asynchronous call. The callback is used to notify
-     * success or failure if the function returns true.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param callback Gatt callback handler that will receive asynchronous
-     *          callbacks.
-     * @return true, if application was successfully registered.
-     */
-    public boolean registerApp(BluetoothGattServerCallback callback) {
-        if (DBG) Log.d(TAG, "registerApp()");
-        if (mService == null) return false;
-
-        mCallback = callback;
-        UUID uuid = UUID.randomUUID();
-        if (DBG) Log.d(TAG, "registerApp() - UUID=" + uuid);
-
-        try {
-            mService.registerServer(new ParcelUuid(uuid), mBluetoothGattServerCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Unregister the current application and callbacks.
-     */
-    public void unregisterApp() {
-        if (DBG) Log.d(TAG, "unregisterApp() - mServerIf=" + mServerIf);
-        if (mService == null || mServerIf == 0) return;
-
-        try {
-            mCallback = null;
-            mService.unregisterServer(mServerIf);
-            mServerIf = 0;
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-        }
-    }
-
-    /**
-     * Starts a scan for Bluetooth LE devices.
-     *
-     * <p>Results of the scan are reported using the
-     * {@link BluetoothGattServerCallback#onScanResult} callback.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @return true, if the scan was started successfully
-     */
-    public boolean startScan() {
-        if (DBG) Log.d(TAG, "startScan()");
-        if (mService == null || mServerIf == 0) return false;
-
-        try {
-            mService.startScan(mServerIf, true);
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Starts a scan for Bluetooth LE devices, looking for devices that
-     * advertise given services.
-     *
-     * <p>Devices which advertise all specified services are reported using the
-     * {@link BluetoothGattServerCallback#onScanResult} callback.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param serviceUuids Array of services to look for
-     * @return true, if the scan was started successfully
-     */
-    public boolean startScan(UUID[] serviceUuids) {
-        if (DBG) Log.d(TAG, "startScan() - with UUIDs");
-        if (mService == null || mServerIf == 0) return false;
-
-        try {
-            ParcelUuid[] uuids = new ParcelUuid[serviceUuids.length];
-            for(int i = 0; i != uuids.length; ++i) {
-                uuids[i] = new ParcelUuid(serviceUuids[i]);
-            }
-            mService.startScanWithUuids(mServerIf, true, uuids);
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Stops an ongoing Bluetooth LE device scan.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     */
-    public void stopScan() {
-        if (DBG) Log.d(TAG, "stopScan()");
-        if (mService == null || mServerIf == 0) return;
-
-        try {
-            mService.stopScan(mServerIf, true);
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-        }
-    }
-
-    /**
-     * Initiate a connection to a Bluetooth Gatt capable device.
+     * Initiate a connection to a Bluetooth GATT capable device.
      *
      * <p>The connection may not be established right away, but will be
      * completed when the remote device is available. A
@@ -542,11 +392,10 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * when the remote device is in range/available. Generally, the first ever
      * connection to a device should be direct (autoConnect set to false) and
      * subsequent connections to known devices should be invoked with the
-     * autoConnect parameter set to false.
+     * autoConnect parameter set to true.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
-     * @param device Remote device to connect to
      * @param autoConnect Whether to directly connect to the remote device (false)
      *                    or to automatically connect as soon as the remote
      *                    device becomes available (true).
@@ -590,7 +439,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * Send a response to a read or write request to a remote device.
      *
      * <p>This function must be invoked in when a remote read/write request
-     * is received by one of these callback methots:
+     * is received by one of these callback methods:
      *
      * <ul>
      *      <li>{@link BluetoothGattServerCallback#onCharacteristicReadRequest}
@@ -662,17 +511,17 @@ public final class BluetoothGattServer implements BluetoothProfile {
     }
 
     /**
-     * Add a service to the list of services to be advertised.
+     * Add a service to the list of services to be hosted.
      *
      * <p>Once a service has been addded to the the list, the service and it's
-     * included characteristics will be advertised by the local device.
+     * included characteristics will be provided by the local device.
      *
-     * <p>If the local device is already advertising services when this function
+     * <p>If the local device has already exposed services when this function
      * is called, a service update notification will be sent to all clients.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
-     * @param service Service to be added to the list of services advertised
+     * @param service Service to be added to the list of services provided
      *                by this device.
      * @return true, if the service has been added successfully
      */
@@ -721,11 +570,11 @@ public final class BluetoothGattServer implements BluetoothProfile {
     }
 
     /**
-     * Removes a service from the list of services to be advertised.
+     * Removes a service from the list of services to be provided.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
-     * @param service Service to beremoved.
+     * @param service Service to be removed.
      * @return true, if the service has been removed
      */
     public boolean removeService(BluetoothGattService service) {
@@ -749,7 +598,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     }
 
     /**
-     * Remove all services from the list of advertised services.
+     * Remove all services from the list of provided services.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      */
     public void clearServices() {
@@ -765,7 +614,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     }
 
     /**
-     * Returns a list of GATT services offered bu this device.
+     * Returns a list of GATT services offered by this device.
      *
      * <p>An application must call {@link #addService} to add a serice to the
      * list of services offered by this device.
@@ -802,99 +651,40 @@ public final class BluetoothGattServer implements BluetoothProfile {
         return null;
     }
 
+
     /**
-     * Get the current connection state of the profile.
+     * Not supported - please use {@link BluetoothManager#getConnectedDevices(int)}
+     * with {@link BluetoothProfile#GATT} as argument
      *
-     * <p>This is not specific to any application configuration but represents
-     * the connection state of the local Bluetooth adapter for this profile.
-     * This can be used by applications like status bar which would just like
-     * to know the state of the local adapter.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param device Remote bluetooth device.
-     * @return State of the profile connection. One of
-     *               {@link #STATE_CONNECTED}, {@link #STATE_CONNECTING},
-     *               {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
+     * @throws UnsupportedOperationException
      */
     @Override
     public int getConnectionState(BluetoothDevice device) {
-        if (DBG) Log.d(TAG,"getConnectionState()");
-        if (mService == null) return STATE_DISCONNECTED;
-
-        List<BluetoothDevice> connectedDevices = getConnectedDevices();
-        for(BluetoothDevice connectedDevice : connectedDevices) {
-            if (device.equals(connectedDevice)) {
-                return STATE_CONNECTED;
-            }
-        }
-
-        return STATE_DISCONNECTED;
+        throw new UnsupportedOperationException("Use BluetoothManager#getConnectionState instead.");
     }
 
     /**
-     * Get connected devices for the Gatt profile.
+     * Not supported - please use {@link BluetoothManager#getConnectedDevices(int)}
+     * with {@link BluetoothProfile#GATT} as argument
      *
-     * <p> Return the set of devices which are in state {@link #STATE_CONNECTED}
-     *
-     * <p>This is not specific to any application configuration but represents
-     * the connection state of the local Bluetooth adapter for this profile.
-     * This can be used by applications like status bar which would just like
-     * to know the state of the local adapter.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @return List of devices. The list will be empty on error.
+     * @throws UnsupportedOperationException
      */
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
-        if (DBG) Log.d(TAG,"getConnectedDevices");
-
-        List<BluetoothDevice> connectedDevices = new ArrayList<BluetoothDevice>();
-        if (mService == null) return connectedDevices;
-
-        try {
-            connectedDevices = mService.getDevicesMatchingConnectionStates(
-                new int[] { BluetoothProfile.STATE_CONNECTED });
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-        }
-
-        return connectedDevices;
+        throw new UnsupportedOperationException
+            ("Use BluetoothManager#getConnectedDevices instead.");
     }
 
     /**
-     * Get a list of devices that match any of the given connection
-     * states.
+     * Not supported - please use
+     * {@link BluetoothManager#getDevicesMatchingConnectionStates(int, int[])}
+     * with {@link BluetoothProfile#GATT} as first argument
      *
-     * <p> If none of the devices match any of the given states,
-     * an empty list will be returned.
-     *
-     * <p>This is not specific to any application configuration but represents
-     * the connection state of the local Bluetooth adapter for this profile.
-     * This can be used by applications like status bar which would just like
-     * to know the state of the local adapter.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param states Array of states. States can be one of
-     *              {@link #STATE_CONNECTED}, {@link #STATE_CONNECTING},
-     *              {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING},
-     * @return List of devices. The list will be empty on error.
+     * @throws UnsupportedOperationException
      */
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        if (DBG) Log.d(TAG,"getDevicesMatchingConnectionStates");
-
-        List<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
-        if (mService == null) return devices;
-
-        try {
-            devices = mService.getDevicesMatchingConnectionStates(states);
-        } catch (RemoteException e) {
-            Log.e(TAG,"",e);
-        }
-
-        return devices;
+        throw new UnsupportedOperationException
+            ("Use BluetoothManager#getDevicesMatchingConnectionStates instead.");
     }
 }

@@ -22,30 +22,8 @@ import android.util.Log;
 
 /**
  * This abstract class is used to implement {@link BluetoothGattServer} callbacks.
- * @hide
  */
 public abstract class BluetoothGattServerCallback {
-    /**
-     * Callback to inform change in registration state of the  application.
-     *
-     * @param status Returns {@link BluetoothGatt#GATT_SUCCESS} if the application
-     *               was successfully registered.
-     */
-    public void onAppRegistered(int status) {
-    }
-
-    /**
-     * Callback reporting an LE device found during a device scan initiated
-     * by the {@link BluetoothGattServer#startScan} function.
-     *
-     * @param device Identifies the remote device
-     * @param rssi The RSSI value for the remote device as reported by the
-     *             Bluetooth hardware. 0 if no RSSI value is available.
-     * @param scanRecord The content of the advertisement record offered by
-     *                   the remote device.
-     */
-    public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
-    }
 
     /**
      * Callback indicating when a remote device has been connected or disconnected.
@@ -101,9 +79,9 @@ public abstract class BluetoothGattServerCallback {
      * @param value The value the client wants to assign to the characteristic
      */
     public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId,
-                            BluetoothGattCharacteristic characteristic,
-                            boolean preparedWrite, boolean responseNeeded,
-                            int offset, byte[] value) {
+                                             BluetoothGattCharacteristic characteristic,
+                                             boolean preparedWrite, boolean responseNeeded,
+                                             int offset, byte[] value) {
     }
 
     /**
@@ -118,7 +96,7 @@ public abstract class BluetoothGattServerCallback {
      * @param descriptor Descriptor to be read
      */
     public void onDescriptorReadRequest(BluetoothDevice device, int requestId,
-                            int offset, BluetoothGattDescriptor descriptor) {
+                                        int offset, BluetoothGattDescriptor descriptor) {
     }
 
     /**
@@ -137,9 +115,9 @@ public abstract class BluetoothGattServerCallback {
      * @param value The value the client wants to assign to the descriptor
      */
     public void onDescriptorWriteRequest(BluetoothDevice device, int requestId,
-                            BluetoothGattDescriptor descriptor,
-                            boolean preparedWrite, boolean responseNeeded,
-                            int offset,  byte[] value) {
+                                         BluetoothGattDescriptor descriptor,
+                                         boolean preparedWrite, boolean responseNeeded,
+                                         int offset,  byte[] value) {
     }
 
     /**
