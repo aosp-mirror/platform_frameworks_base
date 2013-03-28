@@ -53,6 +53,26 @@ public class AndroidKeyPairGeneratorSpecTest extends AndroidTestCase {
         assertEquals("endDate should be the one specified", NOW_PLUS_10_YEARS, spec.getEndDate());
     }
 
+    public void testBuilder_Success() throws Exception {
+        AndroidKeyPairGeneratorSpec spec = new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                .setAlias(TEST_ALIAS_1)
+                .setSubject(TEST_DN_1)
+                .setSerialNumber(SERIAL_1)
+                .setStartDate(NOW)
+                .setEndDate(NOW_PLUS_10_YEARS)
+                .build();
+
+        assertEquals("Context should be the one specified", getContext(), spec.getContext());
+
+        assertEquals("Alias should be the one specified", TEST_ALIAS_1, spec.getKeystoreAlias());
+
+        assertEquals("subjectDN should be the one specified", TEST_DN_1, spec.getSubjectDN());
+
+        assertEquals("startDate should be the one specified", NOW, spec.getStartDate());
+
+        assertEquals("endDate should be the one specified", NOW_PLUS_10_YEARS, spec.getEndDate());
+    }
+
     public void testConstructor_NullContext_Failure() throws Exception {
         try {
             new AndroidKeyPairGeneratorSpec(null, TEST_ALIAS_1, TEST_DN_1, SERIAL_1, NOW,
