@@ -290,7 +290,7 @@ public class LinkProperties implements Parcelable {
             }
             stacked += "] ";
         }
-        return ifaceName + linkAddresses + routes + dns + domainName + proxy + stacked;
+        return "{" + ifaceName + linkAddresses + routes + dns + domainName + proxy + stacked + "}";
     }
 
     /**

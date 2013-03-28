@@ -314,8 +314,8 @@ public class LinkCapabilities implements Parcelable {
             sb.append(":\"");
             sb.append(entry.getValue());
             sb.append("\"");
-            return mCapabilities.toString();
         }
+        sb.append("}");
         return sb.toString();
     }
 
