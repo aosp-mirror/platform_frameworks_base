@@ -65,7 +65,7 @@ public:
     void addClip(OpenGLRenderer& renderer, ClipOp* op);
     void addSaveLayer(OpenGLRenderer& renderer, SaveLayerOp* op, int newSaveCount);
     void addSave(OpenGLRenderer& renderer, SaveOp* op, int newSaveCount);
-    void addRestoreToCount(OpenGLRenderer& renderer, int newSaveCount);
+    void addRestoreToCount(OpenGLRenderer& renderer, StateOp* op, int newSaveCount);
 
     /**
      * Add a draw op into the DeferredDisplayList, reordering as needed (for performance) if
@@ -81,7 +81,7 @@ private:
     void resetBatchingState();
 
     void storeStateOpBarrier(OpenGLRenderer& renderer, StateOp* op);
-    void storeRestoreToCountBarrier(int newSaveCount);
+    void storeRestoreToCountBarrier(OpenGLRenderer& renderer, StateOp* op, int newSaveCount);
 
     bool recordingComplexClip() const { return mComplexClipStackStart >= 0; }
 
