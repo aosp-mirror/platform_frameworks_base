@@ -278,7 +278,7 @@ public:
     SkPaint* filterPaint(SkPaint* paint);
 
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
-    void restoreDisplayState(const DeferredDisplayState& state, int stateDeferFlags);
+    void restoreDisplayState(const DeferredDisplayState& state);
 
     const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }

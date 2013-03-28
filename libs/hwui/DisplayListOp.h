@@ -117,7 +117,7 @@ public:
         applyState(replayStruct.mRenderer, saveCount);
     }
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) = 0;
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const = 0;
 };
 
 class DrawOp : public DisplayListOp {
@@ -223,7 +223,7 @@ public:
         deferStruct.mDeferredList.addSave(deferStruct.mRenderer, this, newSaveCount);
     }
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.save(mFlags);
     }
 
@@ -251,11 +251,12 @@ public:
             : mCount(count) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
-        deferStruct.mDeferredList.addRestoreToCount(deferStruct.mRenderer, saveCount + mCount);
+        deferStruct.mDeferredList.addRestoreToCount(deferStruct.mRenderer,
+                this, saveCount + mCount);
         deferStruct.mRenderer.restoreToCount(saveCount + mCount);
     }
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.restoreToCount(saveCount + mCount);
     }
 
@@ -293,7 +294,7 @@ public:
                 mAlpha, mMode, mFlags);
     }
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom, mAlpha, mMode, mFlags);
     }
 
@@ -330,7 +331,7 @@ public:
     TranslateOp(float dx, float dy)
             : mDx(dx), mDy(dy) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.translate(mDx, mDy);
     }
 
@@ -350,7 +351,7 @@ public:
     RotateOp(float degrees)
             : mDegrees(degrees) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.rotate(mDegrees);
     }
 
@@ -369,7 +370,7 @@ public:
     ScaleOp(float sx, float sy)
             : mSx(sx), mSy(sy) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.scale(mSx, mSy);
     }
 
@@ -389,7 +390,7 @@ public:
     SkewOp(float sx, float sy)
             : mSx(sx), mSy(sy) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.skew(mSx, mSy);
     }
 
@@ -409,7 +410,7 @@ public:
     SetMatrixOp(SkMatrix* matrix)
             : mMatrix(matrix) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.setMatrix(mMatrix);
     }
 
@@ -428,7 +429,7 @@ public:
     ConcatMatrixOp(SkMatrix* matrix)
             : mMatrix(matrix) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.concatMatrix(mMatrix);
     }
 
@@ -471,7 +472,7 @@ public:
     ClipRectOp(float left, float top, float right, float bottom, SkRegion::Op op)
             : ClipOp(op), mArea(left, top, right, bottom) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.clipRect(mArea.left, mArea.top, mArea.right, mArea.bottom, mOp);
     }
 
@@ -500,7 +501,7 @@ public:
     ClipPathOp(SkPath* path, SkRegion::Op op)
             : ClipOp(op), mPath(path) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.clipPath(mPath, mOp);
     }
 
@@ -521,7 +522,7 @@ public:
     ClipRegionOp(SkRegion* region, SkRegion::Op op)
             : ClipOp(op), mRegion(region) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.clipRegion(mRegion, mOp);
     }
 
@@ -540,7 +541,7 @@ private:
 
 class ResetShaderOp : public StateOp {
 public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.resetShader();
     }
 
@@ -555,7 +556,7 @@ class SetupShaderOp : public StateOp {
 public:
     SetupShaderOp(SkiaShader* shader)
             : mShader(shader) {}
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.setupShader(mShader);
     }
 
@@ -571,7 +572,7 @@ private:
 
 class ResetColorFilterOp : public StateOp {
 public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.resetColorFilter();
     }
 
@@ -587,7 +588,7 @@ public:
     SetupColorFilterOp(SkiaColorFilter* colorFilter)
             : mColorFilter(colorFilter) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.setupColorFilter(mColorFilter);
     }
 
@@ -603,7 +604,7 @@ private:
 
 class ResetShadowOp : public StateOp {
 public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.resetShadow();
     }
 
@@ -619,7 +620,7 @@ public:
     SetupShadowOp(float radius, float dx, float dy, int color)
             : mRadius(radius), mDx(dx), mDy(dy), mColor(color) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.setupShadow(mRadius, mDx, mDy, mColor);
     }
 
@@ -638,7 +639,7 @@ private:
 
 class ResetPaintFilterOp : public StateOp {
 public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.resetPaintFilter();
     }
 
@@ -654,7 +655,7 @@ public:
     SetupPaintFilterOp(int clearBits, int setBits)
             : mClearBits(clearBits), mSetBits(setBits) {}
 
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) {
+    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
         renderer.setupPaintFilter(mClearBits, mSetBits);
     }
 
