@@ -161,7 +161,7 @@ void Layer::defer() {
 }
 
 void Layer::flush() {
-    if (deferredList && !deferredList->isEmpty()) {
+    if (deferredList) {
         renderer->setViewport(layer.getWidth(), layer.getHeight());
         renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
                 !isBlend());
