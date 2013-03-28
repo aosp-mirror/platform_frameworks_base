@@ -271,6 +271,12 @@ private:
         return copy;
     }
 
+    inline Layer* refLayer(Layer* layer) {
+        mLayers.add(layer);
+        mCaches.resourceCache.incrementRefcount(layer);
+        return layer;
+    }
+
     inline SkBitmap* refBitmap(SkBitmap* bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
