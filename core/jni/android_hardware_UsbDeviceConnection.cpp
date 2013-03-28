@@ -142,7 +142,7 @@ android_hardware_UsbDeviceConnection_release_interface(JNIEnv *env, jobject thiz
 static jint
 android_hardware_UsbDeviceConnection_control_request(JNIEnv *env, jobject thiz,
         jint requestType, jint request, jint value, jint index,
-        jbyteArray buffer, jint length, jint timeout)
+        jbyteArray buffer, jint start, jint length, jint timeout)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
@@ -152,25 +152,22 @@ android_hardware_UsbDeviceConnection_control_request(JNIEnv *env, jobject thiz,
 
     jbyte* bufferBytes = NULL;
     if (buffer) {
-        if (env->GetArrayLength(buffer) < length) {
-            jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
-            return -1;
-        }
-        bufferBytes = env->GetByteArrayElements(buffer, 0);
+        bufferBytes = (jbyte*)env->GetPrimitiveArrayCritical(buffer, NULL);
     }
 
     jint result = usb_device_control_transfer(device, requestType, request,
-            value, index, bufferBytes, length, timeout);
+            value, index, bufferBytes + start, length, timeout);
 
-    if (bufferBytes)
-        env->ReleaseByteArrayElements(buffer, bufferBytes, 0);
+    if (bufferBytes) {
+        env->ReleasePrimitiveArrayCritical(buffer, bufferBytes, 0);
+    }
 
     return result;
 }
 
 static jint
 android_hardware_UsbDeviceConnection_bulk_request(JNIEnv *env, jobject thiz,
-        jint endpoint, jbyteArray buffer, jint length, jint timeout)
+        jint endpoint, jbyteArray buffer, jint start, jint length, jint timeout)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
@@ -180,17 +177,14 @@ android_hardware_UsbDeviceConnection_bulk_request(JNIEnv *env, jobject thiz,
 
     jbyte* bufferBytes = NULL;
     if (buffer) {
-        if (env->GetArrayLength(buffer) < length) {
-            jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
-            return -1;
-        }
-        bufferBytes = env->GetByteArrayElements(buffer, 0);
+        bufferBytes = (jbyte*)env->GetPrimitiveArrayCritical(buffer, NULL);
     }
 
-    jint result = usb_device_bulk_transfer(device, endpoint, bufferBytes, length, timeout);
+    jint result = usb_device_bulk_transfer(device, endpoint, bufferBytes + start, length, timeout);
 
-    if (bufferBytes)
-        env->ReleaseByteArrayElements(buffer, bufferBytes, 0);
+    if (bufferBytes) {
+        env->ReleasePrimitiveArrayCritical(buffer, bufferBytes, 0);
+    }
 
     return result;
 }
@@ -235,9 +229,9 @@ static JNINativeMethod method_table[] = {
     {"native_get_desc",         "()[B", (void *)android_hardware_UsbDeviceConnection_get_desc},
     {"native_claim_interface",  "(IZ)Z",(void *)android_hardware_UsbDeviceConnection_claim_interface},
     {"native_release_interface","(I)Z", (void *)android_hardware_UsbDeviceConnection_release_interface},
-    {"native_control_request",  "(IIII[BII)I",
+    {"native_control_request",  "(IIII[BIII)I",
                                         (void *)android_hardware_UsbDeviceConnection_control_request},
-    {"native_bulk_request",     "(I[BII)I",
+    {"native_bulk_request",     "(I[BIII)I",
                                         (void *)android_hardware_UsbDeviceConnection_bulk_request},
     {"native_request_wait",             "()Landroid/hardware/usb/UsbRequest;",
                                         (void *)android_hardware_UsbDeviceConnection_request_wait},
