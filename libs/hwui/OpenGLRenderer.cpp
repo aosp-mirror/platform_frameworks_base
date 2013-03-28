@@ -696,7 +696,10 @@ bool OpenGLRenderer::restoreSnapshot() {
     }
 
     if (restoreLayer) {
+        endMark(); // Savelayer
+        startMark("ComposeLayer");
         composeLayer(current, previous);
+        endMark();
     }
 
     return restoreClip;
@@ -874,6 +877,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     mSnapshot->flags |= Snapshot::kFlagIsLayer;
     mSnapshot->layer = layer;
 
+    startMark("SaveLayer");
     if (fboLayer) {
         return createFboLayer(layer, bounds, clip, previousFbo);
     } else {
@@ -1326,8 +1330,6 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
         } else {
             state.mBounds.set(currentClip);
         }
-        state.mDrawModifiers = mDrawModifiers;
-        state.mAlpha = mSnapshot->alpha;
     }
 
     if (stateDeferFlags & kStateDeferFlag_Clip) {
@@ -1336,18 +1338,18 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
         state.mClip.setEmpty();
     }
 
-    // transform always deferred
+    // Transform, drawModifiers, and alpha always deferred, since they are used by state operations
+    // (Note: saveLayer/restore use colorFilter and alpha, so we just save restore everything)
     state.mMatrix.load(currentMatrix);
+    state.mDrawModifiers = mDrawModifiers;
+    state.mAlpha = mSnapshot->alpha;
     return false;
 }
 
-void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, int stateDeferFlags) {
+void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state) {
     currentTransform().load(state.mMatrix);
-
-    if (stateDeferFlags & kStateDeferFlag_Draw) {
-        mDrawModifiers = state.mDrawModifiers;
-        mSnapshot->alpha = state.mAlpha;
-    }
+    mDrawModifiers = state.mDrawModifiers;
+    mSnapshot->alpha = state.mAlpha;
 
     if (!state.mClip.isEmpty()) {
         mSnapshot->setClip(state.mClip.left, state.mClip.top, state.mClip.right, state.mClip.bottom);
