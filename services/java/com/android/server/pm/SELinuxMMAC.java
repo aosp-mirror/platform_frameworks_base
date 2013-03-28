@@ -206,16 +206,38 @@ public final class SELinuxMMAC {
             String tagName = parser.getName();
             if ("seinfo".equals(tagName)) {
                 String seinfoValue = parser.getAttributeValue(null, "value");
-                if (seinfoValue != null) {
+                if (validateValue(seinfoValue)) {
                     seinfo = seinfoValue;
                 } else {
-                    Slog.w(TAG, "<seinfo> without value at "
+                    Slog.w(TAG, "<seinfo> without valid value at "
                            + parser.getPositionDescription());
                 }
             }
             XmlUtils.skipCurrentTag(parser);
         }
         return seinfo;
+    }
+
+    /**
+     * General validation routine for tag values.
+     * Returns a boolean indicating if the passed string
+     * contains only letters or underscores.
+     */
+    private static boolean validateValue(String name) {
+        if (name == null)
+            return false;
+
+        final int N = name.length();
+        if (N == 0)
+            return false;
+
+        for (int i = 0; i < N; i++) {
+            final char c = name.charAt(i);
+            if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c != '_')) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
