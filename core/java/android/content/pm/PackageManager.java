@@ -2862,16 +2862,16 @@ public abstract class PackageManager {
 
     /**
      * @deprecated This function no longer does anything; it was an old
-     * approach to managing preferred activities, which has been superceeded
-     * (and conflicts with) the modern activity-based preferences.
+     * approach to managing preferred activities, which has been superseded
+     * by (and conflicts with) the modern activity-based preferences.
      */
     @Deprecated
     public abstract void addPackageToPreferred(String packageName);
 
     /**
      * @deprecated This function no longer does anything; it was an old
-     * approach to managing preferred activities, which has been superceeded
-     * (and conflicts with) the modern activity-based preferences.
+     * approach to managing preferred activities, which has been superseded
+     * by (and conflicts with) the modern activity-based preferences.
      */
     @Deprecated
     public abstract void removePackageFromPreferred(String packageName);
