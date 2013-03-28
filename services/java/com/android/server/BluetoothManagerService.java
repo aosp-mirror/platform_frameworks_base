@@ -1081,9 +1081,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         if (mBluetooth.getState() == BluetoothAdapter.STATE_ON) return true;
                     } else if (off) {
                         if (mBluetooth.getState() == BluetoothAdapter.STATE_OFF) return true;
-		    } else {
+                    } else {
                         if (mBluetooth.getState() != BluetoothAdapter.STATE_ON) return true;
-		    }
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "getState()", e);
                     break;
@@ -1091,9 +1091,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
             if (on || off) {
                 SystemClock.sleep(300);
-	    } else {
+            } else {
                 SystemClock.sleep(50);
-	    }
+            }
             i++;
         }
         Log.e(TAG,"waitForOnOff time out");

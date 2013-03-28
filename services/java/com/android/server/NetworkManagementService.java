@@ -839,33 +839,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         return event.getMessage().endsWith("started");
     }
 
-    // TODO(BT) Remove
-    @Override
-    public void startReverseTethering(String iface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        // cmd is "tether start first_start first_stop second_start second_stop ..."
-        // an odd number of addrs will fail
-        try {
-            mConnector.execute("tether", "start-reverse", iface);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-        BluetoothTetheringDataTracker.getInstance().startReverseTether(iface);
-
-    }
-
-    // TODO(BT) Remove
-    @Override
-    public void stopReverseTethering() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("tether", "stop-reverse");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-        BluetoothTetheringDataTracker.getInstance().stopReverseTether();
-    }
-
     @Override
     public void tetherInterface(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);

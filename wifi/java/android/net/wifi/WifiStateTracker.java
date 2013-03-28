@@ -27,6 +27,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkStateTracker;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Messenger;
 import android.util.Slog;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -261,5 +262,10 @@ public class WifiStateTracker implements NetworkStateTracker {
     @Override
     public void removeStackedLink(LinkProperties link) {
         mLinkProperties.removeStackedLink(link);
+    }
+
+    @Override
+    public void supplyMessenger(Messenger messenger) {
+        // not supported on this network
     }
 }
