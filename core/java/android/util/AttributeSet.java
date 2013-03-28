@@ -151,7 +151,7 @@ public interface AttributeSet {
      * Return the value of 'attribute' as a resource identifier.
      * 
      * <p>Note that this is different than {@link #getAttributeNameResource}
-     * in that it returns a the value contained in this attribute as a
+     * in that it returns the value contained in this attribute as a
      * resource identifier (i.e., a value originally of the form
      * "@package:type/resource"); the other method returns a resource
      * identifier that identifies the name of the attribute.
@@ -230,7 +230,7 @@ public interface AttributeSet {
      * Return the value of attribute at 'index' as a resource identifier.
      * 
      * <p>Note that this is different than {@link #getAttributeNameResource}
-     * in that it returns a the value contained in this attribute as a
+     * in that it returns the value contained in this attribute as a
      * resource identifier (i.e., a value originally of the form
      * "@package:type/resource"); the other method returns a resource
      * identifier that identifies the name of the attribute.
