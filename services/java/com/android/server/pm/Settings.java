@@ -1359,6 +1359,7 @@ final class Settings {
                     // userId     - application-specific user id
                     // debugFlag  - 0 or 1 if the package is debuggable.
                     // dataPath   - path to package's data path
+                    // seinfo     - seinfo label for the app (assigned at install time)
                     //
                     // NOTE: We prefer not to expose all ApplicationInfo flags for now.
                     //
@@ -1372,6 +1373,8 @@ final class Settings {
                     sb.append((int)ai.uid);
                     sb.append(isDebug ? " 1 " : " 0 ");
                     sb.append(dataPath);
+                    sb.append(" ");
+                    sb.append(ai.seinfo);
                     sb.append("\n");
                     str.write(sb.toString().getBytes());
                 }
