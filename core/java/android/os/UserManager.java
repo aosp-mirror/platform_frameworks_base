@@ -86,7 +86,41 @@ public class UserManager {
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
+
     public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from enabling the
+     * "Unknown Sources" setting, that allows installation of apps from unknown sources.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from configuring bluetooth.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
+
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from transferring files over
+     * USB. The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
+
 
     /** @hide */
     public UserManager(Context context, IUserManager service) {
@@ -130,7 +164,7 @@ public class UserManager {
    /**
      * Used to determine whether the user making this call is subject to
      * teleportations.
-     * @return whether the user making this call is a goat 
+     * @return whether the user making this call is a goat
      */
     public boolean isUserAGoat() {
         return false;
@@ -269,6 +303,16 @@ public class UserManager {
         Bundle bundle = getUserRestrictions(userHandle);
         bundle.putBoolean(key, value);
         setUserRestrictions(bundle, userHandle);
+    }
+
+    /**
+     * @hide
+     * Returns whether the current user has been disallowed from performing certain actions
+     * or setting certain settings.
+     * @param restrictionKey the string key representing the restriction
+     */
+    public boolean hasUserRestriction(String restrictionKey) {
+        return getUserRestrictions().getBoolean(restrictionKey, false);
     }
 
     /**
@@ -465,7 +509,7 @@ public class UserManager {
      * Returns the maximum number of users that can be created on this device. A return value
      * of 1 means that it is a single user device.
      * @hide
-     * @return a value greater than or equal to 1 
+     * @return a value greater than or equal to 1
      */
     public static int getMaxSupportedUsers() {
         // Don't allow multiple users on certain builds
@@ -508,13 +552,6 @@ public class UserManager {
         return -1;
     }
 
-    /**
-     * Returns whether the current user is allowed to toggle location sharing settings.
-     * @hide
-     */
-    public boolean isLocationSharingToggleAllowed() {
-        return !getUserRestrictions().getBoolean(DISALLOW_SHARE_LOCATION, false);
-    }
 
     /**
      * @hide

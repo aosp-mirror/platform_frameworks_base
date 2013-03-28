@@ -906,6 +906,7 @@ public class AccountManagerService
         }
     }
 
+    @Override
     public void invalidateAuthToken(String accountType, String authToken) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "invalidateAuthToken: accountType " + accountType
@@ -1351,7 +1352,7 @@ public class AccountManagerService
         String subtitle = "";
         if (index > 0) {
             title = titleAndSubtitle.substring(0, index);
-            subtitle = titleAndSubtitle.substring(index + 1);            
+            subtitle = titleAndSubtitle.substring(index + 1);
         }
         UserHandle user = new UserHandle(userId);
         n.setLatestEventInfo(mContext, title, subtitle,
@@ -1426,8 +1427,7 @@ public class AccountManagerService
         checkManageAccountsPermission();
 
         // Is user disallowed from modifying accounts?
-        if (getUserManager().getUserRestrictions(Binder.getCallingUserHandle())
-                .getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false)) {
+        if (getUserManager().hasUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
@@ -2570,9 +2570,7 @@ public class AccountManagerService
 
     private boolean canUserModifyAccounts(int callingUid) {
         if (callingUid != android.os.Process.myUid()) {
-            Bundle restrictions = getUserManager().getUserRestrictions(
-                    new UserHandle(UserHandle.getUserId(callingUid)));
-            if (restrictions.getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false)) {
+            if (getUserManager().hasUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
                 return false;
             }
         }
