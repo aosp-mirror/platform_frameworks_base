@@ -222,6 +222,21 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
         return NULL;
     }
 
+    // We first obtain a layer before comparing against the max texture size
+    // because layers are not allocated at the exact desired size. They are
+    // always created slighly larger to improve recycling
+    const uint32_t maxTextureSize = caches.maxTextureSize;
+    if (layer->getWidth() > maxTextureSize || layer->getHeight() > maxTextureSize) {
+        ALOGW("Layer exceeds max. dimensions supported by the GPU (%dx%d, max=%dx%d)",
+                width, height, maxTextureSize, maxTextureSize);
+
+        // Creating a new layer always increment its refcount by 1, this allows
+        // us to destroy the layer object if one was created for us
+        Caches::getInstance().resourceCache.decrementRefcount(layer);
+
+        return NULL;
+    }
+
     layer->setFbo(fbo);
     layer->layer.set(0.0f, 0.0f, width, height);
     layer->texCoords.set(0.0f, height / float(layer->getHeight()),
@@ -243,14 +258,11 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
         layer->setEmpty(false);
         layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
 
+        // This should only happen if we run out of memory
         if (glGetError() != GL_NO_ERROR) {
-            ALOGD("Could not allocate texture for layer (fbo=%d %dx%d)",
-                    fbo, width, height);
-
+            ALOGE("Could not allocate texture for layer (fbo=%d %dx%d)", fbo, width, height);
             glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-
-            Caches::getInstance().resourceCache.decrementRefcount(layer);
-
+            caches.resourceCache.decrementRefcount(layer);
             return NULL;
         }
     }
@@ -272,7 +284,6 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
             layer->texCoords.set(0.0f, height / float(layer->getHeight()),
                     width / float(layer->getWidth()), 0.0f);
         } else {
-            Caches::getInstance().resourceCache.decrementRefcount(layer);
             return false;
         }
     }
