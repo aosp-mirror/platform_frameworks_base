@@ -49,6 +49,8 @@ public class Credentials {
 
     public static final String INSTALL_ACTION = "android.credentials.INSTALL";
 
+    public static final String INSTALL_AS_USER_ACTION = "android.credentials.INSTALL_AS_USER";
+
     public static final String UNLOCK_ACTION = "com.android.credentials.UNLOCK";
 
     /** Key prefix for CA certificates. */
@@ -81,6 +83,12 @@ public class Credentials {
     // commonly used on Windows
     public static final String EXTENSION_CER = ".cer";
     public static final String EXTENSION_PFX = ".pfx";
+
+    /**
+     * Intent extra: install the certificate bundle as this UID instead of
+     * system.
+     */
+    public static final String EXTRA_INSTALL_AS_UID = "install_as_uid";
 
     /**
      * Intent extra: name for the user's private key.
