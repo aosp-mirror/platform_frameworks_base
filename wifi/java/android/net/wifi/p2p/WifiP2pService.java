@@ -164,6 +164,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     public static final int DISCONNECT_WIFI_REQUEST         =   BASE + 12;
     public static final int DISCONNECT_WIFI_RESPONSE        =   BASE + 13;
 
+    public static final int SET_MIRACAST_MODE               =   BASE + 14;
+
     private final boolean mP2pSupported;
 
     private WifiP2pDevice mThisDevice = new WifiP2pDevice();
@@ -310,6 +312,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 "WifiP2pService");
     }
 
+    private void enforceConnectivityInternalPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                "WifiP2pService");
+    }
+
     /**
      * Get a reference to handler. This is used by a client to establish
      * an AsyncChannel communication with WifiP2pService
@@ -318,6 +326,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         enforceAccessPermission();
         enforceChangePermission();
         return new Messenger(mP2pStateMachine.getHandler());
+    }
+
+    /** This is used to provide information to drivers to optimize performance depending
+     * on the current mode of operation.
+     * 0 - disabled
+     * 1 - source operation
+     * 2 - sink operation
+     *
+     * As an example, the driver could reduce the channel dwell time during scanning
+     * when acting as a source or sink to minimize impact on miracast.
+     */
+    public void setMiracastMode(int mode) {
+        enforceConnectivityInternalPermission();
+        mP2pStateMachine.sendMessage(SET_MIRACAST_MODE, mode);
     }
 
     @Override
@@ -572,6 +594,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                 case DhcpStateMachine.CMD_ON_QUIT:
                 case WifiMonitor.P2P_PROV_DISC_FAILURE_EVENT:
+                case SET_MIRACAST_MODE:
                     break;
                 case WifiStateMachine.CMD_ENABLE_P2P:
                     // Enable is lazy and has no response
@@ -878,7 +901,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         sendPeersChangedBroadcast();
                     }
                     break;
-               case WifiP2pManager.ADD_LOCAL_SERVICE:
+                case WifiP2pManager.ADD_LOCAL_SERVICE:
                     if (DBG) logd(getName() + " add service");
                     WifiP2pServiceInfo servInfo = (WifiP2pServiceInfo)message.obj;
                     if (addLocalService(message.replyTo, servInfo)) {
@@ -916,7 +939,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     clearServiceRequests(message.replyTo);
                     replyToMessage(message, WifiP2pManager.CLEAR_SERVICE_REQUESTS_SUCCEEDED);
                     break;
-               case WifiMonitor.P2P_SERV_DISC_RESP_EVENT:
+                case WifiMonitor.P2P_SERV_DISC_RESP_EVENT:
                     if (DBG) logd(getName() + " receive service response");
                     List<WifiP2pServiceResponse> sdRespList =
                         (List<WifiP2pServiceResponse>) message.obj;
@@ -927,13 +950,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         sendServiceResponse(resp);
                     }
                     break;
-               case WifiP2pManager.DELETE_PERSISTENT_GROUP:
+                case WifiP2pManager.DELETE_PERSISTENT_GROUP:
                    if (DBG) logd(getName() + " delete persistent group");
                    mGroups.remove(message.arg1);
                    replyToMessage(message, WifiP2pManager.DELETE_PERSISTENT_GROUP_SUCCEEDED);
                    break;
+                case SET_MIRACAST_MODE:
+                    mWifiNative.setMiracastMode(message.arg1);
+                    break;
                 default:
-                    return NOT_HANDLED;
+                   return NOT_HANDLED;
             }
             return HANDLED;
         }
