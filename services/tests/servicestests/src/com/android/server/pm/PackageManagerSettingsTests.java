@@ -176,8 +176,8 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
 
         // Enable/Disable a package
         PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_1);
-        ps.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0);
-        ps.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 1);
+        ps.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
+        ps.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 1, null);
         assertEquals(COMPONENT_ENABLED_STATE_DISABLED, ps.getEnabled(0));
         assertEquals(COMPONENT_ENABLED_STATE_ENABLED, ps.getEnabled(1));
 
