@@ -19,6 +19,7 @@ package com.android.server;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetooth;
+import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothCallback;
 import android.bluetooth.IBluetoothManager;
 import android.bluetooth.IBluetoothManagerCallback;
@@ -87,6 +88,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     // and Airplane mode will have higher priority.
     private static final int BLUETOOTH_ON_AIRPLANE=2;
 
+    private static final int SERVICE_IBLUETOOTH = 1;
+    private static final int SERVICE_IBLUETOOTHGATT = 2;
+
     private final Context mContext;
 
     // Locks are not provided for mName and mAddress.
@@ -97,6 +101,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private final RemoteCallbackList<IBluetoothManagerCallback> mCallbacks;
     private final RemoteCallbackList<IBluetoothStateChangeCallback> mStateChangeCallbacks;
     private IBluetooth mBluetooth;
+    private IBluetoothGatt mBluetoothGatt;
     private boolean mBinding;
     private boolean mUnbinding;
     // used inside handler thread
@@ -463,6 +468,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
     }
 
+    public IBluetoothGatt getBluetoothGatt() {
+        // sync protection
+        return mBluetoothGatt;
+    }
+
     private void sendBluetoothStateCallback(boolean isUp) {
         int n = mStateChangeCallbacks.beginBroadcast();
         if (DBG) Log.d(TAG,"Broadcasting onBluetoothStateChange("+isUp+") to " + n + " receivers.");
@@ -575,16 +585,35 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
 
         public void onServiceConnected(ComponentName className, IBinder service) {
-            if (DBG) Log.d(TAG, "BluetoothServiceConnection: connected to AdapterService");
+            if (DBG) Log.d(TAG, "BluetoothServiceConnection: " + className.getClassName());
             Message msg = mHandler.obtainMessage(MESSAGE_BLUETOOTH_SERVICE_CONNECTED);
+            // TBD if (className.getClassName().equals(IBluetooth.class.getName())) {
+            if (className.getClassName().equals("com.android.bluetooth.btservice.AdapterService")) {
+                msg.arg1 = SERVICE_IBLUETOOTH;
+                // } else if (className.getClassName().equals(IBluetoothGatt.class.getName())) {
+            } else if (className.getClassName().equals("com.android.bluetooth.gatt.GattService")) {
+                msg.arg1 = SERVICE_IBLUETOOTHGATT;
+            } else {
+                Log.e(TAG, "Unknown service connected: " + className.getClassName());
+                return;
+            }
             msg.obj = service;
             mHandler.sendMessage(msg);
         }
 
         public void onServiceDisconnected(ComponentName className) {
             // Called if we unexpected disconnected.
-            if (DBG) Log.d(TAG, "BluetoothServiceConnection: disconnected from AdapterService");
+            if (DBG) Log.d(TAG, "BluetoothServiceConnection, disconnected: " +
+                           className.getClassName());
             Message msg = mHandler.obtainMessage(MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED);
+            if (className.getClassName().equals("com.android.bluetooth.btservice.AdapterService")) {
+                msg.arg1 = SERVICE_IBLUETOOTH;
+            } else if (className.getClassName().equals("com.android.bluetooth.gatt.GattService")) {
+                msg.arg1 = SERVICE_IBLUETOOTHGATT;
+            } else {
+                Log.e(TAG, "Unknown service disconnected: " + className.getClassName());
+                return;
+            }
             mHandler.sendMessage(msg);
         }
     }
@@ -746,13 +775,18 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
                 case MESSAGE_BLUETOOTH_SERVICE_CONNECTED:
                 {
-                    if (DBG) Log.d(TAG,"MESSAGE_BLUETOOTH_SERVICE_CONNECTED");
-
-                    //Remove timeout
-                    mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
+                    if (DBG) Log.d(TAG,"MESSAGE_BLUETOOTH_SERVICE_CONNECTED: " + msg.arg1);
 
                     IBinder service = (IBinder) msg.obj;
                     synchronized(mConnection) {
+                        if (msg.arg1 == SERVICE_IBLUETOOTHGATT) {
+                            mBluetoothGatt = IBluetoothGatt.Stub.asInterface(service);
+                            break;
+                        } // else must be SERVICE_IBLUETOOTH
+
+                        //Remove timeout
+                            mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
+
                         mBinding = false;
                         mBluetooth = IBluetooth.Stub.asInterface(service);
 
@@ -816,11 +850,19 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
                 case MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED:
                 {
-                    Log.e(TAG, "MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED");
+                    Log.e(TAG, "MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED: " + msg.arg1);
                     synchronized(mConnection) {
-                        // if service is unbinded already, do nothing and return
-                        if (mBluetooth == null) return;
-                        mBluetooth = null;
+                        if (msg.arg1 == SERVICE_IBLUETOOTH) {
+                            // if service is unbinded already, do nothing and return
+                            if (mBluetooth == null) break;
+                            mBluetooth = null;
+                        } else if (msg.arg1 == SERVICE_IBLUETOOTHGATT) {
+                            mBluetoothGatt = null;
+                            break;
+                        } else {
+                            Log.e(TAG, "Bad msg.arg1: " + msg.arg1);
+                            break;
+                        }
                     }
 
                     if (mEnable) {
@@ -1048,10 +1090,19 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 boolean isUp = (newState==BluetoothAdapter.STATE_ON);
                 sendBluetoothStateCallback(isUp);
 
-                //If Bluetooth is off, send service down event to proxy objects, and unbind
-                if (!isUp && canUnbindBluetoothService()) {
-                    sendBluetoothServiceDownCallback();
-                    unbindAndFinish();
+                if (isUp) {
+                    // connect to GattService
+                    Intent i = new Intent(IBluetoothGatt.class.getName());
+                    if (!mContext.bindServiceAsUser(i, mConnection, Context.BIND_AUTO_CREATE,
+                                                    UserHandle.CURRENT)) {
+                        Log.e(TAG, "Fail to bind to: " + IBluetoothGatt.class.getName());
+                    }
+                } else {
+                    //If Bluetooth is off, send service down event to proxy objects, and unbind
+                    if (!isUp && canUnbindBluetoothService()) {
+                        sendBluetoothServiceDownCallback();
+                        unbindAndFinish();
+                    }
                 }
             }
 

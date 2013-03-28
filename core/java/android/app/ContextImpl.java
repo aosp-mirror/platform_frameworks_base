@@ -19,7 +19,7 @@ package android.app;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.Preconditions;
 
-import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -319,7 +319,7 @@ class ContextImpl extends Context {
 
         registerService(BLUETOOTH_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
-                    return BluetoothAdapter.getDefaultAdapter();
+                    return new BluetoothManager(ctx);
                 }});
 
         registerService(CLIPBOARD_SERVICE, new ServiceFetcher() {

@@ -19,8 +19,7 @@ package android.bluetooth;
 import java.util.UUID;
 
 /**
- * Represents a Bluetooth Gatt Descriptor
- * @hide
+ * Represents a Bluetooth GATT Descriptor
  */
 public class BluetoothGattDescriptor {
 
@@ -109,12 +108,28 @@ public class BluetoothGattDescriptor {
      * Create a new BluetoothGattDescriptor.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
+     * @param uuid The UUID for this descriptor
+     * @param permissions Permissions for this descriptor
+     */
+    public BluetoothGattDescriptor(UUID uuid, int permissions) {
+        initDescriptor(null, uuid, permissions);
+    }
+
+    /**
+     * Create a new BluetoothGattDescriptor.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
      * @param characteristic The characteristic this descriptor belongs to
      * @param uuid The UUID for this descriptor
      * @param permissions Permissions for this descriptor
      */
     /*package*/ BluetoothGattDescriptor(BluetoothGattCharacteristic characteristic, UUID uuid,
                                     int permissions) {
+        initDescriptor(characteristic, uuid, permissions);
+    }
+
+    private void initDescriptor(BluetoothGattCharacteristic characteristic, UUID uuid,
+                                int permissions) {
         mCharacteristic = characteristic;
         mUuid = uuid;
         mPermissions = permissions;
@@ -129,8 +144,15 @@ public class BluetoothGattDescriptor {
     }
 
     /**
+     * Set the back-reference to the associated characteristic
+     * @hide
+     */
+    /*package*/ void setCharacteristic(BluetoothGattCharacteristic characteristic) {
+        mCharacteristic = characteristic;
+    }
+
+    /**
      * Returns the UUID of this descriptor.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return UUID of this descriptor
      */
@@ -140,7 +162,6 @@ public class BluetoothGattDescriptor {
 
     /**
      * Returns the permissions for this descriptor.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Permissions of this descriptor
      */
@@ -152,11 +173,9 @@ public class BluetoothGattDescriptor {
      * Returns the stored value for this descriptor
      *
      * <p>This function returns the stored value for this descriptor as
-     * retrieved by calling {@link BluetoothGatt#readDescriptor}. To cached
+     * retrieved by calling {@link BluetoothGatt#readDescriptor}. The cached
      * value of the descriptor is updated as a result of a descriptor read
      * operation.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Cached value of the descriptor
      */
@@ -171,8 +190,6 @@ public class BluetoothGattDescriptor {
      * descriptor. To send the value to the remote device, call
      * {@link BluetoothGatt#writeDescriptor} to send the value to the
      * remote device.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param value New value for this descriptor
      * @return true if the locally stored value has been set, false if the

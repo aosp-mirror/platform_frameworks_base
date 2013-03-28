@@ -18,34 +18,10 @@ package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 
-import android.util.Log;
-
 /**
  * This abstract class is used to implement {@link BluetoothGatt} callbacks.
- * @hide
  */
 public abstract class BluetoothGattCallback {
-    /**
-     * Callback to inform change in registration state of the  application.
-     *
-     * @param status Returns {@link BluetoothGatt#GATT_SUCCESS} if the application
-     *               was successfully registered.
-     */
-    public void onAppRegistered(int status) {
-    }
-
-    /**
-     * Callback reporting an LE device found during a device scan initiated
-     * by the {@link BluetoothGatt#startScan} function.
-     *
-     * @param device Identifies the remote device
-     * @param rssi The RSSI value for the remote device as reported by the
-     *             Bluetooth hardware. 0 if no RSSI value is available.
-     * @param scanRecord The content of the advertisement record offered by
-     *                   the remote device.
-     */
-    public void onScanResult(BluetoothDevice device, int rssi, byte[] scanRecord) {
-    }
 
     /**
      * Callback indicating when a remote device has been connected or disconnected.
@@ -61,8 +37,8 @@ public abstract class BluetoothGattCallback {
     }
 
     /**
-     * Callback invoked when the list of remote services, characteristics and
-     * descriptors for the remote device have been updated.
+     * Callback invoked when the list of remote services, characteristics and descriptors
+     * for the remote device have been updated, ie new services have been discovered.
      *
      * @param device Remote device
      * @param status {@link BluetoothGatt#GATT_SUCCESS} if the remote device
@@ -97,7 +73,7 @@ public abstract class BluetoothGattCallback {
      * @param status The result of the write operation
      */
     public void onCharacteristicWrite(BluetoothGattCharacteristic characteristic,
-                               int status) {
+                                      int status) {
     }
 
     /**
@@ -113,23 +89,21 @@ public abstract class BluetoothGattCallback {
      * Callback reporting the result of a descriptor read operation.
      *
      * @param descriptor Descriptor that was read from the associated
-     *                       remote device.
+     *                   remote device.
      * @param status {@link BluetoothGatt#GATT_SUCCESS} if the read operation
      *               was completed successfully
      */
-    public void onDescriptorRead(BluetoothGattDescriptor descriptor,
-                                     int status) {
+    public void onDescriptorRead(BluetoothGattDescriptor descriptor, int status) {
     }
 
     /**
      * Callback indicating the result of a descriptor write operation.
      *
      * @param descriptor Descriptor that was writte to the associated
-     *                       remote device.
+     *                   remote device.
      * @param status The result of the write operation
      */
-    public void onDescriptorWrite(BluetoothGattDescriptor descriptor,
-                               int status) {
+    public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
     }
 
     /**
@@ -150,7 +124,7 @@ public abstract class BluetoothGattCallback {
      *
      * @param device Identifies the remote device
      * @param rssi The RSSI value for the remote device
-     * @param status 0 if the RSSI was read successfully
+     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the RSSI was read successfully
      */
     public void onReadRemoteRssi(BluetoothDevice device, int rssi, int status) {
     }

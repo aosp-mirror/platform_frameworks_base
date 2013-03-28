@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1126,4 +1127,30 @@ public final class BluetoothDevice implements Parcelable {
         return pinBytes;
     }
 
+    /**
+     * Connect to GATT Server hosted by this device. Caller acts as GATT client.
+     * The callback is used to deliver results to Caller, such as connection status as well
+     * as any further GATT client operations.
+     * The method returns a BluetoothGatt instance. You can use BluetoothGatt to conduct
+     * GATT client operations.
+     * @param callback GATT callback handler that will receive asynchronous callbacks.
+     * @param autoConnect Whether to directly connect to the remote device (false)
+     *                    or to automatically connect as soon as the remote
+     *                    device becomes available (true).
+     * @throws IllegalArgumentException if callback is null
+     */
+    public BluetoothGatt connectGattServer(Context context, boolean autoConnect,
+                                           BluetoothGattCallback callback) {
+        // TODO(Bluetooth) check whether platform support BLE
+        //     Do the check here or in GattServer?
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        IBluetoothManager managerService = adapter.getBluetoothManager();
+        try {
+            IBluetoothGatt iGatt = managerService.getBluetoothGatt();
+            BluetoothGatt gatt = new BluetoothGatt(context, iGatt, this);
+            gatt.connect(autoConnect, callback);
+            return gatt;
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return null;
+    }
 }

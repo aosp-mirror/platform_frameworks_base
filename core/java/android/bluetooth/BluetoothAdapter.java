@@ -22,7 +22,6 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -359,6 +358,8 @@ public final class BluetoothAdapter {
     private IBluetooth mService;
 
     private Handler mServiceRecordHandler;
+    private BluetoothAdapterCallback mCallback;
+    private int mClientIf;
 
     /**
      * Get a handle to the default local Bluetooth adapter.
@@ -1137,7 +1138,8 @@ public final class BluetoothAdapter {
      * Get the profile proxy object associated with the profile.
      *
      * <p>Profile can be one of {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET},
-     * or {@link BluetoothProfile#A2DP}. Clients must implement
+     * {@link BluetoothProfile#A2DP}, {@link BluetoothProfile#GATT}, or
+     * {@link BluetoothProfile#GATT_SERVER}. Clients must implement
      * {@link BluetoothProfile.ServiceListener} to get notified of
      * the connection status and to get the proxy object.
      *
@@ -1165,12 +1167,6 @@ public final class BluetoothAdapter {
             return true;
         } else if (profile == BluetoothProfile.HEALTH) {
             BluetoothHealth health = new BluetoothHealth(context, listener);
-            return true;
-        } else if (profile == BluetoothProfile.GATT) {
-            BluetoothGatt gatt = new BluetoothGatt(context, listener);
-            return true;
-        } else if (profile == BluetoothProfile.GATT_SERVER) {
-            BluetoothGattServer gattServer = new BluetoothGattServer(context, listener);
             return true;
         } else {
             return false;
@@ -1411,4 +1407,230 @@ public final class BluetoothAdapter {
             mProxyServiceStateCallbacks.remove(cb);
         }
     }
+
+    /**
+     * Register an callback to receive async results, such as LE scan result.
+     *
+     * <p>This is an asynchronous call. The callback
+     * {@link BluetoothAdapterCallback#onCallbackRegistration}
+     * is used to notify success or failure if the function returns true.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param callback BluetootAdapter callback handler that will receive asynchronous callbacks.
+     * @return If true, the callback will be called to notify success or failure,
+     *         false on immediate error
+     */
+    public boolean registerCallback(BluetoothAdapterCallback callback) {
+        try {
+            IBluetoothGatt iGatt = (IBluetoothGatt) mManagerService.getBluetoothGatt();
+            mCallback = callback;
+            UUID uuid = UUID.randomUUID();
+            if (DBG) Log.d(TAG, "registerCallback() - UUID=" + uuid);
+
+            iGatt.registerClient(new ParcelUuid(uuid), mBluetoothGattCallback);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            return false;
+        }
+    }
+
+    /**
+     * Unregister the registered callback.
+     */
+    public boolean unRegisterCallback(BluetoothAdapterCallback callback) {
+        if (callback != mCallback) return false;
+        try {
+            IBluetoothGatt iGatt = (IBluetoothGatt) mManagerService.getBluetoothGatt();
+
+            iGatt.unregisterClient(mClientIf);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            return false;
+        }
+    }
+
+    /**
+     * Starts a scan for Bluetooth LE devices.
+     *
+     * <p>Results of the scan are reported using the
+     * {@link BluetoothAdapterCallback#onLeScan} callback.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @return true, if the scan was started successfully
+     */
+    public boolean startLeScan() {
+        if (DBG) Log.d(TAG, "startLeScan()");
+        if (mClientIf == 0) return false;
+
+        try {
+            IBluetoothGatt iGatt = (IBluetoothGatt) mManagerService.getBluetoothGatt();
+            iGatt.startScan(mClientIf, false);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Starts a scan for Bluetooth LE devices, looking for devices that
+     * advertise given services.
+     *
+     * <p>Devices which advertise all specified services are reported using the
+     * {@link BluetoothAdapterCallback#onLeScan} callback.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param serviceUuids Array of services to look for
+     * @return true, if the scan was started successfully
+     */
+    public boolean startLeScan(UUID[] serviceUuids) {
+        if (DBG) Log.d(TAG, "startLeScan() - with UUIDs");
+        if (mClientIf == 0) return false;
+
+        try {
+            IBluetoothGatt iGatt = (IBluetoothGatt) mManagerService.getBluetoothGatt();
+            ParcelUuid[] uuids = new ParcelUuid[serviceUuids.length];
+            for(int i = 0; i != uuids.length; ++i) {
+                uuids[i] = new ParcelUuid(serviceUuids[i]);
+            }
+            iGatt.startScanWithUuids(mClientIf, false, uuids);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Stops an ongoing Bluetooth LE device scan.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     */
+    public void stopLeScan() {
+        if (DBG) Log.d(TAG, "stopScan()");
+        if (mClientIf == 0) return;
+
+        try {
+            IBluetoothGatt iGatt = (IBluetoothGatt) mManagerService.getBluetoothGatt();
+            iGatt.stopScan(mClientIf, false);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+        }
+    }
+
+    /**
+     * Bluetooth GATT interface callbacks
+     */
+    private final IBluetoothGattCallback mBluetoothGattCallback =
+        new IBluetoothGattCallback.Stub() {
+            /**
+             * Application interface registered - app is ready to go
+             */
+            public void onClientRegistered(int status, int clientIf) {
+                if (DBG) Log.d(TAG, "onClientRegistered() - status=" + status
+                    + " clientIf=" + clientIf);
+                mClientIf = clientIf;
+                mCallback.onCallbackRegistration(status == BluetoothGatt.GATT_SUCCESS ?
+                                  BluetoothAdapterCallback.CALLBACK_REGISTERED :
+                                  BluetoothAdapterCallback.CALLBACK_REGISTRATION_FAILURE);
+            }
+
+            public void onClientConnectionState(int status, int clientIf,
+                                                boolean connected, String address) {
+                // no op
+            }
+
+            /**
+             * Callback reporting an LE scan result.
+             * @hide
+             */
+            public void onScanResult(String address, int rssi, byte[] advData) {
+                if (DBG) Log.d(TAG, "onScanResult() - Device=" + address + " RSSI=" +rssi);
+
+                try {
+                    mCallback.onLeScan(getRemoteDevice(address), rssi, advData);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception: " + ex);
+                }
+            }
+
+            public void onGetService(String address, int srvcType,
+                                     int srvcInstId, ParcelUuid srvcUuid) {
+                // no op
+            }
+
+            public void onGetIncludedService(String address, int srvcType,
+                                             int srvcInstId, ParcelUuid srvcUuid,
+                                             int inclSrvcType, int inclSrvcInstId,
+                                             ParcelUuid inclSrvcUuid) {
+                // no op
+            }
+
+            public void onGetCharacteristic(String address, int srvcType,
+                             int srvcInstId, ParcelUuid srvcUuid,
+                             int charInstId, ParcelUuid charUuid,
+                             int charProps) {
+                // no op
+            }
+
+            public void onGetDescriptor(String address, int srvcType,
+                             int srvcInstId, ParcelUuid srvcUuid,
+                             int charInstId, ParcelUuid charUuid,
+                             ParcelUuid descUuid) {
+                // no op
+            }
+
+            public void onSearchComplete(String address, int status) {
+                // no op
+            }
+
+            public void onCharacteristicRead(String address, int status, int srvcType,
+                             int srvcInstId, ParcelUuid srvcUuid,
+                             int charInstId, ParcelUuid charUuid, byte[] value) {
+                // no op
+            }
+
+            public void onCharacteristicWrite(String address, int status, int srvcType,
+                             int srvcInstId, ParcelUuid srvcUuid,
+                             int charInstId, ParcelUuid charUuid) {
+                // no op
+            }
+
+            public void onNotify(String address, int srvcType,
+                             int srvcInstId, ParcelUuid srvcUuid,
+                             int charInstId, ParcelUuid charUuid,
+                             byte[] value) {
+                // no op
+            }
+
+            public void onDescriptorRead(String address, int status, int srvcType,
+                             int srvcInstId, ParcelUuid srvcUuid,
+                             int charInstId, ParcelUuid charUuid,
+                             ParcelUuid descrUuid, byte[] value) {
+                // no op
+            }
+
+            public void onDescriptorWrite(String address, int status, int srvcType,
+                             int srvcInstId, ParcelUuid srvcUuid,
+                             int charInstId, ParcelUuid charUuid,
+                             ParcelUuid descrUuid) {
+                // no op
+            }
+
+            public void onExecuteWrite(String address, int status) {
+                // no op
+            }
+
+            public void onReadRemoteRssi(String address, int rssi, int status) {
+                // no op
+            }
+        };
+
 }
