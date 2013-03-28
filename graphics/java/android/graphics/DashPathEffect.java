@@ -26,7 +26,7 @@ public class DashPathEffect extends PathEffect {
      * controls the length of the dashes. The paint's strokeWidth controls the
      * thickness of the dashes.
      * Note: this patheffect only affects drawing with the paint's style is set
-     * to STROKE or STROKE_AND_FILL. It is ignored if the drawing is done with
+     * to STROKE or FILL_AND_STROKE. It is ignored if the drawing is done with
      * style == FILL.
      * @param intervals array of ON and OFF distances
      * @param phase offset into the intervals array
