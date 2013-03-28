@@ -23,6 +23,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.Settings;
 
@@ -1280,4 +1281,17 @@ public class ConnectivityManager {
         }
     }
 
+    /**
+     * Supply the backend messenger for a network tracker
+     *
+     * @param type NetworkType to set
+     * @param messenger {@link Messenger}
+     * {@hide}
+     */
+    public void supplyMessenger(int networkType, Messenger messenger) {
+        try {
+            mService.supplyMessenger(networkType, messenger);
+        } catch (RemoteException e) {
+        }
+    }
 }

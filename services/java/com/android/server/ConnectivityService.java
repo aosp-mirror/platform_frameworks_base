@@ -74,6 +74,7 @@ import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
@@ -3220,7 +3221,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         throwIfLockdownEnabled();
         try {
             int type = mActiveDefaultNetwork;
-            if (ConnectivityManager.isNetworkTypeValid(type)) {
+            if (ConnectivityManager.isNetworkTypeValid(type) && mNetTrackers[type] != null) {
                 mVpn.protect(socket, mNetTrackers[type].getLinkProperties().getInterfaceName());
                 return true;
             }
@@ -3423,6 +3424,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void throwIfLockdownEnabled() {
         if (mLockdownEnabled) {
             throw new IllegalStateException("Unavailable in lockdown mode");
+        }
+    }
+
+    public void supplyMessenger(int networkType, Messenger messenger) {
+        enforceConnectivityInternalPermission();
+
+        if (isNetworkTypeValid(networkType) && mNetTrackers[networkType] != null) {
+            mNetTrackers[networkType].supplyMessenger(messenger);
         }
     }
 }
