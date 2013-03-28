@@ -328,13 +328,16 @@ public class KeySetManager {
     }
 
     public void removeAppKeySetData(String packageName) {
-        Log.e(TAG, "Removing application " + packageName);
         synchronized (mLockObject) {
             // Get the package's known keys and KeySets
-            Set<Long> deletableKeySets = getKnownKeySetsByPackageName(packageName);
+            Set<Long> deletableKeySets = getKnownKeySetsByPackageNameLocked(packageName);
             Set<Long> deletableKeys = new HashSet<Long>();
+            Set<Long> knownKeys = null;
             for (Long ks : deletableKeySets) {
-                deletableKeys.addAll(mKeySetMapping.get(ks));
+                knownKeys = mKeySetMapping.get(ks);
+                if (knownKeys != null) {
+                    deletableKeys.addAll(knownKeys);
+                }
             }
 
             // Now remove the keys and KeySets known to any other package
@@ -342,11 +345,14 @@ public class KeySetManager {
                 if (pkgName.equals(packageName)) {
                     continue;
                 }
-                Set<Long> knownKeySets = getKnownKeySetsByPackageName(pkgName);
+                Set<Long> knownKeySets = getKnownKeySetsByPackageNameLocked(pkgName);
                 deletableKeySets.removeAll(knownKeySets);
-                Set<Long> knownKeys = new HashSet<Long>();
+                knownKeys = new HashSet<Long>();
                 for (Long ks : knownKeySets) {
-                    deletableKeys.removeAll(mKeySetMapping.get(ks));
+                    knownKeys = mKeySetMapping.get(ks);
+                    if (knownKeys != null) {
+                        deletableKeys.removeAll(knownKeys);
+                    }
                 }
             }
 
@@ -359,10 +365,19 @@ public class KeySetManager {
             for (Long keyId : deletableKeys) {
                 mPublicKeys.delete(keyId);
             }
+
+            // Now remove them from the KeySets known to each package
+            for (String pkgName : mPackages.keySet()) {
+                PackageSetting p = mPackages.get(packageName);
+                for (Long ks : deletableKeySets) {
+                    p.keySetData.removeSigningKeySet(ks);
+                    p.keySetData.removeDefinedKeySet(ks);
+                }
+            }
         }
     }
 
-    private Set<Long> getKnownKeySetsByPackageName(String packageName) {
+    private Set<Long> getKnownKeySetsByPackageNameLocked(String packageName) {
         PackageSetting p = mPackages.get(packageName);
         if (p == null) {
             throw new NullPointerException("Unknown package");
@@ -371,10 +386,10 @@ public class KeySetManager {
             throw new IllegalArgumentException("Package has no keySet data");
         }
         Set<Long> knownKeySets = new HashSet<Long>();
-        for (Long ks : p.keySetData.getSigningKeySets()) {
+        for (long ks : p.keySetData.getSigningKeySets()) {
             knownKeySets.add(ks);
         }
-        for (Long ks : p.keySetData.getDefinedKeySets()) {
+        for (long ks : p.keySetData.getDefinedKeySets()) {
             knownKeySets.add(ks);
         }
         return knownKeySets;

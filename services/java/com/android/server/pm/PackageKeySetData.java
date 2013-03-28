@@ -55,6 +55,20 @@ public class PackageKeySetData {
         mSigningKeySets[end] = ks;
     }
 
+    public void removeSigningKeySet(long ks) {
+        if (packageIsSignedBy(ks)) {
+            long[] keysets = new long[mSigningKeySets.length - 1];
+            int index = 0;
+            for (long signingKeySet : mSigningKeySets) {
+                if (signingKeySet != ks) {
+                    keysets[index] = signingKeySet;
+                    index += 1;
+                }
+            }
+            mSigningKeySets = keysets;
+        }
+    }
+
     public void addDefinedKeySet(long ks, String alias) {
         // deduplicate
         for (long knownKeySet : mDefinedKeySets) {
@@ -66,6 +80,26 @@ public class PackageKeySetData {
         mDefinedKeySets = Arrays.copyOf(mDefinedKeySets, end + 1);
         mDefinedKeySets[end] = ks;
         mKeySetAliases.put(alias, ks);
+    }
+
+    public void removeDefinedKeySet(long ks) {
+        if (mKeySetAliases.containsValue(ks)) {
+            long[] keysets = new long[mDefinedKeySets.length - 1];
+            int index = 0;
+            for (long definedKeySet : mDefinedKeySets) {
+                if (definedKeySet != ks) {
+                    keysets[index] = definedKeySet;
+                    index += 1;
+                }
+            }
+            mDefinedKeySets = keysets;
+            for (String alias : mKeySetAliases.keySet()) {
+                if (mKeySetAliases.get(alias) == ks) {
+                    mKeySetAliases.remove(alias);
+                    break;
+                }
+            }
+        }
     }
 
     public boolean packageIsSignedBy(long ks) {
