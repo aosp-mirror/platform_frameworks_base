@@ -78,17 +78,50 @@
     </family>
     <family>
         <fileset>
-            <file>AnjaliNewLipi-light.ttf</file>
+            <file variant="elegant">NotoSansMalayalam-Regular.ttf</file>
+            <file variant="elegant">NotoSansMalayalam-Bold.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>Lohit-Bengali.ttf</file>
+            <file variant="compact">NotoSansMalayalamUI-Regular.ttf</file>
+            <file variant="compact">NotoSansMalayalamUI-Bold.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>Lohit-Kannada.ttf</file>
+            <file variant="elegant">NotoSansBengali-Regular.ttf</file>
+            <file variant="elegant">NotoSansBengali-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansBengaliUI-Regular.ttf</file>
+            <file variant="compact">NotoSansBengaliUI-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="elegant">NotoSansTelugu-Regular.ttf</file>
+            <file variant="elegant">NotoSansTelugu-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansTeluguUI-Regular.ttf</file>
+            <file variant="compact">NotoSansTeluguUI-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="elegant">NotoSansKannada-Regular.ttf</file>
+            <file variant="elegant">NotoSansKannada-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansKannadaUI-Regular.ttf</file>
+            <file variant="compact">NotoSansKannadaUI-Bold.ttf</file>
         </fileset>
     </family>
     <family>
@@ -99,11 +132,6 @@
     <family>
         <fileset>
             <file>AndroidEmoji.ttf</file>
-        </fileset>
-    </family>
-    <family>
-        <fileset>
-            <file>Lohit-Telugu.ttf</file>
         </fileset>
     </family>
     <family>
