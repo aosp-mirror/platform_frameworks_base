@@ -896,7 +896,7 @@ public class ActivityManager {
      * @param taskId The identifier of the task to be moved, as found in
      * {@link RunningTaskInfo} or {@link RecentTaskInfo}.
      * @param flags Additional operational flags, 0 or more of
-     * {@link #MOVE_TASK_WITH_HOME}.
+     * {@link #MOVE_TASK_WITH_HOME}, {@link #MOVE_TASK_NO_USER_ACTION}.
      */
     public void moveTaskToFront(int taskId, int flags) {
         moveTaskToFront(taskId, flags, null);
@@ -911,7 +911,7 @@ public class ActivityManager {
      * @param taskId The identifier of the task to be moved, as found in
      * {@link RunningTaskInfo} or {@link RecentTaskInfo}.
      * @param flags Additional operational flags, 0 or more of
-     * {@link #MOVE_TASK_WITH_HOME}.
+     * {@link #MOVE_TASK_WITH_HOME}, {@link #MOVE_TASK_NO_USER_ACTION}.
      * @param options Additional options for the operation, either null or
      * as per {@link Context#startActivity(Intent, android.os.Bundle)
      * Context.startActivity(Intent, Bundle)}.
