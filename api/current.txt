@@ -624,7 +624,7 @@ package android {
     field public static final int keyboardLayout = 16843691; // 0x10103ab
     field public static final int keyboardMode = 16843341; // 0x101024d
     field public static final int keycode = 16842949; // 0x10100c5
-    field public static final int keyset = 16843733; // 0x10103d5
+    field public static final int keyset = 16843734; // 0x10103d6
     field public static final int killAfterRestore = 16843420; // 0x101029c
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
@@ -6660,6 +6660,7 @@ package android.content.pm {
     method public abstract boolean addPermission(android.content.pm.PermissionInfo);
     method public abstract boolean addPermissionAsync(android.content.pm.PermissionInfo);
     method public abstract deprecated void addPreferredActivity(android.content.IntentFilter, int, android.content.ComponentName[], android.content.ComponentName);
+    method public android.content.Intent buildPermissionRequestIntent(java.lang.String...);
     method public abstract java.lang.String[] canonicalToCurrentPackageNames(java.lang.String[]);
     method public abstract int checkPermission(java.lang.String, java.lang.String);
     method public abstract int checkSignatures(java.lang.String, java.lang.String);
@@ -6719,7 +6720,6 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract deprecated void removePackageFromPreferred(java.lang.String);
     method public abstract void removePermission(java.lang.String);
-    method public android.content.Intent buildPermissionRequestIntent(java.lang.String...);
     method public abstract android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
     method public abstract android.content.pm.ProviderInfo resolveContentProvider(java.lang.String, int);
     method public abstract android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
@@ -16813,13 +16813,13 @@ package android.os {
     method public void setUserRestriction(java.lang.String, boolean);
     method public void setUserRestrictions(android.os.Bundle);
     method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
+    field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final java.lang.String DISALLOW_CONFIG_WIFI = "no_config_wifi";
     field public static final java.lang.String DISALLOW_INSTALL_APPS = "no_install_apps";
+    field public static final java.lang.String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final java.lang.String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
     field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
     field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
-    field public static final java.lang.String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
-    field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
   }
 
