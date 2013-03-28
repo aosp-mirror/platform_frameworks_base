@@ -89,13 +89,11 @@ public interface BluetoothProfile {
 
     /**
      * GATT
-     * @hide
      */
     static public final int GATT = 7;
 
     /**
      * GATT_SERVER
-     * @hide
      */
     static public final int GATT_SERVER = 8;
 

@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Represents a Bluetooth Gatt Service
- * @hide
+ * Represents a Bluetooth GATT Service
  */
 public class BluetoothGattService {
 
@@ -81,9 +80,14 @@ public class BluetoothGattService {
 
     /**
      * Create a new BluetoothGattService.
-     * @hide
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param uuid The UUID for this service
+     * @param serviceType The type of this service,
+     *        {@link BluetoothGattService#SERVICE_TYPE_PRIMARY} or
+     *        {@link BluetoothGattService#SERVICE_TYPE_SECONDARY}
      */
-    /*package*/ BluetoothGattService(UUID uuid, int serviceType) {
+    public BluetoothGattService(UUID uuid, int serviceType) {
         mDevice = null;
         mUuid = uuid;
         mInstanceId = 0;
@@ -115,11 +119,28 @@ public class BluetoothGattService {
     }
 
     /**
-     * Add a characteristic to this service.
-     * @hide
+     * Add an included service to this service.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param service The service to be added
+     * @return true, if the included service was added to the service
      */
-    /*package*/ void addCharacteristic(BluetoothGattCharacteristic characteristic) {
+    public boolean addService(BluetoothGattService service) {
+        mIncludedServices.add(service);
+        return true;
+    }
+
+    /**
+     * Add a characteristic to this service.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param characteristic The characteristics to be added
+     * @return true, if the characteristic was added to the service
+     */
+    public boolean addCharacteristic(BluetoothGattCharacteristic characteristic) {
         mCharacteristics.add(characteristic);
+        characteristic.setService(this);
+        return true;
     }
 
     /**
@@ -136,11 +157,29 @@ public class BluetoothGattService {
     }
 
     /**
+     * Force the instance ID.
+     * This is needed for conformance testing only.
+     * @hide
+     */
+    public void setInstanceId(int instanceId) {
+        mInstanceId = instanceId;
+    }
+
+    /**
      * Get the handle count override (conformance testing.
      * @hide
      */
     /*package*/ int getHandles() {
         return mHandles;
+    }
+
+    /**
+     * Force the number of handles to reserve for this service.
+     * This is needed for conformance testing only.
+     * @hide
+     */
+    public void setHandles(int handles) {
+        mHandles = handles;
     }
 
     /**
@@ -153,7 +192,6 @@ public class BluetoothGattService {
 
     /**
      * Returns the UUID of this service
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return UUID of this service
      */
@@ -168,8 +206,6 @@ public class BluetoothGattService {
      * (ex. multiple battery services for different batteries), the instance
      * ID is used to distuinguish services.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return Instance ID of this service
      */
     public int getInstanceId() {
@@ -178,15 +214,13 @@ public class BluetoothGattService {
 
     /**
      * Get the type of this service (primary/secondary)
-     * @hide
      */
     public int getType() {
         return mServiceType;
     }
 
     /**
-     * Get the list of included Gatt services for this service.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     * Get the list of included GATT services for this service.
      *
      * @return List of included services or empty list if no included services
      *         were discovered.
@@ -197,7 +231,6 @@ public class BluetoothGattService {
 
     /**
      * Returns a list of characteristics included in this service.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Characteristics included in this service
      */
@@ -217,9 +250,7 @@ public class BluetoothGattService {
      * UUID, the first instance of a characteristic with the given UUID
      * is returned.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @return Gatt characteristic object or null if no characteristic with the
+     * @return GATT characteristic object or null if no characteristic with the
      *         given UUID was found.
      */
     public BluetoothGattCharacteristic getCharacteristic(UUID uuid) {

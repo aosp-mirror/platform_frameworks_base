@@ -4613,8 +4613,13 @@ package android.bluetooth {
     method public boolean isEnabled();
     method public android.bluetooth.BluetoothServerSocket listenUsingInsecureRfcommWithServiceRecord(java.lang.String, java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothServerSocket listenUsingRfcommWithServiceRecord(java.lang.String, java.util.UUID) throws java.io.IOException;
+    method public boolean registerCallback(android.bluetooth.BluetoothAdapterCallback);
     method public boolean setName(java.lang.String);
     method public boolean startDiscovery();
+    method public boolean startLeScan();
+    method public boolean startLeScan(java.util.UUID[]);
+    method public void stopLeScan();
+    method public boolean unRegisterCallback(android.bluetooth.BluetoothAdapterCallback);
     field public static final java.lang.String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED";
     field public static final java.lang.String ACTION_DISCOVERY_FINISHED = "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
     field public static final java.lang.String ACTION_DISCOVERY_STARTED = "android.bluetooth.adapter.action.DISCOVERY_STARTED";
@@ -4643,6 +4648,14 @@ package android.bluetooth {
     field public static final int STATE_ON = 12; // 0xc
     field public static final int STATE_TURNING_OFF = 13; // 0xd
     field public static final int STATE_TURNING_ON = 11; // 0xb
+  }
+
+  public abstract class BluetoothAdapterCallback {
+    ctor public BluetoothAdapterCallback();
+    method public void onCallbackRegistration(int);
+    method public void onLeScan(android.bluetooth.BluetoothDevice, int, byte[]);
+    field public static final int CALLBACK_REGISTERED = 0; // 0x0
+    field public static final int CALLBACK_REGISTRATION_FAILURE = 1; // 0x1
   }
 
   public class BluetoothAssignedNumbers {
@@ -4837,6 +4850,7 @@ package android.bluetooth {
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
+    method public android.bluetooth.BluetoothGatt connectGattServer(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback);
     method public android.bluetooth.BluetoothSocket createInsecureRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothSocket createRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public int describeContents();
@@ -4867,6 +4881,159 @@ package android.bluetooth {
     field public static final java.lang.String EXTRA_PREVIOUS_BOND_STATE = "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
     field public static final java.lang.String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
     field public static final java.lang.String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
+  }
+
+  public final class BluetoothGatt implements android.bluetooth.BluetoothProfile {
+    method public void abortReliableWrite(android.bluetooth.BluetoothDevice);
+    method public boolean beginReliableWrite();
+    method public void disconnect();
+    method public boolean discoverServices();
+    method public boolean executeReliableWrite();
+    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
+    method public android.bluetooth.BluetoothGattService getService(java.util.UUID);
+    method public java.util.List<android.bluetooth.BluetoothGattService> getServices();
+    method public boolean readCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
+    method public boolean readDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    method public boolean readRemoteRssi();
+    method public boolean setCharacteristicNotification(android.bluetooth.BluetoothGattCharacteristic, boolean);
+    method public boolean writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
+    method public boolean writeDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    field public static final int GATT_FAILURE = 0; // 0x0
+    field public static final int GATT_INSUFFICIENT_AUTHENTICATION = 5; // 0x5
+    field public static final int GATT_INSUFFICIENT_ENCRYPTION = 15; // 0xf
+    field public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 13; // 0xd
+    field public static final int GATT_INVALID_OFFSET = 7; // 0x7
+    field public static final int GATT_READ_NOT_PERMITTED = 2; // 0x2
+    field public static final int GATT_REQUEST_NOT_SUPPORTED = 6; // 0x6
+    field public static final int GATT_SUCCESS = 0; // 0x0
+    field public static final int GATT_WRITE_NOT_PERMITTED = 3; // 0x3
+  }
+
+  public abstract class BluetoothGattCallback {
+    ctor public BluetoothGattCallback();
+    method public void onCharacteristicChanged(android.bluetooth.BluetoothGattCharacteristic);
+    method public void onCharacteristicRead(android.bluetooth.BluetoothGattCharacteristic, int);
+    method public void onCharacteristicWrite(android.bluetooth.BluetoothGattCharacteristic, int);
+    method public void onConnectionStateChange(android.bluetooth.BluetoothDevice, int, int);
+    method public void onDescriptorRead(android.bluetooth.BluetoothGattDescriptor, int);
+    method public void onDescriptorWrite(android.bluetooth.BluetoothGattDescriptor, int);
+    method public void onReadRemoteRssi(android.bluetooth.BluetoothDevice, int, int);
+    method public void onReliableWriteCompleted(android.bluetooth.BluetoothDevice, int);
+    method public void onServicesDiscovered(android.bluetooth.BluetoothDevice, int);
+  }
+
+  public class BluetoothGattCharacteristic {
+    ctor public BluetoothGattCharacteristic(java.util.UUID, int, int);
+    method public boolean addDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    method public android.bluetooth.BluetoothGattDescriptor getDescriptor(java.util.UUID);
+    method public java.util.List<android.bluetooth.BluetoothGattDescriptor> getDescriptors();
+    method public java.lang.Float getFloatValue(int, int);
+    method public int getInstanceId();
+    method public java.lang.Integer getIntValue(int, int);
+    method public int getPermissions();
+    method public int getProperties();
+    method public android.bluetooth.BluetoothGattService getService();
+    method public java.lang.String getStringValue(int);
+    method public java.util.UUID getUuid();
+    method public byte[] getValue();
+    method public int getWriteType();
+    method public boolean setValue(byte[]);
+    method public boolean setValue(int, int, int);
+    method public boolean setValue(int, int, int, int);
+    method public boolean setValue(java.lang.String);
+    method public void setWriteType(int);
+    field public static final int FORMAT_FLOAT = 52; // 0x34
+    field public static final int FORMAT_SFLOAT = 50; // 0x32
+    field public static final int FORMAT_SINT16 = 34; // 0x22
+    field public static final int FORMAT_SINT32 = 36; // 0x24
+    field public static final int FORMAT_SINT8 = 33; // 0x21
+    field public static final int FORMAT_UINT16 = 18; // 0x12
+    field public static final int FORMAT_UINT32 = 20; // 0x14
+    field public static final int FORMAT_UINT8 = 17; // 0x11
+    field public static final int PERMISSION_READ = 1; // 0x1
+    field public static final int PERMISSION_READ_ENCRYPTED = 2; // 0x2
+    field public static final int PERMISSION_READ_ENCRYPTED_MITM = 4; // 0x4
+    field public static final int PERMISSION_WRITE = 16; // 0x10
+    field public static final int PERMISSION_WRITE_ENCRYPTED = 32; // 0x20
+    field public static final int PERMISSION_WRITE_ENCRYPTED_MITM = 64; // 0x40
+    field public static final int PERMISSION_WRITE_SIGNED = 128; // 0x80
+    field public static final int PERMISSION_WRITE_SIGNED_MITM = 256; // 0x100
+    field public static final int PROPERTY_BROADCAST = 1; // 0x1
+    field public static final int PROPERTY_EXTENDED_PROPS = 128; // 0x80
+    field public static final int PROPERTY_INDICATE = 32; // 0x20
+    field public static final int PROPERTY_NOTIFY = 16; // 0x10
+    field public static final int PROPERTY_READ = 2; // 0x2
+    field public static final int PROPERTY_SIGNED_WRITE = 64; // 0x40
+    field public static final int PROPERTY_WRITE = 8; // 0x8
+    field public static final int PROPERTY_WRITE_NO_RESPONSE = 4; // 0x4
+    field public static final int WRITE_TYPE_DEFAULT = 2; // 0x2
+    field public static final int WRITE_TYPE_NO_RESPONSE = 1; // 0x1
+    field public static final int WRITE_TYPE_SIGNED = 4; // 0x4
+    field protected java.util.List mDescriptors;
+  }
+
+  public class BluetoothGattDescriptor {
+    ctor public BluetoothGattDescriptor(java.util.UUID, int);
+    method public android.bluetooth.BluetoothGattCharacteristic getCharacteristic();
+    method public int getPermissions();
+    method public java.util.UUID getUuid();
+    method public byte[] getValue();
+    method public boolean setValue(byte[]);
+    field public static final byte[] DISABLE_NOTIFICATION_VALUE;
+    field public static final byte[] ENABLE_INDICATION_VALUE;
+    field public static final byte[] ENABLE_NOTIFICATION_VALUE;
+    field public static final int PERMISSION_READ = 1; // 0x1
+    field public static final int PERMISSION_READ_ENCRYPTED = 2; // 0x2
+    field public static final int PERMISSION_READ_ENCRYPTED_MITM = 4; // 0x4
+    field public static final int PERMISSION_WRITE = 16; // 0x10
+    field public static final int PERMISSION_WRITE_ENCRYPTED = 32; // 0x20
+    field public static final int PERMISSION_WRITE_ENCRYPTED_MITM = 64; // 0x40
+    field public static final int PERMISSION_WRITE_SIGNED = 128; // 0x80
+    field public static final int PERMISSION_WRITE_SIGNED_MITM = 256; // 0x100
+  }
+
+  public final class BluetoothGattServer implements android.bluetooth.BluetoothProfile {
+    method public boolean addService(android.bluetooth.BluetoothGattService);
+    method public void cancelConnection(android.bluetooth.BluetoothDevice);
+    method public void clearServices();
+    method public boolean connect(android.bluetooth.BluetoothDevice, boolean);
+    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
+    method public android.bluetooth.BluetoothGattService getService(java.util.UUID);
+    method public java.util.List<android.bluetooth.BluetoothGattService> getServices();
+    method public boolean notifyCharacteristicChanged(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothGattCharacteristic, boolean);
+    method public boolean removeService(android.bluetooth.BluetoothGattService);
+    method public boolean sendResponse(android.bluetooth.BluetoothDevice, int, int, int, byte[]);
+  }
+
+  public abstract class BluetoothGattServerCallback {
+    ctor public BluetoothGattServerCallback();
+    method public void onCharacteristicReadRequest(android.bluetooth.BluetoothDevice, int, int, android.bluetooth.BluetoothGattCharacteristic);
+    method public void onCharacteristicWriteRequest(android.bluetooth.BluetoothDevice, int, android.bluetooth.BluetoothGattCharacteristic, boolean, boolean, int, byte[]);
+    method public void onConnectionStateChange(android.bluetooth.BluetoothDevice, int, int);
+    method public void onDescriptorReadRequest(android.bluetooth.BluetoothDevice, int, int, android.bluetooth.BluetoothGattDescriptor);
+    method public void onDescriptorWriteRequest(android.bluetooth.BluetoothDevice, int, android.bluetooth.BluetoothGattDescriptor, boolean, boolean, int, byte[]);
+    method public void onExecuteWrite(android.bluetooth.BluetoothDevice, int, boolean);
+    method public void onServiceAdded(int, android.bluetooth.BluetoothGattService);
+  }
+
+  public class BluetoothGattService {
+    ctor public BluetoothGattService(java.util.UUID, int);
+    method public boolean addCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
+    method public boolean addService(android.bluetooth.BluetoothGattService);
+    method public android.bluetooth.BluetoothGattCharacteristic getCharacteristic(java.util.UUID);
+    method public java.util.List<android.bluetooth.BluetoothGattCharacteristic> getCharacteristics();
+    method public java.util.List<android.bluetooth.BluetoothGattService> getIncludedServices();
+    method public int getInstanceId();
+    method public int getType();
+    method public java.util.UUID getUuid();
+    field public static final int SERVICE_TYPE_PRIMARY = 0; // 0x0
+    field public static final int SERVICE_TYPE_SECONDARY = 1; // 0x1
+    field protected java.util.List mCharacteristics;
+    field protected java.util.List mIncludedServices;
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
@@ -4931,6 +5098,14 @@ package android.bluetooth {
     method public void onHealthChannelStateChange(android.bluetooth.BluetoothHealthAppConfiguration, android.bluetooth.BluetoothDevice, int, int, android.os.ParcelFileDescriptor, int);
   }
 
+  public final class BluetoothManager {
+    method public android.bluetooth.BluetoothAdapter getAdapter();
+    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices(int);
+    method public int getConnectionState(android.bluetooth.BluetoothDevice, int);
+    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int, int[]);
+    method public android.bluetooth.BluetoothGattServer openGattServer(android.content.Context, android.bluetooth.BluetoothGattServerCallback);
+  }
+
   public abstract interface BluetoothProfile {
     method public abstract java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method public abstract int getConnectionState(android.bluetooth.BluetoothDevice);
@@ -4938,6 +5113,8 @@ package android.bluetooth {
     field public static final int A2DP = 2; // 0x2
     field public static final java.lang.String EXTRA_PREVIOUS_STATE = "android.bluetooth.profile.extra.PREVIOUS_STATE";
     field public static final java.lang.String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
+    field public static final int GATT = 7; // 0x7
+    field public static final int GATT_SERVER = 8; // 0x8
     field public static final int HEADSET = 1; // 0x1
     field public static final int HEALTH = 3; // 0x3
     field public static final int STATE_CONNECTED = 2; // 0x2
@@ -5495,6 +5672,7 @@ package android.content {
     field public static final int BIND_IMPORTANT = 64; // 0x40
     field public static final int BIND_NOT_FOREGROUND = 4; // 0x4
     field public static final int BIND_WAIVE_PRIORITY = 32; // 0x20
+    field public static final java.lang.String BLUETOOTH_SERVICE = "bluetooth";
     field public static final java.lang.String CLIPBOARD_SERVICE = "clipboard";
     field public static final java.lang.String CONNECTIVITY_SERVICE = "connectivity";
     field public static final int CONTEXT_IGNORE_SECURITY = 2; // 0x2
@@ -6658,6 +6836,7 @@ package android.content.pm {
     method public abstract boolean addPermission(android.content.pm.PermissionInfo);
     method public abstract boolean addPermissionAsync(android.content.pm.PermissionInfo);
     method public abstract deprecated void addPreferredActivity(android.content.IntentFilter, int, android.content.ComponentName[], android.content.ComponentName);
+    method public android.content.Intent buildPermissionRequestIntent(java.lang.String...);
     method public abstract java.lang.String[] canonicalToCurrentPackageNames(java.lang.String[]);
     method public abstract int checkPermission(java.lang.String, java.lang.String);
     method public abstract int checkSignatures(java.lang.String, java.lang.String);
@@ -6717,7 +6896,6 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract deprecated void removePackageFromPreferred(java.lang.String);
     method public abstract void removePermission(java.lang.String);
-    method public android.content.Intent buildPermissionRequestIntent(java.lang.String...);
     method public abstract android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
     method public abstract android.content.pm.ProviderInfo resolveContentProvider(java.lang.String, int);
     method public abstract android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
@@ -16810,13 +16988,13 @@ package android.os {
     method public void setUserRestriction(java.lang.String, boolean);
     method public void setUserRestrictions(android.os.Bundle);
     method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
+    field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final java.lang.String DISALLOW_CONFIG_WIFI = "no_config_wifi";
     field public static final java.lang.String DISALLOW_INSTALL_APPS = "no_install_apps";
+    field public static final java.lang.String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final java.lang.String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
     field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
     field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
-    field public static final java.lang.String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
-    field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
   }
 

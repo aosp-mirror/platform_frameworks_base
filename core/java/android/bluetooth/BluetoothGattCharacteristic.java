@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Represents a Bluetooth Gatt Characteristic
- * @hide
+ * Represents a Bluetooth GATT Characteristic
  */
 public class BluetoothGattCharacteristic {
 
@@ -119,7 +118,7 @@ public class BluetoothGattCharacteristic {
     public static final int WRITE_TYPE_NO_RESPONSE = 0x01;
 
     /**
-     * Write characteristic including and authenticated signature
+     * Write characteristic including authentication signature
      */
     public static final int WRITE_TYPE_SIGNED = 0x04;
 
@@ -219,12 +218,30 @@ public class BluetoothGattCharacteristic {
     protected List<BluetoothGattDescriptor> mDescriptors;
 
     /**
+     * Create a new BluetoothGattCharacteristic.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param uuid The UUID for this characteristic
+     * @param properties Properties of this characteristic
+     * @param permissions Permissions for this characteristic
+     */
+    public BluetoothGattCharacteristic(UUID uuid, int properties, int permissions) {
+        initCharacteristic(null, uuid, 0, properties, permissions);
+    }
+
+    /**
      * Create a new BluetoothGattCharacteristic
      * @hide
      */
     /*package*/ BluetoothGattCharacteristic(BluetoothGattService service,
                                             UUID uuid, int instanceId,
                                             int properties, int permissions) {
+        initCharacteristic(service, uuid, instanceId, properties, permissions);
+    }
+
+    private void initCharacteristic(BluetoothGattService service,
+                                    UUID uuid, int instanceId,
+                                    int properties, int permissions) {
         mUuid = uuid;
         mInstance = instanceId;
         mProperties = properties;
@@ -249,11 +266,16 @@ public class BluetoothGattCharacteristic {
     }
 
     /**
-     * Add a descriptor to this characteristic
-     * @hide
+     * Adds a descriptor to this characteristic.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param descriptor Descriptor to be added to this characteristic.
+     * @return true, if the descriptor was added to the characteristic
      */
-    /*package*/ void addDescriptor(BluetoothGattDescriptor descriptor) {
+    public boolean addDescriptor(BluetoothGattDescriptor descriptor) {
         mDescriptors.add(descriptor);
+        descriptor.setCharacteristic(this);
+        return true;
     }
 
     /**
@@ -265,8 +287,15 @@ public class BluetoothGattCharacteristic {
     }
 
     /**
+     * Sets the service associated with this device.
+     * @hide
+     */
+    /*package*/ void setService(BluetoothGattService service) {
+        mService = service;
+    }
+
+    /**
      * Returns the UUID of this characteristic
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return UUID of this characteristic
      */
@@ -280,8 +309,6 @@ public class BluetoothGattCharacteristic {
      * <p>If a remote device offers multiple characteristics with the same UUID,
      * the instance ID is used to distuinguish between characteristics.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return Instance ID of this characteristic
      */
     public int getInstanceId() {
@@ -294,8 +321,6 @@ public class BluetoothGattCharacteristic {
      * <p>The properties contain a bit mask of property flags indicating
      * the features of this characteristic.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return Properties of this characteristic
      */
     public int getProperties() {
@@ -304,7 +329,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Returns the permissions for this characteristic.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Permissions of this characteristic
      */
@@ -314,7 +338,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Gets the write type for this characteristic.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Write type for this characteristic
      */
@@ -329,11 +352,6 @@ public class BluetoothGattCharacteristic {
      * {@link BluetoothGatt#writeCharacteristic} function write this
      * characteristic.
      *
-     * <p>The default write type for a characteristic is
-     * {@link #WRITE_TYPE_DEFAULT}.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param writeType The write type to for this characteristic. Can be one
      *                  of:
      *                  {@link #WRITE_TYPE_DEFAULT},
@@ -345,8 +363,15 @@ public class BluetoothGattCharacteristic {
     }
 
     /**
+     * Set the desired key size.
+     * @hide
+     */
+    public void setKeySize(int keySize) {
+        mKeySize = keySize;
+    }
+
+    /**
      * Returns a list of descriptors for this characteristic.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Descriptors for this characteristic
      */
@@ -358,9 +383,7 @@ public class BluetoothGattCharacteristic {
      * Returns a descriptor with a given UUID out of the list of
      * descriptors for this characteristic.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @return Gatt descriptor object or null if no descriptor with the
+     * @return GATT descriptor object or null if no descriptor with the
      *         given UUID was found.
      */
     public BluetoothGattDescriptor getDescriptor(UUID uuid) {
@@ -376,11 +399,9 @@ public class BluetoothGattCharacteristic {
      * Get the stored value for this characteristic.
      *
      * <p>This function returns the stored value for this characteristic as
-     * retrieved by calling {@link BluetoothGatt#readCharacteristic}. To cached
+     * retrieved by calling {@link BluetoothGatt#readCharacteristic}. The cached
      * value of the characteristic is updated as a result of a read characteristic
      * operation or if a characteristic update notification has been received.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Cached value of the characteristic
      */
@@ -396,8 +417,6 @@ public class BluetoothGattCharacteristic {
      * {@link #FORMAT_UINT16} specifies that the first two bytes of the
      * characteristic value at the given offset are interpreted to generate the
      * return value.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param formatType The format type used to interpret the characteristic
      *                   value.
@@ -436,7 +455,6 @@ public class BluetoothGattCharacteristic {
     /**
      * Return the stored value of this characteristic.
      * <p>See {@link #getValue} for details.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param formatType The format type used to interpret the characteristic
      *                   value.
@@ -462,7 +480,7 @@ public class BluetoothGattCharacteristic {
     /**
      * Return the stored value of this characteristic.
      * <p>See {@link #getValue} for details.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
      * @param offset Offset at which the string value can be found.
      * @return Cached value of the characteristic
      */
@@ -481,8 +499,6 @@ public class BluetoothGattCharacteristic {
      * {@link BluetoothGatt#writeCharacteristic} to send the value to the
      * remote device.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param value New value for this characteristic
      * @return true if the locally stored value has been set, false if the
      *              requested value could not be stored locally.
@@ -495,7 +511,6 @@ public class BluetoothGattCharacteristic {
     /**
      * Set the locally stored value of this characteristic.
      * <p>See {@link #setValue(byte[])} for details.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param value New value for this characteristic
      * @param formatType Integer format type used to transform the value parameter
@@ -542,7 +557,7 @@ public class BluetoothGattCharacteristic {
     /**
      * Set the locally stored value of this characteristic.
      * <p>See {@link #setValue(byte[])} for details.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
      * @param mantissa Mantissa for this characteristic
      * @param exponent  exponent value for this characteristic
      * @param formatType Float format type used to transform the value parameter
@@ -582,7 +597,7 @@ public class BluetoothGattCharacteristic {
     /**
      * Set the locally stored value of this characteristic.
      * <p>See {@link #setValue(byte[])} for details.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
      * @param value New value for this characteristic
      * @return true if the locally stored value has been set
      */
@@ -593,7 +608,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Returns the size of a give value type.
-     * @hide
      */
     private int getTypeLen(int formatType) {
         return formatType & 0xF;
@@ -601,7 +615,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Convert a signed byte to an unsigned int.
-     * @hide
      */
     private int unsignedByteToInt(byte b) {
         return b & 0xFF;
@@ -609,7 +622,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Convert signed bytes to a 16-bit unsigned int.
-     * @hide
      */
     private int unsignedBytesToInt(byte b0, byte b1) {
         return (unsignedByteToInt(b0) + (unsignedByteToInt(b1) << 8));
@@ -617,7 +629,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Convert signed bytes to a 32-bit unsigned int.
-     * @hide
      */
     private int unsignedBytesToInt(byte b0, byte b1, byte b2, byte b3) {
         return (unsignedByteToInt(b0) + (unsignedByteToInt(b1) << 8))
@@ -626,7 +637,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Convert signed bytes to a 16-bit short float value.
-     * @hide
      */
     private float bytesToFloat(byte b0, byte b1) {
         int mantissa = unsignedToSigned(unsignedByteToInt(b0)
@@ -637,7 +647,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Convert signed bytes to a 32-bit short float value.
-     * @hide
      */
     private float bytesToFloat(byte b0, byte b1, byte b2, byte b3) {
         int mantissa = unsignedToSigned(unsignedByteToInt(b0)
@@ -649,7 +658,6 @@ public class BluetoothGattCharacteristic {
     /**
      * Convert an unsigned integer value to a two's-complement encoded
      * signed value.
-     * @hide
      */
     private int unsignedToSigned(int unsigned, int size) {
         if ((unsigned & (1 << size-1)) != 0) {
@@ -660,7 +668,6 @@ public class BluetoothGattCharacteristic {
 
     /**
      * Convert an integer into the signed bits of a given length.
-     * @hide
      */
     private int intToSignedBits(int i, int size) {
         if (i < 0) {
