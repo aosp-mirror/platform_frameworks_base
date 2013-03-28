@@ -1359,7 +1359,7 @@ public final class ContactsContract {
      * status definitions. Automatically computed as the highest presence of all
      * constituent raw contacts. The provider may choose not to store this value
      * in persistent storage. The expectation is that presence status will be
-     * updated on a regular basic.</td>
+     * updated on a regular basis.</td>
      * </tr>
      * <tr>
      * <td>String</td>
@@ -4181,7 +4181,7 @@ public final class ContactsContract {
      * all IM rows. See {@link StatusUpdates} for individual status definitions.
      * The provider may choose not to store this value
      * in persistent storage. The expectation is that presence status will be
-     * updated on a regular basic.
+     * updated on a regular basis.
      * </td>
      * </tr>
      * <tr>
