@@ -2285,9 +2285,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         // Update 464xlat state.
-        // TODO: Move to handleConnect()
         NetworkStateTracker tracker = mNetTrackers[netType];
         if (mClat.requiresClat(netType, tracker)) {
+            // If the connection was previously using clat, but is not using it now, stop the clat
+            // daemon. Normally, this happens automatically when the connection disconnects, but if
+            // the disconnect is not reported, or if the connection's LinkProperties changed for
+            // some other reason (e.g., handoff changes the IP addresses on the link), it would
+            // still be running. If it's not running, then stopping it is a no-op.
+            if (Nat464Xlat.isRunningClat(curLp) && !Nat464Xlat.isRunningClat(newLp)) {
+                mClat.stopClat();
+            }
+            // If the link requires clat to be running, then start the daemon now.
             if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
                 mClat.startClat(tracker);
             } else {
