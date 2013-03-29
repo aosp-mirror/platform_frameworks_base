@@ -541,6 +541,7 @@ public class AccountManagerService
         }
     }
 
+    @Override
     public boolean addAccount(Account account, String password, Bundle extras) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "addAccount: " + account
@@ -549,9 +550,13 @@ public class AccountManagerService
         }
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
-        if (!canUserModifyAccounts(Binder.getCallingUid())) {
-            return false;
-        }
+        /*
+         * Child users are not allowed to add accounts. Only the accounts that are
+         * shared by the parent profile can be added to child profile.
+         *
+         * TODO: Only allow accounts that were shared to be added by
+         *     a limited user.
+         */
 
         UserAccounts accounts = getUserAccountsForCaller();
         // fails if the account already exists
@@ -588,12 +593,9 @@ public class AccountManagerService
                         if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
                             // Create a Session for the target user and pass in the bundle
                             completeCloningAccount(result, account, toAccounts);
-                        } else {
-                            clonePassword(fromAccounts, toAccounts, account);
                         }
                         return;
                     } else {
-                        clonePassword(fromAccounts, toAccounts, account);
                         super.onResult(result);
                     }
                 }
@@ -602,23 +604,6 @@ public class AccountManagerService
             restoreCallingIdentity(identityToken);
         }
         return true;
-    }
-
-    // TODO: Remove fallback - move to authenticator
-    private void clonePassword(UserAccounts fromAccounts, UserAccounts toAccounts,
-            Account account) {
-        long id = clearCallingIdentity();
-        try {
-            String password = readPasswordInternal(fromAccounts, account);
-            String extraFlags = readUserDataInternal(fromAccounts, account, "flags");
-            String extraServices = readUserDataInternal(fromAccounts, account, "services");
-            Bundle extras = new Bundle();
-            extras.putString("flags", extraFlags);
-            extras.putString("services", extraServices);
-            addAccountInternal(toAccounts, account, password, extras, true);
-        } finally {
-            restoreCallingIdentity(id);
-        }
     }
 
     void completeCloningAccount(final Bundle result, final Account account,
