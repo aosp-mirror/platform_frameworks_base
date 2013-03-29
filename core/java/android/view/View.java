@@ -9485,17 +9485,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Sets the opacity of the view. This is a value from 0 to 1, where 0 means the view is
      * completely transparent and 1 means the view is completely opaque.</p>
      *
-     * <p>If this view overrides {@link #onSetAlpha(int)} to return true, then this view is
-     * responsible for applying the opacity itself. Otherwise, calling this method is
-     * equivalent to calling {@link #setLayerType(int, android.graphics.Paint)} and
-     * setting a hardware layer.</p>
+     * <p> Note that setting alpha to a translucent value (0 < alpha < 1) can have significant
+     * performance implications, especially for large views. It is best to use the alpha property
+     * sparingly and transiently, as in the case of fading animations.</p>
      *
-     * <p>Note that setting alpha to a translucent value (0 < alpha < 1) may have
-     * performance implications. It is generally best to use the alpha property sparingly and
-     * transiently, as in the case of fading animations.</p>
+     * <p>For a view with a frequently changing alpha, such as during a fading animation, it is
+     * strongly recommended for performance reasons to either override
+     * {@link #hasOverlappingRendering()} to return false if appropriate, or setting a
+     * {@link #setLayerType(int, android.graphics.Paint) layer type} on the view.</p>
+     *
+     * <p>If this view overrides {@link #onSetAlpha(int)} to return true, then this view is
+     * responsible for applying the opacity itself.</p>
+     *
+     * <p>Note that if the view is backed by a
+     * {@link #setLayerType(int, android.graphics.Paint) layer} and is associated with a
+     * {@link #setLayerPaint(android.graphics.Paint) layer paint}, setting an alpha value less than
+     * 1.0 will supercede the alpha of the layer paint.</p>
      *
      * @param alpha The opacity of the view.
      *
+     * @see #hasOverlappingRendering()
      * @see #setLayerType(int, android.graphics.Paint)
      *
      * @attr ref android.R.styleable#View_alpha
@@ -12365,13 +12374,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ul>
      *
      * <p>If this view has an alpha value set to < 1.0 by calling
-     * {@link #setAlpha(float)}, the alpha value of the layer's paint is replaced by
-     * this view's alpha value. Calling {@link #setAlpha(float)} is therefore
-     * equivalent to setting a hardware layer on this view and providing a paint with
-     * the desired alpha value.</p>
+     * {@link #setAlpha(float)}, the alpha value of the layer's paint is superceded
+     * by this view's alpha value.</p>
      *
-     * <p>Refer to the documentation of {@link #LAYER_TYPE_NONE disabled},
-     * {@link #LAYER_TYPE_SOFTWARE software} and {@link #LAYER_TYPE_HARDWARE hardware}
+     * <p>Refer to the documentation of {@link #LAYER_TYPE_NONE},
+     * {@link #LAYER_TYPE_SOFTWARE} and {@link #LAYER_TYPE_HARDWARE}
      * for more information on when and how to use layers.</p>
      *
      * @param layerType The type of layer to use with this view, must be one of
@@ -12441,11 +12448,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>{@link android.graphics.Paint#getColorFilter() Color filter}</li>
      * </ul>
      *
-     * <p>If this view has an alpha value set to < 1.0 by calling
-     * {@link #setAlpha(float)}, the alpha value of the layer's paint is replaced by
-     * this view's alpha value. Calling {@link #setAlpha(float)} is therefore
-     * equivalent to setting a hardware layer on this view and providing a paint with
-     * the desired alpha value.</p>
+     * <p>If this view has an alpha value set to < 1.0 by calling {@link #setAlpha(float)}, the
+     * alpha value of the layer's paint is superceded by this view's alpha value.</p>
      *
      * @param paint The paint used to compose the layer. This argument is optional
      *        and can be null. It is ignored when the layer type is
