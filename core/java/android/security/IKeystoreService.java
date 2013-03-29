@@ -427,6 +427,23 @@ public interface IKeystoreService extends IInterface {
                 }
                 return _result;
             }
+
+            @Override
+            public int is_hardware_backed() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_is_hardware_backed, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "android.security.keystore";
@@ -452,6 +469,7 @@ public interface IKeystoreService extends IInterface {
         static final int TRANSACTION_ungrant = IBinder.FIRST_CALL_TRANSACTION + 18;
         static final int TRANSACTION_getmtime = IBinder.FIRST_CALL_TRANSACTION + 19;
         static final int TRANSACTION_duplicate = IBinder.FIRST_CALL_TRANSACTION + 20;
+        static final int TRANSACTION_is_hardware_backed = IBinder.FIRST_CALL_TRANSACTION + 21;
 
         /**
          * Cast an IBinder object into an IKeystoreService interface, generating
@@ -539,4 +557,6 @@ public interface IKeystoreService extends IInterface {
 
     public int duplicate(String srcKey, int srcUid, String destKey, int destUid)
             throws RemoteException;
+
+    public int is_hardware_backed() throws RemoteException;
 }
