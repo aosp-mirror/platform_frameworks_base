@@ -1468,6 +1468,8 @@ class WifiConfigStore {
         if (config.enterpriseConfig.migrateOldEapTlsNative(mWifiNative, netId)) {
             saveConfig();
         }
+
+        config.enterpriseConfig.migrateCerts(mKeyStore);
     }
 
     private String removeDoubleQuotes(String string) {

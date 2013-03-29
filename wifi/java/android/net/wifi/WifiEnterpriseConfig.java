@@ -17,9 +17,9 @@ package android.net.wifi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.security.Credentials;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.org.bouncycastle.asn1.ASN1InputStream;
 import com.android.org.bouncycastle.asn1.ASN1Sequence;
@@ -481,7 +481,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         String caCertName = Credentials.CA_CERTIFICATE + name;
         if (mClientCertificate != null) {
             byte[] privKeyData = mClientPrivateKey.getEncoded();
-            ret = keyStore.importKey(privKeyName, privKeyData);
+            ret = keyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID);
             if (ret == false) {
                 return ret;
             }
@@ -489,7 +489,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             ret = putCertInKeyStore(keyStore, userCertName, mClientCertificate);
             if (ret == false) {
                 // Remove private key installed
-                keyStore.delKey(privKeyName);
+                keyStore.delKey(privKeyName, Process.WIFI_UID);
                 return ret;
             }
         }
@@ -499,8 +499,8 @@ public class WifiEnterpriseConfig implements Parcelable {
             if (ret == false) {
                 if (mClientCertificate != null) {
                     // Remove client key+cert
-                    keyStore.delKey(privKeyName);
-                    keyStore.delete(userCertName);
+                    keyStore.delKey(privKeyName, Process.WIFI_UID);
+                    keyStore.delete(userCertName, Process.WIFI_UID);
                 }
                 return ret;
             }
@@ -525,7 +525,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             Certificate cert) {
         try {
             byte[] certData = Credentials.convertToPem(cert);
-            return keyStore.put(name, certData);
+            return keyStore.put(name, certData, Process.WIFI_UID);
         } catch (IOException e1) {
             return false;
         } catch (CertificateException e2) {
@@ -537,14 +537,14 @@ public class WifiEnterpriseConfig implements Parcelable {
         String client = getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
         // a valid client certificate is configured
         if (!TextUtils.isEmpty(client)) {
-            keyStore.delKey(Credentials.USER_PRIVATE_KEY + client);
-            keyStore.delete(Credentials.USER_CERTIFICATE + client);
+            keyStore.delKey(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
+            keyStore.delete(Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
         }
 
         String ca = getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
         // a valid ca certificate is configured
         if (!TextUtils.isEmpty(ca)) {
-            keyStore.delete(Credentials.CA_CERTIFICATE + ca);
+            keyStore.delete(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
         }
     }
 
@@ -623,6 +623,29 @@ public class WifiEnterpriseConfig implements Parcelable {
         // Remove old private_key string so we don't run this again.
         wifiNative.setNetworkVariable(netId, OLD_PRIVATE_KEY_NAME, EMPTY_VALUE);
         return true;
+    }
+
+    /** Migrate certs from global pool to wifi UID if not already done */
+    void migrateCerts(android.security.KeyStore keyStore) {
+        String client = getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
+        // a valid client certificate is configured
+        if (!TextUtils.isEmpty(client)) {
+            if (!keyStore.contains(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID)) {
+                keyStore.duplicate(Credentials.USER_PRIVATE_KEY + client, -1,
+                        Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
+                keyStore.duplicate(Credentials.USER_CERTIFICATE + client, -1,
+                        Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
+            }
+        }
+
+        String ca = getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
+        // a valid ca certificate is configured
+        if (!TextUtils.isEmpty(ca)) {
+            if (!keyStore.contains(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID)) {
+                keyStore.duplicate(Credentials.CA_CERTIFICATE + ca, -1,
+                        Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
+            }
+        }
     }
 
     private String removeDoubleQuotes(String string) {
