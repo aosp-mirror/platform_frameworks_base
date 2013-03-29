@@ -284,7 +284,7 @@ immune to SQL injection.</p>
 // Define 'where' part of query.
 String selection = FeedReaderContract.FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
 // Specify arguments in placeholder order.
-String[] selelectionArgs = { String.valueOf(rowId) };
+String[] selectionArgs = { String.valueOf(rowId) };
 // Issue SQL statement.
 db.delete(table_name, selection, selectionArgs);
 </pre>
@@ -309,7 +309,7 @@ values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE, title);
 
 // Which row to update, based on the ID
 String selection = FeedReaderContract.FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
-String[] selelectionArgs = { String.valueOf(rowId) };
+String[] selectionArgs = { String.valueOf(rowId) };
 
 int count = db.update(
     FeedReaderDbHelper.FeedEntry.TABLE_NAME,
