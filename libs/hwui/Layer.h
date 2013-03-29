@@ -275,6 +275,7 @@ struct Layer {
 
     void defer();
     void flush();
+    void render();
 
     /**
      * Bounds of the layer.
