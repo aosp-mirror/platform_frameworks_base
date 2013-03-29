@@ -572,7 +572,10 @@ public abstract class SensorManager {
      *        are received faster. The value must be one of
      *        {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
      *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}
-     *        or, the desired delay between events in microsecond.
+     *        or, the desired delay between events in microseconds.
+     *        Specifying the delay in microseconds only works from Android
+     *        2.3 (API level 9) onwards. For earlier releases, you must use
+     *        one of the {@code SENSOR_DELAY_*} constants.
      *
      * @return <code>true</code> if the sensor is supported and successfully
      *         enabled.
@@ -604,7 +607,10 @@ public abstract class SensorManager {
      *        are received faster. The value must be one of
      *        {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
      *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
-     *        or, the desired delay between events in microsecond.
+     *        or, the desired delay between events in microseconds.
+     *        Specifying the delay in microseconds only works from Android
+     *        2.3 (API level 9) onwards. For earlier releases, you must use
+     *        one of the {@code SENSOR_DELAY_*} constants.
      *
      * @param handler
      *        The {@link android.os.Handler Handler} the
