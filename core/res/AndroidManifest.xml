@@ -2320,6 +2320,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.android.server.updates.SELinuxPolicyInstallReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.UPDATE_SEPOLICY" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name="com.android.server.MasterClearReceiver"
             android:permission="android.permission.MASTER_CLEAR"
             android:priority="100" >

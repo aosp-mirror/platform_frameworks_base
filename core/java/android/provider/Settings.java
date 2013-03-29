@@ -5405,6 +5405,12 @@ public final class Settings {
          */
         public static final String CERT_PIN_UPDATE_METADATA_URL = "cert_pin_metadata_url";
 
+        /*
+         * SELinux enforcement status. If 0, permissive; if 1, enforcing.
+         * @hide
+         */
+        public static final String SELINUX_STATUS = "selinux_status";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
