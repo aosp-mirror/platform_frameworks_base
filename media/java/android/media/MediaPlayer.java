@@ -328,8 +328,8 @@ import java.lang.ref.WeakReference;
  *         the state. Calling this method in an invalid state transfers the
  *         object to the <em>Error</em> state. </p></td></tr>
  * <tr><td>pause </p></td>
- *     <td>{Started, Paused}</p></td>
- *     <td>{Idle, Initialized, Prepared, Stopped, PlaybackCompleted, Error}</p></td>
+ *     <td>{Started, Paused, PlaybackCompleted}</p></td>
+ *     <td>{Idle, Initialized, Prepared, Stopped, Error}</p></td>
  *     <td>Successful invoke of this method in a valid state transfers the
  *         object to the <em>Paused</em> state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
