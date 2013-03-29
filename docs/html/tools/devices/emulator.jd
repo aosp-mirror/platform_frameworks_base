@@ -1254,7 +1254,7 @@ syntax for this command is as follows: </p>
 <td>&nbsp;</td>
 </tr>
 <tr>
-  <td><code>power health &lt;percent&gt;</code></td>
+  <td><code>capacity &lt;percent&gt;</code></td>
   <td>Set remaining battery capacity state (0-100).</td>
 <td>&nbsp;</td>
 </tr>
