@@ -777,10 +777,11 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
 
 <p class="note"><strong>Note:</strong> If your organization has a firewall 
 that restricts the traffic to or 
-from the Internet, you need to configure it to allow connectivity with GCM. 
+from the Internet, you need to configure it to allow connectivity with GCM in order for
+your Android devices to receive messages. 
 The ports to open are: 5228, 5229, and 5230. GCM typically only uses 5228, but 
 it sometimes uses 5229 and 5230. GCM doesn't provide specific IPs, so you should 
-allow your server to accept incoming connections from all IP addresses 
+allow your firewall to accept incoming connections from all IP addresses 
 contained in the IP blocks listed in Google's ASN of 15169.</p>
 
 
