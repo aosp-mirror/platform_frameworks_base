@@ -296,6 +296,15 @@ public class KeyStore {
         }
     }
 
+    public boolean isHardwareBacked() {
+        try {
+            return mBinder.is_hardware_backed() == NO_ERROR;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
     public int getLastError() {
         return mError;
     }
