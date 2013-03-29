@@ -55,7 +55,8 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart" />
         </LinearLayout>
         <ImageView android:id="@+id/titleDivider"
             android:layout_width="match_parent"
