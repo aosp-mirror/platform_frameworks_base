@@ -159,6 +159,7 @@ interface IAudioService {
     oneway void remoteControlDisplayUsesBitmapSize(in IRemoteControlDisplay rcd, int w, int h);
 
     oneway void setPlaybackInfoForRcc(int rccId, int what, int value);
+           void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed);
            int  getRemoteStreamMaxVolume();
            int  getRemoteStreamVolume();
     oneway void registerRemoteVolumeObserverForRcc(int rccId, in IRemoteVolumeObserver rvo);

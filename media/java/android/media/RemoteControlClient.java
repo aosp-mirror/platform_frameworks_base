@@ -172,6 +172,17 @@ public class RemoteControlClient
      */
     public final static int PLAYBACKINFO_INVALID_VALUE = Integer.MIN_VALUE;
 
+    /**
+     * @hide
+     * An unknown or invalid playback position value.
+     */
+    public final static long PLAYBACK_POSITION_INVALID = -1;
+    /**
+     * @hide
+     * The default playback speed, 1x.
+     */
+    public final static float PLAYBACK_SPEED_1X = 1.0f;
+
     //==========================================
     // Public keys for playback information
     /**
@@ -208,15 +219,7 @@ public class RemoteControlClient
     public final static int PLAYBACKINFO_USES_STREAM = 5;
 
     //==========================================
-    // Private keys for playback information
-    /**
-     * @hide
-     * Used internally to relay playback state (set by the application with
-     * {@link #setPlaybackState(int)}) to AudioService
-     */
-    public final static int PLAYBACKINFO_PLAYSTATE = 255;
-
-
+    // Public flags for the supported transport control capabililities
     /**
      * Flag indicating a RemoteControlClient makes use of the "previous" media key.
      *
@@ -273,6 +276,15 @@ public class RemoteControlClient
      * @see android.view.KeyEvent#KEYCODE_MEDIA_NEXT
      */
     public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
+    /**
+     * @hide
+     * (to be un-hidden and added in javadoc of setTransportControlFlags(int))
+     * Flag indicating a RemoteControlClient can receive changes in the media playback position
+     * through the {@link #OnPlaybackPositionUpdateListener} interface.
+     *
+     * @see #setTransportControlFlags(int)
+     */
+    public final static int FLAG_KEY_MEDIA_POSITION_UPDATE = 1 << 8;
 
     /**
      * @hide
@@ -588,17 +600,54 @@ public class RemoteControlClient
      *       {@link #PLAYSTATE_ERROR}.
      */
     public void setPlaybackState(int state) {
+        setPlaybackState(state, PLAYBACK_POSITION_INVALID, PLAYBACK_SPEED_1X);
+    }
+
+    /**
+     * @hide
+     * (to be un-hidden)
+     * Sets the current playback state and the matching media position for the current playback
+     *   speed.
+     * @param state The current playback state, one of the following values:
+     *       {@link #PLAYSTATE_STOPPED},
+     *       {@link #PLAYSTATE_PAUSED},
+     *       {@link #PLAYSTATE_PLAYING},
+     *       {@link #PLAYSTATE_FAST_FORWARDING},
+     *       {@link #PLAYSTATE_REWINDING},
+     *       {@link #PLAYSTATE_SKIPPING_FORWARDS},
+     *       {@link #PLAYSTATE_SKIPPING_BACKWARDS},
+     *       {@link #PLAYSTATE_BUFFERING},
+     *       {@link #PLAYSTATE_ERROR}.
+     * @param timeInMs a 0 or positive value for the current media position expressed in ms
+     *    (same unit as for when sending the media duration, if applicable, with
+     *    {@link android.media.MediaMetadataRetriever#METADATA_KEY_DURATION} in the
+     *    {@link RemoteControlClient.MetadataEditor}). Negative values imply that position is not
+     *    known (e.g. listening to a live stream of a radio) or not applicable (e.g. when state
+     *    is {@link #PLAYSTATE_BUFFERING} and nothing had played yet).
+     * @param playbackSpeed a value expressed as a ratio of 1x playback: 1.0f is normal playback,
+     *    2.0f is 2x, 0.5f is half-speed, -2.0f is rewind at 2x speed. 0.0f means nothing is
+     *    playing (e.g. when state is {@link #PLAYSTATE_ERROR}).
+     */
+    public void setPlaybackState(int state, long timeInMs, float playbackSpeed) {
         synchronized(mCacheLock) {
-            if (mPlaybackState != state) {
+            if (timeInMs != PLAYBACK_POSITION_INVALID) {
+                mPlaybackPositionCapabilities |= MEDIA_POSITION_READABLE;
+            } else {
+                mPlaybackPositionCapabilities &= ~MEDIA_POSITION_READABLE;
+            }
+            if ((mPlaybackState != state) || (mPlaybackPositionMs != timeInMs)
+                    || (mPlaybackSpeed != playbackSpeed)) {
                 // store locally
                 mPlaybackState = state;
+                mPlaybackPositionMs = timeInMs;
+                mPlaybackSpeed = playbackSpeed;
                 // keep track of when the state change occurred
                 mPlaybackStateChangeTimeMs = SystemClock.elapsedRealtime();
 
                 // send to remote control display if conditions are met
                 sendPlaybackState_syncCacheLock();
                 // update AudioService
-                sendAudioServiceNewPlaybackInfo_syncCacheLock(PLAYBACKINFO_PLAYSTATE, state);
+                sendAudioServiceNewPlaybackState_syncCacheLock();
             }
         }
     }
@@ -624,6 +673,65 @@ public class RemoteControlClient
             sendTransportControlFlags_syncCacheLock();
         }
     }
+
+    /**
+     * @hide
+     * (to be un-hidden)
+     * Interface definition for a callback to be invoked when the media playback position is
+     * requested to be updated.
+     */
+    public interface OnPlaybackPositionUpdateListener {
+        /**
+         * Called on the listener to notify it that the playback head should be set at the given
+         * position. If the position can be changed from its current value, the implementor of
+         * the interface should also update the playback position using
+         * {@link RemoteControlClient#setPlaybackState(int, long, int)} to reflect the actual new
+         * position being used, regardless of whether it differs from the requested position.
+         * @param newPositionMs the new requested position in the current media, expressed in ms.
+         */
+        void onPlaybackPositionUpdate(long newPositionMs);
+    }
+
+    /**
+     * @hide
+     * (to be un-hidden)
+     * Sets the listener RemoteControlClient calls whenever the media playback position is requested
+     * to be updated.
+     * Notifications will be received in the same thread as the one in which RemoteControlClient
+     * was created.
+     * @param l
+     */
+    public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener l) {
+        synchronized(mCacheLock) {
+            if ((mPositionUpdateListener == null) && (l != null)) {
+                mPlaybackPositionCapabilities |= MEDIA_POSITION_WRITABLE;
+                // tell RCDs and AudioService this RCC accepts position updates
+                // TODO implement
+            } else if ((mPositionUpdateListener != null) && (l == null)) {
+                mPlaybackPositionCapabilities &= ~MEDIA_POSITION_WRITABLE;
+                // tell RCDs and AudioService this RCC doesn't handle position updates
+                // TODO implement
+            }
+            mPositionUpdateListener = l;
+        }
+    }
+
+    /**
+     * @hide
+     * Flag to reflect that the application controlling this RemoteControlClient sends playback
+     * position updates. The playback position being "readable" is considered from the application's
+     * point of view.
+     */
+    public static int MEDIA_POSITION_READABLE = 1 << 0;
+    /**
+     * @hide
+     * Flag to reflect that the application controlling this RemoteControlClient can receive
+     * playback position updates. The playback position being "writable"
+     * is considered from the application's point of view.
+     */
+    public static int MEDIA_POSITION_WRITABLE = 1 << 1;
+
+    private int mPlaybackPositionCapabilities = 0;
 
     /** @hide */
     public final static int DEFAULT_PLAYBACK_VOLUME_HANDLING = PLAYBACK_VOLUME_VARIABLE;
@@ -756,6 +864,14 @@ public class RemoteControlClient
      */
     private long mPlaybackStateChangeTimeMs = 0;
     /**
+     * Last playback position in ms reported by the user
+     */
+    private long mPlaybackPositionMs = PLAYBACK_POSITION_INVALID;
+    /**
+     * Last playback speed reported by the user
+     */
+    private float mPlaybackSpeed = PLAYBACK_SPEED_1X;
+    /**
      * Cache for the artwork bitmap.
      * Access synchronized on mCacheLock
      * Artwork and metadata are not kept in one Bundle because the bitmap sometimes needs to be
@@ -774,9 +890,13 @@ public class RemoteControlClient
      * This is re-initialized in apply() and so cannot be final.
      */
     private Bundle mMetadata = new Bundle();
-
     /**
-     * The current remote control client generation ID across the system
+     * Listener registered by user of RemoteControlClient to receive requests for playback position
+     * update requests.
+     */
+    private OnPlaybackPositionUpdateListener mPositionUpdateListener;
+    /**
+     * The current remote control client generation ID across the system, as known by this object
      */
     private int mCurrentClientGenId = -1;
     /**
@@ -789,7 +909,8 @@ public class RemoteControlClient
 
     /**
      * The media button intent description associated with this remote control client
-     * (can / should include target component for intent handling)
+     * (can / should include target component for intent handling, used when persisting media
+     *    button event receiver across reboots).
      */
     private final PendingIntent mRcMediaIntent;
 
@@ -990,7 +1111,8 @@ public class RemoteControlClient
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
                 try {
                     di.mRcDisplay.setPlaybackState(mInternalClientGenId,
-                            mPlaybackState, mPlaybackStateChangeTimeMs);
+                            mPlaybackState, mPlaybackStateChangeTimeMs, mPlaybackPositionMs,
+                            mPlaybackSpeed);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error in setPlaybackState(), dead display " + di.mRcDisplay, e);
                     displayIterator.remove();
@@ -1109,7 +1231,20 @@ public class RemoteControlClient
         try {
             service.setPlaybackInfoForRcc(mRcseId, what, value);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in sendAudioServiceNewPlaybackInfo_syncCacheLock", e);
+            Log.e(TAG, "Dead object in setPlaybackInfoForRcc", e);
+        }
+    }
+
+    private void sendAudioServiceNewPlaybackState_syncCacheLock() {
+        if (mRcseId == RCSE_ID_UNREGISTERED) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.setPlaybackStateForRcc(mRcseId,
+                    mPlaybackState, mPlaybackPositionMs, mPlaybackSpeed);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setPlaybackStateForRcc", e);
         }
     }
 
