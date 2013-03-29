@@ -165,6 +165,9 @@ void Layer::defer() {
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 
     displayList->defer(deferredState, 0);
+
+    deferredUpdateScheduled = false;
+    displayList = NULL;
 }
 
 void Layer::flush() {
@@ -181,6 +184,22 @@ void Layer::flush() {
         dirtyRect.setEmpty();
         deferredList->clear();
     }
+}
+
+void Layer::render() {
+    renderer->setViewport(layer.getWidth(), layer.getHeight());
+    renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
+            !isBlend());
+
+    renderer->drawDisplayList(displayList, dirtyRect, DisplayList::kReplayFlag_ClipChildren);
+
+    renderer->finish();
+    renderer = NULL;
+
+    dirtyRect.setEmpty();
+
+    deferredUpdateScheduled = false;
+    displayList = NULL;
 }
 
 }; // namespace uirenderer
