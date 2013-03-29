@@ -75,9 +75,9 @@ parent.link=index.html
 <p>
     You use the <code>android</code> tool to create test projects.
     You also use <code>android</code> to convert existing test code into an Android test project,
-    or to add the <code>run-tests</code> Ant target to an existing Android test project.
+    or to add the <code>test</code> Ant target to an existing Android test project.
     These operations are described in more detail in the section <a href="#UpdateTestProject">
-    Updating a test project</a>. The <code>run-tests</code> target is described in
+    Updating a test project</a>. The <code>test</code> target is described in
     <a href="#RunTestsAnt">Quick build and run with Ant</a>.
 </p>
 <h3 id="CreateTestProject">Creating a test project</h3>
@@ -300,7 +300,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
 <h3 id="RunTestsAnt">Quick build and run with Ant</h3>
 <p>
     You can use Ant to run all the tests in your test project, using the target
-    <code>run-tests</code>, which is created automatically when you create a test project with
+    <code>test</code>, which is created automatically when you create a test project with
     the <code>android</code> tool.
 </p>
 <p>
