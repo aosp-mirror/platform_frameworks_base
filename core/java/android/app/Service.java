@@ -666,7 +666,9 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     
     /**
      * Print the Service's state into the given stream.  This gets invoked if
-     * you run "adb shell dumpsys activity service &lt;yourservicename&gt;".
+     * you run "adb shell dumpsys activity service &lt;yourservicename&gt;"
+     * (note that for this command to work, the service must be running, and
+     * you must specify a fully-qualified service name).
      * This is distinct from "dumpsys &lt;servicename&gt;", which only works for
      * named system services and which invokes the {@link IBinder#dump} method
      * on the {@link IBinder} interface registered with ServiceManager.
