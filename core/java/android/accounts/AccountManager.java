@@ -1914,7 +1914,7 @@ public class AccountManager {
      * <p>
      * The most common case is to call this with one account type, e.g.:
      * <p>
-     * <pre>  newChooseAccountsIntent(null, null, new String[]{"com.google"}, false, null,
+     * <pre>  newChooseAccountIntent(null, null, new String[]{"com.google"}, false, null,
      * null, null, null);</pre>
      * @param selectedAccount if specified, indicates that the {@link Account} is the currently
      * selected one, according to the caller's definition of selected.
