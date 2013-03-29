@@ -258,12 +258,12 @@ public final class ViewRootImpl implements ViewParent,
     QueuedInputEvent mPendingInputEventHead;
     QueuedInputEvent mPendingInputEventTail;
     int mPendingInputEventCount;
-    QueuedInputEvent mCurrentInputEventHead;
-    QueuedInputEvent mCurrentInputEventTail;
-    int mCurrentInputEventCount;
+    QueuedInputEvent mActiveInputEventHead;
+    QueuedInputEvent mActiveInputEventTail;
+    int mActiveInputEventCount;
     boolean mProcessInputEventsScheduled;
     String mPendingInputEventQueueLengthCounterName = "pq";
-    String mCurrentInputEventQueueLengthCounterName = "cq";
+    String mActiveInputEventQueueLengthCounterName = "aq";
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -661,7 +661,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 mPendingInputEventQueueLengthCounterName = "pq:" + attrs.getTitle();
-                mCurrentInputEventQueueLengthCounterName = "cq:" + attrs.getTitle();
+                mActiveInputEventQueueLengthCounterName = "aq:" + attrs.getTitle();
             }
         }
     }
@@ -4443,7 +4443,7 @@ public final class ViewRootImpl implements ViewParent,
     void doProcessInputEvents() {
         // Handle all of the available pending input events. Currently this will immediately
         // process all of the events it can until it encounters one that must go through the IME.
-        // After that it will continue adding events to the current input queue but will wait for a
+        // After that it will continue adding events to the active input queue but will wait for a
         // response from the IME, regardless of whether that particular event needs it or not, in
         // order to guarantee ordering consistency. This could be slightly improved by only
         // queueing events whose source has previously encountered something that needs to be
@@ -4466,18 +4466,18 @@ public final class ViewRootImpl implements ViewParent,
             if (result == EVENT_HANDLED || result == EVENT_NOT_HANDLED) {
                 finishInputEvent(q, result == EVENT_HANDLED);
             } else if (result == EVENT_PENDING_IME) {
-                enqueueCurrentInputEvent(q);
+                enqueueActiveInputEvent(q);
             } else {
                 q.mFlags |= QueuedInputEvent.FLAG_DELIVER_POST_IME;
                 // If the IME decided not to handle this event, and we have no events already being
                 // handled by the IME, go ahead and handle this one and then continue to the next
                 // input event. Otherwise, queue it up and handle it after whatever in front of it
                 // in the queue has been handled.
-                if (mCurrentInputEventHead == null) {
+                if (mActiveInputEventHead == null) {
                     result = deliverInputEventPostIme(q);
                     finishInputEvent(q, result == EVENT_HANDLED);
                 } else {
-                    enqueueCurrentInputEvent(q);
+                    enqueueActiveInputEvent(q);
                 }
             }
         }
@@ -4490,29 +4490,54 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void enqueueCurrentInputEvent(QueuedInputEvent q) {
-        if (mCurrentInputEventHead == null) {
-            mCurrentInputEventHead = q;
-            mCurrentInputEventTail = q;
+    private void enqueueActiveInputEvent(QueuedInputEvent q) {
+        if (mActiveInputEventHead == null) {
+            mActiveInputEventHead = q;
+            mActiveInputEventTail = q;
         } else {
-            mCurrentInputEventTail.mNext = q;
-            mCurrentInputEventTail = q;
+            mActiveInputEventTail.mNext = q;
+            mActiveInputEventTail = q;
         }
-        mCurrentInputEventCount += 1;
-        Trace.traceCounter(Trace.TRACE_TAG_INPUT, mCurrentInputEventQueueLengthCounterName,
-                mCurrentInputEventCount);
+        mActiveInputEventCount += 1;
+        Trace.traceCounter(Trace.TRACE_TAG_INPUT, mActiveInputEventQueueLengthCounterName,
+                mActiveInputEventCount);
     }
 
-    private QueuedInputEvent dequeueCurrentInputEvent() {
-        QueuedInputEvent q = mCurrentInputEventHead;
-        mCurrentInputEventHead = q.mNext;
-        if (mCurrentInputEventHead == null) {
-            mCurrentInputEventTail = null;
+    private QueuedInputEvent dequeueActiveInputEvent() {
+        return dequeueActiveInputEvent(mActiveInputEventHead);
+    }
+
+
+    private QueuedInputEvent dequeueActiveInputEvent(QueuedInputEvent q) {
+        QueuedInputEvent curr = mActiveInputEventHead;
+        QueuedInputEvent prev = null;
+        while (curr != null && curr != q) {
+            prev = curr;
+            curr = curr.mNext;
         }
-        q.mNext = null;
-        mCurrentInputEventCount -= 1;
-        Trace.traceCounter(Trace.TRACE_TAG_INPUT, mCurrentInputEventQueueLengthCounterName,
-                mCurrentInputEventCount);
+        if (curr != null) {
+            if (mActiveInputEventHead == curr) {
+                mActiveInputEventHead = curr.mNext;
+            } else {
+                prev.mNext = curr.mNext;
+            }
+            if (mActiveInputEventTail == curr) {
+                mActiveInputEventTail = prev;
+            }
+            curr.mNext = null;
+
+            mActiveInputEventCount -= 1;
+            Trace.traceCounter(Trace.TRACE_TAG_INPUT, mActiveInputEventQueueLengthCounterName,
+                    mActiveInputEventCount);
+        }
+        return curr;
+    }
+
+    private QueuedInputEvent findActiveInputEvent(int seq) {
+        QueuedInputEvent q = mActiveInputEventHead;
+        while (q != null && q.mEvent.getSequenceNumber() != seq) {
+            q = q.mNext;
+        }
         return q;
     }
 
@@ -4532,36 +4557,35 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void handleImeFinishedEvent(int seq, boolean handled) {
-        QueuedInputEvent q = mCurrentInputEventHead;
-        if (q != null && q.mEvent.getSequenceNumber() == seq) {
-            dequeueCurrentInputEvent();
+        QueuedInputEvent q = findActiveInputEvent(seq);
+        if (q != null) {
             if (DEBUG_IMF) {
                 Log.v(TAG, "IME finished event: seq=" + seq
                         + " handled=" + handled + " event=" + q);
             }
 
-            if (!handled) {
+            if (handled) {
+                dequeueActiveInputEvent(q);
+                finishInputEvent(q, true);
+            } else {
+                q.mFlags |= QueuedInputEvent.FLAG_DELIVER_POST_IME;
+            }
+
+
+            // Flush all of the input events that are no longer waiting on the IME
+            while (mActiveInputEventHead != null && (mActiveInputEventHead.mFlags &
+                        QueuedInputEvent.FLAG_DELIVER_POST_IME) != 0) {
+                q = dequeueActiveInputEvent();
                 // If the window doesn't currently have input focus, then drop
                 // this event.  This could be an event that came back from the
                 // IME dispatch but the window has lost focus in the meantime.
+                handled = false;
                 if (!mAttachInfo.mHasWindowFocus && !isTerminalInputEvent(q.mEvent)) {
                     Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
                 } else {
-                    final int result = deliverInputEventPostIme(q);
-                    if (result == EVENT_HANDLED) {
-                        handled = true;
-                    }
+                    handled = (deliverInputEventPostIme(q) == EVENT_HANDLED);
                 }
-            }
-
-            finishInputEvent(q, handled);
-
-            // Flush all of the input events that are no longer waiting on the IME
-            while (mCurrentInputEventHead != null && (mCurrentInputEventHead.mFlags &
-                        QueuedInputEvent.FLAG_DELIVER_POST_IME) != 0) {
-                q = dequeueCurrentInputEvent();
-                final int result = deliverInputEventPostIme(q);
-                finishInputEvent(q, result == EVENT_HANDLED);
+                finishInputEvent(q, handled);
             }
         } else {
             if (DEBUG_IMF) {
