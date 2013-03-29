@@ -166,6 +166,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_PROMOTE_RCC = 29;
     private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 30;
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 31;
+    private static final int MSG_RCC_NEW_PLAYBACK_STATE = 32;
 
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -3741,6 +3742,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     onRegisterVolumeObserverForRcc(msg.arg1 /* rccId */,
                             (IRemoteVolumeObserver)msg.obj /* rvo */);
                     break;
+                case MSG_RCC_NEW_PLAYBACK_STATE:
+                    onNewPlaybackStateForRcc(msg.arg1 /* rccId */, msg.arg2 /* state */,
+                            (RccPlaybackState)msg.obj /* newState */);
+                    break;
 
                 case MSG_SET_RSX_CONNECTION_STATE:
                     onSetRsxConnectionState(msg.arg1/*available*/, msg.arg2/*address*/);
@@ -5001,6 +5006,59 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      */
     private boolean mHasRemotePlayback;
 
+    private static class RccPlaybackState {
+        public int mState;
+        public long mPositionMs;
+        public float mSpeed;
+
+        public RccPlaybackState(int state, long positionMs, float speed) {
+            mState = state;
+            mPositionMs = positionMs;
+            mSpeed = speed;
+        }
+
+        public void reset() {
+            mState = RemoteControlClient.PLAYSTATE_STOPPED;
+            mPositionMs = RemoteControlClient.PLAYBACK_POSITION_INVALID;
+            mSpeed = RemoteControlClient.PLAYBACK_SPEED_1X;
+        }
+
+        @Override
+        public String toString() {
+            return stateToString() + ", "
+                    + ((mPositionMs == RemoteControlClient.PLAYBACK_POSITION_INVALID) ?
+                            "PLAYBACK_POSITION_INVALID ," : String.valueOf(mPositionMs)) + "ms ,"
+                    + mSpeed + "X";
+        }
+
+        private String stateToString() {
+            switch (mState) {
+                case RemoteControlClient.PLAYSTATE_NONE:
+                    return "PLAYSTATE_NONE";
+                case RemoteControlClient.PLAYSTATE_STOPPED:
+                    return "PLAYSTATE_STOPPED";
+                case RemoteControlClient.PLAYSTATE_PAUSED:
+                    return "PLAYSTATE_PAUSED";
+                case RemoteControlClient.PLAYSTATE_PLAYING:
+                    return "PLAYSTATE_PLAYING";
+                case RemoteControlClient.PLAYSTATE_FAST_FORWARDING:
+                    return "PLAYSTATE_FAST_FORWARDING";
+                case RemoteControlClient.PLAYSTATE_REWINDING:
+                    return "PLAYSTATE_REWINDING";
+                case RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS:
+                    return "PLAYSTATE_SKIPPING_FORWARDS";
+                case RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS:
+                    return "PLAYSTATE_SKIPPING_BACKWARDS";
+                case RemoteControlClient.PLAYSTATE_BUFFERING:
+                    return "PLAYSTATE_BUFFERING";
+                case RemoteControlClient.PLAYSTATE_ERROR:
+                    return "PLAYSTATE_ERROR";
+                default:
+                    return "[invalid playstate]";
+            }
+        }
+    }
+
     private static class RemoteControlStackEntry {
         public int mRccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
         /**
@@ -5029,7 +5087,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         public int mPlaybackVolumeMax;
         public int mPlaybackVolumeHandling;
         public int mPlaybackStream;
-        public int mPlaybackState;
+        public RccPlaybackState mPlaybackState;
         public IRemoteVolumeObserver mRemoteVolumeObs;
 
         public void resetPlaybackInfo() {
@@ -5038,7 +5096,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mPlaybackVolumeMax = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
             mPlaybackVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
             mPlaybackStream = AudioManager.STREAM_MUSIC;
-            mPlaybackState = RemoteControlClient.PLAYSTATE_STOPPED;
+            mPlaybackState.reset();
             mRemoteVolumeObs = null;
         }
 
@@ -6007,21 +6065,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             case RemoteControlClient.PLAYBACKINFO_USES_STREAM:
                                 rcse.mPlaybackStream = value;
                                 break;
-                            case RemoteControlClient.PLAYBACKINFO_PLAYSTATE:
-                                rcse.mPlaybackState = value;
-                                synchronized (mMainRemote) {
-                                    if (rccId == mMainRemote.mRccId) {
-                                        mMainRemoteIsActive = isPlaystateActive(value);
-                                        postReevaluateRemote();
-                                    }
-                                }
-                                // an RCC moving to a "playing" state should become the media button
-                                //   event receiver so it can be controlled, without requiring the
-                                //   app to re-register its receiver
-                                if (isPlaystateActive(value)) {
-                                    postPromoteRcc(rccId);
-                                }
-                                break;
                             default:
                                 Log.e(TAG, "unhandled key " + key + " for RCC " + rccId);
                                 break;
@@ -6031,7 +6074,45 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 }//for
             } catch (ArrayIndexOutOfBoundsException e) {
                 // not expected to happen, indicates improper concurrent modification
-                Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
+                Log.e(TAG, "Wrong index mRCStack on onNewPlaybackInfoForRcc, lock error? ", e);
+            }
+        }
+    }
+
+    public void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed) {
+        sendMsg(mAudioHandler, MSG_RCC_NEW_PLAYBACK_STATE, SENDMSG_QUEUE,
+                rccId /* arg1 */, state /* arg2 */,
+                new RccPlaybackState(state, timeMs, speed) /* obj */, 0 /* delay */);
+    }
+
+    public void onNewPlaybackStateForRcc(int rccId, int state, RccPlaybackState newState) {
+        if(DEBUG_RC) Log.d(TAG, "onNewPlaybackStateForRcc(id=" + rccId + ", state=" + state
+                + ", time=" + newState.mPositionMs + ", speed=" + newState.mSpeed + ")");
+        synchronized(mRCStack) {
+            // iterating from top of stack as playback information changes are more likely
+            //   on entries at the top of the remote control stack
+            try {
+                for (int index = mRCStack.size()-1; index >= 0; index--) {
+                    final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                    if (rcse.mRccId == rccId) {
+                        rcse.mPlaybackState = newState;
+                        synchronized (mMainRemote) {
+                            if (rccId == mMainRemote.mRccId) {
+                                mMainRemoteIsActive = isPlaystateActive(state);
+                                postReevaluateRemote();
+                            }
+                        }
+                        // an RCC moving to a "playing" state should become the media button
+                        //   event receiver so it can be controlled, without requiring the
+                        //   app to re-register its receiver
+                        if (isPlaystateActive(state)) {
+                            postPromoteRcc(rccId);
+                        }
+                    }
+                }//for
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index on mRCStack in onNewPlaybackStateForRcc, lock error? ", e);
             }
         }
     }
@@ -6075,7 +6156,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 for (int index = mRCStack.size()-1; index >= 0; index--) {
                     final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
                     if ((rcse.mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE)
-                            && isPlaystateActive(rcse.mPlaybackState)
+                            && isPlaystateActive(rcse.mPlaybackState.mState)
                             && (rcse.mPlaybackStream == streamType)) {
                         if (DEBUG_RC) Log.d(TAG, "remote playback active on stream " + streamType
                                 + ", vol =" + rcse.mPlaybackVolume);

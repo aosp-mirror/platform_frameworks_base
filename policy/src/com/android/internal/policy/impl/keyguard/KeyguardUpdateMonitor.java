@@ -200,7 +200,8 @@ public class KeyguardUpdateMonitor {
     private final IRemoteControlDisplay.Stub mRemoteControlDisplay =
                 new IRemoteControlDisplay.Stub() {
 
-        public void setPlaybackState(int generationId, int state, long stateChangeTimeMs) {
+        public void setPlaybackState(int generationId, int state, long stateChangeTimeMs,
+                long currentPosMs, float speed) {
             Message msg = mHandler.obtainMessage(MSG_SET_PLAYBACK_STATE,
                     generationId, state, stateChangeTimeMs);
             mHandler.sendMessage(msg);
