@@ -15,6 +15,8 @@
 #include <getopt.h>
 #include <assert.h>
 
+#include <ctype.h>
+
 using namespace android;
 
 static const char* gProgName = "aapt";
