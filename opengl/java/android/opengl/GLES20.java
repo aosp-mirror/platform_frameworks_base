@@ -296,6 +296,9 @@ public class GLES20 {
     public static final int GL_RGB5_A1                                 = 0x8057;
     public static final int GL_RGB565                                  = 0x8D62;
     public static final int GL_DEPTH_COMPONENT16                       = 0x81A5;
+    // GL_STENCIL_INDEX does not appear in gl2.h or gl2ext.h, and there is no
+    // token with value 0x1901.
+    //
     public static final int GL_STENCIL_INDEX                           = 0x1901;
     public static final int GL_STENCIL_INDEX8                          = 0x8D48;
     public static final int GL_RENDERBUFFER_WIDTH                      = 0x8D42;
@@ -327,7 +330,7 @@ public class GLES20 {
 
     native private static void _nativeClassInit();
     static {
-	    _nativeClassInit();
+        _nativeClassInit();
     }
     // C function void glActiveTexture ( GLenum texture )
 
@@ -1025,7 +1028,7 @@ public class GLES20 {
     );
 
     // C function void glGetProgramInfoLog( GLuint program, GLsizei maxLength, GLsizei * length,
- 	//     GLchar * infoLog);
+    //     GLchar * infoLog);
 
     public static native String glGetProgramInfoLog(
         int program
@@ -1065,7 +1068,7 @@ public class GLES20 {
     );
 
     // C function void glGetShaderInfoLog( GLuint shader, GLsizei maxLength, GLsizei * length,
- 	//     GLchar * infoLog);
+    //     GLchar * infoLog);
 
     public static native String glGetShaderInfoLog(
         int shader
