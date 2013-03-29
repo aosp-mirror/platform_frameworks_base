@@ -340,7 +340,7 @@ public class StaticLayout extends Layout {
                         w += widths[j - paraStart];
                     }
 
-                    boolean isSpaceOrTab = c == CHAR_SPACE || c == CHAR_TAB;
+                    boolean isSpaceOrTab = c == CHAR_SPACE || c == CHAR_TAB || c == CHAR_ZWSP;
 
                     if (w <= width || isSpaceOrTab) {
                         fitWidth = w;
@@ -956,6 +956,7 @@ public class StaticLayout extends Layout {
     private static final char CHAR_SPACE = ' ';
     private static final char CHAR_SLASH = '/';
     private static final char CHAR_HYPHEN = '-';
+    private static final char CHAR_ZWSP = '\u200B';
 
     private static final double EXTRA_ROUNDING = 0.5;
 
