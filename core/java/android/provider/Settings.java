@@ -5405,7 +5405,7 @@ public final class Settings {
          */
         public static final String CERT_PIN_UPDATE_METADATA_URL = "cert_pin_metadata_url";
 
-        /*
+        /**
          * SELinux enforcement status. If 0, permissive; if 1, enforcing.
          * @hide
          */
