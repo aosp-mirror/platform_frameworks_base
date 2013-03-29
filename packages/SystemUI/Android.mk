@@ -4,12 +4,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
-    ../../../ex/carousel/java/com/android/ex/carousel/carousel.rs \
     src/com/android/systemui/EventLogTags.logtags
 
 LOCAL_JAVA_LIBRARIES := services telephony-common
-
-LOCAL_STATIC_JAVA_LIBRARIES := android-common-carousel
 
 LOCAL_PACKAGE_NAME := SystemUI
 LOCAL_CERTIFICATE := platform
