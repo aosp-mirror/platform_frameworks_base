@@ -2211,6 +2211,7 @@ package android.accounts {
     field public static final java.lang.String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
     field public static final java.lang.String AUTHENTICATOR_META_DATA_NAME = "android.accounts.AccountAuthenticator";
     field public static final int ERROR_CODE_BAD_ARGUMENTS = 7; // 0x7
+    field public static final int ERROR_CODE_BAD_AUTHENTICATION = 9; // 0x9
     field public static final int ERROR_CODE_BAD_REQUEST = 8; // 0x8
     field public static final int ERROR_CODE_CANCELED = 4; // 0x4
     field public static final int ERROR_CODE_INVALID_RESPONSE = 5; // 0x5

@@ -151,6 +151,7 @@ public class AccountManager {
     public static final int ERROR_CODE_UNSUPPORTED_OPERATION = 6;
     public static final int ERROR_CODE_BAD_ARGUMENTS = 7;
     public static final int ERROR_CODE_BAD_REQUEST = 8;
+    public static final int ERROR_CODE_BAD_AUTHENTICATION = 9;
 
     /** @hide */
     public static final int ERROR_CODE_USER_RESTRICTED = 100;
@@ -964,10 +965,10 @@ public class AccountManager {
      */
     @Deprecated
     public AccountManagerFuture<Bundle> getAuthToken(
-            final Account account, final String authTokenType, 
+            final Account account, final String authTokenType,
             final boolean notifyAuthFailure,
             AccountManagerCallback<Bundle> callback, Handler handler) {
-        return getAuthToken(account, authTokenType, null, notifyAuthFailure, callback, 
+        return getAuthToken(account, authTokenType, null, notifyAuthFailure, callback,
                 handler);
     }
 
