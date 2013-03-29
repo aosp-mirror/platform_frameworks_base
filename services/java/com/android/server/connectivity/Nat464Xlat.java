@@ -87,6 +87,10 @@ public class Nat464Xlat extends BaseNetworkObserver {
         return netType == TYPE_MOBILE && !lp.hasIPv4Address();
     }
 
+    public static boolean isRunningClat(LinkProperties lp) {
+      return lp != null && lp.getAllInterfaceNames().contains(CLAT_INTERFACE_NAME);
+    }
+
     /**
      * Starts the clat daemon.
      * @param lp The link properties of the interface to start clatd on.
