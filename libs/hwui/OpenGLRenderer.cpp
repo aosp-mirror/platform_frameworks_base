@@ -540,13 +540,7 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
         }
 
         if (CC_UNLIKELY(inFrame || mCaches.drawDeferDisabled)) {
-            OpenGLRenderer* renderer = layer->renderer;
-            renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
-            renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom,
-                    !layer->isBlend());
-            renderer->drawDisplayList(layer->displayList, dirty,
-                    DisplayList::kReplayFlag_ClipChildren);
-            renderer->finish();
+            layer->render();
         } else {
             layer->defer();
         }
@@ -556,13 +550,6 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
             startTiling(mSnapshot);
         }
 
-        if (CC_UNLIKELY(inFrame || mCaches.drawDeferDisabled)) {
-            dirty.setEmpty();
-            layer->renderer = NULL;
-        }
-
-        layer->deferredUpdateScheduled = false;
-        layer->displayList = NULL;
         layer->debugDrawUpdate = mCaches.debugLayersUpdates;
 
         return true;
@@ -609,11 +596,12 @@ void OpenGLRenderer::flushLayers() {
         // Note: it is very important to update the layers in reverse order
         for (int i = count - 1; i >= 0; i--) {
             sprintf(layerName, "Layer #%d", i);
-            startMark(layerName); {
-                Layer* layer = mLayerUpdates.itemAt(i);
-                layer->flush();
-                mCaches.resourceCache.decrementRefcount(layer);
-            }
+            startMark(layerName);
+
+            Layer* layer = mLayerUpdates.itemAt(i);
+            layer->flush();
+            mCaches.resourceCache.decrementRefcount(layer);
+
             endMark();
         }
 
@@ -626,6 +614,15 @@ void OpenGLRenderer::flushLayers() {
 
 void OpenGLRenderer::pushLayerUpdate(Layer* layer) {
     if (layer) {
+        // Make sure we don't introduce duplicates.
+        // SortedVector would do this automatically but we need to respect
+        // the insertion order. The linear search is not an issue since
+        // this list is usually very short (typically one item, at most a few)
+        for (int i = mLayerUpdates.size() - 1; i >= 0; i--) {
+            if (mLayerUpdates.itemAt(i) == layer) {
+                return;
+            }
+        }
         mLayerUpdates.push_back(layer);
         mCaches.resourceCache.incrementRefcount(layer);
     }
