@@ -29,6 +29,7 @@ import android.graphics.SurfaceTexture;
 import android.os.Process;
 import android.util.Log;
 import android.view.Surface;
+import android.os.SystemProperties;
 
 
 
@@ -56,20 +57,22 @@ public class RenderScript {
      * We use a class initializer to allow the native code to cache some
      * field offsets.
      */
-    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"}) // TODO: now used locally; remove?
     static boolean sInitialized;
     native static void _nInit();
 
 
     static {
         sInitialized = false;
-        try {
-            System.loadLibrary("rs_jni");
-            _nInit();
-            sInitialized = true;
-        } catch (UnsatisfiedLinkError e) {
-            Log.e(LOG_TAG, "Error loading RS jni library: " + e);
-            throw new RSRuntimeException("Error loading RS jni library: " + e);
+        if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
+            try {
+                System.loadLibrary("rs_jni");
+                _nInit();
+                sInitialized = true;
+            } catch (UnsatisfiedLinkError e) {
+                Log.e(LOG_TAG, "Error loading RS jni library: " + e);
+                throw new RSRuntimeException("Error loading RS jni library: " + e);
+            }
         }
     }
 
@@ -97,6 +100,11 @@ public class RenderScript {
      * @param cacheDir A directory the current process can write to
      */
     public static void setupDiskCache(File cacheDir) {
+        if (!sInitialized) {
+            Log.e(LOG_TAG, "RenderScript.setupDiskCache() called when disabled");
+            return;
+        }
+
         File f = new File(cacheDir, CACHE_PATH);
         mCachePath = f.getAbsolutePath();
         f.mkdirs();
@@ -1036,6 +1044,11 @@ public class RenderScript {
      * @return RenderScript
      */
     public static RenderScript create(Context ctx, int sdkVersion, ContextType ct) {
+        if (!sInitialized) {
+            Log.e(LOG_TAG, "RenderScript.create() called when disabled; someone is likely to crash");
+            return null;
+        }
+
         RenderScript rs = new RenderScript(ctx);
 
         rs.mDev = rs.nDeviceCreate();

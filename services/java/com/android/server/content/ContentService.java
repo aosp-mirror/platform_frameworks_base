@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -61,6 +62,10 @@ public final class ContentService extends IContentService.Stub {
     private final Object mSyncManagerLock = new Object();
 
     private SyncManager getSyncManager() {
+        if (SystemProperties.getBoolean("config.disable_network", false)) {
+            return null;
+        }
+
         synchronized(mSyncManagerLock) {
             try {
                 // Try to create the SyncManager, return null if it fails (e.g. the disk is full).

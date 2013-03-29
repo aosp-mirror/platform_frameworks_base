@@ -24,7 +24,9 @@
 #include <utils/Functor.h>
 #include <utils/Log.h>
 
+#ifdef ANDROID_ENABLE_RENDERSCRIPT
 #include <RenderScript.h>
+#endif
 
 #include "utils/Blur.h"
 #include "utils/Timing.h"
@@ -532,13 +534,18 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
     uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
 
+#ifdef ANDROID_ENABLE_RENDERSCRIPT
     // Align buffers for renderscript usage
     if (paddedWidth & (RS_CPU_ALLOCATION_ALIGNMENT - 1)) {
         paddedWidth += RS_CPU_ALLOCATION_ALIGNMENT - paddedWidth % RS_CPU_ALLOCATION_ALIGNMENT;
     }
-
     int size = paddedWidth * paddedHeight;
     uint8_t* dataBuffer = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, size);
+#else
+    int size = paddedWidth * paddedHeight;
+    uint8_t* dataBuffer = (uint8_t*) malloc(size);
+#endif
+
     memset(dataBuffer, 0, size);
 
     int penX = radius - bounds.left;
@@ -624,43 +631,46 @@ void FontRenderer::removeFont(const Font* font) {
 }
 
 void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int32_t radius) {
-    if (width * height * radius < RS_MIN_INPUT_CUTOFF) {
-        float *gaussian = new float[2 * radius + 1];
-        Blur::generateGaussianWeights(gaussian, radius);
+#ifdef ANDROID_ENABLE_RENDERSCRIPT
+    if (width * height * radius >= RS_MIN_INPUT_CUTOFF) {
+        uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
-        uint8_t* scratch = new uint8_t[width * height];
-        Blur::horizontal(gaussian, radius, *image, scratch, width, height);
-        Blur::vertical(gaussian, radius, scratch, *image, width, height);
+        if (mRs.get() == 0) {
+            mRs = new RSC::RS();
+            if (!mRs->init(true, true)) {
+                ALOGE("blur RS failed to init");
+            }
 
-        delete[] gaussian;
-        delete[] scratch;
-        return;
-    }
-
-    uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
-
-    if (mRs.get() == 0) {
-        mRs = new RSC::RS();
-        if (!mRs->init(true, true)) {
-            ALOGE("blur RS failed to init");
+            mRsElement = RSC::Element::A_8(mRs);
+            mRsScript = new RSC::ScriptIntrinsicBlur(mRs, mRsElement);
         }
 
-        mRsElement = RSC::Element::A_8(mRs);
-        mRsScript = new RSC::ScriptIntrinsicBlur(mRs, mRsElement);
+        sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
+        sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
+                RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, *image);
+        sp<RSC::Allocation> aout = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
+                RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, outImage);
+
+        mRsScript->setRadius(radius);
+        mRsScript->blur(ain, aout);
+
+        // replace the original image's pointer, avoiding a copy back to the original buffer
+        free(*image);
+        *image = outImage;
+
+        return;
     }
+#endif
 
-    sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
-    sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
-            RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, *image);
-    sp<RSC::Allocation> aout = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
-            RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, outImage);
+    float *gaussian = new float[2 * radius + 1];
+    Blur::generateGaussianWeights(gaussian, radius);
 
-    mRsScript->setRadius(radius);
-    mRsScript->blur(ain, aout);
+    uint8_t* scratch = new uint8_t[width * height];
+    Blur::horizontal(gaussian, radius, *image, scratch, width, height);
+    Blur::vertical(gaussian, radius, scratch, *image, width, height);
 
-    // replace the original image's pointer, avoiding a copy back to the original buffer
-    free(*image);
-    *image = outImage;
+    delete[] gaussian;
+    delete[] scratch;
 }
 
 }; // namespace uirenderer

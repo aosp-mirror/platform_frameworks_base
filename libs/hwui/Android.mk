@@ -51,16 +51,22 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		external/skia/include/images \
 		external/skia/src/core \
 		external/skia/src/ports \
-		external/skia/include/utils \
-		$(intermediates) \
-		frameworks/rs/cpp \
-		frameworks/rs
+		external/skia/include/utils
 
 	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DGL_GLEXT_PROTOTYPES
 	LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-	LOCAL_SHARED_LIBRARIES := libcutils libutils libGLESv2 libskia libui libRS libRScpp
+	LOCAL_SHARED_LIBRARIES := libcutils libutils libGLESv2 libskia libui
 	LOCAL_MODULE := libhwui
 	LOCAL_MODULE_TAGS := optional
+
+        ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
+            LOCAL_CFLAGS += -DANDROID_ENABLE_RENDERSCRIPT
+            LOCAL_SHARED_LIBRARIES += libRS libRScpp
+            LOCAL_C_INCLUDES += \
+		$(intermediates) \
+		frameworks/rs/cpp \
+		frameworks/rs
+        endif
 
 	ifndef HWUI_COMPILE_SYMBOLS
 		LOCAL_CFLAGS += -fvisibility=hidden

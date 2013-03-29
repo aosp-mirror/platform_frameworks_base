@@ -19,6 +19,7 @@ package android.os;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -58,6 +59,10 @@ public class Environment {
     private static volatile StorageVolume sPrimaryVolume;
 
     private static StorageVolume getPrimaryVolume() {
+        if (SystemProperties.getBoolean("config.disable_storage", false)) {
+            return null;
+        }
+
         if (sPrimaryVolume == null) {
             synchronized (sLock) {
                 if (sPrimaryVolume == null) {

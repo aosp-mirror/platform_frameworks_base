@@ -32,11 +32,13 @@
 #include "Matrix.h"
 #include "Properties.h"
 
+#ifdef ANDROID_ENABLE_RENDERSCRIPT
 namespace RSC {
     class Element;
     class RS;
     class ScriptIntrinsicBlur;
 }
+#endif
 
 class Functor;
 
@@ -174,10 +176,12 @@ private:
 
     bool mLinearFiltering;
 
+#ifdef ANDROID_ENABLE_RENDERSCRIPT
     // RS constructs
     sp<RSC::RS> mRs;
     sp<const RSC::Element> mRsElement;
     sp<RSC::ScriptIntrinsicBlur> mRsScript;
+#endif
 
     static void computeGaussianWeights(float* weights, int32_t radius);
     static void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
