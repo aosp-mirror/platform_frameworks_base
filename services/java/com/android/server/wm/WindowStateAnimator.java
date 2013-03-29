@@ -1307,6 +1307,7 @@ class WindowStateAnimator {
             if (w.mOrientationChanging) {
                 if (!w.isDrawnLw()) {
                     mAnimator.mBulkUpdateParams &= ~SET_ORIENTATION_CHANGE_COMPLETE;
+                    mAnimator.mLastWindowFreezeSource = w;
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation continue waiting for draw in " + w);
                 } else {
