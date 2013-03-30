@@ -1079,12 +1079,12 @@ public class UserManagerService extends IUserManager.Stub {
 
             for (RestrictionEntry entry : entries) {
                 serializer.startTag(null, TAG_ENTRY);
-                serializer.attribute(null, ATTR_KEY, entry.key);
-                if (entry.getStringValue() != null || entry.getMultipleValues() == null) {
-                    String value = entry.getStringValue();
+                serializer.attribute(null, ATTR_KEY, entry.getKey());
+                if (entry.getSelectedString() != null || entry.getAllSelectedStrings() == null) {
+                    String value = entry.getSelectedString();
                     serializer.text(value != null ? value : "");
                 } else {
-                    String[] values = entry.getMultipleValues();
+                    String[] values = entry.getAllSelectedStrings();
                     serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
                     for (String value : values) {
                         serializer.startTag(null, TAG_VALUE);

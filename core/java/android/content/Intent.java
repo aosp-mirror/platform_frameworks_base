@@ -2416,8 +2416,11 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast to a specific application to query any supported restrictions to impose
-     * on restricted users. The response should contain an extra {@link #EXTRA_RESTRICTIONS}
-     * which is of type <code>ArrayList&lt;RestrictionEntry&gt;</code>.
+     * on restricted users. The response should contain an extra {@link #EXTRA_RESTRICTIONS},
+     * which is of type <code>ArrayList&lt;RestrictionEntry&gt;</code>. It can also
+     * contain an extra {@link #EXTRA_RESTRICTIONS_INTENT}, which is of type <code>Intent</code>.
+     * The activity specified by that intent will be launched for a result which must contain
+     * the extra {@link #EXTRA_RESTRICTIONS}. The returned restrictions will be persisted.
      * @see RestrictionEntry
      */
     public static final String ACTION_GET_RESTRICTION_ENTRIES =
@@ -3160,6 +3163,13 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #ACTION_GET_RESTRICTION_ENTRIES}.
      */
     public static final String EXTRA_RESTRICTIONS = "android.intent.extra.restrictions";
+
+    /**
+     * Extra used in the response from a BroadcastReceiver that handles
+     * {@link #ACTION_GET_RESTRICTION_ENTRIES}.
+     */
+    public static final String EXTRA_RESTRICTIONS_INTENT =
+            "android.intent.extra.restrictions_intent";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

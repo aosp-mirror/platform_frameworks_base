@@ -6178,6 +6178,7 @@ package android.content {
     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
     field public static final java.lang.String EXTRA_REPLACING = "android.intent.extra.REPLACING";
     field public static final java.lang.String EXTRA_RESTRICTIONS = "android.intent.extra.restrictions";
+    field public static final java.lang.String EXTRA_RESTRICTIONS_INTENT = "android.intent.extra.restrictions_intent";
     field public static final java.lang.String EXTRA_RETURN_RESULT = "android.intent.extra.RETURN_RESULT";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON = "android.intent.extra.shortcut.ICON";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON_RESOURCE = "android.intent.extra.shortcut.ICON_RESOURCE";
@@ -6426,12 +6427,25 @@ package android.content {
     ctor public RestrictionEntry(java.lang.String, java.lang.String[]);
     ctor public RestrictionEntry(android.os.Parcel);
     method public int describeContents();
-    method public boolean getBooleanValue();
-    method public java.lang.String[] getMultipleValues();
-    method public java.lang.String getStringValue();
-    method public void setMultipleValues(java.lang.String[]);
-    method public void setValue(java.lang.String);
-    method public void setValue(boolean);
+    method public java.lang.String[] getAllSelectedStrings();
+    method public java.lang.String[] getChoiceEntries();
+    method public java.lang.String[] getChoiceValues();
+    method public java.lang.String getDescription();
+    method public java.lang.String getKey();
+    method public boolean getSelectedState();
+    method public java.lang.String getSelectedString();
+    method public java.lang.String getTitle();
+    method public int getType();
+    method public void setAllSelectedStrings(java.lang.String[]);
+    method public void setChoiceEntries(java.lang.String[]);
+    method public void setChoiceEntries(android.content.Context, int);
+    method public void setChoiceValues(java.lang.String[]);
+    method public void setChoiceValues(android.content.Context, int);
+    method public void setDescription(java.lang.String);
+    method public void setSelectedState(boolean);
+    method public void setSelectedString(java.lang.String);
+    method public void setTitle(java.lang.String);
+    method public void setType(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int TYPE_BOOLEAN = 1; // 0x1
@@ -6439,12 +6453,6 @@ package android.content {
     field public static final int TYPE_CHOICE_LEVEL = 3; // 0x3
     field public static final int TYPE_MULTI_SELECT = 4; // 0x4
     field public static final int TYPE_NULL = 0; // 0x0
-    field public java.lang.String[] choices;
-    field public java.lang.String description;
-    field public java.lang.String key;
-    field public java.lang.String title;
-    field public int type;
-    field public java.lang.String[] values;
   }
 
   public class SearchRecentSuggestionsProvider extends android.content.ContentProvider {
