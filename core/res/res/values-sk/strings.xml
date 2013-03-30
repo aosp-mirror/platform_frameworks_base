@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Priamy prístup k mikrofónu na záznam zvuku."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Priamy prístup k fotoaparátu na nasnímanie fotografií alebo natočenie videí."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Uzamknúť obrazovku"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Možnosť ovplyvniť správanie zámky obrazovky na vašom zariadení."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informácie o vašich aplikáciách"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Schopnosť ovplyvniť správanie ďalších aplikácií na vašom zariadení."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Tapeta"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operácie s textom"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektoré systémové funkcie nemusia fungovať"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je spustená"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je práve spustená"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Zrušiť"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Komu:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Zadajte požadovaný kód PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet bude počas pripojenia k zariadeniu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> od siete Wi-Fi dočasne odpojený."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefón bude počas pripojenia k zariadeniu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> od siete Wi-Fi dočasne odpojený."</string>
     <string name="select_character" msgid="3365550120617701745">"Vkladanie znakov"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Odosielanie správ SMS"</string>
@@ -1477,8 +1472,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu."\n\n" Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Odstrániť"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Zvýšiť hlasitosť nad odporúčanú úroveň?"\n"Dlhodobé počúvanie pri vysokej hlasitosti môže poškodiť váš sluch."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Zjednodušenie ovládania povolíte dlhým stlačením dvoma prstami."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Zjednodušenie ovládania je povolené."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Zjednodušenie ovládania bolo zrušené."</string>

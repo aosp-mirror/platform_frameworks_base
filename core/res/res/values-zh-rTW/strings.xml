@@ -510,7 +510,7 @@
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"控制位置更新通知"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"允許應用程式啟用/停用來自無線電的位置更新通知 (不建議一般應用程式使用)。"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"存取登機選項"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允許讀取/寫入由簽入服務上載的內容 (不建議一般應用程式使用)。"</string>
+    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允許讀取/寫入由簽入服務上傳的內容 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"選擇小工具"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"允許應用程式告知系統哪個應用程式可以使用哪些小工具。啟用這項權限後，應用程式即會讓其他應用程式使用個人資料 (不建議一般應用程式使用)。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手機狀態"</string>

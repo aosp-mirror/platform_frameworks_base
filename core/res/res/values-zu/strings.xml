@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Ukufinyelela okuqondile ku-microphone ukuze uqophe umsindo."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Ikhamela"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Ukufinyelela okuqondile kukhamera ekuthwebuleni isithombe noma ividiyo."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Khiya isikrini"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Ikhono lokwazi ukuthinta ukuziphatha kwesikrini sokukhiya kudivayisi yakho."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Ulwazi lezinhlelo zakho zokusebenza"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Amandla okuthinta ukuziphatha kwezinhlelo zokusebenza kudivayisi yakho."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Isithombe sangemuva"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Izenzo zombhalo"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Isikhala sokulondoloza siyaphela"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Eminye imisebenzi yohlelo ingahle ingasebenzi"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> iyasebenza"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> isebenza manje"</string>
     <string name="ok" msgid="5970060430562524910">"KULUNGILE"</string>
     <string name="cancel" msgid="6442560571259935130">"Khansela"</string>
     <string name="yes" msgid="5362982303337969312">"KULUNGILE"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Ku:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Faka i-PIN edingekayo:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Ithebulethi izonqamuka okwesikhashana ku-Wi-Fi ngenkathi ixhumeke ku-<xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Ifoni izonqamuka okwesikhashana ku-Wi-Fi ngenkathi ixhumeke ku-<xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Faka uhlamvu"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Ithumela imiyalezo ye-SMS"</string>
@@ -1477,8 +1472,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google"\n\n" Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Susa"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Khulisa ivolomu ngaphezu kwezinga elinconyiwe?"\n"Ukulalela ngevolomu ephezulu izikhathi ezinde kungalimaza ukuzwa kwakho."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Gcina ucindezele iminwe yakho emibili ukuze unike amandla ukufinyelela."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ukufinyelela kunikwe amandla."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ukufinyelela kukhanseliwe."</string>
