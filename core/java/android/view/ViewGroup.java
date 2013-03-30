@@ -5882,18 +5882,40 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public static final int DEFAULT_MARGIN_RELATIVE = Integer.MIN_VALUE;
 
-        // Layout direction is LTR by default
-        private int mLayoutDirection = LAYOUT_DIRECTION_LTR;
+        /**
+         * Bit  0: layout direction
+         * Bit  1: layout direction
+         * Bit  2: left margin undefined
+         * Bit  3: right margin undefined
+         * Bit  4: is RTL compatibility mode
+         * Bit  5: need resolution
+         *
+         * Bit 6 to 7 not used
+         *
+         * @hide
+         */
+        @ViewDebug.ExportedProperty(category = "layout", flagMapping = {
+                @ViewDebug.FlagToString(mask = LAYOUT_DIRECTION_MASK,
+                        equals = LAYOUT_DIRECTION_MASK, name = "LAYOUT_DIRECTION"),
+                @ViewDebug.FlagToString(mask = LEFT_MARGIN_UNDEFINED_MASK,
+                        equals = LEFT_MARGIN_UNDEFINED_MASK, name = "LEFT_MARGIN_UNDEFINED_MASK"),
+                @ViewDebug.FlagToString(mask = RIGHT_MARGIN_UNDEFINED_MASK,
+                        equals = RIGHT_MARGIN_UNDEFINED_MASK, name = "RIGHT_MARGIN_UNDEFINED_MASK"),
+                @ViewDebug.FlagToString(mask = RTL_COMPATIBILITY_MODE_MASK,
+                        equals = RTL_COMPATIBILITY_MODE_MASK, name = "RTL_COMPATIBILITY_MODE_MASK"),
+                @ViewDebug.FlagToString(mask = NEED_RESOLUTION_MASK,
+                        equals = NEED_RESOLUTION_MASK, name = "NEED_RESOLUTION_MASK")
+        })
+        byte mMarginFlags;
 
-        private static int DEFAULT_MARGIN_RESOLVED = 0;
+        private static final int LAYOUT_DIRECTION_MASK = 0x00000003;
+        private static final int LEFT_MARGIN_UNDEFINED_MASK = 0x00000004;
+        private static final int RIGHT_MARGIN_UNDEFINED_MASK = 0x00000008;
+        private static final int RTL_COMPATIBILITY_MODE_MASK = 0x00000010;
+        private static final int NEED_RESOLUTION_MASK = 0x00000020;
 
-        private boolean mNeedResolution = false;
-        private boolean mIsRtlCompatibilityMode = true;
-
-        private static int UNDEFINED_MARGIN = DEFAULT_MARGIN_RELATIVE;
-
-        private boolean mLeftMarginUndefined = false;
-        private boolean mRightMarginUndefined = false;
+        private static final int DEFAULT_MARGIN_RESOLVED = 0;
+        private static final int UNDEFINED_MARGIN = DEFAULT_MARGIN_RELATIVE;
 
         /**
          * Creates a new set of layout parameters. The values are extracted from
@@ -5923,14 +5945,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         R.styleable.ViewGroup_MarginLayout_layout_marginLeft,
                         UNDEFINED_MARGIN);
                 if (leftMargin == UNDEFINED_MARGIN) {
-                    mLeftMarginUndefined = true;
+                    mMarginFlags |= LEFT_MARGIN_UNDEFINED_MASK;
                     leftMargin = DEFAULT_MARGIN_RESOLVED;
                 }
                 rightMargin = a.getDimensionPixelSize(
                         R.styleable.ViewGroup_MarginLayout_layout_marginRight,
                         UNDEFINED_MARGIN);
                 if (rightMargin == UNDEFINED_MARGIN) {
-                    mRightMarginUndefined = true;
+                    mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
                     rightMargin = DEFAULT_MARGIN_RESOLVED;
                 }
 
@@ -5948,12 +5970,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
                         DEFAULT_MARGIN_RELATIVE);
 
-                mNeedResolution = isMarginRelative();
+                if (isMarginRelative()) {
+                   mMarginFlags |= NEED_RESOLUTION_MASK;
+                }
             }
 
             final boolean hasRtlSupport = c.getApplicationInfo().hasRtlSupport();
             final int targetSdkVersion = c.getApplicationInfo().targetSdkVersion;
-            mIsRtlCompatibilityMode = targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport;
+            if (targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport) {
+                mMarginFlags |= RTL_COMPATIBILITY_MODE_MASK;
+            }
+
+            // Layout direction is LTR by default
+            mMarginFlags |= LAYOUT_DIRECTION_LTR;
 
             a.recycle();
         }
@@ -5964,11 +5993,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public MarginLayoutParams(int width, int height) {
             super(width, height);
 
-            mLeftMarginUndefined = true;
-            mRightMarginUndefined = true;
+            mMarginFlags |= LEFT_MARGIN_UNDEFINED_MASK;
+            mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
 
-            mNeedResolution = false;
-            mIsRtlCompatibilityMode = false;
+            mMarginFlags &= ~NEED_RESOLUTION_MASK;
+            mMarginFlags &= ~RTL_COMPATIBILITY_MODE_MASK;
         }
 
         /**
@@ -5987,13 +6016,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             this.startMargin = source.startMargin;
             this.endMargin = source.endMargin;
 
-            this.mLeftMarginUndefined = source.mLeftMarginUndefined;
-            this.mRightMarginUndefined = source.mRightMarginUndefined;
-
-            this.mNeedResolution = source.mNeedResolution;
-            this.mIsRtlCompatibilityMode = source.mIsRtlCompatibilityMode;
-
-            setLayoutDirection(source.mLayoutDirection);
+            this.mMarginFlags = source.mMarginFlags;
         }
 
         /**
@@ -6002,11 +6025,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public MarginLayoutParams(LayoutParams source) {
             super(source);
 
-            mLeftMarginUndefined = true;
-            mRightMarginUndefined = true;
+            mMarginFlags |= LEFT_MARGIN_UNDEFINED_MASK;
+            mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
 
-            mNeedResolution = false;
-            mIsRtlCompatibilityMode = false;
+            mMarginFlags &= ~NEED_RESOLUTION_MASK;
+            mMarginFlags &= ~RTL_COMPATIBILITY_MODE_MASK;
         }
 
         /**
@@ -6029,9 +6052,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             rightMargin = right;
             bottomMargin = bottom;
-            mLeftMarginUndefined = false;
-            mRightMarginUndefined = false;
-            mNeedResolution = isMarginRelative();
+            mMarginFlags &= ~LEFT_MARGIN_UNDEFINED_MASK;
+            mMarginFlags &= ~RIGHT_MARGIN_UNDEFINED_MASK;
+            if (isMarginRelative()) {
+                mMarginFlags |= NEED_RESOLUTION_MASK;
+            } else {
+                mMarginFlags &= ~NEED_RESOLUTION_MASK;
+            }
         }
 
         /**
@@ -6057,7 +6084,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             endMargin = end;
             bottomMargin = bottom;
-            mNeedResolution = true;
+            mMarginFlags |= NEED_RESOLUTION_MASK;
         }
 
         /**
@@ -6069,7 +6096,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public void setMarginStart(int start) {
             startMargin = start;
-            mNeedResolution = true;
+            mMarginFlags |= NEED_RESOLUTION_MASK;
         }
 
         /**
@@ -6081,10 +6108,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public int getMarginStart() {
             if (startMargin != DEFAULT_MARGIN_RELATIVE) return startMargin;
-            if (mNeedResolution) {
+            if ((mMarginFlags & NEED_RESOLUTION_MASK) == NEED_RESOLUTION_MASK) {
                 doResolveMargins();
             }
-            switch(mLayoutDirection) {
+            switch(mMarginFlags & LAYOUT_DIRECTION_MASK) {
                 case View.LAYOUT_DIRECTION_RTL:
                     return rightMargin;
                 case View.LAYOUT_DIRECTION_LTR:
@@ -6102,7 +6129,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public void setMarginEnd(int end) {
             endMargin = end;
-            mNeedResolution = true;
+            mMarginFlags |= NEED_RESOLUTION_MASK;
         }
 
         /**
@@ -6114,10 +6141,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         public int getMarginEnd() {
             if (endMargin != DEFAULT_MARGIN_RELATIVE) return endMargin;
-            if (mNeedResolution) {
+            if ((mMarginFlags & NEED_RESOLUTION_MASK) == NEED_RESOLUTION_MASK) {
                 doResolveMargins();
             }
-            switch(mLayoutDirection) {
+            switch(mMarginFlags & LAYOUT_DIRECTION_MASK) {
                 case View.LAYOUT_DIRECTION_RTL:
                     return leftMargin;
                 case View.LAYOUT_DIRECTION_LTR:
@@ -6147,9 +6174,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public void setLayoutDirection(int layoutDirection) {
             if (layoutDirection != View.LAYOUT_DIRECTION_LTR &&
                     layoutDirection != View.LAYOUT_DIRECTION_RTL) return;
-            if (layoutDirection != this.mLayoutDirection) {
-                this.mLayoutDirection = layoutDirection;
-                this.mNeedResolution = isMarginRelative();
+            if (layoutDirection != (mMarginFlags & LAYOUT_DIRECTION_MASK)) {
+                mMarginFlags &= ~LAYOUT_DIRECTION_MASK;
+                mMarginFlags |= (layoutDirection & LAYOUT_DIRECTION_MASK);
+                if (isMarginRelative()) {
+                    mMarginFlags |= NEED_RESOLUTION_MASK;
+                } else {
+                    mMarginFlags &= ~NEED_RESOLUTION_MASK;
+                }
             }
         }
 
@@ -6160,7 +6192,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @return the layout direction.
          */
         public int getLayoutDirection() {
-            return mLayoutDirection;
+            return (mMarginFlags & LAYOUT_DIRECTION_MASK);
         }
 
         /**
@@ -6173,28 +6205,30 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // No relative margin or pre JB-MR1 case or no need to resolve, just dont do anything
             // Will use the left and right margins if no relative margin is defined.
-            if (!isMarginRelative() || !mNeedResolution) return;
+            if (!isMarginRelative() ||
+                    (mMarginFlags & NEED_RESOLUTION_MASK) != NEED_RESOLUTION_MASK) return;
 
             // Proceed with resolution
             doResolveMargins();
         }
 
         private void doResolveMargins() {
-
-            if (mIsRtlCompatibilityMode) {
+            if ((mMarginFlags & RTL_COMPATIBILITY_MODE_MASK) == RTL_COMPATIBILITY_MODE_MASK) {
                 // if left or right margins are not defined and if we have some start or end margin
                 // defined then use those start and end margins.
-                if (mLeftMarginUndefined && startMargin > DEFAULT_MARGIN_RELATIVE) {
+                if ((mMarginFlags & LEFT_MARGIN_UNDEFINED_MASK) == LEFT_MARGIN_UNDEFINED_MASK
+                        && startMargin > DEFAULT_MARGIN_RELATIVE) {
                     leftMargin = startMargin;
                 }
-                if (mRightMarginUndefined && endMargin > DEFAULT_MARGIN_RELATIVE) {
+                if ((mMarginFlags & RIGHT_MARGIN_UNDEFINED_MASK) == RIGHT_MARGIN_UNDEFINED_MASK
+                        && endMargin > DEFAULT_MARGIN_RELATIVE) {
                     rightMargin = endMargin;
                 }
             } else {
                 // We have some relative margins (either the start one or the end one or both). So use
                 // them and override what has been defined for left and right margins. If either start
                 // or end margin is not defined, just set it to default "0".
-                switch(mLayoutDirection) {
+                switch(mMarginFlags & LAYOUT_DIRECTION_MASK) {
                     case View.LAYOUT_DIRECTION_RTL:
                         leftMargin = (endMargin > DEFAULT_MARGIN_RELATIVE) ?
                                 endMargin : DEFAULT_MARGIN_RESOLVED;
@@ -6210,14 +6244,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         break;
                 }
             }
-            mNeedResolution = false;
+            mMarginFlags &= ~NEED_RESOLUTION_MASK;
         }
 
         /**
          * @hide
          */
         public boolean isLayoutRtl() {
-            return (mLayoutDirection == View.LAYOUT_DIRECTION_RTL);
+            return ((mMarginFlags & LAYOUT_DIRECTION_MASK) == View.LAYOUT_DIRECTION_RTL);
         }
 
         /**
