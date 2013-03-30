@@ -5107,6 +5107,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mCallingUid = -1;
             mRcClient = null;
             mRccId = ++sLastRccId;
+            mPlaybackState = new RccPlaybackState(
+                    RemoteControlClient.PLAYSTATE_STOPPED,
+                    RemoteControlClient.PLAYBACK_POSITION_INVALID,
+                    RemoteControlClient.PLAYBACK_SPEED_1X);
 
             resetPlaybackInfo();
         }
