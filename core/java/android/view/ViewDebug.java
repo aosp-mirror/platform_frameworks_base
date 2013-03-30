@@ -1054,8 +1054,7 @@ public class ViewDebug {
                 String categoryPrefix =
                         property.category().length() != 0 ? property.category() + ":" : "";
 
-                if (type == int.class) {
-
+                if (type == int.class || type == byte.class) {
                     if (property.resolveId() && context != null) {
                         final int id = field.getInt(view);
                         fieldValue = resolveId(context, id);
