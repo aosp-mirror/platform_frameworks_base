@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Директан приступ микрофону за снимање звука."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Директан приступ камери за снимање слика или видео снимака."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Закључавање екрана"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Могућност да утиче на понашање закључаног екрана на уређају."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Информације о апликацијама"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Способност да се утиче на понашање других апликација на уређају."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Позадина"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Радње у вези са текстом"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Простор за складиштење је на измаку"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Неке системске функције можда не функционишу"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> је покренута"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g> је тренутно покренута"</string>
     <string name="ok" msgid="5970060430562524910">"Потврди"</string>
     <string name="cancel" msgid="6442560571259935130">"Откажи"</string>
     <string name="yes" msgid="5362982303337969312">"Потврди"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Коме:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Унесите потребни PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Таблет ће привремено прекинути везу са Wi-Fi-јем док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Телефон ће привремено прекинути везу са Wi-Fi-јем док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Уметање знака"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Слање SMS порука"</string>
@@ -1475,8 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште."\n\n"Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Уклони"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Желите ли да појачате звук преко препорученог нивоа?"\n"Ако слушате гласну музику током дужег периода, може да дође до оштећења слуха."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Држите са два прста да бисте омогућили приступачност."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Приступачност је омогућена."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Приступачност је отказана."</string>
