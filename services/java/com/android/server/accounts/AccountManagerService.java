@@ -58,6 +58,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -270,7 +271,7 @@ public class AccountManagerService
 
     private UserManager getUserManager() {
         if (mUserManager == null) {
-            mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            mUserManager = UserManager.get(mContext);
         }
         return mUserManager;
     }
@@ -542,9 +543,9 @@ public class AccountManagerService
     }
 
     @Override
-    public boolean addAccount(Account account, String password, Bundle extras) {
+    public boolean addAccountExplicitly(Account account, String password, Bundle extras) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "addAccount: " + account
+            Log.v(TAG, "addAccountExplicitly: " + account
                     + ", caller's uid " + Binder.getCallingUid()
                     + ", pid " + Binder.getCallingPid());
         }
@@ -1167,7 +1168,7 @@ public class AccountManagerService
 
         final int callingUid = getCallingUid();
         clearCallingIdentity();
-        if (callingUid != android.os.Process.SYSTEM_UID) {
+        if (callingUid != Process.SYSTEM_UID) {
             throw new SecurityException("can only call from system");
         }
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callingUid));
@@ -1395,7 +1396,7 @@ public class AccountManagerService
         return id;
     }
 
-    public void addAcount(final IAccountManagerResponse response, final String accountType,
+    public void addAccount(final IAccountManagerResponse response, final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final boolean expectActivityLaunch, final Bundle optionsIn) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -1412,7 +1413,7 @@ public class AccountManagerService
         checkManageAccountsPermission();
 
         // Is user disallowed from modifying accounts?
-        if (getUserManager().hasUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
+        if (!canUserModifyAccounts(Binder.getCallingUid())) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
@@ -1457,7 +1458,7 @@ public class AccountManagerService
             int userId) {
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && Binder.getCallingUid() != android.os.Process.myUid()
+                && Binder.getCallingUid() != Process.myUid()
                 && mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1576,7 +1577,8 @@ public class AccountManagerService
 
         public void run() throws RemoteException {
             synchronized (mAccounts.cacheLock) {
-                mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType, mCallingUid);
+                mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType, mCallingUid,
+                        null);
             }
             // check whether each account matches the requested features
             mAccountsWithFeatures = new ArrayList<Account>(mAccountsOfType.length);
@@ -1665,7 +1667,7 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             synchronized (accounts.cacheLock) {
-                return getAccountsFromCacheLocked(accounts, null, callingUid);
+                return getAccountsFromCacheLocked(accounts, null, callingUid, null);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1706,7 +1708,7 @@ public class AccountManagerService
                 if (userAccounts == null) continue;
                 synchronized (userAccounts.cacheLock) {
                     Account[] accounts = getAccountsFromCacheLocked(userAccounts, null,
-                            Binder.getCallingUid());
+                            Binder.getCallingUid(), null);
                     for (int a = 0; a < accounts.length; a++) {
                         runningAccounts.add(new AccountAndUser(accounts[a], userId));
                     }
@@ -1720,10 +1722,15 @@ public class AccountManagerService
 
     @Override
     public Account[] getAccountsAsUser(String type, int userId) {
-        final int callingUid = Binder.getCallingUid();
+        return getAccountsAsUser(type, userId, null, -1);
+    }
+
+    private Account[] getAccountsAsUser(String type, int userId, String callingPackage,
+            int packageUid) {
+        int callingUid = Binder.getCallingUid();
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && callingUid != android.os.Process.myUid()
+                && callingUid != Process.myUid()
                 && mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1736,12 +1743,17 @@ public class AccountManagerService
                     + ", caller's uid " + Binder.getCallingUid()
                     + ", pid " + Binder.getCallingPid());
         }
+        // If the original calling app was using the framework account chooser activity, we'll
+        // be passed in the original caller's uid here, which is what should be used for filtering.
+        if (packageUid != -1 && UserHandle.isSameApp(callingUid, Process.myUid())) {
+            callingUid = packageUid;
+        }
         checkReadAccountsPermission();
         UserAccounts accounts = getUserAccounts(userId);
         long identityToken = clearCallingIdentity();
         try {
             synchronized (accounts.cacheLock) {
-                return getAccountsFromCacheLocked(accounts, type, callingUid);
+                return getAccountsFromCacheLocked(accounts, type, callingUid, callingPackage);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1812,6 +1824,16 @@ public class AccountManagerService
         return getAccountsAsUser(type, UserHandle.getCallingUserId());
     }
 
+    @Override
+    public Account[] getAccountsForPackage(String packageName, int uid) {
+        int callingUid = Binder.getCallingUid();
+        if (!UserHandle.isSameApp(callingUid, Process.myUid())) {
+            throw new SecurityException("getAccountsForPackage() called from unauthorized uid "
+                    + callingUid + " with uid=" + uid);
+        }
+        return getAccountsAsUser(null, UserHandle.getCallingUserId(), packageName, uid);
+    }
+
     public void getAccountsByFeatures(IAccountManagerResponse response,
             String type, String[] features) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -1831,7 +1853,7 @@ public class AccountManagerService
             if (features == null || features.length == 0) {
                 Account[] accounts;
                 synchronized (userAccounts.cacheLock) {
-                    accounts = getAccountsFromCacheLocked(userAccounts, type, callingUid);
+                    accounts = getAccountsFromCacheLocked(userAccounts, type, callingUid, null);
                 }
                 Bundle result = new Bundle();
                 result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
@@ -2354,7 +2376,7 @@ public class AccountManagerService
                 }
             } else {
                 Account[] accounts = getAccountsFromCacheLocked(userAccounts, null /* type */,
-                        android.os.Process.myUid());
+                        Process.myUid(), null);
                 fout.println("Accounts: " + accounts.length);
                 for (Account account : accounts) {
                     fout.println("  " + account);
@@ -2507,7 +2529,7 @@ public class AccountManagerService
 
     private boolean hasExplicitlyGrantedPermission(Account account, String authTokenType,
             int callerUid) {
-        if (callerUid == android.os.Process.SYSTEM_UID) {
+        if (callerUid == Process.SYSTEM_UID) {
             return true;
         }
         UserAccounts accounts = getUserAccountsForCaller();
@@ -2560,8 +2582,10 @@ public class AccountManagerService
     }
 
     private boolean canUserModifyAccounts(int callingUid) {
-        if (callingUid != android.os.Process.myUid()) {
-            if (getUserManager().hasUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
+        if (callingUid != Process.myUid()) {
+            if (getUserManager().getUserRestrictions(
+                    new UserHandle(UserHandle.getUserId(callingUid)))
+                    .getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
                 return false;
             }
         }
@@ -2572,7 +2596,7 @@ public class AccountManagerService
             throws RemoteException {
         final int callingUid = getCallingUid();
 
-        if (callingUid != android.os.Process.SYSTEM_UID) {
+        if (callingUid != Process.SYSTEM_UID) {
             throw new SecurityException();
         }
 
@@ -2692,9 +2716,9 @@ public class AccountManagerService
     }
 
     private Account[] filterSharedAccounts(UserAccounts userAccounts, Account[] unfiltered,
-            int callingUid) {
+            int callingUid, String callingPackage) {
         if (getUserManager() == null || userAccounts == null || userAccounts.userId < 0
-                || callingUid == android.os.Process.myUid()) {
+                || callingUid == Process.myUid()) {
             return unfiltered;
         }
         if (mUserManager.getUserInfo(userAccounts.userId).isRestricted()) {
@@ -2718,6 +2742,10 @@ public class AccountManagerService
                     PackageInfo pi = mPackageManager.getPackageInfo(packageName, 0);
                     if (pi != null && pi.restrictedAccountType != null) {
                         requiredAccountType = pi.restrictedAccountType;
+                        // If it matches the package name of the original caller, use this choice.
+                        if (callingPackage != null && packageName.equals(callingPackage)) {
+                            break;
+                        }
                     }
                 }
             } catch (NameNotFoundException nnfe) {
@@ -2746,15 +2774,19 @@ public class AccountManagerService
         }
     }
 
+    /*
+     * packageName can be null. If not null, it should be used to filter out restricted accounts
+     * that the package is not allowed to access.
+     */
     protected Account[] getAccountsFromCacheLocked(UserAccounts userAccounts, String accountType,
-            int callingUid) {
+            int callingUid, String callingPackage) {
         if (accountType != null) {
             final Account[] accounts = userAccounts.accountCache.get(accountType);
             if (accounts == null) {
                 return EMPTY_ACCOUNT_ARRAY;
             } else {
                 return filterSharedAccounts(userAccounts, Arrays.copyOf(accounts, accounts.length),
-                        callingUid);
+                        callingUid, callingPackage);
             }
         } else {
             int totalLength = 0;
@@ -2771,7 +2803,7 @@ public class AccountManagerService
                         accountsOfType.length);
                 totalLength += accountsOfType.length;
             }
-            return filterSharedAccounts(userAccounts, accounts, callingUid);
+            return filterSharedAccounts(userAccounts, accounts, callingUid, callingPackage);
         }
     }
 

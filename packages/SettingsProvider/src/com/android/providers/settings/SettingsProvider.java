@@ -322,7 +322,7 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         mBackupManager = new BackupManager(getContext());
-        mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+        mUserManager = UserManager.get(getContext());
 
         setAppOps(AppOpsManager.OP_NONE, AppOpsManager.OP_WRITE_SETTINGS);
         establishDbTracking(UserHandle.USER_OWNER);

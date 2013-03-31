@@ -842,7 +842,7 @@
   <java-symbol type="string" name="config_chooseAccountActivity" />
   <java-symbol type="string" name="config_chooseTypeAndAccountActivity" />
   <java-symbol type="string" name="config_appsAuthorizedForSharedAccounts" />
-
+  <java-symbol type="string" name="error_message_title" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />
@@ -1086,6 +1086,7 @@
   <java-symbol type="layout" name="notification_template_inbox" />
   <java-symbol type="layout" name="sms_short_code_confirmation_dialog" />
   <java-symbol type="layout" name="action_bar_up_container" />
+  <java-symbol type="layout" name="app_not_authorized" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />

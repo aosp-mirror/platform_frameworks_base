@@ -4068,5 +4068,10 @@
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
-
+    <!-- Error message title [CHAR LIMIT=35] -->
+    <string name="error_message_title">Error</string>
+    <!-- Message informing user that app is not permitted to access accounts. [CHAR LIMIT=none] -->
+    <string name="app_no_restricted_accounts">This application does not support accounts for limited users</string>
+    <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
+    <string name="app_not_found">No application found to handle this action</string>
 </resources>

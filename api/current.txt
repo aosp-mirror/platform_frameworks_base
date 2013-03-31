@@ -16987,6 +16987,7 @@ package android.os {
   }
 
   public class UserManager {
+    method public static synchronized android.os.UserManager get(android.content.Context);
     method public long getSerialNumberForUser(android.os.UserHandle);
     method public int getUserCount();
     method public android.os.UserHandle getUserForSerialNumber(long);
