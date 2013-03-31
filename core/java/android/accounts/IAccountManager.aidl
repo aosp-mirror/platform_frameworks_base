@@ -31,10 +31,11 @@ interface IAccountManager {
     String getUserData(in Account account, String key);
     AuthenticatorDescription[] getAuthenticatorTypes();
     Account[] getAccounts(String accountType);
+    Account[] getAccountsForPackage(String packageName, int uid);
     Account[] getAccountsAsUser(String accountType, int userId);
     void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType, in String[] features);
-    boolean addAccount(in Account account, String password, in Bundle extras);
+    boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
     void removeAccount(in IAccountManagerResponse response, in Account account);
     void invalidateAuthToken(String accountType, String authToken);
     String peekAuthToken(in Account account, String authTokenType);
@@ -47,7 +48,7 @@ interface IAccountManager {
     void getAuthToken(in IAccountManagerResponse response, in Account account,
         String authTokenType, boolean notifyOnAuthFailure, boolean expectActivityLaunch,
         in Bundle options);
-    void addAcount(in IAccountManagerResponse response, String accountType,
+    void addAccount(in IAccountManagerResponse response, String accountType,
         String authTokenType, in String[] requiredFeatures, boolean expectActivityLaunch,
         in Bundle options);
     void updateCredentials(in IAccountManagerResponse response, in Account account,

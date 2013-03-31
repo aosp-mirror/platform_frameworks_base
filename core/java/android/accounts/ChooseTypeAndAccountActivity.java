@@ -18,9 +18,14 @@ package android.accounts;
 import com.google.android.collect.Sets;
 
 import android.app.Activity;
+import android.app.ActivityManagerNative;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +34,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.R;
 
@@ -119,6 +125,9 @@ public class ChooseTypeAndAccountActivity extends Activity
     private Parcelable[] mExistingAccounts = null;
     private int mSelectedItemIndex;
     private Button mOkButton;
+    private int mCallingUid;
+    private String mCallingPackage;
+    private boolean mDisallowAddAccounts;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -126,6 +135,24 @@ public class ChooseTypeAndAccountActivity extends Activity
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "ChooseTypeAndAccountActivity.onCreate(savedInstanceState="
                     + savedInstanceState + ")");
+        }
+
+        String message = null;
+
+        try {
+            IBinder activityToken = getActivityToken();
+            mCallingUid = ActivityManagerNative.getDefault().getLaunchedFromUid(activityToken);
+            mCallingPackage = ActivityManagerNative.getDefault().getLaunchedFromPackage(
+                    activityToken);
+            if (mCallingUid != 0 && mCallingPackage != null) {
+                Bundle restrictions = UserManager.get(this)
+                        .getUserRestrictions(new UserHandle(UserHandle.getUserId(mCallingUid)));
+                mDisallowAddAccounts =
+                        restrictions.getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false);
+            }
+        } catch (RemoteException re) {
+            // Couldn't figure out caller details
+            Log.w(getClass().getSimpleName(), "Unable to get caller identity \n" + re);
         }
 
         // save some items we use frequently
@@ -179,6 +206,11 @@ public class ChooseTypeAndAccountActivity extends Activity
             // If there are no relevant accounts and only one relevant account type go directly to
             // add account. Otherwise let the user choose.
             if (mAccounts.isEmpty()) {
+                if (mDisallowAddAccounts) {
+                    setContentView(R.layout.app_not_authorized);
+                    setTitle(R.string.error_message_title);
+                    return;
+                }
                 if (mSetOfRelevantAccountTypes.size() == 1) {
                     runAddAccountForAuthenticator(mSetOfRelevantAccountTypes.iterator().next());
                 } else {
@@ -296,7 +328,8 @@ public class ChooseTypeAndAccountActivity extends Activity
                 }
 
                 if (accountName == null || accountType == null) {
-                    Account[] currentAccounts = AccountManager.get(this).getAccounts();
+                    Account[] currentAccounts = AccountManager.get(this).getAccountsForPackage(
+                            mCallingPackage, mCallingUid);
                     Set<Account> preExistingAccounts = new HashSet<Account>();
                     for (Parcelable accountParcel : mExistingAccounts) {
                         preExistingAccounts.add((Account) accountParcel);
@@ -347,7 +380,8 @@ public class ChooseTypeAndAccountActivity extends Activity
                     AccountManager.KEY_INTENT);
             if (intent != null) {
                 mPendingRequest = REQUEST_ADD_ACCOUNT;
-                mExistingAccounts = AccountManager.get(this).getAccounts();
+                mExistingAccounts = AccountManager.get(this).getAccountsForPackage(mCallingPackage,
+                        mCallingUid);
                 intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivityForResult(intent, REQUEST_ADD_ACCOUNT);
                 return;
@@ -424,12 +458,14 @@ public class ChooseTypeAndAccountActivity extends Activity
     private String[] getListOfDisplayableOptions(ArrayList<Account> accounts) {
       // List of options includes all accounts found together with "Add new account" as the
       // last item in the list.
-      String[] listItems = new String[accounts.size() + 1];
+      String[] listItems = new String[accounts.size() + (mDisallowAddAccounts ? 0 : 1)];
       for (int i = 0; i < accounts.size(); i++) {
           listItems[i] = accounts.get(i).name;
       }
-      listItems[accounts.size()] = getResources().getString(
-              R.string.add_account_button_label);
+      if (!mDisallowAddAccounts) {
+          listItems[accounts.size()] = getResources().getString(
+                  R.string.add_account_button_label);
+      }
       return listItems;
     }
 
@@ -439,7 +475,8 @@ public class ChooseTypeAndAccountActivity extends Activity
      * allowable accounts, if provided.
      */
     private ArrayList<Account> getAcceptableAccountChoices(AccountManager accountManager) {
-      final Account[] accounts = accountManager.getAccounts();
+      final Account[] accounts = accountManager.getAccountsForPackage(mCallingPackage,
+              mCallingUid);
       ArrayList<Account> accountsToPopulate = new ArrayList<Account>(accounts.length);
       for (Account account : accounts) {
           if (mSetOfAllowableAccounts != null
