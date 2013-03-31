@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Direktang access sa mikropono upang mag-record ng audio."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Direktang access sa camera para sa pagkuha ng larawan o video."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"I-lock ang screen"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Kakayahang maapektuhan ang pagkilos ng lock screen sa iyong device."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Ang impormasyon ng iyong mga application"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Kakayahang maapektuhan ang pag-uugali ng iba pang mga application sa iyong device."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Wallpaper"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"Tumatakbo ang <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"Kasalukuyang tumatakbo ang <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Kanselahin"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kay:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"I-type ang kinakailangang PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Pansamantalang madidiskoneta ang tablet sa Wi-Fi habang nakakonekta ito sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Pansamantalang madidiskoneta ang telepono sa Wi-Fi habang nakakonekta ito sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Magpasok ng character"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Nagpapadala ng mga SMS na mensahe"</string>
@@ -1475,8 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alisin"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Lakasan ang volume nang lagpas sa ligtas na antas?"\n"Maaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Panatilihing nakapindot nang matagal ang iyong dalawang daliri upang paganahin ang pagiging naa-access."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Nakansela ang pagiging naa-access."</string>

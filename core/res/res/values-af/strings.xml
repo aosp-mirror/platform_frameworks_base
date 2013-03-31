@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Direkte toegang tot die mikrofoon om oudio op te neem."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Direkte toegang tot kamera vir die neem van foto of video."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Sluitskerm"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Vermoë om die gedrag van die sluitskerm op jou toestel te beïnvloed."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Jou programme-inligting"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Vermoë om die gedrag van ander programme op jou toestel te beïnvloed."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Muurpapier"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksaksies"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Bergingspasie word min"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sommige stelselfunksies werk moontlik nie"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> loop"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g> loop tans"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Kanselleer"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Aan:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer die vereiste PIN in:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Die tablet sal tydelik van Wi-Fi ontkoppel terwyl dit aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gekoppel is"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Die foon sal tydelik van Wi-Fi ontkoppel terwyl dit aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gekoppel is"</string>
     <string name="select_character" msgid="3365550120617701745">"Voeg karakter in"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Stuur SMS-boodskappe"</string>
@@ -1475,8 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Verhoog volume bo aanbevole vlak?"\n"Deur vir lang tydperke na hoë volume te luister, kan jou gehoor beskadig word."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hou aan met twee vingers inhou om toeganklikheid te aktiveer."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toeganklikheid geaktiveer."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toeganklikheid gekanselleer."</string>

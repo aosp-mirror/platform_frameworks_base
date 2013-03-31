@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Acceder directamente al micrófono para grabar audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Acceder directamente a la cámara para hacer fotos o grabar vídeos"</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Pantalla de bloqueo"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Posibilidad de modificar el comportamiento de la pantalla de bloqueo del dispositivo"</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Información de tus aplicaciones"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Posibilidad de influir en el funcionamiento de otras aplicaciones del dispositivo"</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Fondo de pantalla"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no funcionen."</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando."</string>
     <string name="ok" msgid="5970060430562524910">"Aceptar"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="yes" msgid="5362982303337969312">"Aceptar"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Para:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Escribe el PIN solicitado:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"El tablet se desconectará temporalmente de la red Wi-Fi mientras esté conectado a  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"El teléfono se desconectará temporalmente de la red Wi-Fi mientras está conectado a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="select_character" msgid="3365550120617701745">"Insertar carácter"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Enviando mensajes SMS..."</string>
@@ -1475,8 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminar"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"¿Quieres subir el volumen por encima del nivel recomendado?"\n"Escuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén la pantalla pulsada con dos dedos para habilitar las funciones de accesibilidad."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accesibilidad habilitada"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilidad cancelada"</string>
