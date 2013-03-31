@@ -75,12 +75,12 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         Account a12 = new Account("account1", "type2");
         Account a22 = new Account("account2", "type2");
         Account a32 = new Account("account3", "type2");
-        mAms.addAccount(a11, "p11", null);
-        mAms.addAccount(a12, "p12", null);
-        mAms.addAccount(a21, "p21", null);
-        mAms.addAccount(a22, "p22", null);
-        mAms.addAccount(a31, "p31", null);
-        mAms.addAccount(a32, "p32", null);
+        mAms.addAccountExplicitly(a11, "p11", null);
+        mAms.addAccountExplicitly(a12, "p12", null);
+        mAms.addAccountExplicitly(a21, "p21", null);
+        mAms.addAccountExplicitly(a22, "p22", null);
+        mAms.addAccountExplicitly(a31, "p31", null);
+        mAms.addAccountExplicitly(a32, "p32", null);
 
         Account[] accounts = mAms.getAccounts(null);
         Arrays.sort(accounts, new AccountSorter());
@@ -111,8 +111,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     public void testPasswords() throws Exception {
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
-        mAms.addAccount(a11, "p11", null);
-        mAms.addAccount(a12, "p12", null);
+        mAms.addAccountExplicitly(a11, "p11", null);
+        mAms.addAccountExplicitly(a12, "p12", null);
 
         assertEquals("p11", mAms.getPassword(a11));
         assertEquals("p12", mAms.getPassword(a12));
@@ -134,8 +134,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         u12.putString("a", "a_a12");
         u12.putString("b", "b_a12");
         u12.putString("c", "c_a12");
-        mAms.addAccount(a11, "p11", u11);
-        mAms.addAccount(a12, "p12", u12);
+        mAms.addAccountExplicitly(a11, "p11", u11);
+        mAms.addAccountExplicitly(a12, "p12", u12);
 
         assertEquals("a_a11", mAms.getUserData(a11, "a"));
         assertEquals("b_a11", mAms.getUserData(a11, "b"));
@@ -158,8 +158,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     public void testAuthtokens() throws Exception {
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
-        mAms.addAccount(a11, "p11", null);
-        mAms.addAccount(a12, "p12", null);
+        mAms.addAccountExplicitly(a11, "p11", null);
+        mAms.addAccountExplicitly(a12, "p12", null);
 
         mAms.setAuthToken(a11, "att1", "a11_att1");
         mAms.setAuthToken(a11, "att2", "a11_att2");
