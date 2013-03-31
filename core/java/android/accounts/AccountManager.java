@@ -388,6 +388,23 @@ public class AccountManager {
     }
 
     /**
+     * @hide
+     * For use by internal activities. Returns the list of accounts that the calling package
+     * is authorized to use, particularly for shared accounts.
+     * @param packageName package name of the calling app.
+     * @param uid the uid of the calling app.
+     * @return the accounts that are available to this package and user.
+     */
+    public Account[] getAccountsForPackage(String packageName, int uid) {
+        try {
+            return mService.getAccountsForPackage(packageName, uid);
+        } catch (RemoteException re) {
+            // possible security exception
+            throw new RuntimeException(re);
+        }
+    }
+
+    /**
      * Lists all accounts of a particular type.  The account type is a
      * string token corresponding to the authenticator and useful domain
      * of the account.  For example, there are types corresponding to Google
@@ -575,7 +592,7 @@ public class AccountManager {
     public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
-            return mService.addAccount(account, password, userdata);
+            return mService.addAccountExplicitly(account, password, userdata);
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
@@ -1123,7 +1140,7 @@ public class AccountManager {
 
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
-                mService.addAcount(mResponse, accountType, authTokenType,
+                mService.addAccount(mResponse, accountType, authTokenType,
                         requiredFeatures, activity != null, optionsIn);
             }
         }.start();

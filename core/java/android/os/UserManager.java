@@ -121,6 +121,14 @@ public class UserManager {
      */
     public static final String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
 
+    private static UserManager sInstance = null;
+
+    public synchronized static UserManager get(Context context) {
+        if (sInstance == null) {
+            sInstance = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        }
+        return sInstance;
+    }
 
     /** @hide */
     public UserManager(Context context, IUserManager service) {

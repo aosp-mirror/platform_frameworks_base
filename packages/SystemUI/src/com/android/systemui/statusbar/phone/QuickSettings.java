@@ -206,8 +206,7 @@ class QuickSettings {
         mUserInfoTask = new AsyncTask<Void, Void, Pair<String, Drawable>>() {
             @Override
             protected Pair<String, Drawable> doInBackground(Void... params) {
-                final UserManager um =
-                        (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                final UserManager um = UserManager.get(mContext);
 
                 // Fall back to the UserManager nickname if we can't read the name from the local
                 // profile below.
@@ -292,8 +291,7 @@ class QuickSettings {
             @Override
             public void onClick(View v) {
                 mBar.collapseAllPanels(true);
-                final UserManager um =
-                        (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                final UserManager um = UserManager.get(mContext);
                 if (um.getUsers(true).size() > 1) {
                     try {
                         WindowManagerGlobal.getWindowManagerService().lockNow(null);
