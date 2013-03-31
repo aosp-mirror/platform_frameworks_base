@@ -188,6 +188,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private LightsService.Light mAttentionLight;
     private LightsService.Light mButtonsLight;
     private LightsService.Light mKeyboardLight;
+    private LightsService.Light mCapsLight;
+    private LightsService.Light mFnLight;
 
     private final Object mLock = new Object();
 
@@ -472,6 +474,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
             mButtonsLight = mLightsService.getLight(LightsService.LIGHT_ID_BUTTONS);
             mKeyboardLight = mLightsService.getLight(LightsService.LIGHT_ID_KEYBOARD);
+            mCapsLight = mLightsService.getLight(LightsService.LIGHT_ID_CAPS);
+            mFnLight = mLightsService.getLight(LightsService.LIGHT_ID_FUNC);
 
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
@@ -949,7 +953,28 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
             if (mKeyboardVisible != visible) {
                 mKeyboardVisible = visible;
+                if (!visible) {
+                    mKeyboardLight.turnOff();
+                    // If hiding keyboard, turn off leds
+                    setKeyboardLight(false, 1);
+                    setKeyboardLight(false, 2);
+                }
             }
+        }
+    }
+
+    @Override // Binder call
+    public void setKeyboardLight(boolean on, int key) {
+        if (key == 1) {
+            if (on)
+                mCapsLight.setColor(0x00ffffff);
+            else
+                mCapsLight.turnOff();
+        } else if (key == 2) {
+            if (on)
+                mFnLight.setColor(0x00ffffff);
+            else
+                mFnLight.turnOff();
         }
     }
 
