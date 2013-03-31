@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Прамы доступ да мікрафону для запісу гуку."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Прамы доступ да камеры, каб зрабіць здымак ці зняць відэа."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Экран блакіроўкі"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Магчымасць уплываць на паводзіны экрана блакіроўкi на вашай прыладзе."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Інфармацыя аб вашых прыкладаннях"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Магчымасць уплываць на паводзіны іншых прыкладанняў на вашай прыладзе."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Шпалеры"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дзеянні з тэкстам"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Месца для захавання на зыходзе"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некаторыя сістэмныя функцыі могуць не працаваць"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"Прыкладанне <xliff:g id="APP_NAME">%1$s</xliff:g> працуе"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"Прыкладанне <xliff:g id="APP_NAME">%1$s</xliff:g> зараз працуе"</string>
     <string name="ok" msgid="5970060430562524910">"ОК"</string>
     <string name="cancel" msgid="6442560571259935130">"Адмяніць"</string>
     <string name="yes" msgid="5362982303337969312">"ОК"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Каму:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Увядзіце патрэбны PIN-код:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-код"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Тэлефон будзе часова адключаны ад сеткі Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Тэлефон будзе часова адключаны ад Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Уставіць сімвал"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Адпраўка SMS"</string>
@@ -1475,8 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google."\n\n" Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Выдалiць"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Павялiчыць гук больш за рэкамендаваны ўзровень?"\n"Доўгае слуханне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Утрымлiвайце два пальцы, каб уключыць доступ."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Даступнасць уключана."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Даступнасць адменена."</string>

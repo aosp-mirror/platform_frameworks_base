@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Άμεση πρόσβαση στο μικρόφωνο για την εγγραφή ήχου."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Κάμερα"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Άμεση πρόσβαση σε κάμερα για λήψη εικόνας ή βίντεο."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Κλείδωμα οθόνης"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Δυνατότητα επίδρασης της συμπεριφοράς της οθόνης κλειδώματος στη συσκευή σας."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Οι πληροφορίες των εφαρμογών σας"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Δυνατότητα επιρροής συμπεριφοράς άλλων εφαρμογών στη συσκευή σας."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Ταπετσαρία"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Ενέργειες κειμένου"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ο χώρος αποθήκευσης εξαντλείται"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ορισμένες λειτουργίες συστήματος ενδέχεται να μην λειτουργούν"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εκτελείται"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εκτελείται τώρα."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Ακύρωση"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Προς:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Πληκτρολογήστε τον απαιτούμενο κωδικό PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Το tablet θα αποσυνδεθεί προσωρινά από το δίκτυο Wi-Fi ενώ συνδέεται στη συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Το τηλέφωνο θα αποσυνδεθεί προσωρινά από το δίκτυο Wi-Fi ενώ συνδέεται στη συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Εισαγωγή χαρακτήρα"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Αποστολή μηνυμάτων SMS"</string>
@@ -1475,8 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου."\n\n" Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Κατάργηση"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Αυξάνετε την ένταση ήχου πάνω από το επίπεδο ασφαλείας;"\n"Αν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Αγγίξτε παρατεταμένα με δύο δάχτυλα για να ενεργοποιήσετε τη λειτουργία προσβασιμότητας."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ενεργοποιήθηκε η προσβασιμότητα."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Η λειτουργία προσβασιμότητας ακυρώθηκε."</string>

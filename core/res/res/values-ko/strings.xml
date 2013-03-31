@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"오디오를 녹음하기 위해 마이크에 직접 액세스합니다."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"이미지 및 동영상을 캡처하기 위해 카메라에 직접 액세스합니다."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"화면 잠금"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"기기의 잠금 화면 동작에 영향을 줄 수 있는 기능입니다."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"애플리케이션 정보"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"기기의 다른 애플리케이션의 작동에 영향을 줍니다."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"배경화면"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> 실행 중"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g>이(가) 현재 실행 중입니다."</string>
     <string name="ok" msgid="5970060430562524910">"확인"</string>
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
     <string name="yes" msgid="5362982303337969312">"확인"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"받는사람:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"필수 PIN 입력:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>에 연결되어 있는 동안 일시적으로 태블릿의 Wi-Fi 연결이 해제됩니다."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>에 연결되어 있는 동안 일시적으로 휴대전화의 Wi-Fi 연결이 해제됩니다."</string>
     <string name="select_character" msgid="3365550120617701745">"문자 삽입"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS 메시지를 보내는 중"</string>
@@ -1475,8 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"안전한 수준 이상으로 볼륨을 높이시겠습니까?"\n"높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
