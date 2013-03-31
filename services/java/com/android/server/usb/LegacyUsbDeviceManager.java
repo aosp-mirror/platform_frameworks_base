@@ -107,6 +107,7 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
     private boolean mUseUsbNotification;
     private boolean mAdbEnabled;
     private boolean mLegacy = false;
+    private UsbDebuggingManager mDebuggingManager;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -165,6 +166,9 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         mHandler = new LegacyUsbHandler(thread.getLooper());
+        if ("1".equals(SystemProperties.get("ro.adb.secure"))) {
+            mDebuggingManager = new UsbDebuggingManager(context);
+        }
     }
 
     public void setCurrentSettings(UsbSettingsManager settings) {
@@ -552,6 +556,9 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
                     if (mCurrentAccessory != null) {
                         getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     }
+                    if (mDebuggingManager != null) {
+                        mDebuggingManager.setAdbEnabled(mAdbEnabled);
+                    }
                     break;
             }
         }
@@ -671,6 +678,27 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
             } catch (IOException e) {
                 pw.println("IOException: " + e);
             }
+        }
+    }
+
+    public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
+        if (mDebuggingManager != null) {
+            mDebuggingManager.allowUsbDebugging(alwaysAllow, publicKey);
+        }
+    }
+
+    public void denyUsbDebugging() {
+        if (mDebuggingManager != null) {
+            mDebuggingManager.denyUsbDebugging();
+        }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw) {
+        if (mHandler != null) {
+            mHandler.dump(fd, pw);
+        }
+        if (mDebuggingManager != null) {
+            mDebuggingManager.dump(fd, pw);
         }
     }
 }
