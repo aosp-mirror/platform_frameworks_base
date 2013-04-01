@@ -20,13 +20,14 @@ import static com.android.server.am.ActivityManagerService.DEBUG_CLEANUP;
 import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerService.TAG;
 
+import android.app.IThumbnailReceiver;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.util.EventLog;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -54,12 +55,12 @@ public class ActivityStackSupervisor {
 
     /** The stack containing the launcher app */
     private ActivityStack mHomeStack;
+
+    /** The stack currently receiving input or launching the next activity */
     private ActivityStack mMainStack;
 
     /** All the non-launcher stacks */
     private ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
-
-    private boolean mHomeOnTop = true;
 
     public ActivityStackSupervisor(ActivityManagerService service, Context context,
             Looper looper) {
@@ -71,7 +72,6 @@ public class ActivityStackSupervisor {
     void init() {
         mHomeStack = new ActivityStack(mService, mContext, mLooper, HOME_STACK_ID, this);
         setMainStack(mHomeStack);
-        mService.mFocusedStack = mHomeStack;
         mStacks.add(mHomeStack);
     }
 
@@ -82,8 +82,16 @@ public class ActivityStackSupervisor {
         }
     }
 
+    boolean isHomeStackMain() {
+        return mHomeStack == mMainStack;
+    }
+
     boolean isMainStack(ActivityStack stack) {
         return stack == mMainStack;
+    }
+
+    ActivityStack getMainStack() {
+        return mMainStack;
     }
 
     void setMainStack(ActivityStack stack) {
@@ -115,10 +123,63 @@ public class ActivityStackSupervisor {
         return mCurTaskId;
     }
 
+    boolean attachApplicationLocked(ProcessRecord app, boolean headless) throws Exception {
+        boolean didSomething = false;
+        final String processName = app.processName;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            ActivityRecord hr = stack.topRunningActivityLocked(null);
+            if (hr != null) {
+                if (hr.app == null && app.uid == hr.info.applicationInfo.uid
+                        && processName.equals(hr.processName)) {
+                    try {
+                        if (headless) {
+                            Slog.e(TAG, "Starting activities not supported on headless device: "
+                                    + hr);
+                        } else if (stack.realStartActivityLocked(hr, app, true, true)) {
+                            didSomething = true;
+                        }
+                    } catch (Exception e) {
+                        Slog.w(TAG, "Exception in new application when starting activity "
+                              + hr.intent.getComponent().flattenToShortString(), e);
+                        throw e;
+                    }
+                } else {
+                    stack.ensureActivitiesVisibleLocked(hr, null, processName, 0);
+                }
+            }
+        }
+        return didSomething;
+    }
+
+    boolean allResumedActivitiesIdle() {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            if (mStacks.get(stackNdx).mResumedActivity == null ||
+                    !mStacks.get(stackNdx).mResumedActivity.idle) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
+            PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
+        ActivityRecord r = null;
+        final int numStacks = mStacks.size();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            final ActivityRecord ar =
+                    stack.getTasksLocked(maxNum - list.size(), receiver, pending, list);
+            if (isMainStack(stack)) {
+                r = ar;
+            }
+        }
+        return r;
+    }
+
     void startHomeActivity(Intent intent, ActivityInfo aInfo) {
         mHomeStack.startActivityLocked(null, intent, null, aInfo, null, null, 0, 0, 0, null, 0,
                 null, false, null);
-        mHomeOnTop = true;
     }
 
     void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
@@ -178,7 +239,7 @@ public class ActivityStackSupervisor {
 
     void resumeTopActivityLocked() {
         final int start, end;
-        if (mHomeOnTop) {
+        if (isHomeStackMain()) {
             start = 0;
             end = 1;
         } else {
@@ -339,6 +400,10 @@ public class ActivityStackSupervisor {
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mDismissKeyguardOnNextActivity:");
                 pw.println(mDismissKeyguardOnNextActivity);
+    }
+
+    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
+        return mMainStack.getDumpActivitiesLocked(name);
     }
 
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
