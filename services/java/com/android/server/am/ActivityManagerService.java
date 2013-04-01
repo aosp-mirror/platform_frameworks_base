@@ -1407,7 +1407,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     public static void setSystemProcess() {
         try {
             ActivityManagerService m = mSelf;
-            
+
             ServiceManager.addService("activity", m, true);
             ServiceManager.addService("meminfo", new MemBinder(m));
             ServiceManager.addService("gfxinfo", new GraphicsBinder(m));
@@ -1443,6 +1443,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
+    }
+
+    public void startObservingNativeCrashes() {
+        final NativeCrashListener ncl = new NativeCrashListener();
+        ncl.start();
     }
 
     public static final Context main(int factoryTest) {
@@ -8333,6 +8338,14 @@ public final class ActivityManagerService  extends ActivityManagerNative
         final String processName = app == null ? "system_server"
                 : (r == null ? "unknown" : r.processName);
 
+        handleApplicationCrashInner(r, processName, crashInfo);
+    }
+
+    /* Native crash reporting uses this inner version because it needs to be somewhat
+     * decoupled from the AM-managed cleanup lifecycle
+     */
+    void handleApplicationCrashInner(ProcessRecord r, String processName,
+            ApplicationErrorReport.CrashInfo crashInfo) {
         EventLog.writeEvent(EventLogTags.AM_CRASH, Binder.getCallingPid(),
                 UserHandle.getUserId(Binder.getCallingUid()), processName,
                 r == null ? -1 : r.info.flags,
@@ -8846,7 +8859,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             return null;
         }
 
-        if (!r.crashing && !r.notResponding) {
+        if (!r.crashing && !r.notResponding && !r.forceCrashReport) {
             return null;
         }
 
@@ -8857,7 +8870,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         report.time = timeMillis;
         report.systemApp = (r.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
 
-        if (r.crashing) {
+        if (r.crashing || r.forceCrashReport) {
             report.type = ApplicationErrorReport.TYPE_CRASH;
             report.crashInfo = crashInfo;
         } else if (r.notResponding) {
@@ -10867,7 +10880,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         mProcessesToGc.remove(app);
         
         // Dismiss any open dialogs.
-        if (app.crashDialog != null) {
+        if (app.crashDialog != null && !app.forceCrashReport) {
             app.crashDialog.dismiss();
             app.crashDialog = null;
         }
