@@ -16509,7 +16509,7 @@ package android.os {
     method public abstract android.os.IBinder asBinder();
   }
 
-  public class Looper {
+  public final class Looper {
     method public void dump(android.util.Printer, java.lang.String);
     method public static android.os.Looper getMainLooper();
     method public java.lang.Thread getThread();
@@ -16564,9 +16564,9 @@ package android.os {
     field public int what;
   }
 
-  public class MessageQueue {
-    method public final void addIdleHandler(android.os.MessageQueue.IdleHandler);
-    method public final void removeIdleHandler(android.os.MessageQueue.IdleHandler);
+  public final class MessageQueue {
+    method public void addIdleHandler(android.os.MessageQueue.IdleHandler);
+    method public void removeIdleHandler(android.os.MessageQueue.IdleHandler);
   }
 
   public static abstract interface MessageQueue.IdleHandler {
