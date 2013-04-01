@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -153,6 +155,92 @@ class TaskRecord extends ThumbnailHolder {
             numFullscreen--;
         }
         return mActivities.size() == 0;
+    }
+
+    /**
+     * Completely remove all activities associated with an existing
+     * task starting at a specified index.
+     */
+    final void performClearTaskAtIndexLocked(int activityNdx) {
+        final ArrayList<ActivityRecord> activities = mActivities;
+        int numActivities = activities.size();
+        for ( ; activityNdx < numActivities; ++activityNdx) {
+            final ActivityRecord r = activities.get(activityNdx);
+            if (r.finishing) {
+                continue;
+            }
+            if (stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear", false)) {
+                --activityNdx;
+                --numActivities;
+            }
+        }
+    }
+
+    /**
+     * Completely remove all activities associated with an existing task.
+     */
+    final void performClearTaskLocked() {
+        performClearTaskAtIndexLocked(0);
+    }
+
+    /**
+     * Perform clear operation as requested by
+     * {@link Intent#FLAG_ACTIVITY_CLEAR_TOP}: search from the top of the
+     * stack to the given task, then look for
+     * an instance of that activity in the stack and, if found, finish all
+     * activities on top of it and return the instance.
+     *
+     * @param newR Description of the new activity being started.
+     * @return Returns the old activity that should be continued to be used,
+     * or null if none was found.
+     */
+    final ActivityRecord performClearTaskLocked(ActivityRecord newR, int launchFlags) {
+        final ArrayList<ActivityRecord> activities = mActivities;
+        int numActivities = activities.size();
+        for (int activityNdx = numActivities - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord r = activities.get(activityNdx);
+            if (r.finishing) {
+                continue;
+            }
+            if (r.realActivity.equals(newR.realActivity)) {
+                // Here it is!  Now finish everything in front...
+                ActivityRecord ret = r;
+
+                for (++activityNdx; activityNdx < numActivities; ++activityNdx) {
+                    r = activities.get(activityNdx);
+                    if (r.finishing) {
+                        continue;
+                    }
+                    ActivityOptions opts = r.takeOptionsLocked();
+                    if (opts != null) {
+                        ret.updateOptionsLocked(opts);
+                    }
+                    if (stack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear",
+                            false)) {
+                        --activityNdx;
+                        --numActivities;
+                    }
+                }
+
+                // Finally, if this is a normal launch mode (that is, not
+                // expecting onNewIntent()), then we will finish the current
+                // instance of the activity so a new fresh one can be started.
+                if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
+                        && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
+                    if (!ret.finishing) {
+                        if (activities.contains(ret)) {
+                            stack.finishActivityLocked(ret, Activity.RESULT_CANCELED, null,
+                                    "clear", false);
+                        }
+                        return null;
+                    }
+                }
+
+                return ret;
+            }
+        }
+
+        return null;
     }
 
     void dump(PrintWriter pw, String prefix) {
