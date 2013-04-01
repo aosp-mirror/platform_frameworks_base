@@ -135,7 +135,7 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
-                pw.print(" launchedFromPackage="); pw.println(launchedFromPackage);
+                pw.print(" launchedFromPackage="); pw.print(launchedFromPackage);
                 pw.print(" userId="); pw.println(userId);
         pw.print(prefix); pw.print("app="); pw.println(app);
         pw.print(prefix); pw.println(intent.toInsecureStringWithClip());

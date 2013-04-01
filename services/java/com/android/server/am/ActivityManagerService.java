@@ -866,8 +866,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static ActivityManagerService mSelf;
     static ActivityThread mSystemThread;
 
-    private Looper mLooper;
-
     private int mCurrentUserId = 0;
     private UserManagerService mUserManager;
 
@@ -1423,7 +1421,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 mSelf.mContext.getPackageManager().getApplicationInfo(
                             "android", STOCK_PM_FLAGS);
             mSystemThread.installSystemApplicationInfo(info);
-       
+
             synchronized (mSelf) {
                 ProcessRecord app = mSelf.newProcessRecordLocked(
                         mSystemThread.getApplicationThread(), info,
@@ -1469,7 +1467,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
         context.setTheme(android.R.style.Theme_Holo);
         m.mContext = context;
         m.mFactoryTest = factoryTest;
-        m.mLooper = thr.mLooper;
 
         m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
         m.mStackSupervisor.init();
@@ -1836,7 +1833,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
         }
     }
-    
+
     @Override
     public void batteryNeedsCpuUpdate() {
         updateCpuStatsNow();
@@ -1896,12 +1893,12 @@ public final class ActivityManagerService  extends ActivityManagerNative
         // put it on the LRU to keep track of when it should be exited.
         int lrui = mLruProcesses.indexOf(app);
         if (lrui >= 0) mLruProcesses.remove(lrui);
-        
+
         int i = mLruProcesses.size()-1;
         int skipTop = 0;
-        
+
         app.lruSeq = mLruSeq;
-        
+
         // compute the new weight for this process.
         app.lastActivityTime = SystemClock.uptimeMillis();
         if (app.activities.size() > 0) {
@@ -1939,7 +1936,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         if (i < 0) {
             mLruProcesses.add(0, app);
         }
-        
+
         // If the app is currently using a content provider or service,
         // bump those processes as well.
         if (app.connections.size() > 0) {
@@ -2524,6 +2521,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         mPendingActivityLaunches.clear();
     }
 
+    @Override
     public final int startActivity(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags,
@@ -2575,6 +2573,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return ret;
     }
 
+    @Override
     public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
@@ -7013,7 +7012,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     // Actually is sleeping or shutting down or whatever else in the future
     // is an inactive state.
-    public boolean isSleeping() {
+    public boolean isSleepingOrShuttingDown() {
         return mSleeping || mShuttingDown;
     }
 
