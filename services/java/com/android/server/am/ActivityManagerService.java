@@ -2317,7 +2317,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                         intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                             flags, userId);
-    
+
                 if (info != null) {
                     ai = info.activityInfo;
                 }
@@ -2337,7 +2337,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         if (mCheckedForSetup) {
             return;
         }
-        
+
         // We will show this screen if the current one is a different
         // version than the last one shown, and we are not running in
         // low-level factory test mode.
@@ -2346,12 +2346,12 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 Settings.Global.getInt(resolver,
                         Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
             mCheckedForSetup = true;
-            
+
             // See if we should be showing the platform update setup UI.
             Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
             List<ResolveInfo> ris = mSelf.mContext.getPackageManager()
                     .queryIntentActivities(intent, PackageManager.GET_META_DATA);
-            
+
             // We don't allow third party apps to replace this.
             ResolveInfo ri = null;
             for (int i=0; ris != null && i<ris.size(); i++) {
@@ -2361,7 +2361,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     break;
                 }
             }
-            
+
             if (ri != null) {
                 String vers = ri.activityInfo.metaData != null
                         ? ri.activityInfo.metaData.getString(Intent.METADATA_SETUP_VERSION)
@@ -2382,7 +2382,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
         }
     }
-    
+
     CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
         return mCompatModePackages.compatibilityInfoForPackageLocked(ai);
     }
@@ -2536,7 +2536,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         enforceNotIsolatedCaller("startActivity");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivity", null);
-        return getMainStack().startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
+        // TODO: Switch to user app stacks here.
+        return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
                 null, null, options, userId);
     }
@@ -2550,7 +2551,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
-        getMainStack().startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
+        // TODO: Switch to user app stacks here.
+        mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
                 res, null, options, UserHandle.getCallingUserId());
         return res;
@@ -2564,7 +2566,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         enforceNotIsolatedCaller("startActivityWithConfig");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityWithConfig", null);
-        int ret = getMainStack().startActivityMayWait(caller, -1, callingPackage, intent,
+        // TODO: Switch to user app stacks here.
+        int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, resultTo, resultWho, requestCode, startFlags,
                 null, null, null, config, options, userId);
         return ret;
@@ -2706,7 +2709,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityInPackage", null);
 
-        int ret = getMainStack().startActivityMayWait(null, uid, callingPackage, intent, resolvedType,
+        // TODO: Switch to user app stacks here.
+        int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
                 null, null, null, null, options, userId);
         return ret;
@@ -2719,7 +2723,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         enforceNotIsolatedCaller("startActivities");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivity", null);
-        int ret = getMainStack().startActivities(caller, -1, callingPackage, intents,
+        // TODO: Switch to user app stacks here.
+        int ret = mStackSupervisor.startActivities(caller, -1, callingPackage, intents,
                 resolvedTypes, resultTo, options, userId);
         return ret;
     }
@@ -2730,7 +2735,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityInPackage", null);
-        int ret = getMainStack().startActivities(null, uid, callingPackage, intents, resolvedTypes,
+        // TODO: Switch to user app stacks here.
+        int ret = mStackSupervisor.startActivities(null, uid, callingPackage, intents, resolvedTypes,
                 resultTo, options, userId);
         return ret;
     }
@@ -2876,6 +2882,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
     
+    @Override
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
@@ -3162,6 +3169,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
         FileObserver observer = new FileObserver(tracesPath, FileObserver.CLOSE_WRITE) {
+            @Override
             public synchronized void onEvent(int event, String path) { notify(); }
         };
 
@@ -3446,7 +3454,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     
             // Bring up the infamous App Not Responding dialog
             Message msg = Message.obtain();
-            HashMap map = new HashMap();
+            HashMap<String, Object> map = new HashMap<String, Object>();
             msg.what = SHOW_NOT_RESPONDING_MSG;
             msg.obj = map;
             msg.arg1 = aboveSystem ? 1 : 0;

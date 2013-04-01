@@ -19,7 +19,6 @@ package com.android.server.am;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.util.Objects;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -36,19 +35,15 @@ import android.app.IActivityManager;
 import android.app.IThumbnailReceiver;
 import android.app.IThumbnailRetriever;
 import android.app.IApplicationThread;
-import android.app.PendingIntent;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.IIntentSender;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -2997,292 +2992,6 @@ final class ActivityStack {
         return ActivityManager.START_SUCCESS;
     }
 
-    ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
-            String profileFile, ParcelFileDescriptor profileFd, int userId) {
-        // Collect information about the target of the Intent.
-        ActivityInfo aInfo;
-        try {
-            ResolveInfo rInfo =
-                AppGlobals.getPackageManager().resolveIntent(
-                        intent, resolvedType,
-                        PackageManager.MATCH_DEFAULT_ONLY
-                                    | ActivityManagerService.STOCK_PM_FLAGS, userId);
-            aInfo = rInfo != null ? rInfo.activityInfo : null;
-        } catch (RemoteException e) {
-            aInfo = null;
-        }
-
-        if (aInfo != null) {
-            // Store the found target back into the intent, because now that
-            // we have it we never want to do this again.  For example, if the
-            // user navigates back to this point in the history, we should
-            // always restart the exact same activity.
-            intent.setComponent(new ComponentName(
-                    aInfo.applicationInfo.packageName, aInfo.name));
-
-            // Don't debug things in the system process
-            if ((startFlags&ActivityManager.START_FLAG_DEBUG) != 0) {
-                if (!aInfo.processName.equals("system")) {
-                    mService.setDebugApp(aInfo.processName, true, false);
-                }
-            }
-
-            if ((startFlags&ActivityManager.START_FLAG_OPENGL_TRACES) != 0) {
-                if (!aInfo.processName.equals("system")) {
-                    mService.setOpenGlTraceApp(aInfo.applicationInfo, aInfo.processName);
-                }
-            }
-
-            if (profileFile != null) {
-                if (!aInfo.processName.equals("system")) {
-                    mService.setProfileApp(aInfo.applicationInfo, aInfo.processName,
-                            profileFile, profileFd,
-                            (startFlags&ActivityManager.START_FLAG_AUTO_STOP_PROFILER) != 0);
-                }
-            }
-        }
-        return aInfo;
-    }
-
-    final int startActivityMayWait(IApplicationThread caller, int callingUid,
-            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, WaitResult outResult, Configuration config,
-            Bundle options, int userId) {
-        // Refuse possible leaked file descriptors
-        if (intent != null && intent.hasFileDescriptors()) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
-        }
-        boolean componentSpecified = intent.getComponent() != null;
-
-        // Don't modify the client's object!
-        intent = new Intent(intent);
-
-        // Collect information about the target of the Intent.
-        ActivityInfo aInfo = resolveActivity(intent, resolvedType, startFlags,
-                profileFile, profileFd, userId);
-
-        synchronized (mService) {
-            int callingPid;
-            if (callingUid >= 0) {
-                callingPid = -1;
-            } else if (caller == null) {
-                callingPid = Binder.getCallingPid();
-                callingUid = Binder.getCallingUid();
-            } else {
-                callingPid = callingUid = -1;
-            }
-
-            mConfigWillChange = config != null
-                    && mService.mConfiguration.diff(config) != 0;
-            if (DEBUG_CONFIGURATION) Slog.v(TAG,
-                    "Starting activity when config will change = " + mConfigWillChange);
-
-            final long origId = Binder.clearCallingIdentity();
-
-            if (mStackSupervisor.isMainStack(this) && aInfo != null &&
-                    (aInfo.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
-                // This may be a heavy-weight process!  Check to see if we already
-                // have another, different heavy-weight process running.
-                if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {
-                    if (mService.mHeavyWeightProcess != null &&
-                            (mService.mHeavyWeightProcess.info.uid != aInfo.applicationInfo.uid ||
-                            !mService.mHeavyWeightProcess.processName.equals(aInfo.processName))) {
-                        int realCallingPid = callingPid;
-                        int realCallingUid = callingUid;
-                        if (caller != null) {
-                            ProcessRecord callerApp = mService.getRecordForAppLocked(caller);
-                            if (callerApp != null) {
-                                realCallingPid = callerApp.pid;
-                                realCallingUid = callerApp.info.uid;
-                            } else {
-                                Slog.w(TAG, "Unable to find app for caller " + caller
-                                      + " (pid=" + realCallingPid + ") when starting: "
-                                      + intent.toString());
-                                ActivityOptions.abort(options);
-                                return ActivityManager.START_PERMISSION_DENIED;
-                            }
-                        }
-
-                        IIntentSender target = mService.getIntentSenderLocked(
-                                ActivityManager.INTENT_SENDER_ACTIVITY, "android",
-                                realCallingUid, userId, null, null, 0, new Intent[] { intent },
-                                new String[] { resolvedType }, PendingIntent.FLAG_CANCEL_CURRENT
-                                | PendingIntent.FLAG_ONE_SHOT, null);
-
-                        Intent newIntent = new Intent();
-                        if (requestCode >= 0) {
-                            // Caller is requesting a result.
-                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_HAS_RESULT, true);
-                        }
-                        newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_INTENT,
-                                new IntentSender(target));
-                        if (mService.mHeavyWeightProcess.activities.size() > 0) {
-                            ActivityRecord hist = mService.mHeavyWeightProcess.activities.get(0);
-                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP,
-                                    hist.packageName);
-                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK,
-                                    hist.task.taskId);
-                        }
-                        newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_NEW_APP,
-                                aInfo.packageName);
-                        newIntent.setFlags(intent.getFlags());
-                        newIntent.setClassName("android",
-                                HeavyWeightSwitcherActivity.class.getName());
-                        intent = newIntent;
-                        resolvedType = null;
-                        caller = null;
-                        callingUid = Binder.getCallingUid();
-                        callingPid = Binder.getCallingPid();
-                        componentSpecified = true;
-                        try {
-                            ResolveInfo rInfo =
-                                AppGlobals.getPackageManager().resolveIntent(
-                                        intent, null,
-                                        PackageManager.MATCH_DEFAULT_ONLY
-                                        | ActivityManagerService.STOCK_PM_FLAGS, userId);
-                            aInfo = rInfo != null ? rInfo.activityInfo : null;
-                            aInfo = mService.getActivityInfoForUser(aInfo, userId);
-                        } catch (RemoteException e) {
-                            aInfo = null;
-                        }
-                    }
-                }
-            }
-
-            int res = startActivityLocked(caller, intent, resolvedType,
-                    aInfo, resultTo, resultWho, requestCode, callingPid, callingUid,
-                    callingPackage, startFlags, options, componentSpecified, null);
-
-            if (mConfigWillChange && mStackSupervisor.isMainStack(this)) {
-                // If the caller also wants to switch to a new configuration,
-                // do so now.  This allows a clean switch, as we are waiting
-                // for the current activity to pause (so we will not destroy
-                // it), and have not yet started the next activity.
-                mService.enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
-                        "updateConfiguration()");
-                mConfigWillChange = false;
-                if (DEBUG_CONFIGURATION) Slog.v(TAG,
-                        "Updating to new configuration after starting activity.");
-                mService.updateConfigurationLocked(config, null, false, false);
-            }
-
-            Binder.restoreCallingIdentity(origId);
-
-            if (outResult != null) {
-                outResult.result = res;
-                if (res == ActivityManager.START_SUCCESS) {
-                    mWaitingActivityLaunched.add(outResult);
-                    do {
-                        try {
-                            mService.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    } while (!outResult.timeout && outResult.who == null);
-                } else if (res == ActivityManager.START_TASK_TO_FRONT) {
-                    ActivityRecord r = this.topRunningActivityLocked(null);
-                    if (r.nowVisible) {
-                        outResult.timeout = false;
-                        outResult.who = new ComponentName(r.info.packageName, r.info.name);
-                        outResult.totalTime = 0;
-                        outResult.thisTime = 0;
-                    } else {
-                        outResult.thisTime = SystemClock.uptimeMillis();
-                        mWaitingActivityVisible.add(outResult);
-                        do {
-                            try {
-                                mService.wait();
-                            } catch (InterruptedException e) {
-                            }
-                        } while (!outResult.timeout && outResult.who == null);
-                    }
-                }
-            }
-
-            return res;
-        }
-    }
-
-    final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle options, int userId) {
-        if (intents == null) {
-            throw new NullPointerException("intents is null");
-        }
-        if (resolvedTypes == null) {
-            throw new NullPointerException("resolvedTypes is null");
-        }
-        if (intents.length != resolvedTypes.length) {
-            throw new IllegalArgumentException("intents are length different than resolvedTypes");
-        }
-
-        ActivityRecord[] outActivity = new ActivityRecord[1];
-
-        int callingPid;
-        if (callingUid >= 0) {
-            callingPid = -1;
-        } else if (caller == null) {
-            callingPid = Binder.getCallingPid();
-            callingUid = Binder.getCallingUid();
-        } else {
-            callingPid = callingUid = -1;
-        }
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mService) {
-
-                for (int i=0; i<intents.length; i++) {
-                    Intent intent = intents[i];
-                    if (intent == null) {
-                        continue;
-                    }
-
-                    // Refuse possible leaked file descriptors
-                    if (intent != null && intent.hasFileDescriptors()) {
-                        throw new IllegalArgumentException("File descriptors passed in Intent");
-                    }
-
-                    boolean componentSpecified = intent.getComponent() != null;
-
-                    // Don't modify the client's object!
-                    intent = new Intent(intent);
-
-                    // Collect information about the target of the Intent.
-                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i],
-                            0, null, null, userId);
-                    // TODO: New, check if this is correct
-                    aInfo = mService.getActivityInfoForUser(aInfo, userId);
-
-                    if (mStackSupervisor.isMainStack(this) && aInfo != null &&
-                            (aInfo.applicationInfo.flags & ApplicationInfo.FLAG_CANT_SAVE_STATE)
-                                    != 0) {
-                        throw new IllegalArgumentException(
-                                "FLAG_CANT_SAVE_STATE not supported here");
-                    }
-
-                    Bundle theseOptions;
-                    if (options != null && i == intents.length-1) {
-                        theseOptions = options;
-                    } else {
-                        theseOptions = null;
-                    }
-                    int res = startActivityLocked(caller, intent, resolvedTypes[i],
-                            aInfo, resultTo, null, -1, callingPid, callingUid, callingPackage,
-                            0, theseOptions, componentSpecified, outActivity);
-                    if (res < 0) {
-                        return res;
-                    }
-
-                    resultTo = outActivity[0] != null ? outActivity[0].appToken : null;
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-
-        return ActivityManager.START_SUCCESS;
-    }
-
     void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
             long thisTime, long totalTime) {
         for (int i=mWaitingActivityLaunched.size()-1; i>=0; i--) {
@@ -3296,7 +3005,7 @@ final class ActivityStack {
         }
         mService.notifyAll();
     }
-    
+
     void reportActivityVisibleLocked(ActivityRecord r) {
         for (int i=mWaitingActivityVisible.size()-1; i>=0; i--) {
             WaitResult w = mWaitingActivityVisible.get(i);
@@ -3394,7 +3103,7 @@ final class ActivityStack {
             }
         }
     }
-    
+
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(
             boolean remove) {
         int N = mStoppingActivities.size();
@@ -3476,7 +3185,7 @@ final class ActivityStack {
                 if (fromTimeout) {
                     reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
                 }
-                
+
                 // This is a hack to semi-deal with a race condition
                 // in the client where it can be constructed with a
                 // newer configuration from when we asked it to launch.
@@ -3485,7 +3194,7 @@ final class ActivityStack {
                 if (config != null) {
                     r.configuration = config;
                 }
-                
+
                 // No longer need to keep the device awake.
                 if (mResumedActivity == r && mLaunchingActivity.isHeld()) {
                     mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
