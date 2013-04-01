@@ -1702,16 +1702,15 @@ final class ActivityStack {
             // the screen based on the new activity order.
             boolean updated = false;
             if (mStackSupervisor.isMainStack(this)) {
-                synchronized (mService) {
-                    Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
-                            mService.mConfiguration,
-                            next.mayFreezeScreenLocked(next.app) ? next.appToken : null);
-                    if (config != null) {
-                        next.frozenBeforeDestroy = true;
-                    }
-                    updated = mService.updateConfigurationLocked(config, next, false, false);
+                Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
+                        mService.mConfiguration,
+                        next.mayFreezeScreenLocked(next.app) ? next.appToken : null);
+                if (config != null) {
+                    next.frozenBeforeDestroy = true;
                 }
+                updated = mService.updateConfigurationLocked(config, next, false, false);
             }
+
             if (!updated) {
                 // The configuration update wasn't able to keep the existing
                 // instance of the activity, and instead started a new one.
@@ -2060,8 +2059,8 @@ final class ActivityStack {
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to bottom task " + p.task);
                 } else {
-                    setTask(target, createTaskRecord(mService.getNextTaskId(), target.info, null,
-                            false), null, false);
+                    setTask(target, createTaskRecord(mStackSupervisor.getNextTaskId(), target.info,
+                            null, false), null, false);
                     target.task.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to new task " + target.task);
@@ -2562,8 +2561,7 @@ final class ActivityStack {
 
                 if (abort) {
                     if (resultRecord != null) {
-                        sendActivityResultLocked(-1,
-                            resultRecord, resultWho, requestCode,
+                        sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
                             Activity.RESULT_CANCELED, null);
                     }
                     // We pretend to the caller that it was really started, but
@@ -2605,9 +2603,9 @@ final class ActivityStack {
             } else {
                 mService.mDidAppSwitch = true;
             }
-
-            mService.doPendingActivityLaunchesLocked(false);
         }
+
+        mService.doPendingActivityLaunchesLocked(false);
 
         err = startActivityUncheckedLocked(r, sourceRecord,
                 startFlags, true, options);
@@ -2913,8 +2911,8 @@ final class ActivityStack {
         if (r.resultTo == null && !addingToTask
                 && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             if (reuseTask == null) {
-                setTask(r, createTaskRecord(mService.getNextTaskId(), r.info, intent, true), null,
-                        true);
+                setTask(r, createTaskRecord(mStackSupervisor.getNextTaskId(), r.info, intent,
+                        true), null, true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                         + " in new task " + r.task);
             } else {
@@ -2984,8 +2982,8 @@ final class ActivityStack {
             }
             setTask(r, prev != null
                     ? prev.task
-                    : createTaskRecord(mService.getNextTaskId(), r.info, intent, true), null,
-                            true);
+                    : createTaskRecord(mStackSupervisor.getNextTaskId(), r.info, intent, true),
+                            null, true);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
@@ -3257,8 +3255,9 @@ final class ActivityStack {
                     // TODO: New, check if this is correct
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
-                    if (mStackSupervisor.isMainStack(this) && aInfo != null && (aInfo.applicationInfo.flags
-                            & ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+                    if (mStackSupervisor.isMainStack(this) && aInfo != null &&
+                            (aInfo.applicationInfo.flags & ApplicationInfo.FLAG_CANT_SAVE_STATE)
+                                    != 0) {
                         throw new IllegalArgumentException(
                                 "FLAG_CANT_SAVE_STATE not supported here");
                     }
@@ -4938,7 +4937,7 @@ final class ActivityStack {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             pw.print("  Task "); pw.print(taskNdx); pw.print(": id #"); pw.println(task.taskId);
-            ActivityManagerService.dumpHistoryList(fd, pw, mTaskHistory.get(taskNdx).mActivities,
+            ActivityStackSupervisor.dumpHistoryList(fd, pw, mTaskHistory.get(taskNdx).mActivities,
                 "    ", "Hist", true, !dumpAll, dumpClient, dumpPackage);
         }
     }
@@ -5031,7 +5030,7 @@ final class ActivityStack {
     }
 
     void moveTask(int taskId, boolean toTop) {
-        final TaskRecord task = mService.anyTaskForIdLocked(taskId);
+        final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
         if (task == null) {
             return;
         }
