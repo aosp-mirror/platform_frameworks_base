@@ -47,7 +47,7 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
      * @return ScriptIntrinsicColorMatrix
      */
     public static ScriptIntrinsicColorMatrix create(RenderScript rs, Element e) {
-        if (e != Element.U8_4(rs)) {
+        if (!e.isCompatible(Element.U8_4(rs))) {
             throw new RSIllegalArgumentException("Unsuported element type.");
         }
         int id = rs.nScriptIntrinsicCreate(2, e.getID(rs));
