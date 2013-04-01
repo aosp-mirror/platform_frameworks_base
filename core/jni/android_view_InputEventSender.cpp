@@ -79,7 +79,7 @@ NativeInputEventSender::NativeInputEventSender(JNIEnv* env,
         const sp<MessageQueue>& messageQueue) :
         mSenderObjGlobal(env->NewGlobalRef(senderObj)),
         mInputPublisher(inputChannel), mMessageQueue(messageQueue),
-        mNextPublishedSeq(0) {
+        mNextPublishedSeq(1) {
 #if DEBUG_DISPATCH_CYCLE
     ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName());
 #endif
