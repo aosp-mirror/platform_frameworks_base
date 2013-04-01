@@ -14,16 +14,16 @@ page.metaDescription=The official site for Android developers. Provides the Andr
             <ul>
                 <li class="item carousel-home">
                     <div class="content-left col-10">
-                    <img src="{@docRoot}images/home/io-logo-2013.png" style="margin:40px 0 0">
+                    <img src="{@docRoot}images/home/io-extended-2013.png" style="margin:90px 0 0">
                     </div>
                     <div class="content-right col-5">
-                    <h1>Google I/O 2013</h1>
-                    <p>Android will be at Google I/O on May 15-17, 2013, with sessions covering a variety of topics
-                    such as design, performance, and how to extend your app with the latest Android features.</p>
-                    <p>For more information about event details and planned sessions,
-                    stay tuned to <a
-                    href="http://google.com/+GoogleDevelopers">+Google Developers</a>.</p>
-                    <p><a href="https://developers.google.com/events/io/" class="button">Learn more</a></p>
+                    <h1>Google I/O Extended</h1>
+                    <p>Android will be at Google I/O on May 15-17, 2013, with sessions covering topics
+                    such as design, performance, and how to enhance your app with the latest Android features.</p>
+                    <p>Even if you can't make it there, you can experience the excitement and innovation of
+                    Google I/O remotely with Google I/O Extended.</p>
+                    <p><a href="https://developers.google.com/events/io/io-extended/?utm_source=site&utm_medium=emb&utm_campaign=extended-android-site"
+                    >Organize or attend an event near you &raquo;</a></p>
                     </div>
                 </li>
                 <li class="item carousel-home">
