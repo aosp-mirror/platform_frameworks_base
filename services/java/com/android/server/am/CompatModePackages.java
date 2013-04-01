@@ -166,7 +166,7 @@ public class CompatModePackages {
     }
 
     public boolean getFrontActivityAskCompatModeLocked() {
-        ActivityRecord r = mService.mFocusedStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getMainStack().topRunningActivityLocked(null);
         if (r == null) {
             return false;
         }
@@ -178,7 +178,7 @@ public class CompatModePackages {
     }
 
     public void setFrontActivityAskCompatModeLocked(boolean ask) {
-        ActivityRecord r = mService.mFocusedStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getMainStack().topRunningActivityLocked(null);
         if (r != null) {
             setPackageAskCompatModeLocked(r.packageName, ask);
         }
@@ -200,7 +200,7 @@ public class CompatModePackages {
     }
 
     public int getFrontActivityScreenCompatModeLocked() {
-        ActivityRecord r = mService.mFocusedStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getMainStack().topRunningActivityLocked(null);
         if (r == null) {
             return ActivityManager.COMPAT_MODE_UNKNOWN;
         }
@@ -208,7 +208,7 @@ public class CompatModePackages {
     }
 
     public void setFrontActivityScreenCompatModeLocked(int mode) {
-        ActivityRecord r = mService.mFocusedStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getMainStack().topRunningActivityLocked(null);
         if (r == null) {
             Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
             return;
@@ -295,8 +295,8 @@ public class CompatModePackages {
             Message msg = mHandler.obtainMessage(MSG_WRITE);
             mHandler.sendMessageDelayed(msg, 10000);
 
-            
-            ActivityRecord starting = mService.mFocusedStack.restartPackage(packageName);
+            final ActivityStack stack = mService.getMainStack();
+            ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.
             for (int i=mService.mLruProcesses.size()-1; i>=0; i--) {
@@ -315,10 +315,10 @@ public class CompatModePackages {
             }
 
             if (starting != null) {
-                mService.mFocusedStack.ensureActivityConfigurationLocked(starting, 0);
+                stack.ensureActivityConfigurationLocked(starting, 0);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
-                mService.mFocusedStack.ensureActivitiesVisibleLocked(starting, 0);
+                stack.ensureActivitiesVisibleLocked(starting, 0);
             }
         }
     }
