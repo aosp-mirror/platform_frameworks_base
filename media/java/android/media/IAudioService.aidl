@@ -126,11 +126,6 @@ interface IAudioService {
     oneway void registerMediaButtonEventReceiverForCalls(in ComponentName c);
     oneway void unregisterMediaButtonEventReceiverForCalls();
 
-           int registerRemoteControlClient(in PendingIntent mediaIntent,
-               in IRemoteControlClient rcClient, in String callingPackageName);
-    oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
-           in IRemoteControlClient rcClient);
-
     /**
      * Register an IRemoteControlDisplay.
      * Notify all IRemoteControlClient of the new display and cause the RemoteControlClient
@@ -157,9 +152,29 @@ interface IAudioService {
      *   display doesn't need to receive artwork.
      */
     oneway void remoteControlDisplayUsesBitmapSize(in IRemoteControlDisplay rcd, int w, int h);
+    /**
+     * Request the user of a RemoteControlClient to seek to the given playback position.
+     * @param generationId the RemoteControlClient generation counter for which this request is
+     *         issued. Requests for an older generation than current one will be ignored.
+     * @param timeMs the time in ms to seek to, must be positive.
+     */
+     void setRemoteControlClientPlaybackPosition(int generationId, long timeMs);
+
+    /**
+     * Do not use directly, use instead
+     *     {@link android.media.AudioManager#registerRemoteControlClient(RemoteControlClient)}
+     */
+    int registerRemoteControlClient(in PendingIntent mediaIntent,
+            in IRemoteControlClient rcClient, in String callingPackageName);
+    /**
+     * Do not use directly, use instead
+     *     {@link android.media.AudioManager#unregisterRemoteControlClient(RemoteControlClient)}
+     */
+    oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
+            in IRemoteControlClient rcClient);
 
     oneway void setPlaybackInfoForRcc(int rccId, int what, int value);
-           void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed);
+    void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed);
            int  getRemoteStreamMaxVolume();
            int  getRemoteStreamVolume();
     oneway void registerRemoteVolumeObserverForRcc(int rccId, in IRemoteVolumeObserver rvo);

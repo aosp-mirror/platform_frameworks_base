@@ -2274,6 +2274,26 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Request the user of a RemoteControlClient to seek to the given playback position.
+     * @param generationId the RemoteControlClient generation counter for which this request is
+     *         issued. Requests for an older generation than current one will be ignored.
+     * @param timeMs the time in ms to seek to, must be positive.
+     */
+    public void setRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
+        if (timeMs < 0) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.setRemoteControlClientPlaybackPosition(generationId, timeMs);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setRccPlaybackPosition("+ generationId + ", "
+                    + timeMs + ")", e);
+        }
+    }
+
+    /**
      *  @hide
      *  Reload audio settings. This method is called by Settings backup
      *  agent when audio settings are restored and causes the AudioService
