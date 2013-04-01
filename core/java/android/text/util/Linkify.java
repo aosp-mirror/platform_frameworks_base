@@ -16,6 +16,7 @@
 
 package android.text.util;
 
+import android.telephony.PhoneNumberUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
 import android.text.style.URLSpan;
@@ -32,8 +33,13 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.android.i18n.phonenumbers.PhoneNumberMatch;
+import com.android.i18n.phonenumbers.PhoneNumberUtil;
+import com.android.i18n.phonenumbers.PhoneNumberUtil.Leniency;
 
 /**
  *  Linkify take a piece of text and a regular expression and turns all of the
@@ -221,9 +227,7 @@ public class Linkify {
         }
 
         if ((mask & PHONE_NUMBERS) != 0) {
-            gatherLinks(links, text, Patterns.PHONE,
-                new String[] { "tel:" },
-                sPhoneNumberMatchFilter, sPhoneNumberTransformFilter);
+            gatherTelLinks(links, text);
         }
 
         if ((mask & MAP_ADDRESSES) != 0) {
@@ -440,6 +444,19 @@ public class Linkify {
 
                 links.add(spec);
             }
+        }
+    }
+
+    private static final void gatherTelLinks(ArrayList<LinkSpec> links, Spannable s) {
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        Iterable<PhoneNumberMatch> matches = phoneUtil.findNumbers(s.toString(),
+                Locale.getDefault().getCountry(), Leniency.POSSIBLE, Long.MAX_VALUE);
+        for (PhoneNumberMatch match : matches) {
+            LinkSpec spec = new LinkSpec();
+            spec.url = "tel:" + PhoneNumberUtils.normalizeNumber(match.rawString());
+            spec.start = match.start();
+            spec.end = match.end();
+            links.add(spec);
         }
     }
 
