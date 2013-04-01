@@ -50,7 +50,7 @@ import android.util.PrefixPrinter;
   *      }
   *  }</pre>
   */
-public class Looper {
+public final class Looper {
     private static final String TAG = "Looper";
 
     // sThreadLocal.get() will return null unless you've called prepare().
@@ -223,7 +223,7 @@ public class Looper {
      *
      * @hide
      */
-    public final int postSyncBarrier() {
+    public int postSyncBarrier() {
         return mQueue.enqueueSyncBarrier(SystemClock.uptimeMillis());
     }
 
@@ -238,7 +238,7 @@ public class Looper {
      *
      * @hide
      */
-    public final void removeSyncBarrier(int token) {
+    public void removeSyncBarrier(int token) {
         mQueue.removeSyncBarrier(token);
     }
 
