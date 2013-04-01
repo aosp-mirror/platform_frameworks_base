@@ -23,7 +23,7 @@ page.title=Get Started with Publishing
 
 <ul>
 <li>Register for a Google Play publisher account</li>
-<li>If you will sell apps, set up a Google Checkout Merchant Account</li>
+<li>If you will sell apps, set up a Google Wallet Merchant Account</li>
 <li>Explore the Google Play Developer Console and learn about the tools for publishing</li>
 </ul>
 
@@ -57,11 +57,11 @@ with the Developer Program Policies and US export law,</li>
 a Google Checkout account, you can quickly set one up during the process.</li>
 </ol>
 
-<p>When your registration is verified, you’ll be notified at the email address you specified during registration. </p>
+<p>When your registration is verified, you’ll be notified at the email address you specified during registration.</p>
 
-<h3>Set up a Google Checkout Merchant account</h3>
+<h3>Set up a Google Wallet Merchant account</h3>
  
-<p>If you want to sell products on Google Play &mdash; priced apps, in-app products, or subscriptions &mdash; you will also need to set up a Google Checkout <a href="http://checkout.google.com/sell">Merchant Account</a>. You can do that at any time, but make sure to first review the list of <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">merchant countries</a>.</p>
+<p>If you want to sell products on Google Play &mdash; priced apps, in-app products, or subscriptions &mdash; you will also need to set up a Google Wallet Merchant Account. You can do that at any time, but make sure to first review the list of <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">merchant countries</a>.</p>
 
 <p>To set up a Merchant account from the Developer Console:</p>
 
