@@ -5152,22 +5152,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // If this is an existing, non-system package, then
                     // we can't add any new permissions to it.
                     if (!allowedSig && !gp.grantedPermissions.contains(perm)) {
-                        allowed = false;
                         // Except...  if this is a permission that was added
                         // to the platform (note: need to only do this when
                         // updating the platform).
-                        final int NP = PackageParser.NEW_PERMISSIONS.length;
-                        for (int ip=0; ip<NP; ip++) {
-                            final PackageParser.NewPermissionInfo npi
-                                    = PackageParser.NEW_PERMISSIONS[ip];
-                            if (npi.name.equals(perm)
-                                    && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
-                                allowed = true;
-                                Log.i(TAG, "Auto-granting " + perm + " to old pkg "
-                                        + pkg.packageName);
-                                break;
-                            }
-                        }
+                        allowed = isNewPlatformPermissionForPackage(perm, pkg);
                     }
                 }
                 if (allowed) {
@@ -5211,6 +5199,23 @@ public class PackageManagerService extends IPackageManager.Stub {
             ps.permissionsFixed = true;
         }
         ps.haveGids = true;
+    }
+
+    private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {
+        boolean allowed = false;
+        final int NP = PackageParser.NEW_PERMISSIONS.length;
+        for (int ip=0; ip<NP; ip++) {
+            final PackageParser.NewPermissionInfo npi
+                    = PackageParser.NEW_PERMISSIONS[ip];
+            if (npi.name.equals(perm)
+                    && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
+                allowed = true;
+                Log.i(TAG, "Auto-granting " + perm + " to old pkg "
+                        + pkg.packageName);
+                break;
+            }
+        }
+        return allowed;
     }
 
     private boolean doSignaturePermission(String perm, PackageParser.Package pkg,
