@@ -1604,11 +1604,17 @@ public class WebView extends AbsoluteLayout
     //-------------------------------------------------------------------------
 
     /**
-     * Save the username and password for a particular host in the WebView's
-     * internal database.
-     * @param host The host that required the credentials.
-     * @param username The username for the given host.
-     * @param password The password for the given host.
+     * Sets a username and password pair for the specified host. This data is
+     * used by the Webview to autocomplete username and password fields in web
+     * forms. Note that this is unrelated to the credentials used for HTTP
+     * authentication.
+     *
+     * @param host the host that required the credentials. It is recommended that
+     *             the host is given using scheme://hostname format.
+     * @param username the username for the given host
+     * @param password the password for the given host
+     * @see WebViewDatabase#clearUsernamePassword
+     * @see WebViewDatabase#hasUsernamePassword
      */
     public void savePassword(String host, String username, String password) {
         checkThread();
