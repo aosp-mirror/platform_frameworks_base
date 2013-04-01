@@ -96,7 +96,8 @@ public class MtpDatabase {
             Files.FileColumns.FORMAT, // 2
             Files.FileColumns.PARENT, // 3
             Files.FileColumns.DATA, // 4
-            Files.FileColumns.DATE_MODIFIED, // 5
+            Files.FileColumns.DATE_ADDED, // 5
+            Files.FileColumns.DATE_MODIFIED, // 6
     };
     private static final String ID_WHERE = Files.FileColumns._ID + "=?";
     private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
@@ -840,7 +841,7 @@ public class MtpDatabase {
     }
 
     private boolean getObjectInfo(int handle, int[] outStorageFormatParent,
-                        char[] outName, long[] outModified) {
+                        char[] outName, long[] outCreatedModified) {
         Cursor c = null;
         try {
             c = mMediaProvider.query(mPackageName, mObjectsUri, OBJECT_INFO_PROJECTION,
@@ -861,7 +862,12 @@ public class MtpDatabase {
                 path.getChars(start, end, outName, 0);
                 outName[end - start] = 0;
 
-                outModified[0] = c.getLong(5);
+                outCreatedModified[0] = c.getLong(5);
+                outCreatedModified[1] = c.getLong(6);
+                // use modification date as creation date if date added is not set
+                if (outCreatedModified[0] == 0) {
+                    outCreatedModified[0] = outCreatedModified[1];
+                }
                 return true;
             }
         } catch (RemoteException e) {
