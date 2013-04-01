@@ -10525,8 +10525,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * handler can be used to pump events in the UI events queue.
      */
     public Handler getHandler() {
-        if (mAttachInfo != null) {
-            return mAttachInfo.mHandler;
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            return attachInfo.mHandler;
         }
         return null;
     }
