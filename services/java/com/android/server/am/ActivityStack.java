@@ -344,7 +344,7 @@ final class ActivityStack {
             switch (msg.what) {
                 case SLEEP_TIMEOUT_MSG: {
                     synchronized (mService) {
-                        if (mService.isSleeping()) {
+                        if (mService.isSleepingOrShuttingDown()) {
                             Slog.w(TAG, "Sleep timeout!  Sleeping now.");
                             mSleepTimeout = true;
                             checkReadyForSleepLocked();
@@ -875,7 +875,7 @@ final class ActivityStack {
     }
 
     void stopIfSleepingLocked() {
-        if (mService.isSleeping()) {
+        if (mService.isSleepingOrShuttingDown()) {
             if (!mGoingToSleep.isHeld()) {
                 mGoingToSleep.acquire();
                 if (mLaunchingActivity.isHeld()) {
@@ -912,7 +912,7 @@ final class ActivityStack {
     }
 
     void checkReadyForSleepLocked() {
-        if (!mService.isSleeping()) {
+        if (!mService.isSleepingOrShuttingDown()) {
             // Do not care.
             return;
         }
@@ -1003,14 +1003,13 @@ final class ActivityStack {
 
     private final void startPausingLocked(boolean userLeaving, boolean uiSleeping) {
         if (mPausingActivity != null) {
-            RuntimeException e = new RuntimeException();
             Slog.e(TAG, "Trying to pause when pause is already pending for "
-                  + mPausingActivity, e);
+                  + mPausingActivity, new RuntimeException("here").fillInStackTrace());
         }
         ActivityRecord prev = mResumedActivity;
         if (prev == null) {
-            RuntimeException e = new RuntimeException();
-            Slog.e(TAG, "Trying to pause when nothing is resumed", e);
+            Slog.e(TAG, "Trying to pause when nothing is resumed",
+                    new RuntimeException("here").fillInStackTrace());
             resumeTopActivityLocked(null);
             return;
         }
@@ -1049,7 +1048,7 @@ final class ActivityStack {
 
         // If we are not going to sleep, we want to ensure the device is
         // awake until the next activity is started.
-        if (!mService.mSleeping && !mService.mShuttingDown) {
+        if (!mService.isSleepingOrShuttingDown()) {
             mLaunchingActivity.acquire();
             if (!mHandler.hasMessages(LAUNCH_TIMEOUT_MSG)) {
                 // To be safe, don't allow the wake lock to be held for too long.
@@ -1057,7 +1056,6 @@ final class ActivityStack {
                 mHandler.sendMessageDelayed(msg, LAUNCH_TIMEOUT);
             }
         }
-
 
         if (mPausingActivity != null) {
             // Have the window manager pause its key dispatching until the new
@@ -1205,7 +1203,7 @@ final class ActivityStack {
             mPausingActivity = null;
         }
 
-        if (!mService.isSleeping()) {
+        if (!mService.isSleepingOrShuttingDown()) {
             resumeTopActivityLocked(prev);
         } else {
             checkReadyForSleepLocked();
@@ -3375,7 +3373,7 @@ final class ActivityStack {
                     mService.mWindowManager.setAppVisibility(r.appToken, false);
                 }
                 r.app.thread.scheduleStopActivity(r.appToken, r.visible, r.configChangeFlags);
-                if (mService.isSleeping()) {
+                if (mService.isSleepingOrShuttingDown()) {
                     r.setSleeping(true);
                 }
                 Message msg = mHandler.obtainMessage(STOP_TIMEOUT_MSG);
@@ -3425,7 +3423,7 @@ final class ActivityStack {
                     mService.mWindowManager.setAppVisibility(s.appToken, false);
                 }
             }
-            if ((!s.waitingVisible || mService.isSleeping()) && remove) {
+            if ((!s.waitingVisible || mService.isSleepingOrShuttingDown()) && remove) {
                 if (localLOGV) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
                     stops = new ArrayList<ActivityRecord>();
