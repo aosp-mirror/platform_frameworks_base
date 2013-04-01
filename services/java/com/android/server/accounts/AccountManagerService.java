@@ -116,6 +116,7 @@ public class AccountManagerService
 
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
+    private static final int MESSAGE_COPY_SHARED_ACCOUNT = 4;
 
     private final IAccountAuthenticatorCache mAuthenticatorCache;
 
@@ -619,7 +620,17 @@ public class AccountManagerService
                 }
 
                 public void run() throws RemoteException {
-                    mAuthenticator.addAccountFromCredentials(this, account, result);
+                    // Confirm that the owner's account still exists before this step.
+                    UserAccounts owner = getUserAccounts(UserHandle.USER_OWNER);
+                    synchronized (owner.cacheLock) {
+                        Account[] ownerAccounts = getAccounts(UserHandle.USER_OWNER);
+                        for (Account acc : ownerAccounts) {
+                            if (acc.equals(account)) {
+                                mAuthenticator.addAccountFromCredentials(this, account, result);
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 public void onResult(Bundle result) {
@@ -692,7 +703,33 @@ public class AccountManagerService
                 db.endTransaction();
             }
             sendAccountsChangedBroadcast(accounts.userId);
-            return true;
+        }
+        if (accounts.userId == UserHandle.USER_OWNER) {
+            addAccountToLimitedUsers(account);
+        }
+        return true;
+    }
+
+    /**
+     * Adds the account to all limited users as shared accounts. If the user is currently
+     * running, then clone the account too.
+     * @param account the account to share with limited users
+     */
+    private void addAccountToLimitedUsers(Account account) {
+        List<UserInfo> users = mUserManager.getUsers();
+        for (UserInfo user : users) {
+            if (user.isRestricted()) {
+                addSharedAccountAsUser(account, user.id);
+                try {
+                    if (ActivityManagerNative.getDefault().isUserRunning(user.id, false)) {
+                        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
+                                MESSAGE_COPY_SHARED_ACCOUNT, UserHandle.USER_OWNER, user.id,
+                                account));
+                    }
+                } catch (RemoteException re) {
+                    // Shouldn't happen
+                }
+            }
         }
     }
 
@@ -2165,6 +2202,10 @@ public class AccountManagerService
                 case MESSAGE_TIMED_OUT:
                     Session session = (Session)msg.obj;
                     session.onTimedOut();
+                    break;
+
+                case MESSAGE_COPY_SHARED_ACCOUNT:
+                    copyAccountToUser((Account) msg.obj, msg.arg1, msg.arg2);
                     break;
 
                 default:
