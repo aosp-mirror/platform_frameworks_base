@@ -33,14 +33,41 @@ public class LinkPropertiesTest extends TestCase {
     private static String GATEWAY2 = "69.78.8.1";
     private static String NAME = "qmi0";
 
+    public void assertLinkPropertiesEqual(LinkProperties source, LinkProperties target) {
+        // Check implementation of equals(), element by element.
+        assertTrue(source.isIdenticalInterfaceName(target));
+        assertTrue(target.isIdenticalInterfaceName(source));
+
+        assertTrue(source.isIdenticalAddresses(target));
+        assertTrue(target.isIdenticalAddresses(source));
+
+        assertTrue(source.isIdenticalDnses(target));
+        assertTrue(target.isIdenticalDnses(source));
+
+        assertTrue(source.isIdenticalRoutes(target));
+        assertTrue(target.isIdenticalRoutes(source));
+
+        assertTrue(source.isIdenticalHttpProxy(target));
+        assertTrue(target.isIdenticalHttpProxy(source));
+
+        assertTrue(source.isIdenticalStackedLinks(target));
+        assertTrue(target.isIdenticalStackedLinks(source));
+
+        // Check result of equals().
+        assertTrue(source.equals(target));
+        assertTrue(target.equals(source));
+
+        // Check hashCode.
+        assertEquals(source.hashCode(), target.hashCode());
+    }
+
     @SmallTest
     public void testEqualsNull() {
         LinkProperties source = new LinkProperties();
         LinkProperties target = new LinkProperties();
 
         assertFalse(source == target);
-        assertTrue(source.equals(target));
-        assertTrue(source.hashCode() == target.hashCode());
+        assertLinkPropertiesEqual(source, target);
     }
 
     @SmallTest
@@ -73,8 +100,7 @@ public class LinkPropertiesTest extends TestCase {
             target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
             target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
 
-            assertTrue(source.equals(target));
-            assertTrue(source.hashCode() == target.hashCode());
+            assertLinkPropertiesEqual(source, target);
 
             target.clear();
             // change Interface Name
@@ -163,8 +189,7 @@ public class LinkPropertiesTest extends TestCase {
             target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
             target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
 
-            assertTrue(source.equals(target));
-            assertTrue(source.hashCode() == target.hashCode());
+            assertLinkPropertiesEqual(source, target);
         } catch (Exception e) {
             fail();
         }
@@ -191,8 +216,7 @@ public class LinkPropertiesTest extends TestCase {
             target.addLinkAddress(new LinkAddress(
                     NetworkUtils.numericToInetAddress(ADDRV6), 128));
 
-            assertTrue(source.equals(target));
-            assertTrue(source.hashCode() == target.hashCode());
+            assertLinkPropertiesEqual(source, target);
         } catch (Exception e) {
             fail();
         }
