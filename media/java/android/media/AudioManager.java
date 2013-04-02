@@ -2127,7 +2127,7 @@ public class AudioManager {
         mediaButtonIntent.setComponent(eventReceiver);
         PendingIntent pi = PendingIntent.getBroadcast(mContext,
                 0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
-        unregisterMediaButtonIntent(pi, eventReceiver);
+        unregisterMediaButtonIntent(pi);
     }
 
     /**
@@ -2139,16 +2139,16 @@ public class AudioManager {
         if (eventReceiver == null) {
             return;
         }
-        unregisterMediaButtonIntent(eventReceiver, null);
+        unregisterMediaButtonIntent(eventReceiver);
     }
 
     /**
      * @hide
      */
-    public void unregisterMediaButtonIntent(PendingIntent pi, ComponentName eventReceiver) {
+    public void unregisterMediaButtonIntent(PendingIntent pi) {
         IAudioService service = getService();
         try {
-            service.unregisterMediaButtonIntent(pi, eventReceiver);
+            service.unregisterMediaButtonIntent(pi);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterMediaButtonIntent"+e);
         }
