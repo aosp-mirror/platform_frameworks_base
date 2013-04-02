@@ -376,7 +376,7 @@ res/
 screen area. Specifically, the device's smallestWidth is the shortest of the screen's available
 height and width (you may also think of it as the "smallest possible width" for the screen). You can
 use this qualifier to ensure that, regardless of the screen's current orientation, your
-application's has at least {@code &lt;N&gt;} dps of width available for it UI.</p>
+application has at least {@code &lt;N&gt;} dps of width available for its UI.</p>
         <p>For example, if your layout requires that its smallest dimension of screen area be at
 least 600 dp at all times, then you can use this qualifer to create the layout resources, {@code
 res/layout-sw600dp/}. The system will use these resources only when the smallest dimension of
