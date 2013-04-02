@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
-public class MessageQueue {
+public final class MessageQueue {
     // True if the message queue can be quit.
     private final boolean mQuitAllowed;
 
@@ -78,7 +78,7 @@ public class MessageQueue {
      * 
      * @param handler The IdleHandler to be added.
      */
-    public final void addIdleHandler(IdleHandler handler) {
+    public void addIdleHandler(IdleHandler handler) {
         if (handler == null) {
             throw new NullPointerException("Can't add a null IdleHandler");
         }
@@ -94,7 +94,7 @@ public class MessageQueue {
      * 
      * @param handler The IdleHandler to be removed.
      */
-    public final void removeIdleHandler(IdleHandler handler) {
+    public void removeIdleHandler(IdleHandler handler) {
         synchronized (this) {
             mIdleHandlers.remove(handler);
         }
@@ -121,7 +121,7 @@ public class MessageQueue {
         }
     }
 
-    final Message next() {
+    Message next() {
         int pendingIdleHandlerCount = -1; // -1 only during first iteration
         int nextPollTimeoutMillis = 0;
 
@@ -218,7 +218,7 @@ public class MessageQueue {
         }
     }
 
-    final void quit() {
+    void quit() {
         if (!mQuitAllowed) {
             throw new RuntimeException("Main thread not allowed to quit.");
         }
@@ -232,7 +232,7 @@ public class MessageQueue {
         nativeWake(mPtr);
     }
 
-    final int enqueueSyncBarrier(long when) {
+    int enqueueSyncBarrier(long when) {
         // Enqueue a new sync barrier token.
         // We don't need to wake the queue because the purpose of a barrier is to stall it.
         synchronized (this) {
@@ -259,7 +259,7 @@ public class MessageQueue {
         }
     }
 
-    final void removeSyncBarrier(int token) {
+    void removeSyncBarrier(int token) {
         // Remove a sync barrier token from the queue.
         // If the queue is no longer stalled by a barrier then wake it.
         final boolean needWake;
@@ -288,7 +288,7 @@ public class MessageQueue {
         }
     }
 
-    final boolean enqueueMessage(Message msg, long when) {
+    boolean enqueueMessage(Message msg, long when) {
         if (msg.isInUse()) {
             throw new AndroidRuntimeException(msg + " This message is already in use.");
         }
@@ -338,7 +338,7 @@ public class MessageQueue {
         return true;
     }
 
-    final boolean hasMessages(Handler h, int what, Object object) {
+    boolean hasMessages(Handler h, int what, Object object) {
         if (h == null) {
             return false;
         }
@@ -355,7 +355,7 @@ public class MessageQueue {
         }
     }
 
-    final boolean hasMessages(Handler h, Runnable r, Object object) {
+    boolean hasMessages(Handler h, Runnable r, Object object) {
         if (h == null) {
             return false;
         }
@@ -372,7 +372,7 @@ public class MessageQueue {
         }
     }
 
-    final void removeMessages(Handler h, int what, Object object) {
+    void removeMessages(Handler h, int what, Object object) {
         if (h == null) {
             return;
         }
@@ -406,7 +406,7 @@ public class MessageQueue {
         }
     }
 
-    final void removeMessages(Handler h, Runnable r, Object object) {
+    void removeMessages(Handler h, Runnable r, Object object) {
         if (h == null || r == null) {
             return;
         }
@@ -440,7 +440,7 @@ public class MessageQueue {
         }
     }
 
-    final void removeCallbacksAndMessages(Handler h, Object object) {
+    void removeCallbacksAndMessages(Handler h, Object object) {
         if (h == null) {
             return;
         }
