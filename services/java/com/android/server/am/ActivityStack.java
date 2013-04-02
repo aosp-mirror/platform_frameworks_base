@@ -368,7 +368,7 @@ final class ActivityStack {
                     // so we need to be conservative and assume it isn't.
                     ActivityRecord r = (ActivityRecord)msg.obj;
                     Slog.w(TAG, "Activity idle timeout for " + r);
-                    synchronized (this) {
+                    synchronized (mService) {
                         activityIdleInternalLocked(r != null ? r.appToken : null, true, null);
                     }
                 } break;
@@ -2157,189 +2157,6 @@ final class ActivityStack {
         newTop.frontOfTask = true;
     }
 
-    final int startActivityLocked(IApplicationThread caller,
-            Intent intent, String resolvedType, ActivityInfo aInfo, IBinder resultTo,
-            String resultWho, int requestCode,
-            int callingPid, int callingUid, String callingPackage, int startFlags, Bundle options,
-            boolean componentSpecified, ActivityRecord[] outActivity) {
-        int err = ActivityManager.START_SUCCESS;
-
-        ProcessRecord callerApp = null;
-        if (caller != null) {
-            callerApp = mService.getRecordForAppLocked(caller);
-            if (callerApp != null) {
-                callingPid = callerApp.pid;
-                callingUid = callerApp.info.uid;
-            } else {
-                Slog.w(TAG, "Unable to find app for caller " + caller
-                      + " (pid=" + callingPid + ") when starting: "
-                      + intent.toString());
-                err = ActivityManager.START_PERMISSION_DENIED;
-            }
-        }
-
-        if (err == ActivityManager.START_SUCCESS) {
-            final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
-            Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
-                    + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
-        }
-
-        ActivityRecord sourceRecord = null;
-        ActivityRecord resultRecord = null;
-        if (resultTo != null) {
-            sourceRecord = isInStackLocked(resultTo);
-            if (DEBUG_RESULTS) Slog.v(
-                TAG, "Will send result to " + resultTo + " " + sourceRecord);
-            if (sourceRecord != null) {
-                if (requestCode >= 0 && !sourceRecord.finishing) {
-                    resultRecord = sourceRecord;
-                }
-            }
-        }
-
-        int launchFlags = intent.getFlags();
-
-        if ((launchFlags&Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0
-                && sourceRecord != null) {
-            // Transfer the result target from the source activity to the new
-            // one being started, including any failures.
-            if (requestCode >= 0) {
-                ActivityOptions.abort(options);
-                return ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT;
-            }
-            resultRecord = sourceRecord.resultTo;
-            resultWho = sourceRecord.resultWho;
-            requestCode = sourceRecord.requestCode;
-            sourceRecord.resultTo = null;
-            if (resultRecord != null) {
-                resultRecord.removeResultsLocked(
-                    sourceRecord, resultWho, requestCode);
-            }
-        }
-
-        if (err == ActivityManager.START_SUCCESS && intent.getComponent() == null) {
-            // We couldn't find a class that can handle the given Intent.
-            // That's the end of that!
-            err = ActivityManager.START_INTENT_NOT_RESOLVED;
-        }
-
-        if (err == ActivityManager.START_SUCCESS && aInfo == null) {
-            // We couldn't find the specific class specified in the Intent.
-            // Also the end of the line.
-            err = ActivityManager.START_CLASS_NOT_FOUND;
-        }
-
-        if (err != ActivityManager.START_SUCCESS) {
-            if (resultRecord != null) {
-                sendActivityResultLocked(-1,
-                    resultRecord, resultWho, requestCode,
-                    Activity.RESULT_CANCELED, null);
-            }
-            mStackSupervisor.setDismissKeyguard(false);
-            ActivityOptions.abort(options);
-            return err;
-        }
-
-        final int startAnyPerm = mService.checkPermission(
-                START_ANY_ACTIVITY, callingPid, callingUid);
-        final int componentPerm = mService.checkComponentPermission(aInfo.permission, callingPid,
-                callingUid, aInfo.applicationInfo.uid, aInfo.exported);
-        if (startAnyPerm != PERMISSION_GRANTED && componentPerm != PERMISSION_GRANTED) {
-            if (resultRecord != null) {
-                sendActivityResultLocked(-1,
-                    resultRecord, resultWho, requestCode,
-                    Activity.RESULT_CANCELED, null);
-            }
-            mStackSupervisor.setDismissKeyguard(false);
-            String msg;
-            if (!aInfo.exported) {
-                msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")"
-                        + " not exported from uid " + aInfo.applicationInfo.uid;
-            } else {
-                msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")"
-                        + " requires " + aInfo.permission;
-            }
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-
-        if (mStackSupervisor.isMainStack(this)) {
-            if (mService.mController != null) {
-                boolean abort = false;
-                try {
-                    // The Intent we give to the watcher has the extra data
-                    // stripped off, since it can contain private information.
-                    Intent watchIntent = intent.cloneFilter();
-                    abort = !mService.mController.activityStarting(watchIntent,
-                            aInfo.applicationInfo.packageName);
-                } catch (RemoteException e) {
-                    mService.mController = null;
-                }
-
-                if (abort) {
-                    if (resultRecord != null) {
-                        sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
-                            Activity.RESULT_CANCELED, null);
-                    }
-                    // We pretend to the caller that it was really started, but
-                    // they will just get a cancel result.
-                    mStackSupervisor.setDismissKeyguard(false);
-                    ActivityOptions.abort(options);
-                    return ActivityManager.START_SUCCESS;
-                }
-            }
-        }
-
-        ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
-                intent, resolvedType, aInfo, mService.mConfiguration,
-                resultRecord, resultWho, requestCode, componentSpecified);
-        if (outActivity != null) {
-            outActivity[0] = r;
-        }
-
-        if (mStackSupervisor.isMainStack(this)) {
-            if (mResumedActivity == null
-                    || mResumedActivity.info.applicationInfo.uid != callingUid) {
-                if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
-                    PendingActivityLaunch pal =
-                            new PendingActivityLaunch(r, sourceRecord, startFlags, this);
-                    mService.mPendingActivityLaunches.add(pal);
-                    mStackSupervisor.setDismissKeyguard(false);
-                    ActivityOptions.abort(options);
-                    return ActivityManager.START_SWITCHES_CANCELED;
-                }
-            }
-
-            if (mService.mDidAppSwitch) {
-                // This is the second allowed switch since we stopped switches,
-                // so now just generally allow switches.  Use case: user presses
-                // home (switches disabled, switch to home, mDidAppSwitch now true);
-                // user taps a home icon (coming from home so allowed, we hit here
-                // and now allow anyone to switch again).
-                mService.mAppSwitchesAllowedTime = 0;
-            } else {
-                mService.mDidAppSwitch = true;
-            }
-        }
-
-        mService.doPendingActivityLaunchesLocked(false);
-
-        err = startActivityUncheckedLocked(r, sourceRecord,
-                startFlags, true, options);
-        if (mPausingActivity == null) {
-            // Someone asked to have the keyguard dismissed on the next
-            // activity start, but we are not actually doing an activity
-            // switch...  just dismiss the keyguard now, because we
-            // probably want to see whatever is behind it.
-            mStackSupervisor.dismissKeyguard();
-        }
-        return err;
-    }
-
     final void moveHomeToFrontFromLaunchLocked(int launchFlags) {
         if ((launchFlags &
                 (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME))
@@ -3369,7 +3186,7 @@ final class ActivityStack {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
                             destIntent.getComponent(), 0, srec.userId);
-                    int res = startActivityLocked(srec.app.thread, destIntent,
+                    int res = mStackSupervisor.startActivityLocked(srec.app.thread, destIntent,
                             null, aInfo, parent.appToken, null,
                             0, -1, parent.launchedFromUid, parent.launchedFromPackage,
                             0, null, true, null);

@@ -2388,7 +2388,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
-                    getMainStack().startActivityLocked(null, intent, null, ri.activityInfo,
+                    mStackSupervisor.startActivityLocked(null, intent, null, ri.activityInfo,
                             null, null, 0, 0, 0, null, 0, null, false, null);
                 }
             }
@@ -2700,7 +2700,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
 
             final long origId = Binder.clearCallingIdentity();
-            int res = r.task.stack.startActivityLocked(r.app.thread, intent,
+            int res = mStackSupervisor.startActivityLocked(r.app.thread, intent,
                     r.resolvedType, aInfo, resultTo != null ? resultTo.appToken : null,
                     resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage, 0,
                     options, false, null);
@@ -3767,7 +3767,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return infos;
     }
 
-    public long[] getProcessPss(int[] pids) throws RemoteException {
+    @Override
+    public long[] getProcessPss(int[] pids) {
         enforceNotIsolatedCaller("getProcessPss");
         long[] pss = new long[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
@@ -3776,6 +3777,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return pss;
     }
 
+    @Override
     public void killApplicationProcess(String processName, int uid) {
         if (processName == null) {
             return;
@@ -4214,7 +4216,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
 
         boolean normalMode = mProcessesReady || isAllowedWhileBooting(app.info);
-        List providers = normalMode ? generateApplicationProvidersLocked(app) : null;
+        List<ProviderInfo> providers = normalMode ? generateApplicationProvidersLocked(app) : null;
 
         if (!normalMode) {
             Slog.i(TAG, "Launching preboot mode app: " + app);
@@ -4360,6 +4362,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return true;
     }
 
+    @Override
     public final void attachApplication(IApplicationThread thread) {
         synchronized (this) {
             int callingPid = Binder.getCallingPid();
