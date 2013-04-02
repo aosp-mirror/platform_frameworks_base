@@ -674,7 +674,7 @@ action view still appears in the action bar when the user selects the item. You 
 view collapsible by adding {@code "collapseActionView"} to the {@code android:showAsAction}
 attribute, as shown in the XML above.</p>
 
-<p>Because the system will expand the action view when the user selects the item, so you
+<p>Because the system will expand the action view when the user selects the item, you
 <em>do not</em> need to respond to the item in the {@link
 android.app.Activity#onOptionsItemSelected onOptionsItemSelected} callback. The system still calls
 {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} when the user selects it,
