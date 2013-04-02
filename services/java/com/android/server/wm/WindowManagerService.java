@@ -8908,10 +8908,31 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ORIENTATION &&
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                         TAG, "Resizing " + win + " WITH DRAW PENDING");
-                win.mClient.resized(win.mFrame, win.mLastOverscanInsets, win.mLastContentInsets,
-                        win.mLastVisibleInsets,
-                        winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
-                        configChanged ? win.mConfiguration : null);
+                final IWindow client = win.mClient;
+                final Rect frame = win.mFrame;
+                final Rect overscanInsets = win.mLastOverscanInsets;
+                final Rect contentInsets = win.mLastContentInsets;
+                final Rect visibleInsets = win.mLastVisibleInsets;
+                final boolean reportDraw
+                        = winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
+                final Configuration newConfig = configChanged ? win.mConfiguration : null;
+                if (win.mClient instanceof IWindow.Stub) {
+                    // To prevent deadlock simulate one-way call if win.mClient is a local object.
+                    mH.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                client.resized(frame, overscanInsets, contentInsets,
+                                        visibleInsets, reportDraw, newConfig);
+                            } catch (RemoteException e) {
+                                // Not a remote call, RemoteException won't be raised.
+                            }
+                        }
+                    });
+                } else {
+                   client.resized(frame, overscanInsets, contentInsets, visibleInsets, reportDraw,
+                           newConfig);
+                }
                 win.mOverscanInsetsChanged = false;
                 win.mContentInsetsChanged = false;
                 win.mVisibleInsetsChanged = false;
