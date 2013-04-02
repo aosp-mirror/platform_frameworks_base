@@ -716,7 +716,7 @@ public class AccountManagerService
      * @param account the account to share with limited users
      */
     private void addAccountToLimitedUsers(Account account) {
-        List<UserInfo> users = mUserManager.getUsers();
+        List<UserInfo> users = getUserManager().getUsers();
         for (UserInfo user : users) {
             if (user.isRestricted()) {
                 addSharedAccountAsUser(account, user.id);
