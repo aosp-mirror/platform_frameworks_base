@@ -143,7 +143,9 @@ does not include tax.</td>
   </tr>
   <tr>
     <td>{@code INAPP_DATA_SIGNATURE}</td>
-    <td>String containing the signature of the purchase data that was signed with the private key of the developer.</td>
+    <td>String containing the signature of the purchase data that was signed 
+with the private key of the developer. The data signature uses the 
+RSASSA-PKCS1-v1_5 scheme.</td>
   </tr>
 </table>
 </p>

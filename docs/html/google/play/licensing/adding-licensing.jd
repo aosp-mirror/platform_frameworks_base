@@ -853,37 +853,39 @@ sample application calls <code>checkAccess()</code> from a
 
 <h3 id="account-key">Embed your public key for licensing</h3>
 
-<p>For each publisher account, the Google Play service automatically
-generates a  2048-bit RSA public/private key pair that is used exclusively for
-licensing. The key pair is uniquely associated with the publisher account and is
-shared across all applications that are published through the account. Although
-associated with a publisher account, the key pair is <em>not</em> the same as
-the key that you use to sign your applications (or derived from it).</p>
+<p>For each application, the Google Play service automatically
+generates a  2048-bit RSA public/private key pair that is used for 
+licensing and in-app billing. The key pair is uniquely associated with the 
+application. Although associated with the application, the key pair is 
+<em>not</em> the same as the key that you use to sign your applications (or derived from it).</p>
 
 <p>The Google Play Developer Console exposes the public key for licensing to any
-developer signed in to the publisher account, but it keeps the private key
+developer signed in to the Developer Console, but it keeps the private key
 hidden from all users in a secure location. When an application requests a
 license check for an application published in your account, the licensing server
-signs the license response using the private key of your account's key pair.
+signs the license response using the private key of your application's key pair.
 When the LVL receives the response, it uses the public key provided by the
 application to verify the signature of the license response. </p>
 
-<p>To add licensing to an application, you must obtain your publisher account's
+<p>To add licensing to an application, you must obtain your application's
 public key for licensing and copy it into your application. Here's how to find
-your account's public key for licensing:</p>
+your application's public key for licensing:</p>
 
 <ol>
 <li>Go to the Google Play <a
 href="http://play.google.com/apps/publish">Developer Console</a> and sign in.
 Make sure that you sign in to the account from which the application you are
 licensing is published (or will be published). </li>
-<li>In the account home page, locate the "Edit profile" link and click it. </li>
-<li>In the Edit Profile page, locate the "Licensing" pane, shown below. Your
-public key for licensing is given in the "Public key" text box. </li>
+<li>In the application details page, locate the <strong>Services & APIs</strong> 
+link and click it. </li>
+<li>In the <strong>Services & APIs</strong> page, locate the 
+<strong>Licensing & In-App Billing</strong> section. Your public key for 
+licensing is given in the 
+<strong>Your License Key For This Application</strong> field. </li>
 </ol>
 
 <p>To add the public key to your application, simply copy/paste the key string
-from the text box into your application as the value of the String variable
+from the field into your application as the value of the String variable
 <code>BASE64_PUBLIC_KEY</code>. When you are copying, make sure that you have
 selected the entire key string, without omitting any characters. </p>
 
@@ -964,16 +966,6 @@ mapping, and </li>
 application that they have legitimately purchased on another device.</li>
 </ul>
 </div>
-
-
-
-
-
-
-
-
-
-
 
 <h2 id="app-obfuscation">Obfuscating Your Code</h2>
 
