@@ -76,10 +76,12 @@ class SaveImageInBackgroundData {
     int result;
 
     void clearImage() {
-        context = null;
         image = null;
         imageUri = null;
         iconSize = 0;
+    }
+    void clearContext() {
+        context = null;
     }
 }
 
@@ -172,8 +174,6 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         mNotificationBuilder.setLargeIcon(croppedIcon);
         // But we still don't set it for the expanded view, allowing the smallIcon to show here.
         mNotificationStyle.bigLargeIcon(null);
-
-        Log.d(TAG, "SaveImageInBackgroundTask constructor");
     }
 
     @Override
@@ -181,7 +181,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         if (params.length != 1) return null;
         if (isCancelled()) {
             params[0].clearImage();
-            Log.d(TAG, "doInBackground cancelled");
+            params[0].clearContext();
             return null;
         }
 
@@ -246,7 +246,6 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             // mounted
             params[0].clearImage();
             params[0].result = 1;
-            Log.d(TAG, "doInBackground failed");
         }
 
         // Recycle the bitmap data
@@ -254,7 +253,6 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             image.recycle();
         }
 
-        Log.d(TAG, "doInBackground complete");
         return params[0];
     }
 
@@ -263,7 +261,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         if (isCancelled()) {
             params.finisher.run();
             params.clearImage();
-            Log.d(TAG, "onPostExecute cancelled");
+            params.clearContext();
             return;
         }
 
@@ -291,7 +289,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             mNotificationManager.notify(mNotificationId, n);
         }
         params.finisher.run();
-        Log.d(TAG, "onPostExecute complete");
+        params.clearContext();
     }
 }
 
@@ -395,15 +393,12 @@ class GlobalScreenshot {
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
         mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
-
-        Log.d(TAG, "GlobalScreenshot constructor");
     }
 
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
     private void saveScreenshotInWorkerThread(Runnable finisher) {
-        Log.d(TAG, "saveScreenshotInWorkerThread");
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
         data.context = mContext;
         data.image = mScreenBitmap;
@@ -411,7 +406,6 @@ class GlobalScreenshot {
         data.finisher = finisher;
         if (mSaveInBgTask != null) {
             mSaveInBgTask.cancel(false);
-            Log.d(TAG, "saveScreenshotInWorkerThread cancel");
         }
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data, mNotificationManager,
                 SCREENSHOT_NOTIFICATION_ID).execute(data);
@@ -436,8 +430,6 @@ class GlobalScreenshot {
      * Takes a screenshot of the current display and shows an animation.
      */
     void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible) {
-        Log.d(TAG, "takeScreenshot");
-
         // We need to orient the screenshot correctly (and the Surface api seems to take screenshots
         // only in the natural orientation of the device :!)
         mDisplay.getRealMetrics(mDisplayMetrics);
@@ -451,8 +443,6 @@ class GlobalScreenshot {
             mDisplayMatrix.mapPoints(dims);
             dims[0] = Math.abs(dims[0]);
             dims[1] = Math.abs(dims[1]);
-
-            Log.d(TAG, "takeScreenshot requiresRotation");
         }
 
         // Take the screenshot
@@ -460,7 +450,6 @@ class GlobalScreenshot {
         if (mScreenBitmap == null) {
             notifyScreenshotError(mContext, mNotificationManager);
             finisher.run();
-            Log.d(TAG, "takeScreenshot null bitmap");
             return;
         }
 
@@ -477,7 +466,6 @@ class GlobalScreenshot {
             // Recycle the previous bitmap
             mScreenBitmap.recycle();
             mScreenBitmap = ss;
-            Log.d(TAG, "takeScreenshot rotation bitmap created");
         }
 
         // Optimizations
@@ -487,7 +475,6 @@ class GlobalScreenshot {
         // Start the post-screenshot animation
         startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
                 statusBarVisible, navBarVisible);
-        Log.d(TAG, "takeScreenshot startedAnimation");
     }
 
 
@@ -496,7 +483,6 @@ class GlobalScreenshot {
      */
     private void startAnimation(final Runnable finisher, int w, int h, boolean statusBarVisible,
             boolean navBarVisible) {
-        Log.d(TAG, "startAnimation");
         // Add the view for the animation
         mScreenshotView.setImageBitmap(mScreenBitmap);
         mScreenshotLayout.requestFocus();
@@ -505,11 +491,9 @@ class GlobalScreenshot {
         if (mScreenshotAnimation != null) {
             mScreenshotAnimation.end();
             mScreenshotAnimation.removeAllListeners();
-            Log.d(TAG, "startAnimation reset previous animations");
         }
 
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
-        Log.d(TAG, "startAnimation layout added to WM");
         ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
         ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(w, h,
                 statusBarVisible, navBarVisible);
@@ -525,7 +509,6 @@ class GlobalScreenshot {
                 // Clear any references to the bitmap
                 mScreenBitmap = null;
                 mScreenshotView.setImageBitmap(null);
-                Log.d(TAG, "startAnimation onAnimationEnd");
             }
         });
         mScreenshotLayout.post(new Runnable() {
@@ -537,7 +520,6 @@ class GlobalScreenshot {
                 mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 mScreenshotView.buildLayer();
                 mScreenshotAnimation.start();
-                Log.d(TAG, "startAnimation post runnable");
             }
         });
     }
@@ -675,7 +657,6 @@ class GlobalScreenshot {
     }
 
     static void notifyScreenshotError(Context context, NotificationManager nManager) {
-        Log.d(TAG, "notifyScreenshotError");
         Resources r = context.getResources();
 
         // Clear all existing notification, compose the new notification and show it
