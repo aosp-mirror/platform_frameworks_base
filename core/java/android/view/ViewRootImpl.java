@@ -1425,6 +1425,8 @@ public final class ViewRootImpl implements ViewParent,
 
                 final int surfaceGenerationId = mSurface.getGenerationId();
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
+                mWindowsAnimating |=
+                        (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_ANIMATING) != 0;
 
                 if (DEBUG_LAYOUT) Log.v(TAG, "relayout: frame=" + frame.toShortString()
                         + " overscan=" + mPendingOverscanInsets.toShortString()
