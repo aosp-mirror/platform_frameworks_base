@@ -186,7 +186,7 @@ licensing server, possibly because of network availability problems. </td>
 </tr>
 <tr>
 <td>{@code ERROR_SERVER_FAILURE}</td>
-<td>Server error &mdash; the server could not load the publisher account's key
+<td>Server error &mdash; the server could not load the application's key
 pair for licensing.</td>
 <td>No</td>
 <td></td>
