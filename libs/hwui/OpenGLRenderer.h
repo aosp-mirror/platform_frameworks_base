@@ -51,6 +51,7 @@ namespace uirenderer {
 struct DrawModifiers {
     SkiaShader* mShader;
     SkiaColorFilter* mColorFilter;
+    float mOverrideLayerAlpha;
 
     // Drop shadow
     bool mHasShadow;
@@ -275,6 +276,9 @@ public:
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 
+    // If this value is set to < 1.0, it overrides alpha set on layer (see drawBitmap, drawLayer)
+    void setOverrideLayerAlpha(float alpha) { mDrawModifiers.mOverrideLayerAlpha = alpha; }
+
     SkPaint* filterPaint(SkPaint* paint);
 
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
@@ -283,7 +287,6 @@ public:
     const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
 
-    // TODO: what does this mean? no perspective? no rotate?
     ANDROID_API bool isCurrentTransformSimple() {
         return mSnapshot->transform->isSimple();
     }
@@ -325,7 +328,8 @@ public:
     /**
      * Gets the alpha and xfermode out of a paint object. If the paint is null
      * alpha will be 255 and the xfermode will be SRC_OVER. This method does
-     * not multiply the paint's alpha by the current snapshot's alpha.
+     * not multiply the paint's alpha by the current snapshot's alpha, and does
+     * not replace the alpha with the overrideLayerAlpha
      *
      * @param paint The paint to extract values from
      * @param alpha Where to store the resulting alpha
@@ -450,13 +454,21 @@ protected:
 
     /**
      * Gets the alpha and xfermode out of a paint object. If the paint is null
-     * alpha will be 255 and the xfermode will be SRC_OVER.
+     * alpha will be 255 and the xfermode will be SRC_OVER. Accounts for both
+     * snapshot alpha, and overrideLayerAlpha
      *
      * @param paint The paint to extract values from
      * @param alpha Where to store the resulting alpha
      * @param mode Where to store the resulting xfermode
      */
-    inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
+    inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const;
+
+    /**
+     * Gets the alpha from a layer, accounting for snapshot alpha and overrideLayerAlpha
+     *
+     * @param layer The layer from which the alpha is extracted
+     */
+    inline float getLayerAlpha(Layer* layer) const;
 
     /**
      * Safely retrieves the mode from the specified xfermode. If the specified
