@@ -1,107 +1,65 @@
 page.title=Dashboards
-header.hide=1
 @jd:body
 
+<style>
+div.chart,
+div.screens-chart {
+  display:none;
+}
+tr .total {
+  background-color:transparent;
+  border:0;
+  color:#666;
+}
+tr th.total {
+  font-weight:bold;
+}
+</style>
+
+
+
+
+<div class="sidebox">
+<h2>Google Play Install Stats</h2>
+<p>The Google Play Developer Console also provides <a
+href="{@docRoot}distribute/googleplay/about/distribution.html#stats">detailed statistics</a>
+about your users' devices. Those stats may help you prioritize the device profiles for which
+you optimize your app.</p>
+</div>
+
+<p>This page provides information about the relative number of devices that share a certain
+characteristic, such as Android version or screen size. This information may
+help you prioritize efforts for <a
+href="{@docRoot}training/basics/supporting-devices/index.html">supporting different devices</a>.</p>
+
+<p>Each snapshot of data represents all the devices that visited the Google Play Store in the
+prior 14 days.</p>
+
+<p class="note"><strong>Note:</strong> Beginning in April, 2013, these charts are now built
+using data collected from each device when the user visits the Google Play Store. Previously, the
+data was collected when the device simply checked-in to Google servers. We believe the new
+data more accurately reflects those users who are most engaged in the Android and Google Play
+ecosystem.</p>
 
 
 <h2 id="Platform">Platform Versions</h2>
 
-<p>This page provides data about the relative number of active devices
-running a given version of the Android platform. This can help you
-understand the landscape of device distribution and decide how to prioritize
-the development of your application features for the devices currently in
-the hands of users. For information about how to target your application to devices based on
-platform version, read about <a 
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API levels</a>.</p>
+<p>This section provides data about the relative number of devices running a given version of
+the Android platform.</p>
+
+<p>For information about how to target your application to devices based on
+platform version, read <a 
+href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different
+Platform Versions</a>.</p>
 
 
-<h3 id="PlatformCurrent">Current Distribution</h3>
-
-<p>The following pie chart and table is based on the number of Android devices that have accessed
-Google Play within a 14-day period ending on the data collection date noted below.</p>
-
-<div class="col-5" style="margin-left:0">
-
-
-<table>
-<tr>
-  <th>Version</th>
-  <th>Codename</th>
-  <th>API</th>
-  <th>Distribution</th>
-</tr>
-<tr><td><a href="/about/versions/android-1.6.html">1.6</a></td><td>Donut</td>    <td>4</td><td>0.2%</td></tr>
-<tr><td><a href="/about/versions/android-2.1.html">2.1</a></td><td>Eclair</td>   <td>7</td><td>1.9%</td></tr>
-<tr><td><a href="/about/versions/android-2.2.html">2.2</a></td><td>Froyo</td>    <td>8</td><td>7.5%</td></tr>
-<tr><td><a href="/about/versions/android-2.3.html">2.3 - 2.3.2</a>
-                                   </td><td rowspan="2">Gingerbread</td>    <td>9</td><td>0.2%</td></tr>
-<tr><td><a href="/about/versions/android-2.3.3.html">2.3.3 - 2.3.7
-        </a></td><!-- Gingerbread -->                                       <td>10</td><td>43.9%</td></tr>
-<tr><td><a href="/about/versions/android-3.1.html">3.1</a></td>
-                                                   <td rowspan="2">Honeycomb</td>      <td>12</td><td>0.3%</td></tr>
-<tr><td><a href="/about/versions/android-3.2.html">3.2</a></td>      <!-- Honeycomb --><td>13</td><td>0.9%</td></tr>
-<tr><td><a href="/about/versions/android-4.0.3.html">4.0.3 - 4.0.4</a></td>
-                                                            <td>Ice Cream Sandwich</td><td>15</td><td>28.6%</td></tr> 
-<tr><td><a href="/about/versions/android-4.1.html">4.1</a></td>
-                                                   <td rowspan="2">Jelly Bean</td><td>16</td><td>14.9%</td></tr>
-<tr><td><a href="/about/versions/android-4.2.html">4.2</a></td><!--Jelly Bean-->  <td>17</td><td>1.6%</td></tr>  
-</table>
-
+<div id="version-chart">
 </div>
 
-<div class="col-8" style="margin-right:0">
-<img style="margin-left:30px" alt=""
-src="//chart.apis.google.com/chart?&cht=p&chs=460x245&chf=bg,s,00000000&chd=t:2.1,7.5,44.1,1.2,28.6,16.5&chl=Eclair%20%26%20older|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=c4df9b,6fad0c"
-/>
 
-</div><!-- end dashboard-panel -->
-
-<p style="clear:both"><em>Data collected during a 14-day period ending on March 4, 2013</em></p>
-<!--
-<p style="font-size:.9em">* <em>Other: 0.1% of devices running obsolete versions</em></p>
--->
-
-<h3 id="PlatformHistorical">Historical Distribution</h3>
-
-<p>The following stacked line graph provides a history of the relative number of
-active Android devices running different versions of the Android platform. It also provides a
-valuable perspective of how many devices your application is compatible with, based on the
-platform version.</p>
-
-<p>Notice that the platform versions are stacked on top of each other with the oldest active
-version at the top. This format indicates the total percent of active devices that are compatible
-with a given version of Android. For example, if you develop your application for
-the version that is at the very top of the chart, then your application is
-compatible with 100% of active devices (and all future versions), because all Android APIs are
-forward compatible. Or, if you develop your application for a version lower on the chart,
-then it is currently compatible with the percentage of devices indicated on the y-axis, where the
-line for that version meets the y-axis on the right.</p>
-
-<p>Each dataset in the timeline is based on the number of Android devices that accessed
-Google Play within a 14-day period ending on the date indicated on the x-axis.</p>
-
-<img alt="" height="250" width="660"
-src="//chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chf=bg,s,00000000&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C09/01%7C09/15%7C10/01%7C10/15%7C11/01%7C11/15%7C12/01%7C12/15%7C01/01%7C01/15%7C02/01%7C02/15%7C03/01%7C1%3A%7C2012%7C%7C%7C%7C%7C%7C%7C%7C2013%7C%7C%7C%7C2013%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:99.3,99.4,99.5,99.5,99.5,99.6,100.0,100.0,100.0,100.0,100.0,100.0,100.0|95.6,95.8,96.1,96.3,96.4,96.7,96.9,97.2,97.4,97.4,97.6,97.7,97.9|81.4,82.3,83.2,83.8,84.7,85.6,86.4,87.0,88.2,88.8,89.4,89.9,90.3|23.7,25.5,27.4,28.7,31.1,33.0,35.4,36.8,40.3,42.0,43.6,45.1,46.0|21.5,23.5,25.5,26.8,29.4,31.4,33.8,35.2,38.8,40.7,42.3,43.9,44.8|1.1,1.4,1.8,2.1,3.2,4.8,6.5,7.5,9.9,11.7,13.3,14.8,16.1&chm=b,c3df9b,0,1,0|tFroyo,689326,1,0,15,,t::-5|b,b4db77,1,2,0|tGingerbread,547a19,2,0,15,,t::-5|b,a5db51,2,3,0|b,96dd28,3,4,0|tIce%20Cream%20Sandwich,293f07,4,0,15,,t::-5|b,83c916,4,5,0|tJelly%20Bean,131d02,5,9,15,,t::-5|B,6fad0c,5,6,0&chg=7,25&chdl=Eclair|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=add274,9dd14f,8ece2a,7ab61c,659b11,507d08"
-/>
-<p><em>Last historical dataset collected during a 14-day period ending on March 1, 2013</em></p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<p style="clear:both"><em>Data collected during a 14-day period ending on April 2, 2013.
+<br/>Any versions with less than 0.1% distribution are not shown.</em>
+</p>
 
 
 
@@ -111,72 +69,22 @@ src="//chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chf=bg,s,000
 <h2 id="Screens">Screen Sizes and Densities</h2>
 
 
-<img alt="" style="float:right;"
-src="//chart.googleapis.com/chart?cht=p&chs=400x250&chf=bg,s,00000000&chco=c4df9b,6fad0c&chl=Xlarge%7CLarge%7CNormal%7CSmall&chd=t%3A4.6,6.1,86.6,2.7" />
-
-
-<img alt="" style="float:right;clear:right"
-src="//chart.googleapis.com/chart?cht=p&chs=400x250&chf=bg,s,00000000&chco=c4df9b,6fad0c&chl=ldpi%7Cmdpi%7Chdpi%7Cxhdpi&chd=t%3A2.2,18,51.1,28.7" />
-
-
-<p>This section provides data about the relative number of active devices that have a particular
+<p>This section provides data about the relative number of devices that have a particular
 screen configuration, defined by a combination of screen size and density. To simplify the way that
 you design your user interfaces for different screen configurations, Android divides the range of
-actual screen sizes and densities into:</p> 
- 
-<ul> 
-<li>A set of four generalized <strong>sizes</strong>: <em>small</em>, <em>normal</em>,
-<em>large</em>, and <em>xlarge</em></em></li>
-<li>A set of four generalized <strong>densities</strong>: <em>ldpi</em> (low), <em>mdpi</em>
-(medium), <em>hdpi</em> (high), and <em>xhdpi</em> (extra high)</li>
-</ul> 
+actual screen sizes and densities into several buckets as expressed by the table below.</p>
 
 <p>For information about how you can support multiple screen configurations in your
-application, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+application, read <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
 Screens</a>.</p>
 
-<p class="note"><strong>Note:</strong> This data is based on the number
-of Android devices that have accessed Google Play within a 7-day period
-ending on the data collection date noted below.</p>
+
+<div id="screens-chart">
+</div>
 
 
-<table style="width:350px">
-<tr>
-<th></th>
-<th scope="col">ldpi</th>
-<th scope="col">mdpi</th>
-<th scope="col">hdpi</th>
-<th scope="col">xhdpi</th>
-</tr>
-<tr><th scope="row">small</th> 
-<td>1.7%</td>     <!-- small/ldpi -->
-<td></td>     <!-- small/mdpi -->
-<td>1.0%</td> <!-- small/hdpi -->
-<td></td>     <!-- small/xhdpi -->
-</tr> 
-<tr><th scope="row">normal</th> 
-<td>0.4%</td>  <!-- normal/ldpi -->
-<td>11%</td> <!-- normal/mdpi -->
-<td>50.1%</td> <!-- normal/hdpi -->
-<td>25.1%</td>      <!-- normal/xhdpi -->
-</tr> 
-<tr><th scope="row">large</th> 
-<td>0.1%</td>     <!-- large/ldpi -->
-<td>2.4%</td> <!-- large/mdpi -->
-<td></td>     <!-- large/hdpi -->
-<td>3.6%</td>     <!-- large/xhdpi -->
-</tr> 
-<tr><th scope="row">xlarge</th> 
-<td></td>     <!-- xlarge/ldpi -->
-<td>4.6%</td> <!-- xlarge/mdpi -->
-<td></td>     <!-- xlarge/hdpi -->
-<td></td>     <!-- xlarge/xhdpi -->
-</tr> 
-</table>
-
-<p style="clear:both"><em>Data collected during a 7-day period ending on October 1, 2012</em></p>
-
-
+<p style="clear:both"><em>Data collected during a 14-day period ending on April 2, 2013
+<br/>Any screen configurations with less than 0.1% distribution are not shown.</em></p>
 
 
 
@@ -187,14 +95,14 @@ ending on the data collection date noted below.</p>
 
 <h2 id="OpenGL">Open GL Version</h2>
 
-<p>This section provides data about the relative number of active devices that support a particular
+<p>This section provides data about the relative number of devices that support a particular
 version of OpenGL ES. Note that support for one particular version of OpenGL ES also implies
 support for any lower version (for example, support for version 2.0 also implies support for
 1.1).</p>
 
 
 <img alt="" style="float:right"
-src="//chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1%20only|GL%202.0%20%26%201.1&chd=t%3A9.2,90.8&chf=bg,s,00000000" />
+src="//chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1%20only|GL%202.0%20%26%201.1&chd=t%3A0.3,99.7&chf=bg,s,00000000" />
 
 <p>To declare which version of OpenGL ES your application requires, you should use the {@code
 android:glEsVersion} attribute of the <a
@@ -204,10 +112,6 @@ href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
 &lt;supports-gl-texture&gt;}</a> element to declare the GL compression formats that your application
 uses.</p>
 
-<p class="note"><strong>Note:</strong> This data is based on the number
-of Android devices that have accessed Google Play within a 7-day period
-ending on the data collection date noted below.</p>
-
 
 <table style="width:350px">
 <tr>
@@ -216,14 +120,347 @@ ending on the data collection date noted below.</p>
 </tr>
 <tr>
 <td>1.1 only</th>
-<td>9.2%</td>
+<td>0.3%</td>
 </tr>
 <tr>
 <td>2.0 &amp; 1.1</th>
-<td>90.8%</td>
+<td>99.7%</td>
 </tr>
 </table>
 
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on October 1, 2012</em></p>
+<p style="clear:both"><em>Data collected during a 14-day period ending on April 2, 2013</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+var VERSION_DATA =
+[
+  {
+    "chart": "//chart.googleapis.com/chart?chf=bg%2Cs%2C00000000&chd=t%3A1.8%2C4.0%2C39.8%2C0.2%2C29.3%2C25.0&chl=Eclair%7CFroyo%7CGingerbread%7CHoneycomb%7CIce%20Cream%20Sandwich%7CJelly%20Bean&chs=500x250&cht=p&chco=c4df9b%2C6fad0c",
+    "data": [
+      {
+        "api": 4,
+        "name": "Donut",
+        "perc": "0.1"
+      },
+      {
+        "api": 7,
+        "name": "Eclair",
+        "perc": "1.7"
+      },
+      {
+        "api": 8,
+        "name": "Froyo",
+        "perc": "4.0"
+      },
+      {
+        "api": 9,
+        "name": "Gingerbread",
+        "perc": "0.1"
+      },
+      {
+        "api": 10,
+        "name": "Gingerbread",
+        "perc": "39.7"
+      },
+      {
+        "api": 13,
+        "name": "Honeycomb",
+        "perc": "0.2"
+      },
+      {
+        "api": 15,
+        "name": "Ice Cream Sandwich",
+        "perc": "29.3"
+      },
+      {
+        "api": 16,
+        "name": "Jelly Bean",
+        "perc": "23.0"
+      },
+      {
+        "api": 17,
+        "name": "Jelly Bean",
+        "perc": "2.0"
+      }
+    ]
+  }
+];
+
+
+
+
+
+var SCREEN_DATA =
+[
+  {
+    "data": {
+      "Large": {
+        "hdpi": "0.5",
+        "ldpi": "0.7",
+        "mdpi": "2.7",
+        "tvdpi": "1.0",
+        "xhdpi": "0.8"
+      },
+      "Normal": {
+        "hdpi": "37.9",
+        "ldpi": "0.1",
+        "mdpi": "16.1",
+        "xhdpi": "25.0",
+        "xxhdpi": "0.8"
+      },
+      "Small": {
+        "ldpi": "9.5"
+      },
+      "Xlarge": {
+        "hdpi": "0.1",
+        "ldpi": "0.1",
+        "mdpi": "4.6",
+        "xhdpi": "0.1"
+      }
+    },
+    "densitychart": "//chart.googleapis.com/chart?chf=bg%2Cs%2C00000000&chd=t%3A10.4%2C23.4%2C1.0%2C38.5%2C25.9%2C0.8&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chs=400x250&cht=p&chco=c4df9b%2C6fad0c",
+    "layoutchart": "//chart.googleapis.com/chart?chf=bg%2Cs%2C00000000&chd=t%3A4.9%2C5.7%2C79.9%2C9.5&chl=Xlarge%7CLarge%7CNormal%7CSmall&chs=400x250&cht=p&chco=c4df9b%2C6fad0c"
+  }
+];
+
+
+
+var VERSION_NAMES =
+[
+  {"api":0},{"api":1},{"api":2},{"api":3},
+  { 
+    "api":4,
+    "link":"<a href='/about/versions/android-1.6.html'>1.6</a>",
+    "codename":"Donut",
+  },
+  { "api":5},
+  { "api":6},
+  { 
+    "api":7,
+    "link":"<a href='/about/versions/android-2.1.html'>2.1</a>",
+    "codename":"Eclair",
+  },
+  {
+    "api":8,
+    "link":"<a href='/about/versions/android-2.2.html'>2.2</a>",
+    "codename":"Froyo"
+  },
+  {
+    "api":9,
+    "link":"<a href='/about/versions/android-2.3.html'>2.3 -<br>2.3.2</a>",
+    "codename":"Gingerbread"
+  },
+  {
+    "api":10,
+    "link":"<a href='/about/versions/android-2.3.3.html'>2.3.3 -<br>2.3.7</a>",
+    "codename":"Gingerbread"
+  },
+  { "api":11},
+  {
+    "api":12,
+    "link":"<a href='/about/versions/android-3.1.html'>3.1</a>",
+    "codename":"Honeycomb"
+  },
+  {
+    "api":13,
+    "link":"<a href='/about/versions/android-3.2.html'>3.2</a>",
+    "codename":"Honeycomb"
+  },
+  { "api":14},
+  {
+    "api":15,
+    "link":"<a href='/about/versions/android-4.0.html'>4.0.3 -<br>4.0.4</a>",
+    "codename":"Ice Cream Sandwich"
+  },
+  {
+    "api":16,
+    "link":"<a href='/about/versions/android-4.1.html'>4.1.x</a>",
+    "codename":"Jelly Bean"
+  },
+  {
+    "api":17,
+    "link":"<a href='/about/versions/android-4.2.html'>4.2.x</a>",
+    "codename":"Jelly Bean"
+  }
+];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$(document).ready(function(){
+  // for each set of data (each month)
+  $.each(VERSION_DATA, function(i, set) {
+
+    // set up wrapper divs
+    var $div = $('<div class="chart"'
+         + ((i == 0) ? ' style="display:block"' : '')
+         + ' >');
+    var $divtable = $('<div class="col-5" style="margin-left:0">');
+    var $divchart = $('<div class="col-8" style="margin-right:0">');
+
+    // set up a new table
+    var $table = $("<table>");
+    var $trh = $("<tr><th>Version</th>"
+                   + "<th>Codename</th>"
+                   + "<th>API</th>"
+                   + "<th>Distribution</th></tr>");
+    $table.append($trh);
+
+    // loop each data set (each api level represented in stats)
+    $.each(set.data, function(i, data) {
+      // check if we need to rowspan the codename
+      var rowspan = 1;
+      // must not be first row
+      if (i > 0) {
+        // if this row's codename is the same as previous row codename
+        if (data.name == set.data[i-1].name) {
+          rowspan = 0;
+        // otherwise, as long as this is not the last row
+        } else if (i < (set.data.length - 1)) {
+          // increment rowspan for each subsequent row w/ same codename
+          while (data.name == set.data[i+rowspan].name) {
+            rowspan++;
+            // unless we've reached the last row
+            if ((i + rowspan) >= set.data.length) break;
+          }
+        }
+      }
+
+      // create table row and get corresponding version info from VERSION_NAMES
+      var $tr = $("<tr>");
+      $tr.append("<td>" + VERSION_NAMES[data.api].link + "</td>");
+      if (rowspan > 0) {
+        $tr.append("<td rowspan='" + rowspan + "'>" + VERSION_NAMES[data.api].codename + "</td>");
+      }
+      $tr.append("<td>" + data.api + "</td>");
+      $tr.append("<td>" + data.perc + "%</td>");
+      $table.append($tr);
+    });
+
+    // create chart image
+    var $chart = $('<img style="margin-left:30px" alt="" src="' + set.chart + '" />');
+
+    // stack up and insert the elements
+    $divtable.append($table);
+    $divchart.append($chart);
+    $div.append($divtable).append($divchart);
+    $("#version-chart").append($div);
+  });
+
+
+
+  var SCREEN_SIZES = ["Small","Normal","Large","Xlarge"];
+  var SCREEN_DENSITIES = ["ldpi","mdpi","tvdpi","hdpi","xhdpi","xxhdpi"];
+
+
+  // for each set of screens data (each month)
+  $.each(SCREEN_DATA, function(i, set) {
+
+    // set up wrapper divs
+    var $div = $('<div class="screens-chart"'
+         + ((i == 0) ? ' style="display:block"' : '')
+         + ' >');
+
+    // set up a new table
+    var $table = $("<table>");
+    var $trh = $("<tr><th></th></tr>");
+    $.each(SCREEN_DENSITIES, function(i, density) {
+      $trh.append("<th scope='col'>" + density + "</th>");
+    });
+    $trh.append("<th scope='col' class='total'>Total</th>");
+    $table.append($trh);
+
+    // array to hold totals for each density
+    var densityTotals = new Array(SCREEN_DENSITIES.length);
+    $.each(densityTotals, function(i, total) {
+      densityTotals[i] = 0; // make them all zero to start
+    });
+
+    // loop through each screen size
+    $.each(SCREEN_SIZES, function(i, size) {
+      // if there are any devices of this size
+      if (typeof set.data[size] != "undefined") {
+        // create table row and insert data
+        var $tr = $("<tr>");
+        $tr.append("<th scope='row'>" + size + "</th>");
+        // variable to sum all densities for this size
+        var total = 0;
+        // loop through each density
+        $.each(SCREEN_DENSITIES, function(i, density) {
+          var num = typeof set.data[size][density] != "undefined" ? set.data[size][density] : 0;
+          $tr.append("<td>" + (num != 0 ? num + "%" : "") + "</td>");
+          total += parseFloat(num);
+          densityTotals[i] += parseFloat(num);
+        })
+        $tr.append("<td class='total'>" + total.toFixed(1) + "%</td>");
+        $table.append($tr);
+      }
+    });
+
+    // create row of totals for each density
+    var $tr = $("<tr><th class='total'>Total</th></tr>");
+    $.each(densityTotals, function(i, total) {
+      $tr.append("<td class='total'>" + total.toFixed(1) + "%</td>");
+    });
+    $table.append($tr);
+
+    // create charts
+    var $sizechart = $('<img style="float:left;width:380px" alt="" src="'
+            + set.layoutchart + '" />');
+    var $densitychart = $('<img style="float:left;width:380px" alt="" src="'
+            + set.densitychart + '" />');
+
+    // stack up and insert the elements
+    $div.append($table).append($sizechart).append($densitychart);
+    $("#screens-chart").append($div);
+  });
+
+
+});
+
+
+
+function changeVersionDate() {
+  var date = $('#date-versions option:selected').val();
+
+  $(".chart").hide();
+  $(".chart."+date+"").show();
+}
+
+
+function changeScreensVersionDate() {
+  var date = $('#date-screens option:selected').val();
+
+  $(".screens-chart").hide();
+  $(".screens-chart."+date+"").show();
+}
+
+</script>
