@@ -4889,7 +4889,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mRemoteVolumeObs = null;
         }
 
-        /** precondition: mediaIntent != null, eventReceiver != null */
+        /** precondition: mediaIntent != null */
         public RemoteControlStackEntry(PendingIntent mediaIntent, ComponentName eventReceiver) {
             mMediaIntent = mediaIntent;
             mReceiverComponent = eventReceiver;
@@ -5062,6 +5062,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 Settings.System.MEDIA_BUTTON_RECEIVER, UserHandle.USER_CURRENT);
         if ((null != receiverName) && !receiverName.isEmpty()) {
             ComponentName eventReceiver = ComponentName.unflattenFromString(receiverName);
+            if (eventReceiver == null) {
+                // an invalid name was persisted
+                return;
+            }
             // construct a PendingIntent targeted to the restored component name
             // for the media button and register it
             Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
@@ -5077,7 +5081,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * Helper function:
      * Set the new remote control receiver at the top of the RC focus stack.
      * Called synchronized on mAudioFocusLock, then mRCStack
-     * precondition: mediaIntent != null, target != null
+     * precondition: mediaIntent != null
      */
     private void pushMediaButtonReceiver_syncAfRcs(PendingIntent mediaIntent, ComponentName target) {
         // already at top of stack?
@@ -5106,8 +5110,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         mRCStack.push(rcse); // rcse is never null
 
         // post message to persist the default media button receiver
-        mAudioHandler.sendMessage( mAudioHandler.obtainMessage(
-                MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0, target/*obj*/) );
+        if (target != null) {
+            mAudioHandler.sendMessage( mAudioHandler.obtainMessage(
+                    MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0, target/*obj*/) );
+        }
     }
 
     /**
@@ -5407,7 +5413,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /**
      * see AudioManager.registerMediaButtonIntent(PendingIntent pi, ComponentName c)
-     * precondition: mediaIntent != null, target != null
+     * precondition: mediaIntent != null
      */
     public void registerMediaButtonIntent(PendingIntent mediaIntent, ComponentName eventReceiver) {
         Log.i(TAG, "  Remote Control   registerMediaButtonIntent() for " + mediaIntent);
@@ -5425,7 +5431,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * see AudioManager.unregisterMediaButtonIntent(PendingIntent mediaIntent)
      * precondition: mediaIntent != null, eventReceiver != null
      */
-    public void unregisterMediaButtonIntent(PendingIntent mediaIntent, ComponentName eventReceiver)
+    public void unregisterMediaButtonIntent(PendingIntent mediaIntent)
     {
         Log.i(TAG, "  Remote Control   unregisterMediaButtonIntent() for " + mediaIntent);
 
