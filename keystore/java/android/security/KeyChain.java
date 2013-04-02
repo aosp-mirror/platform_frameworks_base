@@ -361,7 +361,7 @@ public final class KeyChain {
      * specific {@code PrivateKey} type indicated by {@code algorithm} (e.g.,
      * "RSA").
      */
-    public static boolean isKeyTypeSupported(String algorithm) {
+    public static boolean isKeyAlgorithmSupported(String algorithm) {
         return "RSA".equals(algorithm);
     }
 
@@ -372,8 +372,8 @@ public final class KeyChain {
      * hardware support that can be used to bind keys to the device in a way
      * that makes it non-exportable.
      */
-    public static boolean isBoundKeyType(String algorithm) {
-        if (!isKeyTypeSupported(algorithm)) {
+    public static boolean isBoundKeyAlgorithm(String algorithm) {
+        if (!isKeyAlgorithmSupported(algorithm)) {
             return false;
         }
 
