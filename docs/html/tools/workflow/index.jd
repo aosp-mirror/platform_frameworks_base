@@ -34,7 +34,7 @@ development steps encompass four development phases, which include:</p>
   </li>
   <li><strong>Development</strong>
     <p>During this phase you set up and develop your Android project, which contains all of the
-    source code and resource files for your application. For more informations, see
+    source code and resource files for your application. For more information, see
     <a href="{@docRoot}tools/projects/index.html">Create an Android project</a>.</p>
   </li>
   <li><strong>Debugging and Testing</strong>
