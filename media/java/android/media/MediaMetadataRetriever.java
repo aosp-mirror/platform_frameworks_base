@@ -367,7 +367,7 @@ public class MediaMetadataRetriever
      * counterparts in include/media/mediametadataretriever.h!
      */
     /**
-     * The metadata key to retrieve the numberic string describing the
+     * The metadata key to retrieve the numeric string describing the
      * order of the audio data source on its original recording.
      */
     public static final int METADATA_KEY_CD_TRACK_NUMBER = 0;
