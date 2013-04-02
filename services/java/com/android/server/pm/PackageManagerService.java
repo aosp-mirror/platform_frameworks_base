@@ -1326,6 +1326,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                             ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
                             : 0));
 
+            // If this is the first boot, and it is a normal boot, then
+            // we need to initialize the default preferred apps.
+            if (!mRestoredSettings && !onlyCore) {
+                mSettings.readDefaultPreferredAppsLPw(this, 0);
+            }
+
             // can downgrade to reader
             mSettings.writeLPr();
 
