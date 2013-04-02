@@ -42,7 +42,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -54,18 +53,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -88,10 +84,10 @@ final class ActivityStack {
     static final boolean DEBUG_TASKS = ActivityManagerService.DEBUG_TASKS;
     static final boolean DEBUG_CLEANUP = ActivityManagerService.DEBUG_CLEANUP;
 
-    static final boolean DEBUG_STATES = false;
-    static final boolean DEBUG_ADD_REMOVE = false;
-    static final boolean DEBUG_SAVED_STATE = false;
-    static final boolean DEBUG_APP = false;
+    static final boolean DEBUG_STATES = ActivityStackSupervisor.DEBUG_STATES;
+    static final boolean DEBUG_ADD_REMOVE = ActivityStackSupervisor.DEBUG_ADD_REMOVE;
+    static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
+    static final boolean DEBUG_APP = ActivityStackSupervisor.DEBUG_APP;
 
     static final boolean VALIDATE_TOKENS = ActivityManagerService.VALIDATE_TOKENS;
 
@@ -445,7 +441,7 @@ final class ActivityStack {
     }
 
     ActivityStack(ActivityManagerService service, Context context, Looper looper, int stackId,
-            ActivityStackSupervisor supervisor) {
+            ActivityStackSupervisor supervisor, int userId) {
         mHandler = new ActivityStackHandler(looper);
         mService = service;
         mContext = context;
@@ -456,6 +452,7 @@ final class ActivityStack {
         mLaunchingActivity.setReferenceCounted(false);
         mStackId = stackId;
         mStackSupervisor = supervisor;
+        mCurrentUser = userId;
     }
 
     private boolean okToShow(ActivityRecord r) {
@@ -541,7 +538,7 @@ final class ActivityStack {
         return null;
     }
 
-    private final boolean updateLRUListLocked(ActivityRecord r) {
+    final boolean updateLRUListLocked(ActivityRecord r) {
         final boolean hadit = mLRUActivities.remove(r);
         mLRUActivities.add(r);
         return hadit;
@@ -619,13 +616,6 @@ final class ActivityStack {
         return null;
     }
 
-    final void showAskCompatModeDialogLocked(ActivityRecord r) {
-        Message msg = Message.obtain();
-        msg.what = ActivityManagerService.SHOW_COMPAT_MODE_DIALOG_MSG;
-        msg.obj = r.task.askedCompatMode ? null : r;
-        mService.mHandler.sendMessage(msg);
-    }
-
     /*
      * Move the activities around in the stack to bring a user to the foreground.
      * @return whether there are any activities for the specified user.
@@ -660,180 +650,17 @@ final class ActivityStack {
         return haveActivities;
     }
 
-    final boolean realStartActivityLocked(ActivityRecord r,
-            ProcessRecord app, boolean andResume, boolean checkConfig)
-            throws RemoteException {
-
-        r.startFreezingScreenLocked(app, 0);
-        mService.mWindowManager.setAppVisibility(r.appToken, true);
-
-        // schedule launch ticks to collect information about slow apps.
-        r.startLaunchTickingLocked();
-
-        // Have the window manager re-evaluate the orientation of
-        // the screen based on the new activity order.  Note that
-        // as a result of this, it can call back into the activity
-        // manager with a new orientation.  We don't care about that,
-        // because the activity is not currently running so we are
-        // just restarting it anyway.
-        if (checkConfig) {
-            Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
-                    mService.mConfiguration,
-                    r.mayFreezeScreenLocked(app) ? r.appToken : null);
-            mService.updateConfigurationLocked(config, r, false, false);
-        }
-
-        r.app = app;
-        app.waitingToKill = null;
-        r.launchCount++;
-        r.lastLaunchTime = SystemClock.uptimeMillis();
-
-        if (localLOGV) Slog.v(TAG, "Launching: " + r);
-
-        int idx = app.activities.indexOf(r);
-        if (idx < 0) {
-            app.activities.add(r);
-        }
-        mService.updateLruProcessLocked(app, true);
-
-        try {
-            if (app.thread == null) {
-                throw new RemoteException();
-            }
-            List<ResultInfo> results = null;
-            List<Intent> newIntents = null;
-            if (andResume) {
-                results = r.results;
-                newIntents = r.newIntents;
-            }
-            if (DEBUG_SWITCH) Slog.v(TAG, "Launching: " + r
-                    + " icicle=" + r.icicle
-                    + " with results=" + results + " newIntents=" + newIntents
-                    + " andResume=" + andResume);
-            if (andResume) {
-                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY,
-                        r.userId, System.identityHashCode(r),
-                        r.task.taskId, r.shortComponentName);
-            }
-            if (r.isHomeActivity) {
-                mService.mHomeProcess = app;
-            }
-            mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
-            r.sleeping = false;
-            r.forceNewConfig = false;
-            showAskCompatModeDialogLocked(r);
-            r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
-            String profileFile = null;
-            ParcelFileDescriptor profileFd = null;
-            boolean profileAutoStop = false;
-            if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
-                if (mService.mProfileProc == null || mService.mProfileProc == app) {
-                    mService.mProfileProc = app;
-                    profileFile = mService.mProfileFile;
-                    profileFd = mService.mProfileFd;
-                    profileAutoStop = mService.mAutoStopProfiler;
-                }
-            }
-            app.hasShownUi = true;
-            app.pendingUiClean = true;
-            if (profileFd != null) {
-                try {
-                    profileFd = profileFd.dup();
-                } catch (IOException e) {
-                    if (profileFd != null) {
-                        try {
-                            profileFd.close();
-                        } catch (IOException o) {
-                        }
-                        profileFd = null;
-                    }
-                }
-            }
-            app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
-                    System.identityHashCode(r), r.info,
-                    new Configuration(mService.mConfiguration),
-                    r.compat, r.icicle, results, newIntents, !andResume,
-                    mService.isNextTransitionForward(), profileFile, profileFd,
-                    profileAutoStop);
-
-            if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
-                // This may be a heavy-weight process!  Note that the package
-                // manager will ensure that only activity can run in the main
-                // process of the .apk, which is the only thing that will be
-                // considered heavy-weight.
-                if (app.processName.equals(app.info.packageName)) {
-                    if (mService.mHeavyWeightProcess != null
-                            && mService.mHeavyWeightProcess != app) {
-                        Log.w(TAG, "Starting new heavy weight process " + app
-                                + " when already running "
-                                + mService.mHeavyWeightProcess);
-                    }
-                    mService.mHeavyWeightProcess = app;
-                    Message msg = mService.mHandler.obtainMessage(
-                            ActivityManagerService.POST_HEAVY_NOTIFICATION_MSG);
-                    msg.obj = r;
-                    mService.mHandler.sendMessage(msg);
-                }
-            }
-
-        } catch (RemoteException e) {
-            if (r.launchFailed) {
-                // This is the second time we failed -- finish activity
-                // and give up.
-                Slog.e(TAG, "Second failure launching "
-                      + r.intent.getComponent().flattenToShortString()
-                      + ", giving up", e);
-                mService.appDiedLocked(app, app.pid, app.thread);
-                requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                        "2nd-crash", false);
-                return false;
-            }
-
-            // This is the first time we failed -- restart process and
-            // retry.
-            app.activities.remove(r);
-            throw e;
-        }
-
-        r.launchFailed = false;
-        if (updateLRUListLocked(r)) {
-            Slog.w(TAG, "Activity " + r
-                  + " being launched, but already in LRU list");
-        }
-
-        if (andResume) {
-            // As part of the process of launching, ActivityThread also performs
-            // a resume.
-            r.state = ActivityState.RESUMED;
-            if (DEBUG_STATES) Slog.v(TAG, "Moving to RESUMED: " + r
-                    + " (starting new instance)");
-            r.stopped = false;
-            mResumedActivity = r;
-            r.task.touchActiveTime();
-            mService.addRecentTaskLocked(r.task);
-            completeResumeLocked(r);
-            checkReadyForSleepLocked();
-            if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
-        } else {
-            // This activity is not starting in the resumed state... which
-            // should look like we asked it to pause+stop (but remain visible),
-            // and it has done so and reported back the current icicle and
-            // other state.
-            if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPED: " + r
-                    + " (starting in stopped state)");
-            r.state = ActivityState.STOPPED;
-            r.stopped = true;
-        }
-
-        // Launch the new version setup screen if needed.  We do this -after-
-        // launching the initial activity (that is, home), so that it can have
-        // a chance to initialize itself while in the background, making the
-        // switch back to it faster and look better.
-        if (mStackSupervisor.isMainStack(this)) {
-            mService.startSetupActivityLocked();
-        }
-
-        return true;
+    void minimalResumeActivityLocked(ActivityRecord r) {
+        r.state = ActivityState.RESUMED;
+        if (DEBUG_STATES) Slog.v(TAG, "Moving to RESUMED: " + r
+                + " (starting new instance)");
+        r.stopped = false;
+        mResumedActivity = r;
+        r.task.touchActiveTime();
+        mService.addRecentTaskLocked(r.task);
+        completeResumeLocked(r);
+        checkReadyForSleepLocked();
+        if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
     }
 
     private final void startSpecificActivityLocked(ActivityRecord r,
@@ -854,7 +681,7 @@ final class ActivityStack {
         if (app != null && app.thread != null) {
             try {
                 app.addPackage(r.info.packageName);
-                realStartActivityLocked(r, app, andResume, checkConfig);
+                mStackSupervisor.realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception when starting activity "
@@ -1749,7 +1576,7 @@ final class ActivityStack {
                         next.task.taskId, next.shortComponentName);
 
                 next.sleeping = false;
-                showAskCompatModeDialogLocked(next);
+                mService.showAskCompatModeDialogLocked(next);
                 next.app.pendingUiClean = true;
                 next.app.thread.scheduleResumeActivity(next.appToken,
                         mService.isNextTransitionForward());
@@ -3386,7 +3213,7 @@ final class ActivityStack {
         }
 
         finishActivityResultsLocked(r, resultCode, resultData);
-        
+
         if (mService.mPendingThumbnails.size() > 0) {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
@@ -3428,7 +3255,6 @@ final class ActivityStack {
     private static final int FINISH_IMMEDIATELY = 0;
     private static final int FINISH_AFTER_PAUSE = 1;
     private static final int FINISH_AFTER_VISIBLE = 2;
-
 
     private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
             int mode, boolean oomAdj) {
@@ -3598,7 +3424,7 @@ final class ActivityStack {
         // down to the max limit while they are still waiting to finish.
         mFinishingActivities.remove(r);
         mWaitingVisibleActivities.remove(r);
-        
+
         // Remove any pending results.
         if (r.finishing && r.pendingResults != null) {
             for (WeakReference<PendingIntentRecord> apr : r.pendingResults) {
@@ -3611,7 +3437,7 @@ final class ActivityStack {
         }
 
         if (cleanServices) {
-            cleanUpActivityServicesLocked(r);            
+            cleanUpActivityServicesLocked(r);
         }
 
         if (mService.mPendingThumbnails.size() > 0) {

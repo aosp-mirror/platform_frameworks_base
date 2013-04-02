@@ -1466,7 +1466,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         m.mFactoryTest = factoryTest;
 
         m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
-        m.mStackSupervisor.init();
+        m.mStackSupervisor.init(m.mCurrentUserId);
 
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
@@ -1884,6 +1884,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
         final boolean nextState = r != null && r.immersive;
         mHandler.sendMessage(
                 mHandler.obtainMessage(IMMERSIVE_MODE_LOCK_MSG, (nextState) ? 1 : 0, 0, r));
+    }
+
+    final void showAskCompatModeDialogLocked(ActivityRecord r) {
+        Message msg = Message.obtain();
+        msg.what = SHOW_COMPAT_MODE_DIALOG_MSG;
+        msg.obj = r.task.askedCompatMode ? null : r;
+        mHandler.sendMessage(msg);
     }
 
     private final void updateLruProcessInternalLocked(ProcessRecord app, int bestPos) {
@@ -3334,7 +3341,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         if (MONITOR_CPU_USAGE) {
             updateCpuStatsNow();
         }
-        
+
         synchronized (this) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
             if (mShuttingDown) {
@@ -3347,7 +3354,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 Slog.i(TAG, "Crashing app skipping ANR: " + app + " " + annotation);
                 return;
             }
-            
+
             // In case we come through here for the same app before completing
             // this one, mark as anring now so we will bail out.
             app.notResponding = true;
@@ -3358,11 +3365,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
             // Dump thread traces as quickly as we can, starting with "interesting" processes.
             firstPids.add(app.pid);
-    
+
             int parentPid = app.pid;
             if (parent != null && parent.app != null && parent.app.pid > 0) parentPid = parent.app.pid;
             if (parentPid != app.pid) firstPids.add(parentPid);
-    
+
             if (MY_PID != app.pid && MY_PID != parentPid) firstPids.add(MY_PID);
 
             for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
@@ -3445,13 +3452,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 Process.killProcessQuiet(app.pid);
                 return;
             }
-    
+
             // Set the app's notResponding state, and look up the errorReportReceiver
             makeAppNotRespondingLocked(app,
                     activity != null ? activity.shortComponentName : null,
                     annotation != null ? "ANR " + annotation : "ANR",
                     info.toString());
-    
+
             // Bring up the infamous App Not Responding dialog
             Message msg = Message.obtain();
             HashMap<String, Object> map = new HashMap<String, Object>();
@@ -3462,7 +3469,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             if (activity != null) {
                 map.put("activity", activity);
             }
-    
+
             mHandler.sendMessage(msg);
         }
     }
@@ -3490,7 +3497,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
             });
         }
     }
-    
+
+    @Override
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
@@ -3546,6 +3554,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return true;
     }
 
+    @Override
     public void killBackgroundProcesses(final String packageName, int userId) {
         if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED &&
@@ -3582,6 +3591,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public void killAllBackgroundProcesses() {
         if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED) {

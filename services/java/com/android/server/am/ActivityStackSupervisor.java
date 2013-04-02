@@ -16,11 +16,14 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerService.localLOGV;
 import static com.android.server.am.ActivityManagerService.DEBUG_CLEANUP;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
+import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerService.TAG;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
@@ -29,6 +32,7 @@ import android.app.IThumbnailReceiver;
 import android.app.PendingIntent;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
+import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -43,12 +47,15 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
+import com.android.server.am.ActivityStack.ActivityState;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -57,6 +64,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityStackSupervisor {
+    static final boolean DEBUG_ADD_REMOVE = false;
+    static final boolean DEBUG_APP = false;
+    static final boolean DEBUG_SAVED_STATE = false;
+    static final boolean DEBUG_STATES = false;
+
     public static final int HOME_STACK_ID = 0;
 
     final ActivityManagerService mService;
@@ -72,6 +84,9 @@ public class ActivityStackSupervisor {
     /** Task identifier that activities are currently being started in.  Incremented each time a
      * new task is created. */
     private int mCurTaskId = 0;
+
+    /** The current user */
+    private int mCurrentUser;
 
     /** The stack containing the launcher app */
     private ActivityStack mHomeStack;
@@ -89,8 +104,8 @@ public class ActivityStackSupervisor {
         mLooper = looper;
     }
 
-    void init() {
-        mHomeStack = new ActivityStack(mService, mContext, mLooper, HOME_STACK_ID, this);
+    void init(int userId) {
+        mHomeStack = new ActivityStack(mService, mContext, mLooper, HOME_STACK_ID, this, userId);
         setMainStack(mHomeStack);
         mStacks.add(mHomeStack);
     }
@@ -156,7 +171,7 @@ public class ActivityStackSupervisor {
                         if (headless) {
                             Slog.e(TAG, "Starting activities not supported on headless device: "
                                     + hr);
-                        } else if (stack.realStartActivityLocked(hr, app, true, true)) {
+                        } else if (realStartActivityLocked(hr, app, true, true)) {
                             didSomething = true;
                         }
                     } catch (Exception e) {
@@ -488,6 +503,174 @@ public class ActivityStackSupervisor {
         return ActivityManager.START_SUCCESS;
     }
 
+    final boolean realStartActivityLocked(ActivityRecord r,
+            ProcessRecord app, boolean andResume, boolean checkConfig)
+            throws RemoteException {
+
+        r.startFreezingScreenLocked(app, 0);
+        mService.mWindowManager.setAppVisibility(r.appToken, true);
+
+        // schedule launch ticks to collect information about slow apps.
+        r.startLaunchTickingLocked();
+
+        // Have the window manager re-evaluate the orientation of
+        // the screen based on the new activity order.  Note that
+        // as a result of this, it can call back into the activity
+        // manager with a new orientation.  We don't care about that,
+        // because the activity is not currently running so we are
+        // just restarting it anyway.
+        if (checkConfig) {
+            Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
+                    mService.mConfiguration,
+                    r.mayFreezeScreenLocked(app) ? r.appToken : null);
+            mService.updateConfigurationLocked(config, r, false, false);
+        }
+
+        r.app = app;
+        app.waitingToKill = null;
+        r.launchCount++;
+        r.lastLaunchTime = SystemClock.uptimeMillis();
+
+        if (localLOGV) Slog.v(TAG, "Launching: " + r);
+
+        int idx = app.activities.indexOf(r);
+        if (idx < 0) {
+            app.activities.add(r);
+        }
+        mService.updateLruProcessLocked(app, true);
+
+        final ActivityStack stack = r.task.stack;
+        try {
+            if (app.thread == null) {
+                throw new RemoteException();
+            }
+            List<ResultInfo> results = null;
+            List<Intent> newIntents = null;
+            if (andResume) {
+                results = r.results;
+                newIntents = r.newIntents;
+            }
+            if (DEBUG_SWITCH) Slog.v(TAG, "Launching: " + r
+                    + " icicle=" + r.icicle
+                    + " with results=" + results + " newIntents=" + newIntents
+                    + " andResume=" + andResume);
+            if (andResume) {
+                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY,
+                        r.userId, System.identityHashCode(r),
+                        r.task.taskId, r.shortComponentName);
+            }
+            if (r.isHomeActivity) {
+                mService.mHomeProcess = app;
+            }
+            mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
+            r.sleeping = false;
+            r.forceNewConfig = false;
+            mService.showAskCompatModeDialogLocked(r);
+            r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
+            String profileFile = null;
+            ParcelFileDescriptor profileFd = null;
+            boolean profileAutoStop = false;
+            if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
+                if (mService.mProfileProc == null || mService.mProfileProc == app) {
+                    mService.mProfileProc = app;
+                    profileFile = mService.mProfileFile;
+                    profileFd = mService.mProfileFd;
+                    profileAutoStop = mService.mAutoStopProfiler;
+                }
+            }
+            app.hasShownUi = true;
+            app.pendingUiClean = true;
+            if (profileFd != null) {
+                try {
+                    profileFd = profileFd.dup();
+                } catch (IOException e) {
+                    if (profileFd != null) {
+                        try {
+                            profileFd.close();
+                        } catch (IOException o) {
+                        }
+                        profileFd = null;
+                    }
+                }
+            }
+            app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
+                    System.identityHashCode(r), r.info,
+                    new Configuration(mService.mConfiguration),
+                    r.compat, r.icicle, results, newIntents, !andResume,
+                    mService.isNextTransitionForward(), profileFile, profileFd,
+                    profileAutoStop);
+
+            if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+                // This may be a heavy-weight process!  Note that the package
+                // manager will ensure that only activity can run in the main
+                // process of the .apk, which is the only thing that will be
+                // considered heavy-weight.
+                if (app.processName.equals(app.info.packageName)) {
+                    if (mService.mHeavyWeightProcess != null
+                            && mService.mHeavyWeightProcess != app) {
+                        Slog.w(TAG, "Starting new heavy weight process " + app
+                                + " when already running "
+                                + mService.mHeavyWeightProcess);
+                    }
+                    mService.mHeavyWeightProcess = app;
+                    Message msg = mService.mHandler.obtainMessage(
+                            ActivityManagerService.POST_HEAVY_NOTIFICATION_MSG);
+                    msg.obj = r;
+                    mService.mHandler.sendMessage(msg);
+                }
+            }
+
+        } catch (RemoteException e) {
+            if (r.launchFailed) {
+                // This is the second time we failed -- finish activity
+                // and give up.
+                Slog.e(TAG, "Second failure launching "
+                      + r.intent.getComponent().flattenToShortString()
+                      + ", giving up", e);
+                mService.appDiedLocked(app, app.pid, app.thread);
+                stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
+                        "2nd-crash", false);
+                return false;
+            }
+
+            // This is the first time we failed -- restart process and
+            // retry.
+            app.activities.remove(r);
+            throw e;
+        }
+
+        r.launchFailed = false;
+        if (stack.updateLRUListLocked(r)) {
+            Slog.w(TAG, "Activity " + r
+                  + " being launched, but already in LRU list");
+        }
+
+        if (andResume) {
+            // As part of the process of launching, ActivityThread also performs
+            // a resume.
+            stack.minimalResumeActivityLocked(r);
+        } else {
+            // This activity is not starting in the resumed state... which
+            // should look like we asked it to pause+stop (but remain visible),
+            // and it has done so and reported back the current icicle and
+            // other state.
+            if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPED: " + r
+                    + " (starting in stopped state)");
+            r.state = ActivityState.STOPPED;
+            r.stopped = true;
+        }
+
+        // Launch the new version setup screen if needed.  We do this -after-
+        // launching the initial activity (that is, home), so that it can have
+        // a chance to initialize itself while in the background, making the
+        // switch back to it faster and look better.
+        if (isMainStack(stack)) {
+            mService.startSetupActivityLocked();
+        }
+
+        return true;
+    }
+
     void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
         // Just in case.
         final int numStacks = mStacks.size();
@@ -599,7 +782,8 @@ public class ActivityStackSupervisor {
                     break;
                 }
             }
-            mStacks.add(new ActivityStack(mService, mContext, mLooper, mLastStackId, this));
+            mStacks.add(new ActivityStack(mService, mContext, mLooper, mLastStackId, this,
+                    mCurrentUser));
             return mLastStackId;
         }
     }
@@ -694,6 +878,7 @@ public class ActivityStackSupervisor {
     }
 
     boolean switchUserLocked(int userId, UserStartedState uss) {
+        mCurrentUser = userId;
         boolean haveActivities = false;
         final int numStacks = mStacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
