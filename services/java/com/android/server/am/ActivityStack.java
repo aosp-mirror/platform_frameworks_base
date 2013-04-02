@@ -2309,93 +2309,6 @@ final class ActivityStack {
     }
 
     /**
-     * Perform clear operation as requested by
-     * {@link Intent#FLAG_ACTIVITY_CLEAR_TOP}: search from the top of the
-     * stack to the given task, then look for
-     * an instance of that activity in the stack and, if found, finish all
-     * activities on top of it and return the instance.
-     *
-     * @param newR Description of the new activity being started.
-     * @return Returns the old activity that should be continued to be used,
-     * or null if none was found.
-     */
-    private final ActivityRecord performClearTaskLocked(TaskRecord task,
-            ActivityRecord newR, int launchFlags) {
-
-        final ArrayList<ActivityRecord> activities = task.mActivities;
-        int numActivities = activities.size();
-        for (int activityNdx = numActivities - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord r = activities.get(activityNdx);
-            if (r.finishing) {
-                continue;
-            }
-            if (r.realActivity.equals(newR.realActivity)) {
-                // Here it is!  Now finish everything in front...
-                ActivityRecord ret = r;
-
-                for (++activityNdx; activityNdx < numActivities; ++activityNdx) {
-                    r = activities.get(activityNdx);
-                    if (r.finishing) {
-                        continue;
-                    }
-                    ActivityOptions opts = r.takeOptionsLocked();
-                    if (opts != null) {
-                        ret.updateOptionsLocked(opts);
-                    }
-                    if (finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear", false)) {
-                        --activityNdx;
-                        --numActivities;
-                    }
-                }
-
-                // Finally, if this is a normal launch mode (that is, not
-                // expecting onNewIntent()), then we will finish the current
-                // instance of the activity so a new fresh one can be started.
-                if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
-                        && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
-                    if (!ret.finishing) {
-                        if (activities.contains(ret)) {
-                            finishActivityLocked(ret, Activity.RESULT_CANCELED, null,
-                                    "clear", false);
-                        }
-                        return null;
-                    }
-                }
-
-                return ret;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Completely remove all activities associated with an existing
-     * task starting at a specified index.
-     */
-    private final void performClearTaskAtIndexLocked(TaskRecord task, int activityNdx) {
-        final ArrayList<ActivityRecord> activities = task.mActivities;
-        int numActivities = activities.size();
-        for ( ; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = activities.get(activityNdx);
-            if (r.finishing) {
-                continue;
-            }
-            if (finishActivityLocked(r, Activity.RESULT_CANCELED, null, "clear", false)) {
-                --activityNdx;
-                --numActivities;
-            }
-        }
-    }
-
-    /**
-     * Completely remove all activities associated with an existing task.
-     */
-    private final void performClearTaskLocked(TaskRecord task) {
-        performClearTaskAtIndexLocked(task, 0);
-    }
-
-    /**
      * Find the activity in the history stack within the given task.  Returns
      * the index within the history at which it's found, or < 0 if not found.
      */
@@ -2764,7 +2677,7 @@ final class ActivityStack {
                         // existing task with its new activity.  Well that should
                         // not be too hard...
                         reuseTask = taskTop.task;
-                        performClearTaskLocked(taskTop.task);
+                        taskTop.task.performClearTaskLocked();
                         reuseTask.setIntent(r.intent, r.info);
                     } else if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK
@@ -2773,7 +2686,7 @@ final class ActivityStack {
                         // from the task up to the one being started.  In most
                         // cases this means we are resetting the task to its
                         // initial state.
-                        ActivityRecord top = performClearTaskLocked(taskTop.task, r, launchFlags);
+                        ActivityRecord top = taskTop.task.performClearTaskLocked(r, launchFlags);
                         if (top != null) {
                             if (top.frontOfTask) {
                                 // Activity aliases may mean we use different
@@ -2922,7 +2835,7 @@ final class ActivityStack {
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
-                ActivityRecord top = performClearTaskLocked(sourceRecord.task, r, launchFlags);
+                ActivityRecord top = sourceRecord.task.performClearTaskLocked(r, launchFlags);
                 keepCurTransition = true;
                 if (top != null) {
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
@@ -4226,7 +4139,7 @@ final class ActivityStack {
 
         if (subTaskIndex < 0) {
             // Just remove the entire task.
-            performClearTaskAtIndexLocked(task, info.rootIndex);
+            task.performClearTaskAtIndexLocked(info.rootIndex);
             return info.root;
         }
 
@@ -4239,7 +4152,7 @@ final class ActivityStack {
 
         // Remove all of this task's activities starting at the sub task.
         TaskAccessInfo.SubTask subtask = info.subtasks.get(subTaskIndex);
-        performClearTaskAtIndexLocked(task, subtask.index);
+        task.performClearTaskAtIndexLocked(subtask.index);
         return subtask.activity;
     }
 
