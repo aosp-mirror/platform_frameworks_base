@@ -21448,6 +21448,7 @@ package android.telephony {
     method public int getDataState();
     method public java.lang.String getDeviceId();
     method public java.lang.String getDeviceSoftwareVersion();
+    method public java.lang.String getGroupIdLevel1();
     method public java.lang.String getLine1Number();
     method public java.util.List<android.telephony.NeighboringCellInfo> getNeighboringCellInfo();
     method public java.lang.String getNetworkCountryIso();

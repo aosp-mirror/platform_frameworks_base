@@ -907,6 +907,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the Group Identifier Level1 for a GSM phone.
+     * Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    public String getGroupIdLevel1() {
+        try {
+            return getSubscriberInfo().getGroupIdLevel1();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
      * Returns the phone number string for line 1, for example, the MSISDN
      * for a GSM phone. Return null if it is unavailable.
      * <p>
