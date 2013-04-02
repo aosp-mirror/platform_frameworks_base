@@ -16,7 +16,7 @@ restrict use of the application to a specific device, in addition to any other c
 
 <p>The licensing service is a secure means of controlling access to your applications. When an
 application checks the licensing status, the Google Play server signs the licensing status
-response using a key pair that is uniquely associated with the publisher account. Your application
+response using a key pair that is uniquely associated with the application. Your application
 stores the public key in its compiled <code>.apk</code> file and uses it to verify the licensing
 status response.</p>
 
