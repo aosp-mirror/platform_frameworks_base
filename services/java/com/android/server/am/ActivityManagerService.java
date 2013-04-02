@@ -4370,7 +4370,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             synchronized (this) {
                 ActivityStack stack = ActivityRecord.getStackLocked(token);
                 if (stack != null) {
-                    ActivityRecord r = stack.activityIdleInternal(token, false, config);
+                    ActivityRecord r = stack.activityIdleInternalLocked(token, false, config);
                     if ((mProfileProc == r.app) && (mProfileFd != null)) {
                         try {
                             mProfileFd.close();

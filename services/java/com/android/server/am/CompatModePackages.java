@@ -15,7 +15,6 @@ import com.android.internal.util.FastXmlSerializer;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.res.CompatibilityInfo;
