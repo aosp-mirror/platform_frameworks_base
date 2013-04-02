@@ -28,8 +28,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * MediaDrm class can be used in conjunction with {@link android.media.MediaCrypto}
- * to obtain licenses for decoding encrypted media data.
+ * MediaDrm can be used in conjunction with {@link android.media.MediaCrypto}
+ * to obtain keys for decrypting protected media data.
  *
  * Crypto schemes are assigned 16 byte UUIDs,
  * the method {@link #isCryptoSchemeSupported} can be used to query if a given
@@ -131,11 +131,15 @@ public final class MediaDrm {
         void onEvent(MediaDrm md, byte[] sessionId, int event, int extra, byte[] data);
     }
 
+    public static final int MEDIA_DRM_EVENT_PROVISION_REQUIRED = 1;
+    public static final int MEDIA_DRM_EVENT_KEY_REQUIRED = 2;
+    public static final int MEDIA_DRM_EVENT_KEY_EXPIRED = 3;
+    public static final int MEDIA_DRM_EVENT_VENDOR_DEFINED = 4;
+
     /* Do not change these values without updating their counterparts
      * in include/media/mediadrm.h!
      */
     private static final int DRM_EVENT = 200;
-
     private class EventHandler extends Handler
     {
         private MediaDrm mMediaDrm;
@@ -197,68 +201,88 @@ public final class MediaDrm {
     public native byte[] openSession() throws MediaDrmException;
 
     /**
-     *  Close a session on the MediaDrm object.
+     *  Close a session on the MediaDrm object that was previously opened
+     *  with {@link #openSession}.
      */
     public native void closeSession(byte[] sessionId) throws MediaDrmException;
 
-    public static final int MEDIA_DRM_LICENSE_TYPE_STREAMING = 1;
-    public static final int MEDIA_DRM_LICENSE_TYPE_OFFLINE = 2;
+    public static final int MEDIA_DRM_KEY_TYPE_STREAMING = 1;
+    public static final int MEDIA_DRM_KEY_TYPE_OFFLINE = 2;
 
-    public final class LicenseRequest {
-        public LicenseRequest() {}
+    public final class KeyRequest {
+        public KeyRequest() {}
         public byte[] data;
         public String defaultUrl;
     };
 
     /**
-     * A license request/response exchange occurs between the app and a License
-     * Server to obtain the keys required to decrypt the content.  getLicenseRequest()
-     * is used to obtain an opaque license request byte array that is delivered to the
-     * license server.  The opaque license request byte array is returned in
-     * LicenseReqeust.data.  The recommended URL to deliver the license request to is
-     * returned in LicenseRequest.defaultUrl
+     * A key request/response exchange occurs between the app and a license
+     * server to obtain the keys to decrypt encrypted content.  getKeyRequest()
+     * is used to obtain an opaque key request byte array that is delivered to the
+     * license server.  The opaque key request byte array is returned in
+     * KeyRequest.data.  The recommended URL to deliver the key request to is
+     * returned in KeyRequest.defaultUrl.
+     *
+     * After the app has received the key request response from the server,
+     * it should deliver to the response to the DRM engine plugin using the method
+     * {@link #provideKeyResponse}.
      *
      * @param sessonId the session ID for the drm session
      * @param init container-specific data, its meaning is interpreted based on the
      * mime type provided in the mimeType parameter.  It could contain, for example,
      * the content ID, key ID or other data obtained from the content metadata that is
-     * required in generating the license request.
+     * required in generating the key request.
      * @param mimeType identifies the mime type of the content
-     * @param licenseType specifes if the license is for streaming or offline content
-     * @param optionalParameters are included in the license server request message to
+     * @param keyType specifes if the request is for streaming or offline content
+     * @param optionalParameters are included in the key request message to
      * allow a client application to provide additional message parameters to the server.
      */
-    public native LicenseRequest getLicenseRequest( byte[] sessionId, byte[] init,
-                                                    String mimeType, int licenseType,
-                                                    HashMap<String, String> optionalParameters )
+    public native KeyRequest getKeyRequest(byte[] sessionId, byte[] init,
+                                           String mimeType, int keyType,
+                                           HashMap<String, String> optionalParameters)
         throws MediaDrmException;
 
     /**
-     * After a license response is received by the app, it is provided to the DRM plugin
-     * using provideLicenseResponse.
+     * A key response is received from the license server by the app, then it is
+     * provided to the DRM engine plugin using provideKeyResponse. The byte array
+     * returned is a keySetId that can be used to later restore the keys to a new
+     * session with the method {@link restoreKeys}, enabling offline key use.
      *
      * @param sessionId the session ID for the DRM session
      * @param response the byte array response from the server
      */
-    public native void provideLicenseResponse( byte[] sessionId, byte[] response )
+    public native byte[] provideKeyResponse(byte[] sessionId, byte[] response)
         throws MediaDrmException;
 
     /**
-     * Remove the keys associated with a license for a session
+     * Restore persisted offline keys into a new session.  keySetId identifies the
+     * keys to load, obtained from a prior call to {@link provideKeyResponse}.
+     *
      * @param sessionId the session ID for the DRM session
+     * @param keySetId identifies the saved key set to restore
      */
-    public native void removeLicense( byte[] sessionId ) throws MediaDrmException;
+    public native void restoreKeys(byte[] sessionId, byte[] keySetId)
+        throws MediaDrmException;
 
     /**
-     * Request an informative description of the license for the session.  The status is
+     * Remove the persisted keys associated with an offline license.  Keys are persisted
+     * when {@link provideKeyResponse} is called with keys obtained from the method
+     * {@link getKeyRequest} using keyType = MEDIA_DRM_KEY_TYPE_OFFLINE.
+     *
+     * @param keySetId identifies the saved key set to remove
+     */
+    public native void removeKeys(byte[] keySetId) throws MediaDrmException;
+
+    /**
+     * Request an informative description of the key status for the session.  The status is
      * in the form of {name, value} pairs.  Since DRM license policies vary by vendor,
      * the specific status field names are determined by each DRM vendor.  Refer to your
      * DRM provider documentation for definitions of the field names for a particular
-     * DrmEngine.
+     * DRM engine plugin.
      *
      * @param sessionId the session ID for the DRM session
      */
-    public native HashMap<String, String> queryLicenseStatus( byte[] sessionId )
+    public native HashMap<String, String> queryKeyStatus(byte[] sessionId)
         throws MediaDrmException;
 
     public final class ProvisionRequest {
@@ -269,22 +293,23 @@ public final class MediaDrm {
 
     /**
      * A provision request/response exchange occurs between the app and a provisioning
-     * server to retrieve a device certificate.  getProvisionRequest is used to obtain
-     * an opaque license request byte array that is delivered to the provisioning server.
-     * The opaque provision request byte array is returned in ProvisionRequest.data
-     * The recommended URL to deliver the license request to is returned in
-     * ProvisionRequest.defaultUrl.
+     * server to retrieve a device certificate.  If provisionining is required, the
+     * MEDIA_DRM_EVENT_PROVISION_REQUIRED event will be sent to the event handler.
+     * getProvisionRequest is used to obtain the opaque provision request byte array that
+     * should be delivered to the provisioning server. The provision request byte array
+     * is returned in ProvisionRequest.data. The recommended URL to deliver the provision
+     * request to is returned in ProvisionRequest.defaultUrl.
      */
     public native ProvisionRequest getProvisionRequest() throws MediaDrmException;
 
     /**
      * After a provision response is received by the app, it is provided to the DRM
-     * plugin using this method.
+     * engine plugin using this method.
      *
      * @param response the opaque provisioning response byte array to provide to the
-     * DrmEngine.
+     * DRM engine plugin.
      */
-    public native void provideProvisionResponse( byte[] response )
+    public native void provideProvisionResponse(byte[] response)
         throws MediaDrmException;
 
     /**
@@ -314,37 +339,139 @@ public final class MediaDrm {
      *
      * @param ssRelease the server response indicating which secure stops to release
      */
-    public native void releaseSecureStops( byte[] ssRelease )
+    public native void releaseSecureStops(byte[] ssRelease)
         throws MediaDrmException;
 
 
     /**
-     * Read a Drm plugin property value, given the property name string.  There are several
-     * forms of property access functions, depending on the data type returned.
+     * Read a DRM engine plugin property value, given the property name string.  There are
+     * several forms of property access functions, depending on the data type returned.
      *
      * Standard fields names are:
-     *   vendor         String - identifies the maker of the plugin
-     *   version        String - identifies the version of the plugin
-     *   description    String - describes the plugin
+     *   vendor         String - identifies the maker of the DRM engine plugin
+     *   version        String - identifies the version of the DRM engine plugin
+     *   description    String - describes the DRM engine plugin
      *   deviceUniqueId byte[] - The device unique identifier is established during device
-     *                             provisioning and provides a means of uniquely identifying
-     *                             each device
+     *                           provisioning and provides a means of uniquely identifying
+     *                           each device
+     *   algorithms     String - a comma-separate list of cipher and mac algorithms supported
+     *                           by CryptoSession.  The list may be empty if the DRM engine
+     *                           plugin does not support CryptoSession operations.
      */
-    public native String getPropertyString( String propertyName )
+    public native String getPropertyString(String propertyName)
         throws MediaDrmException;
 
-    public native byte[] getPropertyByteArray( String propertyName )
+    public native byte[] getPropertyByteArray(String propertyName)
         throws MediaDrmException;
 
     /**
-     * Write a Drm plugin property value.  There are several forms of property setting
-     * functions, depending on the data type being set.
+     * Write a DRM engine plugin property value.  There are several forms of
+     * property setting functions, depending on the data type being set.
      */
-    public native void setPropertyString( String propertyName, String value )
+    public native void setPropertyString(String propertyName, String value)
         throws MediaDrmException;
 
-    public native void setPropertyByteArray( String propertyName, byte[] value )
+    public native void setPropertyByteArray(String propertyName, byte[] value)
         throws MediaDrmException;
+
+    /**
+     * In addition to supporting decryption of DASH Common Encrypted Media, the
+     * MediaDrm APIs provide the ability to securely deliver session keys from
+     * an operator's session key server to a client device, based on the factory-installed
+     * root of trust, and provide the ability to do encrypt, decrypt, sign and verify
+     * with the session key on arbitrary user data.
+     *
+     * The CryptoSession class implements generic encrypt/decrypt/sign/verify methods
+     * based on the established session keys.  These keys are exchanged using the
+     * getKeyRequest/provideKeyResponse methods.
+     *
+     * Applications of this capability could include securing various types of
+     * purchased or private content, such as applications, books and other media,
+     * photos or media delivery protocols.
+     *
+     * Operators can create session key servers that are functionally similar to a
+     * license key server, except that instead of receiving license key requests and
+     * providing encrypted content keys which are used specifically to decrypt A/V media
+     * content, the session key server receives session key requests and provides
+     * encrypted session keys which can be used for general purpose crypto operations.
+     */
+
+    private static final native void setCipherAlgorithmNative(MediaDrm drm, byte[] sessionId,
+                                                              String algorithm);
+
+    private static final native void setMacAlgorithmNative(MediaDrm drm, byte[] sessionId,
+                                                           String algorithm);
+
+    private static final native byte[] encryptNative(MediaDrm drm, byte[] sessionId,
+                                                     byte[] keyId, byte[] input, byte[] iv);
+
+    private static final native byte[] decryptNative(MediaDrm drm, byte[] sessionId,
+                                                     byte[] keyId, byte[] input, byte[] iv);
+
+    private static final native byte[] signNative(MediaDrm drm, byte[] sessionId,
+                                                  byte[] keyId, byte[] message);
+
+    private static final native boolean verifyNative(MediaDrm drm, byte[] sessionId,
+                                                     byte[] keyId, byte[] message,
+                                                     byte[] signature);
+
+    public final class CryptoSession {
+        private MediaDrm mDrm;
+        private byte[] mSessionId;
+
+        /**
+         * Construct a CryptoSession which can be used to encrypt, decrypt,
+         * sign and verify messages or data using the session keys established
+         * for the session using methods {@link getKeyRequest} and
+         * {@link provideKeyResponse} using a session key server.
+         *
+         * @param sessionId the session ID for the session containing keys
+         * to be used for encrypt, decrypt, sign and/or verify
+         *
+         * @param cipherAlgorithm the algorithm to use for encryption and
+         * decryption ciphers. The algorithm string conforms to JCA Standard
+         * Names for Cipher Transforms and is case insensitive.  For example
+         * "AES/CBC/PKCS5Padding".
+         *
+         * @param macAlgorithm the algorithm to use for sign and verify
+         * The algorithm string conforms to JCA Standard Names for Mac
+         * Algorithms and is case insensitive.  For example "HmacSHA256".
+         *
+         * The list of supported algorithms for a DRM engine plugin can be obtained
+         * using the method {@link getPropertyString("algorithms")}
+         */
+
+        public CryptoSession(MediaDrm drm, byte[] sessionId,
+                             String cipherAlgorithm, String macAlgorithm)
+            throws MediaDrmException {
+            mSessionId = sessionId;
+            mDrm = drm;
+            setCipherAlgorithmNative(drm, sessionId, cipherAlgorithm);
+            setMacAlgorithmNative(drm, sessionId, macAlgorithm);
+        }
+
+        public byte[] encrypt(byte[] keyid, byte[] input, byte[] iv) {
+            return encryptNative(mDrm, mSessionId, keyid, input, iv);
+        }
+
+        public byte[] decrypt(byte[] keyid, byte[] input, byte[] iv) {
+            return decryptNative(mDrm, mSessionId, keyid, input, iv);
+        }
+
+        public byte[] sign(byte[] keyid, byte[] message) {
+            return signNative(mDrm, mSessionId, keyid, message);
+        }
+        public boolean verify(byte[] keyid, byte[] message, byte[] signature) {
+            return verifyNative(mDrm, mSessionId, keyid, message, signature);
+        }
+    };
+
+    public CryptoSession getCryptoSession(byte[] sessionId,
+                                          String cipherAlgorithm,
+                                          String macAlgorithm)
+        throws MediaDrmException {
+        return new CryptoSession(this, sessionId, cipherAlgorithm, macAlgorithm);
+    }
 
     @Override
     protected void finalize() {
