@@ -17,9 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerService.localLOGV;
-import static com.android.server.am.ActivityManagerService.DEBUG_CLEANUP;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerService.TAG;
 
@@ -671,35 +669,37 @@ public class ActivityStackSupervisor {
         return true;
     }
 
+    void startSpecificActivityLocked(ActivityRecord r,
+            boolean andResume, boolean checkConfig) {
+        // Is this activity's application already running?
+        ProcessRecord app = mService.getProcessRecordLocked(r.processName,
+                r.info.applicationInfo.uid);
+
+        r.task.stack.setLaunchTime(r);
+
+        if (app != null && app.thread != null) {
+            try {
+                app.addPackage(r.info.packageName);
+                realStartActivityLocked(r, app, andResume, checkConfig);
+                return;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Exception when starting activity "
+                        + r.intent.getComponent().flattenToShortString(), e);
+            }
+
+            // If a dead object exception was thrown -- fall through to
+            // restart the application.
+        }
+
+        mService.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
+                "activity", r.intent.getComponent(), false, false);
+    }
+
     void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
         // Just in case.
         final int numStacks = mStacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.mPausingActivity != null && stack.mPausingActivity.app == app) {
-                if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG,
-                        "App died while pausing: " + stack.mPausingActivity);
-                stack.mPausingActivity = null;
-            }
-            if (stack.mLastPausedActivity != null && stack.mLastPausedActivity.app == app) {
-                stack.mLastPausedActivity = null;
-            }
-
-            // Remove this application's activities from active lists.
-            boolean hasVisibleActivities = stack.removeHistoryRecordsForAppLocked(app);
-
-            if (!restarting) {
-                if (!stack.resumeTopActivityLocked(null)) {
-                    // If there was nothing to resume, and we are not already
-                    // restarting this process, but there is a visible activity that
-                    // is hosted by the process...  then make sure all visible
-                    // activities are running, taking care of restarting this
-                    // process.
-                    if (hasVisibleActivities) {
-                        stack.ensureActivitiesVisibleLocked(null, 0);
-                    }
-                }
-            }
+            mStacks.get(stackNdx).handleAppDiedLocked(app, restarting);
         }
     }
 
