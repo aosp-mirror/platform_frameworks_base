@@ -5120,89 +5120,91 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Log.i(TAG, "Package " + pkg.packageName + " checking " + name + ": " + bp);
                 }
             }
-            if (bp != null && bp.packageSetting != null) {
-                final String perm = bp.name;
-                boolean allowed;
-                boolean allowedSig = false;
-                final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
-                if (level == PermissionInfo.PROTECTION_NORMAL
-                        || level == PermissionInfo.PROTECTION_DANGEROUS) {
-                    // If the permission is required, or it's optional and was previously
-                    // granted to the application, then allow it. Otherwise deny.
-                    allowed = (required || origPermissions.contains(perm));
-                } else if (bp.packageSetting == null) {
-                    // This permission is invalid; skip it.
-                    allowed = false;
-                } else if (level == PermissionInfo.PROTECTION_SIGNATURE) {
-                    allowed = doSignaturePermission(perm, pkg, bp, origPermissions);
-                    if (allowed) {
-                        allowedSig = true;
-                    }
-                } else {
-                    allowed = false;
-                }
-                if (DEBUG_INSTALL) {
-                    if (gp != ps) {
-                        Log.i(TAG, "Package " + pkg.packageName + " granting " + perm);
-                    }
-                }
+
+            if (bp == null || bp.packageSetting == null) {
+                Slog.w(TAG, "Unknown permission " + name
+                        + " in package " + pkg.packageName);
+                continue;
+            }
+
+            final String perm = bp.name;
+            boolean allowed;
+            boolean allowedSig = false;
+            final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
+            if (level == PermissionInfo.PROTECTION_NORMAL
+                    || level == PermissionInfo.PROTECTION_DANGEROUS) {
+                // If the permission is required, or it's optional and was previously
+                // granted to the application, then allow it. Otherwise deny.
+                allowed = (required || origPermissions.contains(perm));
+            } else if (bp.packageSetting == null) {
+                // This permission is invalid; skip it.
+                allowed = false;
+            } else if (level == PermissionInfo.PROTECTION_SIGNATURE) {
+                allowed = doSignaturePermission(perm, pkg, bp, origPermissions);
                 if (allowed) {
-                    if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0
-                            && ps.permissionsFixed) {
-                        // If this is an existing, non-system package, then
-                        // we can't add any new permissions to it.
-                        if (!allowedSig && !gp.grantedPermissions.contains(perm)) {
-                            allowed = false;
-                            // Except...  if this is a permission that was added
-                            // to the platform (note: need to only do this when
-                            // updating the platform).
-                            final int NP = PackageParser.NEW_PERMISSIONS.length;
-                            for (int ip=0; ip<NP; ip++) {
-                                final PackageParser.NewPermissionInfo npi
-                                        = PackageParser.NEW_PERMISSIONS[ip];
-                                if (npi.name.equals(perm)
-                                        && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
-                                    allowed = true;
-                                    Log.i(TAG, "Auto-granting " + perm + " to old pkg "
-                                            + pkg.packageName);
-                                    break;
-                                }
+                    allowedSig = true;
+                }
+            } else {
+                allowed = false;
+            }
+            if (DEBUG_INSTALL) {
+                if (gp != ps) {
+                    Log.i(TAG, "Package " + pkg.packageName + " granting " + perm);
+                }
+            }
+            if (allowed) {
+                if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0
+                        && ps.permissionsFixed) {
+                    // If this is an existing, non-system package, then
+                    // we can't add any new permissions to it.
+                    if (!allowedSig && !gp.grantedPermissions.contains(perm)) {
+                        allowed = false;
+                        // Except...  if this is a permission that was added
+                        // to the platform (note: need to only do this when
+                        // updating the platform).
+                        final int NP = PackageParser.NEW_PERMISSIONS.length;
+                        for (int ip=0; ip<NP; ip++) {
+                            final PackageParser.NewPermissionInfo npi
+                                    = PackageParser.NEW_PERMISSIONS[ip];
+                            if (npi.name.equals(perm)
+                                    && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
+                                allowed = true;
+                                Log.i(TAG, "Auto-granting " + perm + " to old pkg "
+                                        + pkg.packageName);
+                                break;
                             }
                         }
                     }
-                    if (allowed) {
-                        if (!gp.grantedPermissions.contains(perm)) {
-                            changedPermission = true;
-                            gp.grantedPermissions.add(perm);
-                            gp.gids = appendInts(gp.gids, bp.gids);
-                        } else if (!ps.haveGids) {
-                            gp.gids = appendInts(gp.gids, bp.gids);
-                        }
-                    } else {
-                        Slog.w(TAG, "Not granting permission " + perm
-                                + " to package " + pkg.packageName
-                                + " because it was previously installed without");
+                }
+                if (allowed) {
+                    if (!gp.grantedPermissions.contains(perm)) {
+                        changedPermission = true;
+                        gp.grantedPermissions.add(perm);
+                        gp.gids = appendInts(gp.gids, bp.gids);
+                    } else if (!ps.haveGids) {
+                        gp.gids = appendInts(gp.gids, bp.gids);
                     }
                 } else {
-                    if (gp.grantedPermissions.remove(perm)) {
-                        changedPermission = true;
-                        gp.gids = removeInts(gp.gids, bp.gids);
-                        Slog.i(TAG, "Un-granting permission " + perm
-                                + " from package " + pkg.packageName
-                                + " (protectionLevel=" + bp.protectionLevel
-                                + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
-                                + ")");
-                    } else {
-                        Slog.w(TAG, "Not granting permission " + perm
-                                + " to package " + pkg.packageName
-                                + " (protectionLevel=" + bp.protectionLevel
-                                + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
-                                + ")");
-                    }
+                    Slog.w(TAG, "Not granting permission " + perm
+                            + " to package " + pkg.packageName
+                            + " because it was previously installed without");
                 }
             } else {
-                Slog.w(TAG, "Unknown permission " + name
-                        + " in package " + pkg.packageName);
+                if (gp.grantedPermissions.remove(perm)) {
+                    changedPermission = true;
+                    gp.gids = removeInts(gp.gids, bp.gids);
+                    Slog.i(TAG, "Un-granting permission " + perm
+                            + " from package " + pkg.packageName
+                            + " (protectionLevel=" + bp.protectionLevel
+                            + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
+                            + ")");
+                } else {
+                    Slog.w(TAG, "Not granting permission " + perm
+                            + " to package " + pkg.packageName
+                            + " (protectionLevel=" + bp.protectionLevel
+                            + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
+                            + ")");
+                }
             }
         }
 
