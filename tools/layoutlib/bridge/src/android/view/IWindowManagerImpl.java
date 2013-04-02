@@ -449,6 +449,10 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void removeRotationWatcher(IRotationWatcher arg0) throws RemoteException {
+    }
+
+    @Override
     public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
         return false;
     }
