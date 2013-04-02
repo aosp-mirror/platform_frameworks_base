@@ -38,12 +38,12 @@ the licensing server and receives the result. The Google Play application sends
 the result to your application, which can allow or disallow further use of the
 application as needed.</p>
 
-<p class="note"><strong>Note:</strong> If a paid application has been uploaded to Google Play but
-saved only as a draft application (the app is unpublished), the licensing server considers all users
-to be licensed users of the application (because it's not even possible to purchase the app).
-This exception is necessary in order for you to perform testing of your licensing
+<p class="note"><strong>Note:</strong> If a paid application has been uploaded 
+to Google Play, but saved only as a draft application (the app is 
+unpublished), the licensing server considers all users to be licensed users of 
+the application (because it's not even possible to purchase the app). This 
+exception is necessary in order for you to perform testing of your licensing 
 implementation.</p>
-
 
 <div class="figure" style="width:469px">
 <img src="{@docRoot}images/licensing_arch.png" alt=""/>
@@ -102,10 +102,11 @@ response data using an RSA key pair that is shared exclusively between the Googl
 server and you.</p>
 
 <p>The licensing service generates a single licensing key pair for each
-publisher account and exposes the public key in your account's profile page. You must copy the
-public key from the web site and embed it in your application source code. The server retains the
-private key internally and uses it to sign license responses for the applications you
-publish with that account.</p>
+application and exposes the public key in your application's 
+<strong>Services & APIs</strong> page in the Developer Console. You must copy 
+the public key from the Developer Console and embed it in your application 
+source code. The server retains the private key internally and uses it to sign 
+license responses for the applications you publish with that account.</p>
 
 <p>When your application receives a signed response, it uses the embedded public
 key to verify the data. The use of public key cryptography in the licensing
@@ -221,7 +222,7 @@ gives you wider distribution potential for your applications. </p>
 <p>Licensing lets you move to a license-based model that is enforceable on
 all devices that have access to Google Play. Access is not bound to the
 characteristics of the host device, but to your
-publisher account on Google Play (through the app's public key) and the
+application on Google Play (through the app's public key) and the
 licensing policy that you define. Your application can be installed and
 managed on any device on any storage, including SD card.</p>
 
