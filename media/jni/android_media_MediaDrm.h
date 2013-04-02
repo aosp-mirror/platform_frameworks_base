@@ -20,6 +20,8 @@
 #include "jni.h"
 
 #include <media/stagefright/foundation/ABase.h>
+#include <media/IDrm.h>
+#include <media/IDrmClient.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 
@@ -27,14 +29,23 @@ namespace android {
 
 struct IDrm;
 
-struct JDrm : public RefBase {
+class DrmListener: virtual public RefBase
+{
+public:
+    virtual void notify(DrmPlugin::EventType eventType, int extra,
+                        const Parcel *obj) = 0;
+};
+
+struct JDrm : public BnDrmClient {
     static bool IsCryptoSchemeSupported(const uint8_t uuid[16]);
 
     JDrm(JNIEnv *env, jobject thiz, const uint8_t uuid[16]);
 
     status_t initCheck() const;
-
     sp<IDrm> getDrm() { return mDrm; }
+
+    void notify(DrmPlugin::EventType, int extra, const Parcel *obj);
+    status_t setListener(const sp<DrmListener>& listener);
 
 protected:
     virtual ~JDrm();
@@ -42,6 +53,10 @@ protected:
 private:
     jweak mObject;
     sp<IDrm> mDrm;
+
+    sp<DrmListener> mListener;
+    Mutex mNotifyLock;
+    Mutex mLock;
 
     static sp<IDrm> MakeDrm();
     static sp<IDrm> MakeDrm(const uint8_t uuid[16]);
