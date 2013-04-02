@@ -18,14 +18,20 @@ package com.android.keyguard;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.IRotationWatcher;
+import android.view.IWindowManager;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.internal.widget.LockPatternUtils;
+
+import java.lang.Math;
 
 public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecurityView {
 
@@ -42,6 +48,30 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
 
     private boolean mIsShowing = false;
     private final Object mIsShowingLock = new Object();
+
+    private int mLastRotation;
+    private boolean mWatchingRotation;
+    private final IWindowManager mWindowManager =
+            IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
+
+    private final IRotationWatcher mRotationWatcher = new IRotationWatcher.Stub() {
+        public void onRotationChanged(int rotation) {
+            if (DEBUG) Log.d(TAG, "onRotationChanged(): " + mLastRotation + "->" + rotation);
+
+            // If the difference between the new rotation value and the previous rotation value is
+            // equal to 2, the rotation change was 180 degrees.  This stops the biometric unlock
+            // and starts it in the new position.  This is not performed for 90 degree rotations
+            // since a 90 degree rotation is a configuration change, which takes care of this for
+            // us.
+            if (Math.abs(rotation - mLastRotation) == 2) {
+                if (mBiometricUnlock != null) {
+                    mBiometricUnlock.stop();
+                    maybeStartBiometricUnlock();
+                }
+            }
+            mLastRotation = rotation;
+        }
+    };
 
     public KeyguardFaceUnlockView(Context context) {
         this(context, null);
@@ -89,6 +119,14 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             mBiometricUnlock.stop();
         }
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateCallback);
+        if (mWatchingRotation) {
+            try {
+                mWindowManager.removeRotationWatcher(mRotationWatcher);
+                mWatchingRotation = false;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception when removing rotation watcher");
+            }
+        }
     }
 
     @Override
@@ -98,6 +136,14 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             mBiometricUnlock.stop();
         }
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateCallback);
+        if (mWatchingRotation) {
+            try {
+                mWindowManager.removeRotationWatcher(mRotationWatcher);
+                mWatchingRotation = false;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception when removing rotation watcher");
+            }
+        }
     }
 
     @Override
@@ -106,6 +152,17 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         mIsShowing = KeyguardUpdateMonitor.getInstance(mContext).isKeyguardVisible();
         maybeStartBiometricUnlock();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
+
+        // Registers a callback which handles stopping the biometric unlock and restarting it in
+        // the new position for a 180 degree rotation change.
+        if (!mWatchingRotation) {
+            try {
+                mLastRotation = mWindowManager.watchRotation(mRotationWatcher);
+                mWatchingRotation = true;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception when adding rotation watcher");
+            }
+        }
     }
 
     @Override
@@ -170,9 +227,15 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
                 return;
             }
 
-            // TODO: Some of these conditions are handled in KeyguardSecurityModel and may not be
-            // necessary here.
+            // Although these same conditions are handled in KeyguardSecurityModel, they are still
+            // necessary here.  When a tablet is rotated 90 degrees, a configuration change is
+            // triggered and everything is torn down and reconstructed.  That means
+            // KeyguardSecurityModel gets a chance to take care of the logic and doesn't even
+            // reconstruct KeyguardFaceUnlockView if the biometric unlock should be suppressed.
+            // However, for a 180 degree rotation, no configuration change is triggered, so only
+            // the logic here is capable of suppressing Face Unlock.
             if (monitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
+                    && monitor.isAlternateUnlockEnabled()
                     && !monitor.getMaxBiometricUnlockAttemptsReached()
                     && !backupIsTimedOut) {
                 mBiometricUnlock.start();

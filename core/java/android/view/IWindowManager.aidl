@@ -172,6 +172,12 @@ interface IWindowManager
     int watchRotation(IRotationWatcher watcher);
 
     /**
+     * Remove a rotation watcher set using watchRotation.
+     * @hide
+     */
+    void removeRotationWatcher(IRotationWatcher watcher);
+
+    /**
      * Determine the preferred edge of the screen to pin the compact options menu against.
      * @return a Gravity value for the options menu panel
      * @hide

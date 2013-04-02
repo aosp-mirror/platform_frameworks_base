@@ -5815,6 +5815,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void removeRotationWatcher(IRotationWatcher watcher) {
+        final IBinder watcherBinder = watcher.asBinder();
+        synchronized (mWindowMap) {
+            for (int i=0; i<mRotationWatchers.size(); i++) {
+                if (watcherBinder == mRotationWatchers.get(i).asBinder()) {
+                    mRotationWatchers.remove(i);
+                    i--;
+                }
+            }
+        }
+    }
+
     /**
      * Apps that use the compact menu panel (as controlled by the panelMenuIsCompact
      * theme attribute) on devices that feature a physical options menu key attempt to position
