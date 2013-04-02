@@ -54,7 +54,7 @@ parent.link=index.html
   <p>When DDMS starts, it connects to <a href="{@docRoot}tools/help/adb.html">adb</a>.
   When a device is connected, a VM monitoring service is created between
   <code>adb</code> and DDMS, which notifies DDMS when a VM on the device is started or terminated. Once a VM
-  is running, DDMS retrieves the the VM's process ID (pid), via <code>adb</code>, and opens a connection to the
+  is running, DDMS retrieves the VM's process ID (pid), via <code>adb</code>, and opens a connection to the
   VM's debugger, through the adb daemon (adbd) on the device. DDMS can now talk to the VM using a
   custom wire protocol.</p>
 

@@ -111,14 +111,14 @@ parent.link=index.html
     </li>
     <li>
         The SDK tools for building and tests are available in Eclipse with ADT, and also in
-        command-line form for use with other IDES. These tools get information from the project of
+        command-line form for use with other IDEs. These tools get information from the project of
         the application under test and use this information to automatically create the build files,
         manifest file, and directory structure for the test package.
     </li>
     <li>
         The SDK also provides
   <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">monkeyrunner</a>, an API
-        testing devices with Python programs, and <a
+        for testing devices with Python programs, and <a
         href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>,
         a command-line tool for stress-testing UIs by sending pseudo-random events to a device.
     </li>

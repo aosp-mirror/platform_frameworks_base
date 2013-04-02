@@ -172,7 +172,7 @@ the user might not come back).</dd>
 
 <p>Most applications should implement at least these three methods for every fragment, but there are
 several other callback methods you should also use to handle various stages of the
-fragment lifecycle. All the lifecycle callback methods are discussed more later, in the section
+fragment lifecycle. All the lifecycle callback methods are discussed in more detail in the section
 about <a href="#Lifecycle">Handling the Fragment Lifecycle</a>.</p>
 
 
