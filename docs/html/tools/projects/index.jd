@@ -68,12 +68,12 @@ page.title=Managing Projects
     <code>src<em>/your/package/namespace/ActivityName</em>.java</code>. All other source code
      files (such as <code>.java</code> or <code>.aidl</code> files) go here as well.</dd>
 
-    <dt><code>bin</code></dt>
+    <dt><code>bin/</code></dt>
 
     <dd>Output directory of the build. This is where you can find the final <code>.apk</code> file and other
     compiled resources.</dd>
 
-    <dt><code>jni</code></dt>
+    <dt><code>jni/</code></dt>
 
     <dd>Contains native code sources developed using the Android NDK. For more information, see the
     <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK documentation</a>.</dd>
@@ -88,7 +88,7 @@ page.title=Managing Projects
     <dd>This is empty. You can use it to store raw asset files. Files that you save here are
     compiled into an <code>.apk</code> file as-is, and the original filename is preserved. You can navigate this
     directory in the same way as a typical file system using URIs and read files as a stream of
-    bytes using the the {@link android.content.res.AssetManager}. For example, this is a good
+    bytes using the {@link android.content.res.AssetManager}. For example, this is a good
     location for textures and game data.</dd>
 
     <dt><code>res/</code></dt>
@@ -114,7 +114,7 @@ page.title=Managing Projects
         <dt><code>drawable/</code></dt>
 
         <dd>For bitmap files (PNG, JPEG, or GIF), 9-Patch image files, and XML files that describe
-        Drawable shapes or a Drawable objects that contain multiple states (normal, pressed, or
+        Drawable shapes or Drawable objects that contain multiple states (normal, pressed, or
         focused). See the <a href=
         "{@docRoot}guide/topics/resources/drawable-resource.html">Drawable</a> resource type.</dd>
 
@@ -251,7 +251,7 @@ used.</dd>
     code and resources as a standard Android project, stored in the same way. For example, source
     code in the library project can access its own resources through its <code>R</code> class.</p>
 
-    <p>However, a library project differs from an standard Android application project in that you
+    <p>However, a library project differs from a standard Android application project in that you
     cannot compile it directly to its own <code>.apk</code> and run it on an Android device.
     Similarly, you cannot export the library project to a self-contained JAR file, as you would do
     for a true library. Instead, you must compile the library indirectly, by referencing the
