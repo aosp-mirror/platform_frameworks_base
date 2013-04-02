@@ -138,6 +138,7 @@ class ProcessRecord {
     boolean persistent;         // always keep this application running?
     boolean crashing;           // are we in the process of crashing?
     Dialog crashDialog;         // dialog being displayed due to crash.
+    boolean forceCrashReport;   // suppress normal auto-dismiss of crash dialog & report UI?
     boolean notResponding;      // does the app have a not responding dialog?
     Dialog anrDialog;           // dialog being displayed due to app not resp.
     boolean removed;            // has app package been removed from device?
