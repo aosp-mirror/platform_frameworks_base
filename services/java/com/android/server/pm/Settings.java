@@ -1603,9 +1603,6 @@ final class Settings {
                     mReadMessages.append("No settings file found\n");
                     PackageManagerService.reportSettingsProblem(Log.INFO,
                             "No settings file; creating initial state");
-                    if (!onlyCore) {
-                        readDefaultPreferredAppsLPw(service, 0);
-                    }
                     mInternalSdkPlatform = mExternalSdkPlatform = sdkVersion;
                     return false;
                 }
