@@ -352,7 +352,9 @@ void DisplayList::outputViewProperties(const int level) {
         }
     }
     if (mAlpha < 1) {
-        if (mCaching || !mHasOverlappingRendering) {
+        if (mCaching) {
+            ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mAlpha);
+        } else if (!mHasOverlappingRendering) {
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mAlpha);
         } else {
             int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
@@ -400,7 +402,9 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
         }
     }
     if (mAlpha < 1) {
-        if (mCaching || !mHasOverlappingRendering) {
+        if (mCaching) {
+            renderer.setOverrideLayerAlpha(mAlpha);
+        } else if (!mHasOverlappingRendering) {
             renderer.scaleAlpha(mAlpha);
         } else {
             // TODO: should be able to store the size of a DL at record time and not
@@ -513,6 +517,7 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
     handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT);
     renderer.restoreToCount(restoreTo);
+    renderer.setOverrideLayerAlpha(1.0f);
 }
 
 }; // namespace uirenderer
