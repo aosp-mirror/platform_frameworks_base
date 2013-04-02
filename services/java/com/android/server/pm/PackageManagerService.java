@@ -5158,53 +5158,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // This permission is invalid; skip it.
                     allowed = false;
                 } else if (level == PermissionInfo.PROTECTION_SIGNATURE) {
-                    allowed = (compareSignatures(
-                            bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
-                                    == PackageManager.SIGNATURE_MATCH)
-                            || (compareSignatures(mPlatformPackage.mSignatures, pkg.mSignatures)
-                                    == PackageManager.SIGNATURE_MATCH);
-                    if (!allowed && (bp.protectionLevel
-                            & PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
-                        if (isSystemApp(pkg)) {
-                            // For updated system applications, a system permission
-                            // is granted only if it had been defined by the original application.
-                            if (isUpdatedSystemApp(pkg)) {
-                                final PackageSetting sysPs = mSettings
-                                        .getDisabledSystemPkgLPr(pkg.packageName);
-                                final GrantedPermissions origGp = sysPs.sharedUser != null
-                                        ? sysPs.sharedUser : sysPs;
-                                if (origGp.grantedPermissions.contains(perm)) {
-                                    allowed = true;
-                                } else {
-                                    // The system apk may have been updated with an older
-                                    // version of the one on the data partition, but which
-                                    // granted a new system permission that it didn't have
-                                    // before.  In this case we do want to allow the app to
-                                    // now get the new permission, because it is allowed by
-                                    // the system image.
-                                    allowed = false;
-                                    if (sysPs.pkg != null) {
-                                        for (int j=0;
-                                                j<sysPs.pkg.requestedPermissions.size(); j++) {
-                                            if (perm.equals(
-                                                    sysPs.pkg.requestedPermissions.get(j))) {
-                                                allowed = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                allowed = true;
-                            }
-                        }
-                    }
-                    if (!allowed && (bp.protectionLevel
-                            & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
-                        // For development permissions, a development permission
-                        // is granted only if it was already granted.
-                        allowed = origPermissions.contains(perm);
-                    }
+                    allowed = doSignaturePermission(perm, pkg, bp, origPermissions);
                     if (allowed) {
                         allowedSig = true;
                     }
@@ -5286,7 +5240,60 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         ps.haveGids = true;
     }
-    
+
+    private boolean doSignaturePermission(String perm, PackageParser.Package pkg,
+                                          BasePermission bp, HashSet<String> origPermissions) {
+        boolean allowed;
+        allowed = (compareSignatures(
+                bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
+                        == PackageManager.SIGNATURE_MATCH)
+                || (compareSignatures(mPlatformPackage.mSignatures, pkg.mSignatures)
+                        == PackageManager.SIGNATURE_MATCH);
+        if (!allowed && (bp.protectionLevel
+                & PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
+            if (isSystemApp(pkg)) {
+                // For updated system applications, a system permission
+                // is granted only if it had been defined by the original application.
+                if (isUpdatedSystemApp(pkg)) {
+                    final PackageSetting sysPs = mSettings
+                            .getDisabledSystemPkgLPr(pkg.packageName);
+                    final GrantedPermissions origGp = sysPs.sharedUser != null
+                            ? sysPs.sharedUser : sysPs;
+                    if (origGp.grantedPermissions.contains(perm)) {
+                        allowed = true;
+                    } else {
+                        // The system apk may have been updated with an older
+                        // version of the one on the data partition, but which
+                        // granted a new system permission that it didn't have
+                        // before.  In this case we do want to allow the app to
+                        // now get the new permission, because it is allowed by
+                        // the system image.
+                        allowed = false;
+                        if (sysPs.pkg != null) {
+                            for (int j=0;
+                                    j<sysPs.pkg.requestedPermissions.size(); j++) {
+                                if (perm.equals(
+                                        sysPs.pkg.requestedPermissions.get(j))) {
+                                    allowed = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    allowed = true;
+                }
+            }
+        }
+        if (!allowed && (bp.protectionLevel
+                & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
+            // For development permissions, a development permission
+            // is granted only if it was already granted.
+            allowed = origPermissions.contains(perm);
+        }
+        return allowed;
+    }
+
     final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
