@@ -479,7 +479,7 @@ ObjectAnimator.ofFloat(targetObject, "propName", 1f)
     </li>
 
     <li>Depending on what property or object you are animating, you might need to call the {@link
-    android.view.View#invalidate invalidate()} method on a View force the screen to redraw itself with the
+    android.view.View#invalidate invalidate()} method on a View to force the screen to redraw itself with the
     updated animated values. You do this in the
     {@link android.animation.ValueAnimator.AnimatorUpdateListener#onAnimationUpdate onAnimationUpdate()}
     callback. For example, animating the color property of a Drawable object only cause updates to the
@@ -825,7 +825,7 @@ rotationAnim.setDuration(5000ms);
 
   <h2 id="views">Animating Views</h2>
 
-  <p>The property animation system allow streamlined animation of View objects and offerse
+  <p>The property animation system allow streamlined animation of View objects and offers
   a few advantages over the view animation system. The view
   animation system transformed View objects by changing the way that they were drawn. This was
   handled in the container of each View, because the View itself had no properties to manipulate.
