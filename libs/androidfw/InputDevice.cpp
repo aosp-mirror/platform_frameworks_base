@@ -172,8 +172,8 @@ void InputDeviceInfo::addSource(uint32_t source) {
 }
 
 void InputDeviceInfo::addMotionRange(int32_t axis, uint32_t source, float min, float max,
-        float flat, float fuzz) {
-    MotionRange range = { axis, source, min, max, flat, fuzz };
+        float flat, float fuzz, float resolution) {
+    MotionRange range = { axis, source, min, max, flat, fuzz, resolution };
     mMotionRanges.add(range);
 }
 

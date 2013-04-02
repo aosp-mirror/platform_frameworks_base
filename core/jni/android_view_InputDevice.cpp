@@ -62,8 +62,8 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
     const Vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (size_t i = 0; i < ranges.size(); i++) {
         const InputDeviceInfo::MotionRange& range = ranges.itemAt(i);
-        env->CallVoidMethod(inputDeviceObj.get(), gInputDeviceClassInfo.addMotionRange,
-                range.axis, range.source, range.min, range.max, range.flat, range.fuzz);
+        env->CallVoidMethod(inputDeviceObj.get(), gInputDeviceClassInfo.addMotionRange, range.axis,
+                range.source, range.min, range.max, range.flat, range.fuzz, range.resolution);
         if (env->ExceptionCheck()) {
             return NULL;
         }
@@ -90,7 +90,7 @@ int register_android_view_InputDevice(JNIEnv* env)
             "<init>", "(IILjava/lang/String;Ljava/lang/String;ZIILandroid/view/KeyCharacterMap;Z)V");
 
     GET_METHOD_ID(gInputDeviceClassInfo.addMotionRange, gInputDeviceClassInfo.clazz,
-            "addMotionRange", "(IIFFFF)V");
+            "addMotionRange", "(IIFFFFF)V");
 
     return 0;
 }
