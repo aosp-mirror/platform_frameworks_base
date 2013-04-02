@@ -5164,7 +5164,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // This permission is invalid; skip it.
                 allowed = false;
             } else if (level == PermissionInfo.PROTECTION_SIGNATURE) {
-                allowed = doSignaturePermission(perm, pkg, bp, origPermissions);
+                allowed = grantSignaturePermission(perm, pkg, bp, origPermissions);
                 if (allowed) {
                     allowedSig = true;
                 }
@@ -5248,7 +5248,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return allowed;
     }
 
-    private boolean doSignaturePermission(String perm, PackageParser.Package pkg,
+    private boolean grantSignaturePermission(String perm, PackageParser.Package pkg,
                                           BasePermission bp, HashSet<String> origPermissions) {
         boolean allowed;
         allowed = (compareSignatures(
