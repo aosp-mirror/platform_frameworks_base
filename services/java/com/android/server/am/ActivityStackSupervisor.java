@@ -187,8 +187,8 @@ public class ActivityStackSupervisor {
 
     boolean allResumedActivitiesIdle() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            if (mStacks.get(stackNdx).mResumedActivity == null ||
-                    !mStacks.get(stackNdx).mResumedActivity.idle) {
+            final ActivityRecord resumedActivity = mStacks.get(stackNdx).mResumedActivity;
+            if (resumedActivity == null || !resumedActivity.idle) {
                 return false;
             }
         }
@@ -727,15 +727,7 @@ public class ActivityStackSupervisor {
     }
 
     void resumeTopActivityLocked() {
-        final int start, end;
-        if (isHomeStackMain()) {
-            start = 0;
-            end = 1;
-        } else {
-            start = 1;
-            end = mStacks.size();
-        }
-        for (int stackNdx = start; stackNdx < end; ++stackNdx) {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             mStacks.get(stackNdx).resumeTopActivityLocked(null);
         }
     }
