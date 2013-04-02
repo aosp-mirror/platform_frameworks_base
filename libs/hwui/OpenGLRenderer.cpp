@@ -114,6 +114,7 @@ OpenGLRenderer::OpenGLRenderer():
         mCaches(Caches::getInstance()), mExtensions(Extensions::getInstance()) {
     mDrawModifiers.mShader = NULL;
     mDrawModifiers.mColorFilter = NULL;
+    mDrawModifiers.mOverrideLayerAlpha = 1.0f;
     mDrawModifiers.mHasShadow = false;
     mDrawModifiers.mHasDrawFilter = false;
 
@@ -1074,7 +1075,7 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
             layer->setFilter(GL_LINEAR, true);
         }
 
-        float alpha = layer->getAlpha() / 255.0f * mSnapshot->alpha;
+        float alpha = getLayerAlpha(layer);
         bool blend = layer->isBlend() || alpha < 1.0f;
         drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
                 layer->getTexture(), alpha, layer->getMode(), blend,
@@ -1112,7 +1113,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             rects = safeRegion.getArray(&count);
         }
 
-        const float alpha = layer->getAlpha() / 255.0f * mSnapshot->alpha;
+        const float alpha = getLayerAlpha(layer);
         const float texX = 1.0f / float(layer->getWidth());
         const float texY = 1.0f / float(layer->getHeight());
         const float height = rect.getHeight();
@@ -2237,7 +2238,7 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
         float left, float top, float right, float bottom, SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
-    getAlphaAndModeDirect(paint, &alpha, &mode);
+    getAlphaAndMode(paint, &alpha, &mode);
 
     return drawPatch(bitmap, xDivs, yDivs, colors, width, height, numColors,
             left, top, right, bottom, alpha, mode);
@@ -2990,7 +2991,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
         if (layer->region.isRect()) {
             composeLayerRect(layer, layer->regionRect);
         } else if (layer->mesh) {
-            const float a = layer->getAlpha() / 255.0f * mSnapshot->alpha;
+            const float a = getLayerAlpha(layer);
             setupDraw();
             setupDrawWithTexture();
             setupDrawColor(a, a, a, a);
@@ -3446,9 +3447,23 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
     TextureVertex::setUV(v++, u2, v2);
 }
 
-void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
+void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const {
     getAlphaAndModeDirect(paint, alpha,  mode);
+    if (mDrawModifiers.mOverrideLayerAlpha < 1.0f) {
+        // if drawing a layer, ignore the paint's alpha
+        *alpha = mDrawModifiers.mOverrideLayerAlpha;
+    }
     *alpha *= mSnapshot->alpha;
+}
+
+float OpenGLRenderer::getLayerAlpha(Layer* layer) const {
+    float alpha;
+    if (mDrawModifiers.mOverrideLayerAlpha < 1.0f) {
+        alpha = mDrawModifiers.mOverrideLayerAlpha;
+    } else {
+        alpha = layer->getAlpha() / 255.0f;
+    }
+    return alpha * mSnapshot->alpha;
 }
 
 }; // namespace uirenderer
