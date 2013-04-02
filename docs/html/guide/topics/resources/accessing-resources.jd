@@ -50,7 +50,7 @@ the {@code aapt} tool automatically generates.</p>
 <p>When your application is compiled, {@code aapt} generates the {@code R} class, which contains
 resource IDs for all the resources in your {@code
 res/} directory. For each type of resource, there is an {@code R} subclass (for example,
-{@code R.drawable} for all drawable resources) and for each resource of that type, there is a static
+{@code R.drawable} for all drawable resources), and for each resource of that type, there is a static
 integer (for example, {@code R.drawable.icon}). This integer is the resource ID that you can use
 to retrieve your resource.</p>
 
@@ -68,7 +68,7 @@ resource is a simple value (such as a string).</li>
 
 <p>There are two ways you can access a resource:</p>
 <ul>
-  <li><strong>In code:</strong> Using an static integer from a sub-class of your {@code R}
+  <li><strong>In code:</strong> Using a static integer from a sub-class of your {@code R}
 class, such as:
     <pre class="classic no-pretty-print">R.string.hello</pre>
     <p>{@code string} is the resource type and {@code hello} is the resource name. There are many
@@ -264,11 +264,13 @@ reference a system resource, you would need to include the package name. For exa
     android:text=&quot;&#64;string/hello&quot; /&gt;
 </pre>
 
-<p class="note"><strong>Note:</strong> You should use string resources at all times, so that your
-application can be localized for other languages. For information about creating alternative
+<p class="note"><strong>Note:</strong> You should use string resources at 
+all times, so that your application can be localized for other languages. 
+For information about creating alternative
 resources (such as localized strings), see <a
 href="providing-resources.html#AlternativeResources">Providing Alternative
-Resources</a>.</p>
+Resources</a>. For a complete guide to localizing your application for other languages,
+see <a href="localization.html">Localization</a>.</p>
 
 <p>You can even use resources in XML to create aliases. For example, you can create a
 drawable resource that is an alias for another drawable resource:</p>
