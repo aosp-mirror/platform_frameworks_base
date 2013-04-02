@@ -368,7 +368,7 @@ final class ActivityStack {
                     // so we need to be conservative and assume it isn't.
                     ActivityRecord r = (ActivityRecord)msg.obj;
                     Slog.w(TAG, "Activity idle timeout for " + r);
-                    synchronized (this) {
+                    synchronized (mService) {
                         activityIdleInternalLocked(r != null ? r.appToken : null, true, null);
                     }
                 } break;
