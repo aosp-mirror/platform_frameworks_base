@@ -862,6 +862,11 @@ class ServerThread extends Thread {
             public void run() {
                 Slog.i(TAG, "Making services ready");
 
+                try {
+                    ActivityManagerService.self().startObservingNativeCrashes();
+                } catch (Throwable e) {
+                    reportWtf("observing native crashes", e);
+                }
                 if (!headless) startSystemUi(contextF);
                 try {
                     if (mountServiceF != null) mountServiceF.systemReady();
