@@ -372,6 +372,7 @@ public final class InputMethodManager {
                             return;
                         }
                         
+                        flushPendingEventsLocked();
                         mCurMethod = res.method;
                         if (mCurChannel != null) {
                             mCurChannel.dispose();
@@ -718,6 +719,7 @@ public final class InputMethodManager {
      */
     void clearBindingLocked() {
         clearConnectionLocked();
+        flushPendingEventsLocked();
         mBindSequence = -1;
         mCurId = null;
         mCurMethod = null;
@@ -1709,6 +1711,30 @@ public final class InputMethodManager {
             mPendingEventPoolSize += 1;
             p.mNext = mPendingEventPool;
             mPendingEventPool = p;
+        }
+    }
+
+    private void flushPendingEventsLocked() {
+        mH.removeMessages(MSG_EVENT_TIMEOUT);
+        PendingEvent curr, prev, next;
+        curr = mFirstPendingEvent;
+        prev = null;
+        while (curr != null) {
+            next = curr.mNext;
+            curr.mNext = prev;
+            prev = curr;
+            curr = next;
+        }
+        curr = prev;
+        prev = null;
+        while (curr != null) {
+            Message msg = mH.obtainMessage(MSG_EVENT_TIMEOUT, curr.mSeq, 0, curr);
+            msg.setAsynchronous(true);
+            mH.sendMessage(msg);
+            next = curr.mNext;
+            curr.mNext = prev;
+            prev = curr;
+            curr = next;
         }
     }
 
