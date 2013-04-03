@@ -441,6 +441,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager.WakeLock mBroadcastWakeLock;
     boolean mHavePendingMediaKeyRepeatWithWakeLock;
 
+    // Maps global key codes to the components that will handle them.
+    private GlobalKeyManager mGlobalKeyManager;
+
     // Fallback actions by key code.
     private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
             new SparseArray<KeyCharacterMap.FallbackAction>();
@@ -897,6 +900,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mScreenshotChordEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenshotChord);
+
+        mGlobalKeyManager = new GlobalKeyManager(mContext);
 
         // Controls rotation and the like.
         initializeHdmiState();
@@ -2137,6 +2142,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
                         || keyCode == KeyEvent.KEYCODE_SPACE)) {
             mLanguageSwitchKeyPressed = false;
+            return -1;
+        }
+
+        if (mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
             return -1;
         }
 
@@ -3583,6 +3592,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     result |= ACTION_WAKE_UP;
                 }
             }
+        }
+
+        // If the key would be handled globally, just return the result, don't worry about special
+        // key processing.
+        if (mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
+            return result;
         }
 
         // Handle special keys.
