@@ -138,16 +138,15 @@ static hb_font_funcs_t* harfbuzzSkiaGetFontFuncs()
 hb_blob_t* harfbuzzSkiaReferenceTable(hb_face_t* face, hb_tag_t tag, void* userData)
 {
     SkTypeface* typeface = reinterpret_cast<SkTypeface*>(userData);
-    SkFontID uniqueID = typeface->uniqueID();
 
-    const size_t tableSize = SkFontHost::GetTableSize(uniqueID, tag);
+    const size_t tableSize = typeface->getTableSize(tag);
     if (!tableSize)
         return 0;
 
     char* buffer = reinterpret_cast<char*>(malloc(tableSize));
     if (!buffer)
         return 0;
-    size_t actualSize = SkFontHost::GetTableData(uniqueID, tag, 0, tableSize, buffer);
+    size_t actualSize = typeface->getTableData(tag, 0, tableSize, buffer);
     if (tableSize != actualSize) {
         free(buffer);
         return 0;
