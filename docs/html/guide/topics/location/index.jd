@@ -59,7 +59,9 @@ href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a> g
 
 <h2 id="maps">Google Maps Android API</h2>
 
-<p>With the Google Maps Android API, you can add maps to your app that are based on Google
+<p>With the 
+<a href="http://developers.google.com/maps/documentation/android/">Google Maps Android API</a>,
+you can add maps to your app that are based on Google
 Maps data. The API automatically handles access to Google Maps servers, data downloading,
 map display, and touch gestures on the map. You can also use API calls to add markers,
 polygons and overlays, and to change the user's view of a particular map area.</p>
@@ -85,6 +87,6 @@ with the Google Play Store running Android 2.2 or higher, through
 
 <p>To integrate Google Maps into your app, you need to install the Google Play services
 libraries for your Android SDK. For more details, read about <a
-href="{@docRoot}google/play-services/index.html">Google Play services</a>.</p>
+href="{@docRoot}google/play-services/maps.html">Google Play services</a>.</p>
 
 
