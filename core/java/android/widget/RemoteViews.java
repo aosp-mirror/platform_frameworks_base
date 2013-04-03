@@ -34,6 +34,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -2263,8 +2264,13 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setUri(int viewId, String methodName, Uri value) {
-        // Resolve any filesystem path before sending remotely
-        value = value.getCanonicalUri();
+        if (value != null) {
+            // Resolve any filesystem path before sending remotely
+            value = value.getCanonicalUri();
+            if (StrictMode.vmFileUriExposureEnabled()) {
+                value.checkFileUriExposed("RemoteViews.setUri()");
+            }
+        }
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.URI, value));
     }
 

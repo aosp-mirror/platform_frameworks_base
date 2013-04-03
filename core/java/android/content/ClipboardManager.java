@@ -22,6 +22,7 @@ import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -118,6 +119,9 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public void setPrimaryClip(ClipData clip) {
         try {
+            if (clip != null) {
+                clip.prepareToLeaveProcess();
+            }
             getService().setPrimaryClip(clip, mContext.getBasePackageName());
         } catch (RemoteException e) {
         }

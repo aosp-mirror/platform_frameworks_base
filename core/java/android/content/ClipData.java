@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -788,6 +789,24 @@ public class ClipData implements Parcelable {
      */
     public Item getItemAt(int index) {
         return mItems.get(index);
+    }
+
+    /**
+     * Prepare this {@link ClipData} to leave an app process.
+     *
+     * @hide
+     */
+    public void prepareToLeaveProcess() {
+        final int size = mItems.size();
+        for (int i = 0; i < size; i++) {
+            final Item item = mItems.get(i);
+            if (item.mIntent != null) {
+                item.mIntent.prepareToLeaveProcess();
+            }
+            if (item.mUri != null && StrictMode.vmFileUriExposureEnabled()) {
+                item.mUri.checkFileUriExposed("ClipData.Item.getUri()");
+            }
+        }
     }
 
     @Override

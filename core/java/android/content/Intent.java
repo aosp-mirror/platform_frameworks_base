@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -6955,6 +6956,32 @@ public class Intent implements Parcelable, Cloneable {
             type = type.substring(0, semicolonIndex);
         }
         return type;
+    }
+
+    /**
+     * Prepare this {@link Intent} to leave an app process.
+     *
+     * @hide
+     */
+    public void prepareToLeaveProcess() {
+        setAllowFds(false);
+
+        if (mSelector != null) {
+            mSelector.prepareToLeaveProcess();
+        }
+        if (mClipData != null) {
+            mClipData.prepareToLeaveProcess();
+        }
+
+        if (mData != null && StrictMode.vmFileUriExposureEnabled()) {
+            // There are several ACTION_MEDIA_* broadcasts that send file://
+            // Uris, so only check common actions.
+            if (ACTION_VIEW.equals(mAction) ||
+                    ACTION_EDIT.equals(mAction) ||
+                    ACTION_ATTACH_DATA.equals(mAction)) {
+                mData.checkFileUriExposed("Intent.getData()");
+            }
+        }
     }
 
     /**
