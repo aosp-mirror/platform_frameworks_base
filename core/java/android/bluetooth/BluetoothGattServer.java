@@ -554,9 +554,10 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
                 List<BluetoothGattDescriptor> descriptors = characteristic.getDescriptors();
                 for (BluetoothGattDescriptor descriptor: descriptors) {
+                    permission = ((characteristic.getKeySize() - 7) << 12)
+                                        + descriptor.getPermissions();
                     mService.addDescriptor(mServerIf,
-                        new ParcelUuid(descriptor.getUuid()),
-                        descriptor.getPermissions());
+                        new ParcelUuid(descriptor.getUuid()), permission);
                 }
             }
 
