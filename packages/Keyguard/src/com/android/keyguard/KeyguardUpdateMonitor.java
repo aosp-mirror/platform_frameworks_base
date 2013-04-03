@@ -209,7 +209,7 @@ public class KeyguardUpdateMonitor {
 
         }
 
-        public void setTransportControlFlags(int generationId, int flags) {
+        public void setTransportControlInfo(int generationId, int flags, int posCapabilities) {
 
         }
 
