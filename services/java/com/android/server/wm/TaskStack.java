@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -54,25 +56,29 @@ public class TaskStack {
         return taskLists;
     }
 
+    boolean isHomeStack() {
+        return mStackId == HOME_STACK_ID;
+    }
+
     /**
      * Put a Task in this stack. Used for adding and moving.
      * @param task The task to add.
      * @param toTop Whether to add it to the top or bottom.
      */
-    void addTask(Task task, boolean toTop) {
+    boolean addTask(Task task, boolean toTop) {
         mParent.makeDirty();
         mTasks.add(toTop ? mTasks.size() : 0, task);
-        mDisplayContent.moveStackBox(mStackId, toTop);
+        return mDisplayContent.moveHomeStackBox(mStackId == HOME_STACK_ID);
     }
 
-    void moveTaskToTop(Task task) {
+    boolean moveTaskToTop(Task task) {
         mTasks.remove(task);
-        addTask(task, true);
+        return addTask(task, true);
     }
 
-    void moveTaskToBottom(Task task) {
+    boolean moveTaskToBottom(Task task) {
         mTasks.remove(task);
-        addTask(task, false);
+        return addTask(task, false);
     }
 
     /**

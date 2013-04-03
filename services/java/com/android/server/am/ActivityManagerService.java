@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+
 import android.app.AppOpsManager;
 import android.appwidget.AppWidgetManager;
 import com.android.internal.R;
@@ -168,7 +170,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class ActivityManagerService  extends ActivityManagerNative
+public final class ActivityManagerService extends ActivityManagerNative
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
     private static final String USER_DATA_DIR = "/data/user/";
     static final String TAG = "ActivityManager";
@@ -209,8 +211,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static final long MONITOR_CPU_MIN_TIME = 5*1000;        // don't sample cpu less than every 5 seconds.
     static final long MONITOR_CPU_MAX_TIME = 0x0fffffff;    // wait possibly forever for next cpu sample.
     static final boolean MONITOR_THREAD_CPU_USAGE = false;
-
-    static final int HOME_ACTIVITY_STACK = 0;
 
     // The flags that are set for all calls we make to the package manager.
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
@@ -1443,7 +1443,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
-        wm.createStack(HOME_ACTIVITY_STACK, -1, StackBox.TASK_STACK_GOES_OVER, 1.0f);
+        wm.createStack(HOME_STACK_ID, -1, StackBox.TASK_STACK_GOES_OVER, 1.0f);
     }
 
     public void startObservingNativeCrashes() {

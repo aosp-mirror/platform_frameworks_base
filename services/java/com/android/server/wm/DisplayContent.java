@@ -16,11 +16,11 @@
 
 package com.android.server.wm;
 
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+
 import android.graphics.Rect;
 import android.view.Display;
 import android.view.DisplayInfo;
-
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -82,7 +82,11 @@ class DisplayContent {
      */
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
+    /** Array containing the home StackBox and possibly one more which would contain apps */
     private ArrayList<StackBox> mStackBoxes = new ArrayList<StackBox>();
+
+    /** True when the home StackBox is at the top of mStackBoxes, false otherwise */
+    private boolean mHomeOnTop = true;
 
     /**
      * Sorted most recent at top, oldest at [0].
@@ -115,6 +119,10 @@ class DisplayContent {
         return mDisplayInfo;
     }
 
+    boolean homeOnTop() {
+        return mHomeOnTop;
+    }
+
     /**
      * Retrieve the tasks on this display in stack order from the topmost TaskStack down.
      * Note that the order of TaskStacks in the same StackBox is defined within StackBox.
@@ -127,6 +135,10 @@ class DisplayContent {
             mTmpTasks.addAll(mStackBoxes.get(boxNdx).getTasks());
         }
         return mTmpTasks;
+    }
+
+    TaskStack getHomeStack() {
+        return mStackBoxes.get(mHomeOnTop ? mStackBoxes.size() - 1 : 0).mStack;
     }
 
     public void updateDisplayInfo() {
@@ -205,20 +217,24 @@ class DisplayContent {
     }
 
     /**
-     * Reorder a StackBox within mStackBox. The StackBox to reorder is the one containing the
-     * specified TaskStack.
-     * @param stackId The TaskStack to reorder.
-     * @param toTop Move to the top of all StackBoxes if true, to the bottom if false. Only the
-     * topmost layer of StackBoxes, those in mStackBoxes can be reordered.
+     * Move the home StackBox to the top or bottom of mStackBoxes. That is the only place
+     * it is allowed to be. This is a nop if the home StackBox is already in the correct position.
+     * @param toTop Move home to the top of mStackBoxes if true, to the bottom if false.
+     * @return true if a change was made, false otherwise.
      */
-    void moveStackBox(int stackId, boolean toTop) {
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            final StackBox box = mStackBoxes.get(stackBoxNdx);
-            if (box.contains(stackId)) {
-                mStackBoxes.remove(box);
-                mStackBoxes.add(toTop ? mStackBoxes.size() : 0, box);
-                return;
-            }
+    boolean moveHomeStackBox(boolean toTop) {
+        switch (mStackBoxes.size()) {
+            case 0: throw new RuntimeException("moveHomeStackBox: No home StackBox!");
+            case 1: return false; // Only the home StackBox exists.
+            case 2: 
+                if (mHomeOnTop != toTop) {
+                    final StackBox home = mStackBoxes.remove(toTop ? 0 : 1);
+                    mStackBoxes.add(toTop ? 1 : 0, home);
+                    mHomeOnTop = toTop;
+                    return true;
+                }
+                return false;
+            default: throw new RuntimeException("moveHomeStackBox: Too many toplevel StackBoxes!");
         }
     }
 

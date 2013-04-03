@@ -84,7 +84,7 @@ public class ActivityStackSupervisor {
     private boolean mDismissKeyguardOnNextActivity = false;
 
     /** Identifier counter for all ActivityStacks */
-    private int mLastStackId = 0;
+    private int mLastStackId = HOME_STACK_ID;
 
     /** Task identifier that activities are currently being started in.  Incremented each time a
      * new task is created. */
