@@ -23,6 +23,8 @@ import android.os.MessageQueue;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Provides a low-level mechanism for an application to receive input events.
  * @hide
@@ -42,7 +44,7 @@ public abstract class InputEventReceiver {
     // Map from InputEvent sequence numbers to dispatcher sequence numbers.
     private final SparseIntArray mSeqMap = new SparseIntArray();
 
-    private static native int nativeInit(InputEventReceiver receiver,
+    private static native int nativeInit(WeakReference<InputEventReceiver> receiver,
             InputChannel inputChannel, MessageQueue messageQueue);
     private static native void nativeDispose(int receiverPtr);
     private static native void nativeFinishInputEvent(int receiverPtr, int seq, boolean handled);
@@ -65,7 +67,8 @@ public abstract class InputEventReceiver {
 
         mInputChannel = inputChannel;
         mMessageQueue = looper.getQueue();
-        mReceiverPtr = nativeInit(this, inputChannel, mMessageQueue);
+        mReceiverPtr = nativeInit(new WeakReference<InputEventReceiver>(this),
+                inputChannel, mMessageQueue);
 
         mCloseGuard.open("dispose");
     }
