@@ -34,6 +34,9 @@
 namespace android {
 namespace uirenderer {
 
+// Depth of the save stack at the beginning of batch playback at flush time
+#define FLUSH_SAVE_STACK_DEPTH 2
+
 /////////////////////////////////////////////////////////////////////////////////
 // Operation Batches
 /////////////////////////////////////////////////////////////////////////////////
@@ -270,7 +273,7 @@ void DeferredDisplayList::addRestoreToCount(OpenGLRenderer& renderer, StateOp* o
 
     while (!mSaveStack.isEmpty() && mSaveStack.top() >= newSaveCount) mSaveStack.pop();
 
-    storeRestoreToCountBarrier(renderer, op, mSaveStack.size() + 1);
+    storeRestoreToCountBarrier(renderer, op, mSaveStack.size() + FLUSH_SAVE_STACK_DEPTH);
 }
 
 void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
@@ -386,6 +389,8 @@ status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     DrawModifiers restoreDrawModifiers = renderer.getDrawModifiers();
     renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
+    // NOTE: depth of the save stack at this point, before playback, should be reflected in
+    // FLUSH_SAVE_STACK_DEPTH, so that save/restores match up correctly
     status |= replayBatchList(mBatches, renderer, dirty);
 
     renderer.restoreToCount(1);
