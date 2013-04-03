@@ -77,7 +77,7 @@ parent.link=index.html
   </div>
 </div>
 <p>
-    Activity testing is particularly dependent on the the Android instrumentation framework.
+    Activity testing is particularly dependent on the Android instrumentation framework.
     Unlike other components, activities have a complex lifecycle based on callback methods; these
     can't be invoked directly except by instrumentation. Also, the only way to send events to the
     user interface from a program is through instrumentation.
@@ -322,7 +322,7 @@ parent.link=index.html
     the published application.
 </p>
 <p>
-    To add the the permission, add the element
+    To add the permission, add the element
     <code>&lt;uses-permission android:name="android.permission.DISABLE_KEYGUARD"/&gt;</code>
     as a child of the <code>&lt;manifest&gt;</code> element. To disable the KeyGuard, add the
     following code to the <code>onCreate()</code> method of activities you intend to test:

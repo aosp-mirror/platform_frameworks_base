@@ -54,7 +54,7 @@ next.link=purchase-iab-products.html
 <li>The {@code List} argument consists of one or more product IDs (also called SKUs) for the products that you want to query.</li>
 <li>Finally, the {@code QueryInventoryFinishedListener} argument specifies a listener is notified when the query operation has completed and handles the query response.</li>
 </ul>
-If you use the the convenience classes provided in the sample, the classes will handle background thread management for In-app Billing requests, so you can safely make queries from the main thread of your application.
+If you use the convenience classes provided in the sample, the classes will handle background thread management for In-app Billing requests, so you can safely make queries from the main thread of your application.
 </p>
 <p>The following code shows how you can retrieve the details for two products with IDs {@code SKU_APPLE} and {@code SKU_BANANA} that you previously defined in the Developer Console.</p>
 

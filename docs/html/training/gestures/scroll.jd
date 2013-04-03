@@ -56,7 +56,7 @@ scrolling animation in response to a touch event. They are similar, but
 {@link android.widget.OverScroller}
 includes methods for indicating to users that they've reached the content edges 
 after a pan or fling gesture. The {@code InteractiveChart} sample 
-uses the the {@link android.widget.EdgeEffect} class 
+uses the {@link android.widget.EdgeEffect} class
 (actually the {@link android.support.v4.widget.EdgeEffectCompat} class)
 to display a "glow" effect when users reach the content edges.</p>
 

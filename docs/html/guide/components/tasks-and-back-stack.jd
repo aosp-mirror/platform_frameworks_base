@@ -231,7 +231,7 @@ activities except for the root activity when the user leaves the task.</p>
 &lt;activity&gt;}</a> manifest element and with flags in the intent that you pass to {@link
 android.app.Activity#startActivity startActivity()}.</p>
 
-<p>In this regard, the the principal <a
+<p>In this regard, the principal <a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
 attributes you can use are:</p>
 
@@ -319,7 +319,7 @@ each instance can belong to different tasks, and one task can have multiple inst
 routes the intent to that instance through a call to its {@link
 android.app.Activity#onNewIntent onNewIntent()} method, rather than creating a new instance of the
 activity. The activity can be instantiated multiple times, each instance can
-belong to different tasks, and one task can have multiple instances (but only if the the
+belong to different tasks, and one task can have multiple instances (but only if the
 activity at the top of the back stack is <em>not</em> an existing instance of the activity).
   <p>For example, suppose a task's back stack consists of root activity A with activities B, C,
 and D on top (the stack is A-B-C-D; D is on top). An intent arrives for an activity of type D.
