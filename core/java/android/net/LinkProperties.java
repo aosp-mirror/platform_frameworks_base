@@ -378,7 +378,7 @@ public class LinkProperties implements Parcelable {
      * @return {@code true} if both are identical, {@code false} otherwise.
      */
     public boolean isIdenticalStackedLinks(LinkProperties target) {
-        if (!mStackedLinks.keys().equals(target.mStackedLinks.keys())) {
+        if (!mStackedLinks.keySet().equals(target.mStackedLinks.keySet())) {
             return false;
         }
         for (LinkProperties stacked : mStackedLinks.values()) {
