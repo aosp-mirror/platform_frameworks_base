@@ -345,7 +345,7 @@ receivers can be either declared in the manifest or created dynamically in code 
 {@link android.content.BroadcastReceiver} objects) and registered with the system by calling
 {@link android.content.Context#registerReceiver registerReceiver()}.</p>
 
-<p>For more about how to structure the manifest file for your application, see the <a
+<p>For more about how to structure the manifest file for your application, see <a
 href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a>
 documentation. </p>
 

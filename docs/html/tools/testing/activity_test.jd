@@ -537,7 +537,7 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 </pre>
 <p>
-    You now have the the complete <code>setUp()</code> method.
+    You now have the complete <code>setUp()</code> method.
 </p>
 <h3 id="AddPreConditionsTest">Adding an initial conditions test</h3>
 <p>
@@ -1266,7 +1266,7 @@ $ adb install Spinner/bin/SpinnerActivity-debug.apk
   </li>
   <li>
     Follow the tutorial, starting with the section <a href="#CreateTestCaseClass">Creating the Test Case Class</a>. When you are prompted to
-    run the sample application, go the the Launcher screen in your device or emulator and select SpinnerActivity.
+    run the sample application, go to the Launcher screen in your device or emulator and select SpinnerActivity.
     When you are prompted to run the test application, return here to continue with the following instructions.
   </li>
   <li>
