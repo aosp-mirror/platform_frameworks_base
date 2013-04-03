@@ -30,6 +30,7 @@ import com.android.server.ProcessMap;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.WindowManagerService;
@@ -273,6 +274,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     public ActivityStack mMainStack;
+
+    public IntentFirewall mIntentFirewall;
 
     private final boolean mHeadless;
 
@@ -570,8 +573,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
 
         @Override
-        protected String packageForFilter(BroadcastFilter filter) {
-            return filter.packageName;
+        protected boolean isPackageForFilter(String packageName, BroadcastFilter filter) {
+            return packageName.equals(filter.packageName);
         }
     };
 
@@ -1467,7 +1470,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
         m.mContext = context;
         m.mFactoryTest = factoryTest;
         m.mMainStack = new ActivityStack(m, context, true, thr.mLooper);
-        
+        m.mIntentFirewall = new IntentFirewall(m.new IntentFirewallInterface());
+
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
         m.mAppOpsService.publish(context);
@@ -4940,6 +4944,14 @@ public final class ActivityManagerService  extends ActivityManagerNative
         public boolean checkPermission(String permission, int pid, int uid) {
             return mActivityManagerService.checkPermission(permission, pid,
                     uid) == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+    class IntentFirewallInterface implements IntentFirewall.AMSInterface {
+        public int checkComponentPermission(String permission, int pid, int uid,
+                int owningUid, boolean exported) {
+            return ActivityManagerService.this.checkComponentPermission(permission, pid, uid,
+                    owningUid, exported);
         }
     }
 
