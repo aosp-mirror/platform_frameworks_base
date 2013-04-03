@@ -1476,4 +1476,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietar"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Eroare"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Această aplicație nu acceptă conturile pentru utilizatori cu permisiuni limitate"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Nicio aplicație pentru gestionarea acestei acțiuni"</string>
 </resources>

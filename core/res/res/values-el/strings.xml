@@ -1476,4 +1476,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Η λειτουργία προσβασιμότητας ακυρώθηκε."</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Κάτοχος"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Σφάλμα"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Αυτή η εφαρμογή δεν υποστηρίζει λογαριασμούς για περιορισμένους χρήστες"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Δεν υπάρχει εφαρμογή για τη διαχείριση αυτής της ενέργειας"</string>
 </resources>

@@ -1470,10 +1470,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Verhoog volume bo aanbevole vlak?"\n"Deur vir lang tydperke na hoë volume te luister, kan jou gehoor beskadig word."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Verhoog volume bo aanbevole vlak?"\n"Deur vir lang tydperke teen hoë volume te luister, kan jou gehoor beskadig word."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hou aan met twee vingers inhou om toeganklikheid te aktiveer."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toeganklikheid geaktiveer."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toeganklikheid gekanselleer."</string>
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g> ."</string>
     <string name="owner_name" msgid="2716755460376028154">"Eienaar"</string>
+    <!-- no translation found for error_message_title (4510373083082500195) -->
+    <skip />
+    <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
+    <skip />
+    <!-- no translation found for app_not_found (3429141853498927379) -->
+    <skip />
 </resources>
