@@ -158,7 +158,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
             }
         }
 
-        public void setTransportControlFlags(int generationId, int flags) {
+        public void setTransportControlInfo(int generationId, int flags, int posCapabilities) {
             Handler handler = mLocalHandler.get();
             if (handler != null) {
                 handler.obtainMessage(MSG_SET_TRANSPORT_CONTROLS, generationId, flags)

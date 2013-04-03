@@ -167,7 +167,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 30;
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 31;
     private static final int MSG_RCC_NEW_PLAYBACK_STATE = 32;
-
+    private static final int MSG_RCC_SEEK_REQUEST = 33;
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
@@ -4708,6 +4708,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     };
 
+    /**
+     * Synchronization on mCurrentRcLock always inside a block synchronized on mRCStack
+     */
     private final Object mCurrentRcLock = new Object();
     /**
      * The one remote control client which will receive a request for display information.
@@ -4978,6 +4981,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         "  -- vol: " + rcse.mPlaybackVolume +
                         "  -- volMax: " + rcse.mPlaybackVolumeMax +
                         "  -- volObs: " + rcse.mRemoteVolumeObs);
+            }
+            synchronized(mCurrentRcLock) {
+                pw.println("\nCurrent remote control generation ID = " + mCurrentRcClientGen);
             }
         }
         synchronized (mMainRemote) {
@@ -5807,6 +5813,29 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         } catch (RemoteException e) {
                             Log.e(TAG, "Error setting bitmap size for RCD on RCC: ", e);
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    public void setRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
+        sendMsg(mAudioHandler, MSG_RCC_SEEK_REQUEST, SENDMSG_QUEUE, generationId /* arg1 */,
+                0 /* arg2 ignored*/, new Long(timeMs) /* obj */, 0 /* delay */);
+    }
+
+    public void onSetRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
+        if(DEBUG_RC) Log.d(TAG, "onSetRemoteControlClientPlaybackPosition(genId=" + generationId +
+                ", timeMs=" + timeMs + ")");
+        synchronized(mRCStack) {
+            synchronized(mCurrentRcLock) {
+                if ((mCurrentRcClient != null) && (mCurrentRcClientGen == generationId)) {
+                    // tell the current client to seek to the requested location
+                    try {
+                        mCurrentRcClient.seekTo(generationId, timeMs);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Current valid remote client is dead: "+e);
+                        mCurrentRcClient = null;
                     }
                 }
             }
