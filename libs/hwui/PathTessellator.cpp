@@ -61,6 +61,7 @@ void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint
         bool forceExpand) {
     if (forceExpand || paint->getStyle() != SkPaint::kFill_Style) {
         float outset = paint->getStrokeWidth() * 0.5f;
+        if (outset == 0) outset = 0.5f; // account for hairline
         bounds.outset(outset, outset);
     }
 }
