@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Environment.UserEnvironment;
+import android.os.StrictMode;
 import android.util.Log;
 import java.io.File;
 import java.io.IOException;
@@ -2324,6 +2325,18 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             return Uri.fromFile(new File(canonicalPath));
         } else {
             return this;
+        }
+    }
+
+    /**
+     * If this is a {@code file://} Uri, it will be reported to
+     * {@link StrictMode}.
+     *
+     * @hide
+     */
+    public void checkFileUriExposed(String location) {
+        if ("file".equals(getScheme())) {
+            StrictMode.onFileUriExposed(location);
         }
     }
 }
