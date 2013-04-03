@@ -278,11 +278,14 @@ public class RemoteControlClient
     public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
     /**
      * @hide
-     * (to be un-hidden and added in javadoc of setTransportControlFlags(int))
+     * TODO un-hide and add in javadoc of setTransportControlFlags(int)
      * Flag indicating a RemoteControlClient can receive changes in the media playback position
-     * through the {@link #OnPlaybackPositionUpdateListener} interface.
-     *
+     * through the {@link #OnPlaybackPositionUpdateListener} interface. This flag must be set
+     * in order for components that display the RemoteControlClient information, to display and
+     * let the user control media playback position.
      * @see #setTransportControlFlags(int)
+     * @see #setPlaybackPositionProvider(PlaybackPositionProvider)
+     * @see #setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener)
      */
     public final static int FLAG_KEY_MEDIA_POSITION_UPDATE = 1 << 8;
 
@@ -605,7 +608,7 @@ public class RemoteControlClient
 
     /**
      * @hide
-     * (to be un-hidden)
+     * TODO un-hide
      * Sets the current playback state and the matching media position for the current playback
      *   speed.
      * @param state The current playback state, one of the following values:
@@ -630,11 +633,6 @@ public class RemoteControlClient
      */
     public void setPlaybackState(int state, long timeInMs, float playbackSpeed) {
         synchronized(mCacheLock) {
-            if (timeInMs != PLAYBACK_POSITION_INVALID) {
-                mPlaybackPositionCapabilities |= MEDIA_POSITION_READABLE;
-            } else {
-                mPlaybackPositionCapabilities &= ~MEDIA_POSITION_READABLE;
-            }
             if ((mPlaybackState != state) || (mPlaybackPositionMs != timeInMs)
                     || (mPlaybackSpeed != playbackSpeed)) {
                 // store locally
@@ -670,19 +668,20 @@ public class RemoteControlClient
             mTransportControlFlags = transportControlFlags;
 
             // send to remote control display if conditions are met
-            sendTransportControlFlags_syncCacheLock();
+            sendTransportControlInfo_syncCacheLock();
         }
     }
 
     /**
      * @hide
-     * (to be un-hidden)
+     * TODO un-hide
      * Interface definition for a callback to be invoked when the media playback position is
      * requested to be updated.
+     * @see RemoteControlClient#FLAG_KEY_MEDIA_POSITION_UPDATE
      */
     public interface OnPlaybackPositionUpdateListener {
         /**
-         * Called on the listener to notify it that the playback head should be set at the given
+         * Called on the implementer to notify it that the playback head should be set at the given
          * position. If the position can be changed from its current value, the implementor of
          * the interface should also update the playback position using
          * {@link RemoteControlClient#setPlaybackState(int, long, int)} to reflect the actual new
@@ -694,8 +693,25 @@ public class RemoteControlClient
 
     /**
      * @hide
-     * (to be un-hidden)
-     * Sets the listener RemoteControlClient calls whenever the media playback position is requested
+     * TODO un-hide
+     * Interface definition for a callback to be invoked when the media playback position is
+     * queried.
+     * @see RemoteControlClient#FLAG_KEY_MEDIA_POSITION_UPDATE
+     */
+    public interface PlaybackPositionProvider {
+        /**
+         * Called on the implementer of the interface to query the current playback position.
+         * @return a negative value if the current playback position (or the last valid playback
+         *     position) is not known, or a zero or positive value expressed in ms indicating the
+         *     current position, or the last valid known position.
+         */
+        long getPlaybackPosition();
+    }
+
+    /**
+     * @hide
+     * TODO un-hide
+     * Sets the listener to be called whenever the media playback position is requested
      * to be updated.
      * Notifications will be received in the same thread as the one in which RemoteControlClient
      * was created.
@@ -703,16 +719,41 @@ public class RemoteControlClient
      */
     public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener l) {
         synchronized(mCacheLock) {
-            if ((mPositionUpdateListener == null) && (l != null)) {
+            int oldCapa = mPlaybackPositionCapabilities;
+            if (l != null) {
                 mPlaybackPositionCapabilities |= MEDIA_POSITION_WRITABLE;
-                // tell RCDs and AudioService this RCC accepts position updates
-                // TODO implement
-            } else if ((mPositionUpdateListener != null) && (l == null)) {
+            } else {
                 mPlaybackPositionCapabilities &= ~MEDIA_POSITION_WRITABLE;
-                // tell RCDs and AudioService this RCC doesn't handle position updates
-                // TODO implement
             }
             mPositionUpdateListener = l;
+            if (oldCapa != mPlaybackPositionCapabilities) {
+                // tell RCDs that this RCC's playback position capabilities have changed
+                sendTransportControlInfo_syncCacheLock();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * TODO un-hide
+     * Sets the listener to be called whenever the media current playback position is needed.
+     * Queries will be received in the same thread as the one in which RemoteControlClient
+     * was created.
+     * @param l
+     */
+    public void setPlaybackPositionProvider(PlaybackPositionProvider l) {
+        synchronized(mCacheLock) {
+            int oldCapa = mPlaybackPositionCapabilities;
+            if (l != null) {
+                mPlaybackPositionCapabilities |= MEDIA_POSITION_READABLE;
+            } else {
+                mPlaybackPositionCapabilities &= ~MEDIA_POSITION_READABLE;
+            }
+            mPositionProvider = l;
+            if (oldCapa != mPlaybackPositionCapabilities) {
+                // tell RCDs that this RCC's playback position capabilities have changed
+                sendTransportControlInfo_syncCacheLock();
+            }
         }
     }
 
@@ -896,6 +937,10 @@ public class RemoteControlClient
      */
     private OnPlaybackPositionUpdateListener mPositionUpdateListener;
     /**
+     * Provider registered by user of RemoteControlClient to provide the current playback position.
+     */
+    private PlaybackPositionProvider mPositionProvider;
+    /**
      * The current remote control client generation ID across the system, as known by this object
      */
     private int mCurrentClientGenId = -1;
@@ -957,14 +1002,14 @@ public class RemoteControlClient
      */
     private final IRemoteControlClient mIRCC = new IRemoteControlClient.Stub() {
 
-        public void onInformationRequested(int clientGeneration, int infoFlags) {
+        public void onInformationRequested(int generationId, int infoFlags) {
             // only post messages, we can't block here
             if (mEventHandler != null) {
                 // signal new client
                 mEventHandler.removeMessages(MSG_NEW_INTERNAL_CLIENT_GEN);
                 mEventHandler.dispatchMessage(
                         mEventHandler.obtainMessage(MSG_NEW_INTERNAL_CLIENT_GEN,
-                                /*arg1*/ clientGeneration, /*arg2, ignored*/ 0));
+                                /*arg1*/ generationId, /*arg2, ignored*/ 0));
                 // send the information
                 mEventHandler.removeMessages(MSG_REQUEST_PLAYBACK_STATE);
                 mEventHandler.removeMessages(MSG_REQUEST_METADATA);
@@ -1011,6 +1056,16 @@ public class RemoteControlClient
                         MSG_UPDATE_DISPLAY_ARTWORK_SIZE, w, h, rcd));
             }
         }
+
+        public void seekTo(int generationId, long timeMs) {
+            // only post messages, we can't block here
+            if (mEventHandler != null) {
+                mEventHandler.removeMessages(MSG_SEEK_TO);
+                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
+                        MSG_SEEK_TO, generationId /* arg1 */, 0 /* arg2, ignored */,
+                        new Long(timeMs)));
+            }
+        }
     };
 
     /**
@@ -1051,6 +1106,7 @@ public class RemoteControlClient
     private final static int MSG_PLUG_DISPLAY = 7;
     private final static int MSG_UNPLUG_DISPLAY = 8;
     private final static int MSG_UPDATE_DISPLAY_ARTWORK_SIZE = 9;
+    private final static int MSG_SEEK_TO = 10;
 
     private class EventHandler extends Handler {
         public EventHandler(RemoteControlClient rcc, Looper looper) {
@@ -1072,7 +1128,7 @@ public class RemoteControlClient
                     break;
                 case MSG_REQUEST_TRANSPORTCONTROL:
                     synchronized (mCacheLock) {
-                        sendTransportControlFlags_syncCacheLock();
+                        sendTransportControlInfo_syncCacheLock();
                     }
                     break;
                 case MSG_REQUEST_ARTWORK:
@@ -1095,6 +1151,8 @@ public class RemoteControlClient
                 case MSG_UPDATE_DISPLAY_ARTWORK_SIZE:
                     onUpdateDisplayArtworkSize((IRemoteControlDisplay)msg.obj, msg.arg1, msg.arg2);
                     break;
+                case MSG_SEEK_TO:
+                    onSeekTo(msg.arg1, ((Long)msg.obj).longValue());
                 default:
                     Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
             }
@@ -1136,14 +1194,14 @@ public class RemoteControlClient
         }
     }
 
-    private void sendTransportControlFlags_syncCacheLock() {
+    private void sendTransportControlInfo_syncCacheLock() {
         if (mCurrentClientGenId == mInternalClientGenId) {
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
                 try {
-                    di.mRcDisplay.setTransportControlFlags(mInternalClientGenId,
-                            mTransportControlFlags);
+                    di.mRcDisplay.setTransportControlInfo(mInternalClientGenId,
+                            mTransportControlFlags, mPlaybackPositionCapabilities);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error in setTransportControlFlags(), dead display " + di.mRcDisplay,
                             e);
@@ -1321,6 +1379,14 @@ public class RemoteControlClient
                     }
                     break;
                 }
+            }
+        }
+    }
+
+    private void onSeekTo(int generationId, long timeMs) {
+        synchronized (mCacheLock) {
+            if ((mCurrentClientGenId == generationId) && (mPositionUpdateListener != null)) {
+                mPositionUpdateListener.onPlaybackPositionUpdate(timeMs);
             }
         }
     }

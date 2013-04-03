@@ -43,7 +43,16 @@ oneway interface IRemoteControlDisplay
     void setPlaybackState(int generationId, int state, long stateChangeTimeMs, long currentPosMs,
             float speed);
 
-    void setTransportControlFlags(int generationId, int transportControlFlags);
+    /**
+     * Sets the transport control flags and playback position capabilities of a client.
+     * @param generationId the current generation ID as known by this client
+     * @param transportControlFlags bitmask of the transport controls this client supports, see
+     *         {@link RemoteControlClient#setTransportControlFlags(int)}
+     * @param posCapabilities a bit mask for playback position capabilities, see
+     *         {@link RemoteControlClient#MEDIA_POSITION_READABLE} and
+     *         {@link RemoteControlClient#MEDIA_POSITION_WRITABLE}
+     */
+    void setTransportControlInfo(int generationId, int transportControlFlags, int posCapabilities);
 
     void setMetadata(int generationId, in Bundle metadata);
 
