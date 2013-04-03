@@ -4371,11 +4371,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
     @Override
     public final void activityIdle(IBinder token, Configuration config, boolean stopProfiling) {
         final long origId = Binder.clearCallingIdentity();
-        if (stopProfiling) {
-            synchronized (this) {
-                ActivityStack stack = ActivityRecord.getStackLocked(token);
-                if (stack != null) {
-                    ActivityRecord r = stack.activityIdleInternalLocked(token, false, config);
+        synchronized (this) {
+            ActivityStack stack = ActivityRecord.getStackLocked(token);
+            if (stack != null) {
+                ActivityRecord r = stack.activityIdleInternalLocked(token, false, config);
+                if (stopProfiling) {
                     if ((mProfileProc == r.app) && (mProfileFd != null)) {
                         try {
                             mProfileFd.close();
