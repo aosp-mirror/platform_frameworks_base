@@ -165,7 +165,11 @@ public:
         return DeferredDisplayList::kOpBatch_None;
     }
 
-    float strokeWidthOutset() { return mPaint->getStrokeWidth() * 0.5f; }
+    float strokeWidthOutset() {
+        float width = mPaint->getStrokeWidth();
+        if (width == 0) return 0.5f; // account for hairline
+        return width * 0.5f;
+    }
 
 protected:
     SkPaint* getPaint(OpenGLRenderer& renderer) {
