@@ -135,7 +135,7 @@ a reference of all available attributes,
     </dd>
   <dt id="requestfocus-element"><code>&lt;requestFocus&gt;</code></dt>
     <dd>Any element representing a {@link android.view.View} object can include this empty element,
-    which gives it's parent initial focus on the screen. You can have only one of these
+    which gives its parent initial focus on the screen. You can have only one of these
     elements per file.</dd>
 
   <dt id="include-element"><code>&lt;include&gt;</code></dt>
