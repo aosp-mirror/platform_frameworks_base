@@ -2595,14 +2595,14 @@ public final class ActivityManagerService  extends ActivityManagerNative
         if (fillInIntent != null && fillInIntent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-        
+
         IIntentSender sender = intent.getTarget();
         if (!(sender instanceof PendingIntentRecord)) {
             throw new IllegalArgumentException("Bad PendingIntent object");
         }
-        
+
         PendingIntentRecord pir = (PendingIntentRecord)sender;
-        
+
         synchronized (this) {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
@@ -2616,7 +2616,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, options);
         return ret;
     }
-    
+
     @Override
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent, Bundle options) {
@@ -2782,8 +2782,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     }
 
     @Override
-    public void setRequestedOrientation(IBinder token,
-            int requestedOrientation) {
+    public void setRequestedOrientation(IBinder token, int requestedOrientation) {
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
@@ -2792,8 +2791,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             mWindowManager.setAppOrientation(r.appToken, requestedOrientation);
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    mConfiguration,
-                    r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
+                    mConfiguration, r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
             if (config != null) {
                 r.frozenBeforeDestroy = true;
                 if (!updateConfigurationLocked(config, r, false, false)) {
@@ -3639,6 +3637,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public void forceStopPackage(final String packageName, int userId) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -3687,6 +3686,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     /*
      * The pkg name and app id have to be specified.
      */
+    @Override
     public void killApplicationWithAppId(String pkg, int appid) {
         if (pkg == null) {
             return;
@@ -3711,6 +3711,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    @Override
     public void closeSystemDialogs(String reason) {
         enforceNotIsolatedCaller("closeSystemDialogs");
 
@@ -3755,8 +3756,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 Process.SYSTEM_UID, UserHandle.USER_ALL);
     }
 
-    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
-            throws RemoteException {
+    @Override
+    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids) {
         enforceNotIsolatedCaller("getProcessMemoryInfo");
         Debug.MemoryInfo[] infos = new Debug.MemoryInfo[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
