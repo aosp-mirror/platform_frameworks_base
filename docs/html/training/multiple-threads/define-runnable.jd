@@ -98,7 +98,7 @@ class PhotoDecodeRunnable implements Runnable {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
         ...
         /*
-         * Stores the current Thread in the the PhotoTask instance,
+         * Stores the current Thread in the PhotoTask instance,
          * so that the instance
          * can interrupt the Thread.
          */
