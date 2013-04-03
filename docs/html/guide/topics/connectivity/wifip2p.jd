@@ -433,7 +433,7 @@ if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
 
   <p>The {@link android.net.wifi.p2p.WifiP2pManager#requestPeers requestPeers()} method is also
   asynchronous and can notify your activity when a list of peers is available with {@link
-  android.net.wifi.p2p.WifiP2pManager.PeerListListener#onPeersAvailable onPeersAvailable()}, which is defined in the
+  android.net.wifi.p2p.WifiP2pManager.PeerListListener#onPeersAvailable onPeersAvailable()}, which is defined in
   the {@link android.net.wifi.p2p.WifiP2pManager.PeerListListener} interface. The {@link
   android.net.wifi.p2p.WifiP2pManager.PeerListListener#onPeersAvailable onPeersAvailable()} method
   provides you with an {@link android.net.wifi.p2p.WifiP2pDeviceList}, which you can iterate

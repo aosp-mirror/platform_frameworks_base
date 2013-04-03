@@ -204,7 +204,7 @@ public void onAccessibilityEvent(AccessibilityEvent event) {
 <p>This step is optional, but highly useful.  One of the new features in Android
 4.0 (API Level 14) is the ability for an
 {@link android.accessibilityservice.AccessibilityService} to query the view
-hierarchy, collecting information about the the UI component that generated an event, and
+hierarchy, collecting information about the UI component that generated an event, and
 its parent and children.  In order to do this, make sure that you set the
 following line in your XML configuration:</p>
 <pre>
