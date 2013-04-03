@@ -34,6 +34,8 @@
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
 
+#include <ScopedLocalRef.h>
+
 namespace android {
 
 static struct {
@@ -47,7 +49,7 @@ static struct {
 class NativeInputEventReceiver : public LooperCallback {
 public:
     NativeInputEventReceiver(JNIEnv* env,
-            jobject receiverObj, const sp<InputChannel>& inputChannel,
+            jobject receiverWeak, const sp<InputChannel>& inputChannel,
             const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
@@ -59,7 +61,7 @@ protected:
     virtual ~NativeInputEventReceiver();
 
 private:
-    jobject mReceiverObjGlobal;
+    jobject mReceiverWeakGlobal;
     InputConsumer mInputConsumer;
     sp<MessageQueue> mMessageQueue;
     PreallocatedInputEventFactory mInputEventFactory;
@@ -74,9 +76,9 @@ private:
 
 
 NativeInputEventReceiver::NativeInputEventReceiver(JNIEnv* env,
-        jobject receiverObj, const sp<InputChannel>& inputChannel,
+        jobject receiverWeak, const sp<InputChannel>& inputChannel,
         const sp<MessageQueue>& messageQueue) :
-        mReceiverObjGlobal(env->NewGlobalRef(receiverObj)),
+        mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
         mInputConsumer(inputChannel), mMessageQueue(messageQueue),
         mBatchedInputEventPending(false) {
 #if DEBUG_DISPATCH_CYCLE
@@ -86,7 +88,7 @@ NativeInputEventReceiver::NativeInputEventReceiver(JNIEnv* env,
 
 NativeInputEventReceiver::~NativeInputEventReceiver() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->DeleteGlobalRef(mReceiverObjGlobal);
+    env->DeleteGlobalRef(mReceiverWeakGlobal);
 }
 
 status_t NativeInputEventReceiver::initialize() {
@@ -151,6 +153,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
         mBatchedInputEventPending = false;
     }
 
+    ScopedLocalRef<jobject> receiverObj(env, NULL);
     bool skipCallbacks = false;
     for (;;) {
         uint32_t seq;
@@ -162,12 +165,21 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 if (!skipCallbacks && !mBatchedInputEventPending
                         && mInputConsumer.hasPendingBatch()) {
                     // There is a pending batch.  Come back later.
+                    if (!receiverObj.get()) {
+                        receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+                        if (!receiverObj.get()) {
+                            ALOGW("channel '%s' ~ Receiver object was finalized "
+                                    "without being disposed.", getInputChannelName());
+                            return DEAD_OBJECT;
+                        }
+                    }
+
                     mBatchedInputEventPending = true;
 #if DEBUG_DISPATCH_CYCLE
                     ALOGD("channel '%s' ~ Dispatching batched input event pending notification.",
                             getInputChannelName());
 #endif
-                    env->CallVoidMethod(mReceiverObjGlobal,
+                    env->CallVoidMethod(receiverObj.get(),
                             gInputEventReceiverClassInfo.dispatchBatchedInputEventPending);
                     if (env->ExceptionCheck()) {
                         ALOGE("Exception dispatching batched input events.");
@@ -183,6 +195,15 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
         assert(inputEvent);
 
         if (!skipCallbacks) {
+            if (!receiverObj.get()) {
+                receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+                if (!receiverObj.get()) {
+                    ALOGW("channel '%s' ~ Receiver object was finalized "
+                            "without being disposed.", getInputChannelName());
+                    return DEAD_OBJECT;
+                }
+            }
+
             jobject inputEventObj;
             switch (inputEvent->getType()) {
             case AINPUT_EVENT_TYPE_KEY:
@@ -210,12 +231,13 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 #if DEBUG_DISPATCH_CYCLE
                 ALOGD("channel '%s' ~ Dispatching input event.", getInputChannelName());
 #endif
-                env->CallVoidMethod(mReceiverObjGlobal,
+                env->CallVoidMethod(receiverObj.get(),
                         gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj);
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching input event.");
                     skipCallbacks = true;
                 }
+                env->DeleteLocalRef(inputEventObj);
             } else {
                 ALOGW("channel '%s' ~ Failed to obtain event object.", getInputChannelName());
                 skipCallbacks = true;
@@ -229,7 +251,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 }
 
 
-static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
+static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
@@ -245,7 +267,7 @@ static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
     }
 
     sp<NativeInputEventReceiver> receiver = new NativeInputEventReceiver(env,
-            receiverObj, inputChannel, messageQueue);
+            receiverWeak, inputChannel, messageQueue);
     status_t status = receiver->initialize();
     if (status) {
         String8 message;
@@ -293,7 +315,7 @@ static void nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jint rece
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
-            "(Landroid/view/InputEventReceiver;Landroid/view/InputChannel;Landroid/os/MessageQueue;)I",
+            "(Ljava/lang/ref/WeakReference;Landroid/view/InputChannel;Landroid/os/MessageQueue;)I",
             (void*)nativeInit },
     { "nativeDispose", "(I)V",
             (void*)nativeDispose },
