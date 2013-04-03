@@ -2577,6 +2577,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SHOW_BRIGHTNESS_DIALOG =
             "android.intent.action.SHOW_BRIGHTNESS_DIALOG";
 
+    /**
+     * Broadcast Action:  A global button was pressed.  Includes a single
+     * extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
+     * caused the broadcast.
+     * @hide
+     */
+    public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
