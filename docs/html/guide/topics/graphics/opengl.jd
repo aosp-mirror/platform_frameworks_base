@@ -138,7 +138,7 @@ calling OpenGL APIs using the following classes:</p>
             <li>{@link android.opengl.GLES10}</li>
             <li>{@link android.opengl.GLES10Ext}</li>
             <li>{@link android.opengl.GLES11}</li>
-            <li>{@link android.opengl.GLES10Ext}</li>
+            <li>{@link android.opengl.GLES11Ext}</li>
           </ul>
         </li>
       <li>{@link javax.microedition.khronos.opengles} - This package provides the standard
@@ -289,13 +289,14 @@ matrices to the coordinates of objects that use this shader.
     private final String vertexShaderCode =
 
         // This matrix member variable provides a hook to manipulate
-        // the coordinates of objects that use this vertex shader
+        // the coordinates of objects that use this vertex shader.
         "uniform mat4 uMVPMatrix;   \n" +
 
         "attribute vec4 vPosition;  \n" +
         "void main(){               \n" +
-
-        // the matrix must be included as part of gl_Position
+        // The matrix must be included as part of gl_Position
+        // Note that the uMVPMatrix factor *must be first* in order
+        // for the matrix multiplication product to be correct.
         " gl_Position = uMVPMatrix * vPosition; \n" +
 
         "}  \n";
