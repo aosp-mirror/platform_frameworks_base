@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Bedienungshilfen abgebrochen"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigentümer"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Fehler"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Diese App unterstützt keine Konten für eingeschränkte Nutzer."</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Für diese Aktion wurde keine App gefunden."</string>
 </resources>

@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
     <string name="owner_name" msgid="2716755460376028154">"Tulajdonos"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Hiba"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Ez az alkalmazás nem támogatja a korlátozott jogokkal rendelkező felhasználói fiókokat."</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Nincs megfelelő alkalmazás a művelet elvégzésére."</string>
 </resources>

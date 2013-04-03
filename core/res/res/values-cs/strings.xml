@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Usnadnění zrušeno."</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuální uživatel je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Vlastník"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Chyba"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Tato aplikace u omezeného počtu uživatelů nepodporuje účty"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Aplikace potřebná k provedení této akce nebyla nalezena"</string>
 </resources>

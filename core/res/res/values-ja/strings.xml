@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ユーザー補助をキャンセルしました。"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"エラー"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"このアプリでは限定ユーザー用のアカウントはサポートしていません"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"この操作を行うアプリが見つかりません"</string>
 </resources>

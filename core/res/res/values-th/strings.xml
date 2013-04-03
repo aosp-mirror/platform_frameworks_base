@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"เข้าถึงไมโครโฟนเพื่อบันทึกเสียงโดยตรง"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"กล้องถ่ายรูป"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"เข้าถึงกล้องถ่ายรูปเพื่อดูภาพและวิดีโอที่ถ่ายไว้โดยตรง"</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"ล็อกหน้าจอ"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"ความสามารถในการส่งผลกระทบต่อพฤติกรรมของหน้าจอล็อกบนอุปกรณ์"</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"ข้อมูลแอปพลิเคชันของคุณ"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"สามารถส่งผลต่อการทำงานของแอปพลิเคชันอื่นในอุปกรณ์ของคุณ"</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"วอลเปเปอร์"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"การทำงานของข้อความ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังทำงาน"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังทำงานในขณะนี้"</string>
     <string name="ok" msgid="5970060430562524910">"ตกลง"</string>
     <string name="cancel" msgid="6442560571259935130">"ยกเลิก"</string>
     <string name="yes" msgid="5362982303337969312">"ตกลง"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ถึง:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"พิมพ์ PIN ที่ต้องการ:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"แท็บเล็ตนี้จะยกเลิกการเชื่อมต่อกับ Wi-Fi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"โทรศัพท์จะยกเลิกการเชื่อมต่อกับ Wi-Fi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"ใส่อักขระ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"กำลังส่งข้อความ SMS"</string>
@@ -1477,11 +1472,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล"\n\n" โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"นำออก"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ในกรณีที่ต้องการเพิ่มระดับเสียงจนเกินระดับที่แนะนำ"\n"การฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ใช้สองนิ้วแตะค้างไว้เพื่อเปิดใช้งานการเข้าถึง"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"เปิดใช้งานการเข้าถึงแล้ว"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ยกเลิกการเข้าถึงแล้ว"</string>
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"เจ้าของ"</string>
+    <!-- no translation found for error_message_title (4510373083082500195) -->
+    <skip />
+    <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
+    <skip />
+    <!-- no translation found for app_not_found (3429141853498927379) -->
+    <skip />
 </resources>
