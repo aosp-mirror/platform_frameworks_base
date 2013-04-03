@@ -133,6 +133,7 @@ class TaskRecord extends ThumbnailHolder {
     }
 
     void addActivityToTop(ActivityRecord r) {
+        // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.fullscreen) {
             // Was not previously in list.
             numFullscreen++;
