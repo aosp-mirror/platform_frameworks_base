@@ -1410,8 +1410,8 @@ public class Instrumentation {
             }
         }
         try {
-            intent.setAllowFds(false);
             intent.migrateExtraStreamToClipData();
+            intent.prepareToLeaveProcess();
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1467,7 +1467,8 @@ public class Instrumentation {
         try {
             String[] resolvedTypes = new String[intents.length];
             for (int i=0; i<intents.length; i++) {
-                intents[i].setAllowFds(false);
+                intents[i].migrateExtraStreamToClipData();
+                intents[i].prepareToLeaveProcess();
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
@@ -1526,8 +1527,8 @@ public class Instrumentation {
             }
         }
         try {
-            intent.setAllowFds(false);
             intent.migrateExtraStreamToClipData();
+            intent.prepareToLeaveProcess();
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1586,8 +1587,8 @@ public class Instrumentation {
             }
         }
         try {
-            intent.setAllowFds(false);
             intent.migrateExtraStreamToClipData();
+            intent.prepareToLeaveProcess();
             int result = ActivityManagerNative.getDefault()
                 .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),

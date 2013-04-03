@@ -520,7 +520,7 @@ public abstract class BroadcastReceiver {
         IActivityManager am = ActivityManagerNative.getDefault();
         IBinder binder = null;
         try {
-            service.setAllowFds(false);
+            service.prepareToLeaveProcess();
             binder = am.peekService(service, service.resolveTypeIfNeeded(
                     myContext.getContentResolver()));
         } catch (RemoteException e) {
