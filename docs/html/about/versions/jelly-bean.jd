@@ -904,7 +904,7 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <h3>Media codec access</h3>
 
-<p>Android 4.1 provides low-level access to platform hardware and software codecs. Apps can query the system to discover what <strong>low-level media codecs</strong> are available on the device and then and use them in the ways they need. For example, you can now create multiple instances of a media codec, queue input buffers, and receive output buffers in return. In addition, the media codec framework supports protected content. Apps can query for an available codec that is able to play protected content with a DRM solution available on the the device.</p>
+<p>Android 4.1 provides low-level access to platform hardware and software codecs. Apps can query the system to discover what <strong>low-level media codecs</strong> are available on the device and then and use them in the ways they need. For example, you can now create multiple instances of a media codec, queue input buffers, and receive output buffers in return. In addition, the media codec framework supports protected content. Apps can query for an available codec that is able to play protected content with a DRM solution available on the device.</p>
 
 <h3>USB Audio</h3>
 
