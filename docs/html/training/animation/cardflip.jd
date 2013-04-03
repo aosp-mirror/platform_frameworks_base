@@ -70,7 +70,7 @@ trainingnavtop=true
         <code>animator/card_flip_right_out.xml</code>
       </li>
       <li>
-        <code>animator/card_flip_right_in.xml</code>
+        <code>animator/card_flip_left_in.xml</code>
       </li>
       <li>
         <code>animator/card_flip_left_out.xml</code>
