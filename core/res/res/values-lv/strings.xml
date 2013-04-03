@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pieejamība ir atcelta."</string>
     <string name="user_switched" msgid="3768006783166984410">"Pašreizējais lietotājs: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Īpašnieks"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Kļūda"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Šajā lietojumprogrammā netiek atbalstīti ierobežotu lietotāju konti."</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Netika atrasta neviena lietojumprogramma, kas var veikt šo darbību."</string>
 </resources>

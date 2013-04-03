@@ -200,10 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"ऑडियो रिकॉर्ड करने के लिए माइक्रोफ़ोन पर सीधी पहुंच."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कैमरा"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"चित्र या वीडियो कैप्‍चर के लिए कैमरे पर सीधी पहुंच."</string>
-    <!-- no translation found for permgrouplab_screenlock (8275500173330718168) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_screenlock (7067497128925499401) -->
-    <skip />
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"स्‍क्रीन लॉक करें"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"आपके उपकरण की लॉक स्क्रीन का व्यवहार प्रभावित करने की क्षमता."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"आपके एप्‍लिकेशन की जानकारी"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"अपने उपकरण पर अन्‍य एप्‍लिकेशन के व्‍यवहार को प्रभावित करने की क्षमता."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"वॉलपेपर"</string>
@@ -1050,10 +1048,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"पाठ क्रियाएं"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"संग्रहण स्‍थान समाप्‍त हो रहा है"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
-    <!-- no translation found for app_running_notification_title (4625479411505090209) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (3368349329989620597) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> चल रहा है"</string>
+    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g> वर्तमान में चल रहा है"</string>
     <string name="ok" msgid="5970060430562524910">"ठीक"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द करें"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक"</string>
@@ -1147,8 +1143,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"प्रति:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"आवश्‍यक पिन लिखें:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"पिन:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (8012981257742232475) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> से कनेक्ट रहने पर टेबलेट Wi-Fi से अस्थायी रूप से डिस्कनेक्ट हो जाएगा"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"फ़ोन <xliff:g id="DEVICE_NAME">%1$s</xliff:g> से कनेक्ट रहते समय Wi-Fi से अस्थायी रूप से डिस्कनेक्ट हो जाएगा"</string>
     <string name="select_character" msgid="3365550120617701745">"वर्ण सम्‍मिलित करें"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS संदेश भेज रहा है"</string>
@@ -1477,11 +1472,16 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
-    <!-- no translation found for safe_media_volume_warning (7324161939475478066) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"वॉल्यूम को उपरोक्त अनुशंसित स्तर तक बढ़ाएं?"\n"लंबे समय तक अधिक वॉल्यूम पर सुनने से आपकी सुनने की क्षमता को क्षति पहुंच सकती है."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"पहुंच-योग्यता को सक्षम करने के लिए दो अंगुलियों से नीचे दबाए रखें."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुंच-योग्यता सक्षम कर दी है."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुंच-योग्यता रद्द की गई."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
+    <!-- no translation found for error_message_title (4510373083082500195) -->
+    <skip />
+    <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
+    <skip />
+    <!-- no translation found for app_not_found (3429141853498927379) -->
+    <skip />
 </resources>

@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ułatwienia dostępu zostały anulowane."</string>
     <string name="user_switched" msgid="3768006783166984410">"Bieżący użytkownik: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Właściciel"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Błąd"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Ta aplikacja nie obsługuje kont użytkowników z ograniczeniami"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Nie znaleziono aplikacji do obsługi tej akcji"</string>
 </resources>

@@ -200,8 +200,8 @@
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Akses langsung ke mikrofon untuk merekam audio."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Akses langsung ke kamera untuk gambar atau tangkapan video."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Layar pengunci"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Kemampuan untuk memengaruhi perilaku layar pengunci di perangkat Anda."</string>
+    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Layar terkunci"</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Kemampuan untuk memengaruhi perilaku layar terkunci di perangkat Anda."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informasi aplikasi Anda"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Kemampuan untuk memengaruhi perilaku aplikasi lain pada perangkat Anda."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Wallpaper"</string>
@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Aksesibilitas dibatalkan."</string>
     <string name="user_switched" msgid="3768006783166984410">"Pengguna saat ini <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Pemilik"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Kesalahan"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Aplikasi ini tidak mendukung akun untuk pengguna terbatas"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Tidak ada aplikasi yang ditemukan untuk menangani tindakan ini"</string>
 </resources>

@@ -1478,4 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Byte till tillgänglighetsläge avbrutet."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuvarande användare: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Ägare"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Fel"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Appen har inte stöd för användarkonton med begränsningar"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Ingen app som kan hantera åtgärden hittades"</string>
 </resources>
