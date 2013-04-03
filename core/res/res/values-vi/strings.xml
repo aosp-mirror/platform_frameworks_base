@@ -201,7 +201,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Máy ảnh"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Truy cập trực tiếp vào máy ảnh để chụp ảnh hoặc quay video."</string>
     <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Khóa màn hình"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Khả năng ảnh hưởng tới trạng thái màn hình khóa trên thiết bị của bạn."</string>
+    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Có thể ảnh hưởng đến thao tác của màn hình khóa trên thiết bị của bạn."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Thông tin về các ứng dụng của bạn"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Khả năng ảnh hưởng tới hoạt động của các ứng dụng khác trên thiết bị của bạn."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Hình nền"</string>
@@ -1470,10 +1470,13 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Xóa"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Tăng âm lượng trên mức được đề xuất?"\n"Nghe ở âm lượng cao trong thời gian dài có thể gây hại cho thính giác của bạn."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Tăng âm lượng trên mức được đề xuất?"\n"Nghe ở mức âm lượng cao trong thời gian dài có thể gây hại cho thính giác của bạn."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Tiếp tục giữ hai ngón tay để bật trợ năng."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Trợ năng đã được bật."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Đã hủy trợ năng."</string>
     <string name="user_switched" msgid="3768006783166984410">"Người dùng hiện tại <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Chủ sở hữu"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"Lỗi"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Ứng dụng này không hỗ trợ tài khoản cho người dùng giới hạn"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Không tìm thấy ứng dụng nào để xử lý tác vụ này"</string>
 </resources>
