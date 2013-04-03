@@ -816,7 +816,7 @@ zone.
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
     
-    <td>The end minute of the instance measured from midnight in the the
+    <td>The end minute of the instance measured from midnight in the
 Calendar's time zone.</td>
     
   </tr>

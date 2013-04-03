@@ -834,7 +834,7 @@ android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}</l
 </ul>
 
 <p>You can create a group by nesting {@code &lt;item&gt;} elements inside a {@code &lt;group&gt;}
-element in your menu resource or by specifying a group ID with the the {@link
+element in your menu resource or by specifying a group ID with the {@link
 android.view.Menu#add(int,int,int,int) add()} method.</p>
 
 <p>Here's an example menu resource that includes a group:</p>
