@@ -22,6 +22,10 @@ import java.util.UUID;
 
 /**
  * Represents a Bluetooth GATT Characteristic
+ *
+ * <p>A GATT characteristic is a basic data element used to construct a GATT service,
+ * {@link BluetoothGattService}. The characteristic contains a value as well as
+ * additional information and optional GATT descriptors, {@link BluetoothGattDescriptor}.
  */
 public class BluetoothGattCharacteristic {
 

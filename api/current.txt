@@ -4850,7 +4850,7 @@ package android.bluetooth {
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
-    method public android.bluetooth.BluetoothGatt connectGattServer(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback);
+    method public android.bluetooth.BluetoothGatt connectGatt(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback);
     method public android.bluetooth.BluetoothSocket createInsecureRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothSocket createRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public int describeContents();
@@ -4859,6 +4859,7 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothClass getBluetoothClass();
     method public int getBondState();
     method public java.lang.String getName();
+    method public int getType();
     method public android.os.ParcelUuid[] getUuids();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED";
@@ -4873,6 +4874,10 @@ package android.bluetooth {
     field public static final int BOND_BONDING = 11; // 0xb
     field public static final int BOND_NONE = 10; // 0xa
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int DEVICE_TYPE_CLASSIC = 1; // 0x1
+    field public static final int DEVICE_TYPE_DUAL = 3; // 0x3
+    field public static final int DEVICE_TYPE_LE = 2; // 0x2
+    field public static final int DEVICE_TYPE_UNKNOWN = 0; // 0x0
     field public static final int ERROR = -2147483648; // 0x80000000
     field public static final java.lang.String EXTRA_BOND_STATE = "android.bluetooth.device.extra.BOND_STATE";
     field public static final java.lang.String EXTRA_CLASS = "android.bluetooth.device.extra.CLASS";
@@ -4886,11 +4891,14 @@ package android.bluetooth {
   public final class BluetoothGatt implements android.bluetooth.BluetoothProfile {
     method public void abortReliableWrite(android.bluetooth.BluetoothDevice);
     method public boolean beginReliableWrite();
+    method public void close();
+    method public boolean connect();
     method public void disconnect();
     method public boolean discoverServices();
     method public boolean executeReliableWrite();
     method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method public android.bluetooth.BluetoothDevice getDevice();
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     method public android.bluetooth.BluetoothGattService getService(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattService> getServices();
@@ -4913,15 +4921,15 @@ package android.bluetooth {
 
   public abstract class BluetoothGattCallback {
     ctor public BluetoothGattCallback();
-    method public void onCharacteristicChanged(android.bluetooth.BluetoothGattCharacteristic);
-    method public void onCharacteristicRead(android.bluetooth.BluetoothGattCharacteristic, int);
-    method public void onCharacteristicWrite(android.bluetooth.BluetoothGattCharacteristic, int);
-    method public void onConnectionStateChange(android.bluetooth.BluetoothDevice, int, int);
-    method public void onDescriptorRead(android.bluetooth.BluetoothGattDescriptor, int);
-    method public void onDescriptorWrite(android.bluetooth.BluetoothGattDescriptor, int);
-    method public void onReadRemoteRssi(android.bluetooth.BluetoothDevice, int, int);
-    method public void onReliableWriteCompleted(android.bluetooth.BluetoothDevice, int);
-    method public void onServicesDiscovered(android.bluetooth.BluetoothDevice, int);
+    method public void onCharacteristicChanged(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic);
+    method public void onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
+    method public void onCharacteristicWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
+    method public void onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int);
+    method public void onDescriptorRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
+    method public void onDescriptorWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
+    method public void onReadRemoteRssi(android.bluetooth.BluetoothGatt, int, int);
+    method public void onReliableWriteCompleted(android.bluetooth.BluetoothGatt, int);
+    method public void onServicesDiscovered(android.bluetooth.BluetoothGatt, int);
   }
 
   public class BluetoothGattCharacteristic {

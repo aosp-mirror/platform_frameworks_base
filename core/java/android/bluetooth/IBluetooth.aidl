@@ -60,6 +60,7 @@ interface IBluetooth
     int getBondState(in BluetoothDevice device);
 
     String getRemoteName(in BluetoothDevice device);
+    int getRemoteType(in BluetoothDevice device);
     String getRemoteAlias(in BluetoothDevice device);
     boolean setRemoteAlias(in BluetoothDevice device, in String name);
     int getRemoteClass(in BluetoothDevice device);
