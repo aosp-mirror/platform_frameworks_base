@@ -111,8 +111,10 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.Environment.UserEnvironment;
+import android.os.UserManager;
+import android.provider.Settings.Secure;
+import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -8656,6 +8658,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (writeSettings) {
                 // Save settings now
                 mSettings.writeLPr();
+            }
+        }
+        // A user ID was deleted here. Go through all users and remove it from
+        // KeyStore.
+        final int appId = outInfo.removedAppId;
+        if (appId != -1) {
+            final KeyStore keyStore = KeyStore.getInstance();
+            if (keyStore != null) {
+                for (final int userId : sUserManager.getUserIds()) {
+                    keyStore.clearUid(UserHandle.getUid(userId, appId));
+                }
             }
         }
     }
