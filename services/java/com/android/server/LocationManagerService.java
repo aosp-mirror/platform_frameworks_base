@@ -54,19 +54,17 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
-
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.server.location.GeocoderProxy;
+import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GpsLocationProvider;
 import com.android.server.location.LocationBlacklist;
@@ -338,11 +336,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         addProviderLocked(passiveProvider);
         mEnabledProviders.add(passiveProvider.getName());
         mPassiveProvider = passiveProvider;
+        // Create a gps location provider
+        GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
+                mLocationHandler.getLooper());
 
         if (GpsLocationProvider.isSupported()) {
-            // Create a gps location provider
-            GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
-                    mLocationHandler.getLooper());
             mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
             mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
             addProviderLocked(gpsProvider);
@@ -406,6 +404,14 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mGeocodeProvider == null) {
             Slog.e(TAG,  "no geocoder provider found");
         }
+
+        // bind to geofence provider
+        GeofenceProxy provider = GeofenceProxy.createAndBind(mContext, providerPackageNames,
+                mLocationHandler, gpsProvider.getGpsGeofenceProxy());
+        if (provider == null) {
+            Slog.e(TAG,  "no geofence provider found");
+        }
+
     }
 
     /**

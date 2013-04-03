@@ -616,6 +616,14 @@
         android:label="@string/permlab_installLocationProvider"
         android:description="@string/permdesc_installLocationProvider" />
 
+    <!-- Allows an application to use location features in hardware,
+         such as the geofencing api
+         Protected by signature|system protection level -->
+    <permission android:name="android.permission.LOCATION_HARDWARE"
+        android:permissionGroup="android.permission-group.LOCATION"
+        android:protectionLevel="signature|system" />
+    <uses-permission android:name="android.permission.LOCATION_HARDWARE"/>
+
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->
@@ -2350,6 +2358,9 @@
             android:permission="android.permission.MASTER_CLEAR"
             android:exported="true" />
 
+        <service android:name="android.hardware.location.GeofenceHardwareService"
+            android:permission="android.permission.LOCATION_HARDWARE"
+            android:exported="false" />
     </application>
 
 </manifest>
