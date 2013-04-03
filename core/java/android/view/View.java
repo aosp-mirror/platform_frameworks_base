@@ -6889,7 +6889,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Adds the children of a given View for accessibility. Since some Views are
      * not important for accessibility the children for accessibility are not
-     * necessarily direct children of the riew, rather they are the first level of
+     * necessarily direct children of the view, rather they are the first level of
      * descendants important for accessibility.
      *
      * @param children The list of children for accessibility.
