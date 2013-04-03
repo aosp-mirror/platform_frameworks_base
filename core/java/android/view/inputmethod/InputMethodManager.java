@@ -325,7 +325,8 @@ public final class InputMethodManager {
 
     PendingEvent mPendingEventPool;
     int mPendingEventPoolSize;
-    PendingEvent mFirstPendingEvent;
+    PendingEvent mPendingEventHead;
+    PendingEvent mPendingEventTail;
 
     // -----------------------------------------------------------
     
@@ -366,18 +367,14 @@ public final class InputMethodManager {
                         if (mBindSequence < 0 || mBindSequence != res.sequence) {
                             Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
                                     + ", given seq=" + res.sequence);
-                            if (res.channel != null) {
+                            if (res.channel != null && res.channel != mCurChannel) {
                                 res.channel.dispose();
                             }
                             return;
                         }
-                        
-                        flushPendingEventsLocked();
+
+                        setInputChannelLocked(res.channel);
                         mCurMethod = res.method;
-                        if (mCurChannel != null) {
-                            mCurChannel.dispose();
-                        }
-                        mCurChannel = res.channel;
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                     }
@@ -719,20 +716,26 @@ public final class InputMethodManager {
      */
     void clearBindingLocked() {
         clearConnectionLocked();
-        flushPendingEventsLocked();
+        setInputChannelLocked(null);
         mBindSequence = -1;
         mCurId = null;
         mCurMethod = null;
-        if (mCurSender != null) {
-            mCurSender.dispose();
-            mCurSender = null;
-        }
-        if (mCurChannel != null) {
-            mCurChannel.dispose();
-            mCurChannel = null;
+    }
+
+    void setInputChannelLocked(InputChannel channel) {
+        if (mCurChannel != channel) {
+            if (mCurSender != null) {
+                flushPendingEventsLocked();
+                mCurSender.dispose();
+                mCurSender = null;
+            }
+            if (mCurChannel != null) {
+                mCurChannel.dispose();
+            }
+            mCurChannel = channel;
         }
     }
-    
+
     /**
      * Reset all of the state associated with a served view being connected
      * to an input method
@@ -1174,15 +1177,12 @@ public final class InputMethodManager {
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res != null) {
                     if (res.id != null) {
+                        setInputChannelLocked(res.channel);
                         mBindSequence = res.sequence;
                         mCurMethod = res.method;
-                        if (mCurChannel != null) {
-                            mCurChannel.dispose();
-                        }
-                        mCurChannel = res.channel;
                         mCurId = res.id;
                     } else {
-                        if (res.channel != null) {
+                        if (res.channel != null && res.channel != mCurChannel) {
                             res.channel.dispose();
                         }
                         if (mCurMethod == null) {
@@ -1655,8 +1655,13 @@ public final class InputMethodManager {
     private void enqueuePendingEventLocked(
             long startTime, int seq, String inputMethodId, FinishedEventCallback callback) {
         PendingEvent p = obtainPendingEventLocked(startTime, seq, inputMethodId, callback);
-        p.mNext = mFirstPendingEvent;
-        mFirstPendingEvent = p;
+        if (mPendingEventTail != null) {
+            mPendingEventTail.mNext = p;
+            mPendingEventTail = p;
+        } else {
+            mPendingEventHead = p;
+            mPendingEventTail = p;
+        }
 
         Message msg = mH.obtainMessage(MSG_EVENT_TIMEOUT, seq, 0, p);
         msg.setAsynchronous(true);
@@ -1664,12 +1669,15 @@ public final class InputMethodManager {
     }
 
     private PendingEvent dequeuePendingEventLocked(int seq) {
-        PendingEvent p = mFirstPendingEvent;
+        PendingEvent p = mPendingEventHead;
         if (p == null) {
             return null;
         }
         if (p.mSeq == seq) {
-            mFirstPendingEvent = p.mNext;
+            mPendingEventHead = p.mNext;
+            if (mPendingEventHead == null) {
+                mPendingEventTail = null;
+            }
         } else {
             PendingEvent prev;
             do {
@@ -1680,6 +1688,9 @@ public final class InputMethodManager {
                 }
             } while (p.mSeq != seq);
             prev.mNext = p.mNext;
+            if (mPendingEventTail == p) {
+                mPendingEventTail = prev;
+            }
         }
         p.mNext = null;
         return p;
@@ -1716,25 +1727,13 @@ public final class InputMethodManager {
 
     private void flushPendingEventsLocked() {
         mH.removeMessages(MSG_EVENT_TIMEOUT);
-        PendingEvent curr, prev, next;
-        curr = mFirstPendingEvent;
-        prev = null;
-        while (curr != null) {
-            next = curr.mNext;
-            curr.mNext = prev;
-            prev = curr;
-            curr = next;
-        }
-        curr = prev;
-        prev = null;
-        while (curr != null) {
-            Message msg = mH.obtainMessage(MSG_EVENT_TIMEOUT, curr.mSeq, 0, curr);
+
+        PendingEvent p = mPendingEventHead;
+        while (p != null) {
+            Message msg = mH.obtainMessage(MSG_EVENT_TIMEOUT, p.mSeq, 0, p);
             msg.setAsynchronous(true);
             mH.sendMessage(msg);
-            next = curr.mNext;
-            curr.mNext = prev;
-            prev = curr;
-            curr = next;
+            p = p.mNext;
         }
     }
 
