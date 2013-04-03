@@ -1476,4 +1476,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
+    <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"이 애플리케이션은 제한된 사용자를 위한 계정을 지원하지 않습니다."</string>
+    <string name="app_not_found" msgid="3429141853498927379">"이 작업을 처리하는 애플리케이션을 찾을 수 없습니다."</string>
 </resources>
