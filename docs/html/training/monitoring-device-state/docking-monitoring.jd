@@ -79,7 +79,7 @@ boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK ||
 
 <h2 id="MonitorDockState">Monitor for Changes in the Dock State or Type</h2> 
 
-<p>Whenever the the device is docked or undocked, the {@link
+<p>Whenever the device is docked or undocked, the {@link
 android.content.Intent#ACTION_DOCK_EVENT} action is broadcast. To monitor changes in the
 device's dock-state, simply register a broadcast receiver in your application manifest as shown in
 the snippet below:</p>
