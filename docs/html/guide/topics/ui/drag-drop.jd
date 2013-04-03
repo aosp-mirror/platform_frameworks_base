@@ -750,7 +750,7 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
         A{@link android.view.DragEvent#ACTION_DRAG_EXITED} event, it receives a new
         {@link android.view.DragEvent#ACTION_DRAG_LOCATION} event every time the touch point moves.
         The {@link android.view.DragEvent#getX()} and {@link android.view.DragEvent#getY()} methods
-        return the the X and Y coordinates of the touch point.
+        return the X and Y coordinates of the touch point.
     </li>
     <li>
         {@link android.view.DragEvent#ACTION_DRAG_EXITED}:  This event is sent to a listener that

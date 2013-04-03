@@ -217,7 +217,7 @@ separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientat
   </tr><tr>
   <td>"{@code uiMode}"</td>
    <td>The user interface mode has changed &mdash; this can be caused when the user places the
-device into a desk/car dock or when the the night mode changes. See {@link
+device into a desk/car dock or when the night mode changes. See {@link
 android.app.UiModeManager}. 
     <em>Added in API level 8</em>.</td>
   </tr><tr>

@@ -269,7 +269,7 @@ returns to the main activity:</p>
   
     // When the user changes the preferences selection, 
     // onSharedPreferenceChanged() restarts the main activity as a new
-    // task. Sets the the refreshDisplay flag to "true" to indicate that 
+    // task. Sets the refreshDisplay flag to "true" to indicate that
     // the main activity should update its display.
     // The main activity queries the PreferenceManager to get the latest settings.
     

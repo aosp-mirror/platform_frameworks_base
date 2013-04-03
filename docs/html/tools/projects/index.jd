@@ -88,7 +88,7 @@ page.title=Managing Projects
     <dd>This is empty. You can use it to store raw asset files. Files that you save here are
     compiled into an <code>.apk</code> file as-is, and the original filename is preserved. You can navigate this
     directory in the same way as a typical file system using URIs and read files as a stream of
-    bytes using the the {@link android.content.res.AssetManager}. For example, this is a good
+    bytes using the {@link android.content.res.AssetManager}. For example, this is a good
     location for textures and game data.</dd>
 
     <dt><code>res/</code></dt>
