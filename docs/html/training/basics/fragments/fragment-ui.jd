@@ -41,7 +41,7 @@ tablet which has a wider screen size to display more information to the user.</p
 
 <img src="{@docRoot}images/training/basics/fragments-screen-mock.png" alt="" />
 <p class="img-caption"><strong>Figure 1.</strong> Two fragments, displayed in different
-configurations for the same activity on different screen sizes. On a large screen, both fragment
+configurations for the same activity on different screen sizes. On a large screen, both fragments
 fit side by side, but on a handset device, only one fragment fits at a time so the fragments must
 replace each other as the user navigates.</p>
 
