@@ -339,7 +339,7 @@ a label.</li>
 </code> is a permission that a {@link android.app.admin.DeviceAdminReceiver} subclass must
 have, to ensure that only the system can interact with the receiver (no application can be granted this permission). This
 prevents other applications from abusing your device admin app.</li>
-<li><code>android.app.action.DEVICE_ADMIN_ENABLED</code> is the  the primary
+<li><code>android.app.action.DEVICE_ADMIN_ENABLED</code> is the primary
 action that a {@link android.app.admin.DeviceAdminReceiver} subclass must handle to be
 allowed to manage a device. This is set to the receiver when the user enables
 the device admin app. Your code typically handles this in
