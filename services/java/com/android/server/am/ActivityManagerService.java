@@ -2524,7 +2524,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
         for (int i=0; i<N; i++) {
             PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
-            pal.stack.startActivityUncheckedLocked(pal.r, pal.sourceRecord, pal.startFlags,
+            mStackSupervisor.startActivityUncheckedLocked(pal.r, pal.sourceRecord, pal.startFlags,
                     doResume && i == (N-1), null);
         }
         mPendingActivityLaunches.clear();
