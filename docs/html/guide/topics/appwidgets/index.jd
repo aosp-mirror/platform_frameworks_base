@@ -1119,7 +1119,7 @@ initialize an array of <code>WidgetItem</code> objects. When your app widget is
 active, the system accesses these objects using their index position in the
 array and the text they contain is displayed  </p>
 
-<p>Here is an excerpt from the the <a
+<p>Here is an excerpt from the <a
 href="{@docRoot}resources/samples/StackWidget/index.html">StackView Widget</a>
 sample's 
 {@link android.widget.RemoteViewsService.RemoteViewsFactory

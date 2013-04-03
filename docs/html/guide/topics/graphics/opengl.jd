@@ -444,7 +444,7 @@ investigate other texture compression formats available on your target devices.<
 
 <p>Beyond the ETC1 format, Android devices have varied support for texture compression based on
 their GPU chipsets and OpenGL implementations. You should investigate texture compression support on
-the the devices you are are targeting to determine what compression types your application should
+the devices you are are targeting to determine what compression types your application should
 support. In order to determine what texture formats are supported on a given device, you must <a
 href="#gl-extension-query">query the device</a> and review the <em>OpenGL extension names</em>,
 which identify what texture compression formats (and other OpenGL features) are supported by the

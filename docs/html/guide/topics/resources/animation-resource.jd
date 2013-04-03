@@ -593,7 +593,7 @@ attribute, the value of which is a reference to an interpolator resource.</p>
 <p>All interpolators available in Android are subclasses of the {@link
 android.view.animation.Interpolator} class. For each interpolator class, Android
 includes a public resource you can reference in order to apply the interpolator to an animation
-using the the {@code android:interpolator} attribute.
+using the {@code android:interpolator} attribute.
 The following table specifies the resource to use for each interpolator:</p>
 
 <table>
