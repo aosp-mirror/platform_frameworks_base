@@ -24,7 +24,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
@@ -54,10 +53,9 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
 
 import com.android.internal.util.XmlUtils;
 
@@ -567,6 +565,28 @@ public class PackageParser {
         return pkg;
     }
 
+    /**
+     * Gathers the {@link ManifestDigest} for {@code pkg} if it exists in the
+     * APK. If it successfully scanned the package and found the
+     * {@code AndroidManifest.xml}, {@code true} is returned.
+     */
+    public boolean collectManifestDigest(Package pkg) {
+        try {
+            final JarFile jarFile = new JarFile(mArchiveSourcePath);
+            try {
+                final ZipEntry je = jarFile.getEntry(ANDROID_MANIFEST_FILENAME);
+                if (je != null) {
+                    pkg.manifestDigest = ManifestDigest.fromInputStream(jarFile.getInputStream(je));
+                }
+            } finally {
+                jarFile.close();
+            }
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     public boolean collectCertificates(Package pkg, int flags) {
         pkg.mSignatures = null;
 
@@ -618,7 +638,6 @@ public class PackageParser {
                 }
             } else {
                 Enumeration<JarEntry> entries = jarFile.entries();
-                final Manifest manifest = jarFile.getManifest();
                 while (entries.hasMoreElements()) {
                     final JarEntry je = entries.nextElement();
                     if (je.isDirectory()) continue;
@@ -629,8 +648,8 @@ public class PackageParser {
                         continue;
 
                     if (ANDROID_MANIFEST_FILENAME.equals(name)) {
-                        final Attributes attributes = manifest.getAttributes(name);
-                        pkg.manifestDigest = ManifestDigest.fromAttributes(attributes);
+                        pkg.manifestDigest =
+                                ManifestDigest.fromInputStream(jarFile.getInputStream(je));
                     }
 
                     final Certificate[] localCerts = loadCertificates(jarFile, je, readBuffer);

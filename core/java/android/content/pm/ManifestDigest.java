@@ -18,10 +18,17 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Base64;
+import android.util.Slog;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.jar.Attributes;
+
+import libcore.io.IoUtils;
 
 /**
  * Represents the manifest digest for a package. This is suitable for comparison
@@ -30,16 +37,16 @@ import java.util.jar.Attributes;
  * @hide
  */
 public class ManifestDigest implements Parcelable {
+    private static final String TAG = "ManifestDigest";
+
     /** The digest of the manifest in our preferred order. */
     private final byte[] mDigest;
 
-    /** Digest field names to look for in preferred order. */
-    private static final String[] DIGEST_TYPES = {
-            "SHA1-Digest", "SHA-Digest", "MD5-Digest",
-    };
-
     /** What we print out first when toString() is called. */
     private static final String TO_STRING_PREFIX = "ManifestDigest {mDigest=";
+
+    /** Digest algorithm to use. */
+    private static final String DIGEST_ALGORITHM = "SHA-256";
 
     ManifestDigest(byte[] digest) {
         mDigest = digest;
@@ -49,26 +56,32 @@ public class ManifestDigest implements Parcelable {
         mDigest = source.createByteArray();
     }
 
-    static ManifestDigest fromAttributes(Attributes attributes) {
-        if (attributes == null) {
+    static ManifestDigest fromInputStream(InputStream fileIs) {
+        if (fileIs == null) {
             return null;
         }
 
-        String encodedDigest = null;
+        final MessageDigest md;
+        try {
+            md = MessageDigest.getInstance(DIGEST_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(DIGEST_ALGORITHM + " must be available", e);
+        }
 
-        for (int i = 0; i < DIGEST_TYPES.length; i++) {
-            final String value = attributes.getValue(DIGEST_TYPES[i]);
-            if (value != null) {
-                encodedDigest = value;
-                break;
+        final DigestInputStream dis = new DigestInputStream(new BufferedInputStream(fileIs), md);
+        try {
+            byte[] readBuffer = new byte[8192];
+            while (dis.read(readBuffer, 0, readBuffer.length) != -1) {
+                // not using
             }
-        }
-
-        if (encodedDigest == null) {
+        } catch (IOException e) {
+            Slog.w(TAG, "Could not read manifest");
             return null;
+        } finally {
+            IoUtils.closeQuietly(dis);
         }
 
-        final byte[] digest = Base64.decode(encodedDigest, Base64.DEFAULT);
+        final byte[] digest = md.digest();
         return new ManifestDigest(digest);
     }
 
