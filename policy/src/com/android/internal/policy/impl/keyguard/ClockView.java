@@ -42,7 +42,7 @@ import com.android.internal.R;
 public class ClockView extends RelativeLayout {
     private static final String ANDROID_CLOCK_FONT_FILE = "/system/fonts/AndroidClock.ttf";
     private final static String M12 = "h:mm";
-    private final static String M24 = "kk:mm";
+    private final static String M24 = "HH:mm";
 
     private Calendar mCalendar;
     private String mFormat;
