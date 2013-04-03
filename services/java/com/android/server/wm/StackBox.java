@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import android.graphics.Rect;
 
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -200,6 +202,10 @@ public class StackBox {
     /** Remove this box and propagate its sibling's content up to their parent.
      * @return The first stackId of the resulting StackBox. */
     int removeStack() {
+        if (mParent == null) {
+            mDisplayContent.removeStackBox(this);
+            return HOME_STACK_ID;
+        }
         if (mParent.mFirst == this) {
             mParent.absorb(mParent.mSecond);
         } else {
@@ -219,8 +225,8 @@ public class StackBox {
         pw.print(prefix); pw.print("mFirst="); pw.println(mFirst);
         pw.print(prefix); pw.print("mSecond="); pw.println(mSecond);
         pw.print(prefix); pw.print("mBounds="); pw.print(mBounds.toShortString());
-            pw.print("mVertical="); pw.print(mVertical);
-            pw.print("layoutNeeded="); pw.println(layoutNeeded);
+            pw.print(" mVertical="); pw.print(mVertical);
+            pw.print(" layoutNeeded="); pw.println(layoutNeeded);
         if (mStack != null) {
             pw.print(prefix); pw.print("mStack="); pw.println(mStack);
             mStack.dump(prefix + "  ", pw);
