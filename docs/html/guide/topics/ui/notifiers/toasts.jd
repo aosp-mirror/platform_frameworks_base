@@ -105,7 +105,7 @@ with the following XML (saved as <em>toast_layout.xml</em>):</p>
 &lt;/LinearLayout>
 </pre> 
 
-<p>Notice that the ID of the LinearLayout element is "toast_layout". You must use this
+<p>Notice that the ID of the LinearLayout element is "toast_layout_root". You must use this
 ID to inflate the layout from the XML, as shown here:</p>
 
 <pre>
