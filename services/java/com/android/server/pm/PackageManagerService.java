@@ -5133,9 +5133,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
             if (level == PermissionInfo.PROTECTION_NORMAL
                     || level == PermissionInfo.PROTECTION_DANGEROUS) {
-                // If the permission is required, or it's optional and was previously
-                // granted to the application, then allow it. Otherwise deny.
-                allowed = (required || origPermissions.contains(perm));
+                // We grant a normal or dangerous permission if any of the following
+                // are true:
+                // 1) The permission is required
+                // 2) The permission is optional, but was granted in the past
+                // 3) The permission is optional, but was requested by an
+                //    app in /system (not /data)
+                //
+                // Otherwise, reject the permission.
+                allowed = (required || origPermissions.contains(perm)
+                        || (isSystemApp(ps) && !isUpdatedSystemApp(ps)));
             } else if (bp.packageSetting == null) {
                 // This permission is invalid; skip it.
                 allowed = false;
@@ -5153,8 +5160,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (allowed) {
-                if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0
-                        && ps.permissionsFixed) {
+                if (!isSystemApp(ps) && ps.permissionsFixed) {
                     // If this is an existing, non-system package, then
                     // we can't add any new permissions to it.
                     if (!allowedSig && !gp.grantedPermissions.contains(perm)) {
@@ -5197,8 +5203,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if ((changedPermission || replace) && !ps.permissionsFixed &&
-                ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) ||
-                ((ps.pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)){
+                !isSystemApp(ps) || isUpdatedSystemApp(ps)){
             // This is the first that we have heard about this package, so the
             // permissions we have now selected are fixed until explicitly
             // changed.
@@ -8377,6 +8382,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isSystemApp(PackageSetting ps) {
         return (ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private static boolean isUpdatedSystemApp(PackageSetting ps) {
+        return (ps.pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
     private static boolean isUpdatedSystemApp(PackageParser.Package pkg) {
