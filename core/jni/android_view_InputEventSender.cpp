@@ -35,6 +35,8 @@
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
 
+#include <ScopedLocalRef.h>
+
 namespace android {
 
 static struct {
@@ -47,7 +49,7 @@ static struct {
 class NativeInputEventSender : public LooperCallback {
 public:
     NativeInputEventSender(JNIEnv* env,
-            jobject senderObj, const sp<InputChannel>& inputChannel,
+            jobject senderWeak, const sp<InputChannel>& inputChannel,
             const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
@@ -59,7 +61,7 @@ protected:
     virtual ~NativeInputEventSender();
 
 private:
-    jobject mSenderObjGlobal;
+    jobject mSenderWeakGlobal;
     InputPublisher mInputPublisher;
     sp<MessageQueue> mMessageQueue;
     KeyedVector<uint32_t, uint32_t> mPublishedSeqMap;
@@ -75,9 +77,9 @@ private:
 
 
 NativeInputEventSender::NativeInputEventSender(JNIEnv* env,
-        jobject senderObj, const sp<InputChannel>& inputChannel,
+        jobject senderWeak, const sp<InputChannel>& inputChannel,
         const sp<MessageQueue>& messageQueue) :
-        mSenderObjGlobal(env->NewGlobalRef(senderObj)),
+        mSenderWeakGlobal(env->NewGlobalRef(senderWeak)),
         mInputPublisher(inputChannel), mMessageQueue(messageQueue),
         mNextPublishedSeq(1) {
 #if DEBUG_DISPATCH_CYCLE
@@ -87,7 +89,7 @@ NativeInputEventSender::NativeInputEventSender(JNIEnv* env,
 
 NativeInputEventSender::~NativeInputEventSender() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->DeleteGlobalRef(mSenderObjGlobal);
+    env->DeleteGlobalRef(mSenderWeakGlobal);
 }
 
 status_t NativeInputEventSender::initialize() {
@@ -178,6 +180,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
     ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName());
 #endif
 
+    ScopedLocalRef<jobject> senderObj(env, NULL);
     bool skipCallbacks = false;
     for (;;) {
         uint32_t publishedSeq;
@@ -205,7 +208,16 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
 #endif
 
             if (!skipCallbacks) {
-                env->CallVoidMethod(mSenderObjGlobal,
+                if (!senderObj.get()) {
+                    senderObj.reset(jniGetReferent(env, mSenderWeakGlobal));
+                    if (!senderObj.get()) {
+                        ALOGW("channel '%s' ~ Sender object was finalized "
+                                "without being disposed.", getInputChannelName());
+                        return DEAD_OBJECT;
+                    }
+                }
+
+                env->CallVoidMethod(senderObj.get(),
                         gInputEventSenderClassInfo.dispatchInputEventFinished,
                         jint(seq), jboolean(handled));
                 if (env->ExceptionCheck()) {
@@ -218,7 +230,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
 }
 
 
-static jint nativeInit(JNIEnv* env, jclass clazz, jobject senderObj,
+static jint nativeInit(JNIEnv* env, jclass clazz, jobject senderWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
@@ -234,7 +246,7 @@ static jint nativeInit(JNIEnv* env, jclass clazz, jobject senderObj,
     }
 
     sp<NativeInputEventSender> sender = new NativeInputEventSender(env,
-            senderObj, inputChannel, messageQueue);
+            senderWeak, inputChannel, messageQueue);
     status_t status = sender->initialize();
     if (status) {
         String8 message;
@@ -277,7 +289,7 @@ static jboolean nativeSendMotionEvent(JNIEnv* env, jclass clazz, jint senderPtr,
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
-            "(Landroid/view/InputEventSender;Landroid/view/InputChannel;Landroid/os/MessageQueue;)I",
+            "(Ljava/lang/ref/WeakReference;Landroid/view/InputChannel;Landroid/os/MessageQueue;)I",
             (void*)nativeInit },
     { "nativeDispose", "(I)V",
             (void*)nativeDispose },

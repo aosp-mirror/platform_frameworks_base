@@ -93,14 +93,6 @@ static struct debug_offsets_t
 
 // ----------------------------------------------------------------------------
 
-static struct weakreference_offsets_t
-{
-    // Class state.
-    jclass mClass;
-    jmethodID mGet;
-
-} gWeakReferenceOffsets;
-
 static struct error_offsets_t
 {
     jclass mClass;
@@ -570,7 +562,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
     // Someone else's...  do we know about it?
     jobject object = (jobject)val->findObject(&gBinderProxyOffsets);
     if (object != NULL) {
-        jobject res = env->CallObjectMethod(object, gWeakReferenceOffsets.mGet);
+        jobject res = jniGetReferent(env, object);
         if (res != NULL) {
             ALOGV("objectForBinder %p: found existing %p!\n", val.get(), res);
             return res;
@@ -1210,13 +1202,6 @@ const char* const kBinderProxyPathName = "android/os/BinderProxy";
 static int int_register_android_os_BinderProxy(JNIEnv* env)
 {
     jclass clazz;
-
-    clazz = env->FindClass("java/lang/ref/WeakReference");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.lang.ref.WeakReference");
-    gWeakReferenceOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    gWeakReferenceOffsets.mGet
-        = env->GetMethodID(clazz, "get", "()Ljava/lang/Object;");
-    assert(gWeakReferenceOffsets.mGet);
 
     clazz = env->FindClass("java/lang/Error");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class java.lang.Error");

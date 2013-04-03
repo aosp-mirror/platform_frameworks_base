@@ -22,6 +22,8 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Provides a low-level mechanism for an application to send input events.
  * @hide
@@ -38,7 +40,7 @@ public abstract class InputEventSender {
     private InputChannel mInputChannel;
     private MessageQueue mMessageQueue;
 
-    private static native int nativeInit(InputEventSender sender,
+    private static native int nativeInit(WeakReference<InputEventSender> sender,
             InputChannel inputChannel, MessageQueue messageQueue);
     private static native void nativeDispose(int senderPtr);
     private static native boolean nativeSendKeyEvent(int senderPtr, int seq, KeyEvent event);
@@ -60,7 +62,8 @@ public abstract class InputEventSender {
 
         mInputChannel = inputChannel;
         mMessageQueue = looper.getQueue();
-        mSenderPtr = nativeInit(this, inputChannel, mMessageQueue);
+        mSenderPtr = nativeInit(new WeakReference<InputEventSender>(this),
+                inputChannel, mMessageQueue);
 
         mCloseGuard.open("dispose");
     }
