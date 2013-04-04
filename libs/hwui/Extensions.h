@@ -45,6 +45,9 @@ public:
     inline bool has1BitStencil() const { return mHas1BitStencil; }
     inline bool has4BitStencil() const { return mHas4BitStencil; }
 
+    inline int getMajorGlVersion() const { return mVersionMajor; }
+    inline int getMinorGlVersion() const { return mVersionMinor; }
+
     bool hasExtension(const char* extension) const;
 
     void dump() const;
@@ -55,6 +58,7 @@ private:
     SortedVector<String8> mExtensionList;
 
     char* mExtensions;
+    char* mVersion;
 
     bool mHasNPot;
     bool mHasFramebufferFetch;
@@ -64,6 +68,9 @@ private:
     bool mHasTiledRendering;
     bool mHas1BitStencil;
     bool mHas4BitStencil;
+
+    int mVersionMajor;
+    int mVersionMinor;
 }; // class Extensions
 
 }; // namespace uirenderer
