@@ -2478,6 +2478,11 @@ package android.animation {
     method public void setPropertyName(java.lang.String);
   }
 
+  public class RectEvaluator implements android.animation.TypeEvaluator {
+    ctor public RectEvaluator();
+    method public android.graphics.Rect evaluate(float, android.graphics.Rect, android.graphics.Rect);
+  }
+
   public class TimeAnimator extends android.animation.ValueAnimator {
     ctor public TimeAnimator();
     method public void setTimeListener(android.animation.TimeAnimator.TimeListener);

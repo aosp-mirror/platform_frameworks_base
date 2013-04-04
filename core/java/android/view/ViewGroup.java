@@ -416,10 +416,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private View[] mChildren;
     // Number of valid children in the mChildren array, the rest should be null or not
     // considered as children
-
-    private boolean mLayoutSuppressed = false;
-
     private int mChildrenCount;
+
+    // Whether layout calls are currently being suppressed, controlled by calls to
+    // suppressLayout()
+    boolean mSuppressLayout = false;
+
+    // Whether any layout calls have actually been suppressed while mSuppressLayout
+    // has been true. This tracks whether we need to issue a requestLayout() when
+    // layout is later re-enabled.
+    private boolean mLayoutCalledWhileSuppressed = false;
 
     private static final int ARRAY_INITIAL_CAPACITY = 12;
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
@@ -2574,7 +2580,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         exitHoverTargets();
 
         // In case view is detached while transition is running
-        mLayoutSuppressed = false;
+        mLayoutCalledWhileSuppressed = false;
 
         // Tear down our drag tracking
         mDragNotifiedChildren = null;
@@ -4553,7 +4559,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             super.layout(l, t, r, b);
         } else {
             // record the fact that we noop'd it; request layout when transition finishes
-            mLayoutSuppressed = true;
+            mLayoutCalledWhileSuppressed = true;
         }
     }
 
@@ -5273,15 +5279,33 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @Override
         public void endTransition(LayoutTransition transition, ViewGroup container,
                 View view, int transitionType) {
-            if (mLayoutSuppressed && !transition.isChangingLayout()) {
+            if (mLayoutCalledWhileSuppressed && !transition.isChangingLayout()) {
                 requestLayout();
-                mLayoutSuppressed = false;
+                mLayoutCalledWhileSuppressed = false;
             }
             if (transitionType == LayoutTransition.DISAPPEARING && mTransitioningViews != null) {
                 endViewTransition(view);
             }
         }
     };
+
+    /**
+     * Tells this ViewGroup to suppress all layout() calls until layout
+     * suppression is disabled with a later call to suppressLayout(false).
+     * When layout suppression is disabled, a requestLayout() call is sent
+     * if layout() was attempted while layout was being suppressed.
+     *
+     * @hide
+     */
+    public void suppressLayout(boolean suppress) {
+        mSuppressLayout = suppress;
+        if (!suppress) {
+            if (mLayoutCalledWhileSuppressed) {
+                requestLayout();
+                mLayoutCalledWhileSuppressed = false;
+            }
+        }
+    }
 
     /**
      * {@inheritDoc}
