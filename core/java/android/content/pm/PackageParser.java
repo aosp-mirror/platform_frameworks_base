@@ -1398,6 +1398,17 @@ public class PackageParser {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
         }
 
+        /*
+         * b/8528162: Ignore the <uses-permission android:required> attribute if
+         * targetSdkVersion < JELLY_BEAN_MR2. There are lots of apps in the wild
+         * which are improperly using this attribute, even though it never worked.
+         */
+        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            for (int i = 0; i < pkg.requestedPermissionsRequired.size(); i++) {
+                pkg.requestedPermissionsRequired.set(i, Boolean.TRUE);
+            }
+        }
+
         return pkg;
     }
 
