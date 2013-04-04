@@ -198,7 +198,6 @@ public final class ViewRootImpl implements ViewParent,
     int mHeight;
     Rect mDirty;
     final Rect mCurrentDirty = new Rect();
-    final Rect mPreviousDirty = new Rect();
     boolean mIsAnimating;
 
     CompatibilityInfo.Translator mTranslator;
@@ -770,10 +769,11 @@ public final class ViewRootImpl implements ViewParent,
 
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
-                mAttachInfo.mHardwareRenderer.setName(attrs.getTitle().toString());
-                mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareAccelerationRequested
-                        = mAttachInfo.mHardwareRenderer != null;
-
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    mAttachInfo.mHardwareRenderer.setName(attrs.getTitle().toString());
+                    mAttachInfo.mHardwareAccelerated =
+                            mAttachInfo.mHardwareAccelerationRequested = true;
+                }
             } else if (fakeHwAccelerated) {
                 // The window had wanted to use hardware acceleration, but this
                 // is not allowed in its process.  By setting this flag, it can
@@ -2390,14 +2390,10 @@ public final class ViewRootImpl implements ViewParent,
                 mResizeAlpha = resizeAlpha;
 
                 mCurrentDirty.set(dirty);
-                mCurrentDirty.union(mPreviousDirty);
-                mPreviousDirty.set(dirty);
                 dirty.setEmpty();
 
-                if (attachInfo.mHardwareRenderer.draw(mView, attachInfo, this,
-                        animating ? null : mCurrentDirty)) {
-                    mPreviousDirty.set(0, 0, mWidth, mHeight);
-                }
+                attachInfo.mHardwareRenderer.draw(mView, attachInfo, this,
+                        animating ? null : mCurrentDirty);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface
@@ -2452,6 +2448,8 @@ public final class ViewRootImpl implements ViewParent,
 
             canvas = mSurface.lockCanvas(dirty);
 
+            // The dirty rectangle can be modified by Surface.lockCanvas()
+            //noinspection ConstantConditions
             if (left != dirty.left || top != dirty.top || right != dirty.right ||
                     bottom != dirty.bottom) {
                 attachInfo.mIgnoreDirtyState = true;
@@ -3102,8 +3100,7 @@ public final class ViewRootImpl implements ViewParent,
                         boolean inTouchMode = msg.arg2 != 0;
                         ensureTouchModeLocally(inTouchMode);
 
-                        if (mAttachInfo.mHardwareRenderer != null &&
-                                mSurface != null && mSurface.isValid()) {
+                        if (mAttachInfo.mHardwareRenderer != null && mSurface.isValid()){
                             mFullRedrawNeeded = true;
                             try {
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
