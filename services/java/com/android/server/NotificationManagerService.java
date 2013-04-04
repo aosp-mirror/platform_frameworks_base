@@ -237,9 +237,15 @@ public class NotificationManagerService extends INotificationManager.Stub
         ArrayDeque<StatusBarNotification> mBuffer = new ArrayDeque<StatusBarNotification>(BUFFER_SIZE);
 
         public Archive() {
-
         }
+
         public void record(StatusBarNotification nr) {
+            // Nuke heavy parts of notification before storing in archive
+            nr.notification.tickerView = null;
+            nr.notification.contentView = null;
+            nr.notification.bigContentView = null;
+            nr.notification.largeIcon = null;
+
             if (mBuffer.size() == BUFFER_SIZE) {
                 mBuffer.removeFirst();
             }
