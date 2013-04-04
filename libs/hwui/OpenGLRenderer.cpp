@@ -921,7 +921,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLui
 
     // Initialize the texture if needed
     if (layer->isEmpty()) {
-        layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
+        layer->allocateTexture();
         layer->setEmpty(false);
     }
 

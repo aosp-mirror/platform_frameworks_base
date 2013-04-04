@@ -256,7 +256,7 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
     // Initialize the texture if needed
     if (layer->isEmpty()) {
         layer->setEmpty(false);
-        layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
+        layer->allocateTexture();
 
         // This should only happen if we run out of memory
         if (glGetError() != GL_NO_ERROR) {
