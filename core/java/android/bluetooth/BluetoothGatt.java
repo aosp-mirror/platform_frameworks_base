@@ -43,7 +43,7 @@ import java.util.UUID;
  * with Bluetooth Smart or Smart Ready devices.
  *
  * <p>To connect to a remote peripheral device, create a {@link BluetoothGattCallback}
- * and call {@link BluetoothDevice#connectGattServer} to get a instance of this class.
+ * and call {@link BluetoothDevice#connectGatt} to get a instance of this class.
  * GATT capable devices can be discovered using the Bluetooth device discovery or BLE
  * scan process.
  */
@@ -66,6 +66,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private static final int CONN_STATE_CONNECTING = 1;
     private static final int CONN_STATE_CONNECTED = 2;
     private static final int CONN_STATE_DISCONNECTING = 3;
+    private static final int CONN_STATE_CLOSED = 4;
 
     private List<BluetoothGattService> mServices;
 
@@ -135,7 +136,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 }
                 mClientIf = clientIf;
                 if (status != GATT_SUCCESS) {
-                    mCallback.onConnectionStateChange(mDevice, GATT_FAILURE,
+                    mCallback.onConnectionStateChange(BluetoothGatt.this, GATT_FAILURE,
                                                       BluetoothProfile.STATE_DISCONNECTED);
                     synchronized(mStateLock) {
                         mConnState = CONN_STATE_IDLE;
@@ -164,7 +165,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 int profileState = connected ? BluetoothProfile.STATE_CONNECTED :
                                                BluetoothProfile.STATE_DISCONNECTED;
                 try {
-                    mCallback.onConnectionStateChange(mDevice, status, profileState);
+                    mCallback.onConnectionStateChange(BluetoothGatt.this, status, profileState);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -291,7 +292,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
                 try {
-                    mCallback.onServicesDiscovered(mDevice, status);
+                    mCallback.onServicesDiscovered(BluetoothGatt.this, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -338,7 +339,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (status == 0) characteristic.setValue(value);
 
                 try {
-                    mCallback.onCharacteristicRead(characteristic, status);
+                    mCallback.onCharacteristicRead(BluetoothGatt.this, characteristic, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -384,7 +385,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 mAuthRetry = false;
 
                 try {
-                    mCallback.onCharacteristicWrite(characteristic, status);
+                    mCallback.onCharacteristicWrite(BluetoothGatt.this, characteristic, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -415,7 +416,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 characteristic.setValue(value);
 
                 try {
-                    mCallback.onCharacteristicChanged(characteristic);
+                    mCallback.onCharacteristicChanged(BluetoothGatt.this, characteristic);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -464,7 +465,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 mAuthRetry = true;
 
                 try {
-                    mCallback.onDescriptorRead(descriptor, status);
+                    mCallback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -512,7 +513,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 mAuthRetry = false;
 
                 try {
-                    mCallback.onDescriptorWrite(descriptor, status);
+                    mCallback.onDescriptorWrite(BluetoothGatt.this, descriptor, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -529,7 +530,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
                 try {
-                    mCallback.onReliableWriteCompleted(mDevice, status);
+                    mCallback.onReliableWriteCompleted(BluetoothGatt.this, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -546,7 +547,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
                 try {
-                    mCallback.onReadRemoteRssi(mDevice, rssi, status);
+                    mCallback.onReadRemoteRssi(BluetoothGatt.this, rssi, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
@@ -563,12 +564,13 @@ public final class BluetoothGatt implements BluetoothProfile {
     }
 
     /**
-     * Close the connection to the gatt service.
+     * Close this Bluetooth GATT client.
      */
-    /*package*/ void close() {
+    public void close() {
         if (DBG) Log.d(TAG, "close()");
 
         unregisterApp();
+        mConnState = CONN_STATE_CLOSED;
     }
 
     /**
@@ -694,7 +696,35 @@ public final class BluetoothGatt implements BluetoothProfile {
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
         }
-        // TBD deregister after conneciton is torn down
+    }
+
+    /**
+     * Connect back to remote device.
+     *
+     * <p>This method is used to re-connect to a remote device after the
+     * connection has been dropped. If the device is not in range, the
+     * re-connection will be triggered once the device is back in range.
+     *
+     * @return true, if the connection attempt was initiated successfully
+     */
+    public boolean connect() {
+        try {
+            mService.clientConnect(mClientIf, mDevice.getAddress(),
+                                   false); // autoConnect is inverse of "isDirect"
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            return false;
+        }
+    }
+
+    /**
+     * Return the remote bluetooth device this GATT client targets to
+     *
+     * @return remote bluetooth device
+     */
+    public BluetoothDevice getDevice() {
+        return mDevice;
     }
 
     /**
