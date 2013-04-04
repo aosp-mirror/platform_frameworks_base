@@ -167,7 +167,6 @@ void Layer::defer() {
     displayList->defer(deferredState, 0);
 
     deferredUpdateScheduled = false;
-    displayList = NULL;
 }
 
 void Layer::flush() {
@@ -182,7 +181,7 @@ void Layer::flush() {
         renderer = NULL;
 
         dirtyRect.setEmpty();
-        deferredList->clear();
+        displayList = NULL;
     }
 }
 
