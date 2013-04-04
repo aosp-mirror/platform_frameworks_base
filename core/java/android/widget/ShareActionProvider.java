@@ -39,31 +39,26 @@ import com.android.internal.R;
  * <p>
  * Here is how to use the action provider with custom backing file in a {@link MenuItem}:
  * </p>
- * <p>
  * <pre>
- * <code>
- *  // In Activity#onCreateOptionsMenu
- *  public boolean onCreateOptionsMenu(Menu menu) {
- *      // Get the menu item.
- *      MenuItem menuItem = menu.findItem(R.id.my_menu_item);
- *      // Get the provider and hold onto it to set/change the share intent.
- *      mShareActionProvider = (ShareActionProvider) menuItem.getActionProvider();
- *      // Set history different from the default before getting the action
- *      // view since a call to {@link MenuItem#getActionView() MenuItem.getActionView()} calls
- *      // {@link ActionProvider#onCreateActionView()} which uses the backing file name. Omit this
- *      // line if using the default share history file is desired.
- *      mShareActionProvider.setShareHistoryFileName("custom_share_history.xml");
- *      . . .
- *  }
+ * // In Activity#onCreateOptionsMenu
+ * public boolean onCreateOptionsMenu(Menu menu) {
+ *     // Get the menu item.
+ *     MenuItem menuItem = menu.findItem(R.id.my_menu_item);
+ *     // Get the provider and hold onto it to set/change the share intent.
+ *     mShareActionProvider = (ShareActionProvider) menuItem.getActionProvider();
+ *     // Set history different from the default before getting the action
+ *     // view since a call to {@link MenuItem#getActionView() MenuItem.getActionView()} calls
+ *     // {@link ActionProvider#onCreateActionView()} which uses the backing file name. Omit this
+ *     // line if using the default share history file is desired.
+ *     mShareActionProvider.setShareHistoryFileName("custom_share_history.xml");
+ *     . . .
+ * }
  *
- *  // Somewhere in the application.
- *  public void doShare(Intent shareIntent) {
- *      // When you want to share set the share intent.
- *      mShareActionProvider.setShareIntent(shareIntent);
- *  }
- * </pre>
- * </code>
- * </p>
+ * // Somewhere in the application.
+ * public void doShare(Intent shareIntent) {
+ *     // When you want to share set the share intent.
+ *     mShareActionProvider.setShareIntent(shareIntent);
+ * }</pre>
  * <p>
  * <strong>Note:</strong> While the sample snippet demonstrates how to use this provider
  * in the context of a menu item, the use of the provider is not limited to menu items.
@@ -245,9 +240,9 @@ public class ShareActionProvider extends ActionProvider {
      * call {@link android.app.Activity#invalidateOptionsMenu()} to recreate the
      * action view. You should <strong>not</strong> call
      * {@link android.app.Activity#invalidateOptionsMenu()} from
-     * {@link android.app.Activity#onCreateOptionsMenu(Menu)}."
-     * <p>
-     * <code>
+     * {@link android.app.Activity#onCreateOptionsMenu(Menu)}.
+     * </p>
+     * <pre>
      * private void doShare(Intent intent) {
      *     if (IMAGE.equals(intent.getMimeType())) {
      *         mShareActionProvider.setHistoryFileName(SHARE_IMAGE_HISTORY_FILE_NAME);
@@ -256,9 +251,7 @@ public class ShareActionProvider extends ActionProvider {
      *     }
      *     mShareActionProvider.setIntent(intent);
      *     invalidateOptionsMenu();
-     * }
-     * <code>
-     *
+     * }</pre>
      * @param shareHistoryFile The share history file name.
      */
     public void setShareHistoryFileName(String shareHistoryFile) {
@@ -269,16 +262,11 @@ public class ShareActionProvider extends ActionProvider {
     /**
      * Sets an intent with information about the share action. Here is a
      * sample for constructing a share intent:
-     * <p>
      * <pre>
-     * <code>
-     *  Intent shareIntent = new Intent(Intent.ACTION_SEND);
-     *  shareIntent.setType("image/*");
-     *  Uri uri = Uri.fromFile(new File(getFilesDir(), "foo.jpg"));
-     *  shareIntent.putExtra(Intent.EXTRA_STREAM, uri.toString());
-     * </pre>
-     * </code>
-     * </p>
+     * Intent shareIntent = new Intent(Intent.ACTION_SEND);
+     * shareIntent.setType("image/*");
+     * Uri uri = Uri.fromFile(new File(getFilesDir(), "foo.jpg"));
+     * shareIntent.putExtra(Intent.EXTRA_STREAM, uri.toString());</pre>
      *
      * @param shareIntent The share intent.
      *
