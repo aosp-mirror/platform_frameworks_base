@@ -823,8 +823,8 @@ public class ActivityStackSupervisor {
             throw new SecurityException(msg);
         }
 
-        boolean abort = !mService.mIntentFirewall.checkStartActivity(intent,	2596
-                callerApp==null?null:callerApp.info, callingPackage, callingUid, callingPid,	2597
+        boolean abort = !mService.mIntentFirewall.checkStartActivity(intent,
+                callerApp==null?null:callerApp.info, callingPackage, callingUid, callingPid,
                 resolvedType, aInfo);
 
         if (mService.mController != null) {
