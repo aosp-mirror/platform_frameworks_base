@@ -75,6 +75,7 @@ class BrowserFrame extends Handler {
     private final CallbackProxy mCallbackProxy;
     private final WebSettingsClassic mSettings;
     private final Context mContext;
+    private final WebViewDatabaseClassic mDatabase;
     private final WebViewCore mWebViewCore;
     /* package */ boolean mLoadInitFromJava;
     private int mLoadType;
@@ -252,6 +253,7 @@ class BrowserFrame extends Handler {
         mSettings = settings;
         mContext = context;
         mCallbackProxy = proxy;
+        mDatabase = WebViewDatabaseClassic.getInstance(appContext);
         mWebViewCore = w;
 
         mSearchBox = new SearchBoxImpl(mWebViewCore, mCallbackProxy);
@@ -830,10 +832,9 @@ class BrowserFrame extends Handler {
             // the post data (there could be another form on the
             // page and that was posted instead.
             String postString = new String(postData);
-            WebViewDatabaseClassic db = WebViewDatabaseClassic.getInstance(mContext);
             if (postString.contains(URLEncoder.encode(username)) &&
                     postString.contains(URLEncoder.encode(password))) {
-                String[] saved = db.getUsernamePassword(schemePlusHost);
+                String[] saved = mDatabase.getUsernamePassword(schemePlusHost);
                 if (saved != null) {
                     // null username implies that user has chosen not to
                     // save password
@@ -841,7 +842,7 @@ class BrowserFrame extends Handler {
                         // non-null username implies that user has
                         // chosen to save password, so update the
                         // recorded password
-                        db.setUsernamePassword(schemePlusHost, username,
+                        mDatabase.setUsernamePassword(schemePlusHost, username,
                                 password);
                     }
                 } else {
