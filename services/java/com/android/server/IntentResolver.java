@@ -117,7 +117,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             boolean printedHeader = false;
             F filter;
             for (int i=0; i<N && (filter=a[i]) != null; i++) {
-                if (packageName != null && !packageName.equals(packageForFilter(filter))) {
+                if (packageName != null && !isPackageForFilter(packageName, filter)) {
                     continue;
                 }
                 if (title != null) {
@@ -357,11 +357,11 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     }
 
     /**
-     * Return the package that owns this filter.  This must be implemented to
-     * provide correct filtering of Intents that have specified a package name
-     * they are to be delivered to.
+     * Returns whether this filter is owned by this package. This must be
+     * implemented to provide correct filtering of Intents that have
+     * specified a package name they are to be delivered to.
      */
-    protected abstract String packageForFilter(F filter);
+    protected abstract boolean isPackageForFilter(String packageName, F filter);
 
     protected abstract F[] newArray(int size);
 
@@ -556,7 +556,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             }
 
             // Is delivery being limited to filters owned by a particular package?
-            if (packageName != null && !packageName.equals(packageForFilter(filter))) {
+            if (packageName != null && !isPackageForFilter(packageName, filter)) {
                 if (debug) {
                     Slog.v(TAG, "  Filter is not from package " + packageName + "; skipping");
                 }
@@ -710,8 +710,8 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     }
 
     private final IntentResolverOld<F, R> mOldResolver = new IntentResolverOld<F, R>() {
-        @Override protected String packageForFilter(F filter) {
-            return IntentResolver.this.packageForFilter(filter);
+        @Override protected boolean isPackageForFilter(String packageName, F filter) {
+            return IntentResolver.this.isPackageForFilter(packageName, filter);
         }
         @Override protected boolean allowFilterResult(F filter, List<R> dest) {
             return IntentResolver.this.allowFilterResult(filter, dest);

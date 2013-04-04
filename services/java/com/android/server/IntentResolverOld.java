@@ -106,7 +106,7 @@ public abstract class IntentResolverOld<F extends IntentFilter, R extends Object
             boolean printedHeader = false;
             for (int i=0; i<N; i++) {
                 F filter = a.get(i);
-                if (packageName != null && !packageName.equals(packageForFilter(filter))) {
+                if (packageName != null && !isPackageForFilter(packageName, filter)) {
                     continue;
                 }
                 if (title != null) {
@@ -336,11 +336,11 @@ public abstract class IntentResolverOld<F extends IntentFilter, R extends Object
     }
 
     /**
-     * Return the package that owns this filter.  This must be implemented to
-     * provide correct filtering of Intents that have specified a package name
-     * they are to be delivered to.
+     * Returns whether this filter is owned by this package. This must be
+     * implemented to provide correct filtering of Intents that have
+     * specified a package name they are to be delivered to.
      */
-    protected abstract String packageForFilter(F filter);
+    protected abstract boolean isPackageForFilter(String packageName, F filter);
     
     @SuppressWarnings("unchecked")
     protected R newResult(F filter, int match, int userId) {
@@ -529,7 +529,7 @@ public abstract class IntentResolverOld<F extends IntentFilter, R extends Object
             }
 
             // Is delivery being limited to filters owned by a particular package?
-            if (packageName != null && !packageName.equals(packageForFilter(filter))) {
+            if (packageName != null && !isPackageForFilter(packageName, filter)) {
                 if (debug) {
                     Slog.v(TAG, "  Filter is not from package " + packageName + "; skipping");
                 }

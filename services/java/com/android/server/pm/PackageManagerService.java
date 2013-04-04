@@ -5434,8 +5434,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
-        protected String packageForFilter(PackageParser.ActivityIntentInfo info) {
-            return info.activity.owner.packageName;
+        protected boolean isPackageForFilter(String packageName,
+                PackageParser.ActivityIntentInfo info) {
+            return packageName.equals(info.activity.owner.packageName);
         }
         
         @Override
@@ -5631,8 +5632,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
-        protected String packageForFilter(PackageParser.ServiceIntentInfo info) {
-            return info.service.owner.packageName;
+        protected boolean isPackageForFilter(String packageName,
+                PackageParser.ServiceIntentInfo info) {
+            return packageName.equals(info.service.owner.packageName);
         }
         
         @Override

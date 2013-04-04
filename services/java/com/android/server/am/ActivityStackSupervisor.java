@@ -823,29 +823,32 @@ public class ActivityStackSupervisor {
             throw new SecurityException(msg);
         }
 
+        boolean abort = !mService.mIntentFirewall.checkStartActivity(intent,	2596
+                callerApp==null?null:callerApp.info, callingPackage, callingUid, callingPid,	2597
+                resolvedType, aInfo);
+
         if (mService.mController != null) {
-            boolean abort = false;
             try {
                 // The Intent we give to the watcher has the extra data
                 // stripped off, since it can contain private information.
                 Intent watchIntent = intent.cloneFilter();
-                abort = !mService.mController.activityStarting(watchIntent,
+                abort |= !mService.mController.activityStarting(watchIntent,
                         aInfo.applicationInfo.packageName);
             } catch (RemoteException e) {
                 mService.mController = null;
             }
+        }
 
-            if (abort) {
-                if (resultRecord != null) {
-                    resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
+        if (abort) {
+            if (resultRecord != null) {
+                resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
                         Activity.RESULT_CANCELED, null);
-                }
-                // We pretend to the caller that it was really started, but
-                // they will just get a cancel result.
-                setDismissKeyguard(false);
-                ActivityOptions.abort(options);
-                return ActivityManager.START_SUCCESS;
             }
+            // We pretend to the caller that it was really started, but
+            // they will just get a cancel result.
+            setDismissKeyguard(false);
+            ActivityOptions.abort(options);
+            return ActivityManager.START_SUCCESS;
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,

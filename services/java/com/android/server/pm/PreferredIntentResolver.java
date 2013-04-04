@@ -27,8 +27,8 @@ public class PreferredIntentResolver
         return new PreferredActivity[size];
     }
     @Override
-    protected String packageForFilter(PreferredActivity filter) {
-        return filter.mPref.mComponent.getPackageName();
+    protected boolean isPackageForFilter(String packageName, PreferredActivity filter) {
+        return packageName.equals(filter.mPref.mComponent.getPackageName());
     }
     @Override
     protected void dumpFilter(PrintWriter out, String prefix,
