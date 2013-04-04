@@ -90,7 +90,7 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
     if (fbo) {
         Caches::getInstance().activeTexture(0);
         bindTexture();
-        allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
+        allocateTexture();
 
         if (glGetError() != GL_NO_ERROR) {
             setSize(oldWidth, oldHeight);
