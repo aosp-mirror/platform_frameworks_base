@@ -255,13 +255,14 @@ struct Layer {
         texture.id = 0;
     }
 
-    inline void allocateTexture(GLenum format, GLenum storage) {
+    inline void allocateTexture() {
 #if DEBUG_LAYERS
         ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
 #endif
         if (texture.id) {
-            glTexImage2D(renderTarget, 0, format, getWidth(), getHeight(), 0,
-                    format, storage, NULL);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+            glTexImage2D(renderTarget, 0, GL_RGBA, getWidth(), getHeight(), 0,
+                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         }
     }
 
