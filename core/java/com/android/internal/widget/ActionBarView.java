@@ -36,7 +36,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -125,6 +124,7 @@ public class ActionBarView extends AbsActionBarView {
     private boolean mWasHomeEnabled; // Was it enabled before action view expansion?
 
     private MenuBuilder mOptionsMenu;
+    private boolean mMenuPrepared;
     
     private ActionBarContextView mContextView;
 
@@ -164,7 +164,10 @@ public class ActionBarView extends AbsActionBarView {
 
     private final OnClickListener mUpClickListener = new OnClickListener() {
         public void onClick(View v) {
-            mWindowCallback.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
+            if (mMenuPrepared) {
+                // Only invoke the window callback if the options menu has been initialized.
+                mWindowCallback.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
+            }
         }
     };
 
@@ -400,6 +403,10 @@ public class ActionBarView extends AbsActionBarView {
 
     public void setCallback(OnNavigationListener callback) {
         mCallback = callback;
+    }
+
+    public void setMenuPrepared() {
+        mMenuPrepared = true;
     }
 
     public void setMenu(Menu menu, MenuPresenter.Callback cb) {
