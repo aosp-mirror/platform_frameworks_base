@@ -791,7 +791,7 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setPlaybackRate(int sampleRateInHz) {
-        if (mState == STATE_UNINITIALIZED) {
+        if (mState != STATE_INITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
         if (sampleRateInHz <= 0) {
