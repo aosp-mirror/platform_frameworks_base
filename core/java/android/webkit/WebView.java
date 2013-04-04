@@ -588,8 +588,7 @@ public class WebView extends AbsoluteLayout
      * Saves the username and password for a particular host in this WebView's
      * internal database.
      *
-     * @param host the host that required the credentials. It is recommended that
-     *             the host is given using scheme://hostname format.
+     * @param host the host that required the credentials
      * @param username the username for the given host
      * @param password the password for the given host
      */
