@@ -56,12 +56,14 @@ public class Input {
                     return;
                 }
             } else if (command.equals("keyevent")) {
-                if (args.length == 2) {
-                    int keyCode = KeyEvent.keyCodeFromString(args[1]);
-                    if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
-                        keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[1]);
+                if (args.length >= 2) {
+                    for (int i=1; i < args.length; i++) {
+                        int keyCode = KeyEvent.keyCodeFromString(args[i]);
+                        if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+                            keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[i]);
+                        }
+                        sendKeyEvent(keyCode);
                     }
-                    sendKeyEvent(keyCode);
                     return;
                 }
             } else if (command.equals("tap")) {
@@ -223,7 +225,7 @@ public class Input {
                 DEFAULT_META_STATE, DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y, DEFAULT_DEVICE_ID,
                 DEFAULT_EDGE_FLAGS);
         event.setSource(inputSource);
-        Log.i("Input", "injectMotionEvent: " + event);
+        Log.i(TAG, "injectMotionEvent: " + event);
         InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
@@ -235,7 +237,7 @@ public class Input {
     private void showUsage() {
         System.err.println("usage: input ...");
         System.err.println("       input text <string>");
-        System.err.println("       input keyevent <key code number or name>");
+        System.err.println("       input keyevent <key code number or name> ...");
         System.err.println("       input [touchscreen|touchpad] tap <x> <y>");
         System.err.println("       input [touchscreen|touchpad] swipe <x1> <y1> <x2> <y2>");
         System.err.println("       input trackball press");
