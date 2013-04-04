@@ -672,7 +672,7 @@ public final class StrictMode {
             }
 
             /**
-             * Detect when a {@code file://} {@link Uri} is exposed beyond this
+             * Detect when a {@code file://} {@link android.net.Uri} is exposed beyond this
              * app. The receiving app may not have access to the sent path.
              * Instead, when sharing files between apps, {@code content://}
              * should be used with permission grants.
