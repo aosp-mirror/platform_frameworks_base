@@ -31,6 +31,7 @@
 
 #include "Caches.h"
 #include "Debug.h"
+#include "Extensions.h"
 #include "FontRenderer.h"
 #include "Rect.h"
 
@@ -375,32 +376,58 @@ void FontRenderer::checkTextureUpdate() {
 
     Caches& caches = Caches::getInstance();
     GLuint lastTextureId = 0;
+
+    // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
+    // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
+    // With OpenGL ES 2.0 we have to upload entire stripes instead.
+    const bool hasUnpackRowLength = Extensions::getInstance().getMajorGlVersion() >= 3;
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     // Iterate over all the cache textures and see which ones need to be updated
     for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
         CacheTexture* cacheTexture = mCacheTextures[i];
         if (cacheTexture->isDirty() && cacheTexture->getTexture()) {
-            // Can't copy inner rect; glTexSubimage expects pointer to deal with entire buffer
-            // of data. So expand the dirty rect to the encompassing horizontal stripe.
             const Rect* dirtyRect = cacheTexture->getDirtyRect();
-            uint32_t x = 0;
+            uint32_t x = hasUnpackRowLength ? dirtyRect->left : 0;
             uint32_t y = dirtyRect->top;
             uint32_t width = cacheTexture->getWidth();
             uint32_t height = dirtyRect->getHeight();
-            void* textureData = cacheTexture->getTexture() + y * width;
+            void* textureData = cacheTexture->getTexture() + y * width + x;
 
             if (cacheTexture->getTextureId() != lastTextureId) {
                 lastTextureId = cacheTexture->getTextureId();
                 caches.activeTexture(0);
                 glBindTexture(GL_TEXTURE_2D, lastTextureId);
+
+                // The unpack row length only needs to be specified when a new
+                // texture is bound
+                if (hasUnpackRowLength) {
+                    glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
+                }
             }
+
+            // If we can upload a sub-rectangle, use the dirty rect width
+            // instead of the width of the entire texture
+            if (hasUnpackRowLength) {
+                width = dirtyRect->getWidth();
+            }
+
 #if DEBUG_FONT_RENDERER
             ALOGD("glTexSubimage for cacheTexture %d: x, y, width height = %d, %d, %d, %d",
                     i, x, y, width, height);
 #endif
+
             glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
                     GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
+
             cacheTexture->setDirty(false);
         }
+    }
+
+    // Reset to default unpack row length to avoid affecting texture
+    // uploads in other parts of the renderer
+    if (hasUnpackRowLength) {
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     }
 
     mUploadTexture = false;

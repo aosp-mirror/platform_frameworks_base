@@ -15,10 +15,9 @@
  */
 
 #include <SkGlyph.h>
-#include <utils/Log.h>
 
-#include "Debug.h"
 #include "CacheTexture.h"
+#include "../Debug.h"
 
 namespace android {
 namespace uirenderer {
