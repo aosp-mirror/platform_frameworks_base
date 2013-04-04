@@ -1036,24 +1036,9 @@ public class PackageParser {
                     return null;
                 }
             } else if (tagName.equals("uses-permission")) {
-                sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.AndroidManifestUsesPermission);
-
-                // Note: don't allow this value to be a reference to a resource
-                // that may change.
-                String name = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
-                boolean required = sa.getBoolean(
-                        com.android.internal.R.styleable.AndroidManifestUsesPermission_required, true);
-
-                sa.recycle();
-
-                if (name != null && !pkg.requestedPermissions.contains(name)) {
-                    pkg.requestedPermissions.add(name.intern());
-                    pkg.requestedPermissionsRequired.add(required ? Boolean.TRUE : Boolean.FALSE);
+                if (!parseUsesPermission(pkg, res, parser, attrs, outError)) {
+                    return null;
                 }
-
-                XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("uses-configuration")) {
                 ConfigurationInfo cPref = new ConfigurationInfo();
@@ -1410,6 +1395,39 @@ public class PackageParser {
         }
 
         return pkg;
+    }
+
+    private boolean parseUsesPermission(Package pkg, Resources res, XmlResourceParser parser,
+                                        AttributeSet attrs, String[] outError)
+            throws XmlPullParserException, IOException {
+        TypedArray sa = res.obtainAttributes(attrs,
+                com.android.internal.R.styleable.AndroidManifestUsesPermission);
+
+        // Note: don't allow this value to be a reference to a resource
+        // that may change.
+        String name = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
+        boolean required = sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestUsesPermission_required, true);
+
+        sa.recycle();
+
+        if (name != null) {
+            int index = pkg.requestedPermissions.indexOf(name);
+            if (index == -1) {
+                pkg.requestedPermissions.add(name.intern());
+                pkg.requestedPermissionsRequired.add(required ? Boolean.TRUE : Boolean.FALSE);
+            } else {
+                if (pkg.requestedPermissionsRequired.get(index) != required) {
+                    outError[0] = "conflicting <uses-permission> entries";
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+            }
+        }
+
+        XmlUtils.skipCurrentTag(parser);
+        return true;
     }
 
     private static String buildClassName(String pkg, CharSequence clsSeq,
