@@ -23,6 +23,9 @@ import java.util.UUID;
 
 /**
  * Represents a Bluetooth GATT Service
+ *
+ * <p> Gatt Service contains a collection of {@link BluetoothGattCharacteristic},
+ * as well as referenced services.
  */
 public class BluetoothGattService {
 
