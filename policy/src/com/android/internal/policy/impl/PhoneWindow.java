@@ -380,6 +380,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             st.createdPanelView = cb.onCreatePanelView(st.featureId);
         }
 
+        final boolean isActionBarMenu =
+                (st.featureId == FEATURE_OPTIONS_PANEL || st.featureId == FEATURE_ACTION_BAR);
+
+        if (isActionBarMenu && mActionBar != null) {
+            // Enforce ordering guarantees around events so that the action bar never
+            // dispatches menu-related events before the panel is prepared.
+            mActionBar.setMenuPrepared();
+        }
+
         if (st.createdPanelView == null) {
             // Init the panel state's menu--return false if init failed
             if (st.menu == null || st.refreshMenuContent) {
@@ -389,7 +398,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 }
 
-                if (mActionBar != null) {
+                if (isActionBarMenu && mActionBar != null) {
                     if (mActionMenuPresenterCallback == null) {
                         mActionMenuPresenterCallback = new ActionMenuPresenterCallback();
                     }
@@ -405,7 +414,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // Ditch the menu created above
                     st.setMenu(null);
 
-                    if (mActionBar != null) {
+                    if (isActionBarMenu && mActionBar != null) {
                         // Don't show it in the action bar either
                         mActionBar.setMenu(null, mActionMenuPresenterCallback);
                     }
@@ -430,7 +439,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             if (!cb.onPreparePanel(st.featureId, st.createdPanelView, st.menu)) {
-                if (mActionBar != null) {
+                if (isActionBarMenu && mActionBar != null) {
                     // The app didn't want to show the menu for now but it still exists.
                     // Clear it out of the action bar.
                     mActionBar.setMenu(null, mActionMenuPresenterCallback);
