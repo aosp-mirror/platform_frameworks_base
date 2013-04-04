@@ -571,8 +571,8 @@ void OpenGLRenderer::updateLayers() {
             startMark("Defer Layer Updates");
         }
 
-        // Note: it is very important to update the layers in reverse order
-        for (int i = count - 1; i >= 0; i--) {
+        // Note: it is very important to update the layers in order
+        for (int i = 0; i < count; i++) {
             Layer* layer = mLayerUpdates.itemAt(i);
             updateLayer(layer, false);
             if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
@@ -594,8 +594,8 @@ void OpenGLRenderer::flushLayers() {
         startMark("Apply Layer Updates");
         char layerName[12];
 
-        // Note: it is very important to update the layers in reverse order
-        for (int i = count - 1; i >= 0; i--) {
+        // Note: it is very important to update the layers in order
+        for (int i = 0; i < count; i++) {
             sprintf(layerName, "Layer #%d", i);
             startMark(layerName);
 
