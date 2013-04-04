@@ -80,7 +80,7 @@ to the item.  The ID can be retrieved from the meta-data Bundle by the
 </tr><tr>
   <td>Color value, in the form "{@code #rgb}", "{@code #argb}", 
       "{@code #rrggbb}", or "{@code #aarrggbb}"</td>
-  <td>{@link android.os.Bundle#getString(String) getString()}</td>
+  <td>{@link android.os.Bundle#getInt(String) getInt()}</td>
 </tr><tr>
   <td>Float value, such as "{@code 1.23}"</td>
   <td>{@link android.os.Bundle#getFloat(String) getFloat()}</td>
