@@ -2442,6 +2442,9 @@ public class WifiStateMachine extends StateMachine {
                         if (DBG) log("Already in delayed stop");
                         break;
                     }
+                    /* disconnect right now, but leave the driver running for a bit */
+                    mWifiConfigStore.disableAllNetworks();
+
                     mInDelayedStop = true;
                     mDelayedStopCounter++;
                     if (DBG) log("Delayed stop message " + mDelayedStopCounter);
@@ -2462,6 +2465,9 @@ public class WifiStateMachine extends StateMachine {
                         mDelayedStopCounter++;
                         mAlarmManager.cancel(mDriverStopIntent);
                         if (DBG) log("Delayed stop ignored due to start");
+                        if (mOperationalMode == CONNECT_MODE) {
+                            mWifiConfigStore.enableAllNetworks();
+                        }
                     }
                     break;
                 case CMD_DELAYED_STOP_DRIVER:
