@@ -16,7 +16,7 @@ page.tags="appwidget"
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
     <h3>Collection widgets</h3>
-    <p>As the name implies, collection widgets specialize on displaying multitude elements of the same type, such as a collection of pictures from a gallery app, a collection of articles from a news app or a collection of emails/messages from a communication app. Collection widgets typically focus on two use cases: browsing the collection, and opening an element of the collection to its detail view for consumption. Collection widgets can scroll vertically.</p>
+    <p>As the name implies, collection widgets specialize in displaying multitude elements of the same type, such as a collection of pictures from a gallery app, a collection of articles from a news app or a collection of emails/messages from a communication app. Collection widgets typically focus on two use cases: browsing the collection, and opening an element of the collection to its detail view for consumption. Collection widgets can scroll vertically.</p>
   </div>
   <div class="layout-content-col span-3">
     <img src="{@docRoot}design/media/widgets_collection_gmail.png">
