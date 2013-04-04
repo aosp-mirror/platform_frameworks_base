@@ -136,7 +136,7 @@ public class HttpExampleActivity extends Activity {
             getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null &amp;&amp; networkInfo.isConnected()) {
-            new DownloadWebpageText().execute(stringUrl);
+            new DownloadWebpageTask().execute(stringUrl);
         } else {
             textView.setText("No network connection available.");
         }
@@ -147,7 +147,7 @@ public class HttpExampleActivity extends Activity {
      // has been established, the AsyncTask downloads the contents of the webpage as
      // an InputStream. Finally, the InputStream is converted into a string, which is
      // displayed in the UI by the AsyncTask's onPostExecute method.
-     private class DownloadWebpageText extends AsyncTask<String, Void, String> {
+     private class DownloadWebpageTask extends AsyncTask&lt;String, Void, String&gt; {
         &#64;Override
         protected String doInBackground(String... urls) {
               
