@@ -64,10 +64,32 @@ Extensions::Extensions(): Singleton<Extensions>() {
     mHas4BitStencil = hasExtension("GL_OES_stencil4");
 
     mExtensions = strdup(buffer);
+
+    const char* version = (const char*) glGetString(GL_VERSION);
+    mVersion = strdup(version);
+
+    // Section 6.1.5 of the OpenGL ES specification indicates the GL version
+    // string strictly follows this format:
+    //
+    // OpenGL<space>ES<space><version number><space><vendor-specific information>
+    //
+    // In addition section 6.1.5 describes the version number thusly:
+    //
+    // "The version number is either of the form major number.minor number or
+    // major number.minor number.release number, where the numbers all have one
+    // or more digits. The release number and vendor specific information are
+    // optional."
+
+    if (sscanf(version, "OpenGL ES %d.%d", &mVersionMajor, &mVersionMinor) !=2) {
+        // If we cannot parse the version number, assume OpenGL ES 2.0
+        mVersionMajor = 2;
+        mVersionMinor = 0;
+    }
 }
 
 Extensions::~Extensions() {
    free(mExtensions);
+   free(mVersion);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,6 +102,7 @@ bool Extensions::hasExtension(const char* extension) const {
 }
 
 void Extensions::dump() const {
+   ALOGD("%s", mVersion);
    ALOGD("Supported extensions:\n%s", mExtensions);
 }
 
