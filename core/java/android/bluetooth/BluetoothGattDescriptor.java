@@ -20,6 +20,10 @@ import java.util.UUID;
 
 /**
  * Represents a Bluetooth GATT Descriptor
+ *
+ * <p> GATT Descriptors contain additional information and attributes of a GATT
+ * characteristic, {@link BluetoothGattCharacteristic}. They can be used to describe
+ * the characteristic's features or to control certain behaviours of the characteristic.
  */
 public class BluetoothGattDescriptor {
 

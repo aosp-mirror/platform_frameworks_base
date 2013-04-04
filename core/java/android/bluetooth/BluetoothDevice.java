@@ -262,6 +262,26 @@ public final class BluetoothDevice implements Parcelable {
     public static final String EXTRA_PAIRING_KEY = "android.bluetooth.device.extra.PAIRING_KEY";
 
     /**
+     * Bluetooth device type, Unknown
+     */
+    public static final int DEVICE_TYPE_UNKNOWN = 0;
+
+    /**
+     * Bluetooth device type, Classic - BR/EDR devices
+     */
+    public static final int DEVICE_TYPE_CLASSIC = 1;
+
+    /**
+     * Bluetooth device type, Low Energy - LE-only
+     */
+    public static final int DEVICE_TYPE_LE = 2;
+
+    /**
+     * Bluetooth device type, Dual Mode - BR/EDR/LE
+     */
+    public static final int DEVICE_TYPE_DUAL = 3;
+
+    /**
      * Broadcast Action: This intent is used to broadcast the {@link UUID}
      * wrapped as a {@link android.os.ParcelUuid} of the remote device after it
      * has been fetched. This intent is sent only when the UUIDs of the remote
@@ -599,6 +619,26 @@ public final class BluetoothDevice implements Parcelable {
             return sService.getRemoteName(this);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
+    }
+
+    /**
+     * Get the Bluetooth device type of the remote device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @return the device type {@link #DEVICE_TYPE_CLASSIC}, {@link #DEVICE_TYPE_LE}
+     *                         {@link #DEVICE_TYPE_DUAL}.
+     *         {@link #DEVICE_TYPE_UNKNOWN} if it's not available
+     */
+    public int getType() {
+        if (sService == null) {
+            Log.e(TAG, "BT not enabled. Cannot get Remote Device type");
+            return DEVICE_TYPE_UNKNOWN;
+        }
+        try {
+            return sService.getRemoteType(this);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return DEVICE_TYPE_UNKNOWN;
     }
 
     /**
@@ -1139,8 +1179,8 @@ public final class BluetoothDevice implements Parcelable {
      *                    device becomes available (true).
      * @throws IllegalArgumentException if callback is null
      */
-    public BluetoothGatt connectGattServer(Context context, boolean autoConnect,
-                                           BluetoothGattCallback callback) {
+    public BluetoothGatt connectGatt(Context context, boolean autoConnect,
+                                     BluetoothGattCallback callback) {
         // TODO(Bluetooth) check whether platform support BLE
         //     Do the check here or in GattServer?
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
