@@ -5406,6 +5406,20 @@ public final class Settings {
         public static final String CERT_PIN_UPDATE_METADATA_URL = "cert_pin_metadata_url";
 
         /**
+         * URL for intent firewall updates
+         * @hide
+         */
+        public static final String INTENT_FIREWALL_UPDATE_CONTENT_URL =
+                "intent_firewall_content_url";
+
+        /**
+         * URL for intent firewall update metadata
+         * @hide
+         */
+        public static final String INTENT_FIREWALL_UPDATE_METADATA_URL =
+                "intent_firewall_metadata_url";
+
+        /**
          * SELinux enforcement status. If 0, permissive; if 1, enforcing.
          * @hide
          */

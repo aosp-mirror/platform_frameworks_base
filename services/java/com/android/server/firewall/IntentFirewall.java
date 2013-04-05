@@ -42,7 +42,9 @@ import java.util.List;
 public class IntentFirewall {
     private static final String TAG = "IntentFirewall";
 
-    private static final String RULES_FILENAME = "ifw.xml";
+    // e.g. /data/system/ifw/ifw.xml or /data/secure/system/ifw/ifw.xml
+    private static final File RULES_FILE =
+            new File(Environment.getSystemSecureDirectory(), "ifw/ifw.xml");
 
     private static final String TAG_RULES = "rules";
     private static final String TAG_ACTIVITY = "activity";
@@ -93,9 +95,7 @@ public class IntentFirewall {
 
     public IntentFirewall(AMSInterface ams) {
         mAms = ams;
-        File dataSystemDir = new File(Environment.getDataDirectory(), "system");
-        File rulesFile = new File(dataSystemDir, RULES_FILENAME);
-        readRules(rulesFile);
+        readRules(getRulesFile());
     }
 
     public boolean checkStartActivity(Intent intent, ApplicationInfo callerApp,
@@ -125,6 +125,10 @@ public class IntentFirewall {
         }
 
         return !block;
+    }
+
+    public static File getRulesFile() {
+        return RULES_FILE;
     }
 
     private void readRules(File rulesFile) {

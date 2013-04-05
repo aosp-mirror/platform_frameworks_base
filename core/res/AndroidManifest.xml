@@ -2308,6 +2308,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.android.server.updates.IntentFirewallInstallReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.UPDATE_INTENT_FIREWALL" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name="com.android.server.updates.SmsShortCodesInstallReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SMS_SHORT_CODES" />
