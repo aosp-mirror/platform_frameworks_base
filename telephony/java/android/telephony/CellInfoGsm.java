@@ -87,10 +87,11 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     public String toString() {
         StringBuffer sb = new StringBuffer();
 
-        sb.append("CellInfoGsm:");
+        sb.append("CellInfoGsm:{");
         sb.append(super.toString());
-        sb.append(", ").append(mCellIdentityGsm);
-        sb.append(", ").append(mCellSignalStrengthGsm);
+        sb.append(" ").append(mCellIdentityGsm);
+        sb.append(" ").append(mCellSignalStrengthGsm);
+        sb.append("}");
 
         return sb.toString();
     }

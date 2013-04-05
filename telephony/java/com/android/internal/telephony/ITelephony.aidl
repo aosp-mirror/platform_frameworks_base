@@ -294,5 +294,10 @@ interface ITelephony {
      * Returns the all observed cell information of the device.
      */
     List<CellInfo> getAllCellInfo();
+
+    /**
+     * Sets minimum time in milli-seconds between onCellInfoChanged
+     */
+    void setCellInfoListRate(int rateInMillis);
 }
 
