@@ -695,6 +695,86 @@ public abstract class ActionBar {
     public boolean isTitleTruncated() { return false; }
 
     /**
+     * Set an alternate drawable to display next to the icon/logo/title
+     * when {@link #DISPLAY_HOME_AS_UP} is enabled. This can be useful if you are using
+     * this mode to display an alternate selection for up navigation, such as a sliding drawer.
+     *
+     * <p>If you pass <code>null</code> to this method, the default drawable from the theme
+     * will be used.</p>
+     *
+     * <p>If you implement alternate or intermediate behavior around Up, you should also
+     * call {@link #setHomeActionContentDescription(int) setHomeActionContentDescription()}
+     * to provide a correct description of the action for accessibility support.</p>
+     *
+     * @param indicator A drawable to use for the up indicator, or null to use the theme's default
+     *
+     * @see #setDisplayOptions(int, int)
+     * @see #setDisplayHomeAsUpEnabled(boolean)
+     * @see #setHomeActionContentDescription(int)
+     */
+    public void setHomeAsUpIndicator(Drawable indicator) { }
+
+    /**
+     * Set an alternate drawable to display next to the icon/logo/title
+     * when {@link #DISPLAY_HOME_AS_UP} is enabled. This can be useful if you are using
+     * this mode to display an alternate selection for up navigation, such as a sliding drawer.
+     *
+     * <p>If you pass <code>0</code> to this method, the default drawable from the theme
+     * will be used.</p>
+     *
+     * <p>If you implement alternate or intermediate behavior around Up, you should also
+     * call {@link #setHomeActionContentDescription(int) setHomeActionContentDescription()}
+     * to provide a correct description of the action for accessibility support.</p>
+     *
+     * @param resId Resource ID of a drawable to use for the up indicator, or null
+     *              to use the theme's default
+     *
+     * @see #setDisplayOptions(int, int)
+     * @see #setDisplayHomeAsUpEnabled(boolean)
+     * @see #setHomeActionContentDescription(int)
+     */
+    public void setHomeAsUpIndicator(int resId) { }
+
+    /**
+     * Set an alternate description for the Home/Up action, when enabled.
+     *
+     * <p>This description is commonly used for accessibility/screen readers when
+     * the Home action is enabled. (See {@link #setDisplayHomeAsUpEnabled(boolean)}.)
+     * Examples of this are, "Navigate Home" or "Navigate Up" depending on the
+     * {@link #DISPLAY_HOME_AS_UP} display option. If you have changed the home-as-up
+     * indicator using {@link #setHomeAsUpIndicator(int)} to indicate more specific
+     * functionality such as a sliding drawer, you should also set this to accurately
+     * describe the action.</p>
+     *
+     * <p>Setting this to <code>null</code> will use the system default description.</p>
+     *
+     * @param description New description for the Home action when enabled
+     * @see #setHomeAsUpIndicator(int)
+     * @see #setHomeAsUpIndicator(android.graphics.drawable.Drawable)
+     */
+    public void setHomeActionContentDescription(CharSequence description) { }
+
+    /**
+     * Set an alternate description for the Home/Up action, when enabled.
+     *
+     * <p>This description is commonly used for accessibility/screen readers when
+     * the Home action is enabled. (See {@link #setDisplayHomeAsUpEnabled(boolean)}.)
+     * Examples of this are, "Navigate Home" or "Navigate Up" depending on the
+     * {@link #DISPLAY_HOME_AS_UP} display option. If you have changed the home-as-up
+     * indicator using {@link #setHomeAsUpIndicator(int)} to indicate more specific
+     * functionality such as a sliding drawer, you should also set this to accurately
+     * describe the action.</p>
+     *
+     * <p>Setting this to <code>0</code> will use the system default description.</p>
+     *
+     * @param resId Resource ID of a string to use as the new description
+     *              for the Home action when enabled
+     * @see #setHomeAsUpIndicator(int)
+     * @see #setHomeAsUpIndicator(android.graphics.drawable.Drawable)
+     */
+    public void setHomeActionContentDescription(int resId) { }
+
+    /**
      * Listener interface for ActionBar navigation events.
      */
     public interface OnNavigationListener {

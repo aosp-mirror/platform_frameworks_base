@@ -2596,6 +2596,10 @@ package android.app {
     method public abstract void setDisplayShowHomeEnabled(boolean);
     method public abstract void setDisplayShowTitleEnabled(boolean);
     method public abstract void setDisplayUseLogoEnabled(boolean);
+    method public void setHomeActionContentDescription(java.lang.CharSequence);
+    method public void setHomeActionContentDescription(int);
+    method public void setHomeAsUpIndicator(android.graphics.drawable.Drawable);
+    method public void setHomeAsUpIndicator(int);
     method public void setHomeButtonEnabled(boolean);
     method public abstract void setIcon(int);
     method public abstract void setIcon(android.graphics.drawable.Drawable);
