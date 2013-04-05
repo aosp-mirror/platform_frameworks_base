@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.util.Log;
 
 /**
@@ -136,10 +137,8 @@ public final class MediaDrm {
     public static final int MEDIA_DRM_EVENT_KEY_EXPIRED = 3;
     public static final int MEDIA_DRM_EVENT_VENDOR_DEFINED = 4;
 
-    /* Do not change these values without updating their counterparts
-     * in include/media/mediadrm.h!
-     */
     private static final int DRM_EVENT = 200;
+
     private class EventHandler extends Handler
     {
         private MediaDrm mMediaDrm;
@@ -161,10 +160,18 @@ public final class MediaDrm {
                 Log.i(TAG, "Drm event (" + msg.arg1 + "," + msg.arg2 + ")");
 
                 if (mOnEventListener != null) {
-                    Bundle bundle = msg.getData();
-                    byte[] sessionId = bundle.getByteArray("sessionId");
-                    byte[] data = bundle.getByteArray("data");
-                    mOnEventListener.onEvent(mMediaDrm, sessionId, msg.arg1, msg.arg2, data);
+                    if (msg.obj != null && msg.obj instanceof Parcel) {
+                        Parcel parcel = (Parcel)msg.obj;
+                        byte[] sessionId = parcel.createByteArray();
+                        if (sessionId.length == 0) {
+                            sessionId = null;
+                        }
+                        byte[] data = parcel.createByteArray();
+                        if (data.length == 0) {
+                            data = null;
+                        }
+                        mOnEventListener.onEvent(mMediaDrm, sessionId, msg.arg1, msg.arg2, data);
+                    }
                 }
                 return;
 
@@ -183,14 +190,14 @@ public final class MediaDrm {
      * the cookie passed to native_setup().)
      */
     private static void postEventFromNative(Object mediadrm_ref,
-                                            int what, int arg1, int arg2, Object obj)
+                                            int eventType, int extra, Object obj)
     {
         MediaDrm md = (MediaDrm)((WeakReference)mediadrm_ref).get();
         if (md == null) {
             return;
         }
         if (md.mEventHandler != null) {
-            Message m = md.mEventHandler.obtainMessage(what, arg1, arg2, obj);
+            Message m = md.mEventHandler.obtainMessage(DRM_EVENT, eventType, extra, obj);
             md.mEventHandler.sendMessage(m);
         }
     }
