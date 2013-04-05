@@ -5377,6 +5377,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (maxLayer < winAnim.mSurfaceLayer) {
                         maxLayer = winAnim.mSurfaceLayer;
                     }
+                    if (minLayer > winAnim.mSurfaceLayer) {
+                        minLayer = winAnim.mSurfaceLayer;
+                    }
 
                     // Don't include wallpaper in bounds calculation
                     if (!ws.mIsWallpaper) {
@@ -5389,17 +5392,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         frame.union(left, top, right, bottom);
                     }
 
-                    if (ws.mAppToken != null && ws.mAppToken.token == appToken) {
-                        if (minLayer > ws.mWinAnimator.mSurfaceLayer) {
-                            minLayer = ws.mWinAnimator.mSurfaceLayer;
-                        }
-                        if (ws.isDisplayedLw()) {
-                            screenshotReady = true;
-                        }
-                        if (fullscreen) {
-                            // No point in continuing down through windows.
-                            break;
-                        }
+                    if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
+                            ws.isDisplayedLw()) {
+                        screenshotReady = true;
+                    }
+
+                    if (fullscreen) {
+                        // No point in continuing down through windows.
+                        break;
                     }
                 }
 
@@ -5473,14 +5473,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 rawss = SurfaceControl.screenshot(dw, dh, minLayer, maxLayer);
             }
         } while (!screenshotReady && retryCount <= MAX_SCREENSHOT_RETRIES);
-        if (DEBUG_SCREENSHOT && retryCount > MAX_SCREENSHOT_RETRIES) {
-            Slog.i(TAG, "Screenshot max retries " + retryCount + " of " + appToken + " appWin="
-                    + (appWin == null ? "null" : (appWin + " drawState="
-                            + appWin.mWinAnimator.mDrawState)));
-        }
+        if (retryCount > MAX_SCREENSHOT_RETRIES)  Slog.i(TAG, "Screenshot max retries " +
+                retryCount + " of " + appToken + " appWin=" + (appWin == null ?
+                        "null" : (appWin + " drawState=" + appWin.mWinAnimator.mDrawState)));
 
         if (rawss == null) {
-            Slog.w(TAG, "Failure taking screenshot for (" + dw + "x" + dh
+            Slog.w(TAG, "Screenshot failure taking screenshot for (" + dw + "x" + dh
                     + ") to layer " + maxLayer);
             return null;
         }
@@ -5493,7 +5491,7 @@ public class WindowManagerService extends IWindowManager.Stub
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
 
-        if (DEBUG_SCREENSHOT) {
+        if (true || DEBUG_SCREENSHOT) {
             // TEST IF IT's ALL BLACK
             int[] buffer = new int[bm.getWidth() * bm.getHeight()];
             bm.getPixels(buffer, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
@@ -5506,7 +5504,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (allBlack) {
                 Slog.i(TAG, "Screenshot " + appWin + " was all black! mSurfaceLayer=" +
-                        (appWin != null ? appWin.mWinAnimator.mSurfaceLayer : "null"));
+                        (appWin != null ? appWin.mWinAnimator.mSurfaceLayer : "null") +
+                        " minLayer=" + minLayer + " maxLayer=" + maxLayer);
             }
         }
 
