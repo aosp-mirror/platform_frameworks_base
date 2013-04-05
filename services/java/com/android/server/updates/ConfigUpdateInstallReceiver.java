@@ -226,8 +226,6 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         FileOutputStream out = null;
         File tmp = null;
         try {
-            // create the temporary file
-            tmp = File.createTempFile("journal", "", dir);
             // create the parents for the destination file
             File parent = file.getParentFile();
             parent.mkdirs();
@@ -235,6 +233,8 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
             if (!parent.exists()) {
                 throw new IOException("Failed to create directory " + parent.getCanonicalPath());
             }
+            // create the temporary file
+            tmp = File.createTempFile("journal", "", dir);
             // mark tmp -rw-r--r--
             tmp.setReadable(true, false);
             // write to it
