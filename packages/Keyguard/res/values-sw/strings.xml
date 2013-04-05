@@ -80,7 +80,7 @@
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Imefanyika"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modi ya mabadiliko"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Songa"</string>
-    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Ingiza"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Fungua"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Kimya"</string>
