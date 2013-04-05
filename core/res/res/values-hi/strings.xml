@@ -1476,10 +1476,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुंच-योग्यता रद्द की गई."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
-    <!-- no translation found for error_message_title (4510373083082500195) -->
-    <skip />
-    <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
-    <skip />
-    <!-- no translation found for app_not_found (3429141853498927379) -->
-    <skip />
+    <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"यह एप्लिकेशन सीमित उपयोगकर्ताओं के खातों का समर्थन नहीं करता है"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"इस कार्यवाही को प्रबंधित करने के लिए कोई एप्लिकेशन नहीं मिला"</string>
 </resources>
