@@ -30,4 +30,5 @@
     android:cacheColorHint="@null"
     android:divider="?android:attr/listDividerAlertDialog"
     android:scrollbars="vertical"
-    android:overScrollMode="ifContentScrolls" />
+    android:overScrollMode="ifContentScrolls"
+    android:textAlignment="viewStart" />
