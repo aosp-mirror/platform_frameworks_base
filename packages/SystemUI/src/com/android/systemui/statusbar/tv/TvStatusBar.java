@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.tv;
 
+import android.service.notification.StatusBarNotification;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.statusbar.BaseStatusBar;
 
 import android.os.IBinder;

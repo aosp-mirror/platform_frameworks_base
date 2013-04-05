@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.statusbar;
+package android.service.notification;
 
 parcelable StatusBarNotification;
 

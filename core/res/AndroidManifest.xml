@@ -2200,6 +2200,14 @@
         android:label="@string/permlab_access_keyguard_secure_storage"
         android:description="@string/permdesc_access_keyguard_secure_storage" />
 
+    <!-- Must be required by an {@link
+         android.service.notification.NotificationListenerService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+        android:label="@string/permlab_bindNotificationListenerService"
+        android:description="@string/permdesc_bindNotificationListenerService"
+        android:protectionLevel="signature" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>

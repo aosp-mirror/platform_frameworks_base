@@ -1439,6 +1439,7 @@
   <java-symbol type="string" name="launch_warning_title" />
   <java-symbol type="string" name="low_internal_storage_view_text" />
   <java-symbol type="string" name="low_internal_storage_view_title" />
+  <java-symbol type="string" name="notification_listener_binding_label" />
   <java-symbol type="string" name="report" />
   <java-symbol type="string" name="select_input_method" />
   <java-symbol type="string" name="select_keyboard_layout_notification_title" />

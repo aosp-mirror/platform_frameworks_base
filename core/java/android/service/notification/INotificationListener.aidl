@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.service.notification;
 
-import com.android.internal.statusbar.StatusBarNotification;
+import android.service.notification.StatusBarNotification;
 
 /** @hide */
 oneway interface INotificationListener

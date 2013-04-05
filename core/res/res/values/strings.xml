@@ -1816,6 +1816,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessNotifications">Allows the app to retrieve, examine, and clear notifications, including those posted by other apps.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindNotificationListenerService">bind to a notification listener service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindNotificationListenerService">Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps.</string>
+
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->
@@ -3513,6 +3518,9 @@
     <string name="wallpaper_binding_label">Wallpaper</string>
     <!-- Dialog title for user to select a different wallpaper from service list -->
     <string name="chooser_wallpaper">Change wallpaper</string>
+    <!-- Label to show for a service that is running because it is observing
+         the user's notifications. -->
+    <string name="notification_listener_binding_label">Notification listener</string>
 
     <!-- Do Not Translate: Alternate eri.xml -->
     <string name="alternate_eri_file">/data/eri.xml</string>
