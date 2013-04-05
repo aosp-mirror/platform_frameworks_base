@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.statusbar;
+package android.service.notification;
 
 import android.app.Notification;
 import android.os.Parcel;
@@ -23,34 +23,54 @@ import android.os.UserHandle;
 
 /**
  * Class encapsulating a Notification. Sent by the NotificationManagerService to clients including
- * the IStatusBar (in System UI).
+ * the status bar and any {@link android.service.notification.NotificationListenerService}s.
  */
 public class StatusBarNotification implements Parcelable {
+    /** The package of the app that posted the notification. */
     public final String pkg;
-    public final String basePkg;
+    /** The id supplied to {@link android.app.NotificationManager#notify}. */
     public final int id;
+    /** The tag supplied to {@link android.app.NotificationManager#notify}, or null if no tag
+     * was specified. */
     public final String tag;
+
+    /** The notifying app's calling uid. @hide */
     public final int uid;
+    /** The notifying app's base package. @hide */
+    public final String basePkg;
+    /** @hide */
     public final int initialPid;
     // TODO: make this field private and move callers to an accessor that
     // ensures sourceUser is applied.
+
+    /** The {@link android.app.Notification} supplied to
+     * {@link android.app.NotificationManager#notify}. */
     public final Notification notification;
-    public final int score;
+    /** The {@link android.os.UserHandle} for whom this notification is intended. */
     public final UserHandle user;
+    /** The time (in {@link System#currentTimeMillis} time) the notification was posted,
+     * which may be different than {@link android.app.Notification#when}.
+     */
     public final long postTime;
 
-    /** This is temporarily needed for the JB MR1 PDK. */
+    /** @hide */
+    public final int score;
+
+    /** This is temporarily needed for the JB MR1 PDK.
+     * @hide */
     @Deprecated
     public StatusBarNotification(String pkg, int id, String tag, int uid, int initialPid, int score,
             Notification notification) {
         this(pkg, id, tag, uid, initialPid, score, notification, UserHandle.OWNER);
     }
 
+    /** @hide */
     public StatusBarNotification(String pkg, int id, String tag, int uid, int initialPid, int score,
             Notification notification, UserHandle user) {
         this(pkg, null, id, tag, uid, initialPid, score, notification, user);
     }
 
+    /** @hide */
     public StatusBarNotification(String pkg, String basePkg, int id, String tag, int uid,
             int initialPid, int score, Notification notification, UserHandle user) {
         this(pkg, basePkg, id, tag, uid, initialPid, score, notification, user,
@@ -147,10 +167,17 @@ public class StatusBarNotification implements Parcelable {
                 this.score, this.notification);
     }
 
+    /** Convenience method to check the notification's flags for
+     * {@link Notification#FLAG_ONGOING_EVENT}.
+     */
     public boolean isOngoing() {
         return (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0;
     }
 
+    /** Convenience method to check the notification's flags for
+     * either {@link Notification#FLAG_ONGOING_EVENT} or
+     * {@link Notification#FLAG_NO_CLEAR}.
+     */
     public boolean isClearable() {
         return ((notification.flags & Notification.FLAG_ONGOING_EVENT) == 0)
                 && ((notification.flags & Notification.FLAG_NO_CLEAR) == 0);

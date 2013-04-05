@@ -17,12 +17,12 @@
 
 package android.app;
 
-import android.app.INotificationListener;
 import android.app.ITransientNotification;
+import android.service.notification.StatusBarNotification;
 import android.app.Notification;
+import android.content.ComponentName;
 import android.content.Intent;
-
-import com.android.internal.statusbar.StatusBarNotification;
+import android.service.notification.INotificationListener;
 
 /** {@hide} */
 interface INotificationManager
@@ -41,7 +41,9 @@ interface INotificationManager
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
 
-    void registerListener(in INotificationListener listener, String pkg, int userid);
+    void registerListener(in INotificationListener listener, in ComponentName component, int userid);
     void unregisterListener(in INotificationListener listener, int userid);
-}
 
+    void clearNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
+    void clearAllNotificationsFromListener(in INotificationListener token);
+}

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.service.notification.StatusBarNotification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -23,10 +24,7 @@ import android.os.Handler;
 import android.text.StaticLayout;
 import android.text.Layout.Alignment;
 import android.text.TextPaint;
-import android.text.TextUtils;
-import android.util.Slog;
 import android.view.View;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
@@ -35,7 +33,6 @@ import android.widget.ImageSwitcher;
 import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarNotification;
 import com.android.internal.util.CharSequences;
 
 import com.android.systemui.R;
