@@ -812,6 +812,26 @@ public class ActionBarImpl extends ActionBar {
         return mActionView != null && mActionView.isTitleTruncated();
     }
 
+    @Override
+    public void setHomeAsUpIndicator(Drawable indicator) {
+        mActionView.setHomeAsUpIndicator(indicator);
+    }
+
+    @Override
+    public void setHomeAsUpIndicator(int resId) {
+        mActionView.setHomeAsUpIndicator(resId);
+    }
+
+    @Override
+    public void setHomeActionContentDescription(CharSequence description) {
+        mActionView.setHomeActionContentDescription(description);
+    }
+
+    @Override
+    public void setHomeActionContentDescription(int resId) {
+        mActionView.setHomeActionContentDescription(resId);
+    }
+
     /**
      * @hide 
      */

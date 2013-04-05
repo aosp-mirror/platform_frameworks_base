@@ -3771,6 +3771,17 @@
     <string name="action_bar_up_description">Navigate up</string>
     <!-- Content description for the action menu overflow button. [CHAR LIMIT=NONE] -->
     <string name="action_menu_overflow_description">More options</string>
+    <!-- Formatting string for describing the action bar's title/home/up affordance.
+         This is a single tappable "button" that includes the app icon, the Up indicator
+         (usually a "<" chevron) and the window title text.
+         %1$s is the title. %2$s is the description of what tapping/clicking the whole
+         thing is going to do. -->
+    <string name="action_bar_home_description_format">%1$s, %2$s</string>
+    <!-- Just like action_bar_home_description_format, but this one will be used
+         if the window is also providing subtitle text.
+         %1$s is the title. %2$s is the subtitle. %3$s is the description of what
+         tapping/clicking the whole thing is going to do. -->
+    <string name="action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
 
     <!-- Storage description for internal storage. [CHAR LIMIT=NONE] -->
     <string name="storage_internal">Internal storage</string>
