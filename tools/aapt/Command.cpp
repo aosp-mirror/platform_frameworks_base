@@ -592,6 +592,10 @@ int doDump(Bundle* bundle)
                         goto bail;
                     }
                     printf("uses-permission: %s\n", name.string());
+                    int req = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
+                    if (!req) {
+                        printf("optional-permission: %s\n", name.string());
+                    }
                 }
             }
         } else if (strcmp("badging", option) == 0) {
@@ -1033,6 +1037,10 @@ int doDump(Bundle* bundle)
                                 hasWriteCallLogPermission = true;
                             }
                             printf("uses-permission:'%s'\n", name.string());
+                            int req = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
+                            if (!req) {
+                                printf("optional-permission:'%s'\n", name.string());
+                            }
                         } else {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
                                     error.string());
