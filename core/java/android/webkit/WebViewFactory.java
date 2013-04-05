@@ -25,8 +25,13 @@ import dalvik.system.PathClassLoader;
 
 /**
  * Top level factory, used creating all the main WebView implementation classes.
+ *
+ * @hide
  */
-class WebViewFactory {
+public final class WebViewFactory {
+    public static final String WEBVIEW_EXPERIMENTAL_PROPERTY = "persist.sys.webview.exp";
+    private static final String DEPRECATED_CHROMIUM_PROPERTY = "webview.use_chromium";
+
     // Default Provider factory class name.
     // TODO: When the Chromium powered WebView is ready, it should be the default factory class.
     private static final String DEFAULT_WEBVIEW_FACTORY = "android.webkit.WebViewClassic$Factory";
@@ -43,16 +48,17 @@ class WebViewFactory {
     private static WebViewFactoryProvider sProviderInstance;
     private static final Object sProviderLock = new Object();
 
+    public static boolean isExperimentalWebViewAvailable() {
+        return Build.IS_DEBUGGABLE && (new java.io.File(CHROMIUM_WEBVIEW_JAR).exists());
+    }
+
     static WebViewFactoryProvider getProvider() {
         synchronized (sProviderLock) {
             // For now the main purpose of this function (and the factory abstraction) is to keep
             // us honest and minimize usage of WebViewClassic internals when binding the proxy.
             if (sProviderInstance != null) return sProviderInstance;
 
-            // For debug builds, we allow a system property to specify that we should use the
-            // Chromium powered WebView. This enables us to switch between implementations
-            // at runtime. For user (release) builds, don't allow this.
-            if (Build.IS_DEBUGGABLE && SystemProperties.getBoolean("webview.use_chromium", false)) {
+            if (isExperimentalWebViewEnabled()) {
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 try {
                     sProviderInstance = loadChromiumProvider();
@@ -74,6 +80,20 @@ class WebViewFactory {
             }
             return sProviderInstance;
         }
+    }
+
+    // For debug builds, we allow a system property to specify that we should use the
+    // experimtanl Chromium powered WebView. This enables us to switch between
+    // implementations at runtime. For user (release) builds, don't allow this.
+    private static boolean isExperimentalWebViewEnabled() {
+        if (!isExperimentalWebViewAvailable())
+            return false;
+        if (SystemProperties.getBoolean(DEPRECATED_CHROMIUM_PROPERTY, false)) {
+            Log.w(LOGTAG, String.format("The property %s has been deprecated. Please use %s.",
+                    DEPRECATED_CHROMIUM_PROPERTY, WEBVIEW_EXPERIMENTAL_PROPERTY));
+            return true;
+        }
+        return SystemProperties.getBoolean(WEBVIEW_EXPERIMENTAL_PROPERTY, false);
     }
 
     // TODO: This allows us to have the legacy and Chromium WebView coexist for development
