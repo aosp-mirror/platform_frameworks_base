@@ -152,7 +152,15 @@ public class Binder implements IBinder {
      * not return until the current process is exiting.
      */
     public static final native void joinThreadPool();
-    
+
+    /**
+     * Returns true if the specified interface is a proxy.
+     * @hide
+     */
+    public static final boolean isProxy(IInterface iface) {
+        return iface.asBinder() != iface;
+    }
+
     /**
      * Default constructor initializes the object.
      */

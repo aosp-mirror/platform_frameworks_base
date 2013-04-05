@@ -219,6 +219,11 @@ status_t InputChannel::receiveMessage(InputMessage* msg) {
     return OK;
 }
 
+sp<InputChannel> InputChannel::dup() const {
+    int fd = ::dup(getFd());
+    return fd >= 0 ? new InputChannel(getName(), fd) : NULL;
+}
+
 
 // --- InputPublisher ---
 
