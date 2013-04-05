@@ -168,6 +168,9 @@ public:
      */
     status_t receiveMessage(InputMessage* msg);
 
+    /* Returns a new object that has a duplicate of this channel's fd. */
+    sp<InputChannel> dup() const;
+
 private:
     String8 mName;
     int mFd;

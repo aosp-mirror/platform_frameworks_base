@@ -54,6 +54,7 @@ public final class InputChannel implements Parcelable {
     private native void nativeTransferTo(InputChannel other);
     private native void nativeReadFromParcel(Parcel parcel);
     private native void nativeWriteToParcel(Parcel parcel);
+    private native void nativeDup(InputChannel target);
     
     private native String nativeGetName();
 
@@ -64,7 +65,7 @@ public final class InputChannel implements Parcelable {
      */
     public InputChannel() {
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -123,6 +124,15 @@ public final class InputChannel implements Parcelable {
         }
         
         nativeTransferTo(outParameter);
+    }
+
+    /**
+     * Duplicates the input channel.
+     */
+    public InputChannel dup() {
+        InputChannel target = new InputChannel();
+        nativeDup(target);
+        return target;
     }
 
     @Override
