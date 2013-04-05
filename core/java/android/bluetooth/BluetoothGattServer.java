@@ -288,9 +288,9 @@ public final class BluetoothGattServer implements BluetoothProfile {
     }
 
     /**
-     * Close the connection to the gatt service.
+     * Close this GATT server instance.
      */
-    /*package*/ void close() {
+    public void close() {
         if (DBG) Log.d(TAG, "close()");
         unregisterCallback();
     }
