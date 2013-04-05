@@ -154,9 +154,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"ตัวเลือกโทรศัพท์"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ล็อกหน้าจอ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ปิดเครื่อง"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"รายงานข้อบกพร่อง"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ใช้รายงานข้อบกพร่อง"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"การดำเนินการนี้จะรวบรวมข้อมูลเกี่ยวกับสถานะปัจจุบันของอุปกรณ์ของคุณ โดยจะส่งไปในรูปแบบข้อความอีเมล อาจใช้เวลาสักครู่ตั้งแต่เริ่มการสร้างรายงานข้อบกพร่องจนกระทั่งเสร็จสมบูรณ์ โปรดอดทนรอ"</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"รายงานบั๊ก"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"ใช้รายงานบั๊ก"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"การดำเนินการนี้จะรวบรวมข้อมูลเกี่ยวกับสถานะปัจจุบันของอุปกรณ์ของคุณ โดยจะส่งไปในรูปแบบข้อความอีเมล อาจใช้เวลาสักครู่ตั้งแต่เริ่มการสร้างรายงานบั๊กจนกระทั่งเสร็จสมบูรณ์ โปรดอดทนรอ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"โหมดปิดเสียง"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ปิดเสียงไว้"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"เปิดเสียงแล้ว"</string>
@@ -1476,10 +1476,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ยกเลิกการเข้าถึงแล้ว"</string>
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"เจ้าของ"</string>
-    <!-- no translation found for error_message_title (4510373083082500195) -->
-    <skip />
-    <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
-    <skip />
-    <!-- no translation found for app_not_found (3429141853498927379) -->
-    <skip />
+    <string name="error_message_title" msgid="4510373083082500195">"ข้อผิดพลาด"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"แอปพลิเคชันนี้ไม่สนับสนุนบัญชีของผู้ใช้บางรายที่ถูกจำกัด"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"ไม่พบแอปพลิเคชันสำหรับการทำงานนี้"</string>
 </resources>

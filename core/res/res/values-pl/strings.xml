@@ -744,7 +744,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner życiowy"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Ojciec"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Znajomy"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Kierownik"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Menedżer"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Matka"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Rodzic"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
