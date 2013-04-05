@@ -21,10 +21,12 @@
 #include "android_media_MediaDrm.h"
 
 #include "android_runtime/AndroidRuntime.h"
+#include "android_os_Parcel.h"
 #include "jni.h"
 #include "JNIHelp.h"
 
 #include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
 #include <media/IDrm.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -42,6 +44,15 @@ namespace android {
 #define GET_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetMethodID(clazz, fieldName, fieldDescriptor); \
     LOG_FATAL_IF(! var, "Unable to find method " fieldName);
+
+#define GET_STATIC_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
+    var = env->GetStaticFieldID(clazz, fieldName, fieldDescriptor); \
+    LOG_FATAL_IF(! var, "Unable to find field " fieldName);
+
+#define GET_STATIC_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
+    var = env->GetStaticMethodID(clazz, fieldName, fieldDescriptor); \
+    LOG_FATAL_IF(! var, "Unable to find static method " fieldName);
+
 
 struct RequestFields {
     jfieldID data;
@@ -74,8 +85,16 @@ struct EntryFields {
     jmethodID getValue;
 };
 
+struct EventTypes {
+    int kEventProvisionRequired;
+    int kEventKeyRequired;
+    int kEventKeyExpired;
+    int kEventVendorDefined;
+} gEventTypes;
+
 struct fields_t {
     jfieldID context;
+    jmethodID post_event;
     RequestFields keyRequest;
     RequestFields provisionRequest;
     ArrayListFields arraylist;
@@ -86,6 +105,88 @@ struct fields_t {
 };
 
 static fields_t gFields;
+
+// ----------------------------------------------------------------------------
+// ref-counted object for callbacks
+class JNIDrmListener: public DrmListener
+{
+public:
+    JNIDrmListener(JNIEnv* env, jobject thiz, jobject weak_thiz);
+    ~JNIDrmListener();
+    virtual void notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj = NULL);
+private:
+    JNIDrmListener();
+    jclass      mClass;     // Reference to MediaDrm class
+    jobject     mObject;    // Weak ref to MediaDrm Java object to call on
+};
+
+JNIDrmListener::JNIDrmListener(JNIEnv* env, jobject thiz, jobject weak_thiz)
+{
+    // Hold onto the MediaDrm class for use in calling the static method
+    // that posts events to the application thread.
+    jclass clazz = env->GetObjectClass(thiz);
+    if (clazz == NULL) {
+        ALOGE("Can't find android/media/MediaDrm");
+        jniThrowException(env, "java/lang/Exception", NULL);
+        return;
+    }
+    mClass = (jclass)env->NewGlobalRef(clazz);
+
+    // We use a weak reference so the MediaDrm object can be garbage collected.
+    // The reference is only used as a proxy for callbacks.
+    mObject  = env->NewGlobalRef(weak_thiz);
+}
+
+JNIDrmListener::~JNIDrmListener()
+{
+    // remove global references
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->DeleteGlobalRef(mObject);
+    env->DeleteGlobalRef(mClass);
+}
+
+void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
+                            const Parcel *obj)
+{
+    jint jeventType;
+
+    // translate DrmPlugin event types into their java equivalents
+    switch(eventType) {
+        case DrmPlugin::kDrmPluginEventProvisionRequired:
+            jeventType = gEventTypes.kEventProvisionRequired;
+            break;
+        case DrmPlugin::kDrmPluginEventKeyNeeded:
+            jeventType = gEventTypes.kEventKeyRequired;
+            break;
+        case DrmPlugin::kDrmPluginEventKeyExpired:
+            jeventType = gEventTypes.kEventKeyExpired;
+            break;
+        case DrmPlugin::kDrmPluginEventVendorDefined:
+            jeventType = gEventTypes.kEventVendorDefined;
+            break;
+        default:
+            ALOGE("Invalid event DrmPlugin::EventType %d, ignored", (int)eventType);
+            return;
+    }
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (obj && obj->dataSize() > 0) {
+        jobject jParcel = createJavaParcelObject(env);
+        if (jParcel != NULL) {
+            Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
+            nativeParcel->setData(obj->data(), obj->dataSize());
+            env->CallStaticVoidMethod(mClass, gFields.post_event, mObject,
+                    jeventType, extra, jParcel);
+        }
+    }
+
+    if (env->ExceptionCheck()) {
+        ALOGW("An exception occurred while notifying an event.");
+        LOGW_EX(env);
+        env->ExceptionClear();
+    }
+}
+
 
 static bool throwExceptionAsNecessary(
         JNIEnv *env, status_t err, const char *msg = NULL) {
@@ -109,6 +210,9 @@ JDrm::JDrm(
         JNIEnv *env, jobject thiz, const uint8_t uuid[16]) {
     mObject = env->NewWeakGlobalRef(thiz);
     mDrm = MakeDrm(uuid);
+    if (mDrm != NULL) {
+        mDrm->setListener(this);
+    }
 }
 
 JDrm::~JDrm() {
@@ -160,6 +264,25 @@ sp<IDrm> JDrm::MakeDrm(const uint8_t uuid[16]) {
     return drm;
 }
 
+status_t JDrm::setListener(const sp<DrmListener>& listener) {
+    Mutex::Autolock lock(mLock);
+    mListener = listener;
+    return OK;
+}
+
+void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) {
+    sp<DrmListener> listener;
+    mLock.lock();
+    listener = mListener;
+    mLock.unlock();
+
+    if (listener != NULL) {
+        Mutex::Autolock lock(mNotifyLock);
+        listener->notify(eventType, extra, obj);
+    }
+}
+
+
 // static
 bool JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16]) {
     sp<IDrm> drm = MakeDrm();
@@ -194,10 +317,9 @@ static jbyteArray VectorToJByteArray(JNIEnv *env, Vector<uint8_t> const &vector)
 }
 
 static String8 JStringToString8(JNIEnv *env, jstring const &jstr) {
-    jboolean isCopy;
     String8 result;
 
-    const char *s = env->GetStringUTFChars(jstr, &isCopy);
+    const char *s = env->GetStringUTFChars(jstr, NULL);
     if (s) {
         result = s;
         env->ReleaseStringUTFChars(jstr, s);
@@ -322,13 +444,28 @@ static bool CheckSession(JNIEnv *env, const sp<IDrm> &drm, jbyteArray const &jse
 }
 
 static void android_media_MediaDrm_release(JNIEnv *env, jobject thiz) {
-    setDrm(env, thiz, NULL);
+    sp<JDrm> drm = setDrm(env, thiz, NULL);
+    if (drm != NULL) {
+        drm->setListener(NULL);
+    }
 }
 
 static void android_media_MediaDrm_native_init(JNIEnv *env) {
     jclass clazz;
     FIND_CLASS(clazz, "android/media/MediaDrm");
     GET_FIELD_ID(gFields.context, clazz, "mNativeContext", "I");
+    GET_STATIC_METHOD_ID(gFields.post_event, clazz, "postEventFromNative",
+                         "(Ljava/lang/Object;IILjava/lang/Object;)V");
+
+    jfieldID field;
+    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_PROVISION_REQUIRED", "I");
+    gEventTypes.kEventProvisionRequired = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_KEY_REQUIRED", "I");
+    gEventTypes.kEventKeyRequired = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_KEY_EXPIRED", "I");
+    gEventTypes.kEventKeyExpired = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_VENDOR_DEFINED", "I");
+    gEventTypes.kEventVendorDefined = env->GetStaticIntField(clazz, field);
 
     FIND_CLASS(clazz, "android/media/MediaDrm$KeyRequest");
     GET_FIELD_ID(gFields.keyRequest.data, clazz, "data", "[B");
@@ -389,6 +526,8 @@ static void android_media_MediaDrm_native_setup(
         return;
     }
 
+    sp<JNIDrmListener> listener = new JNIDrmListener(env, thiz, weak_this);
+    drm->setListener(listener);
     setDrm(env, thiz, drm);
 }
 
