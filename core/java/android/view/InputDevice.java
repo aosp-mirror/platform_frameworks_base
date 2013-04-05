@@ -371,8 +371,8 @@ public final class InputDevice implements Parcelable {
             if (axis < 0) {
                 break;
             }
-            addMotionRange(axis, in.readInt(),
-                    in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat());
+            addMotionRange(axis, in.readInt(), in.readFloat(), in.readFloat(), in.readFloat(),
+                    in.readFloat(), in.readFloat());
         }
     }
 
@@ -584,8 +584,8 @@ public final class InputDevice implements Parcelable {
 
     // Called from native code.
     private void addMotionRange(int axis, int source,
-            float min, float max, float flat, float fuzz) {
-        mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz));
+            float min, float max, float flat, float fuzz, float resolution) {
+        mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz, resolution));
     }
 
     /**
@@ -625,14 +625,17 @@ public final class InputDevice implements Parcelable {
         private float mMax;
         private float mFlat;
         private float mFuzz;
+        private float mResolution;
 
-        private MotionRange(int axis, int source, float min, float max, float flat, float fuzz) {
+        private MotionRange(int axis, int source, float min, float max, float flat, float fuzz,
+                float resolution) {
             mAxis = axis;
             mSource = source;
             mMin = min;
             mMax = max;
             mFlat = flat;
             mFuzz = fuzz;
+            mResolution = resolution;
         }
 
         /**
@@ -711,6 +714,14 @@ public final class InputDevice implements Parcelable {
         public float getFuzz() {
             return mFuzz;
         }
+
+        /**
+         * Gets the resolution for input device measurements with respect to this axis.
+         * @return The resolution in units per millimeter, or units per radian for rotational axes.
+         */
+        public float getResolution() {
+            return mResolution;
+        }
     }
 
     @Override
@@ -734,6 +745,7 @@ public final class InputDevice implements Parcelable {
             out.writeFloat(range.mMax);
             out.writeFloat(range.mFlat);
             out.writeFloat(range.mFuzz);
+            out.writeFloat(range.mResolution);
         }
         out.writeInt(-1);
     }
@@ -788,6 +800,7 @@ public final class InputDevice implements Parcelable {
             description.append(" max=").append(range.mMax);
             description.append(" flat=").append(range.mFlat);
             description.append(" fuzz=").append(range.mFuzz);
+            description.append(" resolution=").append(range.mResolution);
             description.append("\n");
         }
         return description.toString();

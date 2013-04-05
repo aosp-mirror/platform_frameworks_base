@@ -64,6 +64,7 @@ public:
         float max;
         float flat;
         float fuzz;
+        float resolution;
     };
 
     void initialize(int32_t id, int32_t generation, const InputDeviceIdentifier& identifier,
@@ -83,7 +84,7 @@ public:
 
     void addSource(uint32_t source);
     void addMotionRange(int32_t axis, uint32_t source,
-            float min, float max, float flat, float fuzz);
+            float min, float max, float flat, float fuzz, float resolution);
     void addMotionRange(const MotionRange& range);
 
     inline void setKeyboardType(int32_t keyboardType) { mKeyboardType = keyboardType; }
