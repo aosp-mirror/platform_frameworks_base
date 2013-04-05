@@ -17,12 +17,22 @@
 #ifndef ANDROID_HWUI_DITHER_H
 #define ANDROID_HWUI_DITHER_H
 
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 
 #include "Program.h"
 
 namespace android {
 namespace uirenderer {
+
+///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+// Must be a power of two
+#define DITHER_KERNEL_SIZE 4
+// These must not use the .0f notation as they are used from GLSL
+#define DITHER_KERNEL_SIZE_INV (1.0 / 4.0)
+#define DITHER_KERNEL_SIZE_INV_SQUARE (1.0 / 16.0)
 
 /**
  * Handles dithering for programs.
