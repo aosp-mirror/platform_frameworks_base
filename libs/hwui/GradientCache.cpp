@@ -27,13 +27,6 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Defines
-///////////////////////////////////////////////////////////////////////////////
-
-#define GRADIENT_TEXTURE_HEIGHT 2
-#define GRADIENT_BYTES_PER_PIXEL 4
-
-///////////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -83,6 +76,10 @@ GradientCache::GradientCache():
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
     mCache.setOnEntryRemovedListener(this);
+
+    const Extensions& extensions = Extensions::getInstance();
+    mUseFloatTexture = extensions.getMajorGlVersion() >= 3;
+    mHasNpot = extensions.hasNPot();
 }
 
 GradientCache::GradientCache(uint32_t maxByteSize):
@@ -120,7 +117,7 @@ void GradientCache::setMaxSize(uint32_t maxSize) {
 
 void GradientCache::operator()(GradientCacheEntry& shader, Texture*& texture) {
     if (texture) {
-        const uint32_t size = texture->width * texture->height * GRADIENT_BYTES_PER_PIXEL;
+        const uint32_t size = texture->width * texture->height * bytesPerPixel();
         mSize -= size;
 
         glDeleteTextures(1, &texture->id);
@@ -151,7 +148,7 @@ void GradientCache::getGradientInfo(const uint32_t* colors, const int count,
         GradientInfo& info) {
     uint32_t width = 256 * (count - 1);
 
-    if (!Extensions::getInstance().hasNPot()) {
+    if (!mHasNpot) {
         width = 1 << (31 - __builtin_clz(width));
     }
 
@@ -175,12 +172,12 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
 
     Texture* texture = new Texture;
     texture->width = info.width;
-    texture->height = GRADIENT_TEXTURE_HEIGHT;
+    texture->height = 2;
     texture->blend = info.hasAlpha;
     texture->generation = 1;
 
     // Asume the cache is always big enough
-    const uint32_t size = texture->width * texture->height * GRADIENT_BYTES_PER_PIXEL;
+    const uint32_t size = texture->width * texture->height * bytesPerPixel();
     while (getSize() + size > mMaxSize) {
         mCache.removeOldest();
     }
@@ -193,69 +190,110 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     return texture;
 }
 
+size_t GradientCache::bytesPerPixel() const {
+    // We use 4 channels (RGBA)
+    return 4 * (mUseFloatTexture ? sizeof(float) : sizeof(uint8_t));
+}
+
+void GradientCache::splitToBytes(uint32_t inColor, GradientColor& outColor) const {
+    outColor.r = (inColor >> 16) & 0xff;
+    outColor.g = (inColor >>  8) & 0xff;
+    outColor.b = (inColor >>  0) & 0xff;
+    outColor.a = (inColor >> 24) & 0xff;
+}
+
+void GradientCache::splitToFloats(uint32_t inColor, GradientColor& outColor) const {
+    outColor.r = ((inColor >> 16) & 0xff) / 255.0f;
+    outColor.g = ((inColor >>  8) & 0xff) / 255.0f;
+    outColor.b = ((inColor >>  0) & 0xff) / 255.0f;
+    outColor.a = ((inColor >> 24) & 0xff) / 255.0f;
+}
+
+void GradientCache::mixBytes(GradientColor& start, GradientColor& end, float amount,
+        uint8_t*& dst) const {
+    float oppAmount = 1.0f - amount;
+    const float alpha = start.a * oppAmount + end.a * amount;
+    const float a = alpha / 255.0f;
+
+    *dst++ = uint8_t(a * (start.r * oppAmount + end.r * amount));
+    *dst++ = uint8_t(a * (start.g * oppAmount + end.g * amount));
+    *dst++ = uint8_t(a * (start.b * oppAmount + end.b * amount));
+    *dst++ = uint8_t(alpha);
+}
+
+void GradientCache::mixFloats(GradientColor& start, GradientColor& end, float amount,
+        uint8_t*& dst) const {
+    float oppAmount = 1.0f - amount;
+    const float a = start.a * oppAmount + end.a * amount;
+
+    float* d = (float*) dst;
+    *d++ = a * (start.r * oppAmount + end.r * amount);
+    *d++ = a * (start.g * oppAmount + end.g * amount);
+    *d++ = a * (start.b * oppAmount + end.b * amount);
+    *d++ = a;
+
+    dst += 4 * sizeof(float);
+}
+
 void GradientCache::generateTexture(uint32_t* colors, float* positions,
         int count, Texture* texture) {
-
     const uint32_t width = texture->width;
-    const GLsizei rowBytes = width * GRADIENT_BYTES_PER_PIXEL;
-    uint32_t pixels[width * texture->height];
+    const GLsizei rowBytes = width * bytesPerPixel();
+    uint8_t pixels[rowBytes * texture->height];
+
+    static ChannelSplitter gSplitters[] = {
+            &android::uirenderer::GradientCache::splitToBytes,
+            &android::uirenderer::GradientCache::splitToFloats,
+    };
+    ChannelSplitter split = gSplitters[mUseFloatTexture];
+
+    static ChannelMixer gMixers[] = {
+            &android::uirenderer::GradientCache::mixBytes,
+            &android::uirenderer::GradientCache::mixFloats,
+    };
+    ChannelMixer mix = gMixers[mUseFloatTexture];
+
+    GradientColor start;
+    (this->*split)(colors[0], start);
+
+    GradientColor end;
+    (this->*split)(colors[1], end);
 
     int currentPos = 1;
+    float startPos = positions[0];
+    float distance = positions[1] - startPos;
 
-    float startA = (colors[0] >> 24) & 0xff;
-    float startR = (colors[0] >> 16) & 0xff;
-    float startG = (colors[0] >>  8) & 0xff;
-    float startB = (colors[0] >>  0) & 0xff;
-
-    float endA = (colors[1] >> 24) & 0xff;
-    float endR = (colors[1] >> 16) & 0xff;
-    float endG = (colors[1] >>  8) & 0xff;
-    float endB = (colors[1] >>  0) & 0xff;
-
-    float start = positions[0];
-    float distance = positions[1] - start;
-
-    uint8_t* p = (uint8_t*) pixels;
+    uint8_t* dst = pixels;
     for (uint32_t x = 0; x < width; x++) {
         float pos = x / float(width - 1);
         if (pos > positions[currentPos]) {
-            startA = endA;
-            startR = endR;
-            startG = endG;
-            startB = endB;
-            start = positions[currentPos];
+            start = end;
+            startPos = positions[currentPos];
 
             currentPos++;
 
-            endA = (colors[currentPos] >> 24) & 0xff;
-            endR = (colors[currentPos] >> 16) & 0xff;
-            endG = (colors[currentPos] >>  8) & 0xff;
-            endB = (colors[currentPos] >>  0) & 0xff;
-            distance = positions[currentPos] - start;
+            (this->*split)(colors[currentPos], end);
+            distance = positions[currentPos] - startPos;
         }
 
-        float amount = (pos - start) / distance;
-        float oppAmount = 1.0f - amount;
-
-        const float alpha = startA * oppAmount + endA * amount;
-        const float a = alpha / 255.0f;
-        *p++ = uint8_t(a * (startR * oppAmount + endR * amount));
-        *p++ = uint8_t(a * (startG * oppAmount + endG * amount));
-        *p++ = uint8_t(a * (startB * oppAmount + endB * amount));
-        *p++ = uint8_t(alpha);
+        float amount = (pos - startPos) / distance;
+        (this->*mix)(start, end, amount, dst);
     }
 
-    for (int i = 1; i < GRADIENT_TEXTURE_HEIGHT; i++) {
-        memcpy(pixels + width * i, pixels, rowBytes);
-    }
+    memcpy(pixels + rowBytes, pixels, rowBytes);
 
     glGenTextures(1, &texture->id);
-
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, GRADIENT_BYTES_PER_PIXEL);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, texture->height, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    if (mUseFloatTexture) {
+        // We have to use GL_RGBA16F because GL_RGBA32F does not support filtering
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, texture->height, 0,
+                GL_RGBA, GL_FLOAT, pixels);
+    } else {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, texture->height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    }
 
     texture->setFilter(GL_LINEAR);
     texture->setWrap(GL_CLAMP_TO_EDGE);
