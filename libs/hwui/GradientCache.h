@@ -17,7 +17,7 @@
 #ifndef ANDROID_HWUI_GRADIENT_CACHE_H
 #define ANDROID_HWUI_GRADIENT_CACHE_H
 
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 
 #include <SkShader.h>
 
@@ -160,12 +160,35 @@ private:
 
     void getGradientInfo(const uint32_t* colors, const int count, GradientInfo& info);
 
+    size_t bytesPerPixel() const;
+
+    struct GradientColor {
+        float r;
+        float g;
+        float b;
+        float a;
+    };
+
+    typedef void (GradientCache::*ChannelSplitter)(uint32_t inColor,
+            GradientColor& outColor) const;
+
+    void splitToBytes(uint32_t inColor, GradientColor& outColor) const;
+    void splitToFloats(uint32_t inColor, GradientColor& outColor) const;
+
+    typedef void (GradientCache::*ChannelMixer)(GradientColor& start, GradientColor& end,
+            float amount, uint8_t*& dst) const;
+
+    void mixBytes(GradientColor& start, GradientColor& end, float amount, uint8_t*& dst) const;
+    void mixFloats(GradientColor& start, GradientColor& end, float amount, uint8_t*& dst) const;
+
     LruCache<GradientCacheEntry, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
 
     GLint mMaxTextureSize;
+    bool mUseFloatTexture;
+    bool mHasNpot;
 
     Vector<SkShader*> mGarbage;
     mutable Mutex mLock;
