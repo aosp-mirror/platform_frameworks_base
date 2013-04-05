@@ -24528,6 +24528,7 @@ package android.view {
     method public float getMax();
     method public float getMin();
     method public float getRange();
+    method public float getResolution();
     method public int getSource();
     method public boolean isFromSource(int);
   }
