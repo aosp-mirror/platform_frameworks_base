@@ -84,7 +84,7 @@ public final class InputBindResult implements Parcelable {
         dest.writeStrongInterface(method);
         if (channel != null) {
             dest.writeInt(1);
-            channel.writeToParcel(dest, 0);
+            channel.writeToParcel(dest, flags);
         } else {
             dest.writeInt(0);
         }
