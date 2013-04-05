@@ -174,7 +174,7 @@ public class AudioTrack
      */
     private final Looper mInitializationLooper;
     /**
-     * The audio data sampling rate in Hz.
+     * The audio data source sampling rate in Hz.
      */
     private int mSampleRate; // initialized by all constructors
     /**
@@ -239,7 +239,7 @@ public class AudioTrack
      *   {@link AudioManager#STREAM_VOICE_CALL}, {@link AudioManager#STREAM_SYSTEM},
      *   {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_MUSIC},
      *   {@link AudioManager#STREAM_ALARM}, and {@link AudioManager#STREAM_NOTIFICATION}.
-     * @param sampleRateInHz the sample rate expressed in Hertz.
+     * @param sampleRateInHz the initial source sample rate expressed in Hz.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
@@ -263,7 +263,7 @@ public class AudioTrack
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
         this(streamType, sampleRateInHz, channelConfig, audioFormat,
-                bufferSizeInBytes, mode, 0);
+                bufferSizeInBytes, mode, 0 /*session*/);
     }
 
     /**
@@ -273,7 +273,7 @@ public class AudioTrack
      * is provided when creating an AudioEffect, this effect will be applied only to audio tracks
      * and media players in the same session and not to the output mix.
      * When an AudioTrack is created without specifying a session, it will create its own session
-     * which can be retreived by calling the {@link #getAudioSessionId()} method.
+     * which can be retrieved by calling the {@link #getAudioSessionId()} method.
      * If a non-zero session ID is provided, this AudioTrack will share effects attached to this
      * session
      * with all other media players or audio tracks in the same session, otherwise a new session
@@ -282,7 +282,7 @@ public class AudioTrack
      *   {@link AudioManager#STREAM_VOICE_CALL}, {@link AudioManager#STREAM_SYSTEM},
      *   {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_MUSIC},
      *   {@link AudioManager#STREAM_ALARM}, and {@link AudioManager#STREAM_NOTIFICATION}.
-     * @param sampleRateInHz the sample rate expressed in Hertz.
+     * @param sampleRateInHz the initial source sample rate expressed in Hz.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
@@ -662,7 +662,10 @@ public class AudioTrack
      * object to be created in the {@link #MODE_STREAM} mode. Note that this size doesn't
      * guarantee a smooth playback under load, and higher values should be chosen according to
      * the expected frequency at which the buffer will be refilled with additional data to play.
-     * @param sampleRateInHz the sample rate expressed in Hertz.
+     * For example, if you intend to dynamically set the source sample rate of an AudioTrack
+     * to a higher value than the initial source sample rate, be sure to configure the buffer size
+     * based on the highest planned sample rate.
+     * @param sampleRateInHz the source sample rate expressed in Hz.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
@@ -803,7 +806,10 @@ public class AudioTrack
 
     /**
      * Sets the playback sample rate for this track. This sets the sampling rate at which
-     * the audio data will be consumed and played back, not the original sampling rate of the
+     * the audio data will be consumed and played back
+     * (as set by the sampleRateInHz parameter in the
+     * {@link #AudioTrack(int, int, int, int, int, int)} constructor),
+     * not the original sampling rate of the
      * content. For example, setting it to half the sample rate of the content will cause the
      * playback to last twice as long, but will also result in a pitch shift down by one octave.
      * The valid sample rate range is from 1 Hz to twice the value returned by
