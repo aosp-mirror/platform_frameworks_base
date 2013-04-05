@@ -93,6 +93,8 @@ public class ActionBarView extends AbsActionBarView {
     private CharSequence mSubtitle;
     private Drawable mIcon;
     private Drawable mLogo;
+    private CharSequence mHomeDescription;
+    private int mHomeDescriptionRes;
 
     private HomeView mHomeLayout;
     private HomeView mExpandedHomeLayout;
@@ -286,6 +288,10 @@ public class ActionBarView extends AbsActionBarView {
         mTitleLayout = null;
         if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
             initTitle();
+        }
+
+        if (mHomeDescriptionRes != 0) {
+            setHomeActionContentDescription(mHomeDescriptionRes);
         }
 
         if (mTabScrollView != null && mIncludeTabs) {
@@ -589,14 +595,43 @@ public class ActionBarView extends AbsActionBarView {
             mUpGoerFive.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         } else {
             mUpGoerFive.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            mUpGoerFive.setContentDescription(buildHomeContentDescription());
+        }
+    }
+
+    /**
+     * Compose a content description for the Home/Up affordance.
+     *
+     * <p>As this encompasses the icon/logo, title and subtitle all in one, we need
+     * a description for the whole wad of stuff that can be localized properly.</p>
+     */
+    private CharSequence buildHomeContentDescription() {
+        final CharSequence homeDesc;
+        if (mHomeDescription != null) {
+            homeDesc = mHomeDescription;
+        } else {
             if ((mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-                mUpGoerFive.setContentDescription(mContext.getResources().getText(
-                        R.string.action_bar_up_description));
+                homeDesc = mContext.getResources().getText(R.string.action_bar_up_description);
             } else {
-                mUpGoerFive.setContentDescription(mContext.getResources().getText(
-                        R.string.action_bar_home_description));
+                homeDesc = mContext.getResources().getText(R.string.action_bar_home_description);
             }
         }
+
+        final CharSequence title = getTitle();
+        final CharSequence subtitle = getSubtitle();
+        if (!TextUtils.isEmpty(title)) {
+            final String result;
+            if (!TextUtils.isEmpty(subtitle)) {
+                result = getResources().getString(
+                        R.string.action_bar_home_subtitle_description_format,
+                        title, subtitle, homeDesc);
+            } else {
+                result = getResources().getString(R.string.action_bar_home_description_format,
+                        title, homeDesc);
+            }
+            return result;
+        }
+        return homeDesc;
     }
 
     public void setDisplayOptions(int options) {
@@ -1305,6 +1340,23 @@ public class ActionBarView extends AbsActionBarView {
         }
     }
 
+    public void setHomeAsUpIndicator(Drawable indicator) {
+        mHomeLayout.setUpIndicator(indicator);
+    }
+
+    public void setHomeAsUpIndicator(int resId) {
+        mHomeLayout.setUpIndicator(resId);
+    }
+
+    public void setHomeActionContentDescription(CharSequence description) {
+        mHomeDescription = description;
+    }
+
+    public void setHomeActionContentDescription(int resId) {
+        mHomeDescriptionRes = resId;
+        mHomeDescription = getResources().getText(resId);
+    }
+
     static class SavedState extends BaseSavedState {
         int expandedMenuItemId;
         boolean isOverflowOpen;
@@ -1339,9 +1391,11 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     private static class HomeView extends FrameLayout {
-        private View mUpView;
+        private ImageView mUpView;
         private ImageView mIconView;
         private int mUpWidth;
+        private int mUpIndicatorRes;
+        private Drawable mDefaultUpIndicator;
 
         private static final long DEFAULT_TRANSITION_DURATION = 150;
 
@@ -1364,6 +1418,25 @@ public class ActionBarView extends AbsActionBarView {
 
         public void setIcon(Drawable icon) {
             mIconView.setImageDrawable(icon);
+        }
+
+        public void setUpIndicator(Drawable d) {
+            mUpView.setImageDrawable(d != null ? d : mDefaultUpIndicator);
+            mUpIndicatorRes = 0;
+        }
+
+        public void setUpIndicator(int resId) {
+            mUpIndicatorRes = resId;
+            mUpView.setImageDrawable(resId != 0 ? getResources().getDrawable(resId) : null);
+        }
+
+        @Override
+        protected void onConfigurationChanged(Configuration newConfig) {
+            super.onConfigurationChanged(newConfig);
+            if (mUpIndicatorRes != 0) {
+                // Reload for config change
+                setUpIndicator(mUpIndicatorRes);
+            }
         }
 
         @Override
@@ -1389,8 +1462,9 @@ public class ActionBarView extends AbsActionBarView {
 
         @Override
         protected void onFinishInflate() {
-            mUpView = findViewById(com.android.internal.R.id.up);
+            mUpView = (ImageView) findViewById(com.android.internal.R.id.up);
             mIconView = (ImageView) findViewById(com.android.internal.R.id.home);
+            mDefaultUpIndicator = mUpView.getDrawable();
         }
 
         public int getStartOffset() {
