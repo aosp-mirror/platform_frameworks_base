@@ -1075,7 +1075,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(getAppShowFlags(), null);
         }
-        return new InputBindResult(session.session, session.channel, mCurId, mCurSeq);
+        return new InputBindResult(session.session,
+                session.channel != null ? session.channel.dup() : null, mCurId, mCurSeq);
     }
 
     InputBindResult startInputLocked(IInputMethodClient client,
@@ -2362,13 +2363,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
             case MSG_CREATE_SESSION: {
                 args = (SomeArgs)msg.obj;
+                IInputMethod method = (IInputMethod)args.arg1;
                 InputChannel channel = (InputChannel)args.arg2;
                 try {
-                    ((IInputMethod)args.arg1).createSession(channel,
-                            (IInputSessionCallback)args.arg3);
+                    method.createSession(channel, (IInputSessionCallback)args.arg3);
                 } catch (RemoteException e) {
                 } finally {
-                    if (channel != null) {
+                    // Dispose the channel if the input method is not local to this process
+                    // because the remote proxy will get its own copy when unparceled.
+                    if (channel != null && Binder.isProxy(method)) {
                         channel.dispose();
                     }
                 }
@@ -2409,16 +2412,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // There is nothing interesting about the last client dying.
                 }
                 return true;
-            case MSG_BIND_METHOD:
+            case MSG_BIND_METHOD: {
                 args = (SomeArgs)msg.obj;
+                IInputMethodClient client = (IInputMethodClient)args.arg1;
+                InputBindResult res = (InputBindResult)args.arg2;
                 try {
-                    ((IInputMethodClient)args.arg1).onBindMethod(
-                            (InputBindResult)args.arg2);
+                    client.onBindMethod(res);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Client died receiving input method " + args.arg2);
+                } finally {
+                    // Dispose the channel if the input method is not local to this process
+                    // because the remote proxy will get its own copy when unparceled.
+                    if (res.channel != null && Binder.isProxy(client)) {
+                        res.channel.dispose();
+                    }
                 }
                 args.recycle();
                 return true;
+            }
             case MSG_SET_ACTIVE:
                 try {
                     ((ClientState)msg.obj).client.setActive(msg.arg1 != 0);
