@@ -1477,6 +1477,6 @@
     <string name="user_switched" msgid="3768006783166984410">"Praegune kasutaja <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Omanik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Viga"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Rakendus ei toeta piiratud arvu kasutajate kontot"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Rakendus ei toeta piiratud õigustega kasutajate kontosid"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Selle toimingu käsitlemiseks ei leitud ühtegi rakendust"</string>
 </resources>
