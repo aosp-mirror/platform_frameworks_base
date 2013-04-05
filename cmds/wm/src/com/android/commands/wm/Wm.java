@@ -26,21 +26,15 @@ import android.os.ServiceManager;
 import android.util.AndroidException;
 import android.view.Display;
 import android.view.IWindowManager;
+import com.android.internal.os.BaseCommand;
 
+import java.io.PrintStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Wm {
+public class Wm extends BaseCommand {
 
     private IWindowManager mWm;
-    private String[] mArgs;
-    private int mNextArg;
-    private String mCurArgData;
-
-    // These are magic strings understood by the Eclipse plugin.
-    private static final String FATAL_ERROR_CODE = "Error type 1";
-    private static final String NO_SYSTEM_ERROR_CODE = "Error type 2";
-    private static final String NO_CLASS_ERROR_CODE = "Error type 3";
 
     /**
      * Command-line entry point.
@@ -48,23 +42,25 @@ public class Wm {
      * @param args The command-line arguments
      */
     public static void main(String[] args) {
-        try {
-            (new Wm()).run(args);
-        } catch (IllegalArgumentException e) {
-            showUsage();
-            System.err.println("Error: " + e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            System.exit(1);
-        }
+        (new Wm()).run(args);
     }
 
-    private void run(String[] args) throws Exception {
-        if (args.length < 1) {
-            showUsage();
-            return;
-        }
+    public void onShowUsage(PrintStream out) {
+        out.println(
+                "usage: wm [subcommand] [options]\n" +
+                "       wm size [reset|WxH]\n" +
+                "       wm density [reset|DENSITY]\n" +
+                "       wm overscan [reset|LEFT,TOP,RIGHT,BOTTOM]\n" +
+                "\n" +
+                "wm size: return or override display size.\n" +
+                "\n" +
+                "wm density: override display density.\n" +
+                "\n" +
+                "wm overscan: set overscan area for display.\n"
+                );
+    }
 
+    public void onRun() throws Exception {
         mWm = IWindowManager.Stub.asInterface(ServiceManager.checkService(
                         Context.WINDOW_SERVICE));
         if (mWm == null) {
@@ -72,9 +68,7 @@ public class Wm {
             throw new AndroidException("Can't connect to window manager; is the system running?");
         }
 
-        mArgs = args;
-        String op = args[0];
-        mNextArg = 1;
+        String op = nextArgRequired();
 
         if (op.equals("size")) {
             runDisplaySize();
@@ -83,7 +77,8 @@ public class Wm {
         } else if (op.equals("overscan")) {
             runDisplayOverscan();
         } else {
-            throw new IllegalArgumentException("Unknown command: " + op);
+            showError("Error: unknown command '" + op + "'");
+            return;
         }
     }
 
@@ -197,70 +192,5 @@ public class Wm {
             mWm.setOverscan(Display.DEFAULT_DISPLAY, rect.left, rect.top, rect.right, rect.bottom);
         } catch (RemoteException e) {
         }
-    }
-
-    private String nextOption() {
-        if (mCurArgData != null) {
-            String prev = mArgs[mNextArg - 1];
-            throw new IllegalArgumentException("No argument expected after \"" + prev + "\"");
-        }
-        if (mNextArg >= mArgs.length) {
-            return null;
-        }
-        String arg = mArgs[mNextArg];
-        if (!arg.startsWith("-")) {
-            return null;
-        }
-        mNextArg++;
-        if (arg.equals("--")) {
-            return null;
-        }
-        if (arg.length() > 1 && arg.charAt(1) != '-') {
-            if (arg.length() > 2) {
-                mCurArgData = arg.substring(2);
-                return arg.substring(0, 2);
-            } else {
-                mCurArgData = null;
-                return arg;
-            }
-        }
-        mCurArgData = null;
-        return arg;
-    }
-
-    private String nextArg() {
-        if (mCurArgData != null) {
-            String arg = mCurArgData;
-            mCurArgData = null;
-            return arg;
-        } else if (mNextArg < mArgs.length) {
-            return mArgs[mNextArg++];
-        } else {
-            return null;
-        }
-    }
-
-    private String nextArgRequired() {
-        String arg = nextArg();
-        if (arg == null) {
-            String prev = mArgs[mNextArg - 1];
-            throw new IllegalArgumentException("Argument expected after \"" + prev + "\"");
-        }
-        return arg;
-    }
-
-    private static void showUsage() {
-        System.err.println(
-                "usage: wm [subcommand] [options]\n" +
-                "       wm size [reset|WxH]\n" +
-                "       wm density [reset|DENSITY]\n" +
-                "       wm overscan [reset|LEFT,TOP,RIGHT,BOTTOM]\n" +
-                "\n" +
-                "wm size: return or override display size.\n" +
-                "\n" +
-                "wm density: override display density.\n" +
-                "\n" +
-                "wm overscan: set overscan area for display.\n"
-                );
     }
 }
