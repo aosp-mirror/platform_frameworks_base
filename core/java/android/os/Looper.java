@@ -192,6 +192,14 @@ public final class Looper {
     }
 
     /**
+     * Returns true if the current thread is this looper's thread.
+     * @hide
+     */
+    public boolean isCurrentThread() {
+        return Thread.currentThread() == mThread;
+    }
+
+    /**
      * Quits the looper.
      *
      * Causes the {@link #loop} method to terminate as soon as possible.

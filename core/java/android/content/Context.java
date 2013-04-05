@@ -256,6 +256,12 @@ public abstract class Context {
      * Return the Looper for the main thread of the current process.  This is
      * the thread used to dispatch calls to application components (activities,
      * services, etc).
+     * <p>
+     * By definition, this method returns the same result as would be obtained
+     * by calling {@link Looper#getMainLooper() Looper.getMainLooper()}.
+     * </p>
+     *
+     * @return The main looper.
      */
     public abstract Looper getMainLooper();
 
