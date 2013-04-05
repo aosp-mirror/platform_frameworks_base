@@ -21,6 +21,7 @@ import android.util.Log;
 
 
 /**
+ * @hide
  * <p>ProgramStore contains a set of parameters that control how
  * the graphics hardware handles writes to the framebuffer.
  * It could be used to:</p>
