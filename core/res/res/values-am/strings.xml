@@ -1478,10 +1478,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ተደራሽነት ተሰርዟል።"</string>
     <string name="user_switched" msgid="3768006783166984410">"የአሁኑ ተጠቃሚ <xliff:g id="NAME">%1$s</xliff:g>።"</string>
     <string name="owner_name" msgid="2716755460376028154">"ባለቤት"</string>
-    <!-- no translation found for error_message_title (4510373083082500195) -->
-    <skip />
-    <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
-    <skip />
-    <!-- no translation found for app_not_found (3429141853498927379) -->
-    <skip />
+    <string name="error_message_title" msgid="4510373083082500195">"ስህተት"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"ይህ መተግበሪያ የተገደቡ ተጠቃሚዎች መለያዎችን አይደግፍም"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"ይህን እርምጃ የሚያከናውን ምንም መተግበሪያ አልተገኘም"</string>
 </resources>

@@ -1480,5 +1480,5 @@
     <string name="owner_name" msgid="2716755460376028154">"擁有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"錯誤"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"這個應用程式不支援受限的使用者帳戶。"</string>
-    <string name="app_not_found" msgid="3429141853498927379">"找不到可以處理這個動作的應用程式"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"找不到支援此操作的應用程式"</string>
 </resources>
