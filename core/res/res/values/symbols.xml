@@ -710,6 +710,7 @@
   <java-symbol type="string" name="relationTypeSpouse" />
   <java-symbol type="string" name="relative_time" />
   <java-symbol type="string" name="reset" />
+  <java-symbol type="string" name="revoke" />
   <java-symbol type="string" name="ringtone_default" />
   <java-symbol type="string" name="ringtone_default_with_actual" />
   <java-symbol type="string" name="ringtone_picker_title" />
