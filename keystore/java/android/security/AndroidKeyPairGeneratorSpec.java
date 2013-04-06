@@ -49,8 +49,6 @@ import javax.security.auth.x500.X500Principal;
  * <p>
  * The self-signed certificate may be replaced at a later time by a certificate
  * signed by a real Certificate Authority.
- *
- * @hide
  */
 public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
     private final String mKeystoreAlias;
