@@ -86,6 +86,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScript;
+import android.security.AndroidKeyStoreProvider;
 
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
@@ -101,6 +102,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -5067,6 +5069,8 @@ public final class ActivityThread {
 
         // Set the reporter for event logging in libcore
         EventLogger.setReporter(new EventLoggingReporter());
+
+        Security.addProvider(new AndroidKeyStoreProvider());
 
         Process.setArgV0("<pre-initialized>");
 

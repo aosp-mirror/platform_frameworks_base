@@ -20440,6 +20440,19 @@ package android.sax {
 
 package android.security {
 
+  public class AndroidKeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
+  }
+
+  public static class AndroidKeyPairGeneratorSpec.Builder {
+    ctor public AndroidKeyPairGeneratorSpec.Builder(android.content.Context);
+    method public android.security.AndroidKeyPairGeneratorSpec build();
+    method public android.security.AndroidKeyPairGeneratorSpec.Builder setAlias(java.lang.String);
+    method public android.security.AndroidKeyPairGeneratorSpec.Builder setEndDate(java.util.Date);
+    method public android.security.AndroidKeyPairGeneratorSpec.Builder setSerialNumber(java.math.BigInteger);
+    method public android.security.AndroidKeyPairGeneratorSpec.Builder setStartDate(java.util.Date);
+    method public android.security.AndroidKeyPairGeneratorSpec.Builder setSubject(javax.security.auth.x500.X500Principal);
+  }
+
   public final class KeyChain {
     ctor public KeyChain();
     method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], java.lang.String, int, java.lang.String);
