@@ -520,7 +520,7 @@ public class AppSecurityPermissions {
     private static PermissionItemView getPermissionItemView(Context context, LayoutInflater inflater,
             MyPermissionGroupInfo grp, MyPermissionInfo perm, boolean first,
             CharSequence newPermPrefix, String packageName, boolean showRevokeUI) {
-git co        PermissionItemView permView = (PermissionItemView)inflater.inflate(
+            PermissionItemView permView = (PermissionItemView)inflater.inflate(
                 (perm.flags & PermissionInfo.FLAG_COSTS_MONEY) != 0
                         ? R.layout.app_permission_item_money : R.layout.app_permission_item,
                 null);
