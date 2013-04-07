@@ -20,6 +20,7 @@ import com.android.internal.R;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -77,6 +78,7 @@ public class AppSecurityPermissions {
     private final PermissionInfoComparator mPermComparator = new PermissionInfoComparator();
     private final List<MyPermissionInfo> mPermsList = new ArrayList<MyPermissionInfo>();
     private final CharSequence mNewPermPrefix;
+    private String mPackageName;
 
     static class MyPermissionGroupInfo extends PermissionGroupInfo {
         CharSequence mLabel;
@@ -138,6 +140,8 @@ public class AppSecurityPermissions {
         MyPermissionGroupInfo mGroup;
         MyPermissionInfo mPerm;
         AlertDialog mDialog;
+        private boolean mShowRevokeUI = false;
+        private String mPackageName;
 
         public PermissionItemView(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -145,9 +149,12 @@ public class AppSecurityPermissions {
         }
 
         public void setPermission(MyPermissionGroupInfo grp, MyPermissionInfo perm,
-                boolean first, CharSequence newPermPrefix) {
+                boolean first, CharSequence newPermPrefix, String packageName,
+                boolean showRevokeUI) {
             mGroup = grp;
             mPerm = perm;
+            mShowRevokeUI = showRevokeUI;
+            mPackageName = packageName;
 
             ImageView permGrpIcon = (ImageView) findViewById(R.id.perm_icon);
             TextView permNameView = (TextView) findViewById(R.id.perm_name);
@@ -206,6 +213,7 @@ public class AppSecurityPermissions {
                 }
                 builder.setCancelable(true);
                 builder.setIcon(mGroup.loadGroupIcon(pm));
+                addRevokeUIIfNecessary(builder);
                 mDialog = builder.show();
                 mDialog.setCanceledOnTouchOutside(true);
             }
@@ -217,6 +225,30 @@ public class AppSecurityPermissions {
             if (mDialog != null) {
                 mDialog.dismiss();
             }
+        }
+
+        private void addRevokeUIIfNecessary(AlertDialog.Builder builder) {
+            if (!mShowRevokeUI) {
+                return;
+            }
+
+            final boolean isRequired =
+                    ((mPerm.mExistingReqFlags & PackageInfo.REQUESTED_PERMISSION_REQUIRED) != 0);
+
+            if (isRequired) {
+                return;
+            }
+
+            DialogInterface.OnClickListener ocl = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    PackageManager pm = getContext().getPackageManager();
+                    pm.revokePermission(mPackageName, mPerm.name);
+                    PermissionItemView.this.setVisibility(View.INVISIBLE);
+                }
+            };
+            builder.setNegativeButton(R.string.cancel, null);
+            builder.setPositiveButton(R.string.revoke, ocl);
         }
     }
 
@@ -230,6 +262,7 @@ public class AppSecurityPermissions {
 
     public AppSecurityPermissions(Context context, String packageName) {
         this(context);
+        mPackageName = packageName;
         Set<MyPermissionInfo> permSet = new HashSet<MyPermissionInfo>();
         PackageInfo pkgInfo;
         try {
@@ -252,6 +285,7 @@ public class AppSecurityPermissions {
         if(info == null) {
             return;
         }
+        mPackageName = info.packageName;
 
         // Convert to a PackageInfo
         PackageInfo installedPkgInfo = null;
@@ -419,15 +453,23 @@ public class AppSecurityPermissions {
     }
 
     public View getPermissionsView() {
-        return getPermissionsView(WHICH_ALL);
+        return getPermissionsView(WHICH_ALL, false);
+    }
+
+    public View getPermissionsViewWithRevokeButtons() {
+        return getPermissionsView(WHICH_ALL, true);
     }
 
     public View getPermissionsView(int which) {
+        return getPermissionsView(which, false);
+    }
+
+    private View getPermissionsView(int which, boolean showRevokeUI) {
         LinearLayout permsView = (LinearLayout) mInflater.inflate(R.layout.app_perms_summary, null);
         LinearLayout displayList = (LinearLayout) permsView.findViewById(R.id.perms_list);
         View noPermsView = permsView.findViewById(R.id.no_permissions);
 
-        displayPermissions(mPermGroupsList, displayList, which);
+        displayPermissions(mPermGroupsList, displayList, which, showRevokeUI);
         if (displayList.getChildCount() <= 0) {
             noPermsView.setVisibility(View.VISIBLE);
         }
@@ -440,7 +482,7 @@ public class AppSecurityPermissions {
      * list of permission descriptions.
      */
     private void displayPermissions(List<MyPermissionGroupInfo> groups,
-            LinearLayout permListView, int which) {
+            LinearLayout permListView, int which, boolean showRevokeUI) {
         permListView.removeAllViews();
 
         int spacing = (int)(8*mContext.getResources().getDisplayMetrics().density);
@@ -451,7 +493,7 @@ public class AppSecurityPermissions {
             for (int j=0; j<perms.size(); j++) {
                 MyPermissionInfo perm = perms.get(j);
                 View view = getPermissionItemView(grp, perm, j == 0,
-                        which != WHICH_NEW ? mNewPermPrefix : null);
+                        which != WHICH_NEW ? mNewPermPrefix : null, showRevokeUI);
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -470,18 +512,19 @@ public class AppSecurityPermissions {
     }
 
     private PermissionItemView getPermissionItemView(MyPermissionGroupInfo grp,
-            MyPermissionInfo perm, boolean first, CharSequence newPermPrefix) {
-        return getPermissionItemView(mContext, mInflater, grp, perm, first, newPermPrefix);
+            MyPermissionInfo perm, boolean first, CharSequence newPermPrefix, boolean showRevokeUI) {
+        return getPermissionItemView(mContext, mInflater, grp, perm, first, newPermPrefix,
+                mPackageName, showRevokeUI);
     }
 
     private static PermissionItemView getPermissionItemView(Context context, LayoutInflater inflater,
             MyPermissionGroupInfo grp, MyPermissionInfo perm, boolean first,
-            CharSequence newPermPrefix) {
-        PermissionItemView permView = (PermissionItemView)inflater.inflate(
+            CharSequence newPermPrefix, String packageName, boolean showRevokeUI) {
+git co        PermissionItemView permView = (PermissionItemView)inflater.inflate(
                 (perm.flags & PermissionInfo.FLAG_COSTS_MONEY) != 0
                         ? R.layout.app_permission_item_money : R.layout.app_permission_item,
                 null);
-        permView.setPermission(grp, perm, first, newPermPrefix);
+        permView.setPermission(grp, perm, first, newPermPrefix, packageName, showRevokeUI);
         return permView;
     }
 

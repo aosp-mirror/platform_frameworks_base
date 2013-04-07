@@ -4088,4 +4088,5 @@
     <string name="app_no_restricted_accounts">This application does not support accounts for limited users</string>
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
+    <string name="revoke">Revoke</string>
 </resources>
