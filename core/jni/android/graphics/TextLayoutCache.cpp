@@ -20,7 +20,6 @@
 
 #include "TextLayoutCache.h"
 #include "TextLayout.h"
-#include "SkFontHost.h"
 #include "SkTypeface_android.h"
 #include "HarfBuzzNGFaceSkia.h"
 #include <unicode/unistr.h>
@@ -345,7 +344,7 @@ TextLayoutShaper::TextLayoutShaper() {
 }
 
 void TextLayoutShaper::init() {
-    mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, SkTypeface::kNormal);
+    mDefaultTypeface = SkTypeface::CreateFromName(NULL, SkTypeface::kNormal);
 }
 
 void TextLayoutShaper::unrefTypefaces() {

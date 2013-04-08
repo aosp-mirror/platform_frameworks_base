@@ -398,7 +398,7 @@ static JNIEnv* vm2env(JavaVM* vm)
 ///////////////////////////////////////////////////////////////////////////////
 
 AndroidPixelRef::AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
-        SkColorTable* ctable) : SkMallocPixelRef(storage, size, ctable) {
+        SkColorTable* ctable) : SkMallocPixelRef(storage, size, ctable, (storageObj == NULL)) {
     SkASSERT(storage);
     SkASSERT(env);
 
@@ -423,10 +423,6 @@ AndroidPixelRef::~AndroidPixelRef() {
             env->DeleteGlobalRef(fStorageObj);
         }
         fStorageObj = NULL;
-
-        // Set this to NULL to prevent the SkMallocPixelRef destructor
-        // from freeing the memory.
-        fStorage = NULL;
     }
 }
 
