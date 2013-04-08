@@ -2433,7 +2433,7 @@ public class ListView extends AbsListView {
                     mFirstPosition;
         } else {
             final int lastPos = mFirstPosition + getChildCount() - 1;
-            nextSelected = selectedPos != INVALID_POSITION && selectedPos < lastPos?
+            nextSelected = selectedPos != INVALID_POSITION && selectedPos <= lastPos ?
                     selectedPos - 1 :
                     lastPos;
         }
