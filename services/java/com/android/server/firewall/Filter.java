@@ -26,17 +26,14 @@ interface Filter {
      * @param ifw The IntentFirewall instance
      * @param intent The intent being started/bound/broadcast
      * @param callerApp An ApplicationInfo of an application in the caller's process. This may not
- *                  be the specific app that is actually sending the intent. This also may be
- *                  null, if the caller is the system process, or an unrecognized process (e.g.
- *                  am start)
-     * @param callerPackage The package name of the component sending the intent. This value is
-*                      provided by the caller and might be forged/faked.
+     *                  be the specific app that is actually sending the intent. This also may be
+     *                  null, if the caller is the system process, or an unrecognized process (e.g.
+     *                  am start)
      * @param callerUid
      * @param callerPid
      * @param resolvedType The resolved mime type of the intent
      * @param resolvedApp The application that contains the resolved component that the intent is
      */
     boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-            String callerPackage, int callerUid, int callerPid, String resolvedType,
-            ApplicationInfo resolvedApp);
+            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp);
 }
