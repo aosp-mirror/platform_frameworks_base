@@ -68,8 +68,7 @@ class SenderFilter {
     private static final Filter SIGNATURE = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                String callerPackage, int callerUid, int callerPid, String resolvedType,
-                ApplicationInfo resolvedApp) {
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             if (callerApp == null) {
                 return false;
             }
@@ -80,8 +79,7 @@ class SenderFilter {
     private static final Filter SYSTEM = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                String callerPackage, int callerUid, int callerPid, String resolvedType,
-                ApplicationInfo resolvedApp) {
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             if (callerApp == null) {
                 // if callerApp is null, the caller is the system process
                 return false;
@@ -93,8 +91,7 @@ class SenderFilter {
     private static final Filter SYSTEM_OR_SIGNATURE = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                String callerPackage, int callerUid, int callerPid, String resolvedType,
-                ApplicationInfo resolvedApp) {
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             return isSystemApp(callerApp, callerUid, callerPid) ||
                     ifw.signaturesMatch(callerUid, resolvedApp.uid);
         }
@@ -103,8 +100,7 @@ class SenderFilter {
     private static final Filter USER_ID = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                String callerPackage, int callerUid, int callerPid, String resolvedType,
-                ApplicationInfo resolvedApp) {
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             // This checks whether the caller is either the system process, or has the same user id
             // I.e. the same app, or an app that uses the same shared user id.
             // This is the same set of applications that would be able to access the component if
