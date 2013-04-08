@@ -3990,7 +3990,7 @@ public final class ViewRootImpl implements ViewParent,
             int movement = 0;
             float accel = 1;
             if (xOff > yOff) {
-                movement = x.generate((2/event.getXPrecision()));
+                movement = x.generate();
                 if (movement != 0) {
                     keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT
                             : KeyEvent.KEYCODE_DPAD_LEFT;
@@ -3998,7 +3998,7 @@ public final class ViewRootImpl implements ViewParent,
                     y.reset(2);
                 }
             } else if (yOff > 0) {
-                movement = y.generate((2/event.getYPrecision()));
+                movement = y.generate();
                 if (movement != 0) {
                     keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_DOWN
                             : KeyEvent.KEYCODE_DPAD_UP;
@@ -5515,8 +5515,11 @@ public final class ViewRootImpl implements ViewParent,
          */
         static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/40);
 
+        static final float FIRST_MOVEMENT_THRESHOLD = 0.5f;
+        static final float SECOND_CUMULATIVE_MOVEMENT_THRESHOLD = 2.0f;
+        static final float SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD = 1.0f;
+
         float position;
-        float absPosition;
         float acceleration = 1;
         long lastMoveTime = 0;
         int step;
@@ -5593,21 +5596,18 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             position += off;
-            return (absPosition = Math.abs(position));
+            return Math.abs(position);
         }
 
         /**
          * Generate the number of discrete movement events appropriate for
          * the currently collected trackball movement.
          *
-         * @param precision The minimum movement required to generate the
-         * first discrete movement.
-         *
          * @return Returns the number of discrete movements, either positive
          * or negative, or 0 if there is not enough trackball movement yet
          * for a discrete movement.
          */
-        int generate(float precision) {
+        int generate() {
             int movement = 0;
             nonAccelMovement = 0;
             do {
@@ -5617,7 +5617,7 @@ public final class ViewRootImpl implements ViewParent,
                     // to do this as soon as possible instead of waiting for
                     // a full movement, in order to make things look responsive.
                     case 0:
-                        if (absPosition < precision) {
+                        if (Math.abs(position) < FIRST_MOVEMENT_THRESHOLD) {
                             return movement;
                         }
                         movement += dir;
@@ -5628,13 +5628,12 @@ public final class ViewRootImpl implements ViewParent,
                     // to wait for the second complete trackball motion before
                     // generating the second discrete movement.
                     case 1:
-                        if (absPosition < 2) {
+                        if (Math.abs(position) < SECOND_CUMULATIVE_MOVEMENT_THRESHOLD) {
                             return movement;
                         }
                         movement += dir;
                         nonAccelMovement += dir;
-                        position += dir > 0 ? -2 : 2;
-                        absPosition = Math.abs(position);
+                        position -= SECOND_CUMULATIVE_MOVEMENT_THRESHOLD * dir;
                         step = 2;
                         break;
                     // After the first two, we generate discrete movements
@@ -5645,12 +5644,11 @@ public final class ViewRootImpl implements ViewParent,
                     // a longer increasing acceleration to continuous movement
                     // in one direction.
                     default:
-                        if (absPosition < 1) {
+                        if (Math.abs(position) < SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD) {
                             return movement;
                         }
                         movement += dir;
-                        position += dir >= 0 ? -1 : 1;
-                        absPosition = Math.abs(position);
+                        position -= dir * SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD;
                         float acc = acceleration;
                         acc *= 1.1f;
                         acceleration = acc < MAX_ACCELERATION ? acc : acceleration;
