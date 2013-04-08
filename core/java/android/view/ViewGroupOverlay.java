@@ -15,42 +15,36 @@
  */
 package android.view;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 /**
- * An overlay is an extra layer that sits on top of a View (the "host view")
- * which is drawn after all other content in that view (including children,
- * if the view is a ViewGroup). Interaction with the overlay layer is done in
- * terms of adding/removing views and drawables.
+ * A group overlay is an extra layer that sits on top of a ViewGroup
+ * (the "host view") which is drawn after all other content in that view
+ * (including the view group's children). Interaction with the overlay
+ * layer is done by adding and removing views and drawables.
  *
- * @see android.view.View#getOverlay()
+ * <p>ViewGroupOverlay is a subclass of {@link ViewOverlay}, adding the ability to
+ * manage views for overlays on ViewGroups, in addition to the drawable
+ * support in ViewOverlay.</p>
+ *
+ * @see ViewGroup#getOverlay()
  */
-public interface Overlay {
+public class ViewGroupOverlay extends ViewOverlay {
 
-    /**
-     * Adds a Drawable to the overlay. The bounds of the drawable should be relative to
-     * the host view. Any drawable added to the overlay should be removed when it is no longer
-     * needed or no longer visible.
-     *
-     * @param drawable The Drawable to be added to the overlay. This drawable will be
-     * drawn when the view redraws its overlay.
-     * @see #remove(android.graphics.drawable.Drawable)
-     * @see #add(View)
-     */
-    void add(Drawable drawable);
-
-    /**
-     * Removes the specified Drawable from the overlay.
-     *
-     * @param drawable The Drawable to be removed from the overlay.
-     * @see #add(android.graphics.drawable.Drawable)
-     */
-    void remove(Drawable drawable);
+    ViewGroupOverlay(Context context, View hostView) {
+        super(context, hostView);
+    }
 
     /**
      * Adds a View to the overlay. The bounds of the added view should be
      * relative to the host view. Any view added to the overlay should be
      * removed when it is no longer needed or no longer visible.
+     *
+     * <p>Views in the overlay are visual-only; they do not receive input
+     * events and do not participate in focus traversal. Overlay views
+     * are intended to be transient, such as might be needed by a temporary
+     * animation effect.</p>
      *
      * <p>If the view has a parent, the view will be removed from that parent
      * before being added to the overlay. Also, the view will be repositioned
@@ -62,20 +56,20 @@ public interface Overlay {
      * @param view The View to be added to the overlay. The added view will be
      * drawn when the overlay is drawn.
      * @see #remove(View)
-     * @see #add(android.graphics.drawable.Drawable)
+     * @see ViewOverlay#add(Drawable)
      */
-    void add(View view);
+    public void add(View view) {
+        mOverlayViewGroup.add(view);
+    }
 
     /**
      * Removes the specified View from the overlay.
      *
      * @param view The View to be removed from the overlay.
      * @see #add(View)
+     * @see ViewOverlay#remove(Drawable)
      */
-    void remove(View view);
-
-    /**
-     * Removes all views and drawables from the overlay.
-     */
-    void clear();
+    public void remove(View view) {
+        mOverlayViewGroup.remove(view);
+    }
 }

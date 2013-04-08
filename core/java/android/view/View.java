@@ -12110,7 +12110,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         //System.out.println("Attached! " + this);
         mAttachInfo = info;
         if (mOverlay != null) {
-            mOverlay.dispatchAttachedToWindow(info, visibility);
+            mOverlay.getOverlayView().dispatchAttachedToWindow(info, visibility);
         }
         mWindowAttachCount++;
         // We will need to evaluate the drawable state at least once.
@@ -12181,7 +12181,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mAttachInfo = null;
         if (mOverlay != null) {
-            mOverlay.dispatchDetachedFromWindow();
+            mOverlay.getOverlayView().dispatchDetachedFromWindow();
         }
     }
 
@@ -12834,7 +12834,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                         dispatchDraw(canvas);
                         if (mOverlay != null && !mOverlay.isEmpty()) {
-                            mOverlay.draw(canvas);
+                            mOverlay.getOverlayView().draw(canvas);
                         }
                     } else {
                         draw(canvas);
@@ -13150,7 +13150,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
                 dispatchDraw(canvas);
                 if (mOverlay != null && !mOverlay.isEmpty()) {
-                    mOverlay.draw(canvas);
+                    mOverlay.getOverlayView().draw(canvas);
                 }
             } else {
                 draw(canvas);
@@ -13908,7 +13908,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onDrawScrollBars(canvas);
 
             if (mOverlay != null && !mOverlay.isEmpty()) {
-                mOverlay.dispatchDraw(canvas);
+                mOverlay.getOverlayView().dispatchDraw(canvas);
             }
 
             // we're done...
@@ -14052,34 +14052,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         onDrawScrollBars(canvas);
 
         if (mOverlay != null && !mOverlay.isEmpty()) {
-            mOverlay.dispatchDraw(canvas);
+            mOverlay.getOverlayView().dispatchDraw(canvas);
         }
     }
 
     /**
-     * Called by the addToOverlay() methods to create, attach, and size the overlay as necessary
+     * Returns the overlay for this view, creating it if it does not yet exist.
+     * Adding drawables to the overlay will cause them to be displayed whenever
+     * the view itself is redrawn. Objects in the overlay should be actively
+     * managed: remove them when they should not be displayed anymore. The
+     * overlay will always have the same size as its host view.
+     *
+     * @return The ViewOverlay object for this view.
+     * @see ViewOverlay
      */
-    private void setupOverlay() {
+    public ViewOverlay getOverlay() {
         if (mOverlay == null) {
             mOverlay = new ViewOverlay(mContext, this);
-            mOverlay.mAttachInfo = mAttachInfo;
-            mOverlay.setRight(mRight);
-            mOverlay.setBottom(mBottom);
         }
-    }
-
-    /**
-     * Returns the overlay for this view, creating it if it does not yet exist. Adding drawables
-     * and/or views to the overlay will cause them to be displayed whenever the view itself is
-     * redrawn. Objects in the overlay should be actively managed: remove them when they should
-     * not be displayed anymore and invalidate this view appropriately when overlay drawables
-     * change. The overlay will always have the same size as its host view.
-     *
-     * @return The Overlay object for this view.
-     * @see Overlay
-     */
-    public Overlay getOverlay() {
-        setupOverlay();
         return mOverlay;
     }
 
@@ -14363,8 +14353,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
         onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
         if (mOverlay != null) {
-            mOverlay.setRight(mRight);
-            mOverlay.setBottom(mBottom);
+            mOverlay.getOverlayView().setRight(newWidth);
+            mOverlay.getOverlayView().setBottom(newHeight);
         }
     }
 

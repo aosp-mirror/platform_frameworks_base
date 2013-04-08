@@ -1886,34 +1886,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     // have become out of sync.
                     removePointersFromTouchTargets(idBitsToAssign);
 
-                    final float x = ev.getX(actionIndex);
-                    final float y = ev.getY(actionIndex);
-
-                    if (mOverlay != null) {
-                        ViewOverlay overlay = (ViewOverlay) mOverlay;
-                        // Check to see whether the overlay can handle the event
-                        final View child = mOverlay;
-                        if (canViewReceivePointerEvents(child) &&
-                                isTransformedTouchPointInView(x, y, child, null)) {
-                            newTouchTarget = getTouchTarget(child);
-                            if (newTouchTarget != null) {
-                                newTouchTarget.pointerIdBits |= idBitsToAssign;
-                            } else {
-                                resetCancelNextUpFlag(child);
-                                if (dispatchTransformedTouchEvent(ev, false, child,
-                                        idBitsToAssign)) {
-                                    mLastTouchDownTime = ev.getDownTime();
-                                    mLastTouchDownX = ev.getX();
-                                    mLastTouchDownY = ev.getY();
-                                    newTouchTarget = addTouchTarget(child, idBitsToAssign);
-                                    alreadyDispatchedToNewTouchTarget = true;
-                                }
-                            }
-                        }
-                    }
-
                     final int childrenCount = mChildrenCount;
                     if (newTouchTarget == null && childrenCount != 0) {
+                        final float x = ev.getX(actionIndex);
+                        final float y = ev.getY(actionIndex);
                         // Find a child that can receive the event.
                         // Scan children from front to back.
                         final View[] children = mChildren;
@@ -3001,6 +2977,26 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Returns the ViewGroupOverlay for this view group, creating it if it does
+     * not yet exist. In addition to {@link ViewOverlay}'s support for drawables,
+     * {@link ViewGroupOverlay} allows views to be added to the overlay. These
+     * views, like overlay drawables, are visual-only; they do not receive input
+     * events and should not be used as anything other than a temporary
+     * representation of a view in a parent container, such as might be used
+     * by an animation effect.
+     *
+     * @return The ViewGroupOverlay object for this view.
+     * @see ViewGroupOverlay
+     */
+    @Override
+    public ViewGroupOverlay getOverlay() {
+        if (mOverlay == null) {
+            mOverlay = new ViewGroupOverlay(mContext, this);
+        }
+        return (ViewGroupOverlay) mOverlay;
+    }
+
+    /**
      * Returns the index of the child to draw for this iteration. Override this
      * if you want to change the drawing order of children. By default, it
      * returns i.
@@ -3065,11 +3061,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
         if (mOverlay != null) {
-            mOverlay.mRecreateDisplayList = (mOverlay.mPrivateFlags & PFLAG_INVALIDATED)
+            View overlayView = mOverlay.getOverlayView();
+            overlayView.mRecreateDisplayList = (overlayView.mPrivateFlags & PFLAG_INVALIDATED)
                     == PFLAG_INVALIDATED;
-            mOverlay.mPrivateFlags &= ~PFLAG_INVALIDATED;
-            mOverlay.getDisplayList();
-            mOverlay.mRecreateDisplayList = false;
+            overlayView.mPrivateFlags &= ~PFLAG_INVALIDATED;
+            overlayView.getDisplayList();
+            overlayView.mRecreateDisplayList = false;
         }
     }
 
