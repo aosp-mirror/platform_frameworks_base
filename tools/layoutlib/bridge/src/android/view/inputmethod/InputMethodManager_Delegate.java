@@ -35,28 +35,15 @@ public class InputMethodManager_Delegate {
     // ---- Overridden methods ----
 
     @LayoutlibDelegate
-    /*package*/ static InputMethodManager getInstance(Looper mainLooper) {
-        synchronized (InputMethodManager.mInstanceSync) {
-            if (InputMethodManager.mInstance != null) {
-                return InputMethodManager.mInstance;
+    /*package*/ static InputMethodManager getInstance() {
+        synchronized (InputMethodManager.class) {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm == null) {
+                imm = new InputMethodManager(
+                        new BridgeIInputMethodManager(), Looper.getMainLooper());
+                InputMethodManager.sInstance = imm;
             }
-
-            InputMethodManager.mInstance = new InputMethodManager(new BridgeIInputMethodManager(),
-                    mainLooper);
+            return imm;
         }
-        return InputMethodManager.mInstance;
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static InputMethodManager getInstance(Context context) {
-        synchronized (InputMethodManager.mInstanceSync) {
-            if (InputMethodManager.mInstance != null) {
-                return InputMethodManager.mInstance;
-            }
-
-            InputMethodManager.mInstance = new InputMethodManager(new BridgeIInputMethodManager(),
-                    Looper.myLooper());
-        }
-        return InputMethodManager.mInstance;
     }
 }

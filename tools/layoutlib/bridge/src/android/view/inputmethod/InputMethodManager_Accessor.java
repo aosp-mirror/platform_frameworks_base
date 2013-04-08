@@ -22,6 +22,6 @@ package android.view.inputmethod;
 public class InputMethodManager_Accessor {
 
     public static void resetInstance() {
-        InputMethodManager.mInstance = null;
+        InputMethodManager.sInstance = null;
     }
 }
