@@ -1603,7 +1603,7 @@ public class Notification implements Parcelable
             n.defaults = mDefaults;
             n.flags = mFlags;
             n.bigContentView = makeBigContentView();
-            if (mLedOnMs != 0 && mLedOffMs != 0) {
+            if (mLedOnMs != 0 || mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
             if ((mDefaults & DEFAULT_LIGHTS) != 0) {
