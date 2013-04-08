@@ -1040,6 +1040,10 @@
     <skip />
     <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
     <skip />
+    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
+    <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <!-- no translation found for policydesc_limitPassword (3252114203919510394) -->
@@ -1993,6 +1997,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Agids d\'access"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fund davos"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Midar il fund davos"</string>
+    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
+    <skip />
     <!-- no translation found for vpn_title (19615213552042827) -->
     <skip />
     <!-- no translation found for vpn_title_long (6400714798049252294) -->
@@ -2181,6 +2187,10 @@
     <!-- no translation found for action_bar_up_description (2237496562952152589) -->
     <skip />
     <!-- no translation found for action_menu_overflow_description (2295659037509008453) -->
+    <skip />
+    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
+    <skip />
+    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
     <skip />
     <!-- no translation found for storage_internal (4891916833657929263) -->
     <skip />
@@ -2400,5 +2410,7 @@
     <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
     <skip />
     <!-- no translation found for app_not_found (3429141853498927379) -->
+    <skip />
+    <!-- no translation found for revoke (5404479185228271586) -->
     <skip />
 </resources>

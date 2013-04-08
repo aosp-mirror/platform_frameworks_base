@@ -621,6 +621,10 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"애플리케이션이 애플리케이션의 네트워크 사용량을 계산하는 방식을 수정할 수 있도록 허용합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"알림 액세스"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"앱이 다른 앱에서 게시한 알림을 비롯하여 알림을 검색하고 살펴보며 삭제할 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
@@ -1269,6 +1273,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"접근성"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"배경화면"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"배경화면 변경"</string>
+    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN이 활성화됨"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN이 <xliff:g id="APP">%s</xliff:g>에 의해 활성화됨"</string>
     <string name="vpn_text" msgid="3011306607126450322">"네트워크를 관리하려면 터치하세요."</string>
@@ -1372,6 +1378,10 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"홈 탐색"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"위로 탐색"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"옵션 더보기"</string>
+    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
+    <skip />
+    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
+    <skip />
     <string name="storage_internal" msgid="4891916833657929263">"내부 저장소"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD 카드"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 저장소"</string>
@@ -1481,4 +1491,6 @@
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"이 애플리케이션은 제한된 사용자를 위한 계정을 지원하지 않습니다."</string>
     <string name="app_not_found" msgid="3429141853498927379">"이 작업을 처리하는 애플리케이션을 찾을 수 없습니다."</string>
+    <!-- no translation found for revoke (5404479185228271586) -->
+    <skip />
 </resources>
