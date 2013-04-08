@@ -18,7 +18,7 @@ package android.animation;
 import android.graphics.Rect;
 
 /**
- * This evaluator can be used to perform type interpolation between <code>int</code> values.
+ * This evaluator can be used to perform type interpolation between <code>Rect</code> values.
  */
 public class RectEvaluator implements TypeEvaluator<Rect> {
 
