@@ -8221,14 +8221,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.writeLPr();
             }
         }
-        // A user ID was deleted here. Go through all users and remove it from
-        // KeyStore.
-        final int appId = outInfo.removedAppId;
-        if (appId != -1) {
-            final KeyStore keyStore = KeyStore.getInstance();
-            if (keyStore != null) {
-                for (final int userId : sUserManager.getUserIds()) {
-                    keyStore.clearUid(UserHandle.getUid(userId, appId));
+        if (outInfo != null) {
+            // A user ID was deleted here. Go through all users and remove it
+            // from KeyStore.
+            final int appId = outInfo.removedAppId;
+            if (appId != -1) {
+                final KeyStore keyStore = KeyStore.getInstance();
+                if (keyStore != null) {
+                    for (final int userId : sUserManager.getUserIds()) {
+                        keyStore.clearUid(UserHandle.getUid(userId, appId));
+                    }
                 }
             }
         }
