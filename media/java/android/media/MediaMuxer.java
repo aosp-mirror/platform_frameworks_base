@@ -257,8 +257,10 @@ final public class MediaMuxer {
     }
 
     /**
-     * Writes an encoded sample into the muxer. The application needs to make
-     * sure that the samples are written into the right tracks.
+     * Writes an encoded sample into the muxer.
+     * <p>The application needs to make sure that the samples are written into
+     * the right tracks. Also, it needs to make sure the samples for each track
+     * are written in chronological order.</p>
      * @param byteBuf The encoded sample.
      * @param trackIndex The track index for this sample.
      * @param bufferInfo The buffer information related to this sample.
