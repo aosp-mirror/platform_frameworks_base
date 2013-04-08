@@ -76,7 +76,6 @@ public class IntentFirewall {
                 StringFilter.HOST,
                 StringFilter.MIME_TYPE,
                 StringFilter.PATH,
-                StringFilter.SENDER_PACKAGE,
                 StringFilter.SSP,
 
                 CategoryFilter.FACTORY,
@@ -98,17 +97,16 @@ public class IntentFirewall {
         readRules(getRulesFile());
     }
 
-    public boolean checkStartActivity(Intent intent, ApplicationInfo callerApp,
-            String callerPackage, int callerUid, int callerPid, String resolvedType,
-            ActivityInfo resolvedActivity) {
+    public boolean checkStartActivity(Intent intent, ApplicationInfo callerApp, int callerUid,
+            int callerPid, String resolvedType, ActivityInfo resolvedActivity) {
         List<Rule> matchingRules = mActivityResolver.queryIntent(intent, resolvedType, false, 0);
         boolean log = false;
         boolean block = false;
 
         for (int i=0; i< matchingRules.size(); i++) {
             Rule rule = matchingRules.get(i);
-            if (rule.matches(this, intent, callerApp, callerPackage, callerUid, callerPid,
-                    resolvedType, resolvedActivity.applicationInfo)) {
+            if (rule.matches(this, intent, callerApp, callerUid, callerPid, resolvedType,
+                    resolvedActivity.applicationInfo)) {
                 block |= rule.getBlock();
                 log |= rule.getLog();
 

@@ -824,8 +824,7 @@ public class ActivityStackSupervisor {
         }
 
         boolean abort = !mService.mIntentFirewall.checkStartActivity(intent,
-                callerApp==null?null:callerApp.info, callingPackage, callingUid, callingPid,
-                resolvedType, aInfo);
+                callerApp==null?null:callerApp.info, callingUid, callingPid, resolvedType, aInfo);
 
         if (mService.mController != null) {
             try {
