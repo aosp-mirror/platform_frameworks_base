@@ -220,28 +220,29 @@ public class RelativeLayout extends ViewGroup {
     // with MeasureSpec value overflow and RelativeLayout was one source of them.
     // Some apps came to rely on them. :(
     private boolean mAllowBrokenMeasureSpecs = false;
+    // Compatibility hack. Old versions of the platform would not take
+    // margins and padding into account when generating the height measure spec
+    // for children during the horizontal measure pass.
+    private boolean mMeasureVerticalWithPaddingMargin = false;
 
     // A default width used for RTL measure pass
-    private static int DEFAULT_WIDTH = Integer.MAX_VALUE / 2;
+    private static final int DEFAULT_WIDTH = Integer.MAX_VALUE / 2;
 
     public RelativeLayout(Context context) {
         super(context);
-        mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
-                Build.VERSION_CODES.JELLY_BEAN_MR1;
+        queryCompatibilityModes(context);
     }
 
     public RelativeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         initFromAttributes(context, attrs);
-        mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
-                Build.VERSION_CODES.JELLY_BEAN_MR1;
+        queryCompatibilityModes(context);
     }
 
     public RelativeLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initFromAttributes(context, attrs);
-        mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
-                Build.VERSION_CODES.JELLY_BEAN_MR1;
+        queryCompatibilityModes(context);
     }
 
     private void initFromAttributes(Context context, AttributeSet attrs) {
@@ -249,6 +250,12 @@ public class RelativeLayout extends ViewGroup {
         mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, View.NO_ID);
         mGravity = a.getInt(R.styleable.RelativeLayout_gravity, mGravity);
         a.recycle();
+    }
+
+    private void queryCompatibilityModes(Context context) {
+        int version = context.getApplicationInfo().targetSdkVersion;
+        mAllowBrokenMeasureSpecs = version <= Build.VERSION_CODES.JELLY_BEAN_MR1;
+        mMeasureVerticalWithPaddingMargin = version >= Build.VERSION_CODES.JELLY_BEAN_MR2;
     }
 
     @Override
@@ -692,6 +699,11 @@ public class RelativeLayout extends ViewGroup {
                 params.leftMargin, params.rightMargin,
                 mPaddingLeft, mPaddingRight,
                 myWidth);
+        int maxHeight = myHeight;
+        if (mMeasureVerticalWithPaddingMargin) {
+            maxHeight = Math.max(0, myHeight - mPaddingTop - mPaddingBottom -
+                    params.topMargin - params.bottomMargin);
+        }
         int childHeightMeasureSpec;
         if (myHeight < 0 && !mAllowBrokenMeasureSpecs) {
             if (params.height >= 0) {
@@ -704,9 +716,9 @@ public class RelativeLayout extends ViewGroup {
                 childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             }
         } else if (params.width == LayoutParams.MATCH_PARENT) {
-            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.EXACTLY);
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.EXACTLY);
         } else {
-            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.AT_MOST);
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST);
         }
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
