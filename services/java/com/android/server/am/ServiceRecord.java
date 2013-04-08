@@ -376,37 +376,37 @@ class ServiceRecord extends Binder {
                             // icon, but this used to be able to slip through, so for
                             // those dirty apps give it the app's icon.
                             foregroundNoti.icon = appInfo.icon;
-                            if (foregroundNoti.contentView == null) {
-                                // In this case the app may not have specified a
-                                // content view...  so we'll give them something to show.
-                                CharSequence appName = appInfo.loadLabel(
-                                        ams.mContext.getPackageManager());
-                                if (appName == null) {
-                                    appName = appInfo.packageName;
-                                }
-                                Context ctx = null;
-                                try {
-                                    ctx = ams.mContext.createPackageContext(
-                                            appInfo.packageName, 0);
-                                    Intent runningIntent = new Intent(
-                                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                    runningIntent.setData(Uri.fromParts("package",
-                                            appInfo.packageName, null));
-                                    PendingIntent pi = PendingIntent.getActivity(ams.mContext, 0,
-                                            runningIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                    foregroundNoti.setLatestEventInfo(ctx,
-                                            ams.mContext.getString(
-                                                    com.android.internal.R.string
-                                                            .app_running_notification_title,
-                                                    appName),
-                                            ams.mContext.getString(
-                                                    com.android.internal.R.string
-                                                            .app_running_notification_text,
-                                                    appName),
-                                            pi);
-                                } catch (PackageManager.NameNotFoundException e) {
-                                    foregroundNoti.icon = 0;
-                                }
+
+                            // Do not allow apps to present a sneaky invisible content view either.
+                            foregroundNoti.contentView = null;
+                            foregroundNoti.bigContentView = null;
+                            CharSequence appName = appInfo.loadLabel(
+                                    ams.mContext.getPackageManager());
+                            if (appName == null) {
+                                appName = appInfo.packageName;
+                            }
+                            Context ctx = null;
+                            try {
+                                ctx = ams.mContext.createPackageContext(
+                                        appInfo.packageName, 0);
+                                Intent runningIntent = new Intent(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                runningIntent.setData(Uri.fromParts("package",
+                                        appInfo.packageName, null));
+                                PendingIntent pi = PendingIntent.getActivity(ams.mContext, 0,
+                                        runningIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                foregroundNoti.setLatestEventInfo(ctx,
+                                        ams.mContext.getString(
+                                                com.android.internal.R.string
+                                                        .app_running_notification_title,
+                                                appName),
+                                        ams.mContext.getString(
+                                                com.android.internal.R.string
+                                                        .app_running_notification_text,
+                                                appName),
+                                        pi);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                foregroundNoti.icon = 0;
                             }
                         }
                         if (foregroundNoti.icon == 0) {
