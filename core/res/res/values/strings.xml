@@ -2997,11 +2997,11 @@
     <!-- [CHAR LIMIT=NONE] Stub notification title for an app running a service that has provided
          a bad bad notification for itself. -->
     <string name="app_running_notification_title"><xliff:g id="app_name">%1$s</xliff:g>
-        running</string>
+        is running</string>
     <!-- [CHAR LIMIT=NONE] Stub notification text for an app running a service that has provided
          a bad bad notification for itself. -->
-    <string name="app_running_notification_text"><xliff:g id="app_name">%1$s</xliff:g>
-        is currently running</string>
+    <string name="app_running_notification_text">Touch for more information
+        or to stop the app.</string>
 
     <!-- Preference framework strings. -->
     <string name="ok">OK</string>
