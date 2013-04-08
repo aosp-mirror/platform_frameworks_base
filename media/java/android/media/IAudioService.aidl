@@ -120,7 +120,7 @@ interface IAudioService {
     oneway void dispatchMediaKeyEvent(in KeyEvent keyEvent);
     void dispatchMediaKeyEventUnderWakelock(in KeyEvent keyEvent);
 
-           void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c);
+           void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c, IBinder token);
     oneway void unregisterMediaButtonIntent(in PendingIntent pi);
 
     oneway void registerMediaButtonEventReceiverForCalls(in ComponentName c);
