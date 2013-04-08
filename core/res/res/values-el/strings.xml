@@ -621,6 +621,10 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Επιτρέπει στην εφαρμογή την τροποποίηση του τρόπου υπολογισμού της χρήσης δικτύου έναντι των εφαρμογών. Δεν προορίζεται για χρήση από συνήθεις εφαρμογές."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"πρόσβαση στις ειδοποιήσεις"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Επιτρέπει στην εφαρμογή να ανακτά, να εξετάζει και να απαλείφει ειδοποιήσεις, συμπεριλαμβανομένων εκείνων που δημοσιεύονται από άλλες εφαρμογές."</string>
+    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -1267,6 +1271,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Προσβασιμότητα"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ταπετσαρία"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Αλλαγή ταπετσαρίας"</string>
+    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"Το VPN ενεργοποιήθηκε"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Το VPN ενεργοποιήθηκε από την εφαρμογή <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Αγγίξτε για τη διαχείριση του δικτύου."</string>
@@ -1370,6 +1376,10 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"Πλοήγηση στην αρχική σελίδα"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Πλοήγηση προς τα επάνω"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Περισσότερες επιλογές"</string>
+    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
+    <skip />
+    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
+    <skip />
     <string name="storage_internal" msgid="4891916833657929263">"Εσωτερικός χώρος αποθήκευσης"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Κάρτα SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Χώρος αποθήκευσης USB"</string>
@@ -1479,4 +1489,6 @@
     <string name="error_message_title" msgid="4510373083082500195">"Σφάλμα"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Αυτή η εφαρμογή δεν υποστηρίζει λογαριασμούς για περιορισμένους χρήστες"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Δεν υπάρχει εφαρμογή για τη διαχείριση αυτής της ενέργειας"</string>
+    <!-- no translation found for revoke (5404479185228271586) -->
+    <skip />
 </resources>
