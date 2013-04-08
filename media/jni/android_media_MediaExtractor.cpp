@@ -162,6 +162,18 @@ status_t JMediaExtractor::getTrackFormat(size_t index, jobject *format) const {
     return ConvertMessageToMap(env, msg, format);
 }
 
+status_t JMediaExtractor::getFileFormat(jobject *format) const {
+    sp<AMessage> msg;
+    status_t err;
+    if ((err = mImpl->getFileFormat(&msg)) != OK) {
+        return err;
+    }
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+    return ConvertMessageToMap(env, msg, format);
+}
+
 status_t JMediaExtractor::selectTrack(size_t index) {
     return mImpl->selectTrack(index);
 }
@@ -330,6 +342,26 @@ static jobject android_media_MediaExtractor_getTrackFormatNative(
 
     jobject format;
     status_t err = extractor->getTrackFormat(index, &format);
+
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return NULL;
+    }
+
+    return format;
+}
+
+static jobject android_media_MediaExtractor_getFileFormatNative(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    jobject format;
+    status_t err = extractor->getFileFormat(&format);
 
     if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
@@ -767,6 +799,9 @@ static JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaExtractor_release },
 
     { "getTrackCount", "()I", (void *)android_media_MediaExtractor_getTrackCount },
+
+    { "getFileFormatNative", "()Ljava/util/Map;",
+        (void *)android_media_MediaExtractor_getFileFormatNative },
 
     { "getTrackFormatNative", "(I)Ljava/util/Map;",
         (void *)android_media_MediaExtractor_getTrackFormatNative },
