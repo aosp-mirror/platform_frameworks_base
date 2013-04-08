@@ -22,6 +22,7 @@ import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.view.Surface;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -395,6 +396,27 @@ final public class MediaCodec {
          * see {@link #CRYPTO_MODE_UNENCRYPTED} and {@link #CRYPTO_MODE_AES_CTR}.
          */
         public int mode;
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(numSubSamples + " subsamples, key [");
+            String hexdigits = "0123456789abcdef";
+            for (int i = 0; i < key.length; i++) {
+                builder.append(hexdigits.charAt((key[i] & 0xf0) >> 4));
+                builder.append(hexdigits.charAt(key[i] & 0x0f));
+            }
+            builder.append("], iv [");
+            for (int i = 0; i < key.length; i++) {
+                builder.append(hexdigits.charAt((iv[i] & 0xf0) >> 4));
+                builder.append(hexdigits.charAt(iv[i] & 0x0f));
+            }
+            builder.append("], clear ");
+            builder.append(Arrays.toString(numBytesOfClearData));
+            builder.append(", encrypted ");
+            builder.append(Arrays.toString(numBytesOfEncryptedData));
+            return builder.toString();
+        }
     };
 
     /**

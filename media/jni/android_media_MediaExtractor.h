@@ -45,6 +45,8 @@ struct JMediaExtractor : public RefBase {
     size_t countTracks() const;
     status_t getTrackFormat(size_t index, jobject *format) const;
 
+    status_t getFileFormat(jobject *format) const;
+
     status_t selectTrack(size_t index);
     status_t unselectTrack(size_t index);
 
