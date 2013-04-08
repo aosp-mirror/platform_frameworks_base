@@ -49,6 +49,8 @@ public class NotificationBuilderTest extends Activity
 {
     private final static String TAG = "NotificationTestList";
 
+    private final static String NOTIFY_TAG = "foo";
+
     NotificationManager mNM;
     Handler mHandler;
     int mStartDelay;
@@ -196,7 +198,7 @@ public class NotificationBuilderTest extends Activity
         final Notification n = buildNotification(id);
         mHandler.postDelayed(new Runnable() {
             public void run() {
-                mNM.notify(id, n);
+                mNM.notify(NOTIFY_TAG, id, n);
             }
         }, mStartDelay);
     }
