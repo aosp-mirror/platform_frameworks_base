@@ -47,6 +47,6 @@ class Task {
 
     @Override
     public String toString() {
-        return "id=" + taskId + " appTokens=" + mAppTokens;
+        return "taskId=" + taskId + " appTokens=" + mAppTokens;
     }
 }
