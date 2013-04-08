@@ -244,11 +244,11 @@ public class AppSecurityPermissions {
                 public void onClick(DialogInterface dialog, int which) {
                     PackageManager pm = getContext().getPackageManager();
                     pm.revokePermission(mPackageName, mPerm.name);
-                    PermissionItemView.this.setVisibility(View.INVISIBLE);
+                    PermissionItemView.this.setVisibility(View.GONE);
                 }
             };
-            builder.setNegativeButton(R.string.cancel, null);
-            builder.setPositiveButton(R.string.revoke, ocl);
+            builder.setNegativeButton(R.string.revoke, ocl);
+            builder.setPositiveButton(R.string.ok, null);
         }
     }
 
