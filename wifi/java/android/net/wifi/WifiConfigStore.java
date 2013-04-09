@@ -1196,7 +1196,7 @@ class WifiConfigStore {
             WifiConfiguration newConfig) {
         boolean ipChanged = false;
         boolean proxyChanged = false;
-        LinkProperties linkProperties = new LinkProperties();
+        LinkProperties linkProperties = null;
 
         switch (newConfig.ipAssignment) {
             case STATIC:
@@ -1262,10 +1262,10 @@ class WifiConfigStore {
         }
 
         if (!ipChanged) {
-            addIpSettingsFromConfig(linkProperties, currentConfig);
+            linkProperties = copyIpSettingsFromConfig(currentConfig);
         } else {
             currentConfig.ipAssignment = newConfig.ipAssignment;
-            addIpSettingsFromConfig(linkProperties, newConfig);
+            linkProperties = copyIpSettingsFromConfig(newConfig);
             log("IP config changed SSID = " + currentConfig.SSID + " linkProperties: " +
                     linkProperties.toString());
         }
@@ -1291,8 +1291,9 @@ class WifiConfigStore {
         return new NetworkUpdateResult(ipChanged, proxyChanged);
     }
 
-    private void addIpSettingsFromConfig(LinkProperties linkProperties,
-            WifiConfiguration config) {
+    private LinkProperties copyIpSettingsFromConfig(WifiConfiguration config) {
+        LinkProperties linkProperties = new LinkProperties();
+        linkProperties.setInterfaceName(config.linkProperties.getInterfaceName());
         for (LinkAddress linkAddr : config.linkProperties.getLinkAddresses()) {
             linkProperties.addLinkAddress(linkAddr);
         }
@@ -1302,6 +1303,7 @@ class WifiConfigStore {
         for (InetAddress dns : config.linkProperties.getDnses()) {
             linkProperties.addDns(dns);
         }
+        return linkProperties;
     }
 
     /**
