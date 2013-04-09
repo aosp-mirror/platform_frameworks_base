@@ -2985,6 +2985,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * representation of a view in a parent container, such as might be used
      * by an animation effect.
      *
+     * <p>Note: Overlays do not currently work correctly with {@link
+     * SurfaceView} or {@link TextureView}; contents in overlays for these
+     * types of views may not display correctly.</p>
+     *
      * @return The ViewGroupOverlay object for this view.
      * @see ViewGroupOverlay
      */

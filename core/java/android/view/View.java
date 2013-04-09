@@ -14063,6 +14063,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * managed: remove them when they should not be displayed anymore. The
      * overlay will always have the same size as its host view.
      *
+     * <p>Note: Overlays do not currently work correctly with {@link
+     * SurfaceView} or {@link TextureView}; contents in overlays for these
+     * types of views may not display correctly.</p>
+     *
      * @return The ViewOverlay object for this view.
      * @see ViewOverlay
      */
