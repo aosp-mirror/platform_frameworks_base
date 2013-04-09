@@ -762,7 +762,7 @@ public abstract class WallpaperService extends Service {
             mWindowToken = wrapper.mWindowToken;
             mSurfaceHolder.setSizeFromLayout();
             mInitializing = true;
-            mSession = WindowManagerGlobal.getWindowSession(getMainLooper());
+            mSession = WindowManagerGlobal.getWindowSession();
             
             mWindow.setSession(mSession);
 

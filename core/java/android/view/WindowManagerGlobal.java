@@ -136,11 +136,11 @@ public final class WindowManagerGlobal {
         }
     }
 
-    public static IWindowSession getWindowSession(Looper mainLooper) {
+    public static IWindowSession getWindowSession() {
         synchronized (WindowManagerGlobal.class) {
             if (sWindowSession == null) {
                 try {
-                    InputMethodManager imm = InputMethodManager.getInstance(mainLooper);
+                    InputMethodManager imm = InputMethodManager.getInstance();
                     IWindowManager windowManager = getWindowManagerService();
                     sWindowSession = windowManager.openSession(
                             imm.getClient(), imm.getInputContext());
@@ -351,7 +351,7 @@ public final class WindowManagerGlobal {
         View view = root.getView();
 
         if (view != null) {
-            InputMethodManager imm = InputMethodManager.getInstance(view.getContext());
+            InputMethodManager imm = InputMethodManager.getInstance();
             if (imm != null) {
                 imm.windowDismissed(mViews[index].getWindowToken());
             }

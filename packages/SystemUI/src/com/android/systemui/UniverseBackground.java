@@ -97,7 +97,7 @@ public class UniverseBackground extends FrameLayout {
     public UniverseBackground(Context context) {
         super(context);
         setBackgroundColor(0xff000000);
-        mSession = WindowManagerGlobal.getWindowSession(context.getMainLooper());
+        mSession = WindowManagerGlobal.getWindowSession();
         mContent = View.inflate(context, R.layout.universe, null);
         addView(mContent);
         mContent.findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {

@@ -371,9 +371,9 @@ class ContextImpl extends Context {
                     return new DisplayManager(ctx.getOuterContext());
                 }});
 
-        registerService(INPUT_METHOD_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return InputMethodManager.getInstance(ctx);
+        registerService(INPUT_METHOD_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    return InputMethodManager.getInstance();
                 }});
 
         registerService(TEXT_SERVICES_MANAGER_SERVICE, new ServiceFetcher() {
