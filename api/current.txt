@@ -18445,6 +18445,7 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.ContactsColumns {
+    field public static final java.lang.String CONTACT_LAST_UPDATED_TIMESTAMP = "contact_last_updated_timestamp";
     field public static final java.lang.String DISPLAY_NAME = "display_name";
     field public static final java.lang.String HAS_PHONE_NUMBER = "has_phone_number";
     field public static final java.lang.String IN_VISIBLE_GROUP = "in_visible_group";
@@ -18507,6 +18508,16 @@ package android.provider {
   protected static abstract interface ContactsContract.DataUsageStatColumns {
     field public static final java.lang.String LAST_TIME_USED = "last_time_used";
     field public static final java.lang.String TIMES_USED = "times_used";
+  }
+
+  public static final class ContactsContract.DeletedContacts implements android.provider.ContactsContract.DeletedContactsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final long DAYS_KEPT_MILLISECONDS = 2592000000L; // 0x9a7ec800L
+  }
+
+  protected static abstract interface ContactsContract.DeletedContactsColumns {
+    field public static final java.lang.String CONTACT_DELETED_TIMESTAMP = "contact_deleted_timestamp";
+    field public static final java.lang.String CONTACT_ID = "contact_id";
   }
 
   public static final class ContactsContract.Directory implements android.provider.BaseColumns {
@@ -18588,6 +18599,7 @@ package android.provider {
   public static final class ContactsContract.Intents {
     ctor public ContactsContract.Intents();
     field public static final java.lang.String ATTACH_IMAGE = "com.android.contacts.action.ATTACH_IMAGE";
+    field public static final java.lang.String CONTACTS_DATABASE_CREATED = "android.provider.Contacts.DATABASE_CREATED";
     field public static final java.lang.String EXTRA_CREATE_DESCRIPTION = "com.android.contacts.action.CREATE_DESCRIPTION";
     field public static final java.lang.String EXTRA_FORCE_CREATE = "com.android.contacts.action.FORCE_CREATE";
     field public static final java.lang.String INVITE_CONTACT = "com.android.contacts.action.INVITE_CONTACT";
