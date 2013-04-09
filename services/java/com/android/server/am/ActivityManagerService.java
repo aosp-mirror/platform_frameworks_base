@@ -3873,6 +3873,9 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     if (app.userId != userId) {
                         continue;
                     }
+                    if (appId >= 0 && UserHandle.getAppId(app.uid) != appId) {
+                        continue;
+                    }
                 // Package has been specified, we want to hit all processes
                 // that match it.  We need to qualify this by the processes
                 // that are running under the specified app and user ID.
@@ -7592,6 +7595,18 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
         }
         return killed;
+    }
+
+    @Override
+    public void killUid(int uid, String reason) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("killUid only available to the system");
+        }
+        synchronized (this) {
+            killPackageProcessesLocked(null, UserHandle.getAppId(uid), UserHandle.getUserId(uid),
+                    ProcessList.FOREGROUND_APP_ADJ-1, false, true, true, false,
+                    reason != null ? reason : "kill uid");
+        }
     }
 
     @Override

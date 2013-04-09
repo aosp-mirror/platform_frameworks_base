@@ -2311,6 +2311,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public void revokePermission(String packageName, String permissionName) {
+        int changedAppId = -1;
+
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
@@ -2338,6 +2340,30 @@ public class PackageManagerService extends IPackageManager.Stub {
                     gp.gids = removeInts(gp.gids, bp.gids);
                 }
                 mSettings.writeLPr();
+                changedAppId = ps.appId;
+            }
+        }
+
+        if (changedAppId >= 0) {
+            // We changed the perm on someone, kill its processes.
+            IActivityManager am = ActivityManagerNative.getDefault();
+            if (am != null) {
+                final int callingUserId = UserHandle.getCallingUserId();
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    //XXX we should only revoke for the calling user's app permissions,
+                    // but for now we impact all users.
+                    //am.killUid(UserHandle.getUid(callingUserId, changedAppId),
+                    //        "revoke " + permissionName);
+                    int[] users = sUserManager.getUserIds();
+                    for (int user : users) {
+                        am.killUid(UserHandle.getUid(user, changedAppId),
+                                "revoke " + permissionName);
+                    }
+                } catch (RemoteException e) {
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
     }
@@ -10696,19 +10722,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         || mSettings.mReadExternalStorageEnforced != enforced) {
                     mSettings.mReadExternalStorageEnforced = enforced;
                     mSettings.writeLPr();
-
-                    // kill any non-foreground processes so we restart them and
-                    // grant/revoke the GID.
-                    final IActivityManager am = ActivityManagerNative.getDefault();
-                    if (am != null) {
-                        final long token = Binder.clearCallingIdentity();
-                        try {
-                            am.killProcessesBelowForeground("setPermissionEnforcement");
-                        } catch (RemoteException e) {
-                        } finally {
-                            Binder.restoreCallingIdentity(token);
-                        }
-                    }
+                }
+            }
+            // kill any non-foreground processes so we restart them and
+            // grant/revoke the GID.
+            final IActivityManager am = ActivityManagerNative.getDefault();
+            if (am != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    am.killProcessesBelowForeground("setPermissionEnforcement");
+                } catch (RemoteException e) {
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
             }
         } else {
