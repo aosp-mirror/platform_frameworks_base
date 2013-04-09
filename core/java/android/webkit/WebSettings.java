@@ -1004,6 +1004,7 @@ public abstract class WebSettings {
      * @param flag true if plugins should be enabled
      * @deprecated This method has been deprecated in favor of
      *             {@link #setPluginState}
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
     @Deprecated
     public synchronized void setPluginsEnabled(boolean flag) {
@@ -1032,6 +1033,7 @@ public abstract class WebSettings {
      * @param pluginsPath a String path to the directory containing plugins
      * @deprecated This method is no longer used as plugins are loaded from
      *             their own APK via the system's package manager.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
     @Deprecated
     public synchronized void setPluginsPath(String pluginsPath) {
@@ -1224,6 +1226,7 @@ public abstract class WebSettings {
      * @return true if plugins are enabled
      * @see #setPluginsEnabled
      * @deprecated This method has been replaced by {@link #getPluginState}
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
     @Deprecated
     public synchronized boolean getPluginsEnabled() {
@@ -1249,6 +1252,7 @@ public abstract class WebSettings {
      * @return an empty string
      * @deprecated This method is no longer used as plugins are loaded from
      * their own APK via the system's package manager.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
     @Deprecated
     public synchronized String getPluginsPath() {
