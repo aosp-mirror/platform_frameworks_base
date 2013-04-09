@@ -26,7 +26,10 @@ import android.net.Uri;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * MediaExtractor facilitates extraction of demuxed, typically encoded,  media data
@@ -193,6 +196,38 @@ final public class MediaExtractor {
      * Count the number of tracks found in the data source.
      */
     public native final int getTrackCount();
+
+    /**
+     * Get the PSSH info if present. This returns a map of uuid-to-bytes, with the uuid specifying
+     * the crypto scheme, and the bytes being the data specific to that scheme.
+     * {@hide}
+     */
+    public Map<UUID, byte[]> getPsshInfo() {
+        Map<UUID, byte[]> psshMap = null;
+        Map<String, Object> formatMap = getFileFormatNative();
+        if (formatMap != null && formatMap.containsKey("pssh")) {
+            ByteBuffer rawpssh = (ByteBuffer) formatMap.get("pssh");
+            rawpssh.order(ByteOrder.nativeOrder());
+            rawpssh.rewind();
+            formatMap.remove("pssh");
+            // parse the flat pssh bytebuffer into something more manageable
+            psshMap = new HashMap<UUID, byte[]>();
+            while (rawpssh.remaining() > 0) {
+                rawpssh.order(ByteOrder.BIG_ENDIAN);
+                long msb = rawpssh.getLong();
+                long lsb = rawpssh.getLong();
+                UUID uuid = new UUID(msb, lsb);
+                rawpssh.order(ByteOrder.nativeOrder());
+                int datalen = rawpssh.getInt();
+                byte [] psshdata = new byte[datalen];
+                rawpssh.get(psshdata);
+                psshMap.put(uuid, psshdata);
+            }
+        }
+        return psshMap;
+    }
+
+    private native Map<String, Object> getFileFormatNative();
 
     /**
      * Get the track format at the specified index.

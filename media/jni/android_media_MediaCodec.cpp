@@ -372,7 +372,7 @@ static jint throwExceptionAsNecessary(
 
         default:
         {
-            jniThrowException(env, "java/lang/IllegalStateException", NULL);
+            jniThrowException(env, "java/lang/IllegalStateException", msg);
             break;
         }
     }
@@ -455,13 +455,13 @@ static void android_media_MediaCodec_start(JNIEnv *env, jobject thiz) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
     if (codec == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException", "no codec found");
         return;
     }
 
     status_t err = codec->start();
 
-    throwExceptionAsNecessary(env, err);
+    throwExceptionAsNecessary(env, err, "start failed");
 }
 
 static void android_media_MediaCodec_stop(JNIEnv *env, jobject thiz) {
