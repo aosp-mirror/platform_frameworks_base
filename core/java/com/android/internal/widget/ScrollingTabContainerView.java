@@ -179,6 +179,9 @@ public class ScrollingTabContainerView extends HorizontalScrollView
                 animateToTab(position);
             }
         }
+        if (mTabSpinner != null && position >= 0) {
+            mTabSpinner.setSelection(position);
+        }
     }
 
     public void setContentHeight(int contentHeight) {
