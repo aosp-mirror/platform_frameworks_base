@@ -142,13 +142,13 @@ public final class CellIdentityLte implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("LteCellIdentitiy:");
-        sb.append(super.toString());
+        StringBuilder sb = new StringBuilder("CellIdentitiyLte:{");
         sb.append(" mMcc="); sb.append(mMcc);
         sb.append(" mMnc="); sb.append(mMnc);
         sb.append(" mCi="); sb.append(mCi);
         sb.append(" mPci="); sb.append(mPci);
         sb.append(" mTac="); sb.append(mTac);
+        sb.append("}");
 
         return sb.toString();
     }

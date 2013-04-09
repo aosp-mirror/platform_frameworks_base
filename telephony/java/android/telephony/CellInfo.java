@@ -149,7 +149,7 @@ public abstract class CellInfo implements Parcelable {
         StringBuffer sb = new StringBuffer();
         String timeStampType;
 
-        sb.append(" mRegistered=").append(mRegistered ? "YES" : "NO");
+        sb.append("mRegistered=").append(mRegistered ? "YES" : "NO");
         timeStampType = timeStampTypeToString(mTimeStampType);
         sb.append(" mTimeStampType=").append(timeStampType);
         sb.append(" mTimeStamp=").append(mTimeStamp).append("ns");

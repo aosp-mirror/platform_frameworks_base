@@ -1357,4 +1357,24 @@ public class TelephonyManager {
             return null;
         }
     }
+
+    /**
+     * Sets the minimum time in milli-seconds between {@link PhoneStateListener#onCellInfoChanged
+     * PhoneStateListener.onCellInfoChanged} will be invoked.
+     *
+     * The default, 0, means invoke onCellInfoChanged when any of the reported
+     * information changes. Setting the value to INT_MAX(0x7fffffff) means never issue
+     * A onCellInfoChanged.
+     *
+     * @param rateInMillis the rate
+     *
+     * @hide
+     */
+    public void setCellInfoListRate(int rateInMillis) {
+        try {
+            getITelephony().setCellInfoListRate(rateInMillis);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+    }
 }
