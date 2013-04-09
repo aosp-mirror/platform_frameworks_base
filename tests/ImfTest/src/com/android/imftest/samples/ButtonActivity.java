@@ -47,7 +47,7 @@ public class ButtonActivity extends Activity
         {
             public void onClick (View v)
             {
-                InputMethodManager imm = InputMethodManager.getInstance(instance);
+                InputMethodManager imm = InputMethodManager.getInstance();
                 if (mKeyboardIsActive)
                 {
                     imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
