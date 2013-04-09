@@ -77,7 +77,14 @@ public:
     }
 
     static SkCanvas* initRaster(JNIEnv* env, jobject, SkBitmap* bitmap) {
-        return bitmap ? new SkCanvas(*bitmap) : new SkCanvas;
+        if (bitmap) {
+            return new SkCanvas(*bitmap);
+        } else {
+            // Create an empty bitmap device to prevent callers from crashing
+            // if they attempt to draw into this canvas.
+            SkBitmap emptyBitmap;
+            return new SkCanvas(emptyBitmap);
+        }
     }
     
     static void copyCanvasState(JNIEnv* env, jobject clazz,
