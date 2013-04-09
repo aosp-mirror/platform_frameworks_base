@@ -373,6 +373,8 @@ public interface IActivityManager extends IInterface {
 
     public void reportTopActivityExtras(IBinder token, Bundle extras) throws RemoteException;
 
+    public void killUid(int uid, String reason) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -632,4 +634,5 @@ public interface IActivityManager extends IInterface {
     int GET_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+161;
     int REPORT_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+162;
     int GET_LAUNCHED_FROM_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+163;
+    int KILL_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
 }
