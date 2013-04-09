@@ -45,8 +45,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.ViewPropertyAnimator;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
@@ -195,50 +194,27 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                             oldHolder.calloutLine.setTranslationY(0f);
                         }
                     }
-                    mItemToAnimateInWhenWindowAnimationIsFinished = null;
-
-                    final ViewTreeObserver observer = getViewTreeObserver();
-                    final OnGlobalLayoutListener animateFirstIcon = new OnGlobalLayoutListener() {
-                        public void onGlobalLayout() {
-                            ViewHolder oldHolder = mItemToAnimateInWhenWindowAnimationIsFinished;
-                            if (oldHolder != null) {
-                                oldHolder.iconView.setAlpha(1f);
-                                oldHolder.iconView.setTranslationX(0f);
-                                oldHolder.iconView.setTranslationY(0f);
-                                oldHolder.labelView.setAlpha(1f);
-                                oldHolder.labelView.setTranslationX(0f);
-                                oldHolder.labelView.setTranslationY(0f);
-                                if (oldHolder.calloutLine != null) {
-                                    oldHolder.calloutLine.setAlpha(1f);
-                                    oldHolder.calloutLine.setTranslationX(0f);
-                                    oldHolder.calloutLine.setTranslationY(0f);
-                                }
-                            }
-                            mItemToAnimateInWhenWindowAnimationIsFinished = holder;
-                            int translation = -getResources().getDimensionPixelSize(
-                                    R.dimen.status_bar_recents_app_icon_translate_distance);
-                            final Configuration config = getResources().getConfiguration();
-                            if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                if (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-                                    translation = -translation;
-                                }
-                                holder.iconView.setAlpha(0f);
-                                holder.iconView.setTranslationX(translation);
-                                holder.labelView.setAlpha(0f);
-                                holder.labelView.setTranslationX(translation);
-                                holder.calloutLine.setAlpha(0f);
-                                holder.calloutLine.setTranslationX(translation);
-                            } else {
-                                holder.iconView.setAlpha(0f);
-                                holder.iconView.setTranslationY(translation);
-                            }
-                            if (!mWaitingForWindowAnimation) {
-                                animateInIconOfFirstTask();
-                            }
-                            getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    mItemToAnimateInWhenWindowAnimationIsFinished = holder;
+                    int translation = -getResources().getDimensionPixelSize(
+                            R.dimen.status_bar_recents_app_icon_translate_distance);
+                    final Configuration config = getResources().getConfiguration();
+                    if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        if (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+                            translation = -translation;
                         }
-                    };
-                    observer.addOnGlobalLayoutListener(animateFirstIcon);
+                        holder.iconView.setAlpha(0f);
+                        holder.iconView.setTranslationX(translation);
+                        holder.labelView.setAlpha(0f);
+                        holder.labelView.setTranslationX(translation);
+                        holder.calloutLine.setAlpha(0f);
+                        holder.calloutLine.setTranslationX(translation);
+                    } else {
+                        holder.iconView.setAlpha(0f);
+                        holder.iconView.setTranslationY(translation);
+                    }
+                    if (!mWaitingForWindowAnimation) {
+                        animateInIconOfFirstTask();
+                    }
                 }
             }
 
@@ -586,17 +562,20 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 !mRecentTasksLoader.isFirstScreenful()) {
             int timeSinceWindowAnimation =
                     (int) (System.currentTimeMillis() - mWindowAnimationStartTime);
-            final int minStartDelay = 150;
+            final int minStartDelay = 125;
             final int startDelay = Math.max(0, Math.min(
                     minStartDelay - timeSinceWindowAnimation, minStartDelay));
             final int duration = 250;
             final ViewHolder holder = mItemToAnimateInWhenWindowAnimationIsFinished;
             final TimeInterpolator cubic = new DecelerateInterpolator(1.5f);
+            FirstFrameAnimatorHelper.initializeDrawListener(holder.iconView);
             for (View v :
                 new View[] { holder.iconView, holder.labelView, holder.calloutLine }) {
                 if (v != null) {
-                    v.animate().translationX(0).translationY(0).alpha(1f).setStartDelay(startDelay)
+                    ViewPropertyAnimator vpa = v.animate().translationX(0).translationY(0)
+                            .alpha(1f).setStartDelay(startDelay)
                             .setDuration(duration).setInterpolator(cubic);
+                    FirstFrameAnimatorHelper h = new FirstFrameAnimatorHelper(vpa, v);
                 }
             }
             mItemToAnimateInWhenWindowAnimationIsFinished = null;
