@@ -147,13 +147,13 @@ public final class CellIdentityGsm implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("GsmCellIdentitiy:");
-        sb.append(super.toString());
+        StringBuilder sb = new StringBuilder("CellIdentitiyGsm:{");
         sb.append(" mMcc=").append(mMcc);
-        sb.append(" mMnc=").append(mMcc);
+        sb.append(" mMnc=").append(mMnc);
         sb.append(" mLac=").append(mLac);
         sb.append(" mCid=").append(mCid);
         sb.append(" mPsc=").append(mPsc);
+        sb.append("}");
 
         return sb.toString();
     }

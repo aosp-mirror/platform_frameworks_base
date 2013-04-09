@@ -87,10 +87,11 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     public String toString() {
         StringBuffer sb = new StringBuffer();
 
-        sb.append("CellInfoCdma:");
+        sb.append("CellInfoCdma:{");
         sb.append(super.toString());
-        sb.append(", ").append(mCellIdentityCdma);
-        sb.append(", ").append(mCellSignalStrengthCdma);
+        sb.append(" ").append(mCellIdentityCdma);
+        sb.append(" ").append(mCellSignalStrengthCdma);
+        sb.append("}");
 
         return sb.toString();
     }
