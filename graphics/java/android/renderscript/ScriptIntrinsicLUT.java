@@ -47,7 +47,7 @@ public final class ScriptIntrinsicLUT extends ScriptIntrinsic {
      *
      * The defaults tables are identity.
      *
-     * @param rs The Renderscript context
+     * @param rs The RenderScript context
      * @param e Element type for intputs and outputs
      *
      * @return ScriptIntrinsicLUT

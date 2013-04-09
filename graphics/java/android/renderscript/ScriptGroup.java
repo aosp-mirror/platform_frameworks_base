@@ -20,24 +20,26 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
- * ScriptGroup creates a groups of scripts which are executed
- * together based upon upon one execution call as if they were
- * all part of a single script.  The scripts may be connected
- * internally or to an external allocation. For the internal
- * connections the intermediate results are not observable after
- * the execution of the script.
+ * ScriptGroup creates a group of kernels that are executed
+ * together with one execution call as if they were a single kernel.
+ * The kernels may be connected internally or to an external allocation.
+ * The intermediate results for internal connections are not observable
+ * after the execution of the script.
  * <p>
- * The external connections are grouped into inputs and outputs.
+ * External connections are grouped into inputs and outputs.
  * All outputs are produced by a script kernel and placed into a
- * user supplied allocation. Inputs are similar but supply the
- * input of a kernal. Inputs bounds to a script are set directly
- * upon the script.
+ * user-supplied allocation. Inputs provide the input of a kernel.
+ * Inputs bound to script globals are set directly upon the script.
  * <p>
  * A ScriptGroup must contain at least one kernel. A ScriptGroup
  * must contain only a single directed acyclic graph (DAG) of
  * script kernels and connections. Attempting to create a
  * ScriptGroup with multiple DAGs or attempting to create
  * a cycle within a ScriptGroup will throw an exception.
+ * <p>
+ * Currently, all kernels in a ScriptGroup must be from separate
+ * Script objects. Attempting to use multiple kernels from the same
+ * Script object will result in an {@link android.renderscript.RSInvalidStateException}.
  *
  **/
 public final class ScriptGroup extends BaseObj {
@@ -93,8 +95,8 @@ public final class ScriptGroup extends BaseObj {
 
     /**
      * Sets an input of the ScriptGroup. This specifies an
-     * Allocation to be used for the kernels which require a kernel
-     * input and that input is provided external to the group.
+     * Allocation to be used for kernels that require an input
+     * Allocation provided from outside of the ScriptGroup.
      *
      * @param s The ID of the kernel where the allocation should be
      *          connected.
@@ -113,8 +115,8 @@ public final class ScriptGroup extends BaseObj {
 
     /**
      * Sets an output of the ScriptGroup. This specifies an
-     * Allocation to be used for the kernels which require a kernel
-     * output and that output is provided external to the group.
+     * Allocation to be used for the kernels that require an output
+     * Allocation visible after the ScriptGroup is executed.
      *
      * @param s The ID of the kernel where the allocation should be
      *          connected.
@@ -133,8 +135,8 @@ public final class ScriptGroup extends BaseObj {
 
     /**
      * Execute the ScriptGroup.  This will run all the kernels in
-     * the script.  The state of the connecting lines will not be
-     * observable after this operation.
+     * the ScriptGroup.  No internal connection results will be visible
+     * after execution of the ScriptGroup.
      */
     public void execute() {
         mRS.nScriptGroupExecute(getID(mRS));
@@ -142,20 +144,25 @@ public final class ScriptGroup extends BaseObj {
 
 
     /**
-     * Create a ScriptGroup. There are two steps to creating a
-     * ScriptGoup.
+     * Helper class to build a ScriptGroup. A ScriptGroup is
+     * created in two steps.
      * <p>
-     * First all the Kernels to be used by the group should be
-     * added.  Once this is done the kernels should be connected.
-     * Kernels cannot be added once a connection has been made.
+     * First, all kernels to be used by the ScriptGroup should be added.
      * <p>
-     * Second, add connections. There are two forms of connections.
-     * Kernel to Kernel and Kernel to Field. Kernel to Kernel is
-     * higher performance and should be used where possible. The
-     * line of connections cannot form a loop. If a loop is detected
-     * an exception is thrown.
+     * Second, add connections between kernels. There are two types
+     * of connections: kernel to kernel and kernel to field.
+     * Kernel to kernel allows a kernel's output to be passed to
+     * another kernel as input. Kernel to field allows the output of
+     * one kernel to be bound as a script global. Kernel to kernel is
+     * higher performance and should be used where possible.
      * <p>
-     * Once all the connections are made a call to create will
+     * A ScriptGroup must contain a single directed acyclic graph (DAG); it
+     * cannot contain cycles. Currently, all kernels used in a ScriptGroup
+     * must come from different Script objects. Additionally, all kernels
+     * in a ScriptGroup must have at least one input, output, or internal
+     * connection.
+     * <p>
+     * Once all connections are made, a call to {@link #create} will
      * return the ScriptGroup object.
      *
      */
@@ -166,10 +173,10 @@ public final class ScriptGroup extends BaseObj {
         private int mKernelCount;
 
         /**
-         * Create a builder for generating a ScriptGroup.
+         * Create a Builder for generating a ScriptGroup.
          *
          *
-         * @param rs The Renderscript context.
+         * @param rs The RenderScript context.
          */
         public Builder(RenderScript rs) {
             mRS = rs;
