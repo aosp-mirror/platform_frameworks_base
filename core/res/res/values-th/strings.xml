@@ -621,6 +621,10 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"อนุญาตให้แอปพลิเคชันแก้ไขวิธีการบันทึกบัญชีการใช้งานเครือข่ายของแอปพลิเคชัน ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"เข้าถึงการแจ้งเตือน"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ทำให้แอปสามารถเรียกดู ตรวจสอบ และล้างการแจ้งเตือนได้ ซึ่งรวมถึงการแจ้งเตือนที่โพสต์โดยแอปอื่นๆ ด้วย"</string>
+    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1269,6 +1273,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"การเข้าถึง"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"วอลเปเปอร์"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"เปลี่ยนวอลเปเปอร์"</string>
+    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN เปิดใช้งานแล้ว"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"เปิดใช้งาน VPN โดย <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"แตะเพื่อจัดการเครือข่าย"</string>
@@ -1372,6 +1378,10 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"นำทางไปหน้าแรก"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"นำทางขึ้น"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"ตัวเลือกเพิ่มเติม"</string>
+    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
+    <skip />
+    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
+    <skip />
     <string name="storage_internal" msgid="4891916833657929263">"ที่จัดเก็บข้อมูลภายใน"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"การ์ด SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ที่เก็บข้อมูล USB"</string>
@@ -1479,6 +1489,8 @@
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"เจ้าของ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ข้อผิดพลาด"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"แอปพลิเคชันนี้ไม่สนับสนุนบัญชีของผู้ใช้บางรายที่ถูกจำกัด"</string>
+    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"แอปพลิเคชันนี้ไม่สนับสนุนบัญชีผู้ใช้ที่ถูกจำกัด"</string>
     <string name="app_not_found" msgid="3429141853498927379">"ไม่พบแอปพลิเคชันสำหรับการทำงานนี้"</string>
+    <!-- no translation found for revoke (5404479185228271586) -->
+    <skip />
 </resources>
