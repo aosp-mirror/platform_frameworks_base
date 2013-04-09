@@ -119,34 +119,34 @@ public class NotificationBuilderTest extends Activity
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.clear_1:
-                    mNM.cancel(1);
+                    cancelNotification(1);
                     break;
                 case R.id.clear_2:
-                    mNM.cancel(2);
+                    cancelNotification(2);
                     break;
                 case R.id.clear_3:
-                    mNM.cancel(3);
+                    cancelNotification(3);
                     break;
                 case R.id.clear_4:
-                    mNM.cancel(4);
+                    cancelNotification(4);
                     break;
                 case R.id.clear_5:
-                    mNM.cancel(5);
+                    cancelNotification(5);
                     break;
                 case R.id.clear_6:
-                    mNM.cancel(6);
+                    cancelNotification(6);
                     break;
                 case R.id.clear_7:
-                    mNM.cancel(7);
+                    cancelNotification(7);
                     break;
                 case R.id.clear_8:
-                    mNM.cancel(8);
+                    cancelNotification(8);
                     break;
                 case R.id.clear_9:
-                    mNM.cancel(9);
+                    cancelNotification(9);
                     break;
                 case R.id.clear_10:
-                    mNM.cancel(10);
+                    cancelNotification(10);
                     break;
                 case R.id.notify_1:
                     sendNotification(1);
@@ -201,6 +201,10 @@ public class NotificationBuilderTest extends Activity
                 mNM.notify(NOTIFY_TAG, id, n);
             }
         }, mStartDelay);
+    }
+
+    private void cancelNotification(final int id) {
+        mNM.cancel(NOTIFY_TAG, id);
     }
 
     private static CharSequence subst(CharSequence in, char ch, CharSequence sub) {
