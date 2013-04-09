@@ -321,12 +321,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // track the current default http proxy - tell the world if we get a new one (real change)
     private ProxyProperties mDefaultProxy = null;
-    private Object mDefaultProxyLock = new Object();
+    private Object mProxyLock = new Object();
     private boolean mDefaultProxyDisabled = false;
 
     // track the global proxy.
     private ProxyProperties mGlobalProxy = null;
-    private final Object mGlobalProxyLock = new Object();
 
     private SettingsObserver mSettingsObserver;
 
@@ -3039,14 +3038,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // so this API change wouldn't have a benifit.  It also breaks the passing
         // of proxy info to all the JVMs.
         // enforceAccessPermission();
-        synchronized (mDefaultProxyLock) {
-            return mDefaultProxyDisabled ? null : mDefaultProxy;
+        synchronized (mProxyLock) {
+            if (mGlobalProxy != null) return mGlobalProxy;
+            return (mDefaultProxyDisabled ? null : mDefaultProxy);
         }
     }
 
     public void setGlobalProxy(ProxyProperties proxyProperties) {
         enforceChangePermission();
-        synchronized (mGlobalProxyLock) {
+        synchronized (mProxyLock) {
             if (proxyProperties == mGlobalProxy) return;
             if (proxyProperties != null && proxyProperties.equals(mGlobalProxy)) return;
             if (mGlobalProxy != null && mGlobalProxy.equals(proxyProperties)) return;
@@ -3072,7 +3072,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (mGlobalProxy == null) {
             proxyProperties = mDefaultProxy;
         }
-        //sendProxyBroadcast(proxyProperties);
+        sendProxyBroadcast(proxyProperties);
     }
 
     private void loadGlobalProxy() {
@@ -3083,7 +3083,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
         if (!TextUtils.isEmpty(host)) {
             ProxyProperties proxyProperties = new ProxyProperties(host, port, exclList);
-            synchronized (mGlobalProxyLock) {
+            synchronized (mProxyLock) {
                 mGlobalProxy = proxyProperties;
             }
         }
@@ -3094,7 +3094,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // so this API change wouldn't have a benifit.  It also breaks the passing
         // of proxy info to all the JVMs.
         // enforceAccessPermission();
-        synchronized (mGlobalProxyLock) {
+        synchronized (mProxyLock) {
             return mGlobalProxy;
         }
     }
@@ -3103,11 +3103,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (proxy != null && TextUtils.isEmpty(proxy.getHost())) {
             proxy = null;
         }
-        synchronized (mDefaultProxyLock) {
+        synchronized (mProxyLock) {
             if (mDefaultProxy != null && mDefaultProxy.equals(proxy)) return;
-            if (mDefaultProxy == proxy) return;
+            if (mDefaultProxy == proxy) return; // catches repeated nulls
             mDefaultProxy = proxy;
 
+            if (mGlobalProxy != null) return;
             if (!mDefaultProxyDisabled) {
                 sendProxyBroadcast(proxy);
             }
@@ -3350,10 +3351,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mDnsOverridden = true;
             }
 
-            // Temporarily disable the default proxy.
-            synchronized (mDefaultProxyLock) {
+            // Temporarily disable the default proxy (not global).
+            synchronized (mProxyLock) {
                 mDefaultProxyDisabled = true;
-                if (mDefaultProxy != null) {
+                if (mGlobalProxy == null && mDefaultProxy != null) {
                     sendProxyBroadcast(null);
                 }
             }
@@ -3368,9 +3369,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     mHandler.sendEmptyMessage(EVENT_RESTORE_DNS);
                 }
             }
-            synchronized (mDefaultProxyLock) {
+            synchronized (mProxyLock) {
                 mDefaultProxyDisabled = false;
-                if (mDefaultProxy != null) {
+                if (mGlobalProxy == null && mDefaultProxy != null) {
                     sendProxyBroadcast(mDefaultProxy);
                 }
             }
