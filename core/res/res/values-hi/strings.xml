@@ -621,6 +621,10 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"एप्लिकेशन को यह संशोधित करने देता है कि एप्‍लिकेशन की तुलना में नेटवर्क उपयोग का मूल्यांकन कैसे किया जाता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"सूचनाओं तक पहुंचें"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"एप्लिकेशन को सूचनाओं को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य एप्लिकेशन के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
+    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्‍क्रीन-अनलॉक पासवर्ड में अनुमति प्राप्त लंबाई और वर्णों को नियंत्रित करें."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्‍क्रीन-अनलॉक के प्रयासों पर निगरानी रखें"</string>
@@ -1267,6 +1271,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"पहुंच-योग्यता"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदलें"</string>
+    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN सक्रिय"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN को <xliff:g id="APP">%s</xliff:g> द्वारा सक्रिय किया गया है"</string>
     <string name="vpn_text" msgid="3011306607126450322">"नेटवर्क प्रबंधित करने के लिए स्‍पर्श करें."</string>
@@ -1370,6 +1376,10 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"होम पर नेविगेट करें"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"ऊपर नेविगेट करें"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"अधिक विकल्प"</string>
+    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
+    <skip />
+    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
+    <skip />
     <string name="storage_internal" msgid="4891916833657929263">"आंतरिक संग्रहण"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD कार्ड"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB संग्रहण"</string>
@@ -1479,4 +1489,6 @@
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"यह एप्लिकेशन सीमित उपयोगकर्ताओं के खातों का समर्थन नहीं करता है"</string>
     <string name="app_not_found" msgid="3429141853498927379">"इस कार्यवाही को प्रबंधित करने के लिए कोई एप्लिकेशन नहीं मिला"</string>
+    <!-- no translation found for revoke (5404479185228271586) -->
+    <skip />
 </resources>
