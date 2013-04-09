@@ -18,6 +18,8 @@
 
 #include "CacheTexture.h"
 #include "../Debug.h"
+#include "../Extensions.h"
+#include "../PixelBuffer.h"
 
 namespace android {
 namespace uirenderer {
@@ -111,6 +113,11 @@ CacheTexture::CacheTexture(uint16_t width, uint16_t height, uint32_t maxQuadCoun
             mMesh(NULL), mCurrentQuad(0), mMaxQuadCount(maxQuadCount) {
     mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
             mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
+
+    // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
+    // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
+    // With OpenGL ES 2.0 we have to upload entire stripes instead.
+    mHasES3 = Extensions::getInstance().getMajorGlVersion() >= 3;
 }
 
 CacheTexture::~CacheTexture() {
@@ -143,7 +150,7 @@ void CacheTexture::releaseMesh() {
 
 void CacheTexture::releaseTexture() {
     if (mTexture) {
-        delete[] mTexture;
+        delete mTexture;
         mTexture = NULL;
     }
     if (mTextureId) {
@@ -154,6 +161,17 @@ void CacheTexture::releaseTexture() {
     mCurrentQuad = 0;
 }
 
+void CacheTexture::setLinearFiltering(bool linearFiltering, bool bind) {
+   if (linearFiltering != mLinearFiltering) {
+       mLinearFiltering = linearFiltering;
+
+       const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
+       if (bind) glBindTexture(GL_TEXTURE_2D, getTextureId());
+       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+   }
+}
+
 void CacheTexture::allocateMesh() {
     if (!mMesh) {
         mMesh = new TextureVertex[mMaxQuadCount * 4];
@@ -162,7 +180,7 @@ void CacheTexture::allocateMesh() {
 
 void CacheTexture::allocateTexture() {
     if (!mTexture) {
-        mTexture = new uint8_t[mWidth * mHeight];
+        mTexture = PixelBuffer::create(GL_ALPHA, mWidth, mHeight);
     }
 
     if (!mTextureId) {
@@ -180,6 +198,34 @@ void CacheTexture::allocateTexture() {
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+}
+
+bool CacheTexture::upload() {
+    const Rect& dirtyRect = mDirtyRect;
+
+    uint32_t x = mHasES3 ? dirtyRect.left : 0;
+    uint32_t y = dirtyRect.top;
+    uint32_t width = mHasES3 ? dirtyRect.getWidth() : mWidth;
+    uint32_t height = dirtyRect.getHeight();
+
+    // The unpack row length only needs to be specified when a new
+    // texture is bound
+    if (mHasES3) {
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, mWidth);
+    }
+
+    mTexture->upload(x, y, width, height, y * mWidth + x);
+
+    setDirty(false);
+
+    return mHasES3;
+}
+
+void CacheTexture::setDirty(bool dirty) {
+    mDirty = dirty;
+    if (!dirty) {
+        mDirtyRect.setEmpty();
     }
 }
 

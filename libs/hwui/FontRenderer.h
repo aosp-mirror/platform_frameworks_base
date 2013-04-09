@@ -61,6 +61,7 @@ public:
     void setFont(SkPaint* paint, const mat4& matrix);
 
     void precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix);
+    void endPrecaching();
 
     // bounds is an out parameter
     bool renderPosText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
@@ -95,16 +96,7 @@ public:
         mLinearFiltering = linearFiltering;
     }
 
-    uint32_t getCacheSize() const {
-        uint32_t size = 0;
-        for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-            CacheTexture* cacheTexture = mCacheTextures[i];
-            if (cacheTexture && cacheTexture->getTexture()) {
-                size += cacheTexture->getWidth() * cacheTexture->getHeight();
-            }
-        }
-        return size;
-    }
+    uint32_t getCacheSize() const;
 
 private:
     friend class Font;

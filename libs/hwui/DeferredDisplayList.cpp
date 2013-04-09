@@ -21,6 +21,7 @@
 
 #include <utils/Trace.h>
 
+#include "Caches.h"
 #include "Debug.h"
 #include "DisplayListOp.h"
 #include "OpenGLRenderer.h"
@@ -377,6 +378,8 @@ static status_t replayBatchList(Vector<DrawOpBatch*>& batchList,
 
 status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     ATRACE_NAME("flush drawing commands");
+    Caches::getInstance().fontRenderer->endPrecaching();
+
     status_t status = DrawGlInfo::kStatusDone;
 
     if (isEmpty()) return status; // nothing to flush

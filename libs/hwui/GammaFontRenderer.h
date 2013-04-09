@@ -40,6 +40,8 @@ public:
     virtual void describe(ProgramDescription& description, const SkPaint* paint) const = 0;
     virtual void setupProgram(ProgramDescription& description, Program* program) const = 0;
 
+    virtual void endPrecaching() = 0;
+
     static GammaFontRenderer* createRenderer();
 
 protected:
@@ -85,6 +87,8 @@ public:
 
     void describe(ProgramDescription& description, const SkPaint* paint) const;
     void setupProgram(ProgramDescription& description, Program* program) const;
+
+    void endPrecaching();
 
 private:
     ShaderGammaFontRenderer(bool multiGamma);
@@ -134,6 +138,8 @@ public:
     void setupProgram(ProgramDescription& description, Program* program) const {
     }
 
+    void endPrecaching();
+
 private:
     LookupGammaFontRenderer();
 
@@ -170,6 +176,8 @@ public:
 
     void setupProgram(ProgramDescription& description, Program* program) const {
     }
+
+    void endPrecaching();
 
 private:
     Lookup3GammaFontRenderer();

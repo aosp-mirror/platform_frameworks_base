@@ -129,6 +129,12 @@ void ShaderGammaFontRenderer::setupProgram(ProgramDescription& description,
     }
 }
 
+void ShaderGammaFontRenderer::endPrecaching() {
+    if (mRenderer) {
+        mRenderer->endPrecaching();
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Lookup-based renderer
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,6 +150,12 @@ LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
     }
 
     mRenderer = NULL;
+}
+
+void LookupGammaFontRenderer::endPrecaching() {
+    if (mRenderer) {
+        mRenderer->endPrecaching();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,6 +186,14 @@ Lookup3GammaFontRenderer::Lookup3GammaFontRenderer(): GammaFontRenderer() {
 Lookup3GammaFontRenderer::~Lookup3GammaFontRenderer() {
     for (int i = 0; i < kGammaCount; i++) {
         delete mRenderers[i];
+    }
+}
+
+void Lookup3GammaFontRenderer::endPrecaching() {
+    for (int i = 0; i < kGammaCount; i++) {
+        if (mRenderers[i]) {
+            mRenderers[i]->endPrecaching();
+        }
     }
 }
 

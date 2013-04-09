@@ -33,6 +33,7 @@
 #include "Debug.h"
 #include "Extensions.h"
 #include "FontRenderer.h"
+#include "PixelBuffer.h"
 #include "Rect.h"
 
 namespace android {
@@ -133,26 +134,13 @@ void FontRenderer::flushAllAndInvalidate() {
     for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
         mCacheTextures[i]->init();
     }
-
-#if DEBUG_FONT_RENDERER
-    uint16_t totalGlyphs = 0;
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        totalGlyphs += mCacheTextures[i]->getGlyphCount();
-        // Erase caches, just as a debugging facility
-        if (mCacheTextures[i]->getTexture()) {
-            memset(mCacheTextures[i]->getTexture(), 0,
-                    mCacheTextures[i]->getWidth() * mCacheTextures[i]->getHeight());
-        }
-    }
-    ALOGD("Flushing caches: glyphs cached = %d", totalGlyphs);
-#endif
 }
 
 void FontRenderer::flushLargeCaches() {
     // Start from 1; don't deallocate smallest/default texture
     for (uint32_t i = 1; i < mCacheTextures.size(); i++) {
         CacheTexture* cacheTexture = mCacheTextures[i];
-        if (cacheTexture->getTexture()) {
+        if (cacheTexture->getPixelBuffer()) {
             cacheTexture->init();
             LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
             while (it.next()) {
@@ -226,7 +214,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 
     uint32_t cacheWidth = cacheTexture->getWidth();
 
-    if (!cacheTexture->getTexture()) {
+    if (!cacheTexture->getPixelBuffer()) {
         Caches::getInstance().activeTexture(0);
         // Large-glyph texture memory is allocated only as needed
         cacheTexture->allocateTexture();
@@ -239,7 +227,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     // or anti-aliased (8 bits per pixel)
     SkMask::Format format = static_cast<SkMask::Format>(glyph.fMaskFormat);
 
-    uint8_t* cacheBuffer = cacheTexture->getTexture();
+    uint8_t* cacheBuffer = cacheTexture->getPixelBuffer()->map();
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
 
     // Copy the glyph image, taking the mask format into account
@@ -377,56 +365,36 @@ void FontRenderer::checkTextureUpdate() {
     Caches& caches = Caches::getInstance();
     GLuint lastTextureId = 0;
 
-    // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
-    // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
-    // With OpenGL ES 2.0 we have to upload entire stripes instead.
-    const bool hasUnpackRowLength = Extensions::getInstance().getMajorGlVersion() >= 3;
+    bool resetPixelStore = false;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // Iterate over all the cache textures and see which ones need to be updated
     for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
         CacheTexture* cacheTexture = mCacheTextures[i];
-        if (cacheTexture->isDirty() && cacheTexture->getTexture()) {
-            const Rect* dirtyRect = cacheTexture->getDirtyRect();
-            uint32_t x = hasUnpackRowLength ? dirtyRect->left : 0;
-            uint32_t y = dirtyRect->top;
-            uint32_t width = cacheTexture->getWidth();
-            uint32_t height = dirtyRect->getHeight();
-            void* textureData = cacheTexture->getTexture() + y * width + x;
-
+        if (cacheTexture->isDirty() && cacheTexture->getPixelBuffer()) {
             if (cacheTexture->getTextureId() != lastTextureId) {
                 lastTextureId = cacheTexture->getTextureId();
                 caches.activeTexture(0);
                 glBindTexture(GL_TEXTURE_2D, lastTextureId);
-
-                // The unpack row length only needs to be specified when a new
-                // texture is bound
-                if (hasUnpackRowLength) {
-                    glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
-                }
             }
 
-            // If we can upload a sub-rectangle, use the dirty rect width
-            // instead of the width of the entire texture
-            if (hasUnpackRowLength) {
-                width = dirtyRect->getWidth();
+            if (cacheTexture->upload()) {
+                resetPixelStore = true;
             }
 
 #if DEBUG_FONT_RENDERER
             ALOGD("glTexSubimage for cacheTexture %d: x, y, width height = %d, %d, %d, %d",
                     i, x, y, width, height);
 #endif
-
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
-                    GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
-
-            cacheTexture->setDirty(false);
         }
     }
 
+    // Unbind any PBO we might have used to update textures
+    caches.unbindPixelBuffer();
+
     // Reset to default unpack row length to avoid affecting texture
     // uploads in other parts of the renderer
-    if (hasUnpackRowLength) {
+    if (resetPixelStore) {
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     }
 
@@ -539,13 +507,14 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
         uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius, const float* positions) {
     checkInit();
 
+    DropShadow image;
+    image.width = 0;
+    image.height = 0;
+    image.image = NULL;
+    image.penX = 0;
+    image.penY = 0;
+
     if (!mCurrentFont) {
-        DropShadow image;
-        image.width = 0;
-        image.height = 0;
-        image.image = NULL;
-        image.penX = 0;
-        image.penY = 0;
         return image;
     }
 
@@ -558,6 +527,11 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
 
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
     uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
+
+    uint32_t maxSize = Caches::getInstance().maxTextureSize;
+    if (paddedWidth > maxSize || paddedHeight > maxSize) {
+        return image;
+    }
 
     // Align buffers for renderscript usage
     if (paddedWidth & (RS_CPU_ALLOCATION_ALIGNMENT - 1)) {
@@ -578,10 +552,12 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
         mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
                 Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, NULL, positions);
 
+        // Unbind any PBO we might have used
+        Caches::getInstance().unbindPixelBuffer();
+
         blurImage(&dataBuffer, paddedWidth, paddedHeight, radius);
     }
 
-    DropShadow image;
     image.width = paddedWidth;
     image.height = paddedHeight;
     image.image = dataBuffer;
@@ -610,6 +586,10 @@ void FontRenderer::finishRender() {
 void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix) {
     Font* font = Font::create(this, paint, matrix);
     font->precache(paint, text, numGlyphs);
+}
+
+void FontRenderer::endPrecaching() {
+    checkTextureUpdate();
 }
 
 bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *text,
@@ -688,6 +668,17 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
     // replace the original image's pointer, avoiding a copy back to the original buffer
     free(*image);
     *image = outImage;
+}
+
+uint32_t FontRenderer::getCacheSize() const {
+    uint32_t size = 0;
+    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
+        CacheTexture* cacheTexture = mCacheTextures[i];
+        if (cacheTexture && cacheTexture->getPixelBuffer()) {
+            size += cacheTexture->getPixelBuffer()->getSize();
+        }
+    }
+    return size;
 }
 
 }; // namespace uirenderer
