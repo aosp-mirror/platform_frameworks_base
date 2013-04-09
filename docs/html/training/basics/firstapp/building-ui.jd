@@ -240,7 +240,7 @@ the "hello_world" string.)</p>
     &lt;string name="app_name">My First App&lt;/string>
     &lt;string name="edit_message">Enter a message&lt;/string>
     &lt;string name="button_send">Send&lt;/string>
-    &lt;string name="menu_settings">Settings&lt;/string>
+    &lt;string name="action_settings">Settings&lt;/string>
     &lt;string name="title_activity_main">MainActivity&lt;/string>
 &lt;/resources>
 </pre>
