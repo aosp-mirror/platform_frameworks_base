@@ -4322,6 +4322,10 @@ public final class ActivityThread {
             GLUtils.setTracingLevel(1);
         }
 
+        // Allow application-generated systrace messages if we're debuggable.
+        boolean appTracingAllowed = (data.appInfo.flags&ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        Trace.setAppTracingAllowed(appTracingAllowed);
+
         /**
          * Initialize the default http proxy in this process for the reasons we set the time zone.
          */
