@@ -18,6 +18,9 @@
 
 #include <JNIHelp.h>
 #include <ScopedUtfChars.h>
+#include <ScopedStringChars.h>
+
+#include <utils/String8.h>
 
 #include <cutils/trace.h>
 #include <cutils/log.h>
@@ -36,13 +39,30 @@ static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass clazz,
 
 static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr) {
-    ScopedUtfChars name(env, nameStr);
-    atrace_begin(tag, name.c_str());
+    const size_t MAX_SECTION_NAME_LEN = 127;
+    ScopedStringChars jchars(env, nameStr);
+    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()),
+            jchars.size());
+    size_t size = utf8Chars.size();
+    char* str = utf8Chars.lockBuffer(size);
+    for (size_t i = 0; i < size; i++) {
+        char c = str[i];
+        if (c == '\0' || c == '\n' || c == '|') {
+            str[i] = ' ';
+        }
+    }
+    utf8Chars.unlockBuffer();
+    atrace_begin(tag, utf8Chars.string());
 }
 
 static void android_os_Trace_nativeTraceEnd(JNIEnv* env, jclass clazz,
         jlong tag) {
     atrace_end(tag);
+}
+
+static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv* env,
+        jclass clazz, jboolean allowed) {
+    atrace_set_debuggable(allowed);
 }
 
 static JNINativeMethod gTraceMethods[] = {
@@ -59,6 +79,9 @@ static JNINativeMethod gTraceMethods[] = {
     { "nativeTraceEnd",
             "(J)V",
             (void*)android_os_Trace_nativeTraceEnd },
+    { "nativeSetAppTracingAllowed",
+            "(Z)V",
+            (void*)android_os_Trace_nativeSetAppTracingAllowed },
 };
 
 int register_android_os_Trace(JNIEnv* env) {
