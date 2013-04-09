@@ -1341,7 +1341,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns all observed cell information of the device.
+     * Returns all observed cell information of the device. This does
+     * not cause or change the rate of PhoneStateListner#onCellInfoChanged.
      *
      * @return List of CellInfo or null if info unavailable.
      *
