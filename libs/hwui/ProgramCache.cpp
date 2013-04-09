@@ -186,7 +186,7 @@ const char* gFS_Main_Dither[2] = {
         // ES 2.0
         "texture2D(ditherSampler, ditherTexCoords).a * " STR(DITHER_KERNEL_SIZE_INV_SQUARE),
         // ES 3.0
-        "texture2D(ditherSampler, ditherTexCoords).r"
+        "texture2D(ditherSampler, ditherTexCoords).a"
 };
 const char* gFS_Main_AddDitherToGradient =
         "    gradientColor += %s;\n";
