@@ -18,6 +18,7 @@ package android.accessibilityservice;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.KeyEvent;
 
 /**
  * Top-level interface to an accessibility service component.
@@ -35,4 +36,6 @@ import android.view.accessibility.AccessibilityEvent;
     void onGesture(int gesture);
 
     void clearAccessibilityNodeInfoCache();
+
+    void onKeyEvent(in KeyEvent event, int sequence);
 }

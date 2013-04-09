@@ -2074,6 +2074,7 @@ package android.accessibilityservice {
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected boolean onGesture(int);
     method public abstract void onInterrupt();
+    method protected boolean onKeyEvent(android.view.KeyEvent);
     method protected void onServiceConnected();
     method public final boolean performGlobalAction(int);
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);

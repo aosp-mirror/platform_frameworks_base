@@ -31,6 +31,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.Display;
 import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -692,6 +693,11 @@ public final class UiAutomation {
                     if (listener != null) {
                         listener.onAccessibilityEvent(AccessibilityEvent.obtain(event));
                     }
+                }
+
+                @Override
+                public boolean onKeyEvent(KeyEvent event) {
+                    return false;
                 }
             });
         }
