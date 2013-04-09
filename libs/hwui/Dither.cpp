@@ -38,6 +38,10 @@ void Dither::bindDitherTexture() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         if (useFloatTexture) {
+            // We use a R16F texture, let's remap the alpha channel to the
+            // red channel to avoid changing the shader sampling code on GL ES 3.0+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+
             float dither = 1.0f / (255.0f * DITHER_KERNEL_SIZE * DITHER_KERNEL_SIZE);
             const GLfloat pattern[] = {
                  0 * dither,  8 * dither,  2 * dither, 10 * dither,
