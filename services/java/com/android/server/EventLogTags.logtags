@@ -157,3 +157,8 @@ option java_package com.android.server
 # ConfigUpdateInstallReceiver.java
 # ---------------------------
 51300 config_install_failed (dir|3)
+
+# ---------------------------
+# IntentFirewall.java
+# ---------------------------
+51400 ifw_intent_matched (Intent Type|1|5),(Component Name|3),(Caller Uid|1|5),(Caller Pkg Count|1|1),(Caller Pkgs|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)

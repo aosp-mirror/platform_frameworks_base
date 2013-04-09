@@ -16,18 +16,21 @@
 
 package com.android.server.firewall;
 
+import android.app.AppGlobals;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.os.ServiceManager;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.util.Xml;
 import com.android.internal.util.XmlUtils;
+import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
-import com.android.server.pm.PackageManagerService;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -46,10 +49,17 @@ public class IntentFirewall {
     private static final File RULES_FILE =
             new File(Environment.getSystemSecureDirectory(), "ifw/ifw.xml");
 
+    private static final int LOG_PACKAGES_MAX_LENGTH = 150;
+    private static final int LOG_PACKAGES_SUFFICIENT_LENGTH = 125;
+
     private static final String TAG_RULES = "rules";
     private static final String TAG_ACTIVITY = "activity";
     private static final String TAG_SERVICE = "service";
     private static final String TAG_BROADCAST = "broadcast";
+
+    private static final int TYPE_ACTIVITY = 0;
+    private static final int TYPE_SERVICE = 1;
+    private static final int TYPE_BROADCAST = 2;
 
     private static final HashMap<String, FilterFactory> factoryMap;
 
@@ -119,10 +129,79 @@ public class IntentFirewall {
         }
 
         if (log) {
-            // TODO: log info about intent to event log
+            logIntent(TYPE_ACTIVITY, intent, callerUid, resolvedType);
         }
 
         return !block;
+    }
+
+    private static void logIntent(int intentType, Intent intent, int callerUid,
+            String resolvedType) {
+        // The component shouldn't be null, but let's double check just to be safe
+        ComponentName cn = intent.getComponent();
+        String shortComponent = null;
+        if (cn != null) {
+            shortComponent = cn.flattenToShortString();
+        }
+
+        String callerPackages = null;
+        int callerPackageCount = 0;
+        IPackageManager pm = AppGlobals.getPackageManager();
+        if (pm != null) {
+            try {
+                String[] callerPackagesArray = pm.getPackagesForUid(callerUid);
+                if (callerPackagesArray != null) {
+                    callerPackageCount = callerPackagesArray.length;
+                    callerPackages = joinPackages(callerPackagesArray);
+                }
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Remote exception while retrieving packages", ex);
+            }
+        }
+
+        EventLogTags.writeIfwIntentMatched(intentType, shortComponent, callerUid,
+                callerPackageCount, callerPackages, intent.getAction(), resolvedType,
+                intent.getDataString(), intent.getFlags());
+    }
+
+    /**
+     * Joins a list of package names such that the resulting string is no more than
+     * LOG_PACKAGES_MAX_LENGTH.
+     *
+     * Only full package names will be added to the result, unless every package is longer than the
+     * limit, in which case one of the packages will be truncated and added. In this case, an
+     * additional '-' character will be added to the end of the string, to denote the truncation.
+     *
+     * If it encounters a package that won't fit in the remaining space, it will continue on to the
+     * next package, unless the total length of the built string so far is greater than
+     * LOG_PACKAGES_SUFFICIENT_LENGTH, in which case it will stop and return what it has.
+     */
+    private static String joinPackages(String[] packages) {
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<packages.length; i++) {
+            String pkg = packages[i];
+
+            // + 1 length for the comma. This logic technically isn't correct for the first entry,
+            // but it's not critical.
+            if (sb.length() + pkg.length() + 1 < LOG_PACKAGES_MAX_LENGTH) {
+                if (!first) {
+                    sb.append(',');
+                } else {
+                    first = false;
+                }
+                sb.append(pkg);
+            } else if (sb.length() >= LOG_PACKAGES_SUFFICIENT_LENGTH) {
+                return sb.toString();
+            }
+        }
+        if (sb.length() == 0 && packages.length > 0) {
+            String pkg = packages[0];
+            // truncating from the end - the last part of the package name is more likely to be
+            // interesting/unique
+            return pkg.substring(pkg.length() - LOG_PACKAGES_MAX_LENGTH + 1) + '-';
+        }
+        return null;
     }
 
     public static File getRulesFile() {
@@ -311,7 +390,12 @@ public class IntentFirewall {
     }
 
     boolean signaturesMatch(int uid1, int uid2) {
-        PackageManagerService pm = (PackageManagerService)ServiceManager.getService("package");
-        return pm.checkUidSignatures(uid1, uid2) == PackageManager.SIGNATURE_MATCH;
+        try {
+            IPackageManager pm = AppGlobals.getPackageManager();
+            return pm.checkUidSignatures(uid1, uid2) == PackageManager.SIGNATURE_MATCH;
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Remote exception while checking signatures", ex);
+            return false;
+        }
     }
 }
