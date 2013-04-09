@@ -42,7 +42,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
-import android.os.LatencyTimer;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -117,9 +116,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     private static final String PROPERTY_PROFILE_RENDERING = "viewancestor.profile_rendering";
     private static final String PROPERTY_MEDIA_DISABLED = "config.disable_media";
-    
-    private static final boolean MEASURE_LATENCY = false;
-    private static LatencyTimer lt;
 
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
@@ -139,26 +135,15 @@ public final class ViewRootImpl implements ViewParent,
     private static boolean sRenderThreadQueried = false;
     private static final Object[] sRenderThreadQueryLock = new Object[0];
 
+    final Context mContext;
     final IWindowSession mWindowSession;
     final Display mDisplay;
     final String mBasePackageName;
 
-    long mLastTrackballTime = 0;
-    final TrackballAxis mTrackballAxisX = new TrackballAxis();
-    final TrackballAxis mTrackballAxisY = new TrackballAxis();
-
-    final SimulatedDpad mSimulatedDpad;
-
-    int mLastJoystickXDirection;
-    int mLastJoystickYDirection;
-    int mLastJoystickXKeyCode;
-    int mLastJoystickYKeyCode;
-
     final int[] mTmpLocation = new int[2];
 
     final TypedValue mTmpValue = new TypedValue();
-    
-    final InputMethodCallback mInputMethodCallback;
+
     final Thread mThread;
 
     final WindowLeaked mLocation;
@@ -232,38 +217,23 @@ public final class ViewRootImpl implements ViewParent,
     int mClientWindowLayoutFlags;
     boolean mLastOverscanRequested;
 
-     /** Event was not handled and is finished.
-      * @hide */
-    public static final int EVENT_NOT_HANDLED = 0;
-     /** Event was handled and is finished.
-      * @hide */
-    public static final int EVENT_HANDLED = 1;
-    /** Event is waiting on the IME.
-     * @hide */
-    public static final int EVENT_PENDING_IME = 2;
-    /** Event requires post-IME dispatch.
-     * @hide */
-    public static final int EVENT_POST_IME = 3;
-
     // Pool of queued input events.
     private static final int MAX_QUEUED_INPUT_EVENT_POOL_SIZE = 10;
     private QueuedInputEvent mQueuedInputEventPool;
     private int mQueuedInputEventPoolSize;
 
     /* Input event queue.
-     * Pending input events are input events waiting to be handled by the application. Current
-     * input events are input events which are being handled but are waiting on some action by the
-     * IME, even if they themselves may not need to be handled by the IME.
+     * Pending input events are input events waiting to be delivered to the input stages
+     * and handled by the application.
      */
     QueuedInputEvent mPendingInputEventHead;
     QueuedInputEvent mPendingInputEventTail;
     int mPendingInputEventCount;
-    QueuedInputEvent mActiveInputEventHead;
-    QueuedInputEvent mActiveInputEventTail;
-    int mActiveInputEventCount;
     boolean mProcessInputEventsScheduled;
     String mPendingInputEventQueueLengthCounterName = "pq";
-    String mActiveInputEventQueueLengthCounterName = "aq";
+
+    InputStage mFirstInputStage;
+    InputStage mFirstPostImeInputStage;
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -364,18 +334,8 @@ public final class ViewRootImpl implements ViewParent,
     }
     
     public ViewRootImpl(Context context, Display display) {
-        super();
-
-        if (MEASURE_LATENCY) {
-            if (lt == null) {
-                lt = new LatencyTimer(100, 1000);
-            }
-        }
-
-        // Initialize the statics when this class is first instantiated. This is
-        // done here instead of in the static block because Zygote does not
-        // allow the spawning of threads.
-        mWindowSession = WindowManagerGlobal.getWindowSession(context.getMainLooper());
+        mContext = context;
+        mWindowSession = WindowManagerGlobal.getWindowSession();
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
 
@@ -393,7 +353,6 @@ public final class ViewRootImpl implements ViewParent,
         mWinFrame = new Rect();
         mWindow = new W(this);
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
-        mInputMethodCallback = new InputMethodCallback(this);
         mViewVisibility = View.GONE;
         mTransparentRegion = new Region();
         mPreviousTransparentRegion = new Region();
@@ -414,7 +373,6 @@ public final class ViewRootImpl implements ViewParent,
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mAttachInfo.mScreenOn = powerManager.isScreenOn();
         loadSystemProperties();
-        mSimulatedDpad = new SimulatedDpad(context);
     }
 
     /**
@@ -662,8 +620,22 @@ public final class ViewRootImpl implements ViewParent,
                     view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                 }
 
-                mPendingInputEventQueueLengthCounterName = "pq:" + attrs.getTitle();
-                mActiveInputEventQueueLengthCounterName = "aq:" + attrs.getTitle();
+                // Set up the input pipeline.
+                CharSequence counterSuffix = attrs.getTitle();
+                InputStage syntheticStage = new SyntheticInputStage();
+                InputStage viewPostImeStage = new ViewPostImeInputStage(syntheticStage);
+                InputStage nativePostImeStage = new NativePostImeInputStage(viewPostImeStage,
+                        "aq:native-post-ime:" + counterSuffix);
+                InputStage earlyPostImeStage = new EarlyPostImeInputStage(nativePostImeStage);
+                InputStage imeStage = new ImeInputStage(earlyPostImeStage,
+                        "aq:ime:" + counterSuffix);
+                InputStage viewPreImeStage = new ViewPreImeInputStage(imeStage);
+                InputStage nativePreImeStage = new NativePreImeInputStage(viewPreImeStage,
+                        "aq:native-pre-ime:" + counterSuffix);
+
+                mFirstInputStage = nativePreImeStage;
+                mFirstPostImeInputStage = earlyPostImeStage;
+                mPendingInputEventQueueLengthCounterName = "aq:pending:" + counterSuffix;
             }
         }
     }
@@ -2862,7 +2834,7 @@ public final class ViewRootImpl implements ViewParent,
             mWindowSession.remove(mWindow);
         } catch (RemoteException e) {
         }
-        
+
         // Dispose the input channel after removing the window so the Window Manager
         // doesn't interpret the input channel being closed as an abnormal termination.
         if (mInputChannel != null) {
@@ -3365,365 +3337,822 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
-    private int deliverInputEvent(QueuedInputEvent q) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent");
-        try {
+    /**
+     * Base class for implementing a stage in the chain of responsibility
+     * for processing input events.
+     * <p>
+     * Events are delivered to the stage by the {@link #deliver} method.  The stage
+     * then has the choice of finishing the event or forwarding it to the next stage.
+     * </p>
+     */
+    abstract class InputStage {
+        private final InputStage mNext;
+
+        protected static final int FORWARD = 0;
+        protected static final int FINISH_HANDLED = 1;
+        protected static final int FINISH_NOT_HANDLED = 2;
+
+        /**
+         * Creates an input stage.
+         * @param next The next stage to which events should be forwarded.
+         */
+        public InputStage(InputStage next) {
+            mNext = next;
+        }
+
+        /**
+         * Delivers an event to be processed.
+         */
+        public final void deliver(QueuedInputEvent q) {
+            if ((q.mFlags & QueuedInputEvent.FLAG_FINISHED) != 0) {
+                forward(q);
+            } else if (mView == null || !mAdded) {
+                finish(q, false);
+            } else {
+                apply(q, onProcess(q));
+            }
+        }
+
+        /**
+         * Marks the the input event as finished then forwards it to the next stage.
+         */
+        protected void finish(QueuedInputEvent q, boolean handled) {
+            q.mFlags |= QueuedInputEvent.FLAG_FINISHED;
+            if (handled) {
+                q.mFlags |= QueuedInputEvent.FLAG_FINISHED_HANDLED;
+            }
+            forward(q);
+        }
+
+        /**
+         * Forwards the event to the next stage.
+         */
+        protected void forward(QueuedInputEvent q) {
+            onDeliverToNext(q);
+        }
+
+        /**
+         * Applies a result code from {@link #onProcess} to the specified event.
+         */
+        protected void apply(QueuedInputEvent q, int result) {
+            if (result == FORWARD) {
+                forward(q);
+            } else if (result == FINISH_HANDLED) {
+                finish(q, true);
+            } else if (result == FINISH_NOT_HANDLED) {
+                finish(q, false);
+            } else {
+                throw new IllegalArgumentException("Invalid result: " + result);
+            }
+        }
+
+        /**
+         * Called when an event is ready to be processed.
+         * @return A result code indicating how the event was handled.
+         */
+        protected int onProcess(QueuedInputEvent q) {
+            return FORWARD;
+        }
+
+        /**
+         * Called when an event is being delivered to the next stage.
+         */
+        protected void onDeliverToNext(QueuedInputEvent q) {
+            if (mNext != null) {
+                mNext.deliver(q);
+            } else {
+                finishInputEvent(q);
+            }
+        }
+    }
+
+    /**
+     * Base class for implementing an input pipeline stage that supports
+     * asynchronous and out-of-order processing of input events.
+     * <p>
+     * In addition to what a normal input stage can do, an asynchronous
+     * input stage may also defer an input event that has been delivered to it
+     * and finish or forward it later.
+     * </p>
+     */
+    abstract class AsyncInputStage extends InputStage {
+        private final String mTraceCounter;
+
+        private QueuedInputEvent mQueueHead;
+        private QueuedInputEvent mQueueTail;
+        private int mQueueLength;
+
+        protected static final int DEFER = 3;
+
+        /**
+         * Creates an asynchronous input stage.
+         * @param next The next stage to which events should be forwarded.
+         * @param traceCounter The name of a counter to record the size of
+         * the queue of pending events.
+         */
+        public AsyncInputStage(InputStage next, String traceCounter) {
+            super(next);
+            mTraceCounter = traceCounter;
+        }
+
+        /**
+         * Marks the event as deferred, which is to say that it will be handled
+         * asynchronously.  The caller is responsible for calling {@link #forward}
+         * or {@link #finish} later when it is done handling the event.
+         */
+        protected void defer(QueuedInputEvent q) {
+            q.mFlags |= QueuedInputEvent.FLAG_DEFERRED;
+            enqueue(q);
+        }
+
+        @Override
+        protected void forward(QueuedInputEvent q) {
+            // Clear the deferred flag.
+            q.mFlags &= ~QueuedInputEvent.FLAG_DEFERRED;
+
+            // Fast path if the queue is empty.
+            QueuedInputEvent curr = mQueueHead;
+            if (curr == null) {
+                super.forward(q);
+                return;
+            }
+
+            // Determine whether the event must be serialized behind any others
+            // before it can be delivered to the next stage.  This is done because
+            // deferred events might be handled out of order by the stage.
+            final int deviceId = q.mEvent.getDeviceId();
+            QueuedInputEvent prev = null;
+            boolean blocked = false;
+            while (curr != null && curr != q) {
+                if (!blocked && deviceId == curr.mEvent.getDeviceId()) {
+                    blocked = true;
+                }
+                prev = curr;
+                curr = curr.mNext;
+            }
+
+            // If the event is blocked, then leave it in the queue to be delivered later.
+            // Note that the event might not yet be in the queue if it was not previously
+            // deferred so we will enqueue it if needed.
+            if (blocked) {
+                if (curr == null) {
+                    enqueue(q);
+                }
+                return;
+            }
+
+            // The event is not blocked.  Deliver it immediately.
+            if (curr != null) {
+                curr = curr.mNext;
+                dequeue(q, prev);
+            }
+            super.forward(q);
+
+            // Dequeuing this event may have unblocked successors.  Deliver them.
+            while (curr != null) {
+                if (deviceId == curr.mEvent.getDeviceId()) {
+                    if ((curr.mFlags & QueuedInputEvent.FLAG_DEFERRED) != 0) {
+                        break;
+                    }
+                    QueuedInputEvent next = curr.mNext;
+                    dequeue(curr, prev);
+                    super.forward(curr);
+                    curr = next;
+                } else {
+                    prev = curr;
+                    curr = curr.mNext;
+                }
+            }
+        }
+
+        @Override
+        protected void apply(QueuedInputEvent q, int result) {
+            if (result == DEFER) {
+                defer(q);
+            } else {
+                super.apply(q, result);
+            }
+        }
+
+        private void enqueue(QueuedInputEvent q) {
+            if (mQueueTail == null) {
+                mQueueHead = q;
+                mQueueTail = q;
+            } else {
+                mQueueTail.mNext = q;
+                mQueueTail = q;
+            }
+
+            mQueueLength += 1;
+            Trace.traceCounter(Trace.TRACE_TAG_INPUT, mTraceCounter, mQueueLength);
+        }
+
+        private void dequeue(QueuedInputEvent q, QueuedInputEvent prev) {
+            if (prev == null) {
+                mQueueHead = q.mNext;
+            } else {
+                prev.mNext = q.mNext;
+            }
+            if (mQueueTail == q) {
+                mQueueTail = prev;
+            }
+            q.mNext = null;
+
+            mQueueLength -= 1;
+            Trace.traceCounter(Trace.TRACE_TAG_INPUT, mTraceCounter, mQueueLength);
+        }
+    }
+
+    /**
+     * Delivers pre-ime input events to a native activity.
+     * Does not support pointer events.
+     */
+    final class NativePreImeInputStage extends AsyncInputStage {
+        public NativePreImeInputStage(InputStage next, String traceCounter) {
+            super(next, traceCounter);
+        }
+
+        @Override
+        protected int onProcess(QueuedInputEvent q) {
+            return FORWARD;
+        }
+    }
+
+    /**
+     * Delivers pre-ime input events to the view hierarchy.
+     * Does not support pointer events.
+     */
+    final class ViewPreImeInputStage extends InputStage {
+        public ViewPreImeInputStage(InputStage next) {
+            super(next);
+        }
+
+        @Override
+        protected int onProcess(QueuedInputEvent q) {
             if (q.mEvent instanceof KeyEvent) {
-                return deliverKeyEvent(q);
+                return processKeyEvent(q);
+            }
+            return FORWARD;
+        }
+
+        private int processKeyEvent(QueuedInputEvent q) {
+            final KeyEvent event = (KeyEvent)q.mEvent;
+            if (mView.dispatchKeyEventPreIme(event)) {
+                return FINISH_HANDLED;
+            }
+            return FORWARD;
+        }
+    }
+
+    /**
+     * Delivers input events to the ime.
+     * Does not support pointer events.
+     */
+    final class ImeInputStage extends AsyncInputStage
+            implements InputMethodManager.FinishedInputEventCallback {
+        public ImeInputStage(InputStage next, String traceCounter) {
+            super(next, traceCounter);
+        }
+
+        @Override
+        protected int onProcess(QueuedInputEvent q) {
+            if (mLastWasImTarget) {
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    final InputEvent event = q.mEvent;
+                    if (DEBUG_IMF) Log.v(TAG, "Sending input event to IME: " + event);
+                    int result = imm.dispatchInputEvent(event, q, this, mHandler);
+                    if (result == InputMethodManager.DISPATCH_HANDLED) {
+                        return FINISH_HANDLED;
+                    } else if (result == InputMethodManager.DISPATCH_NOT_HANDLED) {
+                        return FINISH_NOT_HANDLED;
+                    } else {
+                        return DEFER; // callback will be invoked later
+                    }
+                }
+            }
+            return FORWARD;
+        }
+
+        @Override
+        public void onFinishedInputEvent(Object token, boolean handled) {
+            QueuedInputEvent q = (QueuedInputEvent)token;
+            if (handled) {
+                finish(q, true);
+                return;
+            }
+
+            // If the window doesn't currently have input focus, then drop
+            // this event.  This could be an event that came back from the
+            // IME dispatch but the window has lost focus in the meantime.
+            if (!mAttachInfo.mHasWindowFocus && !isTerminalInputEvent(q.mEvent)) {
+                Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
+                finish(q, false);
+                return;
+            }
+
+            forward(q);
+        }
+    }
+
+    /**
+     * Performs early processing of post-ime input events.
+     */
+    final class EarlyPostImeInputStage extends InputStage {
+        public EarlyPostImeInputStage(InputStage next) {
+            super(next);
+        }
+
+        @Override
+        protected int onProcess(QueuedInputEvent q) {
+            if (q.mEvent instanceof KeyEvent) {
+                return processKeyEvent(q);
             } else {
                 final int source = q.mEvent.getSource();
                 if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                    return deliverPointerEvent(q);
-                } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                    return deliverTrackballEvent(q);
-                } else {
-                    return deliverGenericMotionEvent(q);
+                    return processPointerEvent(q);
                 }
             }
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            return FORWARD;
+        }
+
+        private int processKeyEvent(QueuedInputEvent q) {
+            final KeyEvent event = (KeyEvent)q.mEvent;
+
+            // If the key's purpose is to exit touch mode then we consume it
+            // and consider it handled.
+            if (checkForLeavingTouchModeAndConsume(event)) {
+                return FINISH_HANDLED;
+            }
+
+            // Make sure the fallback event policy sees all keys that will be
+            // delivered to the view hierarchy.
+            mFallbackEventHandler.preDispatchKeyEvent(event);
+            return FORWARD;
+        }
+
+        private int processPointerEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
+
+            // Translate the pointer event for compatibility, if needed.
+            if (mTranslator != null) {
+                mTranslator.translateEventInScreenToAppWindow(event);
+            }
+
+            // Enter touch mode on down or scroll.
+            final int action = event.getAction();
+            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_SCROLL) {
+                ensureTouchMode(true);
+            }
+
+            // Offset the scroll position.
+            if (mCurScrollY != 0) {
+                event.offsetLocation(0, mCurScrollY);
+            }
+
+            // Remember the touch position for possible drag-initiation.
+            if (event.isTouchEvent()) {
+                mLastTouchPoint.x = event.getRawX();
+                mLastTouchPoint.y = event.getRawY();
+            }
+            return FORWARD;
         }
     }
 
-    private int deliverInputEventPostIme(QueuedInputEvent q) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEventPostIme");
-        try {
+    /**
+     * Delivers post-ime input events to a native activity.
+     */
+    final class NativePostImeInputStage extends AsyncInputStage {
+        public NativePostImeInputStage(InputStage next, String traceCounter) {
+            super(next, traceCounter);
+        }
+
+        @Override
+        protected int onProcess(QueuedInputEvent q) {
+            return FORWARD;
+        }
+    }
+
+    /**
+     * Delivers post-ime input events to the view hierarchy.
+     */
+    final class ViewPostImeInputStage extends InputStage {
+        public ViewPostImeInputStage(InputStage next) {
+            super(next);
+        }
+
+        @Override
+        protected int onProcess(QueuedInputEvent q) {
             if (q.mEvent instanceof KeyEvent) {
-                return deliverKeyEventPostIme(q);
+                return processKeyEvent(q);
             } else {
                 final int source = q.mEvent.getSource();
-                if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                    return deliverTrackballEventPostIme(q);
+                if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                    return processPointerEvent(q);
+                } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                    return processTrackballEvent(q);
                 } else {
-                    return deliverGenericMotionEventPostIme(q);
+                    return processGenericMotionEvent(q);
                 }
             }
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
-    }
 
-    private int deliverPointerEvent(QueuedInputEvent q) {
-        final MotionEvent event = (MotionEvent)q.mEvent;
-        final boolean isTouchEvent = event.isTouchEvent();
-        if (mInputEventConsistencyVerifier != null) {
-            if (isTouchEvent) {
-                mInputEventConsistencyVerifier.onTouchEvent(event, 0);
-            } else {
-                mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
+        private int processKeyEvent(QueuedInputEvent q) {
+            final KeyEvent event = (KeyEvent)q.mEvent;
+
+            // Deliver the key to the view hierarchy.
+            if (mView.dispatchKeyEvent(event)) {
+                return FINISH_HANDLED;
             }
+
+            // If the Control modifier is held, try to interpret the key as a shortcut.
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.isCtrlPressed()
+                    && event.getRepeatCount() == 0
+                    && !KeyEvent.isModifierKey(event.getKeyCode())) {
+                if (mView.dispatchKeyShortcutEvent(event)) {
+                    return FINISH_HANDLED;
+                }
+            }
+
+            // Apply the fallback event policy.
+            if (mFallbackEventHandler.dispatchKeyEvent(event)) {
+                return FINISH_HANDLED;
+            }
+
+            // Handle automatic focus changes.
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                int direction = 0;
+                switch (event.getKeyCode()) {
+                    case KeyEvent.KEYCODE_DPAD_LEFT:
+                        if (event.hasNoModifiers()) {
+                            direction = View.FOCUS_LEFT;
+                        }
+                        break;
+                    case KeyEvent.KEYCODE_DPAD_RIGHT:
+                        if (event.hasNoModifiers()) {
+                            direction = View.FOCUS_RIGHT;
+                        }
+                        break;
+                    case KeyEvent.KEYCODE_DPAD_UP:
+                        if (event.hasNoModifiers()) {
+                            direction = View.FOCUS_UP;
+                        }
+                        break;
+                    case KeyEvent.KEYCODE_DPAD_DOWN:
+                        if (event.hasNoModifiers()) {
+                            direction = View.FOCUS_DOWN;
+                        }
+                        break;
+                    case KeyEvent.KEYCODE_TAB:
+                        if (event.hasNoModifiers()) {
+                            direction = View.FOCUS_FORWARD;
+                        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                            direction = View.FOCUS_BACKWARD;
+                        }
+                        break;
+                }
+                if (direction != 0) {
+                    View focused = mView.findFocus();
+                    if (focused != null) {
+                        View v = focused.focusSearch(direction);
+                        if (v != null && v != focused) {
+                            // do the math the get the interesting rect
+                            // of previous focused into the coord system of
+                            // newly focused view
+                            focused.getFocusedRect(mTempRect);
+                            if (mView instanceof ViewGroup) {
+                                ((ViewGroup) mView).offsetDescendantRectToMyCoords(
+                                        focused, mTempRect);
+                                ((ViewGroup) mView).offsetRectIntoDescendantCoords(
+                                        v, mTempRect);
+                            }
+                            if (v.requestFocus(direction, mTempRect)) {
+                                playSoundEffect(SoundEffectConstants
+                                        .getContantForFocusDirection(direction));
+                                return FINISH_HANDLED;
+                            }
+                        }
+
+                        // Give the focused view a last chance to handle the dpad key.
+                        if (mView.dispatchUnhandledMove(focused, direction)) {
+                            return FINISH_HANDLED;
+                        }
+                    } else {
+                        // find the best view to give focus to in this non-touch-mode with no-focus
+                        View v = focusSearch(null, direction);
+                        if (v != null && v.requestFocus(direction)) {
+                            return FINISH_HANDLED;
+                        }
+                    }
+                }
+            }
+            return FORWARD;
         }
 
-        // If there is no view, then the event will not be handled.
-        if (mView == null || !mAdded) {
-            return EVENT_NOT_HANDLED;
+        private int processPointerEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
+
+            if (mView.dispatchPointerEvent(event)) {
+                return FINISH_HANDLED;
+            }
+            return FORWARD;
         }
 
-        // Translate the pointer event for compatibility, if needed.
-        if (mTranslator != null) {
-            mTranslator.translateEventInScreenToAppWindow(event);
+        private int processTrackballEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
+
+            if (mView.dispatchTrackballEvent(event)) {
+                return FINISH_HANDLED;
+            }
+            return FORWARD;
         }
 
-        // Enter touch mode on down or scroll.
-        final int action = event.getAction();
-        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_SCROLL) {
-            ensureTouchMode(true);
-        }
+        private int processGenericMotionEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
 
-        // Offset the scroll position.
-        if (mCurScrollY != 0) {
-            event.offsetLocation(0, mCurScrollY);
+            // Deliver the event to the view.
+            if (mView.dispatchGenericMotionEvent(event)) {
+                return FINISH_HANDLED;
+            }
+            return FORWARD;
         }
-        if (MEASURE_LATENCY) {
-            lt.sample("A Dispatching PointerEvents", System.nanoTime() - event.getEventTimeNano());
-        }
-
-        // Remember the touch position for possible drag-initiation.
-        if (isTouchEvent) {
-            mLastTouchPoint.x = event.getRawX();
-            mLastTouchPoint.y = event.getRawY();
-        }
-
-        // Dispatch touch to view hierarchy.
-        boolean handled = mView.dispatchPointerEvent(event);
-        if (MEASURE_LATENCY) {
-            lt.sample("B Dispatched PointerEvents ", System.nanoTime() - event.getEventTimeNano());
-        }
-        return handled ? EVENT_HANDLED : EVENT_NOT_HANDLED;
     }
 
-    private int deliverTrackballEvent(QueuedInputEvent q) {
-        final MotionEvent event = (MotionEvent)q.mEvent;
-        if (mInputEventConsistencyVerifier != null) {
-            mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
+    /**
+     * Performs default processing of unhandled input events.
+     */
+    final class SyntheticInputStage extends InputStage {
+        private final TrackballAxis mTrackballAxisX = new TrackballAxis();
+        private final TrackballAxis mTrackballAxisY = new TrackballAxis();
+        private long mLastTrackballTime;
+
+        private int mLastJoystickXDirection;
+        private int mLastJoystickYDirection;
+        private int mLastJoystickXKeyCode;
+        private int mLastJoystickYKeyCode;
+
+        private SimulatedDpad mSimulatedDpad;
+
+        public SyntheticInputStage() {
+            super(null);
+            mSimulatedDpad = new SimulatedDpad(mContext);
         }
 
-        int result = EVENT_POST_IME;
-        if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
-            if (LOCAL_LOGV)
-                Log.v(TAG, "Dispatching trackball " + event + " to " + mView);
-
-            // Dispatch to the IME before propagating down the view hierarchy.
-            result = dispatchImeInputEvent(q);
-        }
-        return result;
-    }
-
-    private int deliverTrackballEventPostIme(QueuedInputEvent q) {
-        final MotionEvent event = (MotionEvent) q.mEvent;
-
-        // If there is no view, then the event will not be handled.
-        if (mView == null || !mAdded) {
-            return EVENT_NOT_HANDLED;
+        @Override
+        protected int onProcess(QueuedInputEvent q) {
+            q.mFlags |= QueuedInputEvent.FLAG_RESYNTHESIZED;
+            if (q.mEvent instanceof MotionEvent) {
+                final int source = q.mEvent.getSource();
+                if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                    return processTrackballEvent(q);
+                } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+                    return processJoystickEvent(q);
+                } else if ((source & InputDevice.SOURCE_TOUCH_NAVIGATION)
+                        == InputDevice.SOURCE_TOUCH_NAVIGATION) {
+                    return processTouchNavigationEvent(q);
+                }
+            }
+            return FORWARD;
         }
 
-        // Deliver the trackball event to the view.
-        if (mView.dispatchTrackballEvent(event)) {
-            // If we reach this, we delivered a trackball event to mView and
-            // mView consumed it. Because we will not translate the trackball
-            // event into a key event, touch mode will not exit, so we exit
-            // touch mode here.
-            ensureTouchMode(false);
+        @Override
+        protected void onDeliverToNext(QueuedInputEvent q) {
+            if ((q.mFlags & QueuedInputEvent.FLAG_RESYNTHESIZED) == 0) {
+                // Cancel related synthetic events if any prior stage has handled the event.
+                if (q.mEvent instanceof MotionEvent) {
+                    final int source = q.mEvent.getSource();
+                    if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                        cancelTrackballEvent(q);
+                    } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+                        cancelJoystickEvent(q);
+                    } else if ((source & InputDevice.SOURCE_TOUCH_NAVIGATION)
+                            == InputDevice.SOURCE_TOUCH_NAVIGATION) {
+                        cancelTouchNavigationEvent(q);
+                    }
+                }
+            }
+            super.onDeliverToNext(q);
+        }
+
+        private int processTrackballEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
+
+            // Translate the trackball event into DPAD keys and try to deliver those.
+            final TrackballAxis x = mTrackballAxisX;
+            final TrackballAxis y = mTrackballAxisY;
+            long curTime = SystemClock.uptimeMillis();
+            if ((mLastTrackballTime + MAX_TRACKBALL_DELAY) < curTime) {
+                // It has been too long since the last movement,
+                // so restart at the beginning.
+                x.reset(0);
+                y.reset(0);
+                mLastTrackballTime = curTime;
+            }
+
+            final int action = event.getAction();
+            final int metaState = event.getMetaState();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    x.reset(2);
+                    y.reset(2);
+                    enqueueInputEvent(new KeyEvent(curTime, curTime,
+                            KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
+                            KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                            InputDevice.SOURCE_KEYBOARD));
+                    break;
+                case MotionEvent.ACTION_UP:
+                    x.reset(2);
+                    y.reset(2);
+                    enqueueInputEvent(new KeyEvent(curTime, curTime,
+                            KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
+                            KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                            InputDevice.SOURCE_KEYBOARD));
+                    break;
+            }
+
+            if (DEBUG_TRACKBALL) Log.v(TAG, "TB X=" + x.position + " step="
+                    + x.step + " dir=" + x.dir + " acc=" + x.acceleration
+                    + " move=" + event.getX()
+                    + " / Y=" + y.position + " step="
+                    + y.step + " dir=" + y.dir + " acc=" + y.acceleration
+                    + " move=" + event.getY());
+            final float xOff = x.collect(event.getX(), event.getEventTime(), "X");
+            final float yOff = y.collect(event.getY(), event.getEventTime(), "Y");
+
+            // Generate DPAD events based on the trackball movement.
+            // We pick the axis that has moved the most as the direction of
+            // the DPAD.  When we generate DPAD events for one axis, then the
+            // other axis is reset -- we don't want to perform DPAD jumps due
+            // to slight movements in the trackball when making major movements
+            // along the other axis.
+            int keycode = 0;
+            int movement = 0;
+            float accel = 1;
+            if (xOff > yOff) {
+                movement = x.generate((2/event.getXPrecision()));
+                if (movement != 0) {
+                    keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT
+                            : KeyEvent.KEYCODE_DPAD_LEFT;
+                    accel = x.acceleration;
+                    y.reset(2);
+                }
+            } else if (yOff > 0) {
+                movement = y.generate((2/event.getYPrecision()));
+                if (movement != 0) {
+                    keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_DOWN
+                            : KeyEvent.KEYCODE_DPAD_UP;
+                    accel = y.acceleration;
+                    x.reset(2);
+                }
+            }
+
+            if (keycode != 0) {
+                if (movement < 0) movement = -movement;
+                int accelMovement = (int)(movement * accel);
+                if (DEBUG_TRACKBALL) Log.v(TAG, "Move: movement=" + movement
+                        + " accelMovement=" + accelMovement
+                        + " accel=" + accel);
+                if (accelMovement > movement) {
+                    if (DEBUG_TRACKBALL) Log.v(TAG, "Delivering fake DPAD: "
+                            + keycode);
+                    movement--;
+                    int repeatCount = accelMovement - movement;
+                    enqueueInputEvent(new KeyEvent(curTime, curTime,
+                            KeyEvent.ACTION_MULTIPLE, keycode, repeatCount, metaState,
+                            KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                            InputDevice.SOURCE_KEYBOARD));
+                }
+                while (movement > 0) {
+                    if (DEBUG_TRACKBALL) Log.v(TAG, "Delivering fake DPAD: "
+                            + keycode);
+                    movement--;
+                    curTime = SystemClock.uptimeMillis();
+                    enqueueInputEvent(new KeyEvent(curTime, curTime,
+                            KeyEvent.ACTION_DOWN, keycode, 0, metaState,
+                            KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                            InputDevice.SOURCE_KEYBOARD));
+                    enqueueInputEvent(new KeyEvent(curTime, curTime,
+                            KeyEvent.ACTION_UP, keycode, 0, metaState,
+                            KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                            InputDevice.SOURCE_KEYBOARD));
+                }
+                mLastTrackballTime = curTime;
+            }
+
+            // Unfortunately we can't tell whether the application consumed the keys, so
+            // we always consider the trackball event handled.
+            return FINISH_HANDLED;
+        }
+
+        private void cancelTrackballEvent(QueuedInputEvent q) {
             mLastTrackballTime = Integer.MIN_VALUE;
-            return EVENT_HANDLED;
-        }
 
-        // Translate the trackball event into DPAD keys and try to deliver those.
-        final TrackballAxis x = mTrackballAxisX;
-        final TrackballAxis y = mTrackballAxisY;
-
-        long curTime = SystemClock.uptimeMillis();
-        if ((mLastTrackballTime + MAX_TRACKBALL_DELAY) < curTime) {
-            // It has been too long since the last movement,
-            // so restart at the beginning.
-            x.reset(0);
-            y.reset(0);
-            mLastTrackballTime = curTime;
-        }
-
-        final int action = event.getAction();
-        final int metaState = event.getMetaState();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                x.reset(2);
-                y.reset(2);
-                enqueueInputEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
-                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD));
-                break;
-            case MotionEvent.ACTION_UP:
-                x.reset(2);
-                y.reset(2);
-                enqueueInputEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
-                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD));
-                break;
-        }
-
-        if (DEBUG_TRACKBALL) Log.v(TAG, "TB X=" + x.position + " step="
-                + x.step + " dir=" + x.dir + " acc=" + x.acceleration
-                + " move=" + event.getX()
-                + " / Y=" + y.position + " step="
-                + y.step + " dir=" + y.dir + " acc=" + y.acceleration
-                + " move=" + event.getY());
-        final float xOff = x.collect(event.getX(), event.getEventTime(), "X");
-        final float yOff = y.collect(event.getY(), event.getEventTime(), "Y");
-
-        // Generate DPAD events based on the trackball movement.
-        // We pick the axis that has moved the most as the direction of
-        // the DPAD.  When we generate DPAD events for one axis, then the
-        // other axis is reset -- we don't want to perform DPAD jumps due
-        // to slight movements in the trackball when making major movements
-        // along the other axis.
-        int keycode = 0;
-        int movement = 0;
-        float accel = 1;
-        if (xOff > yOff) {
-            movement = x.generate((2/event.getXPrecision()));
-            if (movement != 0) {
-                keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT
-                        : KeyEvent.KEYCODE_DPAD_LEFT;
-                accel = x.acceleration;
-                y.reset(2);
-            }
-        } else if (yOff > 0) {
-            movement = y.generate((2/event.getYPrecision()));
-            if (movement != 0) {
-                keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_DOWN
-                        : KeyEvent.KEYCODE_DPAD_UP;
-                accel = y.acceleration;
-                x.reset(2);
+            // If we reach this, we consumed a trackball event.
+            // Because we will not translate the trackball event into a key event,
+            // touch mode will not exit, so we exit touch mode here.
+            if (mView != null && mAdded) {
+                ensureTouchMode(false);
             }
         }
 
-        if (keycode != 0) {
-            if (movement < 0) movement = -movement;
-            int accelMovement = (int)(movement * accel);
-            if (DEBUG_TRACKBALL) Log.v(TAG, "Move: movement=" + movement
-                    + " accelMovement=" + accelMovement
-                    + " accel=" + accel);
-            if (accelMovement > movement) {
-                if (DEBUG_TRACKBALL) Log.v(TAG, "Delivering fake DPAD: "
-                        + keycode);
-                movement--;
-                int repeatCount = accelMovement - movement;
-                enqueueInputEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_MULTIPLE, keycode, repeatCount, metaState,
-                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD));
-            }
-            while (movement > 0) {
-                if (DEBUG_TRACKBALL) Log.v(TAG, "Delivering fake DPAD: "
-                        + keycode);
-                movement--;
-                curTime = SystemClock.uptimeMillis();
-                enqueueInputEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_DOWN, keycode, 0, metaState,
-                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD));
-                enqueueInputEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_UP, keycode, 0, metaState,
-                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD));
-            }
-            mLastTrackballTime = curTime;
-        }
-
-        // Unfortunately we can't tell whether the application consumed the keys, so
-        // we always consider the trackball event handled.
-        return EVENT_HANDLED;
-    }
-
-    private int deliverGenericMotionEvent(QueuedInputEvent q) {
-        final MotionEvent event = (MotionEvent)q.mEvent;
-        if (mInputEventConsistencyVerifier != null) {
-            mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
-        }
-
-        int result = EVENT_POST_IME;
-        if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
-            if (LOCAL_LOGV)
-                Log.v(TAG, "Dispatching generic motion " + event + " to " + mView);
-
-            // Dispatch to the IME before propagating down the view hierarchy.
-            result = dispatchImeInputEvent(q);
-        }
-        return result;
-    }
-
-    private int deliverGenericMotionEventPostIme(QueuedInputEvent q) {
-        final MotionEvent event = (MotionEvent) q.mEvent;
-        final int source = event.getSource();
-        final boolean isJoystick = event.isFromSource(InputDevice.SOURCE_CLASS_JOYSTICK);
-        final boolean isTouchNavigation = event.isFromSource(InputDevice.SOURCE_TOUCH_NAVIGATION);
-
-        // If there is no view, then the event will not be handled.
-        if (mView == null || !mAdded) {
-            if (isJoystick) {
-                updateJoystickDirection(event, false);
-            } else if (isTouchNavigation) {
-                mSimulatedDpad.updateTouchNavigation(this, event, false);
-            }
-            return EVENT_NOT_HANDLED;
-        }
-
-        // Deliver the event to the view.
-        if (mView.dispatchGenericMotionEvent(event)) {
-            if (isJoystick) {
-                updateJoystickDirection(event, false);
-            } else if (isTouchNavigation) {
-                mSimulatedDpad.updateTouchNavigation(this, event, false);
-            }
-            return EVENT_HANDLED;
-        }
-
-        if (isJoystick) {
-            // Translate the joystick event into DPAD keys and try to deliver
-            // those.
+        private int processJoystickEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
             updateJoystickDirection(event, true);
-            return EVENT_HANDLED;
-        }
-        if (isTouchNavigation) {
-            mSimulatedDpad.updateTouchNavigation(this, event, true);
-            return EVENT_HANDLED;
-        }
-        return EVENT_NOT_HANDLED;
-    }
-
-    private void updateJoystickDirection(MotionEvent event, boolean synthesizeNewKeys) {
-        final long time = event.getEventTime();
-        final int metaState = event.getMetaState();
-        final int deviceId = event.getDeviceId();
-        final int source = event.getSource();
-
-        int xDirection = joystickAxisValueToDirection(event.getAxisValue(MotionEvent.AXIS_HAT_X));
-        if (xDirection == 0) {
-            xDirection = joystickAxisValueToDirection(event.getX());
+            return FINISH_HANDLED;
         }
 
-        int yDirection = joystickAxisValueToDirection(event.getAxisValue(MotionEvent.AXIS_HAT_Y));
-        if (yDirection == 0) {
-            yDirection = joystickAxisValueToDirection(event.getY());
+        private void cancelJoystickEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
+            updateJoystickDirection(event, false);
         }
 
-        if (xDirection != mLastJoystickXDirection) {
-            if (mLastJoystickXKeyCode != 0) {
-                mHandler.removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
-                enqueueInputEvent(new KeyEvent(time, time,
-                        KeyEvent.ACTION_UP, mLastJoystickXKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
-                mLastJoystickXKeyCode = 0;
+        private void updateJoystickDirection(MotionEvent event, boolean synthesizeNewKeys) {
+            final long time = event.getEventTime();
+            final int metaState = event.getMetaState();
+            final int deviceId = event.getDeviceId();
+            final int source = event.getSource();
+
+            int xDirection = joystickAxisValueToDirection(
+                    event.getAxisValue(MotionEvent.AXIS_HAT_X));
+            if (xDirection == 0) {
+                xDirection = joystickAxisValueToDirection(event.getX());
             }
 
-            mLastJoystickXDirection = xDirection;
+            int yDirection = joystickAxisValueToDirection(
+                    event.getAxisValue(MotionEvent.AXIS_HAT_Y));
+            if (yDirection == 0) {
+                yDirection = joystickAxisValueToDirection(event.getY());
+            }
 
-            if (xDirection != 0 && synthesizeNewKeys) {
-                mLastJoystickXKeyCode = xDirection > 0
-                        ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
-                final KeyEvent e = new KeyEvent(time, time,
-                        KeyEvent.ACTION_DOWN, mLastJoystickXKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
-                enqueueInputEvent(e);
-                Message m = mHandler.obtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e);
-                m.setAsynchronous(true);
-                mHandler.sendMessageDelayed(m, mViewConfiguration.getKeyRepeatTimeout());
+            if (xDirection != mLastJoystickXDirection) {
+                if (mLastJoystickXKeyCode != 0) {
+                    mHandler.removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
+                    enqueueInputEvent(new KeyEvent(time, time,
+                            KeyEvent.ACTION_UP, mLastJoystickXKeyCode, 0, metaState,
+                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
+                    mLastJoystickXKeyCode = 0;
+                }
+
+                mLastJoystickXDirection = xDirection;
+
+                if (xDirection != 0 && synthesizeNewKeys) {
+                    mLastJoystickXKeyCode = xDirection > 0
+                            ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
+                    final KeyEvent e = new KeyEvent(time, time,
+                            KeyEvent.ACTION_DOWN, mLastJoystickXKeyCode, 0, metaState,
+                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
+                    enqueueInputEvent(e);
+                    Message m = mHandler.obtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e);
+                    m.setAsynchronous(true);
+                    mHandler.sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
+                }
+            }
+
+            if (yDirection != mLastJoystickYDirection) {
+                if (mLastJoystickYKeyCode != 0) {
+                    mHandler.removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
+                    enqueueInputEvent(new KeyEvent(time, time,
+                            KeyEvent.ACTION_UP, mLastJoystickYKeyCode, 0, metaState,
+                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
+                    mLastJoystickYKeyCode = 0;
+                }
+
+                mLastJoystickYDirection = yDirection;
+
+                if (yDirection != 0 && synthesizeNewKeys) {
+                    mLastJoystickYKeyCode = yDirection > 0
+                            ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
+                    final KeyEvent e = new KeyEvent(time, time,
+                            KeyEvent.ACTION_DOWN, mLastJoystickYKeyCode, 0, metaState,
+                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
+                    enqueueInputEvent(e);
+                    Message m = mHandler.obtainMessage(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT, e);
+                    m.setAsynchronous(true);
+                    mHandler.sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
+                }
             }
         }
 
-        if (yDirection != mLastJoystickYDirection) {
-            if (mLastJoystickYKeyCode != 0) {
-                mHandler.removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
-                enqueueInputEvent(new KeyEvent(time, time,
-                        KeyEvent.ACTION_UP, mLastJoystickYKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
-                mLastJoystickYKeyCode = 0;
-            }
-
-            mLastJoystickYDirection = yDirection;
-
-            if (yDirection != 0 && synthesizeNewKeys) {
-                mLastJoystickYKeyCode = yDirection > 0
-                        ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
-                final KeyEvent e = new KeyEvent(time, time,
-                        KeyEvent.ACTION_DOWN, mLastJoystickYKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
-                enqueueInputEvent(e);
-                Message m = mHandler.obtainMessage(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT, e);
-                m.setAsynchronous(true);
-                mHandler.sendMessageDelayed(m, mViewConfiguration.getKeyRepeatTimeout());
+        private int joystickAxisValueToDirection(float value) {
+            if (value >= 0.5f) {
+                return 1;
+            } else if (value <= -0.5f) {
+                return -1;
+            } else {
+                return 0;
             }
         }
-    }
 
-    private static int joystickAxisValueToDirection(float value) {
-        if (value >= 0.5f) {
-            return 1;
-        } else if (value <= -0.5f) {
-            return -1;
-        } else {
-            return 0;
+        private int processTouchNavigationEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
+            mSimulatedDpad.updateTouchNavigation(ViewRootImpl.this, event, true);
+            return FINISH_HANDLED;
+        }
+
+        private void cancelTouchNavigationEvent(QueuedInputEvent q) {
+            final MotionEvent event = (MotionEvent)q.mEvent;
+            mSimulatedDpad.updateTouchNavigation(ViewRootImpl.this, event, false);
         }
     }
 
@@ -3801,136 +4230,6 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         return false;
-    }
-
-    private int deliverKeyEvent(QueuedInputEvent q) {
-        final KeyEvent event = (KeyEvent)q.mEvent;
-        if (mInputEventConsistencyVerifier != null) {
-            mInputEventConsistencyVerifier.onKeyEvent(event, 0);
-        }
-
-        int result = EVENT_POST_IME;
-        if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
-            if (LOCAL_LOGV) Log.v(TAG, "Dispatching key " + event + " to " + mView);
-
-            // Perform predispatching before the IME.
-            if (mView.dispatchKeyEventPreIme(event)) {
-                return EVENT_HANDLED;
-            }
-
-            // Dispatch to the IME before propagating down the view hierarchy.
-            result = dispatchImeInputEvent(q);
-        }
-        return result;
-    }
-
-    private int deliverKeyEventPostIme(QueuedInputEvent q) {
-        final KeyEvent event = (KeyEvent)q.mEvent;
-
-        // If the view went away, then the event will not be handled.
-        if (mView == null || !mAdded) {
-            return EVENT_NOT_HANDLED;
-        }
-
-        // If the key's purpose is to exit touch mode then we consume it and consider it handled.
-        if (checkForLeavingTouchModeAndConsume(event)) {
-            return EVENT_HANDLED;
-        }
-
-        // Make sure the fallback event policy sees all keys that will be delivered to the
-        // view hierarchy.
-        mFallbackEventHandler.preDispatchKeyEvent(event);
-
-        // Deliver the key to the view hierarchy.
-        if (mView.dispatchKeyEvent(event)) {
-            return EVENT_HANDLED;
-        }
-
-        // If the Control modifier is held, try to interpret the key as a shortcut.
-        if (event.getAction() == KeyEvent.ACTION_DOWN
-                && event.isCtrlPressed()
-                && event.getRepeatCount() == 0
-                && !KeyEvent.isModifierKey(event.getKeyCode())) {
-            if (mView.dispatchKeyShortcutEvent(event)) {
-                return EVENT_HANDLED;
-            }
-        }
-
-        // Apply the fallback event policy.
-        if (mFallbackEventHandler.dispatchKeyEvent(event)) {
-            return EVENT_HANDLED;
-        }
-
-        // Handle automatic focus changes.
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            int direction = 0;
-            switch (event.getKeyCode()) {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if (event.hasNoModifiers()) {
-                        direction = View.FOCUS_LEFT;
-                    }
-                    break;
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if (event.hasNoModifiers()) {
-                        direction = View.FOCUS_RIGHT;
-                    }
-                    break;
-                case KeyEvent.KEYCODE_DPAD_UP:
-                    if (event.hasNoModifiers()) {
-                        direction = View.FOCUS_UP;
-                    }
-                    break;
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    if (event.hasNoModifiers()) {
-                        direction = View.FOCUS_DOWN;
-                    }
-                    break;
-                case KeyEvent.KEYCODE_TAB:
-                    if (event.hasNoModifiers()) {
-                        direction = View.FOCUS_FORWARD;
-                    } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                        direction = View.FOCUS_BACKWARD;
-                    }
-                    break;
-            }
-            if (direction != 0) {
-                View focused = mView.findFocus();
-                if (focused != null) {
-                    View v = focused.focusSearch(direction);
-                    if (v != null && v != focused) {
-                        // do the math the get the interesting rect
-                        // of previous focused into the coord system of
-                        // newly focused view
-                        focused.getFocusedRect(mTempRect);
-                        if (mView instanceof ViewGroup) {
-                            ((ViewGroup) mView).offsetDescendantRectToMyCoords(
-                                    focused, mTempRect);
-                            ((ViewGroup) mView).offsetRectIntoDescendantCoords(
-                                    v, mTempRect);
-                        }
-                        if (v.requestFocus(direction, mTempRect)) {
-                            playSoundEffect(SoundEffectConstants
-                                    .getContantForFocusDirection(direction));
-                            return EVENT_HANDLED;
-                        }
-                    }
-
-                    // Give the focused view a last chance to handle the dpad key.
-                    if (mView.dispatchUnhandledMove(focused, direction)) {
-                        return EVENT_HANDLED;
-                    }
-                } else {
-                    // find the best view to give focus to in this non-touch-mode with no-focus
-                    View v = focusSearch(null, direction);
-                    if (v != null && v.requestFocus(direction)) {
-                        return EVENT_HANDLED;
-                    }
-                }
-            }
-        }
-
-        // Key was unhandled.
-        return EVENT_NOT_HANDLED;
     }
 
     /* drag/drop */
@@ -4371,13 +4670,25 @@ public final class ViewRootImpl implements ViewParent,
      * needing a queue on the application's side.
      */
     private static final class QueuedInputEvent {
-        public static final int FLAG_DELIVER_POST_IME = 1;
+        public static final int FLAG_DELIVER_POST_IME = 1 << 0;
+        public static final int FLAG_DEFERRED = 1 << 1;
+        public static final int FLAG_FINISHED = 1 << 2;
+        public static final int FLAG_FINISHED_HANDLED = 1 << 3;
+        public static final int FLAG_RESYNTHESIZED = 1 << 4;
 
         public QueuedInputEvent mNext;
 
         public InputEvent mEvent;
         public InputEventReceiver mReceiver;
         public int mFlags;
+
+        public boolean shouldSkipIme() {
+            if ((mFlags & FLAG_DELIVER_POST_IME) != 0) {
+                return true;
+            }
+            return mEvent instanceof MotionEvent
+                    && mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER);
+        }
     }
 
     private QueuedInputEvent obtainQueuedInputEvent(InputEvent event,
@@ -4450,14 +4761,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void doProcessInputEvents() {
-        // Handle all of the available pending input events. Currently this will immediately
-        // process all of the events it can until it encounters one that must go through the IME.
-        // After that it will continue adding events to the active input queue but will wait for a
-        // response from the IME, regardless of whether that particular event needs it or not, in
-        // order to guarantee ordering consistency. This could be slightly improved by only
-        // queueing events whose source has previously encountered something that needs to be
-        // handled by the IME, and otherwise handling them immediately since we only need to
-        // guarantee ordering within a given source.
+        // Deliver all pending input events in the queue.
         while (mPendingInputEventHead != null) {
             QueuedInputEvent q = mPendingInputEventHead;
             mPendingInputEventHead = q.mNext;
@@ -4470,25 +4774,7 @@ public final class ViewRootImpl implements ViewParent,
             Trace.traceCounter(Trace.TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
                     mPendingInputEventCount);
 
-            int result = deliverInputEvent(q);
-
-            if (result == EVENT_HANDLED || result == EVENT_NOT_HANDLED) {
-                finishInputEvent(q, result == EVENT_HANDLED);
-            } else if (result == EVENT_PENDING_IME) {
-                enqueueActiveInputEvent(q);
-            } else {
-                q.mFlags |= QueuedInputEvent.FLAG_DELIVER_POST_IME;
-                // If the IME decided not to handle this event, and we have no events already being
-                // handled by the IME, go ahead and handle this one and then continue to the next
-                // input event. Otherwise, queue it up and handle it after whatever in front of it
-                // in the queue has been handled.
-                if (mActiveInputEventHead == null) {
-                    result = deliverInputEventPostIme(q);
-                    finishInputEvent(q, result == EVENT_HANDLED);
-                } else {
-                    enqueueActiveInputEvent(q);
-                }
-            }
+            deliverInputEvent(q);
         }
 
         // We are done processing all input events that we can process right now
@@ -4499,114 +4785,27 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void enqueueActiveInputEvent(QueuedInputEvent q) {
-        if (mActiveInputEventHead == null) {
-            mActiveInputEventHead = q;
-            mActiveInputEventTail = q;
-        } else {
-            mActiveInputEventTail.mNext = q;
-            mActiveInputEventTail = q;
-        }
-        mActiveInputEventCount += 1;
-        Trace.traceCounter(Trace.TRACE_TAG_INPUT, mActiveInputEventQueueLengthCounterName,
-                mActiveInputEventCount);
-    }
+    private void deliverInputEvent(QueuedInputEvent q) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent");
+        try {
+            if (mInputEventConsistencyVerifier != null) {
+                mInputEventConsistencyVerifier.onInputEvent(q.mEvent, 0);
+            }
 
-    private QueuedInputEvent dequeueActiveInputEvent() {
-        return dequeueActiveInputEvent(mActiveInputEventHead);
-    }
-
-
-    private QueuedInputEvent dequeueActiveInputEvent(QueuedInputEvent q) {
-        QueuedInputEvent curr = mActiveInputEventHead;
-        QueuedInputEvent prev = null;
-        while (curr != null && curr != q) {
-            prev = curr;
-            curr = curr.mNext;
-        }
-        if (curr != null) {
-            if (mActiveInputEventHead == curr) {
-                mActiveInputEventHead = curr.mNext;
+            InputStage stage = q.shouldSkipIme() ? mFirstPostImeInputStage : mFirstInputStage;
+            if (stage != null) {
+                stage.deliver(q);
             } else {
-                prev.mNext = curr.mNext;
+                finishInputEvent(q);
             }
-            if (mActiveInputEventTail == curr) {
-                mActiveInputEventTail = prev;
-            }
-            curr.mNext = null;
-
-            mActiveInputEventCount -= 1;
-            Trace.traceCounter(Trace.TRACE_TAG_INPUT, mActiveInputEventQueueLengthCounterName,
-                    mActiveInputEventCount);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
-        return curr;
     }
 
-    private QueuedInputEvent findActiveInputEvent(int seq) {
-        QueuedInputEvent q = mActiveInputEventHead;
-        while (q != null && q.mEvent.getSequenceNumber() != seq) {
-            q = q.mNext;
-        }
-        return q;
-    }
-
-    int dispatchImeInputEvent(QueuedInputEvent q) {
-        if (mLastWasImTarget) {
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) {
-                final InputEvent event = q.mEvent;
-                final int seq = event.getSequenceNumber();
-                if (DEBUG_IMF)
-                    Log.v(TAG, "Sending input event to IME: seq=" + seq + " event=" + event);
-                return imm.dispatchInputEvent(mView.getContext(), seq, event,
-                        mInputMethodCallback);
-            }
-        }
-        return EVENT_POST_IME;
-    }
-
-    void handleImeFinishedEvent(int seq, boolean handled) {
-        QueuedInputEvent q = findActiveInputEvent(seq);
-        if (q != null) {
-            if (DEBUG_IMF) {
-                Log.v(TAG, "IME finished event: seq=" + seq
-                        + " handled=" + handled + " event=" + q);
-            }
-
-            if (handled) {
-                dequeueActiveInputEvent(q);
-                finishInputEvent(q, true);
-            } else {
-                q.mFlags |= QueuedInputEvent.FLAG_DELIVER_POST_IME;
-            }
-
-
-            // Flush all of the input events that are no longer waiting on the IME
-            while (mActiveInputEventHead != null && (mActiveInputEventHead.mFlags &
-                        QueuedInputEvent.FLAG_DELIVER_POST_IME) != 0) {
-                q = dequeueActiveInputEvent();
-                // If the window doesn't currently have input focus, then drop
-                // this event.  This could be an event that came back from the
-                // IME dispatch but the window has lost focus in the meantime.
-                handled = false;
-                if (!mAttachInfo.mHasWindowFocus && !isTerminalInputEvent(q.mEvent)) {
-                    Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
-                } else {
-                    handled = (deliverInputEventPostIme(q) == EVENT_HANDLED);
-                }
-                finishInputEvent(q, handled);
-            }
-        } else {
-            if (DEBUG_IMF) {
-                Log.v(TAG, "IME finished event: seq=" + seq
-                        + " handled=" + handled + ", event not found!");
-            }
-        }
-
-    }
-
-    private void finishInputEvent(QueuedInputEvent q, boolean handled) {
+    private void finishInputEvent(QueuedInputEvent q) {
         if (q.mReceiver != null) {
+            boolean handled = (q.mFlags & QueuedInputEvent.FLAG_FINISHED_HANDLED) != 0;
             q.mReceiver.finishInputEvent(q.mEvent, handled);
         } else {
             q.mEvent.recycleIfNeededAfterDispatch();
@@ -4615,7 +4814,7 @@ public final class ViewRootImpl implements ViewParent,
         recycleQueuedInputEvent(q);
     }
 
-    private static boolean isTerminalInputEvent(InputEvent event) {
+    static boolean isTerminalInputEvent(InputEvent event) {
         if (event instanceof KeyEvent) {
             final KeyEvent keyEvent = (KeyEvent)event;
             return keyEvent.getAction() == KeyEvent.ACTION_UP;
@@ -5149,22 +5348,6 @@ public final class ViewRootImpl implements ViewParent,
         
         public void setKeepScreenOn(boolean screenOn) {
             ((RootViewSurfaceTaker)mView).setSurfaceKeepScreenOn(screenOn);
-        }
-    }
-    
-    static final class InputMethodCallback implements InputMethodManager.FinishedEventCallback {
-        private WeakReference<ViewRootImpl> mViewAncestor;
-
-        public InputMethodCallback(ViewRootImpl viewAncestor) {
-            mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
-        }
-
-        @Override
-        public void finishedEvent(int seq, boolean handled) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.handleImeFinishedEvent(seq, handled);
-            }
         }
     }
 

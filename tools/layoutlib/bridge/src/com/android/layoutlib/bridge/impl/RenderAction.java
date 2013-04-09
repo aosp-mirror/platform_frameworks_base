@@ -232,7 +232,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         sCurrentContext = mContext;
 
         // create an InputMethodManager
-        InputMethodManager.getInstance(Looper.myLooper());
+        InputMethodManager.getInstance();
 
         LayoutLog currentLog = mParams.getLog();
         Bridge.setLog(currentLog);
