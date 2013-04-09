@@ -3535,6 +3535,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     onNewPlaybackStateForRcc(msg.arg1 /* rccId */, msg.arg2 /* state */,
                             (RccPlaybackState)msg.obj /* newState */);
                     break;
+                case MSG_RCC_SEEK_REQUEST:
+                    onSetRemoteControlClientPlaybackPosition(msg.arg1 /* generationId */,
+                            ((Long)msg.obj).longValue() /* timeMs */);
 
                 case MSG_SET_RSX_CONNECTION_STATE:
                     onSetRsxConnectionState(msg.arg1/*available*/, msg.arg2/*address*/);
@@ -5820,7 +5823,16 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     public void setRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
-        sendMsg(mAudioHandler, MSG_RCC_SEEK_REQUEST, SENDMSG_QUEUE, generationId /* arg1 */,
+        // ignore position change requests if invalid generation ID
+        synchronized(mRCStack) {
+            synchronized(mCurrentRcLock) {
+                if (mCurrentRcClientGen != generationId) {
+                    return;
+                }
+            }
+        }
+        // discard any unprocessed seek request in the message queue, and replace with latest
+        sendMsg(mAudioHandler, MSG_RCC_SEEK_REQUEST, SENDMSG_REPLACE, generationId /* arg1 */,
                 0 /* arg2 ignored*/, new Long(timeMs) /* obj */, 0 /* delay */);
     }
 
