@@ -8178,13 +8178,13 @@ public final class ActivityManagerService  extends ActivityManagerNative
         final String processName = app == null ? "system_server"
                 : (r == null ? "unknown" : r.processName);
 
-        handleApplicationCrashInner(r, processName, crashInfo);
+        handleApplicationCrashInner("crash", r, processName, crashInfo);
     }
 
     /* Native crash reporting uses this inner version because it needs to be somewhat
      * decoupled from the AM-managed cleanup lifecycle
      */
-    void handleApplicationCrashInner(ProcessRecord r, String processName,
+    void handleApplicationCrashInner(String eventType, ProcessRecord r, String processName,
             ApplicationErrorReport.CrashInfo crashInfo) {
         EventLog.writeEvent(EventLogTags.AM_CRASH, Binder.getCallingPid(),
                 UserHandle.getUserId(Binder.getCallingUid()), processName,
@@ -8194,7 +8194,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 crashInfo.throwFileName,
                 crashInfo.throwLineNumber);
 
-        addErrorToDropBox("crash", r, processName, null, null, null, null, null, crashInfo);
+        addErrorToDropBox(eventType, r, processName, null, null, null, null, null, crashInfo);
 
         crashApplication(r, crashInfo);
     }

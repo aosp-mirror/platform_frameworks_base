@@ -82,7 +82,7 @@ class NativeCrashListener extends Thread {
                 ci.stackTrace = mCrashReport;
 
                 if (DEBUG) Slog.v(TAG, "Calling handleApplicationCrash()");
-                mAm.handleApplicationCrashInner(mApp, mApp.processName, ci);
+                mAm.handleApplicationCrashInner("native_crash", mApp, mApp.processName, ci);
                 if (DEBUG) Slog.v(TAG, "<-- handleApplicationCrash() returned");
             } catch (Exception e) {
                 Slog.e(TAG, "Unable to report native crash", e);
