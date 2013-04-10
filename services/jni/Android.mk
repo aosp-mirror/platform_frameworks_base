@@ -32,6 +32,7 @@ LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
     libandroidfw \
     libcutils \
+    liblog \
     libhardware \
     libhardware_legacy \
     libnativehelper \

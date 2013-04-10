@@ -28,6 +28,7 @@ LOCAL_SHARED_LIBRARIES := \
     libmedia \
     libskia \
     libui \
+    liblog \
     libcutils \
     libgui \
     libstagefright \

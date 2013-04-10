@@ -28,7 +28,8 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SHARED_LIBRARIES := \
     libnativehelper \
-    libutils
+    libutils \
+    liblog
 
 LOCAL_STATIC_LIBRARIES := \
     libdiskusage

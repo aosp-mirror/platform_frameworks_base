@@ -44,6 +44,7 @@ LOCAL_CFLAGS := $(LOCAL_DRM_CFLAG)
 LOCAL_SHARED_LIBRARIES :=   \
     libutils                \
     libcutils               \
+    liblog                  \
     libcrypto
 
 LOCAL_MODULE := libdrm1
@@ -69,12 +70,13 @@ LOCAL_C_INCLUDES :=         \
     $(LOCAL_PATH)/include/parser \
     $(JNI_H_INCLUDE)    \
     $(call include-path-for, system-core)/cutils
-	
+
 
 LOCAL_SHARED_LIBRARIES := libdrm1 \
     libnativehelper               \
     libutils                      \
-    libcutils
+    libcutils                     \
+    liblog
 
 LOCAL_MODULE := libdrm1_jni
 

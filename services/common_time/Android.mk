@@ -27,7 +27,8 @@ endif
 LOCAL_SHARED_LIBRARIES := \
     libbinder \
     libcommon_time_client \
-    libutils
+    libutils \
+    liblog
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := common_time

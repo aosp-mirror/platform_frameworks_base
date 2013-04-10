@@ -29,6 +29,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
+    liblog \
     libandroidfw \
     libutils \
     libhardware \

@@ -23,6 +23,7 @@ LOCAL_MODULE:= libdrmframework_jni
 
 LOCAL_SHARED_LIBRARIES := \
     libdrmframework \
+    liblog \
     libutils \
     libandroid_runtime \
     libnativehelper \
@@ -43,4 +44,3 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
-

@@ -29,6 +29,7 @@ LOCAL_SHARED_LIBRARIES := \
     libstagefright_foundation \
     libbinder \
     libutils \
+    liblog \
     libjpeg
 
 LOCAL_C_INCLUDES := \

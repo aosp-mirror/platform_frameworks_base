@@ -16,10 +16,11 @@ LOCAL_SHARED_LIBRARIES := \
 	libandroid_runtime \
 	libsensorservice \
 	libsurfaceflinger \
-    libinput \
+	libinput \
 	libutils \
 	libbinder \
-	libcutils
+	libcutils \
+	liblog
 
 LOCAL_MODULE:= libsystem_server
 
