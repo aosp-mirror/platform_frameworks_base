@@ -40,7 +40,6 @@
 #include <androidfw/KeyCharacterMap.h>
 #include <androidfw/VirtualKeyMap.h>
 
-#include <sha1.h>
 #include <string.h>
 #include <stdint.h>
 #include <dirent.h>
@@ -49,6 +48,7 @@
 #include <sys/epoll.h>
 #include <sys/ioctl.h>
 #include <sys/limits.h>
+#include <sys/sha1.h>
 
 /* this macro is used to tell if "bit" is set in "array"
  * it selects a byte from the array, and does a boolean AND
@@ -162,7 +162,8 @@ EventHub::Device::Device(int fd, int32_t id, const String8& path,
         next(NULL),
         fd(fd), id(id), path(path), identifier(identifier),
         classes(0), configuration(NULL), virtualKeyMap(NULL),
-        ffEffectPlaying(false), ffEffectId(-1) {
+        ffEffectPlaying(false), ffEffectId(-1),
+        timestampOverrideSec(0), timestampOverrideUsec(0) {
     memset(keyBitmask, 0, sizeof(keyBitmask));
     memset(absBitmask, 0, sizeof(absBitmask));
     memset(relBitmask, 0, sizeof(relBitmask));
@@ -766,11 +767,36 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
 
                     size_t count = size_t(readSize) / sizeof(struct input_event);
                     for (size_t i = 0; i < count; i++) {
-                        const struct input_event& iev = readBuffer[i];
-                        ALOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, value=%d",
+                        struct input_event& iev = readBuffer[i];
+                        ALOGV("%s got: time=%d.%06d, type=%d, code=%d, value=%d",
                                 device->path.string(),
                                 (int) iev.time.tv_sec, (int) iev.time.tv_usec,
                                 iev.type, iev.code, iev.value);
+
+                        // Some input devices may have a better concept of the time
+                        // when an input event was actually generated than the kernel
+                        // which simply timestamps all events on entry to evdev.
+                        // This is a custom Android extension of the input protocol
+                        // mainly intended for use with uinput based device drivers.
+                        if (iev.type == EV_MSC) {
+                            if (iev.code == MSC_ANDROID_TIME_SEC) {
+                                device->timestampOverrideSec = iev.value;
+                                continue;
+                            } else if (iev.code == MSC_ANDROID_TIME_USEC) {
+                                device->timestampOverrideUsec = iev.value;
+                                continue;
+                            }
+                        }
+                        if (device->timestampOverrideSec || device->timestampOverrideUsec) {
+                            iev.time.tv_sec = device->timestampOverrideSec;
+                            iev.time.tv_usec = device->timestampOverrideUsec;
+                            if (iev.type == EV_SYN && iev.code == SYN_REPORT) {
+                                device->timestampOverrideSec = 0;
+                                device->timestampOverrideUsec = 0;
+                            }
+                            ALOGV("applied override time %d.%06d",
+                                    int(iev.time.tv_sec), int(iev.time.tv_usec));
+                        }
 
 #ifdef HAVE_POSIX_CLOCKS
                         // Use the time specified in the event instead of the current time
@@ -829,8 +855,8 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         event->code = iev.code;
                         event->value = iev.value;
                         event += 1;
+                        capacity -= 1;
                     }
-                    capacity -= count;
                     if (capacity == 0) {
                         // The result buffer is full.  Reset the pending event index
                         // so we will try to read the device again on the next iteration.
