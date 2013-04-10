@@ -26,6 +26,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
 import android.os.RemoteCallbackList;
+import android.util.TimeUtils;
 import android.view.IWindowFocusObserver;
 import android.view.IWindowId;
 import com.android.server.input.InputWindowHandle;
@@ -265,6 +266,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * been updated for the new orientation.
      */
     boolean mOrientationChanging;
+
+    /**
+     * How long we last kept the screen frozen.
+     */
+    int mLastFreezeDuration;
 
     /** Is this window now (or just being) removed? */
     boolean mRemoved;
@@ -1386,6 +1392,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(mOrientationChanging);
                     pw.print(" mAppFreezing="); pw.print(mAppFreezing);
                     pw.print(" mTurnOnScreen="); pw.println(mTurnOnScreen);
+        }
+        if (mLastFreezeDuration != 0) {
+            pw.print(prefix); pw.print("mLastFreezeDuration=");
+                    TimeUtils.formatDuration(mLastFreezeDuration, pw); pw.println();
         }
         if (mHScale != 1 || mVScale != 1) {
             pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
