@@ -244,12 +244,17 @@ public class RecoverySystem {
             // The signature cert matches a trusted key.  Now verify that
             // the digest in the cert matches the actual file data.
 
-            // The verifier in recovery *only* handles SHA1withRSA
-            // signatures.  SignApk.java always uses SHA1withRSA, no
-            // matter what the cert says to use.  Ignore
-            // cert.getSigAlgName(), and instead use whatever
-            // algorithm is used by the signature (which should be
-            // SHA1withRSA).
+            // The verifier in recovery only handles SHA1withRSA and
+            // SHA256withRSA signatures.  SignApk chooses which to use
+            // based on the signature algorithm of the cert:
+            //
+            //    "SHA256withRSA" cert -> "SHA256withRSA" signature
+            //    "SHA1withRSA" cert   -> "SHA1withRSA" signature
+            //    "MD5withRSA" cert    -> "SHA1withRSA" signature (for backwards compatibility)
+            //    any other cert       -> SignApk fails
+            //
+            // Here we ignore whatever the cert says, and instead use
+            // whatever algorithm is used by the signature.
 
             String da = sigInfo.getDigestAlgorithm();
             String dea = sigInfo.getDigestEncryptionAlgorithm();
