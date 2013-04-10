@@ -1052,8 +1052,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Операции с текстом"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Заканчивается свободное место"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некоторые системные функции могут не работать"</string>
-    <string name="app_running_notification_title" msgid="4625479411505090209">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> выполняется"</string>
-    <string name="app_running_notification_text" msgid="3368349329989620597">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> выполняется в данный момент"</string>
+    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"ОК"</string>
     <string name="cancel" msgid="6442560571259935130">"Отмена"</string>
     <string name="yes" msgid="5362982303337969312">"ОК"</string>
