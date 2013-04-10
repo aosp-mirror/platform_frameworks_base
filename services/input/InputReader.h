@@ -791,6 +791,10 @@ struct CookedPointerData {
     void clear();
     void copyFrom(const CookedPointerData& other);
 
+    inline const PointerCoords& pointerCoordsForId(uint32_t id) const {
+        return pointerCoords[idToIndex[id]];
+    }
+
     inline bool isHovering(uint32_t pointerIndex) {
         return hoveringIdBits.hasBit(pointerProperties[pointerIndex].id);
     }
@@ -1180,6 +1184,7 @@ protected:
         DEVICE_MODE_DISABLED, // input is disabled
         DEVICE_MODE_DIRECT, // direct mapping (touchscreen)
         DEVICE_MODE_UNSCALED, // unscaled mapping (touchpad)
+        DEVICE_MODE_NAVIGATION, // unscaled mapping with assist gesture (touch navigation)
         DEVICE_MODE_POINTER, // pointer mapping (pointer)
     };
     DeviceMode mDeviceMode;
@@ -1432,6 +1437,10 @@ private:
     // The maximum swipe width.
     float mPointerGestureMaxSwipeWidth;
 
+    // The start and end Y thresholds for invoking the assist navigation swipe.
+    float mNavigationAssistStartY;
+    float mNavigationAssistEndY;
+
     struct PointerDistanceHeapElement {
         uint32_t currentPointerIndex : 8;
         uint32_t lastPointerIndex : 8;
@@ -1606,6 +1615,15 @@ private:
         }
     } mPointerSimple;
 
+    struct Navigation {
+        // The id of a pointer that is tracking a possible assist swipe.
+        int32_t activeAssistId; // -1 if none
+
+        void reset() {
+            activeAssistId = -1;
+        }
+    } mNavigation;
+
     // The pointer and scroll velocity controls.
     VelocityControl mPointerVelocityControl;
     VelocityControl mWheelXVelocityControl;
@@ -1640,6 +1658,8 @@ private:
     void dispatchPointerSimple(nsecs_t when, uint32_t policyFlags,
             bool down, bool hovering);
     void abortPointerSimple(nsecs_t when, uint32_t policyFlags);
+
+    void dispatchNavigationAssist(nsecs_t when, uint32_t policyFlags);
 
     // Dispatches a motion event.
     // If the changedId is >= 0 and the action is POINTER_DOWN or POINTER_UP, the
