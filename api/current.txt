@@ -20482,17 +20482,35 @@ package android.sax {
 
 package android.security {
 
-  public class AndroidKeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
+  public final class AndroidKeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
+    method public android.content.Context getContext();
+    method public java.util.Date getEndDate();
+    method public java.lang.String getKeystoreAlias();
+    method public java.math.BigInteger getSerialNumber();
+    method public java.util.Date getStartDate();
+    method public javax.security.auth.x500.X500Principal getSubjectDN();
+    method public boolean isEncryptionRequired();
   }
 
-  public static class AndroidKeyPairGeneratorSpec.Builder {
+  public static final class AndroidKeyPairGeneratorSpec.Builder {
     ctor public AndroidKeyPairGeneratorSpec.Builder(android.content.Context);
     method public android.security.AndroidKeyPairGeneratorSpec build();
     method public android.security.AndroidKeyPairGeneratorSpec.Builder setAlias(java.lang.String);
+    method public android.security.AndroidKeyPairGeneratorSpec.Builder setEncryptionRequired();
     method public android.security.AndroidKeyPairGeneratorSpec.Builder setEndDate(java.util.Date);
     method public android.security.AndroidKeyPairGeneratorSpec.Builder setSerialNumber(java.math.BigInteger);
     method public android.security.AndroidKeyPairGeneratorSpec.Builder setStartDate(java.util.Date);
     method public android.security.AndroidKeyPairGeneratorSpec.Builder setSubject(javax.security.auth.x500.X500Principal);
+  }
+
+  public final class AndroidKeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
+    method public boolean isEncryptionRequired();
+  }
+
+  public static final class AndroidKeyStoreParameter.Builder {
+    ctor public AndroidKeyStoreParameter.Builder(android.content.Context);
+    method public android.security.AndroidKeyStoreParameter build();
+    method public android.security.AndroidKeyStoreParameter.Builder setEncryptionRequired();
   }
 
   public final class KeyChain {
