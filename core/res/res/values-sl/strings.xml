@@ -1052,8 +1052,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Besedilna dejanja"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Prostor za shranjevanje bo pošel"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Nekatere sistemske funkcije morda ne delujejo"</string>
-    <string name="app_running_notification_title" msgid="4625479411505090209">"Izvaja se aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="app_running_notification_text" msgid="3368349329989620597">"Trenutno se izvaja aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"V redu"</string>
     <string name="cancel" msgid="6442560571259935130">"Prekliči"</string>
     <string name="yes" msgid="5362982303337969312">"V redu"</string>

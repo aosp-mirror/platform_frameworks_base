@@ -1052,8 +1052,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"存储空间不足"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"某些系统功能可能无法正常使用"</string>
-    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g>正在运行"</string>
-    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前正在运行"</string>
+    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"确定"</string>
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="yes" msgid="5362982303337969312">"确定"</string>
