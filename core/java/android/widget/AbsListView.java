@@ -2606,7 +2606,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mGlobalLayoutListenerAddedFilter = false;
         }
 
-        if (mAdapter != null) {
+        if (mAdapter != null && mDataSetObserver != null) {
             mAdapter.unregisterDataSetObserver(mDataSetObserver);
             mDataSetObserver = null;
         }
