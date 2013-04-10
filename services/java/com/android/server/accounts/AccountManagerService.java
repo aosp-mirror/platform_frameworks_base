@@ -22,6 +22,7 @@ import android.accounts.AccountAndUser;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorDescription;
+import android.accounts.CantAddAccountActivity;
 import android.accounts.GrantCredentialsPermissionActivity;
 import android.accounts.IAccountAuthenticator;
 import android.accounts.IAccountAuthenticatorResponse;
@@ -1455,6 +1456,14 @@ public class AccountManagerService
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
             } catch (RemoteException re) {
+            }
+            Intent cantAddAccount = new Intent(mContext, CantAddAccountActivity.class);
+            cantAddAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            long identityToken = clearCallingIdentity();
+            try {
+                mContext.startActivityAsUser(cantAddAccount, UserHandle.CURRENT);
+            } finally {
+                restoreCallingIdentity(identityToken);
             }
             return;
         }
