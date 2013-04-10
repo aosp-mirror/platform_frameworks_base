@@ -40,6 +40,9 @@ public class KeyStore {
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
 
+    // Flags for "put" and "import"
+    public static final int FLAG_ENCRYPTED = 1;
+
     // States
     public enum State { UNLOCKED, LOCKED, UNINITIALIZED };
 
@@ -87,13 +90,17 @@ public class KeyStore {
         }
     }
 
-    public boolean put(String key, byte[] value, int uid) {
+    public boolean put(String key, byte[] value, int uid, int flags) {
         try {
-            return mBinder.insert(key, value, uid) == NO_ERROR;
+            return mBinder.insert(key, value, uid, flags) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
+    }
+
+    public boolean put(String key, byte[] value, int uid) {
+        return put(key, value, uid, FLAG_ENCRYPTED);
     }
 
     public boolean put(String key, byte[] value) {
@@ -185,26 +192,34 @@ public class KeyStore {
         }
     }
 
-    public boolean generate(String key, int uid) {
+    public boolean generate(String key, int uid, int flags) {
         try {
-            return mBinder.generate(key, uid) == NO_ERROR;
+            return mBinder.generate(key, uid, flags) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
+    }
+
+    public boolean generate(String key, int uid) {
+        return generate(key, uid, FLAG_ENCRYPTED);
     }
 
     public boolean generate(String key) {
         return generate(key, -1);
     }
 
-    public boolean importKey(String keyName, byte[] key, int uid) {
+    public boolean importKey(String keyName, byte[] key, int uid, int flags) {
         try {
-            return mBinder.import_key(keyName, key, uid) == NO_ERROR;
+            return mBinder.import_key(keyName, key, uid, flags) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
+    }
+
+    public boolean importKey(String keyName, byte[] key, int uid) {
+        return importKey(keyName, key, uid, FLAG_ENCRYPTED);
     }
 
     public boolean importKey(String keyName, byte[] key) {

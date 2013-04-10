@@ -78,7 +78,7 @@ public interface IKeystoreService extends IInterface {
                 return _result;
             }
 
-            public int insert(String name, byte[] item, int uid) throws RemoteException {
+            public int insert(String name, byte[] item, int uid, int flags) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
@@ -87,6 +87,7 @@ public interface IKeystoreService extends IInterface {
                     _data.writeString(name);
                     _data.writeByteArray(item);
                     _data.writeInt(uid);
+                    _data.writeInt(flags);
                     mRemote.transact(Stub.TRANSACTION_insert, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
@@ -243,7 +244,7 @@ public interface IKeystoreService extends IInterface {
                 return _result;
             }
 
-            public int generate(String name, int uid) throws RemoteException {
+            public int generate(String name, int uid, int flags) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
@@ -251,6 +252,7 @@ public interface IKeystoreService extends IInterface {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeString(name);
                     _data.writeInt(uid);
+                    _data.writeInt(flags);
                     mRemote.transact(Stub.TRANSACTION_generate, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
@@ -261,7 +263,8 @@ public interface IKeystoreService extends IInterface {
                 return _result;
             }
 
-            public int import_key(String name, byte[] data, int uid) throws RemoteException {
+            public int import_key(String name, byte[] data, int uid, int flags)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
@@ -270,6 +273,7 @@ public interface IKeystoreService extends IInterface {
                     _data.writeString(name);
                     _data.writeByteArray(data);
                     _data.writeInt(uid);
+                    _data.writeInt(flags);
                     mRemote.transact(Stub.TRANSACTION_import, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
@@ -538,7 +542,7 @@ public interface IKeystoreService extends IInterface {
 
     public byte[] get(String name) throws RemoteException;
 
-    public int insert(String name, byte[] item, int uid) throws RemoteException;
+    public int insert(String name, byte[] item, int uid, int flags) throws RemoteException;
 
     public int del(String name, int uid) throws RemoteException;
 
@@ -556,9 +560,9 @@ public interface IKeystoreService extends IInterface {
 
     public int zero() throws RemoteException;
 
-    public int generate(String name, int uid) throws RemoteException;
+    public int generate(String name, int uid, int flags) throws RemoteException;
 
-    public int import_key(String name, byte[] data, int uid) throws RemoteException;
+    public int import_key(String name, byte[] data, int uid, int flags) throws RemoteException;
 
     public byte[] sign(String name, byte[] data) throws RemoteException;
 
