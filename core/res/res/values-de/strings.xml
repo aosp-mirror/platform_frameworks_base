@@ -1052,8 +1052,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Einige Systemfunktionen funktionieren möglicherweise nicht."</string>
-    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird ausgeführt."</string>
-    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird gerade ausgeführt."</string>
+    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
