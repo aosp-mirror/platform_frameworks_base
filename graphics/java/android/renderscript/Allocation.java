@@ -1207,7 +1207,9 @@ public class Allocation extends BaseObj {
      *
      * @param dimX The new size of the allocation.
      *
-     * @deprecated
+     * @deprecated Renderscript objects should be immutable once
+     * created.  The replacement is to create a new allocation and copy the
+     * contents.
      */
     public synchronized void resize(int dimX) {
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
