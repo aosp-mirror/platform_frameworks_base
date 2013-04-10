@@ -60,7 +60,9 @@ Sometimes your application's layout can slow down your application.
 
   <p>The Hierarchy Viewer application allows you to debug and optimize your user interface. It
   provides a visual representation of the layout's View hierarchy (the View Hierarchy window)
-  and a magnified view of the display (the Pixel Perfect window).</p>
+  with performance information for each node in the layout,
+  and a magnified view of the display (the Pixel Perfect window) to closely examine the pixels
+  in your layout.</p>
 
   <p>Android <code>lint</code> is a static code scanning tool that helps you optimize the layouts and layout
   hierarchies of your applications, as well as detect other common coding problems. You can run it against your layout files or resource
