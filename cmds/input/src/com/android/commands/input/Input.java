@@ -75,11 +75,14 @@ public class Input {
                             Float.parseFloat(args[3]), Float.parseFloat(args[4]), -1);
                     return;
                 }
-            } else if (command.equals("touchscreen") || command.equals("touchpad")) {
+            } else if (command.equals("touchscreen") || command.equals("touchpad")
+                    || command.equals("touchnavigation")) {
                 // determine input source
                 int inputSource = InputDevice.SOURCE_TOUCHSCREEN;
                 if (command.equals("touchpad")) {
                     inputSource = InputDevice.SOURCE_TOUCHPAD;
+                } else if (command.equals("touchnavigation")) {
+                    inputSource = InputDevice.SOURCE_TOUCH_NAVIGATION;
                 }
                 // determine subcommand
                 if (args.length > 1) {
@@ -247,8 +250,9 @@ public class Input {
         System.err.println("usage: input ...");
         System.err.println("       input text <string>");
         System.err.println("       input keyevent <key code number or name>");
-        System.err.println("       input [touchscreen|touchpad] tap <x> <y>");
-        System.err.println("       input [touchscreen|touchpad] swipe <x1> <y1> <x2> <y2> [duration(ms)]");
+        System.err.println("       input [touchscreen|touchpad|touchnavigation] tap <x> <y>");
+        System.err.println("       input [touchscreen|touchpad|touchnavigation] swipe "
+                + "<x1> <y1> <x2> <y2> [duration(ms)]");
         System.err.println("       input trackball press");
         System.err.println("       input trackball roll <dx> <dy>");
     }
