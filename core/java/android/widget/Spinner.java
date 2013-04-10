@@ -494,20 +494,23 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         // Make selected view and position it
         mFirstPosition = mSelectedPosition;
-        View sel = makeAndAddView(mSelectedPosition);
-        int width = sel.getMeasuredWidth();
-        int selectedOffset = childrenLeft;
-        final int layoutDirection = getLayoutDirection();
-        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-            case Gravity.CENTER_HORIZONTAL:
-                selectedOffset = childrenLeft + (childrenWidth / 2) - (width / 2);
-                break;
-            case Gravity.RIGHT:
-                selectedOffset = childrenLeft + childrenWidth - width;
-                break;
+
+        if (mAdapter != null) {
+            View sel = makeAndAddView(mSelectedPosition);
+            int width = sel.getMeasuredWidth();
+            int selectedOffset = childrenLeft;
+            final int layoutDirection = getLayoutDirection();
+            final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
+            switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+                case Gravity.CENTER_HORIZONTAL:
+                    selectedOffset = childrenLeft + (childrenWidth / 2) - (width / 2);
+                    break;
+                case Gravity.RIGHT:
+                    selectedOffset = childrenLeft + childrenWidth - width;
+                    break;
+            }
+            sel.offsetLeftAndRight(selectedOffset);
         }
-        sel.offsetLeftAndRight(selectedOffset);
 
         // Flush any cached views that did not get reused above
         mRecycler.clear();
