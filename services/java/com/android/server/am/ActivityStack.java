@@ -43,6 +43,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -3495,11 +3496,13 @@ final class ActivityStack {
 
     static final void logStartActivity(int tag, ActivityRecord r,
             TaskRecord task) {
+        final Uri data = r.intent.getData();
+        final String strData = data != null ? data.toSafeString() : null;
+
         EventLog.writeEvent(tag,
                 r.userId, System.identityHashCode(r), task.taskId,
                 r.shortComponentName, r.intent.getAction(),
-                r.intent.getType(), r.intent.getDataString(),
-                r.intent.getFlags());
+                r.intent.getType(), strData, r.intent.getFlags());
     }
 
     /**
