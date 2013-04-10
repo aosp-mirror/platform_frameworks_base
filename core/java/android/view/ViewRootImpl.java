@@ -19,10 +19,13 @@ package android.view;
 import android.Manifest;
 import android.animation.LayoutTransition;
 import android.app.ActivityManagerNative;
+import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
@@ -51,6 +54,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -2923,8 +2927,6 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_DONE_ANIMATING = 22;
     private final static int MSG_INVALIDATE_WORLD = 23;
     private final static int MSG_WINDOW_MOVED = 24;
-    private final static int MSG_ENQUEUE_X_AXIS_KEY_REPEAT = 25;
-    private final static int MSG_ENQUEUE_Y_AXIS_KEY_REPEAT = 26;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2974,10 +2976,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DISPATCH_DONE_ANIMATING";
                 case MSG_WINDOW_MOVED:
                     return "MSG_WINDOW_MOVED";
-                case MSG_ENQUEUE_X_AXIS_KEY_REPEAT:
-                    return "MSG_ENQUEUE_X_AXIS_KEY_REPEAT";
-                case MSG_ENQUEUE_Y_AXIS_KEY_REPEAT:
-                    return "MSG_ENQUEUE_Y_AXIS_KEY_REPEAT";
             }
             return super.getMessageName(message);
         }
@@ -3198,18 +3196,6 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_INVALIDATE_WORLD: {
                 if (mView != null) {
                     invalidateWorld(mView);
-                }
-            } break;
-            case MSG_ENQUEUE_X_AXIS_KEY_REPEAT:
-            case MSG_ENQUEUE_Y_AXIS_KEY_REPEAT: {
-                KeyEvent oldEvent = (KeyEvent)msg.obj;
-                KeyEvent e = KeyEvent.changeTimeRepeat(oldEvent, SystemClock.uptimeMillis(),
-                        oldEvent.getRepeatCount() + 1);
-                if (mAttachInfo.mHasWindowFocus) {
-                    enqueueInputEvent(e);
-                    Message m = obtainMessage(msg.what, e);
-                    m.setAsynchronous(true);
-                    sendMessageDelayed(m, mViewConfiguration.getKeyRepeatDelay());
                 }
             } break;
             }
@@ -3877,37 +3863,34 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * Performs default processing of unhandled input events.
+     * Performs synthesis of new input events from unhandled input events.
      */
     final class SyntheticInputStage extends InputStage {
-        private final TrackballAxis mTrackballAxisX = new TrackballAxis();
-        private final TrackballAxis mTrackballAxisY = new TrackballAxis();
-        private long mLastTrackballTime;
-
-        private int mLastJoystickXDirection;
-        private int mLastJoystickYDirection;
-        private int mLastJoystickXKeyCode;
-        private int mLastJoystickYKeyCode;
-
-        private SimulatedDpad mSimulatedDpad;
+        private final SyntheticTrackballHandler mTrackball = new SyntheticTrackballHandler();
+        private final SyntheticJoystickHandler mJoystick = new SyntheticJoystickHandler();
+        private final SyntheticTouchNavigationHandler mTouchNavigation =
+                new SyntheticTouchNavigationHandler();
 
         public SyntheticInputStage() {
             super(null);
-            mSimulatedDpad = new SimulatedDpad(mContext);
         }
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
             q.mFlags |= QueuedInputEvent.FLAG_RESYNTHESIZED;
             if (q.mEvent instanceof MotionEvent) {
-                final int source = q.mEvent.getSource();
+                final MotionEvent event = (MotionEvent)q.mEvent;
+                final int source = event.getSource();
                 if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                    return processTrackballEvent(q);
+                    mTrackball.process(event);
+                    return FINISH_HANDLED;
                 } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-                    return processJoystickEvent(q);
+                    mJoystick.process(event);
+                    return FINISH_HANDLED;
                 } else if ((source & InputDevice.SOURCE_TOUCH_NAVIGATION)
                         == InputDevice.SOURCE_TOUCH_NAVIGATION) {
-                    return processTouchNavigationEvent(q);
+                    mTouchNavigation.process(event);
+                    return FINISH_HANDLED;
                 }
             }
             return FORWARD;
@@ -3918,49 +3901,55 @@ public final class ViewRootImpl implements ViewParent,
             if ((q.mFlags & QueuedInputEvent.FLAG_RESYNTHESIZED) == 0) {
                 // Cancel related synthetic events if any prior stage has handled the event.
                 if (q.mEvent instanceof MotionEvent) {
-                    final int source = q.mEvent.getSource();
+                    final MotionEvent event = (MotionEvent)q.mEvent;
+                    final int source = event.getSource();
                     if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                        cancelTrackballEvent(q);
+                        mTrackball.cancel(event);
                     } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-                        cancelJoystickEvent(q);
+                        mJoystick.cancel(event);
                     } else if ((source & InputDevice.SOURCE_TOUCH_NAVIGATION)
                             == InputDevice.SOURCE_TOUCH_NAVIGATION) {
-                        cancelTouchNavigationEvent(q);
+                        mTouchNavigation.cancel(event);
                     }
                 }
             }
             super.onDeliverToNext(q);
         }
+    }
 
-        private int processTrackballEvent(QueuedInputEvent q) {
-            final MotionEvent event = (MotionEvent)q.mEvent;
+    /**
+     * Creates dpad events from unhandled trackball movements.
+     */
+    final class SyntheticTrackballHandler {
+        private final TrackballAxis mX = new TrackballAxis();
+        private final TrackballAxis mY = new TrackballAxis();
+        private long mLastTime;
 
+        public void process(MotionEvent event) {
             // Translate the trackball event into DPAD keys and try to deliver those.
-            final TrackballAxis x = mTrackballAxisX;
-            final TrackballAxis y = mTrackballAxisY;
             long curTime = SystemClock.uptimeMillis();
-            if ((mLastTrackballTime + MAX_TRACKBALL_DELAY) < curTime) {
+            if ((mLastTime + MAX_TRACKBALL_DELAY) < curTime) {
                 // It has been too long since the last movement,
                 // so restart at the beginning.
-                x.reset(0);
-                y.reset(0);
-                mLastTrackballTime = curTime;
+                mX.reset(0);
+                mY.reset(0);
+                mLastTime = curTime;
             }
 
             final int action = event.getAction();
             final int metaState = event.getMetaState();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
-                    x.reset(2);
-                    y.reset(2);
+                    mX.reset(2);
+                    mY.reset(2);
                     enqueueInputEvent(new KeyEvent(curTime, curTime,
                             KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
                             KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
                             InputDevice.SOURCE_KEYBOARD));
                     break;
                 case MotionEvent.ACTION_UP:
-                    x.reset(2);
-                    y.reset(2);
+                    mX.reset(2);
+                    mY.reset(2);
                     enqueueInputEvent(new KeyEvent(curTime, curTime,
                             KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
                             KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
@@ -3968,14 +3957,14 @@ public final class ViewRootImpl implements ViewParent,
                     break;
             }
 
-            if (DEBUG_TRACKBALL) Log.v(TAG, "TB X=" + x.position + " step="
-                    + x.step + " dir=" + x.dir + " acc=" + x.acceleration
+            if (DEBUG_TRACKBALL) Log.v(TAG, "TB X=" + mX.position + " step="
+                    + mX.step + " dir=" + mX.dir + " acc=" + mX.acceleration
                     + " move=" + event.getX()
-                    + " / Y=" + y.position + " step="
-                    + y.step + " dir=" + y.dir + " acc=" + y.acceleration
+                    + " / Y=" + mY.position + " step="
+                    + mY.step + " dir=" + mY.dir + " acc=" + mY.acceleration
                     + " move=" + event.getY());
-            final float xOff = x.collect(event.getX(), event.getEventTime(), "X");
-            final float yOff = y.collect(event.getY(), event.getEventTime(), "Y");
+            final float xOff = mX.collect(event.getX(), event.getEventTime(), "X");
+            final float yOff = mY.collect(event.getY(), event.getEventTime(), "Y");
 
             // Generate DPAD events based on the trackball movement.
             // We pick the axis that has moved the most as the direction of
@@ -3987,20 +3976,20 @@ public final class ViewRootImpl implements ViewParent,
             int movement = 0;
             float accel = 1;
             if (xOff > yOff) {
-                movement = x.generate();
+                movement = mX.generate();
                 if (movement != 0) {
                     keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT
                             : KeyEvent.KEYCODE_DPAD_LEFT;
-                    accel = x.acceleration;
-                    y.reset(2);
+                    accel = mX.acceleration;
+                    mY.reset(2);
                 }
             } else if (yOff > 0) {
-                movement = y.generate();
+                movement = mY.generate();
                 if (movement != 0) {
                     keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_DOWN
                             : KeyEvent.KEYCODE_DPAD_UP;
-                    accel = y.acceleration;
-                    x.reset(2);
+                    accel = mY.acceleration;
+                    mX.reset(2);
                 }
             }
 
@@ -4034,16 +4023,12 @@ public final class ViewRootImpl implements ViewParent,
                             KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
                             InputDevice.SOURCE_KEYBOARD));
                 }
-                mLastTrackballTime = curTime;
+                mLastTime = curTime;
             }
-
-            // Unfortunately we can't tell whether the application consumed the keys, so
-            // we always consider the trackball event handled.
-            return FINISH_HANDLED;
         }
 
-        private void cancelTrackballEvent(QueuedInputEvent q) {
-            mLastTrackballTime = Integer.MIN_VALUE;
+        public void cancel(MotionEvent event) {
+            mLastTime = Integer.MIN_VALUE;
 
             // If we reach this, we consumed a trackball event.
             // Because we will not translate the trackball event into a key event,
@@ -4052,19 +4037,220 @@ public final class ViewRootImpl implements ViewParent,
                 ensureTouchMode(false);
             }
         }
+    }
 
-        private int processJoystickEvent(QueuedInputEvent q) {
-            final MotionEvent event = (MotionEvent)q.mEvent;
-            updateJoystickDirection(event, true);
-            return FINISH_HANDLED;
+    /**
+     * Maintains state information for a single trackball axis, generating
+     * discrete (DPAD) movements based on raw trackball motion.
+     */
+    static final class TrackballAxis {
+        /**
+         * The maximum amount of acceleration we will apply.
+         */
+        static final float MAX_ACCELERATION = 20;
+
+        /**
+         * The maximum amount of time (in milliseconds) between events in order
+         * for us to consider the user to be doing fast trackball movements,
+         * and thus apply an acceleration.
+         */
+        static final long FAST_MOVE_TIME = 150;
+
+        /**
+         * Scaling factor to the time (in milliseconds) between events to how
+         * much to multiple/divide the current acceleration.  When movement
+         * is < FAST_MOVE_TIME this multiplies the acceleration; when >
+         * FAST_MOVE_TIME it divides it.
+         */
+        static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/40);
+
+        static final float FIRST_MOVEMENT_THRESHOLD = 0.5f;
+        static final float SECOND_CUMULATIVE_MOVEMENT_THRESHOLD = 2.0f;
+        static final float SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD = 1.0f;
+
+        float position;
+        float acceleration = 1;
+        long lastMoveTime = 0;
+        int step;
+        int dir;
+        int nonAccelMovement;
+
+        void reset(int _step) {
+            position = 0;
+            acceleration = 1;
+            lastMoveTime = 0;
+            step = _step;
+            dir = 0;
         }
 
-        private void cancelJoystickEvent(QueuedInputEvent q) {
-            final MotionEvent event = (MotionEvent)q.mEvent;
-            updateJoystickDirection(event, false);
+        /**
+         * Add trackball movement into the state.  If the direction of movement
+         * has been reversed, the state is reset before adding the
+         * movement (so that you don't have to compensate for any previously
+         * collected movement before see the result of the movement in the
+         * new direction).
+         *
+         * @return Returns the absolute value of the amount of movement
+         * collected so far.
+         */
+        float collect(float off, long time, String axis) {
+            long normTime;
+            if (off > 0) {
+                normTime = (long)(off * FAST_MOVE_TIME);
+                if (dir < 0) {
+                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " reversed to positive!");
+                    position = 0;
+                    step = 0;
+                    acceleration = 1;
+                    lastMoveTime = 0;
+                }
+                dir = 1;
+            } else if (off < 0) {
+                normTime = (long)((-off) * FAST_MOVE_TIME);
+                if (dir > 0) {
+                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " reversed to negative!");
+                    position = 0;
+                    step = 0;
+                    acceleration = 1;
+                    lastMoveTime = 0;
+                }
+                dir = -1;
+            } else {
+                normTime = 0;
+            }
+
+            // The number of milliseconds between each movement that is
+            // considered "normal" and will not result in any acceleration
+            // or deceleration, scaled by the offset we have here.
+            if (normTime > 0) {
+                long delta = time - lastMoveTime;
+                lastMoveTime = time;
+                float acc = acceleration;
+                if (delta < normTime) {
+                    // The user is scrolling rapidly, so increase acceleration.
+                    float scale = (normTime-delta) * ACCEL_MOVE_SCALING_FACTOR;
+                    if (scale > 1) acc *= scale;
+                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " accelerate: off="
+                            + off + " normTime=" + normTime + " delta=" + delta
+                            + " scale=" + scale + " acc=" + acc);
+                    acceleration = acc < MAX_ACCELERATION ? acc : MAX_ACCELERATION;
+                } else {
+                    // The user is scrolling slowly, so decrease acceleration.
+                    float scale = (delta-normTime) * ACCEL_MOVE_SCALING_FACTOR;
+                    if (scale > 1) acc /= scale;
+                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " deccelerate: off="
+                            + off + " normTime=" + normTime + " delta=" + delta
+                            + " scale=" + scale + " acc=" + acc);
+                    acceleration = acc > 1 ? acc : 1;
+                }
+            }
+            position += off;
+            return Math.abs(position);
         }
 
-        private void updateJoystickDirection(MotionEvent event, boolean synthesizeNewKeys) {
+        /**
+         * Generate the number of discrete movement events appropriate for
+         * the currently collected trackball movement.
+         *
+         * @return Returns the number of discrete movements, either positive
+         * or negative, or 0 if there is not enough trackball movement yet
+         * for a discrete movement.
+         */
+        int generate() {
+            int movement = 0;
+            nonAccelMovement = 0;
+            do {
+                final int dir = position >= 0 ? 1 : -1;
+                switch (step) {
+                    // If we are going to execute the first step, then we want
+                    // to do this as soon as possible instead of waiting for
+                    // a full movement, in order to make things look responsive.
+                    case 0:
+                        if (Math.abs(position) < FIRST_MOVEMENT_THRESHOLD) {
+                            return movement;
+                        }
+                        movement += dir;
+                        nonAccelMovement += dir;
+                        step = 1;
+                        break;
+                    // If we have generated the first movement, then we need
+                    // to wait for the second complete trackball motion before
+                    // generating the second discrete movement.
+                    case 1:
+                        if (Math.abs(position) < SECOND_CUMULATIVE_MOVEMENT_THRESHOLD) {
+                            return movement;
+                        }
+                        movement += dir;
+                        nonAccelMovement += dir;
+                        position -= SECOND_CUMULATIVE_MOVEMENT_THRESHOLD * dir;
+                        step = 2;
+                        break;
+                    // After the first two, we generate discrete movements
+                    // consistently with the trackball, applying an acceleration
+                    // if the trackball is moving quickly.  This is a simple
+                    // acceleration on top of what we already compute based
+                    // on how quickly the wheel is being turned, to apply
+                    // a longer increasing acceleration to continuous movement
+                    // in one direction.
+                    default:
+                        if (Math.abs(position) < SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD) {
+                            return movement;
+                        }
+                        movement += dir;
+                        position -= dir * SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD;
+                        float acc = acceleration;
+                        acc *= 1.1f;
+                        acceleration = acc < MAX_ACCELERATION ? acc : acceleration;
+                        break;
+                }
+            } while (true);
+        }
+    }
+
+    /**
+     * Creates dpad events from unhandled joystick movements.
+     */
+    final class SyntheticJoystickHandler extends Handler {
+        private final static int MSG_ENQUEUE_X_AXIS_KEY_REPEAT = 1;
+        private final static int MSG_ENQUEUE_Y_AXIS_KEY_REPEAT = 2;
+
+        private int mLastXDirection;
+        private int mLastYDirection;
+        private int mLastXKeyCode;
+        private int mLastYKeyCode;
+
+        public SyntheticJoystickHandler() {
+            super(true);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ENQUEUE_X_AXIS_KEY_REPEAT:
+                case MSG_ENQUEUE_Y_AXIS_KEY_REPEAT: {
+                    KeyEvent oldEvent = (KeyEvent)msg.obj;
+                    KeyEvent e = KeyEvent.changeTimeRepeat(oldEvent,
+                            SystemClock.uptimeMillis(),
+                            oldEvent.getRepeatCount() + 1);
+                    if (mAttachInfo.mHasWindowFocus) {
+                        enqueueInputEvent(e);
+                        Message m = obtainMessage(msg.what, e);
+                        m.setAsynchronous(true);
+                        sendMessageDelayed(m, ViewConfiguration.getKeyRepeatDelay());
+                    }
+                } break;
+            }
+        }
+
+        public void process(MotionEvent event) {
+            update(event, true);
+        }
+
+        public void cancel(MotionEvent event) {
+            update(event, false);
+        }
+
+        private void update(MotionEvent event, boolean synthesizeNewKeys) {
             final long time = event.getEventTime();
             final int metaState = event.getMetaState();
             final int deviceId = event.getDeviceId();
@@ -4082,51 +4268,51 @@ public final class ViewRootImpl implements ViewParent,
                 yDirection = joystickAxisValueToDirection(event.getY());
             }
 
-            if (xDirection != mLastJoystickXDirection) {
-                if (mLastJoystickXKeyCode != 0) {
-                    mHandler.removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
+            if (xDirection != mLastXDirection) {
+                if (mLastXKeyCode != 0) {
+                    removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
                     enqueueInputEvent(new KeyEvent(time, time,
-                            KeyEvent.ACTION_UP, mLastJoystickXKeyCode, 0, metaState,
+                            KeyEvent.ACTION_UP, mLastXKeyCode, 0, metaState,
                             deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
-                    mLastJoystickXKeyCode = 0;
+                    mLastXKeyCode = 0;
                 }
 
-                mLastJoystickXDirection = xDirection;
+                mLastXDirection = xDirection;
 
                 if (xDirection != 0 && synthesizeNewKeys) {
-                    mLastJoystickXKeyCode = xDirection > 0
+                    mLastXKeyCode = xDirection > 0
                             ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
                     final KeyEvent e = new KeyEvent(time, time,
-                            KeyEvent.ACTION_DOWN, mLastJoystickXKeyCode, 0, metaState,
+                            KeyEvent.ACTION_DOWN, mLastXKeyCode, 0, metaState,
                             deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
                     enqueueInputEvent(e);
-                    Message m = mHandler.obtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e);
+                    Message m = obtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e);
                     m.setAsynchronous(true);
                     mHandler.sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
                 }
             }
 
-            if (yDirection != mLastJoystickYDirection) {
-                if (mLastJoystickYKeyCode != 0) {
-                    mHandler.removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
+            if (yDirection != mLastYDirection) {
+                if (mLastYKeyCode != 0) {
+                    removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
                     enqueueInputEvent(new KeyEvent(time, time,
-                            KeyEvent.ACTION_UP, mLastJoystickYKeyCode, 0, metaState,
+                            KeyEvent.ACTION_UP, mLastYKeyCode, 0, metaState,
                             deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
-                    mLastJoystickYKeyCode = 0;
+                    mLastYKeyCode = 0;
                 }
 
-                mLastJoystickYDirection = yDirection;
+                mLastYDirection = yDirection;
 
                 if (yDirection != 0 && synthesizeNewKeys) {
-                    mLastJoystickYKeyCode = yDirection > 0
+                    mLastYKeyCode = yDirection > 0
                             ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
                     final KeyEvent e = new KeyEvent(time, time,
-                            KeyEvent.ACTION_DOWN, mLastJoystickYKeyCode, 0, metaState,
+                            KeyEvent.ACTION_DOWN, mLastYKeyCode, 0, metaState,
                             deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
                     enqueueInputEvent(e);
-                    Message m = mHandler.obtainMessage(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT, e);
+                    Message m = obtainMessage(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT, e);
                     m.setAsynchronous(true);
-                    mHandler.sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
+                    sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
                 }
             }
         }
@@ -4140,16 +4326,288 @@ public final class ViewRootImpl implements ViewParent,
                 return 0;
             }
         }
+    }
 
-        private int processTouchNavigationEvent(QueuedInputEvent q) {
-            final MotionEvent event = (MotionEvent)q.mEvent;
-            mSimulatedDpad.updateTouchNavigation(ViewRootImpl.this, event, true);
-            return FINISH_HANDLED;
+    /**
+     * Creates dpad events from unhandled touch navigation movements.
+     */
+    final class SyntheticTouchNavigationHandler extends Handler {
+        private static final int MSG_FLICK = 1;
+
+        // Maximum difference in milliseconds between the down and up of a touch
+        // event for it to be considered a tap
+        // TODO:Read this value from a configuration file
+        private static final int MAX_TAP_TIME = 250;
+
+        // Where the cutoff is for determining an edge swipe
+        private static final float EDGE_SWIPE_THRESHOLD = 0.9f;
+
+        // TODO: Pass touch slop from the input device
+        private static final int TOUCH_SLOP = 30;
+
+        // The position of the previous TouchNavigation event
+        private float mLastTouchNavigationXPosition;
+        private float mLastTouchNavigationYPosition;
+        // Where the Touch Navigation was initially pressed
+        private float mTouchNavigationEnterXPosition;
+        private float mTouchNavigationEnterYPosition;
+        // When the most recent ACTION_HOVER_ENTER occurred
+        private long mLastTouchNavigationStartTimeMs = 0;
+        // When the most recent direction key was sent
+        private long mLastTouchNavigationKeySendTimeMs = 0;
+        // When the most recent touch event of any type occurred
+        private long mLastTouchNavigationEventTimeMs = 0;
+        // Did the swipe begin in a valid region
+        private boolean mEdgeSwipePossible;
+
+        // How quickly keys were sent
+        private int mKeySendRateMs = 0;
+        private int mLastKeySent;
+        // Last movement in device screen pixels
+        private float mLastMoveX = 0;
+        private float mLastMoveY = 0;
+        // Offset from the initial touch. Gets reset as direction keys are sent.
+        private float mAccumulatedX;
+        private float mAccumulatedY;
+
+        // Change in position allowed during tap events
+        private float mTouchSlop;
+        private float mTouchSlopSquared;
+        // Has the TouchSlop constraint been invalidated
+        private boolean mAlwaysInTapRegion = true;
+
+        // Information from the most recent event.
+        // Used to determine what device sent the event during a fling.
+        private int mLastSource;
+        private int mLastMetaState;
+        private int mLastDeviceId;
+
+        // TODO: Currently using screen dimensions tuned to a Galaxy Nexus, need to
+        // read this from a config file instead
+        private int mDistancePerTick;
+        private int mDistancePerTickSquared;
+        // Highest rate that the flinged events can occur at before dying out
+        private int mMaxRepeatDelay;
+        // The square of the minimum distance needed for a flick to register
+        private int mMinFlickDistanceSquared;
+        // How quickly the repeated events die off
+        private float mFlickDecay;
+
+        public SyntheticTouchNavigationHandler() {
+            super(true);
+            mDistancePerTick = SystemProperties.getInt("persist.vr_dist_tick", 64);
+            mDistancePerTickSquared = mDistancePerTick * mDistancePerTick;
+            mMaxRepeatDelay = SystemProperties.getInt("persist.vr_repeat_delay", 300);
+            mMinFlickDistanceSquared = SystemProperties.getInt("persist.vr_min_flick", 20);
+            mMinFlickDistanceSquared *= mMinFlickDistanceSquared;
+            mFlickDecay = Float.parseFloat(SystemProperties.get(
+                    "persist.sys.vr_flick_decay", "1.3"));
+            mTouchSlop = TOUCH_SLOP;
+            mTouchSlopSquared = mTouchSlop * mTouchSlop;
         }
 
-        private void cancelTouchNavigationEvent(QueuedInputEvent q) {
-            final MotionEvent event = (MotionEvent)q.mEvent;
-            mSimulatedDpad.updateTouchNavigation(ViewRootImpl.this, event, false);
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_FLICK: {
+                    final long time = SystemClock.uptimeMillis();
+                    final int keyCode = msg.arg2;
+
+                    // Send the key
+                    enqueueInputEvent(new KeyEvent(time, time,
+                            KeyEvent.ACTION_DOWN, keyCode, 0, mLastMetaState,
+                            mLastDeviceId, 0, KeyEvent.FLAG_FALLBACK, mLastSource));
+                    enqueueInputEvent(new KeyEvent(time, time,
+                            KeyEvent.ACTION_UP, keyCode, 0, mLastMetaState,
+                            mLastDeviceId, 0, KeyEvent.FLAG_FALLBACK, mLastSource));
+
+                    // Increase the delay by the decay factor and resend
+                    final int delay = (int) Math.ceil(mFlickDecay * msg.arg1);
+                    if (delay <= mMaxRepeatDelay) {
+                        Message next = obtainMessage(MSG_FLICK, delay, keyCode);
+                        next.setAsynchronous(true);
+                        sendMessageDelayed(next, delay);
+                    }
+                    break;
+                }
+            }
+        }
+
+        public void process(MotionEvent event) {
+            update(event, true);
+        }
+
+        public void cancel(MotionEvent event) {
+            update(event, false);
+        }
+
+        private void update(MotionEvent event, boolean synthesizeNewKeys) {
+            if (!synthesizeNewKeys) {
+                removeMessages(MSG_FLICK);
+            }
+
+            InputDevice device = event.getDevice();
+            if (device == null) {
+                return;
+            }
+
+            // Store what time the TouchNavigation event occurred
+            final long time = SystemClock.uptimeMillis();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    mLastTouchNavigationStartTimeMs = time;
+                    mAlwaysInTapRegion = true;
+                    mTouchNavigationEnterXPosition = event.getX();
+                    mTouchNavigationEnterYPosition = event.getY();
+                    mAccumulatedX = 0;
+                    mAccumulatedY = 0;
+                    mLastMoveX = 0;
+                    mLastMoveY = 0;
+                    if (device.getMotionRange(MotionEvent.AXIS_Y).getMax()
+                            * EDGE_SWIPE_THRESHOLD < event.getY()) {
+                        // Did the swipe begin in a valid region
+                        mEdgeSwipePossible = true;
+                    }
+                    // Clear any flings
+                    if (synthesizeNewKeys) {
+                        removeMessages(MSG_FLICK);
+                    }
+                    break;
+                }
+
+                case MotionEvent.ACTION_MOVE: {
+                    // Determine whether the move is slop or an intentional move
+                    float deltaX = event.getX() - mTouchNavigationEnterXPosition;
+                    float deltaY = event.getY() - mTouchNavigationEnterYPosition;
+                    if (mTouchSlopSquared < deltaX * deltaX + deltaY * deltaY) {
+                        mAlwaysInTapRegion = false;
+                    }
+
+                    // Checks if the swipe has crossed the midpoint
+                    // and if our swipe gesture is complete
+                    if (event.getY() < (device.getMotionRange(MotionEvent.AXIS_Y).getMax()
+                            * .5) && mEdgeSwipePossible) {
+                        mEdgeSwipePossible = false;
+
+                        Intent intent =
+                                ((SearchManager)mContext.getSystemService(Context.SEARCH_SERVICE))
+                                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT_OR_SELF);
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            try {
+                                mContext.startActivity(intent);
+                            } catch (ActivityNotFoundException e){
+                                Log.e(TAG, "Could not start search activity");
+                            }
+                        } else {
+                            Log.e(TAG, "Could not find a search activity");
+                        }
+                    }
+
+                    // Find the difference in position between the two most recent
+                    // TouchNavigation events
+                    mLastMoveX = event.getX() - mLastTouchNavigationXPosition;
+                    mLastMoveY = event.getY() - mLastTouchNavigationYPosition;
+                    mAccumulatedX += mLastMoveX;
+                    mAccumulatedY += mLastMoveY;
+                    float accumulatedXSquared = mAccumulatedX * mAccumulatedX;
+                    float accumulatedYSquared = mAccumulatedY * mAccumulatedY;
+
+                    // Determine if we've moved far enough to send a key press
+                    if (accumulatedXSquared > mDistancePerTickSquared
+                            || accumulatedYSquared > mDistancePerTickSquared) {
+                        float dominantAxis;
+                        float sign;
+                        boolean isXAxis;
+                        int key;
+                        int repeatCount = 0;
+                        // Determine dominant axis
+                        if (accumulatedXSquared > accumulatedYSquared) {
+                            dominantAxis = mAccumulatedX;
+                            isXAxis = true;
+                        } else {
+                            dominantAxis = mAccumulatedY;
+                            isXAxis = false;
+                        }
+                        // Determine sign of axis
+                        sign = (dominantAxis > 0) ? 1 : -1;
+                        // Determine key to send
+                        if (isXAxis) {
+                            key = (sign == 1) ? KeyEvent.KEYCODE_DPAD_RIGHT :
+                                    KeyEvent.KEYCODE_DPAD_LEFT;
+                        } else {
+                            key = (sign == 1) ? KeyEvent.KEYCODE_DPAD_DOWN :
+                                    KeyEvent.KEYCODE_DPAD_UP;
+                        }
+                        // Send key until maximum distance constraint is satisfied
+                        while (dominantAxis * dominantAxis > mDistancePerTickSquared) {
+                            repeatCount++;
+                            dominantAxis -= sign * mDistancePerTick;
+                            if (synthesizeNewKeys) {
+                                enqueueInputEvent(new KeyEvent(time, time,
+                                        KeyEvent.ACTION_DOWN, key, 0, event.getMetaState(),
+                                        event.getDeviceId(), 0, KeyEvent.FLAG_FALLBACK,
+                                        event.getSource()));
+                                enqueueInputEvent(new KeyEvent(time, time,
+                                        KeyEvent.ACTION_UP, key, 0, event.getMetaState(),
+                                        event.getDeviceId(), 0, KeyEvent.FLAG_FALLBACK,
+                                        event.getSource()));
+                            }
+                        }
+                        // Save new axis values
+                        mAccumulatedX = isXAxis ? dominantAxis : 0;
+                        mAccumulatedY = isXAxis ? 0 : dominantAxis;
+
+                        mLastKeySent = key;
+                        mKeySendRateMs = (int) (time - mLastTouchNavigationKeySendTimeMs) /
+                                repeatCount;
+                        mLastTouchNavigationKeySendTimeMs = time;
+                    }
+                    break;
+                }
+
+                case MotionEvent.ACTION_UP: {
+                    if (time - mLastTouchNavigationStartTimeMs < MAX_TAP_TIME
+                            && mAlwaysInTapRegion) {
+                        if (synthesizeNewKeys) {
+                            enqueueInputEvent(new KeyEvent(mLastTouchNavigationStartTimeMs,
+                                        time, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0,
+                                        event.getMetaState(), event.getDeviceId(), 0,
+                                        KeyEvent.FLAG_FALLBACK, event.getSource()));
+                            enqueueInputEvent(new KeyEvent(mLastTouchNavigationStartTimeMs,
+                                        time, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0,
+                                        event.getMetaState(), event.getDeviceId(), 0,
+                                        KeyEvent.FLAG_FALLBACK, event.getSource()));
+                        }
+                    } else {
+                        float xMoveSquared = mLastMoveX * mLastMoveX;
+                        float yMoveSquared = mLastMoveY * mLastMoveY;
+                        // Determine whether the last gesture was a fling.
+                        if (mMinFlickDistanceSquared <= xMoveSquared + yMoveSquared
+                                && time - mLastTouchNavigationEventTimeMs <= MAX_TAP_TIME
+                                && mKeySendRateMs <= mMaxRepeatDelay
+                                && mKeySendRateMs > 0) {
+                            mLastDeviceId = event.getDeviceId();
+                            mLastSource = event.getSource();
+                            mLastMetaState = event.getMetaState();
+
+                            if (synthesizeNewKeys) {
+                                Message message = obtainMessage(
+                                        MSG_FLICK, mKeySendRateMs, mLastKeySent);
+                                message.setAsynchronous(true);
+                                sendMessageDelayed(message, mKeySendRateMs);
+                            }
+                        }
+                    }
+                    mEdgeSwipePossible = false;
+                    break;
+                }
+            }
+
+            // Store touch event position and time
+            mLastTouchNavigationEventTimeMs = time;
+            mLastTouchNavigationXPosition = event.getX();
+            mLastTouchNavigationYPosition = event.getY();
         }
     }
 
@@ -5484,174 +5942,6 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor != null) {
                 viewAncestor.dispatchDoneAnimating();
             }
-        }
-    }
-
-    /**
-     * Maintains state information for a single trackball axis, generating
-     * discrete (DPAD) movements based on raw trackball motion.
-     */
-    static final class TrackballAxis {
-        /**
-         * The maximum amount of acceleration we will apply.
-         */
-        static final float MAX_ACCELERATION = 20;
-
-        /**
-         * The maximum amount of time (in milliseconds) between events in order
-         * for us to consider the user to be doing fast trackball movements,
-         * and thus apply an acceleration.
-         */
-        static final long FAST_MOVE_TIME = 150;
-
-        /**
-         * Scaling factor to the time (in milliseconds) between events to how
-         * much to multiple/divide the current acceleration.  When movement
-         * is < FAST_MOVE_TIME this multiplies the acceleration; when >
-         * FAST_MOVE_TIME it divides it.
-         */
-        static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/40);
-
-        static final float FIRST_MOVEMENT_THRESHOLD = 0.5f;
-        static final float SECOND_CUMULATIVE_MOVEMENT_THRESHOLD = 2.0f;
-        static final float SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD = 1.0f;
-
-        float position;
-        float acceleration = 1;
-        long lastMoveTime = 0;
-        int step;
-        int dir;
-        int nonAccelMovement;
-
-        void reset(int _step) {
-            position = 0;
-            acceleration = 1;
-            lastMoveTime = 0;
-            step = _step;
-            dir = 0;
-        }
-
-        /**
-         * Add trackball movement into the state.  If the direction of movement
-         * has been reversed, the state is reset before adding the
-         * movement (so that you don't have to compensate for any previously
-         * collected movement before see the result of the movement in the
-         * new direction).
-         *
-         * @return Returns the absolute value of the amount of movement
-         * collected so far.
-         */
-        float collect(float off, long time, String axis) {
-            long normTime;
-            if (off > 0) {
-                normTime = (long)(off * FAST_MOVE_TIME);
-                if (dir < 0) {
-                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " reversed to positive!");
-                    position = 0;
-                    step = 0;
-                    acceleration = 1;
-                    lastMoveTime = 0;
-                }
-                dir = 1;
-            } else if (off < 0) {
-                normTime = (long)((-off) * FAST_MOVE_TIME);
-                if (dir > 0) {
-                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " reversed to negative!");
-                    position = 0;
-                    step = 0;
-                    acceleration = 1;
-                    lastMoveTime = 0;
-                }
-                dir = -1;
-            } else {
-                normTime = 0;
-            }
-
-            // The number of milliseconds between each movement that is
-            // considered "normal" and will not result in any acceleration
-            // or deceleration, scaled by the offset we have here.
-            if (normTime > 0) {
-                long delta = time - lastMoveTime;
-                lastMoveTime = time;
-                float acc = acceleration;
-                if (delta < normTime) {
-                    // The user is scrolling rapidly, so increase acceleration.
-                    float scale = (normTime-delta) * ACCEL_MOVE_SCALING_FACTOR;
-                    if (scale > 1) acc *= scale;
-                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " accelerate: off="
-                            + off + " normTime=" + normTime + " delta=" + delta
-                            + " scale=" + scale + " acc=" + acc);
-                    acceleration = acc < MAX_ACCELERATION ? acc : MAX_ACCELERATION;
-                } else {
-                    // The user is scrolling slowly, so decrease acceleration.
-                    float scale = (delta-normTime) * ACCEL_MOVE_SCALING_FACTOR;
-                    if (scale > 1) acc /= scale;
-                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " deccelerate: off="
-                            + off + " normTime=" + normTime + " delta=" + delta
-                            + " scale=" + scale + " acc=" + acc);
-                    acceleration = acc > 1 ? acc : 1;
-                }
-            }
-            position += off;
-            return Math.abs(position);
-        }
-
-        /**
-         * Generate the number of discrete movement events appropriate for
-         * the currently collected trackball movement.
-         *
-         * @return Returns the number of discrete movements, either positive
-         * or negative, or 0 if there is not enough trackball movement yet
-         * for a discrete movement.
-         */
-        int generate() {
-            int movement = 0;
-            nonAccelMovement = 0;
-            do {
-                final int dir = position >= 0 ? 1 : -1;
-                switch (step) {
-                    // If we are going to execute the first step, then we want
-                    // to do this as soon as possible instead of waiting for
-                    // a full movement, in order to make things look responsive.
-                    case 0:
-                        if (Math.abs(position) < FIRST_MOVEMENT_THRESHOLD) {
-                            return movement;
-                        }
-                        movement += dir;
-                        nonAccelMovement += dir;
-                        step = 1;
-                        break;
-                    // If we have generated the first movement, then we need
-                    // to wait for the second complete trackball motion before
-                    // generating the second discrete movement.
-                    case 1:
-                        if (Math.abs(position) < SECOND_CUMULATIVE_MOVEMENT_THRESHOLD) {
-                            return movement;
-                        }
-                        movement += dir;
-                        nonAccelMovement += dir;
-                        position -= SECOND_CUMULATIVE_MOVEMENT_THRESHOLD * dir;
-                        step = 2;
-                        break;
-                    // After the first two, we generate discrete movements
-                    // consistently with the trackball, applying an acceleration
-                    // if the trackball is moving quickly.  This is a simple
-                    // acceleration on top of what we already compute based
-                    // on how quickly the wheel is being turned, to apply
-                    // a longer increasing acceleration to continuous movement
-                    // in one direction.
-                    default:
-                        if (Math.abs(position) < SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD) {
-                            return movement;
-                        }
-                        movement += dir;
-                        position -= dir * SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD;
-                        float acc = acceleration;
-                        acc *= 1.1f;
-                        acceleration = acc < MAX_ACCELERATION ? acc : acceleration;
-                        break;
-                }
-            } while (true);
         }
     }
 
