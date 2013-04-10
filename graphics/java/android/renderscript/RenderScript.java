@@ -767,6 +767,8 @@ public class RenderScript {
     int     mContext;
     @SuppressWarnings({"FieldCanBeLocal"})
     MessageThread mMessageThread;
+    GCThread mGCThread;
+
 
     Element mElement_U8;
     Element mElement_I8;
@@ -1049,6 +1051,49 @@ public class RenderScript {
         }
     }
 
+    static class GCThread extends Thread {
+        RenderScript mRS;
+        boolean mRun = true;
+
+        int currentSize = 0;
+        final static int targetSize = 256*1024*1024; // call System.gc after 256MB of allocs
+
+        GCThread(RenderScript rs) {
+            super("RSGCThread");
+            mRS = rs;
+
+        }
+
+        public void run() {
+            while(mRun) {
+                boolean doGC = false;
+                synchronized(this) {
+                    if (currentSize >= targetSize) {
+                        doGC = true;
+                    }
+                }
+                if (doGC == true) {
+                    System.gc();
+                }
+                try {
+                    sleep(1, 0);
+                } catch(InterruptedException e) {
+                }
+            }
+            Log.d(LOG_TAG, "GCThread exiting.");
+        }
+
+        public synchronized void addAllocSize(int bytes) {
+            currentSize += bytes;
+        }
+
+        public synchronized void removeAllocSize(int bytes) {
+            currentSize -= bytes;
+        }
+
+    }
+
+
     RenderScript(Context ctx) {
         if (ctx != null) {
             mApplicationContext = ctx.getApplicationContext();
@@ -1071,6 +1116,15 @@ public class RenderScript {
         return create(ctx, sdkVersion, ContextType.NORMAL);
     }
 
+    void addAllocSizeForGC(int bytes) {
+        mGCThread.addAllocSize(bytes);
+    }
+
+    void removeAllocSizeForGC(int bytes) {
+        mGCThread.removeAllocSize(bytes);
+    }
+
+
     /**
      * Create a basic RenderScript context.
      *
@@ -1092,7 +1146,9 @@ public class RenderScript {
             throw new RSDriverException("Failed to create RS context.");
         }
         rs.mMessageThread = new MessageThread(rs);
+        rs.mGCThread = new GCThread(rs);
         rs.mMessageThread.start();
+        rs.mGCThread.start();
         return rs;
     }
 
@@ -1147,8 +1203,10 @@ public class RenderScript {
         validate();
         nContextDeinitToClient(mContext);
         mMessageThread.mRun = false;
+        mGCThread.mRun = false;
         try {
             mMessageThread.join();
+            mGCThread.join();
         } catch(InterruptedException e) {
         }
 
