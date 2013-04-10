@@ -127,6 +127,10 @@ public class AppCompatibility extends InstrumentationTestCase {
         homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         Intent intent = mPackageManager.getLaunchIntentForPackage(packageName);
+        // Skip if the apk does not have a launch intent.
+        if (intent == null) {
+            return null;
+        }
 
         // We check for any Crash or ANR dialogs that are already up, and we ignore them.  This is
         // so that we don't report crashes that were caused by prior apps (which those particular
