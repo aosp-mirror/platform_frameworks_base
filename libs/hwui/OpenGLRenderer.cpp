@@ -1905,14 +1905,15 @@ void OpenGLRenderer::finishDrawTexture() {
 
 status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         int32_t replayFlags) {
+    status_t status;
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
-            startFrame();
+            status = startFrame();
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
             displayList->replay(replayStruct, 0);
-            return replayStruct.mDrawGlStatus;
+            return status | replayStruct.mDrawGlStatus;
         }
 
         DeferredDisplayList deferredList;
@@ -1920,9 +1921,9 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         displayList->defer(deferStruct, 0);
 
         flushLayers();
-        startFrame();
+        status = startFrame();
 
-        return deferredList.flush(*this, dirty);
+        return status | deferredList.flush(*this, dirty);
     }
 
     return DrawGlInfo::kStatusDone;
