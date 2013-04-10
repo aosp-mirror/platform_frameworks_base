@@ -1368,7 +1368,7 @@ public abstract class HardwareRenderer {
                         callbacks.onHardwarePreDraw(canvas);
 
                         if (displayList != null) {
-                            status = drawDisplayList(attachInfo, canvas, displayList, status);
+                            status |= drawDisplayList(attachInfo, canvas, displayList, status);
                         } else {
                             // Shouldn't reach here
                             view.draw(canvas);
