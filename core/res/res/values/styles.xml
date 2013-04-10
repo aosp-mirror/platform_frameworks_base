@@ -1869,7 +1869,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.ListPopupWindow" parent="Widget.ListPopupWindow">
         <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
-        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
+        <item name="android:popupBackground">@android:drawable/menu_panel_holo_dark</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
         <item name="android:dropDownHorizontalOffset">0dip</item>
         <item name="android:dropDownWidth">wrap_content</item>
@@ -2242,7 +2242,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
         <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
-        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
+        <item name="android:popupBackground">@android:drawable/menu_panel_holo_light</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
         <item name="android:dropDownHorizontalOffset">0dip</item>
         <item name="android:dropDownWidth">wrap_content</item>
