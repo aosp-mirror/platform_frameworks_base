@@ -9,6 +9,7 @@ LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
+	liblog \
 	libandroidfw \
 	libutils \
 	libbinder \

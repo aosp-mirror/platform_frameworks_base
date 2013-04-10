@@ -52,6 +52,7 @@ LOCAL_SHARED_LIBRARIES := \
     libaudioutils \
     libbinder \
     libcutils \
+    liblog \
     libdl \
     libgui \
     libmedia \

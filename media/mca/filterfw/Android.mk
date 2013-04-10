@@ -37,6 +37,7 @@ LOCAL_SHARED_LIBRARIES := libstlport \
                           libdl \
                           libcutils \
                           libutils \
+                          liblog \
                           libandroid \
                           libjnigraphics \
                           libmedia
@@ -48,5 +49,3 @@ LOCAL_SHARED_LIBRARIES := libstlport \
 LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)
-
-
