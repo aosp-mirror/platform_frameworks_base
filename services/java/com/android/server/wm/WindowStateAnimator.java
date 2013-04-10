@@ -505,20 +505,20 @@ class WindowStateAnimator {
         public void setAlpha(float alpha) {
             super.setAlpha(alpha);
             if (alpha != mSurfaceTraceAlpha) {
+                mSurfaceTraceAlpha = alpha;
                 Slog.v(SURFACE_TAG, "setAlpha: " + this + ". Called by "
                         + Debug.getCallers(3));
             }
-            mSurfaceTraceAlpha = alpha;
         }
 
         @Override
         public void setLayer(int zorder) {
             super.setLayer(zorder);
             if (zorder != mLayer) {
+                mLayer = zorder;
                 Slog.v(SURFACE_TAG, "setLayer: " + this + ". Called by "
                         + Debug.getCallers(3));
             }
-            mLayer = zorder;
 
             sSurfaces.remove(this);
             int i;
@@ -535,20 +535,20 @@ class WindowStateAnimator {
         public void setPosition(float x, float y) {
             super.setPosition(x, y);
             if (x != mPosition.x || y != mPosition.y) {
+                mPosition.set(x, y);
                 Slog.v(SURFACE_TAG, "setPosition: " + this + ". Called by "
                         + Debug.getCallers(3));
             }
-            mPosition.set(x, y);
         }
 
         @Override
         public void setSize(int w, int h) {
             super.setSize(w, h);
             if (w != mSize.x || h != mSize.y) {
+                mSize.set(w, h);
                 Slog.v(SURFACE_TAG, "setSize: " + this + ". Called by "
                         + Debug.getCallers(3));
             }
-            mSize.set(w, h);
         }
 
         @Override
@@ -556,10 +556,10 @@ class WindowStateAnimator {
             super.setWindowCrop(crop);
             if (crop != null) {
                 if (!crop.equals(mWindowCrop)) {
+                    mWindowCrop.set(crop);
                     Slog.v(SURFACE_TAG, "setWindowCrop: " + this + ". Called by "
                             + Debug.getCallers(3));
                 }
-                mWindowCrop.set(crop);
             }
         }
 
@@ -567,28 +567,28 @@ class WindowStateAnimator {
         public void setLayerStack(int layerStack) {
             super.setLayerStack(layerStack);
             if (layerStack != mLayerStack) {
+                mLayerStack = layerStack;
                 Slog.v(SURFACE_TAG, "setLayerStack: " + this + ". Called by " + Debug.getCallers(3));
             }
-            mLayerStack = layerStack;
         }
 
         @Override
         public void hide() {
             super.hide();
             if (mShown) {
+                mShown = false;
                 Slog.v(SURFACE_TAG, "hide: " + this + ". Called by "
                         + Debug.getCallers(3));
             }
-            mShown = false;
         }
         @Override
         public void show() {
             super.show();
             if (!mShown) {
+                mShown = true;
                 Slog.v(SURFACE_TAG, "show: " + this + ". Called by "
                         + Debug.getCallers(3));
             }
-            mShown = true;
         }
 
         @Override
