@@ -20,7 +20,8 @@ LOCAL_CFLAGS := -Wall -Werror
 LOCAL_STATIC_LIBRARIES := \
 	libandroidfw \
 	libutils \
-	libcutils
+	libcutils \
+	liblog
 
 ifeq ($(HOST_OS),linux)
 LOCAL_LDLIBS += -ldl -lpthread

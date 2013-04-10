@@ -179,6 +179,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libandroidfw \
 	libexpat \
 	libnativehelper \
+	liblog \
 	libcutils \
 	libutils \
 	libbinder \

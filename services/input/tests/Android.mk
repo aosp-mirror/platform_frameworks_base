@@ -9,6 +9,7 @@ test_src_files := \
 
 shared_libraries := \
     libcutils \
+    liblog \
     libandroidfw \
     libutils \
     libhardware \
