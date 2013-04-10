@@ -274,12 +274,20 @@ public class Allocation extends BaseObj {
             }
         }
 
+        // don't need to account for USAGE_SHARED Allocations
+        if ((usage & USAGE_SHARED) == 0) {
+            int numBytes = t.getCount() * t.getElement().getBytesSize();
+            rs.addAllocSizeForGC(numBytes);
+            mGCSize = numBytes;
+        }
+
         mType = t;
         mUsage = usage;
 
         if (t != null) {
             updateCacheInfo(t);
         }
+
     }
 
     private void validateIsInt32() {
@@ -1235,6 +1243,7 @@ public class Allocation extends BaseObj {
         if (type.getID(rs) == 0) {
             throw new RSInvalidStateException("Bad Type");
         }
+
         int id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, 0);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
@@ -1383,7 +1392,6 @@ public class Allocation extends BaseObj {
             alloc.setBitmap(b);
             return alloc;
         }
-
 
         int id = rs.nAllocationCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
         if (id == 0) {
