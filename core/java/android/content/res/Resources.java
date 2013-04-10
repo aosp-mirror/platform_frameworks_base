@@ -1977,17 +1977,20 @@ public class Resources {
         }
     }
 
-    private boolean verifyPreloadConfig(TypedValue value, String name) {
-        if ((value.changingConfigurations&~(ActivityInfo.CONFIG_FONT_SCALE
-                | ActivityInfo.CONFIG_DENSITY)) != 0) {
+    static private final int VARYING_CONFIGS = ActivityInfo.activityInfoConfigToNative(
+            ActivityInfo.CONFIG_LAYOUT_DIRECTION);
+
+    private boolean verifyPreloadConfig(int changingConfigurations, int resourceId, String name) {
+        if (((changingConfigurations&~(ActivityInfo.CONFIG_FONT_SCALE |
+                ActivityInfo.CONFIG_DENSITY)) & VARYING_CONFIGS) != 0) {
             String resName;
             try {
-                resName = getResourceName(value.resourceId);
+                resName = getResourceName(resourceId);
             } catch (NotFoundException e) {
                 resName = "?";
             }
             Log.w(TAG, "Preloaded " + name + " resource #0x"
-                    + Integer.toHexString(value.resourceId)
+                    + Integer.toHexString(resourceId)
                     + " (" + resName + ") that varies with configuration!!");
             return false;
         }
@@ -2090,7 +2093,7 @@ public class Resources {
             cs = dr.getConstantState();
             if (cs != null) {
                 if (mPreloading) {
-                    if (verifyPreloadConfig(value, "drawable")) {
+                    if (verifyPreloadConfig(cs.getChangingConfigurations(), value.resourceId, "drawable")) {
                         if (isColorDrawable) {
                             sPreloadedColorDrawables.put(key, cs);
                         } else {
@@ -2160,7 +2163,7 @@ public class Resources {
 
             csl = ColorStateList.valueOf(value.data);
             if (mPreloading) {
-                if (verifyPreloadConfig(value, "color")) {
+                if (verifyPreloadConfig(value.changingConfigurations, value.resourceId, "color")) {
                     sPreloadedColorStateLists.put(key, csl);
                 }
             }
@@ -2206,7 +2209,7 @@ public class Resources {
 
         if (csl != null) {
             if (mPreloading) {
-                if (verifyPreloadConfig(value, "color")) {
+                if (verifyPreloadConfig(value.changingConfigurations, value.resourceId, "color")) {
                     sPreloadedColorStateLists.put(key, csl);
                 }
             } else {
