@@ -725,6 +725,72 @@ nAllocationData2D_alloc(JNIEnv *_env, jobject _this, RsContext con,
 }
 
 static void
+nAllocationData3D_s(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint zoff, jint lod,
+                    jint w, jint h, jint d, jshortArray data, int sizeBytes)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation3DData_s, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, zoff, w, h, d, len);
+    jshort *ptr = _env->GetShortArrayElements(data, NULL);
+    rsAllocation3DData(con, (RsAllocation)alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
+    _env->ReleaseShortArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationData3D_b(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint zoff, jint lod,
+                    jint w, jint h, jint d, jbyteArray data, int sizeBytes)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation3DData_b, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, zoff, w, h, d, len);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsAllocation3DData(con, (RsAllocation)alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
+    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationData3D_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint zoff, jint lod,
+                    jint w, jint h, jint d, jintArray data, int sizeBytes)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation3DData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, zoff, w, h, d, len);
+    jint *ptr = _env->GetIntArrayElements(data, NULL);
+    rsAllocation3DData(con, (RsAllocation)alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
+    _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationData3D_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint zoff, jint lod,
+                    jint w, jint h, jint d, jfloatArray data, int sizeBytes)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation3DData_f, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, zoff, w, h, d, len);
+    jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
+    rsAllocation3DData(con, (RsAllocation)alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
+    _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationData3D_alloc(JNIEnv *_env, jobject _this, RsContext con,
+                        jint dstAlloc, jint dstXoff, jint dstYoff, jint dstZoff,
+                        jint dstMip,
+                        jint width, jint height, jint depth,
+                        jint srcAlloc, jint srcXoff, jint srcYoff, jint srcZoff,
+                        jint srcMip)
+{
+    LOG_API("nAllocationData3D_alloc, con(%p), dstAlloc(%p), dstXoff(%i), dstYoff(%i),"
+            " dstMip(%i), width(%i), height(%i),"
+            " srcAlloc(%p), srcXoff(%i), srcYoff(%i), srcMip(%i)",
+            con, (RsAllocation)dstAlloc, dstXoff, dstYoff, dstMip, dstFace,
+            width, height, (RsAllocation)srcAlloc, srcXoff, srcYoff, srcMip, srcFace);
+
+    rsAllocationCopy3DRange(con,
+                            (RsAllocation)dstAlloc,
+                            dstXoff, dstYoff, dstZoff, dstMip,
+                            width, height, depth,
+                            (RsAllocation)srcAlloc,
+                            srcXoff, srcYoff, srcZoff, srcMip);
+}
+
+static void
 nAllocationRead_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jintArray data)
 {
     jint len = _env->GetArrayLength(data);
@@ -780,13 +846,6 @@ nAllocationResize1D(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint
 {
     LOG_API("nAllocationResize1D, con(%p), alloc(%p), sizeX(%i)", con, (RsAllocation)alloc, dimX);
     rsAllocationResize1D(con, (RsAllocation)alloc, dimX);
-}
-
-static void
-nAllocationResize2D(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint dimX, jint dimY)
-{
-    LOG_API("nAllocationResize1D, con(%p), alloc(%p), sizeX(%i), sizeY(%i)", con, (RsAllocation)alloc, dimX, dimY);
-    rsAllocationResize2D(con, (RsAllocation)alloc, dimX, dimY);
 }
 
 // -----------------------------------
@@ -1519,13 +1578,17 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationData2D",              "(IIIIIIII[BI)V",                        (void*)nAllocationData2D_b },
 {"rsnAllocationData2D",              "(IIIIIIII[FI)V",                        (void*)nAllocationData2D_f },
 {"rsnAllocationData2D",              "(IIIIIIIIIIIII)V",                      (void*)nAllocationData2D_alloc },
+{"rsnAllocationData3D",              "(IIIIIIIII[II)V",                       (void*)nAllocationData3D_i },
+{"rsnAllocationData3D",              "(IIIIIIIII[SI)V",                       (void*)nAllocationData3D_s },
+{"rsnAllocationData3D",              "(IIIIIIIII[BI)V",                       (void*)nAllocationData3D_b },
+{"rsnAllocationData3D",              "(IIIIIIIII[FI)V",                       (void*)nAllocationData3D_f },
+{"rsnAllocationData3D",              "(IIIIIIIIIIIIII)V",                     (void*)nAllocationData3D_alloc },
 {"rsnAllocationRead",                "(II[I)V",                               (void*)nAllocationRead_i },
 {"rsnAllocationRead",                "(II[S)V",                               (void*)nAllocationRead_s },
 {"rsnAllocationRead",                "(II[B)V",                               (void*)nAllocationRead_b },
 {"rsnAllocationRead",                "(II[F)V",                               (void*)nAllocationRead_f },
 {"rsnAllocationGetType",             "(II)I",                                 (void*)nAllocationGetType},
 {"rsnAllocationResize1D",            "(III)V",                                (void*)nAllocationResize1D },
-{"rsnAllocationResize2D",            "(IIII)V",                               (void*)nAllocationResize2D },
 {"rsnAllocationGenerateMipmaps",     "(II)V",                                 (void*)nAllocationGenerateMipmaps },
 
 {"rsnScriptBindAllocation",          "(IIII)V",                               (void*)nScriptBindAllocation },

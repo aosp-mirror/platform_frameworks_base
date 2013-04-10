@@ -428,6 +428,46 @@ public class RenderScript {
         rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, b);
     }
 
+    native void rsnAllocationData3D(int con,
+                                    int dstAlloc, int dstXoff, int dstYoff, int dstZoff,
+                                    int dstMip,
+                                    int width, int height, int depth,
+                                    int srcAlloc, int srcXoff, int srcYoff, int srcZoff,
+                                    int srcMip);
+    synchronized void nAllocationData3D(int dstAlloc, int dstXoff, int dstYoff, int dstZoff,
+                                        int dstMip,
+                                        int width, int height, int depth,
+                                        int srcAlloc, int srcXoff, int srcYoff, int srcZoff,
+                                        int srcMip) {
+        validate();
+        rsnAllocationData3D(mContext,
+                            dstAlloc, dstXoff, dstYoff, dstZoff,
+                            dstMip, width, height, depth,
+                            srcAlloc, srcXoff, srcYoff, srcZoff, srcMip);
+    }
+
+    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, byte[] d, int sizeBytes);
+    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, byte[] d, int sizeBytes) {
+        validate();
+        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
+    }
+    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, short[] d, int sizeBytes);
+    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, short[] d, int sizeBytes) {
+        validate();
+        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
+    }
+    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, int[] d, int sizeBytes);
+    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, int[] d, int sizeBytes) {
+        validate();
+        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
+    }
+    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, float[] d, int sizeBytes);
+    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, float[] d, int sizeBytes) {
+        validate();
+        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
+    }
+
+
     native void rsnAllocationRead(int con, int id, byte[] d);
     synchronized void nAllocationRead(int id, byte[] d) {
         validate();
@@ -458,11 +498,6 @@ public class RenderScript {
     synchronized void nAllocationResize1D(int id, int dimX) {
         validate();
         rsnAllocationResize1D(mContext, id, dimX);
-    }
-    native void rsnAllocationResize2D(int con, int id, int dimX, int dimY);
-    synchronized void nAllocationResize2D(int id, int dimX, int dimY) {
-        validate();
-        rsnAllocationResize2D(mContext, id, dimX, dimY);
     }
 
     native int  rsnFileA3DCreateFromAssetStream(int con, int assetStream);
