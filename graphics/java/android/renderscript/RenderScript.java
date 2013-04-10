@@ -86,11 +86,7 @@ public class RenderScript {
     native void nContextInitToClient(int con);
     native void nContextDeinitToClient(int con);
 
-    /**
-     * Name of the file that holds the object cache.
-     */
-    private static final String CACHE_PATH = "com.android.renderscript.cache";
-    static String mCachePath;
+    static File mCacheDir;
 
      /**
      * Sets the directory to use as a persistent storage for the
@@ -105,9 +101,8 @@ public class RenderScript {
             return;
         }
 
-        File f = new File(cacheDir, CACHE_PATH);
-        mCachePath = f.getAbsolutePath();
-        f.mkdirs();
+        // Defer creation of cache path to nScriptCCreate().
+        mCacheDir = cacheDir;
     }
 
     public enum ContextType {
