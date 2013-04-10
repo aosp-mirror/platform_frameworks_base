@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Trace;
 import android.widget.FrameLayout;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -423,6 +424,8 @@ public abstract class LayoutInflater {
      */
     public View inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot) {
         synchronized (mConstructorArgs) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "inflate");
+
             final AttributeSet attrs = Xml.asAttributeSet(parser);
             Context lastContext = (Context)mConstructorArgs[0];
             mConstructorArgs[0] = mContext;
@@ -520,6 +523,8 @@ public abstract class LayoutInflater {
                 mConstructorArgs[1] = null;
             }
 
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+
             return result;
         }
     }
@@ -547,6 +552,8 @@ public abstract class LayoutInflater {
         Class<? extends View> clazz = null;
 
         try {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, name);
+
             if (constructor == null) {
                 // Class not found in the cache, see if it's real, and try to add it
                 clazz = mContext.getClassLoader().loadClass(
@@ -615,6 +622,8 @@ public abstract class LayoutInflater {
                     + (clazz == null ? "<unknown>" : clazz.getName()));
             ie.initCause(e);
             throw ie;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
 
