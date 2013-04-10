@@ -767,10 +767,19 @@ public class MediaRouter {
         boolean wantScan = false;
         boolean blockScan = false;
         WifiDisplay[] oldDisplays = oldStatus != null ?
-                oldStatus.getRememberedDisplays() : new WifiDisplay[0];
-        WifiDisplay[] newDisplays = newStatus.getRememberedDisplays();
-        WifiDisplay[] availableDisplays = newStatus.getAvailableDisplays();
-        WifiDisplay activeDisplay = newStatus.getActiveDisplay();
+                oldStatus.getRememberedDisplays() : WifiDisplay.EMPTY_ARRAY;
+        WifiDisplay[] newDisplays;
+        WifiDisplay[] availableDisplays;
+        WifiDisplay activeDisplay;
+
+        if (newStatus.getFeatureState() == WifiDisplayStatus.FEATURE_STATE_ON) {
+            newDisplays = newStatus.getRememberedDisplays();
+            availableDisplays = newStatus.getAvailableDisplays();
+            activeDisplay = newStatus.getActiveDisplay();
+        } else {
+            newDisplays = availableDisplays = WifiDisplay.EMPTY_ARRAY;
+            activeDisplay = null;
+        }
 
         for (int i = 0; i < newDisplays.length; i++) {
             final WifiDisplay d = newDisplays[i];
