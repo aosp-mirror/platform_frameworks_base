@@ -24,7 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.hardware.location.GeofenceHardwareImpl;
+import android.hardware.location.IGeofenceHardware;
 import android.location.Criteria;
+import android.location.IGpsGeofenceHardware;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationManager;
@@ -314,6 +317,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // only modified on handler thread
     private WorkSource mClientSource = new WorkSource();
 
+    private GeofenceHardwareImpl mGeofenceHardwareImpl;
+
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         @Override
         public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {
@@ -365,6 +370,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     public IGpsStatusProvider getGpsStatusProvider() {
         return mGpsStatusProvider;
+    }
+
+    public IGpsGeofenceHardware getGpsGeofenceProxy() {
+        return mGpsGeofenceBinder;
     }
 
     private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
@@ -918,6 +927,31 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return result;
     }
 
+    private IGpsGeofenceHardware mGpsGeofenceBinder = new IGpsGeofenceHardware.Stub() {
+        public boolean isHardwareGeofenceSupported() {
+            return native_is_geofence_supported();
+        }
+
+        public boolean addCircularHardwareGeofence(int geofenceId, double latitude,
+                double longitude, double radius, int lastTransition, int monitorTransitions,
+                int notificationResponsiveness, int unknownTimer) {
+            return native_add_geofence(geofenceId, latitude, longitude, radius,
+                    lastTransition, monitorTransitions, notificationResponsiveness, unknownTimer);
+        }
+
+        public boolean removeHardwareGeofence(int geofenceId) {
+            return native_remove_geofence(geofenceId);
+        }
+
+        public boolean pauseHardwareGeofence(int geofenceId) {
+            return native_pause_geofence(geofenceId);
+        }
+
+        public boolean resumeHardwareGeofence(int geofenceId, int monitorTransition) {
+            return native_resume_geofence(geofenceId, monitorTransition);
+        }
+    };
+
     private boolean deleteAidingData(Bundle extras) {
         int flags;
 
@@ -1016,6 +1050,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private boolean hasCapability(int capability) {
         return ((mEngineCapabilities & capability) != 0);
     }
+
 
     /**
      * called from native code to update our position.
@@ -1318,6 +1353,73 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void xtraDownloadRequest() {
         if (DEBUG) Log.d(TAG, "xtraDownloadRequest");
         sendMessage(DOWNLOAD_XTRA_DATA, 0, null);
+    }
+
+    /**
+     * Called from native to report GPS Geofence transition
+     * All geofence callbacks are called on the same thread
+     */
+    private void reportGeofenceTransition(int geofenceId, int flags, double latitude,
+            double longitude, double altitude, float speed, float bearing, float accuracy,
+            long timestamp, int transition, long transitionTimestamp) {
+        if (mGeofenceHardwareImpl == null) {
+            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+        }
+        mGeofenceHardwareImpl.reportGpsGeofenceTransition(geofenceId, flags, latitude, longitude,
+           altitude, speed, bearing, accuracy, timestamp, transition, transitionTimestamp);
+    }
+
+    /**
+     * called from native code to report GPS status change.
+     */
+    private void reportGeofenceStatus(int status, int flags, double latitude,
+            double longitude, double altitude, float speed, float bearing, float accuracy,
+            long timestamp) {
+        if (mGeofenceHardwareImpl == null) {
+            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+        }
+        mGeofenceHardwareImpl.reportGpsGeofenceStatus(status, flags, latitude, longitude, altitude,
+            speed, bearing, accuracy, timestamp);
+    }
+
+    /**
+     * called from native code - Geofence Add callback
+     */
+    private void reportGeofenceAddStatus(int geofenceId, int status) {
+        if (mGeofenceHardwareImpl == null) {
+            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+        }
+        mGeofenceHardwareImpl.reportGpsGeofenceAddStatus(geofenceId, status);
+    }
+
+    /**
+     * called from native code - Geofence Remove callback
+     */
+    private void reportGeofenceRemoveStatus(int geofenceId, int status) {
+        if (mGeofenceHardwareImpl == null) {
+            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+        }
+        mGeofenceHardwareImpl.reportGpsGeofenceRemoveStatus(geofenceId, status);
+    }
+
+    /**
+     * called from native code - Geofence Pause callback
+     */
+    private void reportGeofencePauseStatus(int geofenceId, int status) {
+        if (mGeofenceHardwareImpl == null) {
+            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+        }
+        mGeofenceHardwareImpl.reportGpsGeofencePauseStatus(geofenceId, status);
+    }
+
+    /**
+     * called from native code - Geofence Resume callback
+     */
+    private void reportGeofenceResumeStatus(int geofenceId, int status) {
+        if (mGeofenceHardwareImpl == null) {
+            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+        }
+        mGeofenceHardwareImpl.reportGpsGeofenceResumeStatus(geofenceId, status);
     }
 
     //=============================================================
@@ -1650,4 +1752,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private native void native_update_network_state(boolean connected, int type,
             boolean roaming, boolean available, String extraInfo, String defaultAPN);
+
+    // Hardware Geofence support.
+    private static native boolean native_is_geofence_supported();
+    private static native boolean native_add_geofence(int geofenceId, double latitude,
+            double longitude, double radius, int lastTransition,int monitorTransitions,
+            int notificationResponsivenes, int unknownTimer);
+    private static native boolean native_remove_geofence(int geofenceId);
+    private static native boolean native_resume_geofence(int geofenceId, int transitions);
+    private static native boolean native_pause_geofence(int geofenceId);
 }

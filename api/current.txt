@@ -69,6 +69,7 @@ package android {
     field public static final java.lang.String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final java.lang.String INTERNET = "android.permission.INTERNET";
     field public static final java.lang.String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
+    field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final java.lang.String MANAGE_ACCOUNTS = "android.permission.MANAGE_ACCOUNTS";
     field public static final java.lang.String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
     field public static final java.lang.String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
@@ -10441,6 +10442,43 @@ package android.hardware.input {
     method public abstract void onInputDeviceAdded(int);
     method public abstract void onInputDeviceChanged(int);
     method public abstract void onInputDeviceRemoved(int);
+  }
+
+}
+
+package android.hardware.location {
+
+  public final class GeofenceHardware {
+    method public boolean addCircularFence(int, double, double, double, int, int, int, int, int, android.hardware.location.GeofenceHardwareCallback);
+    method public int[] getMonitoringTypesAndStatus();
+    method public boolean pauseGeofence(int, int);
+    method public boolean registerForMonitorStateChangeCallback(int, android.hardware.location.GeofenceHardwareCallback);
+    method public boolean removeGeofence(int, int);
+    method public boolean resumeGeofence(int, int, int);
+    method public boolean unregisterForMonitorStateChangeCallback(int, android.hardware.location.GeofenceHardwareCallback);
+    field public static final int GEOFENCE_ENTERED = 1; // 0x1
+    field public static final int GEOFENCE_ERROR_ID_EXISTS = 2; // 0x2
+    field public static final int GEOFENCE_ERROR_ID_UNKNOWN = 3; // 0x3
+    field public static final int GEOFENCE_ERROR_INVALID_TRANSITION = 4; // 0x4
+    field public static final int GEOFENCE_ERROR_TOO_MANY_GEOFENCES = 1; // 0x1
+    field public static final int GEOFENCE_EXITED = 2; // 0x2
+    field public static final int GEOFENCE_FAILURE = 5; // 0x5
+    field public static final int GEOFENCE_SUCCESS = 0; // 0x0
+    field public static final int GEOFENCE_UNCERTAIN = 4; // 0x4
+    field public static final int MONITORING_TYPE_GPS_HARDWARE = 0; // 0x0
+    field public static final int MONITOR_CURRENTLY_AVAILABLE = 0; // 0x0
+    field public static final int MONITOR_CURRENTLY_UNAVAILABLE = 1; // 0x1
+    field public static final int MONITOR_UNSUPPORTED = 2; // 0x2
+  }
+
+  public abstract class GeofenceHardwareCallback {
+    ctor public GeofenceHardwareCallback();
+    method public void onGeofenceAdd(int, int);
+    method public void onGeofenceChange(int, int, android.location.Location, long, int);
+    method public void onGeofencePause(int, int);
+    method public void onGeofenceRemove(int, int);
+    method public void onGeofenceResume(int, int);
+    method public void onMonitoringSystemChange(int, boolean, android.location.Location);
   }
 
 }

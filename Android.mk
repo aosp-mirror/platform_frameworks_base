@@ -124,6 +124,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
 	core/java/android/hardware/input/IInputManager.aidl \
 	core/java/android/hardware/input/IInputDevicesChangedListener.aidl \
+	core/java/android/hardware/location/IGeofenceHardware.aidl \
+	core/java/android/hardware/location/IGeofenceHardwareCallback.aidl \
 	core/java/android/hardware/usb/IUsbManager.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
@@ -210,10 +212,12 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/ICountryDetector.aidl \
 	location/java/android/location/ICountryListener.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
+	location/java/android/location/IGeofenceProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
+	location/java/android/location/IGpsGeofenceHardware.aidl \
 	location/java/android/location/INetInitiatedListener.aidl \
 	location/java/com/android/internal/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
