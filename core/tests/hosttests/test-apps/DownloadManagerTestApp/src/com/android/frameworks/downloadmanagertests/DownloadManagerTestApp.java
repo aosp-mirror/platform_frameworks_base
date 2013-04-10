@@ -265,8 +265,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleSwitching() throws Exception {
-        String filename = DOWNLOAD_500K_FILENAME;
-        long filesize = DOWNLOAD_500K_FILESIZE;
+        String filename = DOWNLOAD_5MB_FILENAME;
+        long filesize = DOWNLOAD_5MB_FILESIZE;
         doCommonDownloadSetup();
 
         String localDownloadDirectory = Environment.getExternalStorageDirectory().getPath();
@@ -340,8 +340,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleWiFiEnableDisable() throws Exception {
-        String filename = DOWNLOAD_500K_FILENAME;
-        long filesize = DOWNLOAD_500K_FILESIZE;
+        String filename = DOWNLOAD_5MB_FILENAME;
+        long filesize = DOWNLOAD_5MB_FILESIZE;
         doCommonDownloadSetup();
 
         String localDownloadDirectory = Environment.getExternalStorageDirectory().getPath();
@@ -409,8 +409,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleAirplaneModeEnableDisable() throws Exception {
-        String filename = DOWNLOAD_500K_FILENAME;
-        long filesize = DOWNLOAD_500K_FILESIZE;
+        String filename = DOWNLOAD_5MB_FILENAME;
+        long filesize = DOWNLOAD_5MB_FILESIZE;
         // make sure WiFi is enabled, and airplane mode is not on
         doCommonDownloadSetup();
 
