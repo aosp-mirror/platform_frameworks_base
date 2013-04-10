@@ -70,6 +70,7 @@ public class WindowAnimator {
     int mAboveUniverseLayer = 0;
 
     int mBulkUpdateParams = 0;
+    Object mLastWindowFreezeSource;
 
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators =
             new SparseArray<WindowAnimator.DisplayContentsAnimator>();
