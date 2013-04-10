@@ -4284,7 +4284,7 @@ public final class ViewRootImpl implements ViewParent,
                     enqueueInputEvent(e);
                     Message m = obtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e);
                     m.setAsynchronous(true);
-                    mHandler.sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
+                    sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
                 }
             }
 
