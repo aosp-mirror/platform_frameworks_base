@@ -1052,8 +1052,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Ações de texto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Pouco espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Algumas funções do sistema podem não funcionar"</string>
-    <string name="app_running_notification_title" msgid="4625479411505090209">"<xliff:g id="APP_NAME">%1$s</xliff:g> em execução"</string>
-    <string name="app_running_notification_text" msgid="3368349329989620597">"<xliff:g id="APP_NAME">%1$s</xliff:g> está em execução"</string>
+    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
+    <skip />
+    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1427,7 +1429,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefone"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fones de ouvido"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes do dock"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes da dock"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Áudio Bluetooth"</string>
