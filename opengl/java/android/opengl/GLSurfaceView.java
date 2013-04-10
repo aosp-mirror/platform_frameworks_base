@@ -1507,7 +1507,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mPaused = false;
             updateState();
             if (mRenderMode == RENDERMODE_WHEN_DIRTY) {
-                executeDraw();
+                requestRender();
             }
         }
 
