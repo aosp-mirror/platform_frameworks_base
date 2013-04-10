@@ -8249,6 +8249,24 @@ public class PackageManagerService extends IPackageManager.Stub {
             updatePermissionsLPw(newPackage.packageName, newPackage,
                     UPDATE_PERMISSIONS_REPLACE_PKG | (newPackage.permissions.size() > 0
                             ? UPDATE_PERMISSIONS_ALL : 0));
+            // For system-bundled packages, we assume that installing an upgraded version
+            // of the package implies that the user actually wants to run that new code,
+            // so we enable the package.
+            if (isSystemApp(newPackage)) {
+                // NB: implicit assumption that system package upgrades apply to all users
+                if (DEBUG_INSTALL) {
+                    Slog.d(TAG, "Implicitly enabling system package on upgrade: " + pkgName);
+                }
+                PackageSetting ps = mSettings.mPackages.get(pkgName);
+                if (ps != null) {
+                    if (res.origUsers != null) {
+                        for (int userHandle : res.origUsers) {
+                            ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT,
+                                    userHandle, installerPackageName);
+                        }
+                    }
+                }
+            }
             res.name = pkgName;
             res.uid = newPackage.applicationInfo.uid;
             res.pkg = newPackage;
