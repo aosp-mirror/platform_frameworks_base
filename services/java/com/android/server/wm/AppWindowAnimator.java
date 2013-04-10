@@ -4,6 +4,7 @@ package com.android.server.wm;
 
 import android.graphics.Matrix;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
@@ -28,6 +29,11 @@ public class AppWindowAnimator {
     // Have we been asked to have this token keep the screen frozen?
     // Protect with mAnimator.
     boolean freezingScreen;
+
+    /**
+     * How long we last kept the screen frozen.
+     */
+    int lastFreezeDuration;
 
     // Offset to the window of all layers in the token, for use by
     // AppWindowToken animations.
@@ -286,6 +292,10 @@ public class AppWindowAnimator {
         pw.print(prefix); pw.print("freezingScreen="); pw.print(freezingScreen);
                 pw.print(" allDrawn="); pw.print(allDrawn);
                 pw.print(" animLayerAdjustment="); pw.println(animLayerAdjustment);
+        if (lastFreezeDuration != 0) {
+            pw.print(prefix); pw.print("lastFreezeDuration=");
+                    TimeUtils.formatDuration(lastFreezeDuration, pw); pw.println();
+        }
         if (animating || animation != null) {
             pw.print(prefix); pw.print("animating="); pw.println(animating);
             pw.print(prefix); pw.print("animation="); pw.println(animation);

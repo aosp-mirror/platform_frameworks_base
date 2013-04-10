@@ -43,6 +43,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
 import android.app.AppOpsManager;
+import android.util.TimeUtils;
 import android.view.IWindowId;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
@@ -443,6 +444,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mTraversalScheduled = false;
     boolean mDisplayFrozen = false;
+    long mDisplayFreezeTime = 0;
+    int mLastDisplayFreezeDuration = 0;
+    Object mLastFinishedFreezeSource = null;
     boolean mWaitingForConfig = false;
     boolean mWindowsFreezingScreen = false;
     boolean mClientFreezingScreen = false;
@@ -561,6 +565,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mWallpaperForceHidingChanged = false;
         boolean mWallpaperMayChange = false;
         boolean mOrientationChangeComplete = true;
+        Object mLastWindowFreezeSource = null;
         private Session mHoldScreen = null;
         private boolean mObscured = false;
         boolean mDimming = false;
@@ -3651,7 +3656,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             mCurConfiguration = new Configuration(config);
-            mWaitingForConfig = false;
+            if (mWaitingForConfig) {
+                mWaitingForConfig = false;
+                mLastFinishedFreezeSource = "new-config";
+            }
             performLayoutAndPlaceSurfacesLocked();
         }
     }
@@ -4270,6 +4278,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mOrientationChanging = true;
                         mInnerFields.mOrientationChangeComplete = false;
                     }
+                    w.mLastFreezeDuration = 0;
                     unfrozeWindows = true;
                     w.mDisplayContent.layoutNeeded = true;
                 }
@@ -4277,7 +4286,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (force || unfrozeWindows) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "No longer freezing: " + wtoken);
                 wtoken.mAppAnimator.freezingScreen = false;
+                wtoken.mAppAnimator.lastFreezeDuration = (int)(SystemClock.elapsedRealtime()
+                        - mDisplayFreezeTime);
                 mAppsFreezingScreen--;
+                mLastFinishedFreezeSource = wtoken;
             }
             if (unfreezeSurfaceNow) {
                 if (unfrozeWindows) {
@@ -4303,6 +4315,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!wtoken.hiddenRequested) {
             if (!wtoken.mAppAnimator.freezingScreen) {
                 wtoken.mAppAnimator.freezingScreen = true;
+                wtoken.mAppAnimator.lastFreezeDuration = 0;
                 mAppsFreezingScreen++;
                 if (mAppsFreezingScreen == 1) {
                     startFreezingDisplayLocked(false, 0, 0);
@@ -4762,6 +4775,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             if (mClientFreezingScreen) {
                 mClientFreezingScreen = false;
+                mLastFinishedFreezeSource = "client";
                 final long origId = Binder.clearCallingIdentity();
                 try {
                     stopFreezingDisplayLocked();
@@ -5754,6 +5768,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mOrientationChanging = true;
                 mInnerFields.mOrientationChangeComplete = false;
             }
+            w.mLastFreezeDuration = 0;
         }
 
         for (int i=mRotationWatchers.size()-1; i>=0; i--) {
@@ -6252,6 +6267,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (config == null && mWaitingForConfig) {
                 // Nothing changed but we are waiting for something... stop that!
                 mWaitingForConfig = false;
+                mLastFinishedFreezeSource = "new-config";
                 performLayoutAndPlaceSurfacesLocked();
             }
             return config;
@@ -7048,6 +7064,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             WindowState w = windows.get(i);
                             if (w.mOrientationChanging) {
                                 w.mOrientationChanging = false;
+                                w.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
+                                        - mDisplayFreezeTime);
                                 Slog.w(TAG, "Force clearing orientation change: " + w);
                             }
                         }
@@ -7125,6 +7143,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         if (mClientFreezingScreen) {
                             mClientFreezingScreen = false;
+                            mLastFinishedFreezeSource = "client-timeout";
                             stopFreezingDisplayLocked();
                         }
                     }
@@ -8049,6 +8068,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.v(TAG,
                     "Changing surface while display frozen: " + w);
             w.mOrientationChanging = true;
+            w.mLastFreezeDuration = 0;
             mInnerFields.mOrientationChangeComplete = false;
             if (!mWindowsFreezingScreen) {
                 mWindowsFreezingScreen = true;
@@ -8443,6 +8463,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             "Orientation not waiting for draw in "
                             + w + ", surface " + winAnimator.mSurfaceControl);
                     w.mOrientationChanging = false;
+                    w.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
+                            - mDisplayFreezeTime);
                 }
             }
         }
@@ -8985,6 +9007,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 winAnimator.mSurfaceResized = false;
             } catch (RemoteException e) {
                 win.mOrientationChanging = false;
+                win.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
+                        - mDisplayFreezeTime);
             }
             mResizingWindows.remove(i);
         }
@@ -8995,6 +9019,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mInnerFields.mOrientationChangeComplete) {
             if (mWindowsFreezingScreen) {
                 mWindowsFreezingScreen = false;
+                mLastFinishedFreezeSource = mInnerFields.mLastWindowFreezeSource;
                 mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
             }
             stopFreezingDisplayLocked();
@@ -9289,6 +9314,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mOrientationChangeComplete = false;
         } else {
             mInnerFields.mOrientationChangeComplete = true;
+            mInnerFields.mLastWindowFreezeSource = mAnimator.mLastWindowFreezeSource;
             if (mWindowsFreezingScreen) {
                 doRequest = true;
             }
@@ -9582,6 +9608,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock.acquire();
 
         mDisplayFrozen = true;
+        mDisplayFreezeTime = SystemClock.elapsedRealtime();
+        mLastFinishedFreezeSource = null;
 
         mInputMonitor.freezeInputDispatchingLw();
 
@@ -9636,6 +9664,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mDisplayFrozen = false;
+        mLastDisplayFreezeDuration = (int)(SystemClock.elapsedRealtime() - mDisplayFreezeTime);
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("Screen frozen for ");
+        TimeUtils.formatDuration(mLastDisplayFreezeDuration, sb);
+        if (mLastFinishedFreezeSource != null) {
+            sb.append(" due to ");
+            sb.append(mLastFinishedFreezeSource);
+        }
+        Slog.i(TAG, sb.toString());
         mH.removeMessages(H.APP_FREEZE_TIMEOUT);
         mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
         if (PROFILE_ORIENTATION) {
@@ -10106,6 +10143,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         pw.print("  mInTouchMode="); pw.print(mInTouchMode);
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
+        pw.print("  mLastDisplayFreezeDuration=");
+                TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);
+                if ( mLastFinishedFreezeSource != null) {
+                    pw.print(" due to ");
+                    pw.print(mLastFinishedFreezeSource);
+                }
+                pw.println();
         if (dumpAll) {
             pw.print("  mSystemDecorRect="); pw.print(mSystemDecorRect.toShortString());
                     pw.print(" mSystemDecorLayer="); pw.print(mSystemDecorLayer);
