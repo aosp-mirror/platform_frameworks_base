@@ -19661,8 +19661,7 @@ package android.renderscript {
     method public int getUsage();
     method public void ioReceive();
     method public void ioSend();
-    method public synchronized void resize(int);
-    method public synchronized void resize(int, int);
+    method public deprecated synchronized void resize(int);
     method public void setFromFieldPacker(int, android.renderscript.FieldPacker);
     method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
     method public void setSurface(android.view.Surface);
