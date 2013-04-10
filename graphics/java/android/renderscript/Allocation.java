@@ -492,7 +492,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(int[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFromUnchecked(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFromUnchecked(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFromUnchecked(0, mCurrentCount, d);
@@ -507,7 +509,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(short[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFromUnchecked(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFromUnchecked(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFromUnchecked(0, mCurrentCount, d);
@@ -522,7 +526,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(byte[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFromUnchecked(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFromUnchecked(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFromUnchecked(0, mCurrentCount, d);
@@ -537,7 +543,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(float[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFromUnchecked(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFromUnchecked(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFromUnchecked(0, mCurrentCount, d);
@@ -553,7 +561,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(int[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFrom(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFrom(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFrom(0, mCurrentCount, d);
@@ -569,7 +579,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(short[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFrom(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFrom(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFrom(0, mCurrentCount, d);
@@ -585,7 +597,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(byte[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFrom(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFrom(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFrom(0, mCurrentCount, d);
@@ -601,7 +615,9 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(float[] d) {
         mRS.validate();
-        if (mCurrentDimY > 0) {
+        if (mCurrentDimZ > 0) {
+            copy3DRangeFrom(0, 0, 0, mCurrentDimX, mCurrentDimY, mCurrentDimZ, d);
+        } else if (mCurrentDimY > 0) {
             copy2DRangeFrom(0, 0, mCurrentDimX, mCurrentDimY, d);
         } else {
             copy1DRangeFrom(0, mCurrentCount, d);
@@ -967,10 +983,142 @@ public class Allocation extends BaseObj {
             Canvas c = new Canvas(newBitmap);
             c.drawBitmap(data, 0, 0, null);
             copy2DRangeFrom(xoff, yoff, newBitmap);
+            return;
         }
         validateBitmapFormat(data);
         validate2DRange(xoff, yoff, data.getWidth(), data.getHeight());
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, data);
+    }
+
+    private void validate3DRange(int xoff, int yoff, int zoff, int w, int h, int d) {
+        if (mAdaptedAllocation != null) {
+
+        } else {
+
+            if (xoff < 0 || yoff < 0 || zoff < 0) {
+                throw new RSIllegalArgumentException("Offset cannot be negative.");
+            }
+            if (h < 0 || w < 0 || d < 0) {
+                throw new RSIllegalArgumentException("Height or width cannot be negative.");
+            }
+            if (((xoff + w) > mCurrentDimX) || ((yoff + h) > mCurrentDimY) || ((zoff + d) > mCurrentDimZ)) {
+                throw new RSIllegalArgumentException("Updated region larger than allocation.");
+            }
+        }
+    }
+
+    /**
+     * @hide
+     *
+     */
+    void copy3DRangeFromUnchecked(int xoff, int yoff, int zoff, int w, int h, int d, byte[] data) {
+        mRS.validate();
+        validate3DRange(xoff, yoff, zoff, w, h, d);
+        mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
+                              w, h, d, data, data.length);
+    }
+
+    /**
+     * @hide
+     *
+     */
+    void copy3DRangeFromUnchecked(int xoff, int yoff, int zoff, int w, int h, int d, short[] data) {
+        mRS.validate();
+        validate3DRange(xoff, yoff, zoff, w, h, d);
+        mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
+                              w, h, d, data, data.length * 2);
+    }
+
+    /**
+     * @hide
+     *
+     */
+    void copy3DRangeFromUnchecked(int xoff, int yoff, int zoff, int w, int h, int d, int[] data) {
+        mRS.validate();
+        validate3DRange(xoff, yoff, zoff, w, h, d);
+        mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
+                              w, h, d, data, data.length * 4);
+    }
+
+    /**
+     * @hide
+     *
+     */
+    void copy3DRangeFromUnchecked(int xoff, int yoff, int zoff, int w, int h, int d, float[] data) {
+        mRS.validate();
+        validate3DRange(xoff, yoff, zoff, w, h, d);
+        mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
+                              w, h, d, data, data.length * 4);
+    }
+
+
+    /**
+     * @hide
+     * Copy a rectangular region from the array into the allocation.
+     * The incoming array is assumed to be tightly packed.
+     *
+     * @param xoff X offset of the region to update
+     * @param yoff Y offset of the region to update
+     * @param zoff Z offset of the region to update
+     * @param w Width of the incoming region to update
+     * @param h Height of the incoming region to update
+     * @param d Depth of the incoming region to update
+     * @param data to be placed into the allocation
+     */
+    public void copy3DRangeFrom(int xoff, int yoff, int zoff, int w, int h, int d, byte[] data) {
+        validateIsInt8();
+        copy3DRangeFromUnchecked(xoff, yoff, zoff, w, h, d, data);
+    }
+
+    /**
+     * @hide
+     *
+     */
+    public void copy3DRangeFrom(int xoff, int yoff, int zoff, int w, int h, int d, short[] data) {
+        validateIsInt16();
+        copy3DRangeFromUnchecked(xoff, yoff, zoff, w, h, d, data);
+    }
+
+    /**
+     * @hide
+     *
+     */
+    public void copy3DRangeFrom(int xoff, int yoff, int zoff, int w, int h, int d, int[] data) {
+        validateIsInt32();
+        copy3DRangeFromUnchecked(xoff, yoff, zoff, w, h, d, data);
+    }
+
+    /**
+     * @hide
+     *
+     */
+    public void copy3DRangeFrom(int xoff, int yoff, int zoff, int w, int h, int d, float[] data) {
+        validateIsFloat32();
+        copy3DRangeFromUnchecked(xoff, yoff, zoff, w, h, d, data);
+    }
+
+    /**
+     * @hide
+     * Copy a rectangular region into the allocation from another
+     * allocation.
+     *
+     * @param xoff X offset of the region to update.
+     * @param yoff Y offset of the region to update.
+     * @param w Width of the incoming region to update.
+     * @param h Height of the incoming region to update.
+     * @param d Depth of the incoming region to update.
+     * @param data source allocation.
+     * @param dataXoff X offset in data of the region to update.
+     * @param dataYoff Y offset in data of the region to update.
+     * @param dataZoff Z offset in data of the region to update
+     */
+    public void copy3DRangeFrom(int xoff, int yoff, int zoff, int w, int h, int d,
+                                Allocation data, int dataXoff, int dataYoff, int dataZoff) {
+        mRS.validate();
+        validate3DRange(xoff, yoff, zoff, w, h, d);
+        mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
+                              w, h, d, data.getID(mRS), dataXoff, dataYoff, dataZoff,
+                              data.mSelectedLOD);
     }
 
 
@@ -1050,6 +1198,8 @@ public class Allocation extends BaseObj {
      * A new type will be created with the new dimension.
      *
      * @param dimX The new size of the allocation.
+     *
+     * @deprecated
      */
     public synchronized void resize(int dimX) {
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
@@ -1063,38 +1213,6 @@ public class Allocation extends BaseObj {
         mType.updateFromNative();
         updateCacheInfo(mType);
     }
-
-    /**
-     * Resize a 2D allocation.  The contents of the allocation are
-     * preserved.  If new elements are allocated objects are created
-     * with null contents and the new region is otherwise undefined.
-     *
-     * If the new region is smaller the references of any objects
-     * outside the new region will be released.
-     *
-     * A new type will be created with the new dimension.
-     *
-     * @param dimX The new size of the allocation.
-     * @param dimY The new size of the allocation.
-     */
-    public synchronized void resize(int dimX, int dimY) {
-        if ((mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
-            throw new RSInvalidStateException(
-                "Resize only support for 2D allocations at this time.");
-        }
-        if (mType.getY() == 0) {
-            throw new RSInvalidStateException(
-                "Resize only support for 2D allocations at this time.");
-        }
-        mRS.nAllocationResize2D(getID(mRS), dimX, dimY);
-        mRS.finish();  // Necessary because resize is fifoed and update is async.
-
-        int typeID = mRS.nAllocationGetType(getID(mRS));
-        mType = new Type(typeID, mRS);
-        mType.updateFromNative();
-        updateCacheInfo(mType);
-    }
-
 
 
     // creation
