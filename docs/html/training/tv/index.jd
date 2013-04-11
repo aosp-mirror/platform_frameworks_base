@@ -1,9 +1,8 @@
 page.title=Designing for TV
+page.tags="input","screens"
 
 trainingnavtop=true
 startpage=true
-next.title=Optimizing layouts for TV
-next.link=optimizing-layouts-tv.html
 
 @jd:body
 

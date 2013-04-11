@@ -1,4 +1,6 @@
 page.title=JNI Tips
+page.tags="ndk","native"
+
 page.article=true
 @jd:body
 

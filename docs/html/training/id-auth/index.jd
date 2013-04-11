@@ -1,9 +1,8 @@
 page.title=Remembering Users
+page.tags="privacy","oauth","accounts"
 
 trainingnavtop=true
 startpage=true
-next.title=Remembering Your User
-next.link=identify.html
 
 @jd:body
 
