@@ -38,6 +38,7 @@ import android.widget.TextView;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.ArrayList;
 
 public class LocalePicker extends ListFragment {
     private static final String TAG = "LocalePicker";
@@ -46,6 +47,10 @@ public class LocalePicker extends ListFragment {
     public static interface LocaleSelectionListener {
         // You can add any argument if you really need it...
         public void onLocaleSelected(Locale locale);
+    }
+
+    protected boolean isInDeveloperMode() {
+        return false;
     }
 
     LocaleSelectionListener mListener;  // default to null
@@ -85,13 +90,39 @@ public class LocalePicker extends ListFragment {
      * {@link LocaleInfo#label}.
      */
     public static ArrayAdapter<LocaleInfo> constructAdapter(Context context) {
-        return constructAdapter(context, R.layout.locale_picker_item, R.id.locale);
+        return constructAdapter(context, false /* disable pesudolocales */);
+    }
+
+    public static ArrayAdapter<LocaleInfo> constructAdapter(Context context,
+                                                            final boolean isInDeveloperMode) {
+        return constructAdapter(context, R.layout.locale_picker_item, R.id.locale,
+                isInDeveloperMode);
     }
 
     public static ArrayAdapter<LocaleInfo> constructAdapter(Context context,
             final int layoutId, final int fieldId) {
+        return constructAdapter(context, layoutId, fieldId, false /* disable pseudolocales */);
+    }
+
+    public static ArrayAdapter<LocaleInfo> constructAdapter(Context context,
+            final int layoutId, final int fieldId, final boolean isInDeveloperMode) {
         final Resources resources = context.getResources();
-        final String[] locales = Resources.getSystem().getAssets().getLocales();
+
+        ArrayList<String> localeList = new ArrayList<String>(Arrays.asList(
+                Resources.getSystem().getAssets().getLocales()));
+        if (isInDeveloperMode) {
+            if (!localeList.contains("zz_ZZ")) {
+                localeList.add("zz_ZZ");
+            }
+        /** - TODO: Enable when zz_ZY Pseudolocale is complete
+         *  if (!localeList.contains("zz_ZY")) {
+         *      localeList.add("zz_ZY");
+         *	}
+         */
+        }
+        String[] locales = new String[localeList.size()];
+        locales = localeList.toArray(locales);
+
         final String[] specialLocaleCodes = resources.getStringArray(R.array.special_locale_codes);
         final String[] specialLocaleNames = resources.getStringArray(R.array.special_locale_names);
         Arrays.sort(locales);
@@ -118,7 +149,8 @@ public class LocalePicker extends ListFragment {
                     //    insert ours with full name
                     //  diff lang -> insert ours with lang-only name
                     if (preprocess[finalSize-1].locale.getLanguage().equals(
-                            language)) {
+                            language) &&
+                            !preprocess[finalSize-1].locale.getLanguage().equals("zz")) {
                         if (DEBUG) {
                             Log.v(TAG, "backing up and fixing "+
                                     preprocess[finalSize-1].label+" to "+
@@ -139,7 +171,9 @@ public class LocalePicker extends ListFragment {
                     } else {
                         String displayName;
                         if (s.equals("zz_ZZ")) {
-                            displayName = "Pseudo...";
+                            displayName = "[Developer] Accented English";
+                        } else if (s.equals("zz_ZY")) {
+                            displayName = "[Developer] Fake Bi-Directional";
                         } else {
                             displayName = toTitleCase(l.getDisplayLanguage(l));
                         }
@@ -206,7 +240,8 @@ public class LocalePicker extends ListFragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final ArrayAdapter<LocaleInfo> adapter = constructAdapter(getActivity());
+        final ArrayAdapter<LocaleInfo> adapter = constructAdapter(getActivity(),
+                isInDeveloperMode());
         setListAdapter(adapter);
     }
 
