@@ -1,9 +1,8 @@
 page.title=Creating Custom Views
+page.tags="widgets","ui","layout"
 
 trainingnavtop=true
 startpage=true
-next.title=Creating a View Class
-next.link=create-view.html
 
 @jd:body
 

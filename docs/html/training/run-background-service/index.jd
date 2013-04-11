@@ -1,7 +1,11 @@
 page.title=Running in a Background Service
+page.tags="intentservice"
+
 trainingnavtop=true
 startpage=true
+
 @jd:body
+
 <div id="tb-wrapper">
 <div id="tb">
 <h2>Dependencies and prerequisites</h2>
