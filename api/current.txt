@@ -6865,7 +6865,6 @@ package android.content.pm {
     method public abstract boolean addPermission(android.content.pm.PermissionInfo);
     method public abstract boolean addPermissionAsync(android.content.pm.PermissionInfo);
     method public abstract deprecated void addPreferredActivity(android.content.IntentFilter, int, android.content.ComponentName[], android.content.ComponentName);
-    method public android.content.Intent buildPermissionRequestIntent(java.lang.String...);
     method public abstract java.lang.String[] canonicalToCurrentPackageNames(java.lang.String[]);
     method public abstract int checkPermission(java.lang.String, java.lang.String);
     method public abstract int checkSignatures(java.lang.String, java.lang.String);
