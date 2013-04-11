@@ -10298,16 +10298,20 @@ package android.hardware {
     field public static final int TYPE_ACCELEROMETER = 1; // 0x1
     field public static final int TYPE_ALL = -1; // 0xffffffff
     field public static final int TYPE_AMBIENT_TEMPERATURE = 13; // 0xd
+    field public static final int TYPE_GAME_ROTATION_VECTOR = 15; // 0xf
     field public static final int TYPE_GRAVITY = 9; // 0x9
     field public static final int TYPE_GYROSCOPE = 4; // 0x4
+    field public static final int TYPE_GYROSCOPE_UNCALIBRATED = 16; // 0x10
     field public static final int TYPE_LIGHT = 5; // 0x5
     field public static final int TYPE_LINEAR_ACCELERATION = 10; // 0xa
     field public static final int TYPE_MAGNETIC_FIELD = 2; // 0x2
+    field public static final int TYPE_MAGNETIC_FIELD_UNCALIBRATED = 14; // 0xe
     field public static final deprecated int TYPE_ORIENTATION = 3; // 0x3
     field public static final int TYPE_PRESSURE = 6; // 0x6
     field public static final int TYPE_PROXIMITY = 8; // 0x8
     field public static final int TYPE_RELATIVE_HUMIDITY = 12; // 0xc
     field public static final int TYPE_ROTATION_VECTOR = 11; // 0xb
+    field public static final int TYPE_SIGNIFICANT_MOTION = 17; // 0x11
     field public static final deprecated int TYPE_TEMPERATURE = 7; // 0x7
   }
 
@@ -10329,6 +10333,7 @@ package android.hardware {
   }
 
   public abstract class SensorManager {
+    method public boolean cancelTriggerSensor(android.hardware.TriggerEventListener, android.hardware.Sensor);
     method public static float getAltitude(float, float);
     method public static void getAngleChange(float[], float[], float[]);
     method public android.hardware.Sensor getDefaultSensor(int);
@@ -10344,6 +10349,7 @@ package android.hardware {
     method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int);
     method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int, android.os.Handler);
     method public static boolean remapCoordinateSystem(float[], int, int, float[]);
+    method public boolean requestTriggerSensor(android.hardware.TriggerEventListener, android.hardware.Sensor);
     method public deprecated void unregisterListener(android.hardware.SensorListener);
     method public deprecated void unregisterListener(android.hardware.SensorListener, int);
     method public void unregisterListener(android.hardware.SensorEventListener, android.hardware.Sensor);
@@ -10405,6 +10411,17 @@ package android.hardware {
     field public static final deprecated int SENSOR_TEMPERATURE = 4; // 0x4
     field public static final deprecated int SENSOR_TRICORDER = 64; // 0x40
     field public static final float STANDARD_GRAVITY = 9.80665f;
+  }
+
+  public final class TriggerEvent {
+    field public android.hardware.Sensor sensor;
+    field public long timestamp;
+    field public final float[] values;
+  }
+
+  public abstract class TriggerEventListener {
+    ctor public TriggerEventListener();
+    method public abstract void onTrigger(android.hardware.TriggerEvent);
   }
 
 }
