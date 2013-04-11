@@ -17,6 +17,8 @@
 
 package android.hardware;
 
+import android.os.Build;
+
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
  * the list of available Sensors.
@@ -119,10 +121,12 @@ public final class Sensor {
      * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
      * details.
      * <p>
-     * No periodic calibration is performed (ie: there are no discontinuities
-     * in the data stream while using this sensor). Assumptions that the
-     * magnetic field is due to the Earth's poles is avoided. Factory calibration
-     * and temperature compensation is still performed.
+     * Similar to {@link #TYPE_MAGNETIC_FIELD} but the hard iron calibration (calibration
+     * due to distortions that arise from magnetized iron, steel or permanenet magnets
+     * on the device) is reported separately. No periodic calibration is performed
+     * (i.e. there are no discontinuities in the data stream while using this sensor).
+     * Assumptions that the magnetic field is due to the Earth's poles is avoided.
+     * Factory calibration and temperature compensation are still performed.
      * </p>
      */
     public static final int TYPE_MAGNETIC_FIELD_UNCALIBRATED = 14;
@@ -193,9 +197,29 @@ public final class Sensor {
             REPORTING_MODE_ON_CHANGE, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS,
             REPORTING_MODE_CONTINUOUS, REPORTING_MODE_ONE_SHOT };
 
+    // Note: This needs to be updated, whenever a new sensor is added.
+    // Holds the maximum length of the values array associated with {@link SensorEvent} or
+    // {@link TriggerEvent} for the Sensor
+    private static int[] sMaxLengthValuesArray = {
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 3, 3, 3,
+            6, 4, 6, 1 };
+
     static int getReportingMode(Sensor sensor) {
         // mType starts from offset 1.
         return sSensorReportingModes[sensor.mType - 1];
+    }
+
+    static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
+        // mType starts from offset 1.
+        int len = sMaxLengthValuesArray[sensor.mType - 1];
+
+        // RotationVector length has changed to 3 to 5 for API level 18
+        // Set it to 3 for backward compatibility.
+        if (sensor.getType() == Sensor.TYPE_ROTATION_VECTOR &&
+                sdkLevel <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            len = 3;
+        }
+        return len;
     }
 
     /* Some of these fields are set only by the native bindings in
