@@ -25,8 +25,6 @@ import android.util.Log;
  * This tracing mechanism is independent of the method tracing mechanism
  * offered by {@link Debug#startMethodTracing}.  In particular, it enables
  * tracing of events that occur across multiple processes.
- *
- * @hide
  */
 public final class Trace {
     /*
@@ -198,7 +196,7 @@ public final class Trace {
 
     /**
      * Writes a trace message to indicate that a given section of code has begun. This call must
-     * be followed by a corresponding call to {@link #traceEnd()} on the same thread.
+     * be followed by a corresponding call to {@link #endSection()} on the same thread.
      *
      * <p class="note"> At this time the vertical bar character '|', newline character '\n', and
      * null character '\0' are used internally by the tracing mechanism.  If sectionName contains
@@ -206,10 +204,8 @@ public final class Trace {
      *
      * @param sectionName The name of the code section to appear in the trace.  This may be at
      * most 127 Unicode code units long.
-     *
-     * @hide
      */
-    public static void traceBegin(String sectionName) {
+    public static void beginSection(String sectionName) {
         if (isTagEnabled(TRACE_TAG_APP)) {
             if (sectionName.length() > MAX_SECTION_NAME_LEN) {
                 throw new IllegalArgumentException("sectionName is too long");
@@ -220,13 +216,12 @@ public final class Trace {
 
     /**
      * Writes a trace message to indicate that a given section of code has ended. This call must
-     * be preceeded by a corresponding call to {@link #traceBegin(String)}. Calling this method
+     * be preceeded by a corresponding call to {@link #beginSection(String)}. Calling this method
      * will mark the end of the most recently begun section of code, so care must be taken to
-     * ensure that traceBegin / traceEnd pairs are properly nested and called from the same thread.
-     *
-     * @hide
+     * ensure that beginSection / endSection pairs are properly nested and called from the same
+     * thread.
      */
-    public static void traceEnd() {
+    public static void endSection() {
         if (isTagEnabled(TRACE_TAG_APP)) {
             nativeTraceEnd(TRACE_TAG_APP);
         }

@@ -17044,6 +17044,11 @@ package android.os {
     method public abstract void released();
   }
 
+  public final class Trace {
+    method public static void beginSection(java.lang.String);
+    method public static void endSection();
+  }
+
   public class TransactionTooLargeException extends android.os.RemoteException {
     ctor public TransactionTooLargeException();
   }
