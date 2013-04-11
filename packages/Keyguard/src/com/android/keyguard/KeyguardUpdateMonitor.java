@@ -390,6 +390,8 @@ public class KeyguardUpdateMonitor {
         mDisplayClientState.clientGeneration = clientGeneration;
         mDisplayClientState.clearing = clearing;
         mDisplayClientState.intent = p;
+        if (DEBUG)
+            Log.v(TAG, "handleSetGenerationId(g=" + clientGeneration + ", clear=" + clearing + ")");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -399,6 +401,11 @@ public class KeyguardUpdateMonitor {
     }
 
     protected void handleSetPlaybackState(int generationId, int playbackState, long eventTime) {
+        if (DEBUG)
+            Log.v(TAG, "handleSetPlaybackState(gen=" + generationId
+                + ", state=" + playbackState + ", t=" + eventTime + ")");
+        mDisplayClientState.playbackState = playbackState;
+        mDisplayClientState.playbackEventTime = eventTime;
         if (generationId == mDisplayClientState.clientGeneration) {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
