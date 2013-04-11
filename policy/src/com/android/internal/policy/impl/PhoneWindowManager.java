@@ -4203,9 +4203,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Ignore sensor when plugged into HDMI.
                 // Note that the dock orientation overrides the HDMI orientation.
                 preferredRotation = mHdmiRotation;
+            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
+                // Application just wants to remain locked in the last rotation.
+                preferredRotation = lastRotation;
             } else if ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                             && (orientation == ActivityInfo.SCREEN_ORIENTATION_USER
-                                    || orientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED))
+                                    || orientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                                    || orientation == ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+                                    || orientation == ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+                                    || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER))
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
@@ -4221,7 +4227,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 if (sensorRotation != Surface.ROTATION_180
                         || mAllowAllRotations == 1
-                        || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR) {
+                        || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                        || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER) {
                     preferredRotation = sensorRotation;
                 } else {
                     preferredRotation = lastRotation;
@@ -4269,6 +4276,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return mSeascapeRotation;
 
                 case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
+                case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
                     // Return either landscape rotation.
                     if (isLandscapeOrSeascape(preferredRotation)) {
                         return preferredRotation;
@@ -4279,6 +4287,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return mLandscapeRotation;
 
                 case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
+                case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
                     // Return either portrait rotation.
                     if (isAnyPortrait(preferredRotation)) {
                         return preferredRotation;

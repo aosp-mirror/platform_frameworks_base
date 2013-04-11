@@ -6648,7 +6648,9 @@ package android.content.pm {
     field public static final int LAUNCH_SINGLE_TOP = 1; // 0x1
     field public static final int SCREEN_ORIENTATION_BEHIND = 3; // 0x3
     field public static final int SCREEN_ORIENTATION_FULL_SENSOR = 10; // 0xa
+    field public static final int SCREEN_ORIENTATION_FULL_USER = 13; // 0xd
     field public static final int SCREEN_ORIENTATION_LANDSCAPE = 0; // 0x0
+    field public static final int SCREEN_ORIENTATION_LOCKED = 14; // 0xe
     field public static final int SCREEN_ORIENTATION_NOSENSOR = 5; // 0x5
     field public static final int SCREEN_ORIENTATION_PORTRAIT = 1; // 0x1
     field public static final int SCREEN_ORIENTATION_REVERSE_LANDSCAPE = 8; // 0x8
@@ -6658,6 +6660,8 @@ package android.content.pm {
     field public static final int SCREEN_ORIENTATION_SENSOR_PORTRAIT = 7; // 0x7
     field public static final int SCREEN_ORIENTATION_UNSPECIFIED = -1; // 0xffffffff
     field public static final int SCREEN_ORIENTATION_USER = 2; // 0x2
+    field public static final int SCREEN_ORIENTATION_USER_LANDSCAPE = 11; // 0xb
+    field public static final int SCREEN_ORIENTATION_USER_PORTRAIT = 12; // 0xc
     field public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1; // 0x1
     field public int configChanges;
     field public int flags;
