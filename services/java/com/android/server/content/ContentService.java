@@ -459,7 +459,7 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                return syncManager.getSyncStorageEngine().getIsSyncable(
+                return syncManager.getIsSyncable(
                         account, userId, providerName);
             }
         } finally {
