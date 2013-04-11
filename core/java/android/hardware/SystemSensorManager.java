@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +16,10 @@
 
 package android.hardware;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
-import android.util.Log;
-import android.util.Pools;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -51,16 +50,14 @@ public class SystemSensorManager extends SensorManager {
     private final HashMap<TriggerEventListener, TriggerEventQueue> mTriggerListeners =
             new HashMap<TriggerEventListener, TriggerEventQueue>();
 
-    private static final int MAX_EVENTS = 16;
-    private static Pools.SynchronizedPool<SensorEvent> sSensorEventPool;
-    private static Pools.SynchronizedPool<TriggerEvent> sTriggerEventPool;
-
     // Looper associated with the context in which this instance was created.
     private final Looper mMainLooper;
+    private final int mTargetSdkLevel;
 
     /** {@hide} */
-    public SystemSensorManager(Looper mainLooper) {
+    public SystemSensorManager(Context context, Looper mainLooper) {
         mMainLooper = mainLooper;
+        mTargetSdkLevel = context.getApplicationInfo().targetSdkVersion;
         synchronized(sSensorModuleLock) {
             if (!sSensorModuleInitialized) {
                 sSensorModuleInitialized = true;
@@ -80,11 +77,6 @@ public class SystemSensorManager extends SensorManager {
                         sHandleToSensor.append(sensor.getHandle(), sensor);
                     }
                 } while (i>0);
-
-                sSensorEventPool = new Pools.SynchronizedPool<SensorEvent>(
-                        sFullSensorsList.size()*2);
-                sTriggerEventPool = new Pools.SynchronizedPool<TriggerEvent>(
-                        sFullSensorsList.size()*2);
             }
         }
     }
@@ -115,7 +107,7 @@ public class SystemSensorManager extends SensorManager {
             SensorEventQueue queue = mSensorListeners.get(listener);
             if (queue == null) {
                 Looper looper = (handler != null) ? handler.getLooper() : mMainLooper;
-                queue = new SensorEventQueue(listener, looper);
+                queue = new SensorEventQueue(listener, looper, this);
                 if (!queue.addSensor(sensor, delay)) {
                     queue.dispose();
                     return false;
@@ -208,6 +200,7 @@ public class SystemSensorManager extends SensorManager {
      */
     private static abstract class BaseEventQueue {
         private native int nativeInitBaseEventQueue(BaseEventQueue eventQ, MessageQueue msgQ,
+
                 float[] scratch);
         private static native int nativeEnableSensor(int eventQ, int handle, int us);
         private static native int nativeDisableSensor(int eventQ, int handle);
@@ -218,10 +211,12 @@ public class SystemSensorManager extends SensorManager {
         protected final SparseBooleanArray mFirstEvent = new SparseBooleanArray();
         private final CloseGuard mCloseGuard = CloseGuard.get();
         private final float[] mScratch = new float[16];
+        protected final SystemSensorManager mManager;
 
-        BaseEventQueue(Looper looper) {
+        BaseEventQueue(Looper looper, SystemSensorManager manager) {
             nSensorEventQueue = nativeInitBaseEventQueue(this, looper.getQueue(), mScratch);
             mCloseGuard.open("dispose");
+            mManager = manager;
         }
 
         public void dispose() {
@@ -234,6 +229,7 @@ public class SystemSensorManager extends SensorManager {
 
             if (enableSensor(sensor, delay) == 0) {
                 mActiveSensors.put(sensor.getHandle(), true);
+                addSensorEvent(sensor);
                 return true;
             }
             return false;
@@ -247,6 +243,7 @@ public class SystemSensorManager extends SensorManager {
                     if (sensor != null) {
                         disableSensor(sensor);
                         mActiveSensors.put(handle, false);
+                        removeSensorEvent(sensor);
                     } else {
                         // it should never happen -- just ignore.
                     }
@@ -260,6 +257,7 @@ public class SystemSensorManager extends SensorManager {
             if (mActiveSensors.get(handle)) {
                 disableSensor(sensor);
                 mActiveSensors.put(sensor.getHandle(), false);
+                removeSensorEvent(sensor);
                 return true;
             }
             return false;
@@ -304,14 +302,29 @@ public class SystemSensorManager extends SensorManager {
         }
         protected abstract void dispatchSensorEvent(int handle, float[] values, int accuracy,
                 long timestamp);
+
+        protected abstract void addSensorEvent(Sensor sensor);
+        protected abstract void removeSensorEvent(Sensor sensor);
     }
 
     static final class SensorEventQueue extends BaseEventQueue {
         private final SensorEventListener mListener;
+        private final SparseArray<SensorEvent> mSensorsEvents = new SparseArray<SensorEvent>();
 
-        public SensorEventQueue(SensorEventListener listener, Looper looper) {
-            super(looper);
+        public SensorEventQueue(SensorEventListener listener, Looper looper,
+                SystemSensorManager manager) {
+            super(looper, manager);
             mListener = listener;
+        }
+
+        public void addSensorEvent(Sensor sensor) {
+            SensorEvent t = new SensorEvent(Sensor.getMaxLengthValuesArray(sensor,
+                    mManager.mTargetSdkLevel));
+            mSensorsEvents.put(sensor.getHandle(), t);
+        }
+
+        public void removeSensorEvent(Sensor sensor) {
+            mSensorsEvents.delete(sensor.getHandle());
         }
 
         // Called from native code.
@@ -320,75 +333,73 @@ public class SystemSensorManager extends SensorManager {
         protected void dispatchSensorEvent(int handle, float[] values, int inAccuracy,
                 long timestamp) {
             final Sensor sensor = sHandleToSensor.get(handle);
-            SensorEvent t = sSensorEventPool.acquire();
-            if (t == null) t = new SensorEvent(MAX_EVENTS);
-            try {
-                // Copy the entire values array.
-                // Any changes in length will be handled at the native layer.
-                System.arraycopy(values, 0, t.values, 0, t.values.length);
-                t.timestamp = timestamp;
-                t.accuracy = inAccuracy;
-                t.sensor = sensor;
-                switch (t.sensor.getType()) {
-                    // Only report accuracy for sensors that support it.
-                    case Sensor.TYPE_MAGNETIC_FIELD:
-                    case Sensor.TYPE_ORIENTATION:
-                        // call onAccuracyChanged() only if the value changes
-                        final int accuracy = mSensorAccuracies.get(handle);
-                        if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
-                            mSensorAccuracies.put(handle, t.accuracy);
-                            mListener.onAccuracyChanged(t.sensor, t.accuracy);
-                        }
-                        break;
-                    default:
-                        // For other sensors, just report the accuracy once
-                        if (mFirstEvent.get(handle) == false) {
-                            mFirstEvent.put(handle, true);
-                            mListener.onAccuracyChanged(
-                                    t.sensor, SENSOR_STATUS_ACCURACY_HIGH);
-                        }
-                        break;
-                }
-                mListener.onSensorChanged(t);
-            } finally {
-                sSensorEventPool.release(t);
+            SensorEvent t = mSensorsEvents.get(handle);
+            // Copy from the values array.
+            System.arraycopy(values, 0, t.values, 0, t.values.length);
+            t.timestamp = timestamp;
+            t.accuracy = inAccuracy;
+            t.sensor = sensor;
+            switch (t.sensor.getType()) {
+                // Only report accuracy for sensors that support it.
+                case Sensor.TYPE_MAGNETIC_FIELD:
+                case Sensor.TYPE_ORIENTATION:
+                    // call onAccuracyChanged() only if the value changes
+                    final int accuracy = mSensorAccuracies.get(handle);
+                    if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
+                        mSensorAccuracies.put(handle, t.accuracy);
+                        mListener.onAccuracyChanged(t.sensor, t.accuracy);
+                    }
+                    break;
+                default:
+                    // For other sensors, just report the accuracy once
+                    if (mFirstEvent.get(handle) == false) {
+                        mFirstEvent.put(handle, true);
+                        mListener.onAccuracyChanged(
+                                t.sensor, SENSOR_STATUS_ACCURACY_HIGH);
+                    }
+                    break;
             }
+            mListener.onSensorChanged(t);
         }
     }
 
     static final class TriggerEventQueue extends BaseEventQueue {
         private final TriggerEventListener mListener;
-        private SensorManager mManager;
+        private final SparseArray<TriggerEvent> mTriggerEvents = new SparseArray<TriggerEvent>();
 
         public TriggerEventQueue(TriggerEventListener listener, Looper looper,
-                SensorManager manager) {
-            super(looper);
+                SystemSensorManager manager) {
+            super(looper, manager);
             mListener = listener;
-            mManager = manager;
+        }
+
+        public void addSensorEvent(Sensor sensor) {
+            TriggerEvent t = new TriggerEvent(Sensor.getMaxLengthValuesArray(sensor,
+                    mManager.mTargetSdkLevel));
+            mTriggerEvents.put(sensor.getHandle(), t);
+        }
+
+        public void removeSensorEvent(Sensor sensor) {
+            mTriggerEvents.delete(sensor.getHandle());
         }
 
         // Called from native code.
         @SuppressWarnings("unused")
         @Override
-        protected void dispatchSensorEvent(int handle, float[] values, int accuracy, long timestamp) {
+        protected void dispatchSensorEvent(int handle, float[] values, int accuracy,
+                long timestamp) {
             final Sensor sensor = sHandleToSensor.get(handle);
-            TriggerEvent t = sTriggerEventPool.acquire();
-            if (t == null) t = new TriggerEvent(MAX_EVENTS);
+            TriggerEvent t = mTriggerEvents.get(handle);
 
-            try {
-                // Copy the entire values array.
-                // Any changes in length will be handled at the native layer.
-                System.arraycopy(values, 0, t.values, 0, t.values.length);
-                t.timestamp = timestamp;
-                t.sensor = sensor;
+            // Copy from the values array.
+            System.arraycopy(values, 0, t.values, 0, t.values.length);
+            t.timestamp = timestamp;
+            t.sensor = sensor;
 
-                // A trigger sensor should be auto disabled.
-                mManager.cancelTriggerSensorImpl(mListener, sensor);
+            // A trigger sensor should be auto disabled.
+            mManager.cancelTriggerSensorImpl(mListener, sensor);
 
-                mListener.onTrigger(t);
-            } finally {
-                sTriggerEventPool.release(t);
-            }
+            mListener.onTrigger(t);
         }
     }
 }
