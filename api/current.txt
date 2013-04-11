@@ -5018,6 +5018,7 @@ package android.bluetooth {
     method public boolean addService(android.bluetooth.BluetoothGattService);
     method public void cancelConnection(android.bluetooth.BluetoothDevice);
     method public void clearServices();
+    method public void close();
     method public boolean connect(android.bluetooth.BluetoothDevice, boolean);
     method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
