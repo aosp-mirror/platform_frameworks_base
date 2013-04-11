@@ -734,7 +734,7 @@ public final class WifiService extends IWifiManager.Stub {
                 if (gateway instanceof Inet4Address) {
                     info.gateway = NetworkUtils.inetAddressToInt((Inet4Address)gateway);
                 }
-            } else if (r.isHostRoute()) {
+            } else if (r.hasGateway() == false) {
                 LinkAddress dest = r.getDestination();
                 if (dest.getAddress() instanceof Inet4Address) {
                     info.netmask = NetworkUtils.prefixLengthToNetmaskInt(
