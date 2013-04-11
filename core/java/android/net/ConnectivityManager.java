@@ -1136,7 +1136,7 @@ public class ConnectivityManager {
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      *
      * <p>This method requires the call to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
      * {@hide}
      */
     public void setGlobalProxy(ProxyProperties p) {

@@ -3045,7 +3045,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public void setGlobalProxy(ProxyProperties proxyProperties) {
-        enforceChangePermission();
+        enforceConnectivityInternalPermission();
         synchronized (mProxyLock) {
             if (proxyProperties == mGlobalProxy) return;
             if (proxyProperties != null && proxyProperties.equals(mGlobalProxy)) return;
@@ -3063,10 +3063,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mGlobalProxy = null;
             }
             ContentResolver res = mContext.getContentResolver();
-            Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, host);
-            Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, port);
-            Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
-                    exclList);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, host);
+                Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, port);
+                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+                        exclList);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         if (mGlobalProxy == null) {
