@@ -963,7 +963,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public List<RestrictionEntry> getApplicationRestrictions(String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId
-                || Binder.getCallingUid() != getUidForPackage(packageName)) {
+                || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
             checkManageUsersPermission("Only system can get restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
@@ -976,7 +976,7 @@ public class UserManagerService extends IUserManager.Stub {
     public void setApplicationRestrictions(String packageName, List<RestrictionEntry> entries,
             int userId) {
         if (UserHandle.getCallingUserId() != userId
-                || Binder.getCallingUid() != getUidForPackage(packageName)) {
+                || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
             checkManageUsersPermission("Only system can set restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
@@ -986,11 +986,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private int getUidForPackage(String packageName) {
+        long ident = Binder.clearCallingIdentity();
         try {
             return mContext.getPackageManager().getApplicationInfo(packageName,
                     PackageManager.GET_UNINSTALLED_PACKAGES).uid;
         } catch (NameNotFoundException nnfe) {
             return -1;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
