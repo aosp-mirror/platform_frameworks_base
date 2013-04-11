@@ -21,6 +21,7 @@ import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -41,6 +42,7 @@ import android.content.SyncInfo;
 import android.content.SyncResult;
 import android.content.SyncStatusInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.RegisteredServicesCache;
@@ -491,6 +493,36 @@ public class SyncManager {
         return mSyncStorageEngine;
     }
 
+    public int getIsSyncable(Account account, int userId, String providerName) {
+        int isSyncable = mSyncStorageEngine.getIsSyncable(account, userId, providerName);
+        UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
+
+        // If it's not a restricted user, return isSyncable
+        if (userInfo == null || !userInfo.isRestricted()) return isSyncable;
+
+        // Else check if the sync adapter has opted-in or not
+        RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                mSyncAdapters.getServiceInfo(
+                SyncAdapterType.newKey(providerName, account.type), userId);
+        if (syncAdapterInfo == null) return isSyncable;
+
+        PackageInfo pInfo = null;
+        try {
+            pInfo = AppGlobals.getPackageManager().getPackageInfo(
+                syncAdapterInfo.componentName.getPackageName(), 0, userId);
+            if (pInfo == null) return isSyncable;
+        } catch (RemoteException re) {
+            // Shouldn't happen
+            return isSyncable;
+        }
+        if (pInfo.restrictedAccountType != null
+                && pInfo.restrictedAccountType.equals(account.type)) {
+            return isSyncable;
+        } else {
+            return 0;
+        }
+    }
+
     private void ensureAlarmService() {
         if (mAlarmService == null) {
             mAlarmService = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
@@ -608,7 +640,7 @@ public class SyncManager {
             }
 
             for (String authority : syncableAuthorities) {
-                int isSyncable = mSyncStorageEngine.getIsSyncable(account.account, account.userId,
+                int isSyncable = getIsSyncable(account.account, account.userId,
                         authority);
                 if (isSyncable == 0) {
                     continue;
@@ -1930,7 +1962,7 @@ public class SyncManager {
                     continue;
                 }
 
-                if (mSyncStorageEngine.getIsSyncable(info.account, info.userId, info.authority)
+                if (getIsSyncable(info.account, info.userId, info.authority)
                         == 0) {
                     continue;
                 }
@@ -2069,7 +2101,7 @@ public class SyncManager {
                     }
 
                     // drop this sync request if it isn't syncable
-                    int syncableState = mSyncStorageEngine.getIsSyncable(
+                    int syncableState = getIsSyncable(
                             op.account, op.userId, op.authority);
                     if (syncableState == 0) {
                         operationIterator.remove();
