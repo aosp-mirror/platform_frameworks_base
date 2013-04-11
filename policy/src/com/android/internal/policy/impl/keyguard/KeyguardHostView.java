@@ -64,7 +64,7 @@ import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardHostView";
-    // transport control states
+    // Transport control states.
     static final int TRANSPORT_GONE = 0;
     static final int TRANSPORT_INVISIBLE = 1;
     static final int TRANSPORT_VISIBLE = 2;
@@ -139,6 +139,9 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        if (DEBUG) Log.e(TAG, "KeyguardHostView()");
+
         mLockPatternUtils = new LockPatternUtils(context);
 
         // Note: This depends on KeyguardHostView getting reconstructed every time the
@@ -203,6 +206,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         mTransportState = (dcs.clearing ? TRANSPORT_GONE :
             (isMusicPlaying(dcs.playbackState) ? TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE));
         mPlaybackState = dcs.playbackState;
+
+        if (DEBUG) Log.v(TAG, "Initial transport state: "
+                + mTransportState + ", pbstate=" + mPlaybackState);
     }
 
     private void cleanupAppWidgetIds() {
@@ -1205,7 +1211,7 @@ public class KeyguardHostView extends KeyguardViewBase {
      * Create KeyguardTransportControlView on demand.
      * @return
      */
-    private KeyguardTransportControlView getTransportControlView() {
+    private KeyguardTransportControlView getOrCreateTransportControl() {
         if (mTransportControl == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mTransportControl = (KeyguardTransportControlView)
@@ -1380,17 +1386,19 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public Parcelable onSaveInstanceState() {
-        if (DEBUG) Log.d(TAG, "onSaveInstanceState");
+        if (DEBUG) Log.d(TAG, "onSaveInstanceState, tstate=" + mTransportState);
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
-        ss.transportState = mTransportState;
+        // If the transport is showing, force it to show it on restore.
+        final boolean showing = mTransportControl != null
+                && mAppWidgetContainer.getWidgetPageIndex(mTransportControl) >= 0;
+        ss.transportState =  showing ? TRANSPORT_VISIBLE : mTransportState;
         ss.appWidgetToShow = mAppWidgetToShow;
         return ss;
     }
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        if (DEBUG) Log.d(TAG, "onRestoreInstanceState");
         if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
@@ -1399,6 +1407,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         super.onRestoreInstanceState(ss.getSuperState());
         mTransportState = (ss.transportState);
         mAppWidgetToShow = ss.appWidgetToShow;
+        if (DEBUG) Log.d(TAG, "onRestoreInstanceState, transport=" + mTransportState);
         post(mSwitchPageRunnable);
     }
 
@@ -1424,23 +1433,44 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setCurrentPage(pageToShow);
     }
 
+    /**
+     * Examines the current state and adds the transport to the widget pager when the state changes.
+     *
+     * Showing the initial transport and keeping it around is a bit tricky because the signals
+     * coming from music players aren't always clear. Here's how the states are handled:
+     *
+     * {@link TRANSPORT_GONE} means we have no reason to show the transport - remove it if present.
+     *
+     * {@link TRANSPORT_INVISIBLE} means we have potential to show the transport because a music
+     * player is registered but not currently playing music (or we don't know the state yet). The
+     * code adds it conditionally on play state.
+     *
+     * {@link #TRANSPORT_VISIBLE} means a music player is active and transport should be showing.
+     *
+     * Once the transport is showing, we always show it until keyguard is dismissed. This state is
+     * maintained by onSave/RestoreInstanceState(). This state is cleared in
+     * {@link KeyguardViewManager#hide} when keyguard is dismissed, which causes the transport to be
+     * gone when keyguard is restarted until we get an update with the current state.
+     *
+     * @param state
+     */
     private void ensureTransportPresentOrRemoved(int state) {
-        int page = getWidgetPosition(R.id.keyguard_transport_control);
-        if (state == TRANSPORT_INVISIBLE || state == TRANSPORT_VISIBLE) {
-            if (page == -1) {
-                if (DEBUGXPORT) Log.v(TAG, "add transport");
-                // insert to left of camera if it exists, otherwise after right-most widget
-                int lastWidget = mAppWidgetContainer.getChildCount() - 1;
-                int position = 0; // handle no widget case
-                if (lastWidget >= 0) {
-                    position = mAppWidgetContainer.isCameraPage(lastWidget) ?
-                            lastWidget : lastWidget + 1;
-                }
-                mAppWidgetContainer.addWidget(getTransportControlView(), position);
+        final boolean showing = getWidgetPosition(R.id.keyguard_transport_control) != -1;
+        final boolean visible = state == TRANSPORT_VISIBLE;
+        final boolean shouldBeVisible = state == TRANSPORT_INVISIBLE && isMusicPlaying(state);
+        if (!showing && (visible || shouldBeVisible)) {
+            if (DEBUGXPORT) Log.v(TAG, "add transport");
+            // insert to left of camera if it exists, otherwise after right-most widget
+            int lastWidget = mAppWidgetContainer.getChildCount() - 1;
+            int position = 0; // handle no widget case
+            if (lastWidget >= 0) {
+                position = mAppWidgetContainer.isCameraPage(lastWidget) ?
+                        lastWidget : lastWidget + 1;
             }
-        } else if (page != -1) {
+            mAppWidgetContainer.addWidget(getOrCreateTransportControl(), position);
+        } else if (showing && state == TRANSPORT_GONE) {
             if (DEBUGXPORT) Log.v(TAG, "remove transport");
-            mAppWidgetContainer.removeWidget(getTransportControlView());
+            mAppWidgetContainer.removeWidget(getOrCreateTransportControl());
             mTransportControl = null;
         }
     }
@@ -1473,7 +1503,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         // if music playing, show transport
         if (musicTransportState == TRANSPORT_VISIBLE) {
             if (DEBUG) Log.d(TAG, "Music playing, show transport");
-            return mAppWidgetContainer.getWidgetPageIndex(getTransportControlView());
+            return mAppWidgetContainer.getWidgetPageIndex(getOrCreateTransportControl());
         }
 
         // else show the right-most widget (except for camera)

@@ -915,7 +915,7 @@ public class KeyguardViewMediator {
      * @see #handleReset()
      */
     private void resetStateLocked(Bundle options) {
-        if (DEBUG) Log.d(TAG, "resetStateLocked");
+        if (DEBUG) Log.e(TAG, "resetStateLocked");
         Message msg = mHandler.obtainMessage(RESET, options);
         mHandler.sendMessage(msg);
     }
