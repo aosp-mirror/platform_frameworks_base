@@ -756,6 +756,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     @Override
     public void onChildViewRemoved(View parent, View child) {
         mForceScreenScrolled = true;
+        invalidate();
+        invalidateCachedOffsets();
     }
 
     protected void invalidateCachedOffsets() {
