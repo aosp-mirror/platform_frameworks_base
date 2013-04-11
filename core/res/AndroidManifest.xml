@@ -2272,6 +2272,14 @@
                 android:process=":ui">
         </activity>
 
+        <activity android:name="android.accounts.CantAddAccountActivity"
+                android:excludeFromRecents="true"
+                android:exported="true"
+                android:theme="@android:style/Theme.Holo.Dialog"
+                android:label="@string/error_message_title"
+                android:process=":ui">
+        </activity>
+
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
