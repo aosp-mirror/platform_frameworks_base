@@ -290,8 +290,12 @@ public class SensorEvent {
      * <li> values[0]: x*sin(&#952/2) </li>
      * <li> values[1]: y*sin(&#952/2) </li>
      * <li> values[2]: z*sin(&#952/2) </li>
-     * <li> values[3]: cos(&#952/2) <i>(optional: only if value.length = 4)</i> </li>
+     * <li> values[3]: cos(&#952/2) </li>
+     * <li> values[4]: estimated heading Accuracy (in radians) (-1 if unavailable)</li>
      * </ul>
+     * <p> values[3], originally optional, will always be present from SDK Level 18 onwards.
+     * values[4] is a new value that has been added in SDK Level 18.
+     * </p>
      *
      * <h4>{@link android.hardware.Sensor#TYPE_ORIENTATION
      * Sensor.TYPE_ORIENTATION}:</h4> All values are angles in degrees.
@@ -395,13 +399,50 @@ public class SensorEvent {
      * @see GeomagneticField
      *
      * <h4>{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD_UNCALIBRATED} </h4>
-     * All values are in micro-Tesla (uT) and measure the ambient magnetic field
-     * in the X, Y and Z axis.
+     * Similar to {@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD},
+     * but the hard iron calibration is reported separately instead of being included
+     * in the measurement. Factory calibration and temperature compensation will still
+     * be applied to the "uncalibrated" measurement. Assumptions that the magnetic field
+     * is due to the Earth's poles is avoided.
      * <p>
-     * No periodic calibration is performed (ie: there are no discontinuities
-     * in the data stream while using this sensor). Assumptions that the the
-     * magnetic field is due to the Earth's poles is avoided. Factory calibration
-     * and temperature compensation is still performed.
+     * The values array is shown below:
+     * <ul>
+     * <li> values[0] = x_uncalib </li>
+     * <li> values[1] = y_uncalib </li>
+     * <li> values[2] = z_uncalib </li>
+     * <li> values[3] = x_bias </li>
+     * <li> values[4] = y_bias </li>
+     * <li> values[5] = z_bias </li>
+     * </ul>
+     * </p>
+     * <p>
+     * x_uncalib, y_uncalib, z_uncalib are the measured magnetic field in X, Y, Z axes.
+     * Soft iron and temperature calibrations are applied. But the hard iron
+     * calibration is not applied. The values are in micro-Tesla (uT).
+     * </p>
+     * <p>
+     * x_bias, y_bias, z_bias give the iron bias estimated in X, Y, Z axes.
+     * Each field is a component of the estimated hard iron calibration.
+     * The values are in micro-Tesla (uT).
+     * </p>
+     * <p> Hard iron - These distortions arise due to the magnetized iron, steel or permanenet
+     * magnets on the device.
+     * Soft iron - These distortions arise due to the interaction with the earth's magentic
+     * field.
+     * </p>
+     * <h4> {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR} </h4>
+     * Identical to {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR} except that it
+     * doesn't use the geomagnetic field. Therefore the Y axis doesn't
+     * point north, but instead to some other reference, that reference is
+     * allowed to drift by the same order of magnitude as the gyroscope
+     * drift around the Z axis.
+     * <p>
+     * In the ideal case, a phone rotated and returning to the same real-world
+     * orientation will report the same game rotation vector
+     * (without using the earth's geomagnetic field). However, the orientation
+     * may drift somewhat over time. See {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR}
+     * for a detailed description of the values. This sensor will not have
+     * the estimated heading accuracy value.
      * </p>
      *
      * <h4> {@link android.hardware.Sensor#TYPE_GYROSCOPE_UNCALIBRATED} </h4>
@@ -452,7 +493,7 @@ public class SensorEvent {
      */
     public long timestamp;
 
-    SensorEvent(int size) {
-        values = new float[size];
+    SensorEvent(int valueSize) {
+        values = new float[valueSize];
     }
 }
