@@ -1,9 +1,8 @@
 page.title=Designing for Multiple Screens
+page.tags="tablet","tv","fragments","support"
 
 trainingnavtop=true
 startpage=true
-next.title=Supporting Different Screen Sizes
-next.link=screensizes.html
 
 @jd:body
 

@@ -1,9 +1,8 @@
 page.title=Optimizing Battery Life
+page.tags="network","internet"
 
 trainingnavtop=true
 startpage=true
-next.title=Monitoring the Battery Level and Charging State
-next.link=battery-monitoring.html
 
 @jd:body
 

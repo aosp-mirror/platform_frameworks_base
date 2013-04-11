@@ -1,9 +1,8 @@
 page.title=Implementing Accessibility
+page.tags="navigation","input"
 
 trainingnavtop=true
 startpage=true
-next.title=Developing Accessible Applications
-next.link=accessible-app.html
 
 @jd:body
 
