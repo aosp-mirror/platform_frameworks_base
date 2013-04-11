@@ -16,10 +16,8 @@
 
 package android.animation;
 
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
-import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.view.Choreographer;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -48,6 +46,7 @@ import java.util.HashMap;
  * Animation</a> developer guide.</p>
  * </div>
  */
+@SuppressWarnings("unchecked")
 public class ValueAnimator extends Animator {
 
     /**
@@ -340,7 +339,7 @@ public class ValueAnimator extends Animator {
             return;
         }
         if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofInt("", values)});
+            setValues(PropertyValuesHolder.ofInt("", values));
         } else {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setIntValues(values);
@@ -368,7 +367,7 @@ public class ValueAnimator extends Animator {
             return;
         }
         if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofFloat("", values)});
+            setValues(PropertyValuesHolder.ofFloat("", values));
         } else {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setFloatValues(values);
@@ -400,8 +399,7 @@ public class ValueAnimator extends Animator {
             return;
         }
         if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofObject("",
-                    (TypeEvaluator)null, values)});
+            setValues(PropertyValuesHolder.ofObject("", null, values));
         } else {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setObjectValues(values);
@@ -423,7 +421,7 @@ public class ValueAnimator extends Animator {
         mValues = values;
         mValuesMap = new HashMap<String, PropertyValuesHolder>(numValues);
         for (int i = 0; i < numValues; ++i) {
-            PropertyValuesHolder valuesHolder = (PropertyValuesHolder) values[i];
+            PropertyValuesHolder valuesHolder = values[i];
             mValuesMap.put(valuesHolder.getPropertyName(), valuesHolder);
         }
         // New property/values/target should cause re-initialization prior to starting
@@ -537,6 +535,7 @@ public class ValueAnimator extends Animator {
      *
      * @hide
      */
+    @SuppressWarnings("unchecked")
     protected static class AnimationHandler implements Runnable {
         // The per-thread list of all active animations
         /** @hide */
@@ -1024,6 +1023,8 @@ public class ValueAnimator extends Animator {
         mStarted = false;
         mStartListenersCalled = false;
         mPlayingBackwards = false;
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, "animator",
+                System.identityHashCode(this));
     }
 
     /**
@@ -1031,6 +1032,8 @@ public class ValueAnimator extends Animator {
      * called on the UI thread.
      */
     private void startAnimation(AnimationHandler handler) {
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, "animator",
+                System.identityHashCode(this));
         initAnimation();
         handler.mAnimations.add(this);
         if (mStartDelay > 0 && mListeners != null) {
@@ -1095,7 +1098,7 @@ public class ValueAnimator extends Animator {
                         }
                     }
                     if (mRepeatMode == REVERSE) {
-                        mPlayingBackwards = mPlayingBackwards ? false : true;
+                        mPlayingBackwards = !mPlayingBackwards;
                     }
                     mCurrentIteration += (int)fraction;
                     fraction = fraction % 1f;
@@ -1252,7 +1255,7 @@ public class ValueAnimator extends Animator {
         }
     }
 
-    private AnimationHandler getOrCreateAnimationHandler() {
+    private static AnimationHandler getOrCreateAnimationHandler() {
         AnimationHandler handler = sAnimationHandler.get();
         if (handler == null) {
             handler = new AnimationHandler();
