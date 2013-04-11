@@ -594,13 +594,12 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         animateOutlinesAndSidePages(false);
     }
 
-    public void showInitialPageHints() {
-        mShowingInitialHints = true;
+    void updateChildrenContentAlpha(float sidePageAlpha) {
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             KeyguardWidgetFrame child = getWidgetPageAt(i);
             if (i != mCurrentPage) {
-                child.setBackgroundAlpha(KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER);
+                child.setBackgroundAlpha(sidePageAlpha);
                 child.setContentAlpha(0f);
             } else {
                 child.setBackgroundAlpha(0f);
@@ -609,9 +608,15 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
+    public void showInitialPageHints() {
+        mShowingInitialHints = true;
+        updateChildrenContentAlpha(KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER);
+    }
+
     @Override
     void setCurrentPage(int currentPage) {
         super.setCurrentPage(currentPage);
+        updateChildrenContentAlpha(0.0f);
         updateWidgetFramesImportantForAccessibility();
     }
 
