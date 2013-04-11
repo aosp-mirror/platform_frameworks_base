@@ -1,9 +1,8 @@
 page.title=Creating Backward-Compatible UIs
+page.tags="widgets","support"
 
 trainingnavtop=true
 startpage=true
-next.title=Abstracting the New Implementation
-next.link=abstracting.html
 
 @jd:body
 
