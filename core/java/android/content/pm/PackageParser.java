@@ -1424,8 +1424,11 @@ public class PackageParser {
         // that may change.
         String name = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
+/*
         boolean required = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestUsesPermission_required, true);
+*/
+        boolean required = true; // Optional <uses-permission> not supported
 
         sa.recycle();
 

@@ -996,8 +996,9 @@
               permission, and it must always be granted when it is installed.
               If you set this to false, then in some cases the application may
               be installed with it being granted the permission, and it will
-              need to request the permission later if it needs it. -->
+              need to request the permission later if it needs it.
         <attr name="required" format="boolean" />
+        -->
     </declare-styleable>
 
     <!-- The <code>uses-configuration</code> tag specifies
@@ -1040,7 +1041,7 @@
               don't support it.  If you set this to false, then this will
               not impose a restriction on where the application can be
               installed. -->
-        <attr name="required" />
+        <attr name="required" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
