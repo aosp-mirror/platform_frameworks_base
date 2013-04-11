@@ -1,8 +1,8 @@
 page.title=Notifying the User
+page.tags="notifications"
+
 trainingnavtop=true
 startpage=true
-next.title=Build a Notification
-next.link=build-notification.html
 
 
 @jd:body

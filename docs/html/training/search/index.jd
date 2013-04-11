@@ -1,8 +1,8 @@
 page.title=Adding Search Functionality
+page.tags="searchview","database"
+
 trainingnavtop=true
 startpage=true
-next.title=Setting Up the Search Interface
-next.link=setup.html
 
 @jd:body
 
