@@ -38,7 +38,6 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
-import com.android.internal.widget.LockPatternView.Cell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +50,6 @@ import java.util.List;
  * "correct" states.
  */
 public class LockPatternView extends View {
-    private static final String TAG = "LockPatternView";
     // Aspect to use when rendering this view
     private static final int ASPECT_SQUARE = 0; // View will be the minimum of width/height
     private static final int ASPECT_LOCK_WIDTH = 1; // Fixed width; height will be minimum of (w,h)
@@ -62,9 +60,6 @@ public class LockPatternView extends View {
 
     private Paint mPaint = new Paint();
     private Paint mPathPaint = new Paint();
-
-    // TODO: make this common with PhoneWindow
-    static final int STATUS_BAR_HEIGHT = 25;
 
     /**
      * How many milliseconds we spend animating each circle of a lock pattern
@@ -124,6 +119,7 @@ public class LockPatternView extends View {
 
     private final Path mCurrentPath = new Path();
     private final Rect mInvalidate = new Rect();
+    private final Rect mTmpInvalidateRect = new Rect();
 
     private int mBitmapWidth;
     private int mBitmapHeight;
@@ -131,7 +127,6 @@ public class LockPatternView extends View {
     private int mAspect;
     private final Matrix mArrowMatrix = new Matrix();
     private final Matrix mCircleMatrix = new Matrix();
-
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -680,8 +675,9 @@ public class LockPatternView extends View {
     private void handleActionMove(MotionEvent event) {
         // Handle all recent motion events so we don't skip any cells even when the device
         // is busy...
+        final float radius = (mSquareWidth * mDiameterFactor * 0.5f);
         final int historySize = event.getHistorySize();
-        Rect invalidateRect = mInvalidate;
+        mTmpInvalidateRect.setEmpty();
         boolean invalidateNow = false;
         for (int i = 0; i < historySize + 1; i++) {
             final float x = i < historySize ? event.getHistoricalX(i) : event.getX();
@@ -702,30 +698,30 @@ public class LockPatternView extends View {
             if (mPatternInProgress && patternSize > 0) {
                 final ArrayList<Cell> pattern = mPattern;
                 final Cell lastCell = pattern.get(patternSize - 1);
-                float startX = getCenterXForColumn(lastCell.column);
-                float startY = getCenterYForRow(lastCell.row);
+                float lastCellCenterX = getCenterXForColumn(lastCell.column);
+                float lastCellCenterY = getCenterYForRow(lastCell.row);
 
-                // Adjust for current position. Radius accounts for line width.
-                final float radius = (mSquareWidth * mDiameterFactor * 0.5f);
-                float left = Math.min(startX, x) - radius;
-                float right = Math.max(startX, x) + radius;
-                float top = Math.min(startY, y) - radius;
-                float bottom = Math.max(startY, y) + radius;
+                // Adjust for drawn segment from last cell to (x,y). Radius accounts for line width.
+                float left = Math.min(lastCellCenterX, x) - radius;
+                float right = Math.max(lastCellCenterX, x) + radius;
+                float top = Math.min(lastCellCenterY, y) - radius;
+                float bottom = Math.max(lastCellCenterY, y) + radius;
 
                 // Invalidate between the pattern's new cell and the pattern's previous cell
-                if (hitCell != null && patternSize >= 2) {
+                if (hitCell != null) {
                     final float width = mSquareWidth * 0.5f;
                     final float height = mSquareHeight * 0.5f;
-                    final float x2 = getCenterXForColumn(hitCell.column);
-                    final float y2 = getCenterYForRow(hitCell.row);
-                    left = Math.min(x2, left - width);
-                    right = Math.max(x2, right + width);
-                    top = Math.min(y2, top - height);
-                    bottom = Math.max(y2, bottom + height);
+                    final float hitCellCenterX = getCenterXForColumn(hitCell.column);
+                    final float hitCellCenterY = getCenterYForRow(hitCell.row);
+
+                    left = Math.min(hitCellCenterX - width, left);
+                    right = Math.max(hitCellCenterX + width, right);
+                    top = Math.min(hitCellCenterY - height, top);
+                    bottom = Math.max(hitCellCenterY + height, bottom);
                 }
 
                 // Invalidate between the pattern's last cell and the previous location
-                invalidateRect.union(Math.round(left), Math.round(top),
+                mTmpInvalidateRect.union(Math.round(left), Math.round(top),
                         Math.round(right), Math.round(bottom));
             }
         }
@@ -734,8 +730,9 @@ public class LockPatternView extends View {
 
         // To save updates, we only invalidate if the user moved beyond a certain amount.
         if (invalidateNow) {
-            invalidate(invalidateRect);
-            invalidateRect.setEmpty();
+            mInvalidate.union(mTmpInvalidateRect);
+            invalidate(mInvalidate);
+            mInvalidate.set(mTmpInvalidateRect);
         }
     }
 
