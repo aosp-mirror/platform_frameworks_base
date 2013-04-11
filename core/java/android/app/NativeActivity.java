@@ -27,7 +27,6 @@ import android.os.Environment;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.AttributeSet;
-import android.view.InputChannel;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.Surface;
@@ -111,11 +110,9 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
             int format, int width, int height);
     private native void onSurfaceRedrawNeededNative(int handle, Surface surface);
     private native void onSurfaceDestroyedNative(int handle);
-    private native void onInputChannelCreatedNative(int handle, InputChannel channel);
-    private native void onInputChannelDestroyedNative(int handle, InputChannel channel);
+    private native void onInputQueueCreatedNative(int handle, int queuePtr);
+    private native void onInputQueueDestroyedNative(int handle, int queuePtr);
     private native void onContentRectChangedNative(int handle, int x, int y, int w, int h);
-    private native void dispatchKeyEventNative(int handle, KeyEvent event);
-    private native void finishPreDispatchKeyEventNative(int handle, int seq, boolean handled);
 
     static class NativeContentView extends View {
         NativeActivity mActivity;
@@ -197,7 +194,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
             mCurSurfaceHolder = null;
         }
         if (mCurInputQueue != null) {
-            onInputChannelDestroyedNative(mNativeHandle, mCurInputQueue.getInputChannel());
+            onInputQueueDestroyedNative(mNativeHandle, mCurInputQueue.getNativePtr());
             mCurInputQueue = null;
         }
         unloadNativeCode(mNativeHandle);
@@ -261,18 +258,6 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         }
     }
     
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (mDispatchingUnhandledKey) {
-            return super.dispatchKeyEvent(event);
-        } else {
-            // Key events from the IME do not go through the input channel;
-            // we need to intercept them here to hand to the application.
-            dispatchKeyEventNative(mNativeHandle, event);
-            return true;
-        }
-    }
-
     public void surfaceCreated(SurfaceHolder holder) {
         if (!mDestroyed) {
             mCurSurfaceHolder = holder;
@@ -304,14 +289,14 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     public void onInputQueueCreated(InputQueue queue) {
         if (!mDestroyed) {
             mCurInputQueue = queue;
-            onInputChannelCreatedNative(mNativeHandle, queue.getInputChannel());
+            onInputQueueCreatedNative(mNativeHandle, queue.getNativePtr());
         }
     }
     
     public void onInputQueueDestroyed(InputQueue queue) {
-        mCurInputQueue = null;
         if (!mDestroyed) {
-            onInputChannelDestroyedNative(mNativeHandle, queue.getInputChannel());
+            onInputQueueDestroyedNative(mNativeHandle, queue.getNativePtr());
+            mCurInputQueue = null;
         }
     }
     
@@ -330,25 +315,6 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
                         mLastContentY, mLastContentWidth, mLastContentHeight);
             }
         }
-    }
-
-    boolean dispatchUnhandledKeyEvent(KeyEvent event) {
-        try {
-            mDispatchingUnhandledKey = true;
-            View decor = getWindow().getDecorView();
-            if (decor != null) {
-                return decor.dispatchKeyEvent(event);
-            } else {
-                return false;
-            }
-        } finally {
-            mDispatchingUnhandledKey = false;
-        }
-    }
-    
-    void preDispatchKeyEvent(KeyEvent event, int seq) {
-        // FIXME: Input dispatch should be redirected back through ViewRootImpl again.
-        finishPreDispatchKeyEventNative(mNativeHandle, seq, false);
     }
 
     void setWindowFlags(int flags, int mask) {

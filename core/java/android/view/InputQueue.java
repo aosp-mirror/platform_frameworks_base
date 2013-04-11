@@ -16,11 +16,127 @@
 
 package android.view;
 
+import dalvik.system.CloseGuard;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.os.MessageQueue;
+import android.util.Pools.Pool;
+import android.util.Pools.SimplePool;
+import android.util.SparseArray;
+
+import java.lang.ref.WeakReference;
+
 /**
  * An input queue provides a mechanism for an application to receive incoming
  * input events.  Currently only usable from native code.
  */
 public final class InputQueue {
+    private final SparseArray<ActiveInputEvent> mActiveEventArray =
+            new SparseArray<ActiveInputEvent>(20);
+    private final Pool<ActiveInputEvent> mActiveInputEventPool =
+            new SimplePool<ActiveInputEvent>(20);
+
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    private int mPtr;
+
+    private static native int nativeInit(WeakReference<InputQueue> weakQueue,
+            MessageQueue messageQueue);
+    private static native int nativeSendKeyEvent(int ptr, KeyEvent e, boolean preDispatch);
+    private static native int nativeSendMotionEvent(int ptr, MotionEvent e);
+    private static native void nativeDispose(int ptr);
+
+    /** @hide */
+    public InputQueue() {
+        mPtr = nativeInit(new WeakReference<InputQueue>(this), Looper.myQueue());
+
+        mCloseGuard.open("dispose");
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            dispose(true);
+        } finally {
+            super.finalize();
+        }
+    }
+
+    /** @hide */
+    public void dispose() {
+        dispose(false);
+    }
+
+    /** @hide */
+    public void dispose(boolean finalized) {
+        if (mCloseGuard != null) {
+            if (finalized) {
+                mCloseGuard.warnIfOpen();
+            }
+            mCloseGuard.close();
+        }
+
+        if (mPtr != 0) {
+            nativeDispose(mPtr);
+            mPtr = 0;
+        }
+    }
+
+    /** @hide */
+    public int getNativePtr() {
+        return mPtr;
+    }
+
+    /** @hide */
+    public void sendInputEvent(InputEvent e, Object token, boolean predispatch,
+            FinishedInputEventCallback callback) {
+        ActiveInputEvent event = obtainActiveInputEvent(token, callback);
+        int id;
+        if (e instanceof KeyEvent) {
+            id = nativeSendKeyEvent(mPtr, (KeyEvent) e, predispatch);
+        } else {
+            id = nativeSendMotionEvent(mPtr, (MotionEvent) e);
+        }
+        mActiveEventArray.put(id, event);
+    }
+
+    private void finishInputEvent(int id, boolean handled) {
+        int index = mActiveEventArray.indexOfKey(id);
+        if (index >= 0) {
+            ActiveInputEvent e = mActiveEventArray.valueAt(index);
+            mActiveEventArray.removeAt(index);
+            e.mCallback.onFinishedInputEvent(e.mToken, handled);
+            recycleActiveInputEvent(e);
+        }
+    }
+
+    private ActiveInputEvent obtainActiveInputEvent(Object token,
+            FinishedInputEventCallback callback) {
+        ActiveInputEvent e = mActiveInputEventPool.acquire();
+        if (e == null) {
+            e = new ActiveInputEvent();
+        }
+        e.mToken = token;
+        e.mCallback = callback;
+        return e;
+    }
+
+    private void recycleActiveInputEvent(ActiveInputEvent e) {
+        e.recycle();
+        mActiveInputEventPool.release(e);
+    }
+
+    private final class ActiveInputEvent {
+        public Object mToken;
+        public FinishedInputEventCallback mCallback;
+
+        public void recycle() {
+            mToken = null;
+            mCallback = null;
+        }
+    }
+
     /**
      * Interface to receive notification of when an InputQueue is associated
      * and dissociated with a thread.
@@ -31,7 +147,7 @@ public final class InputQueue {
          * thread making this call, so it can start receiving events from it.
          */
         void onInputQueueCreated(InputQueue queue);
-        
+
         /**
          * Called when the given InputQueue is no longer associated with
          * the thread and thus not dispatching events.
@@ -39,15 +155,9 @@ public final class InputQueue {
         void onInputQueueDestroyed(InputQueue queue);
     }
 
-    final InputChannel mChannel;
-    
     /** @hide */
-    public InputQueue(InputChannel channel) {
-        mChannel = channel;
+    public static interface FinishedInputEventCallback {
+        void onFinishedInputEvent(Object token, boolean handled);
     }
-    
-    /** @hide */
-    public InputChannel getInputChannel() {
-        return mChannel;
-    }
+
 }
