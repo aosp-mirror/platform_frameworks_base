@@ -1,9 +1,8 @@
 page.title=Implementing Effective Navigation
+page.tags="viewpager","tasks","back","up"
 
 trainingnavtop=true
 startpage=true
-next.title=Implementing Lateral Navigation
-next.link=lateral.html
 
 @jd:body
 

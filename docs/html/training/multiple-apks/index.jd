@@ -1,9 +1,8 @@
 page.title=Maintaining Multiple APKs
+page.tags="support"
 
 trainingnavtop=true
 startpage=true
-next.title=Creating Multiple APKs for Different API Levels
-next.link=api.html
 
 @jd:body
 

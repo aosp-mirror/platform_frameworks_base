@@ -1,9 +1,8 @@
 page.title=Making Your App Location Aware
+page.tags="geolocation","maps"
 
 trainingnavtop=true
 startpage=true
-next.title=Using the Location Manager
-next.link=locationmanager.html
 
 @jd:body
 

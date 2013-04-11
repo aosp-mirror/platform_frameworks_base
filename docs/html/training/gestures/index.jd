@@ -1,8 +1,8 @@
 page.title=Using Touch Gestures
+page.tags="input","navigation","gesturedetector","scroller"
+
 trainingnavtop=true
 startpage=true
-next.title=Detect Built-in Gestures
-next.link=detector.html
 
 
 @jd:body
