@@ -1,5 +1,5 @@
 page.title=Accessibility
-page.tags="accessibility","navigation"
+page.tags="accessibility","navigation","input"
 @jd:body
 
 <p>One of Android's missions is to organize the world's information and make it universally accessible and useful. Accessibility is the measure of how successfully a product can be used by people with varying abilities. Our mission applies to all users-including people with disabilities such as visual impairment, color deficiency, hearing loss, and limited dexterity.</p>

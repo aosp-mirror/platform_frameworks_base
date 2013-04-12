@@ -1,5 +1,5 @@
 page.title=Widgets
-page.tags="appwidget"
+page.tags="appwidget","home"
 @jd:body
 
 <p>Widgets are an essential aspect of home screen customization. You can imagine them as "at-a-glance" views of an app's most important data and functionality that is accessible right from the user's home screen. Users can move widgets across their home screen panels, and, if supported, resize them to tailor the amount of information within a widget to their preference.</p>
