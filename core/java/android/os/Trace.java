@@ -74,6 +74,8 @@ public final class Trace {
     private static native void nativeTraceCounter(long tag, String name, int value);
     private static native void nativeTraceBegin(long tag, String name);
     private static native void nativeTraceEnd(long tag);
+    private static native void nativeAsyncTraceBegin(long tag, String name, int cookie);
+    private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
     private static native void nativeSetAppTracingAllowed(boolean allowed);
 
     static {
@@ -191,6 +193,42 @@ public final class Trace {
     public static void traceEnd(long traceTag) {
         if (isTagEnabled(traceTag)) {
             nativeTraceEnd(traceTag);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that a given section of code has
+     * begun. Must be followed by a call to {@link #asyncTraceEnd} using the same
+     * tag. Unlike {@link #traceBegin(long, String)} and {@link #traceEnd(long)},
+     * asynchronous events do not need to be nested. The name and cookie used to
+     * begin an event must be used to end it.
+     *
+     * @param traceTag The trace tag.
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     *
+     * @hide
+     */
+    public static void asyncTraceBegin(long traceTag, String methodName, int cookie) {
+        if (isTagEnabled(traceTag)) {
+            nativeAsyncTraceBegin(traceTag, methodName, cookie);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that the current method has ended.
+     * Must be called exactly once for each call to {@link #asyncTraceBegin(long, String, int)}
+     * using the same tag, name and cookie.
+     *
+     * @param traceTag The trace tag.
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     *
+     * @hide
+     */
+    public static void asyncTraceEnd(long traceTag, String methodName, int cookie) {
+        if (isTagEnabled(traceTag)) {
+            nativeAsyncTraceEnd(traceTag, methodName, cookie);
         }
     }
 
