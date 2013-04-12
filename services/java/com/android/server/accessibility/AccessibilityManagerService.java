@@ -61,16 +61,20 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
+import android.util.Pools.Pool;
+import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.InputDevice;
+import android.view.InputEventConsistencyVerifier;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
@@ -132,6 +136,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
 
+    private static final int MAX_POOL_SIZE = 10;
+
     private static int sIdCounter = 0;
 
     private static int sNextWindowId;
@@ -139,6 +145,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final Context mContext;
 
     private final Object mLock = new Object();
+
+    private final Pool<PendingEvent> mPendingEventPool =
+            new SimplePool<PendingEvent>(MAX_POOL_SIZE);
 
     private final SimpleStringSplitter mStringColonSplitter =
             new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
@@ -633,6 +642,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    boolean notifyKeyEvent(KeyEvent event, int policyFlags) {
+        synchronized (mLock) {
+            KeyEvent localClone = KeyEvent.obtain(event);
+            boolean handled = notifyKeyEventLocked(localClone, policyFlags, false);
+            if (!handled) {
+                handled = notifyKeyEventLocked(localClone, policyFlags, true);
+            }
+            return handled;
+        }
+    }
+
     /**
      * Gets the bounds of the accessibility focus in the active window.
      *
@@ -792,6 +812,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Service service = state.mBoundServices.get(i);
             if (service.mRequestTouchExplorationMode && service.mIsDefault == isDefault) {
                 service.notifyGesture(gestureId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean notifyKeyEventLocked(KeyEvent event, int policyFlags, boolean isDefault) {
+        // TODO: Now we are giving the key events to the last enabled
+        //       service that can handle them which is the last one
+        //       in our list since we write the last enabled as the
+        //       last record in the enabled services setting. Ideally,
+        //       the user should make the call which service handles
+        //       key events. However, only one service should handle
+        //       key events to avoid user frustration when different
+        //       behavior is observed from different combinations of
+        //       enabled accessibility services.
+        UserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            Service service = state.mBoundServices.get(i);
+            if (service.mIsDefault == isDefault) {
+                service.notifyKeyEvent(event, policyFlags);
                 return true;
             }
         }
@@ -1119,8 +1160,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         boolean setInputFilter = false;
         AccessibilityInputFilter inputFilter = null;
         synchronized (mLock) {
-            if ((userState.mIsAccessibilityEnabled && userState.mIsTouchExplorationEnabled)
-                    || userState.mIsDisplayMagnificationEnabled) {
+            if (userState.mIsAccessibilityEnabled) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
                     if (mInputFilter == null) {
@@ -1141,7 +1181,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             } else {
                 if (mHasInputFilter) {
                     mHasInputFilter = false;
-                    mInputFilter.setEnabledFeatures(0);
+                    mInputFilter.reset();
                     inputFilter = null;
                     setInputFilter = true;
                 }
@@ -1446,6 +1486,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_ANNOUNCE_NEW_USER_IF_NEEDED = 5;
         public static final int MSG_UPDATE_INPUT_FILTER = 6;
         public static final int MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG = 7;
+        public static final int MSG_SEND_KEY_EVENT_TO_INPUT_FILTER = 8;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -1460,6 +1501,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     synchronized (mLock) {
                         if (mHasInputFilter && mInputFilter != null) {
                             mInputFilter.notifyAccessibilityEvent(event);
+                        }
+                    }
+                    event.recycle();
+                } break;
+                case MSG_SEND_KEY_EVENT_TO_INPUT_FILTER: {
+                    KeyEvent event = (KeyEvent) msg.obj;
+                    final int policyFlags = msg.arg1;
+                    synchronized (mLock) {
+                        if (mHasInputFilter && mInputFilter != null) {
+                            mInputFilter.sendInputEvent(event, policyFlags);
                         }
                     }
                     event.recycle();
@@ -1536,6 +1587,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private PendingEvent obtainPendingEventLocked(KeyEvent event, int policyFlags, int sequence) {
+        PendingEvent pendingEvent = mPendingEventPool.acquire();
+        if (pendingEvent == null) {
+            pendingEvent = new PendingEvent();
+        }
+        pendingEvent.event = event;
+        pendingEvent.policyFlags = policyFlags;
+        pendingEvent.sequence = sequence;
+        return pendingEvent;
+    }
+
+    private void recyclePendingEventLocked(PendingEvent pendingEvent) {
+        pendingEvent.clear();
+        mPendingEventPool.release(pendingEvent);
+    }
+
     /**
      * This class represents an accessibility service. It stores all per service
      * data required for the service management, provides API for starting/stopping the
@@ -1545,12 +1612,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * connection for the service.
      */
     class Service extends IAccessibilityServiceConnection.Stub
-            implements ServiceConnection, DeathRecipient {
-
-        // We pick the MSBs to avoid collision since accessibility event types are
-        // used as message types allowing us to remove messages per event type. 
-        private static final int MSG_ON_GESTURE = 0x80000000;
-        private static final int MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE = 0x40000000;
+            implements ServiceConnection, DeathRecipient {;
 
         final int mUserId;
 
@@ -1594,28 +1656,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         final SparseArray<AccessibilityEvent> mPendingEvents =
             new SparseArray<AccessibilityEvent>();
 
-        /**
-         * Handler for delayed event dispatch.
-         */
-        public Handler mHandler = new Handler(mMainHandler.getLooper()) {
+        final KeyEventDispatcher mKeyEventDispatcher = new KeyEventDispatcher();
+
+        // Handler only for dispatching accessibility events since we use event
+        // types as message types allowing us to remove messages per event type.
+        public Handler mEventDispatchHandler = new Handler(mMainHandler.getLooper()) {
             @Override
             public void handleMessage(Message message) {
-                final int type = message.what;
-                switch (type) {
-                    case MSG_ON_GESTURE: {
-                        final int gestureId = message.arg1;
-                        notifyGestureInternal(gestureId);
-                    } break;
-                    case MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE: {
-                        notifyClearAccessibilityNodeInfoCacheInternal();
-                    } break;
-                    default: {
-                        final int eventType = type;
-                        notifyAccessibilityEventInternal(eventType);
-                    } break;
-                }
+                final int eventType =  message.what;
+                notifyAccessibilityEventInternal(eventType);
             }
         };
+
+        // Handler for scheduling method invocations on the main thread.
+        public InvocationHandler mInvocationHandler = new InvocationHandler(
+                mMainHandler.getLooper());
 
         public Service(int userId, ComponentName componentName,
                 AccessibilityServiceInfo accessibilityServiceInfo) {
@@ -1703,6 +1758,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return false;
             }
             UserState userState = getUserStateLocked(mUserId);
+            mKeyEventDispatcher.flush();
             if (!mIsAutomation) {
                 mContext.unbindService(this);
             } else {
@@ -1715,6 +1771,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public boolean canReceiveEventsLocked() {
             return (mEventTypes != 0 && mFeedbackType != 0 && mService != null);
+        }
+
+        @Override
+        public void setOnKeyEventResult(boolean handled, int sequence) {
+            mKeyEventDispatcher.setOnKeyEventResult(handled, sequence);
         }
 
         @Override
@@ -2109,6 +2170,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public void binderDied() {
             synchronized (mLock) {
+                mKeyEventDispatcher.flush();
                 UserState userState = getUserStateLocked(mUserId);
                 // The death recipient is unregistered in removeServiceLocked
                 removeServiceLocked(this, userState);
@@ -2141,12 +2203,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
                 final int what = eventType;
                 if (oldEvent != null) {
-                    mHandler.removeMessages(what);
+                    mEventDispatchHandler.removeMessages(what);
                     oldEvent.recycle();
                 }
 
-                Message message = mHandler.obtainMessage(what);
-                mHandler.sendMessageDelayed(message, mNotificationTimeout);
+                Message message = mEventDispatchHandler.obtainMessage(what);
+                mEventDispatchHandler.sendMessageDelayed(message, mNotificationTimeout);
             }
         }
 
@@ -2211,11 +2273,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public void notifyGesture(int gestureId) {
-            mHandler.obtainMessage(MSG_ON_GESTURE, gestureId, 0).sendToTarget();
+            mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_GESTURE,
+                    gestureId, 0).sendToTarget();
+        }
+
+        public void notifyKeyEvent(KeyEvent event, int policyFlags) {
+            mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_KEY_EVENT,
+                    policyFlags, 0, event).sendToTarget();
         }
 
         public void notifyClearAccessibilityNodeInfoCache() {
-            mHandler.sendEmptyMessage(MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE);
+            mInvocationHandler.sendEmptyMessage(
+                    InvocationHandler.MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE);
         }
 
         private void notifyGestureInternal(int gestureId) {
@@ -2228,6 +2297,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                             + " to " + mService, re);
                 }
             }
+        }
+
+        private void notifyKeyEventInternal(KeyEvent event, int policyFlags) {
+            mKeyEventDispatcher.notifyKeyEvent(event, policyFlags);
         }
 
         private void notifyClearAccessibilityNodeInfoCacheInternal() {
@@ -2338,6 +2411,177 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 /* ignore */
             }
             return null;
+        }
+
+        private final class InvocationHandler extends Handler {
+
+            public static final int MSG_ON_GESTURE = 1;
+            public static final int MSG_ON_KEY_EVENT = 2;
+            public static final int MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE = 3;
+            public static final int MSG_ON_KEY_EVENT_TIMEOUT = 4;
+
+            public InvocationHandler(Looper looper) {
+                super(looper, null, true);
+            }
+
+            @Override
+            public void handleMessage(Message message) {
+                final int type = message.what;
+                switch (type) {
+                    case MSG_ON_GESTURE: {
+                        final int gestureId = message.arg1;
+                        notifyGestureInternal(gestureId);
+                    } break;
+                    case MSG_ON_KEY_EVENT: {
+                        KeyEvent event = (KeyEvent) message.obj;
+                        final int policyFlags = message.arg1;
+                        notifyKeyEventInternal(event, policyFlags);
+                    } break;
+                    case MSG_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE: {
+                        notifyClearAccessibilityNodeInfoCacheInternal();
+                    } break;
+                    case MSG_ON_KEY_EVENT_TIMEOUT: {
+                        PendingEvent eventState = (PendingEvent) message.obj;
+                        setOnKeyEventResult(false, eventState.sequence);
+                    } break;
+                    default: {
+                        throw new IllegalArgumentException("Unknown message: " + type);
+                    }
+                }
+            }
+        }
+
+        private final class KeyEventDispatcher {
+
+            private static final long ON_KEY_EVENT_TIMEOUT_MILLIS = 500;
+
+            private PendingEvent mPendingEvents;
+
+            private final InputEventConsistencyVerifier mSentEventsVerifier =
+                    InputEventConsistencyVerifier.isInstrumentationEnabled()
+                            ? new InputEventConsistencyVerifier(
+                                    this, 0, KeyEventDispatcher.class.getSimpleName()) : null;
+
+            public void notifyKeyEvent(KeyEvent event, int policyFlags) {
+                final PendingEvent pendingEvent;
+
+                synchronized (mLock) {
+                    pendingEvent = addPendingEventLocked(event, policyFlags);
+                }
+
+                Message message = mInvocationHandler.obtainMessage(
+                        InvocationHandler.MSG_ON_KEY_EVENT_TIMEOUT, pendingEvent);
+                mInvocationHandler.sendMessageDelayed(message, ON_KEY_EVENT_TIMEOUT_MILLIS);
+
+                try {
+                    // Accessibility services are exclusively not in the system
+                    // process, therefore no need to clone the motion event to
+                    // prevent tampering. It will be cloned in the IPC call.
+                    mServiceInterface.onKeyEvent(pendingEvent.event, pendingEvent.sequence);
+                } catch (RemoteException re) {
+                    setOnKeyEventResult(false, pendingEvent.sequence);
+                }
+            }
+
+            public void setOnKeyEventResult(boolean handled, int sequence) {
+                synchronized (mLock) {
+                    PendingEvent pendingEvent = removePendingEventLocked(sequence);
+                    if (pendingEvent != null) {
+                        mInvocationHandler.removeMessages(
+                                InvocationHandler.MSG_ON_KEY_EVENT_TIMEOUT,
+                                pendingEvent);
+                        pendingEvent.handled = handled;
+                        finishPendingEventLocked(pendingEvent);
+                    }
+                }
+            }
+
+            public void flush() {
+                synchronized (mLock) {
+                    cancelAllPendingEventsLocked();
+                    mSentEventsVerifier.reset();
+                }
+            }
+
+            private PendingEvent addPendingEventLocked(KeyEvent event, int policyFlags) {
+                final int sequence = event.getSequenceNumber();
+                PendingEvent pendingEvent = obtainPendingEventLocked(event, policyFlags, sequence);
+                pendingEvent.next = mPendingEvents;
+                mPendingEvents = pendingEvent;
+                return pendingEvent;
+            }
+
+            private PendingEvent removePendingEventLocked(int sequence) {
+                PendingEvent previous = null;
+                PendingEvent current = mPendingEvents;
+
+                while (current != null) {
+                    if (current.sequence == sequence) {
+                        if (previous != null) {
+                            previous.next = current.next;
+                        } else {
+                            mPendingEvents = current.next;
+                        }
+                        current.next = null;
+                        return current;
+                    }
+                    previous = current;
+                    current = current.next;
+                }
+                return null;
+            }
+
+            private void finishPendingEventLocked(PendingEvent pendingEvent) {
+                if (!pendingEvent.handled) {
+                    sendKeyEventToInputFilter(pendingEvent.event, pendingEvent.policyFlags);
+                }
+                // Nullify the event since we do not want it to be
+                // recycled yet. It will be sent to the input filter.
+                pendingEvent.event = null;
+                recyclePendingEventLocked(pendingEvent);
+            }
+
+            private void sendKeyEventToInputFilter(KeyEvent event, int policyFlags) {
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Injecting event: " + event);
+                }
+                if (mSentEventsVerifier != null) {
+                    mSentEventsVerifier.onKeyEvent(event, 0);
+                }
+                policyFlags |= WindowManagerPolicy.FLAG_PASS_TO_USER;
+                mMainHandler.obtainMessage(MainHandler.MSG_SEND_KEY_EVENT_TO_INPUT_FILTER,
+                        policyFlags, 0, event).sendToTarget();
+            }
+
+            private void cancelAllPendingEventsLocked() {
+                while (mPendingEvents != null) {
+                    PendingEvent pendingEvent = removePendingEventLocked(mPendingEvents.sequence);
+                    pendingEvent.handled = false;
+                    mInvocationHandler.removeMessages(InvocationHandler.MSG_ON_KEY_EVENT_TIMEOUT,
+                            pendingEvent);
+                    finishPendingEventLocked(pendingEvent);
+                }
+            }
+        }
+    }
+
+    private static final class PendingEvent {
+        PendingEvent next;
+
+        KeyEvent event;
+        int policyFlags;
+        int sequence;
+        boolean handled;
+
+        public void clear() {
+            if (event != null) {
+                event.recycle();
+                event = null;
+            }
+            next = null;
+            policyFlags = 0;
+            sequence = 0;
+            handled = false;
         }
     }
 
