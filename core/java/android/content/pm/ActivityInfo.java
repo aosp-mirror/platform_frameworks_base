@@ -279,6 +279,30 @@ public class ActivityInfo extends ComponentInfo
     public static final int SCREEN_ORIENTATION_FULL_SENSOR = 10;
 
     /**
+     * Constant corresponding to <code>userLandscape</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_USER_LANDSCAPE = 11;
+
+    /**
+     * Constant corresponding to <code>userPortrait</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_USER_PORTRAIT = 12;
+
+    /**
+     * Constant corresponding to <code>fullUser</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_FULL_USER = 13;
+
+    /**
+     * Constant corresponding to <code>locked</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_LOCKED = 14;
+
+    /**
      * The preferred screen orientation this activity would like to run in.
      * From the {@link android.R.attr#screenOrientation} attribute, one of
      * {@link #SCREEN_ORIENTATION_UNSPECIFIED},
@@ -292,7 +316,11 @@ public class ActivityInfo extends ComponentInfo
      * {@link #SCREEN_ORIENTATION_SENSOR_PORTRAIT},
      * {@link #SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
      * {@link #SCREEN_ORIENTATION_REVERSE_PORTRAIT},
-     * {@link #SCREEN_ORIENTATION_FULL_SENSOR}.
+     * {@link #SCREEN_ORIENTATION_FULL_SENSOR},
+     * {@link #SCREEN_ORIENTATION_USER_LANDSCAPE},
+     * {@link #SCREEN_ORIENTATION_USER_PORTRAIT},
+     * {@link #SCREEN_ORIENTATION_FULL_USER},
+     * {@link #SCREEN_ORIENTATION_LOCKED},
      */
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
     
