@@ -69,7 +69,9 @@ public class WebChromeClient {
 
     /**
      * Notify the host application that the current page would
-     * like to show a custom View.
+     * like to show a custom View.  This is used for Fullscreen
+     * video playback; see "HTML5 Video support" documentation on
+     * {@link WebView}.
      * @param view is the View object to be shown.
      * @param callback is the callback to be invoked if and when the view
      * is dismissed.
@@ -84,7 +86,10 @@ public class WebChromeClient {
      * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
      * @param callback is the callback to be invoked if and when the view
      * is dismissed.
+     * @deprecated This method supports the obsolete plugin mechanism,
+     * and will not be invoked in future
      */
+    @Deprecated
     public void onShowCustomView(View view, int requestedOrientation,
             CustomViewCallback callback) {};
     
