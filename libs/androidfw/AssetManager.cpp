@@ -19,6 +19,7 @@
 //
 
 #define LOG_TAG "asset"
+#define ATRACE_TAG ATRACE_TAG_RESOURCES
 //#define LOG_NDEBUG 0
 
 #include <androidfw/Asset.h>
@@ -32,6 +33,7 @@
 #include <utils/threads.h>
 #include <utils/Timers.h>
 #include <utils/ZipFileRO.h>
+#include <cutils/trace.h>
 
 #include <assert.h>
 #include <dirent.h>
@@ -49,6 +51,14 @@
         _rc = (exp);                       \
     } while (_rc == -1 && errno == EINTR); \
     _rc; })
+#endif
+
+#ifdef HAVE_ANDROID_OS
+#define MY_TRACE_BEGIN(x) ATRACE_BEGIN(x)
+#define MY_TRACE_END() ATRACE_END()
+#else
+#define MY_TRACE_BEGIN(x)
+#define MY_TRACE_END()
 #endif
 
 using namespace android;
@@ -638,6 +648,7 @@ const ResTable* AssetManager::getResTable(bool required) const
         ResTable* sharedRes = NULL;
         bool shared = true;
         const asset_path& ap = mAssetPaths.itemAt(i);
+        MY_TRACE_BEGIN(ap.path.string());
         Asset* idmap = openIdmapLocked(ap);
         ALOGV("Looking for resource asset in '%s'\n", ap.path.string());
         if (ap.type != kFileTypeDirectory) {
@@ -702,6 +713,7 @@ const ResTable* AssetManager::getResTable(bool required) const
         if (idmap != NULL) {
             delete idmap;
         }
+        MY_TRACE_END();
     }
 
     if (required && !rt) ALOGW("Unable to find resources file resources.arsc");
