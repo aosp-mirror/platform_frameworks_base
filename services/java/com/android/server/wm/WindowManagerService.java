@@ -16,29 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
-import static android.view.WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.*;
+
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
@@ -4711,7 +4691,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mStackIdToStack.delete(stackId);
             return stack.remove();
         }
-        return -1;
+        return HOME_STACK_ID;
     }
 
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
@@ -7708,8 +7688,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         i -= lastBelow;
         if (i != numRemoved) {
-            Slog.w(TAG, "Rebuild removed " + numRemoved
-                    + " windows but added " + i);
+            Slog.w(TAG, "Rebuild removed " + numRemoved + " windows but added " + i,
+                    new RuntimeException("here").fillInStackTrace());
             for (i=0; i<numRemoved; i++) {
                 WindowState ws = mRebuildTmp[i];
                 if (ws.mRebuilding) {

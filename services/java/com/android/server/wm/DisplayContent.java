@@ -20,6 +20,8 @@ import android.graphics.Rect;
 import android.view.Display;
 import android.view.DisplayInfo;
 
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -191,6 +193,15 @@ class DisplayContent {
             }
         }
         return false;
+    }
+
+    void removeStackBox(StackBox box) {
+        final TaskStack stack = box.mStack;
+        if (stack != null && stack.mStackId == HOME_STACK_ID) {
+            // Never delete the home stack, even if it is empty.
+            return;
+        }
+        mStackBoxes.remove(box);
     }
 
     /**
