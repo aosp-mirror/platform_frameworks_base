@@ -1,5 +1,6 @@
 page.title=Upgrading the SDK
 sdk.version=1.1_r1
+excludeFromSuggestions=true
 @jd:body
 
 <!--
