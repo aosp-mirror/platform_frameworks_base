@@ -215,6 +215,7 @@ public final class MediaDrm {
 
     public static final int MEDIA_DRM_KEY_TYPE_STREAMING = 1;
     public static final int MEDIA_DRM_KEY_TYPE_OFFLINE = 2;
+    public static final int MEDIA_DRM_KEY_TYPE_RELEASE = 3;
 
     public final class KeyRequest {
         public KeyRequest() {}
@@ -223,28 +224,36 @@ public final class MediaDrm {
     };
 
     /**
-     * A key request/response exchange occurs between the app and a license
-     * server to obtain the keys to decrypt encrypted content.  getKeyRequest()
-     * is used to obtain an opaque key request byte array that is delivered to the
-     * license server.  The opaque key request byte array is returned in
-     * KeyRequest.data.  The recommended URL to deliver the key request to is
+     * A key request/response exchange occurs between the app and a license server
+     * to obtain or release keys used to decrypt encrypted content.
+     * getKeyRequest() is used to obtain an opaque key request byte array that is
+     * delivered to the license server.  The opaque key request byte array is returned
+     * in KeyRequest.data.  The recommended URL to deliver the key request to is
      * returned in KeyRequest.defaultUrl.
      *
      * After the app has received the key request response from the server,
      * it should deliver to the response to the DRM engine plugin using the method
      * {@link #provideKeyResponse}.
      *
-     * @param sessonId the session ID for the drm session
+     * @param scope may be a sessionId or a keySetId, depending on the specified keyType.
+     * When the keyType is MEDIA_DRM_KEY_TYPE_STREAMING or MEDIA_DRM_KEY_TYPE_OFFLINE,
+     * scope should be set to the sessionId the keys will be provided to.  When the keyType
+     * is MEDIA_DRM_KEY_TYPE_RELEASE, scope should be set to the keySetId of the keys
+     * being released. Releasing keys from a device invalidates them for all sessions.
      * @param init container-specific data, its meaning is interpreted based on the
      * mime type provided in the mimeType parameter.  It could contain, for example,
      * the content ID, key ID or other data obtained from the content metadata that is
-     * required in generating the key request.
+     * required in generating the key request. init may be null when keyType is
+     * MEDIA_DRM_KEY_TYPE_RELEASE.
      * @param mimeType identifies the mime type of the content
-     * @param keyType specifes if the request is for streaming or offline content
+     * @param keyType specifes the type of the request. The request may be to acquire
+     * keys for streaming or offline content, or to release previously acquired
+     * keys, which are identified by a keySetId.
+
      * @param optionalParameters are included in the key request message to
      * allow a client application to provide additional message parameters to the server.
      */
-    public native KeyRequest getKeyRequest(byte[] sessionId, byte[] init,
+    public native KeyRequest getKeyRequest(byte[] scope, byte[] init,
                                            String mimeType, int keyType,
                                            HashMap<String, String> optionalParameters)
         throws MediaDrmException;
@@ -272,13 +281,11 @@ public final class MediaDrm {
         throws MediaDrmException;
 
     /**
-     * Remove the persisted keys associated with an offline license.  Keys are persisted
-     * when {@link provideKeyResponse} is called with keys obtained from the method
-     * {@link getKeyRequest} using keyType = MEDIA_DRM_KEY_TYPE_OFFLINE.
+     * Remove the current keys from a session.
      *
-     * @param keySetId identifies the saved key set to remove
+     * @param sessionId the session ID for the DRM session
      */
-    public native void removeKeys(byte[] keySetId) throws MediaDrmException;
+    public native void removeKeys(byte[] sessionId) throws MediaDrmException;
 
     /**
      * Request an informative description of the key status for the session.  The status is
