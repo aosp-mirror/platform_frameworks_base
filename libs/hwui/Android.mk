@@ -30,6 +30,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		PatchCache.cpp \
 		PathCache.cpp \
 		PathTessellator.cpp \
+		PixelBuffer.cpp \
 		Program.cpp \
 		ProgramCache.cpp \
 		RenderBufferCache.cpp \
