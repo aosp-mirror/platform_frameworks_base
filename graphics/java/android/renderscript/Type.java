@@ -112,7 +112,7 @@ public class Type extends BaseObj {
     /**
      * Get the YUV format
      *
-     * @hide
+     *
      * @return int
      */
     public int getYuv() {
@@ -277,7 +277,9 @@ public class Type extends BaseObj {
         }
 
         /**
-         * @hide
+         * Set the YUV layout for a Type.  This controls how the memory is
+         * interpreted.  Generally and application should not need to call this
+         * function and it would be set by the Camera.
          *
          * only NV21, YV12.  Enums from ImageFormat
          */
