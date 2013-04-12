@@ -4591,6 +4591,23 @@ public class WindowManagerService extends IWindowManager.Stub
         return index;
     }
 
+    private void moveHomeTasksLocked(boolean toTop) {
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        if (toTop ^ displayContent.homeOnTop()) {
+            final ArrayList<Task> tasks = displayContent.getHomeStack().getTasks();
+            final int numTasks = tasks.size();
+            for (int i = 0; i < numTasks; ++i) {
+                if (toTop) {
+                    // Keep pulling the bottom task off and moving it to the top.
+                    moveTaskToTop(tasks.get(0).taskId);
+                } else {
+                    // Keep pulling the top task off and moving it to the bottom.
+                    moveTaskToBottom(tasks.get(numTasks - 1).taskId);
+                }
+            }
+        }
+    }
+
     private void moveTaskWindowsLocked(Task task) {
         DisplayContent displayContent = task.getDisplayContent();
 
@@ -4637,7 +4654,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.e(TAG, "moveTaskToTop: taskId=" + taskId + " not found in mTaskIdToTask");
                     return;
                 }
-                task.mStack.moveTaskToTop(task);
+                final TaskStack stack = task.mStack;
+                final DisplayContent displayContent = task.getDisplayContent();
+                final boolean isHomeStackTask = stack.isHomeStack();
+                final boolean homeIsOnTop = displayContent.homeOnTop();
+                if (!isHomeStackTask && homeIsOnTop) {
+                    // First move move the home tasks all to the bottom to rearrange the windows.
+                    moveHomeTasksLocked(false);
+                    // Now move the stack itself.
+                    displayContent.moveHomeStackBox(false);
+                } else if (isHomeStackTask && !homeIsOnTop) {
+                    // Move the stack to the top.
+                    displayContent.moveHomeStackBox(true);
+                }
+                stack.moveTaskToTop(task);
                 moveTaskWindowsLocked(task);
             }
         } finally {
