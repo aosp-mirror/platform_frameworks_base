@@ -1732,7 +1732,7 @@ public class Allocation extends BaseObj {
     /**
      * Set a notification handler for USAGE_IO_INPUT
      *
-     * @param instance of the IoInputNotifier class to be called
+     * @param callback instance of the IoInputNotifier class to be called
      *                 when buffer arrive.
      */
     public void setIoInputNotificationHandler(IoInputNotifier callback) {
