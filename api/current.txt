@@ -27638,7 +27638,7 @@ package android.webkit {
     method public void onReceivedTouchIconUrl(android.webkit.WebView, java.lang.String, boolean);
     method public void onRequestFocus(android.webkit.WebView);
     method public void onShowCustomView(android.view.View, android.webkit.WebChromeClient.CustomViewCallback);
-    method public void onShowCustomView(android.view.View, int, android.webkit.WebChromeClient.CustomViewCallback);
+    method public deprecated void onShowCustomView(android.view.View, int, android.webkit.WebChromeClient.CustomViewCallback);
   }
 
   public static abstract interface WebChromeClient.CustomViewCallback {
