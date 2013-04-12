@@ -27,6 +27,18 @@
 
 namespace android {
 
+static void sanitizeString(String8& utf8Chars) {
+    size_t size = utf8Chars.size();
+    char* str = utf8Chars.lockBuffer(size);
+    for (size_t i = 0; i < size; i++) {
+        char c = str[i];
+        if (c == '\0' || c == '\n' || c == '|') {
+            str[i] = ' ';
+        }
+    }
+    utf8Chars.unlockBuffer();
+}
+
 static jlong android_os_Trace_nativeGetEnabledTags(JNIEnv* env, jclass clazz) {
     return atrace_get_enabled_tags();
 }
@@ -41,23 +53,32 @@ static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr) {
     const size_t MAX_SECTION_NAME_LEN = 127;
     ScopedStringChars jchars(env, nameStr);
-    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()),
-            jchars.size());
-    size_t size = utf8Chars.size();
-    char* str = utf8Chars.lockBuffer(size);
-    for (size_t i = 0; i < size; i++) {
-        char c = str[i];
-        if (c == '\0' || c == '\n' || c == '|') {
-            str[i] = ' ';
-        }
-    }
-    utf8Chars.unlockBuffer();
+    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
+    sanitizeString(utf8Chars);
     atrace_begin(tag, utf8Chars.string());
 }
 
 static void android_os_Trace_nativeTraceEnd(JNIEnv* env, jclass clazz,
         jlong tag) {
     atrace_end(tag);
+}
+
+static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass clazz,
+        jlong tag, jstring nameStr, jint cookie) {
+    const size_t MAX_SECTION_NAME_LEN = 127;
+    ScopedStringChars jchars(env, nameStr);
+    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
+    sanitizeString(utf8Chars);
+    atrace_async_begin(tag, utf8Chars.string(), cookie);
+}
+
+static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass clazz,
+        jlong tag, jstring nameStr, jint cookie) {
+    const size_t MAX_SECTION_NAME_LEN = 127;
+    ScopedStringChars jchars(env, nameStr);
+    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
+    sanitizeString(utf8Chars);
+    atrace_async_end(tag, utf8Chars.string(), cookie);
 }
 
 static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv* env,
@@ -79,6 +100,12 @@ static JNINativeMethod gTraceMethods[] = {
     { "nativeTraceEnd",
             "(J)V",
             (void*)android_os_Trace_nativeTraceEnd },
+    { "nativeAsyncTraceBegin",
+            "(JLjava/lang/String;I)V",
+            (void*)android_os_Trace_nativeAsyncTraceBegin },
+    { "nativeAsyncTraceEnd",
+            "(JLjava/lang/String;I)V",
+            (void*)android_os_Trace_nativeAsyncTraceEnd },
     { "nativeSetAppTracingAllowed",
             "(Z)V",
             (void*)android_os_Trace_nativeSetAppTracingAllowed },
