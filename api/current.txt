@@ -2306,22 +2306,28 @@ package android.accounts {
 
 package android.animation {
 
-  public abstract class Animator implements java.lang.Cloneable {
+  public abstract interface Animatable {
+    method public abstract long getDuration();
+    method public abstract android.animation.TimeInterpolator getInterpolator();
+    method public abstract long getStartDelay();
+    method public abstract android.animation.Animatable setDuration(long);
+    method public abstract void setInterpolator(android.animation.TimeInterpolator);
+    method public abstract void setStartDelay(long);
+  }
+
+  public abstract class Animator implements android.animation.Animatable java.lang.Cloneable {
     ctor public Animator();
     method public void addListener(android.animation.Animator.AnimatorListener);
     method public void cancel();
     method public android.animation.Animator clone();
     method public void end();
-    method public abstract long getDuration();
+    method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
-    method public abstract long getStartDelay();
     method public abstract boolean isRunning();
     method public boolean isStarted();
     method public void removeAllListeners();
     method public void removeListener(android.animation.Animator.AnimatorListener);
     method public abstract android.animation.Animator setDuration(long);
-    method public abstract void setInterpolator(android.animation.TimeInterpolator);
-    method public abstract void setStartDelay(long);
     method public void setTarget(java.lang.Object);
     method public void setupEndValues();
     method public void setupStartValues();
@@ -2512,7 +2518,6 @@ package android.animation {
     method public long getCurrentPlayTime();
     method public long getDuration();
     method public static long getFrameDelay();
-    method public android.animation.TimeInterpolator getInterpolator();
     method public int getRepeatCount();
     method public int getRepeatMode();
     method public long getStartDelay();
@@ -25338,6 +25343,7 @@ package android.view {
     method protected float getBottomFadingEdgeStrength();
     method protected int getBottomPaddingOffset();
     method public float getCameraDistance();
+    method public android.graphics.Rect getClipBounds();
     method public java.lang.CharSequence getContentDescription();
     method public final android.content.Context getContext();
     method protected android.view.ContextMenu.ContextMenuInfo getContextMenuInfo();
@@ -25592,6 +25598,7 @@ package android.view {
     method public final void setBottom(int);
     method public void setCameraDistance(float);
     method public void setClickable(boolean);
+    method public void setClipBounds(android.graphics.Rect);
     method public void setContentDescription(java.lang.CharSequence);
     method public void setDrawingCacheBackgroundColor(int);
     method public void setDrawingCacheEnabled(boolean);
@@ -26017,6 +26024,7 @@ package android.view {
     method public static int getChildMeasureSpec(int, int, int);
     method protected boolean getChildStaticTransformation(android.view.View, android.view.animation.Transformation);
     method public boolean getChildVisibleRect(android.view.View, android.graphics.Rect, android.graphics.Point);
+    method public boolean getClipChildren();
     method public int getDescendantFocusability();
     method public android.view.View getFocusedChild();
     method public android.view.animation.LayoutAnimationController getLayoutAnimation();
@@ -26178,6 +26186,7 @@ package android.view {
     method public android.view.ViewPropertyAnimator alphaBy(float);
     method public void cancel();
     method public long getDuration();
+    method public android.animation.TimeInterpolator getInterpolator();
     method public long getStartDelay();
     method public android.view.ViewPropertyAnimator rotation(float);
     method public android.view.ViewPropertyAnimator rotationBy(float);

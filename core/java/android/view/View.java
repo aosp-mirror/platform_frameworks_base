@@ -2758,6 +2758,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     TransformationInfo mTransformationInfo;
 
+    /**
+     * Current clip bounds. to which all drawing of this view are constrained.
+     */
+    private Rect mClipBounds = null;
+
     private boolean mLastIsOpaque;
 
     /**
@@ -10103,7 +10108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Offset this view's horizontal location by the specified amount of pixels.
      *
-     * @param offset the numer of pixels to offset the view by
+     * @param offset the number of pixels to offset the view by
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
@@ -13377,6 +13382,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets a rectangular area on this view to which the view will be clipped
+     * it is drawn. Setting the value to null will remove the clip bounds
+     * and the view will draw normally, using its full bounds.
+     *
+     * @param clipBounds The rectangular area, in the local coordinates of
+     * this view, to which future drawing operations will be clipped.
+     */
+    public void setClipBounds(Rect clipBounds) {
+        mClipBounds = clipBounds;
+        if (clipBounds != null) {
+            invalidate(clipBounds);
+        } else {
+            invalidate();
+        }
+    }
+
+    /**
+     * Returns a copy of the current {@link #setClipBounds(Rect) clipBounds}.
+     *
+     * @return A copy of the current clip bounds if clip bounds are set,
+     * otherwise null.
+     */
+    public Rect getClipBounds() {
+        return (mClipBounds != null) ? new Rect(mClipBounds) : null;
+    }
+
+    /**
      * Utility function, called by draw(canvas, parent, drawingTime) to handle the less common
      * case of an active Animation being run on the view.
      */
@@ -13852,6 +13884,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param canvas The Canvas to which the View is rendered.
      */
     public void draw(Canvas canvas) {
+        if (mClipBounds != null) {
+            canvas.clipRect(mClipBounds);
+        }
         final int privateFlags = mPrivateFlags;
         final boolean dirtyOpaque = (privateFlags & PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &&
                 (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
