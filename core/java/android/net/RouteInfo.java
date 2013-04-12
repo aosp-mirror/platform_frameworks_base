@@ -60,6 +60,7 @@ public class RouteInfo implements Parcelable {
 
     private final boolean mIsDefault;
     private final boolean mIsHost;
+    private final boolean mHasGateway;
 
     /**
      * Constructs a RouteInfo object.
@@ -97,6 +98,8 @@ public class RouteInfo implements Parcelable {
                 gateway = Inet6Address.ANY;
             }
         }
+        mHasGateway = (!gateway.isAnyLocalAddress());
+
         mDestination = new LinkAddress(NetworkUtils.getNetworkPart(destination.getAddress(),
                 destination.getNetworkPrefixLength()), destination.getNetworkPrefixLength());
         mGateway = gateway;
@@ -169,6 +172,10 @@ public class RouteInfo implements Parcelable {
 
     public boolean isHostRoute() {
         return mIsHost;
+    }
+
+    public boolean hasGateway() {
+        return mHasGateway;
     }
 
     public String toString() {
