@@ -654,7 +654,7 @@ public abstract class LayoutInflater {
 
     /**
      * Version of {@link #onCreateView(String, AttributeSet)} that also
-     * takes the future parent of the view being constructure.  The default
+     * takes the future parent of the view being constructed.  The default
      * implementation simply calls {@link #onCreateView(String, AttributeSet)}.
      *
      * @param parent The future parent of the returned view.  <em>Note that

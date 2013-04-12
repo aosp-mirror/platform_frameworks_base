@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.animation.Animatable;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.animation.TimeInterpolator;
@@ -320,6 +321,15 @@ public class ViewPropertyAnimator {
         mInterpolatorSet = true;
         mInterpolator = interpolator;
         return this;
+    }
+
+    /**
+     * Returns the timing interpolator that this animation uses.
+     *
+     * @return The timing interpolator for this animation.
+     */
+    public TimeInterpolator getInterpolator() {
+        return null;
     }
 
     /**
