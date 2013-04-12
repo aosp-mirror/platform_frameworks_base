@@ -5944,6 +5944,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         Layout.Alignment alignment = getLayoutAlignment();
+        final boolean testDirChange = mSingleLine && mLayout != null &&
+            (alignment == Layout.Alignment.ALIGN_NORMAL ||
+             alignment == Layout.Alignment.ALIGN_OPPOSITE);
+        int oldDir = 0;
+        if (testDirChange) oldDir = mLayout.getParagraphDirection(0);
         boolean shouldEllipsize = mEllipsize != null && getKeyListener() == null;
         final boolean switchEllipsize = mEllipsize == TruncateAt.MARQUEE &&
                 mMarqueeFadeMode != MARQUEE_FADE_NORMAL;
@@ -6032,7 +6037,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (bringIntoView) {
+        if (bringIntoView || (testDirChange && oldDir != mLayout.getParagraphDirection(0))) {
             registerForPreDraw();
         }
 
