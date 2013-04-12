@@ -18,6 +18,7 @@ package android.renderscript;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import android.content.res.Resources;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -92,6 +93,9 @@ public class Allocation extends BaseObj {
     int mCurrentDimY;
     int mCurrentDimZ;
     int mCurrentCount;
+    static HashMap<Integer, Allocation> mAllocationMap =
+            new HashMap<Integer, Allocation>();
+    IoInputNotifier mBufferNotifier;
 
 
     /**
@@ -1713,6 +1717,41 @@ public class Allocation extends BaseObj {
             throw new RSRuntimeException("Could not convert string to utf-8.");
         }
     }
+
+    /**
+     * Interface to handle notification when new buffers are
+     * available via USAGE_IO_INPUT.  An application will receive
+     * one notification when a buffer is available.  Additional
+     * buffers will not trigger new notifications until a buffer is
+     * processed.
+     */
+    public interface IoInputNotifier {
+        public void onBufferAvailable(Allocation a);
+    }
+
+    /**
+     * Set a notification handler for USAGE_IO_INPUT
+     *
+     * @param instance of the IoInputNotifier class to be called
+     *                 when buffer arrive.
+     */
+    public void setIoInputNotificationHandler(IoInputNotifier callback) {
+        synchronized(mAllocationMap) {
+            mAllocationMap.put(new Integer(getID(mRS)), this);
+            mBufferNotifier = callback;
+        }
+    }
+
+    static void sendBufferNotification(int id) {
+        synchronized(mAllocationMap) {
+            Allocation a = mAllocationMap.get(new Integer(id));
+
+            if ((a != null) && (a.mBufferNotifier != null)) {
+                a.mBufferNotifier.onBufferAvailable(a);
+            }
+        }
+    }
+
 }
 
 
