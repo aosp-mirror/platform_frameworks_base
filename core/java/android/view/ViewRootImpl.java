@@ -1727,7 +1727,7 @@ public final class ViewRootImpl implements ViewParent,
         if (didLayout) {
             performLayout(lp, desiredWindowWidth, desiredWindowHeight);
 
-            // By this point all views have been sized and positionned
+            // By this point all views have been sized and positioned
             // We can compute the transparent area
 
             if ((host.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) != 0) {
@@ -1745,6 +1745,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 if (!mTransparentRegion.equals(mPreviousTransparentRegion)) {
                     mPreviousTransparentRegion.set(mTransparentRegion);
+                    mFullRedrawNeeded = true;
                     // reconfigure window manager
                     try {
                         mWindowSession.setTransparentRegion(mWindow, mTransparentRegion);
@@ -4922,7 +4923,7 @@ public final class ViewRootImpl implements ViewParent,
     public void handleDispatchDoneAnimating() {
         if (mWindowsAnimating) {
             mWindowsAnimating = false;
-            if (!mDirty.isEmpty() || mIsAnimating)  {
+            if (!mDirty.isEmpty() || mIsAnimating || mFullRedrawNeeded)  {
                 scheduleTraversals();
             }
         }
