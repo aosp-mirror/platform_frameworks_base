@@ -3357,9 +3357,13 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             switch (message.what) {
                 case WifiMonitor.WPS_SUCCESS_EVENT:
+                    // Ignore intermediate success, wait for full connection
+                    break;
+                case WifiMonitor.NETWORK_CONNECTION_EVENT:
                     replyToMessage(mSourceMessage, WifiManager.WPS_COMPLETED);
                     mSourceMessage.recycle();
                     mSourceMessage = null;
+                    deferMessage(message);
                     transitionTo(mDisconnectedState);
                     break;
                 case WifiMonitor.WPS_OVERLAP_EVENT:
@@ -3403,7 +3407,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ENABLE_NETWORK:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
-                case WifiMonitor.NETWORK_CONNECTION_EVENT: /* Handled after exiting WPS state */
                     deferMessage(message);
                     break;
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
