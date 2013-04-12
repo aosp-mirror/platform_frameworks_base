@@ -25,6 +25,10 @@
  * the OpenGLRenderer.
  */
 
+///////////////////////////////////////////////////////////////////////////////
+// Compile-time properties
+///////////////////////////////////////////////////////////////////////////////
+
 // If turned on, text is interpreted as glyphs instead of UTF-16
 #define RENDER_TEXT_AS_GLYPHS 1
 
@@ -38,6 +42,10 @@
 // Note: Only 1 bit is required for clipping but more bits are required
 // to properly implement overdraw debugging
 #define STENCIL_BUFFER_SIZE 8
+
+///////////////////////////////////////////////////////////////////////////////
+// Debug properties
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Debug level for app developers. The value is a numeric value defined
@@ -82,6 +90,23 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_STENCIL_CLIP "debug.hwui.show_non_rect_clip"
 
 /**
+ * Disables draw operation deferral if set to "true", forcing draw
+ * commands to be issued to OpenGL in order, and processed in sequence
+ * with state-manipulation canvas commands.
+ */
+#define PROPERTY_DISABLE_DRAW_DEFER "debug.hwui.disable_draw_defer"
+
+/**
+ * Used to disable draw operation reordering when deferring draw operations
+ * Has no effect if PROPERTY_DISABLE_DRAW_DEFER is set to "true"
+ */
+#define PROPERTY_DISABLE_DRAW_REORDER "debug.hwui.disable_draw_reorder"
+
+///////////////////////////////////////////////////////////////////////////////
+// Runtime configuration properties
+///////////////////////////////////////////////////////////////////////////////
+
+/**
  * Used to enable/disable scissor optimization. The accepted values are
  * "true" and "false". The default value is "false".
  *
@@ -97,17 +122,10 @@ enum DebugLevel {
 #define PROPERTY_DISABLE_SCISSOR_OPTIMIZATION "ro.hwui.disable_scissor_opt"
 
 /**
- * Disables draw operation deferral if set to "true", forcing draw
- * commands to be issued to OpenGL in order, and processed in sequence
- * with state-manipulation canvas commands.
+ * Indicates whether PBOs can be used to back pixel buffers.
+ * Accepted values are "true" and "false".
  */
-#define PROPERTY_DISABLE_DRAW_DEFER "debug.hwui.disable_draw_defer"
-
-/**
- * Used to disable draw operation reordering when deferring draw operations
- * Has no effect if PROPERTY_DISABLE_DRAW_DEFER is set to "true"
- */
-#define PROPERTY_DISABLE_DRAW_REORDER "debug.hwui.disable_draw_reorder"
+#define PROPERTY_ENABLE_GPU_PIXEL_BUFFERS "hwui.use_gpu_pixel_buffers"
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
@@ -152,8 +170,9 @@ enum DebugLevel {
 // Lumincance threshold above which white gamma correction is applied. Range: [0..255]
 #define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "hwui.text_gamma.white_threshold"
 
-// Converts a number of mega-bytes into bytes
-#define MB(s) s * 1024 * 1024
+///////////////////////////////////////////////////////////////////////////////
+// Default property values
+///////////////////////////////////////////////////////////////////////////////
 
 #define DEFAULT_TEXTURE_CACHE_SIZE 24.0f
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
@@ -169,6 +188,13 @@ enum DebugLevel {
 #define DEFAULT_TEXT_GAMMA 1.4f
 #define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
 #define DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD 192
+
+///////////////////////////////////////////////////////////////////////////////
+// Misc
+///////////////////////////////////////////////////////////////////////////////
+
+// Converts a number of mega-bytes into bytes
+#define MB(s) s * 1024 * 1024
 
 static DebugLevel readDebugLevel() {
     char property[PROPERTY_VALUE_MAX];

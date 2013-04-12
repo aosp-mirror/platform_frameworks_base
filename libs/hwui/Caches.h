@@ -176,6 +176,16 @@ public:
     bool unbindIndicesBuffer();
 
     /**
+     * Binds the specified buffer as the current GL unpack pixel buffer.
+     */
+    bool bindPixelBuffer(const GLuint buffer);
+
+    /**
+     * Resets the current unpack pixel buffer to 0 (default value.)
+     */
+    bool unbindPixelBuffer();
+
+    /**
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gMeshStride and a size of 2.
      */
@@ -307,6 +317,7 @@ private:
 
     GLuint mCurrentBuffer;
     GLuint mCurrentIndicesBuffer;
+    GLuint mCurrentPixelBuffer;
     void* mCurrentPositionPointer;
     GLsizei mCurrentPositionStride;
     void* mCurrentTexCoordsPointer;
