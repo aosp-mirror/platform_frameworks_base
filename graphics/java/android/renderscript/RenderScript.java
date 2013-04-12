@@ -966,6 +966,7 @@ public class RenderScript {
         static final int RS_MESSAGE_TO_CLIENT_RESIZE = 2;
         static final int RS_MESSAGE_TO_CLIENT_ERROR = 3;
         static final int RS_MESSAGE_TO_CLIENT_USER = 4;
+        static final int RS_MESSAGE_TO_CLIENT_NEW_BUFFER = 5;
 
         static final int RS_ERROR_FATAL_UNKNOWN = 0x1000;
 
@@ -1022,6 +1023,11 @@ public class RenderScript {
                         // Do not throw here. In these cases, we do not have
                         // a fatal error.
                     }
+                    continue;
+                }
+
+                if (msg == RS_MESSAGE_TO_CLIENT_NEW_BUFFER) {
+                    Allocation.sendBufferNotification(subID);
                     continue;
                 }
 
