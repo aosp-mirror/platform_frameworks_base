@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -348,6 +349,7 @@ public abstract class AccessibilityService extends Service {
         public void onServiceConnected();
         public void onSetConnectionId(int connectionId);
         public boolean onGesture(int gestureId);
+        public boolean onKeyEvent(KeyEvent event);
     }
 
     private int mConnectionId;
@@ -409,6 +411,32 @@ public abstract class AccessibilityService extends Service {
      * @see #GESTURE_SWIPE_RIGHT_AND_DOWN
      */
     protected boolean onGesture(int gestureId) {
+        return false;
+    }
+
+    /**
+     * Callback that allows an accessibility service to observe the key events
+     * before they are passed to the rest of the system. This means that the events
+     * are first delivered here before they are passed to the device policy, the
+     * input method, or applications.
+     * <p>
+     * <strong>Note:</strong> It is important that key events are handled in such
+     * a way that the event stream that would be passed to the rest of the system
+     * is well-formed. For example, handling the down event but not the up event
+     * and vice versa would generate an inconsistent event stream.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> The key events delivered in this method are copies
+     * and modifying them will have no effect on the events that will be passed
+     * to the system. This method is intended to perform purely filtering
+     * functionality.
+     * <p>
+     *
+     * @param event The event to be processed.
+     * @return If true then the event will be consumed and not delivered to
+     *         applications, otherwise it will be delivered as usual.
+     */
+    protected boolean onKeyEvent(KeyEvent event) {
         return false;
     }
 
@@ -535,6 +563,11 @@ public abstract class AccessibilityService extends Service {
             public boolean onGesture(int gestureId) {
                 return AccessibilityService.this.onGesture(gestureId);
             }
+
+            @Override
+            public boolean onKeyEvent(KeyEvent event) {
+                return AccessibilityService.this.onKeyEvent(event);
+            }
         });
     }
 
@@ -554,10 +587,13 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_ON_ACCESSIBILITY_EVENT = 30;
         private static final int DO_ON_GESTURE = 40;
         private static final int DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE = 50;
+        private static final int DO_ON_KEY_EVENT = 60;
 
         private final HandlerCaller mCaller;
 
         private final Callbacks mCallback;
+
+        private int mConnectionId;
 
         public IAccessibilityServiceClientWrapper(Context context, Looper looper,
                 Callbacks callback) {
@@ -591,41 +627,65 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
+        @Override
+        public void onKeyEvent(KeyEvent event, int sequence) {
+            Message message = mCaller.obtainMessageIO(DO_ON_KEY_EVENT, sequence, event);
+            mCaller.sendMessage(message);
+        }
+
         public void executeMessage(Message message) {
             switch (message.what) {
-                case DO_ON_ACCESSIBILITY_EVENT :
+                case DO_ON_ACCESSIBILITY_EVENT: {
                     AccessibilityEvent event = (AccessibilityEvent) message.obj;
                     if (event != null) {
                         AccessibilityInteractionClient.getInstance().onAccessibilityEvent(event);
                         mCallback.onAccessibilityEvent(event);
                         event.recycle();
                     }
-                    return;
-                case DO_ON_INTERRUPT :
+                } return;
+                case DO_ON_INTERRUPT: {
                     mCallback.onInterrupt();
-                    return;
-                case DO_SET_SET_CONNECTION :
-                    final int connectionId = message.arg1;
+                } return;
+                case DO_SET_SET_CONNECTION: {
+                    mConnectionId = message.arg1;
                     IAccessibilityServiceConnection connection =
                         (IAccessibilityServiceConnection) message.obj;
                     if (connection != null) {
-                        AccessibilityInteractionClient.getInstance().addConnection(connectionId,
+                        AccessibilityInteractionClient.getInstance().addConnection(mConnectionId,
                                 connection);
-                        mCallback.onSetConnectionId(connectionId);
+                        mCallback.onSetConnectionId(mConnectionId);
                         mCallback.onServiceConnected();
                     } else {
-                        AccessibilityInteractionClient.getInstance().removeConnection(connectionId);
+                        AccessibilityInteractionClient.getInstance().removeConnection(mConnectionId);
                         AccessibilityInteractionClient.getInstance().clearCache();
                         mCallback.onSetConnectionId(AccessibilityInteractionClient.NO_ID);
                     }
-                    return;
-                case DO_ON_GESTURE :
+                } return;
+                case DO_ON_GESTURE: {
                     final int gestureId = message.arg1;
                     mCallback.onGesture(gestureId);
-                    return;
-                case DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE:
+                } return;
+                case DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE: {
                     AccessibilityInteractionClient.getInstance().clearCache();
-                    return;
+                } return;
+                case DO_ON_KEY_EVENT: {
+                    KeyEvent event = (KeyEvent) message.obj;
+                    try {
+                        IAccessibilityServiceConnection connection = AccessibilityInteractionClient
+                                .getInstance().getConnection(mConnectionId);
+                        if (connection != null) {
+                            final boolean result = mCallback.onKeyEvent(event);
+                            final int sequence = message.arg1;
+                            try {
+                                connection.setOnKeyEventResult(result, sequence);
+                            } catch (RemoteException re) {
+                                /* ignore */
+                            }
+                        }
+                    } finally {
+                        event.recycle();
+                    }
+                } return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
             }

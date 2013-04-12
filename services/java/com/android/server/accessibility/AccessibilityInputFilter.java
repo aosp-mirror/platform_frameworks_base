@@ -25,6 +25,7 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputFilter;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
@@ -80,7 +81,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private final Choreographer mChoreographer;
 
-    private int mCurrentDeviceId;
+    private int mCurrentTouchDeviceId;
 
     private boolean mInstalled;
 
@@ -97,6 +98,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private boolean mMotionEventSequenceStarted;
 
     private boolean mHoverEventSequenceStarted;
+
+    private boolean mKeyEventSequenceStarted;
 
     AccessibilityInputFilter(Context context, AccessibilityManagerService service) {
         super(context.getMainLooper());
@@ -133,11 +136,21 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             Slog.d(TAG, "Received event: " + event + ", policyFlags=0x" 
                     + Integer.toHexString(policyFlags));
         }
-        if (mEventHandler == null) {
+        if (event instanceof MotionEvent
+                && event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
+            MotionEvent motionEvent = (MotionEvent) event;
+            onMotionEvent(motionEvent, policyFlags);
+        } else if (event instanceof KeyEvent
+                && event.isFromSource(InputDevice.SOURCE_KEYBOARD)) {
+            KeyEvent keyEvent = (KeyEvent) event;
+            onKeyEvent(keyEvent, policyFlags);
+        } else {
             super.onInputEvent(event, policyFlags);
-            return;
         }
-        if (event.getSource() != InputDevice.SOURCE_TOUCHSCREEN) {
+    }
+
+    private void onMotionEvent(MotionEvent event, int policyFlags) {
+        if (mEventHandler == null) {
             super.onInputEvent(event, policyFlags);
             return;
         }
@@ -149,26 +162,25 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             return;
         }
         final int deviceId = event.getDeviceId();
-        if (mCurrentDeviceId != deviceId) {
+        if (mCurrentTouchDeviceId != deviceId) {
+            mCurrentTouchDeviceId = deviceId;
             mMotionEventSequenceStarted = false;
             mHoverEventSequenceStarted = false;
             mEventHandler.clear();
-            mCurrentDeviceId = deviceId;
         }
-        if (mCurrentDeviceId < 0) {
+        if (mCurrentTouchDeviceId < 0) {
             super.onInputEvent(event, policyFlags);
             return;
         }
         // We do not handle scroll events.
-        MotionEvent motionEvent = (MotionEvent) event;
-        if (motionEvent.getActionMasked() == MotionEvent.ACTION_SCROLL) {
+        if (event.getActionMasked() == MotionEvent.ACTION_SCROLL) {
             super.onInputEvent(event, policyFlags);
             return;
         }
         // Wait for a down touch event to start processing.
-        if (motionEvent.isTouchEvent()) {
+        if (event.isTouchEvent()) {
             if (!mMotionEventSequenceStarted) {
-                if (motionEvent.getActionMasked() != MotionEvent.ACTION_DOWN) {
+                if (event.getActionMasked() != MotionEvent.ACTION_DOWN) {
                     return;
                 }
                 mMotionEventSequenceStarted = true;
@@ -176,13 +188,29 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         } else {
             // Wait for an enter hover event to start processing.
             if (!mHoverEventSequenceStarted) {
-                if (motionEvent.getActionMasked() != MotionEvent.ACTION_HOVER_ENTER) {
+                if (event.getActionMasked() != MotionEvent.ACTION_HOVER_ENTER) {
                     return;
                 }
                 mHoverEventSequenceStarted = true;
             }
         }
         batchMotionEvent((MotionEvent) event, policyFlags);
+    }
+
+    private void onKeyEvent(KeyEvent event, int policyFlags) {
+        if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
+            mKeyEventSequenceStarted = false;
+            super.onInputEvent(event, policyFlags);
+            return;
+        }
+        // Wait for a down key event to start processing.
+        if (!mKeyEventSequenceStarted) {
+            if (event.getAction() != KeyEvent.ACTION_DOWN) {
+                return;
+            }
+            mKeyEventSequenceStarted = true;
+        }
+        mAms.notifyKeyEvent(event, policyFlags);
     }
 
     private void scheduleProcessBatchedEvents() {
@@ -284,6 +312,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         if (mEventHandler != null) {
             mEventHandler.onAccessibilityEvent(event);
         }
+    }
+
+    void reset() {
+        setEnabledFeatures(0);
+        mKeyEventSequenceStarted = false;
+        mMotionEventSequenceStarted = false;
+        mHoverEventSequenceStarted = false;
     }
 
     private void enableFeatures() {
