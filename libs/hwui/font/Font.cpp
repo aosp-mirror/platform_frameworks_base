@@ -25,11 +25,12 @@
 #include <SkGlyph.h>
 #include <SkUtils.h>
 
-#include "Debug.h"
 #include "FontUtil.h"
 #include "Font.h"
-#include "FontRenderer.h"
-#include "Properties.h"
+#include "../Debug.h"
+#include "../FontRenderer.h"
+#include "../PixelBuffer.h"
+#include "../Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -200,25 +201,23 @@ void Font::drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y,
             p[3].x(), p[3].y(), u1, v1, glyph->mCacheTexture);
 }
 
-void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
-        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
-    int nPenX = x + glyph->mBitmapLeft;
-    int nPenY = y + glyph->mBitmapTop;
-
-    uint32_t endX = glyph->mStartX + glyph->mBitmapWidth;
-    uint32_t endY = glyph->mStartY + glyph->mBitmapHeight;
+void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y, uint8_t* bitmap,
+        uint32_t bitmapWidth, uint32_t bitmapHeight, Rect* bounds, const float* pos) {
+    int dstX = x + glyph->mBitmapLeft;
+    int dstY = y + glyph->mBitmapTop;
 
     CacheTexture* cacheTexture = glyph->mCacheTexture;
-    uint32_t cacheWidth = cacheTexture->getWidth();
-    const uint8_t* cacheBuffer = cacheTexture->getTexture();
 
-    uint32_t cacheX = 0, cacheY = 0;
-    int32_t bX = 0, bY = 0;
-    for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
-        for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
-            uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
-            bitmap[bY * bitmapW + bX] = tempCol;
-        }
+    uint32_t cacheWidth = cacheTexture->getWidth();
+    uint32_t startY = glyph->mStartY * cacheWidth;
+    uint32_t endY = startY + (glyph->mBitmapHeight * cacheWidth);
+
+    PixelBuffer* pixelBuffer = cacheTexture->getPixelBuffer();
+    const uint8_t* cacheBuffer = pixelBuffer->map();
+
+    for (uint32_t cacheY = startY, bitmapY = dstY * bitmapWidth; cacheY < endY;
+            cacheY += cacheWidth, bitmapY += bitmapWidth) {
+        memcpy(&bitmap[bitmapY + dstX], &cacheBuffer[cacheY + glyph->mStartX], glyph->mBitmapWidth);
     }
 }
 

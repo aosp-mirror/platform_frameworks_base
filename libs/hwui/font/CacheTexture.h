@@ -30,6 +30,8 @@
 namespace android {
 namespace uirenderer {
 
+class PixelBuffer;
+
 /**
  * CacheBlock is a node in a linked list of current free space areas in a CacheTexture.
  * Using CacheBlocks enables us to pack the cache from top to bottom as well as left to right.
@@ -83,6 +85,10 @@ public:
     void allocateTexture();
     void allocateMesh();
 
+    // Returns true if glPixelStorei(GL_UNPACK_ROW_LENGTH) must be reset
+    // This method will also call setDirty(false)
+    bool upload();
+
     bool fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY);
 
     inline uint16_t getWidth() const {
@@ -97,7 +103,7 @@ public:
         return &mDirtyRect;
     }
 
-    inline uint8_t* getTexture() const {
+    inline PixelBuffer* getPixelBuffer() const {
         return mTexture;
     }
 
@@ -110,13 +116,6 @@ public:
         return mDirty;
     }
 
-    inline void setDirty(bool dirty) {
-        mDirty = dirty;
-        if (!dirty) {
-            mDirtyRect.setEmpty();
-        }
-    }
-
     inline bool getLinearFiltering() const {
         return mLinearFiltering;
     }
@@ -124,16 +123,7 @@ public:
     /**
      * This method assumes that the proper texture unit is active.
      */
-    void setLinearFiltering(bool linearFiltering, bool bind = true) {
-        if (linearFiltering != mLinearFiltering) {
-            mLinearFiltering = linearFiltering;
-
-            const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
-            if (bind) glBindTexture(GL_TEXTURE_2D, getTextureId());
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-        }
-    }
+    void setLinearFiltering(bool linearFiltering, bool bind = true);
 
     inline uint16_t getGlyphCount() const {
         return mNumGlyphs;
@@ -176,7 +166,9 @@ public:
     }
 
 private:
-    uint8_t* mTexture;
+    void setDirty(bool dirty);
+
+    PixelBuffer* mTexture;
     GLuint mTextureId;
     uint16_t mWidth;
     uint16_t mHeight;
@@ -188,6 +180,7 @@ private:
     uint32_t mMaxQuadCount;
     CacheBlock* mCacheBlocks;
     Rect mDirtyRect;
+    bool mHasES3;
 };
 
 }; // namespace uirenderer

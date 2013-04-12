@@ -2644,6 +2644,9 @@ void OpenGLRenderer::drawTextShadow(SkPaint* paint, const char* text, int bytesC
     mCaches.dropShadowCache.setFontRenderer(fontRenderer);
     const ShadowTexture* shadow = mCaches.dropShadowCache.get(
             paint, text, bytesCount, count, mDrawModifiers.mShadowRadius, positions);
+    // If the drop shadow exceeds the max texture size or couldn't be
+    // allocated, skip drawing
+    if (!shadow) return;
     const AutoTexture autoCleanup(shadow);
 
     const float sx = x - shadow->left + mDrawModifiers.mShadowDx;

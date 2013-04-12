@@ -70,6 +70,7 @@ void Caches::init() {
     mCurrentPositionPointer = this;
     mCurrentPositionStride = 0;
     mCurrentTexCoordsPointer = this;
+    mCurrentPixelBuffer = 0;
 
     mTexCoordsArrayEnabled = false;
 
@@ -360,6 +361,28 @@ bool Caches::unbindIndicesBuffer() {
     if (mCurrentIndicesBuffer) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         mCurrentIndicesBuffer = 0;
+        return true;
+    }
+    return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PBO
+///////////////////////////////////////////////////////////////////////////////
+
+bool Caches::bindPixelBuffer(const GLuint buffer) {
+    if (mCurrentPixelBuffer != buffer) {
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
+        mCurrentPixelBuffer = buffer;
+        return true;
+    }
+    return false;
+}
+
+bool Caches::unbindPixelBuffer() {
+    if (mCurrentPixelBuffer) {
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        mCurrentPixelBuffer = 0;
         return true;
     }
     return false;

@@ -178,6 +178,10 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
         FontRenderer::DropShadow shadow = mRenderer->renderDropShadow(&paintCopy, text, 0,
                 len, numGlyphs, radius, positions);
 
+        if (!shadow.image) {
+            return NULL;
+        }
+
         texture = new ShadowTexture;
         texture->left = shadow.penX;
         texture->top = shadow.penY;
