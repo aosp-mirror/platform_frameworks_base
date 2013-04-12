@@ -621,10 +621,8 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Antaa sovelluksen muokata, miten sovellusten verkonkäyttöä lasketaan. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"käytä ilmoituksia"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Antaa sovelluksen noutaa, tutkia ja tyhjentää ilmoituksia (myös muiden sovelluksien lähettämiä)."</string>
-    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
-    <skip />
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sido ilmoituskuuntelijapalveluun"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Antaa sovelluksen sitoutua ilmoituskuuntelijan ylimmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
@@ -1052,10 +1050,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoiminnot"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Tallennustila loppumassa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kaikki järjestelmätoiminnot eivät välttämättä toimi"</string>
-    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> on käynnissä"</string>
+    <string name="app_running_notification_text" msgid="4653586947747330058">"Hanki lisätietoja tai sulje sovellus koskettamalla."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Peruuta"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1275,8 +1271,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Esteettömyys"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Taustakuva"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Vaihda taustakuvaa"</string>
-    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
-    <skip />
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Ilmoituskuuntelija"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN on aktivoitu"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> on aktivoinut VPN-yhteyden"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Voit hallinnoida verkkoa koskettamalla."</string>
@@ -1380,10 +1375,8 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"Siirry etusivulle"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Siirry ylös"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Lisää asetuksia"</string>
-    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
-    <skip />
-    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
-    <skip />
+    <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
+    <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Sisäinen tallennustila"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kortti"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-tallennustila"</string>
@@ -1493,6 +1486,5 @@
     <string name="error_message_title" msgid="4510373083082500195">"Virhe"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Tämä sovellus ei tue rajoitettujen käyttäjien tilejä"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Tätä toimintoa käsittelevää sovellusta ei löydy"</string>
-    <!-- no translation found for revoke (5404479185228271586) -->
-    <skip />
+    <string name="revoke" msgid="5404479185228271586">"Peruuta"</string>
 </resources>
