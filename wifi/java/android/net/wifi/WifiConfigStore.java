@@ -634,6 +634,8 @@ class WifiConfigStore {
             if (config.priority > mLastPriority) {
                 mLastPriority = config.priority;
             }
+            config.ipAssignment = IpAssignment.DHCP;
+            config.proxySettings = ProxySettings.NONE;
             mConfiguredNetworks.put(config.networkId, config);
             mNetworkIds.put(configKey(config), config.networkId);
         }
@@ -831,8 +833,9 @@ class WifiConfigStore {
 
             while (true) {
                 int id = -1;
-                IpAssignment ipAssignment = IpAssignment.UNASSIGNED;
-                ProxySettings proxySettings = ProxySettings.UNASSIGNED;
+                // Default is DHCP with no proxy
+                IpAssignment ipAssignment = IpAssignment.DHCP;
+                ProxySettings proxySettings = ProxySettings.NONE;
                 LinkProperties linkProperties = new LinkProperties();
                 String proxyHost = null;
                 int proxyPort = -1;
@@ -902,7 +905,8 @@ class WifiConfigStore {
                                 config.ipAssignment = ipAssignment;
                                 break;
                             case UNASSIGNED:
-                                //Ignore
+                                loge("BUG: Found UNASSIGNED IP on file, use DHCP");
+                                config.ipAssignment = IpAssignment.DHCP;
                                 break;
                             default:
                                 loge("Ignore invalid ip assignment while reading");
@@ -920,7 +924,8 @@ class WifiConfigStore {
                                 config.proxySettings = proxySettings;
                                 break;
                             case UNASSIGNED:
-                                //Ignore
+                                loge("BUG: Found UNASSIGNED proxy on file, use NONE");
+                                config.proxySettings = ProxySettings.NONE;
                                 break;
                             default:
                                 loge("Ignore invalid proxy settings while reading");
@@ -1176,6 +1181,8 @@ class WifiConfigStore {
         WifiConfiguration currentConfig = mConfiguredNetworks.get(netId);
         if (currentConfig == null) {
             currentConfig = new WifiConfiguration();
+            currentConfig.ipAssignment = IpAssignment.DHCP;
+            currentConfig.proxySettings = ProxySettings.NONE;
             currentConfig.networkId = netId;
         }
 
