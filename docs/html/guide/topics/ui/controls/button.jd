@@ -1,6 +1,5 @@
 page.title=Buttons
-parent.title=Input Controls
-parent.link=../controls.html
+page.tags="button","imagebutton"
 @jd:body
 
 <div id="qv-wrapper">

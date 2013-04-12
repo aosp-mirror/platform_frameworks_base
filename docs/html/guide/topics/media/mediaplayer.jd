@@ -1,6 +1,5 @@
 page.title=Media Playback
-parent.title=Multimedia and Camera 
-parent.link=index.html
+page.tags="mediaplayer","soundpool","audiomanager"
 @jd:body
 
     <div id="qv-wrapper">
