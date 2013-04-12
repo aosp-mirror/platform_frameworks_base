@@ -622,6 +622,8 @@ public class UserManagerService extends IUserManager.Stub {
                         UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_REMOVE_USER);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -742,6 +744,8 @@ public class UserManagerService extends IUserManager.Stub {
                                 UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_REMOVE_USER);
                     }
                 }
             }

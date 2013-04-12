@@ -110,7 +110,6 @@ public class UserManager {
      */
     public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
 
-
     /**
      * Key for user restrictions. Specifies if a user is disallowed from transferring files over
      * USB. The default value is <code>false</code>.
@@ -120,6 +119,26 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from configuring user
+     * credentials. The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
+
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from removing users.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_REMOVE_USER = "no_remove_user";
 
     private static UserManager sInstance = null;
 
