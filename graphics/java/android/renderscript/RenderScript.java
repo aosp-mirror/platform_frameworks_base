@@ -582,30 +582,58 @@ public class RenderScript {
         validate();
         rsnScriptInvokeV(mContext, id, slot, params);
     }
+
     native void rsnScriptSetVarI(int con, int id, int slot, int val);
     synchronized void nScriptSetVarI(int id, int slot, int val) {
         validate();
         rsnScriptSetVarI(mContext, id, slot, val);
     }
+    native int rsnScriptGetVarI(int con, int id, int slot);
+    synchronized int nScriptGetVarI(int id, int slot) {
+        validate();
+        return rsnScriptGetVarI(mContext, id, slot);
+    }
+
     native void rsnScriptSetVarJ(int con, int id, int slot, long val);
     synchronized void nScriptSetVarJ(int id, int slot, long val) {
         validate();
         rsnScriptSetVarJ(mContext, id, slot, val);
     }
+    native long rsnScriptGetVarJ(int con, int id, int slot);
+    synchronized long nScriptGetVarJ(int id, int slot) {
+        validate();
+        return rsnScriptGetVarJ(mContext, id, slot);
+    }
+
     native void rsnScriptSetVarF(int con, int id, int slot, float val);
     synchronized void nScriptSetVarF(int id, int slot, float val) {
         validate();
         rsnScriptSetVarF(mContext, id, slot, val);
+    }
+    native float rsnScriptGetVarF(int con, int id, int slot);
+    synchronized float nScriptGetVarF(int id, int slot) {
+        validate();
+        return rsnScriptGetVarF(mContext, id, slot);
     }
     native void rsnScriptSetVarD(int con, int id, int slot, double val);
     synchronized void nScriptSetVarD(int id, int slot, double val) {
         validate();
         rsnScriptSetVarD(mContext, id, slot, val);
     }
+    native double rsnScriptGetVarD(int con, int id, int slot);
+    synchronized double nScriptGetVarD(int id, int slot) {
+        validate();
+        return rsnScriptGetVarD(mContext, id, slot);
+    }
     native void rsnScriptSetVarV(int con, int id, int slot, byte[] val);
     synchronized void nScriptSetVarV(int id, int slot, byte[] val) {
         validate();
         rsnScriptSetVarV(mContext, id, slot, val);
+    }
+    native void rsnScriptGetVarV(int con, int id, int slot, byte[] val);
+    synchronized void nScriptGetVarV(int id, int slot, byte[] val) {
+        validate();
+        rsnScriptGetVarV(mContext, id, slot, val);
     }
     native void rsnScriptSetVarVE(int con, int id, int slot, byte[] val,
                                   int e, int[] dims);

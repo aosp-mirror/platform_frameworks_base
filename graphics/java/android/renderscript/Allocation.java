@@ -277,14 +277,14 @@ public class Allocation extends BaseObj {
                 throw new RSIllegalArgumentException("Invalid usage combination.");
             }
         }
-
-        // don't need to account for USAGE_SHARED Allocations
-        if ((usage & USAGE_SHARED) == 0) {
-            int numBytes = t.getCount() * t.getElement().getBytesSize();
-            rs.addAllocSizeForGC(numBytes);
-            mGCSize = numBytes;
+        if (t != null) {
+            // don't need to account for USAGE_SHARED Allocations
+            if ((usage & USAGE_SHARED) == 0) {
+                int numBytes = t.getCount() * t.getElement().getBytesSize();
+                rs.addAllocSizeForGC(numBytes);
+                mGCSize = numBytes;
+            }
         }
-
         mType = t;
         mUsage = usage;
 
@@ -354,6 +354,12 @@ public class Allocation extends BaseObj {
             mType = new Type(typeID, mRS);
             mType.updateFromNative();
             updateCacheInfo(mType);
+        }
+        // don't need to account for USAGE_SHARED Allocations
+        if ((mUsage & USAGE_SHARED) == 0) {
+            int numBytes = mType.getCount() * mType.getElement().getBytesSize();
+            mRS.addAllocSizeForGC(numBytes);
+            mGCSize = numBytes;
         }
     }
 

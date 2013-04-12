@@ -20001,6 +20001,35 @@ package android.renderscript {
     method public void reset();
     method public void reset(int);
     method public void skip(int);
+    method public boolean subBoolean();
+    method public android.renderscript.Byte2 subByte2();
+    method public android.renderscript.Byte3 subByte3();
+    method public android.renderscript.Byte4 subByte4();
+    method public android.renderscript.Double2 subDouble2();
+    method public android.renderscript.Double3 subDouble3();
+    method public android.renderscript.Double4 subDouble4();
+    method public float subF32();
+    method public double subF64();
+    method public android.renderscript.Float2 subFloat2();
+    method public android.renderscript.Float3 subFloat3();
+    method public android.renderscript.Float4 subFloat4();
+    method public short subI16();
+    method public int subI32();
+    method public long subI64();
+    method public byte subI8();
+    method public android.renderscript.Int2 subInt2();
+    method public android.renderscript.Int3 subInt3();
+    method public android.renderscript.Int4 subInt4();
+    method public android.renderscript.Long2 subLong2();
+    method public android.renderscript.Long3 subLong3();
+    method public android.renderscript.Long4 subLong4();
+    method public android.renderscript.Matrix2f subMatrix2f();
+    method public android.renderscript.Matrix3f subMatrix3f();
+    method public android.renderscript.Matrix4f subMatrix4f();
+    method public android.renderscript.Short2 subShort2();
+    method public android.renderscript.Short3 subShort3();
+    method public android.renderscript.Short4 subShort4();
+    method public void subalign(int);
   }
 
   public class Float2 {
@@ -20245,6 +20274,12 @@ package android.renderscript {
     method protected android.renderscript.Script.KernelID createKernelID(int, int, android.renderscript.Element, android.renderscript.Element);
     method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker);
     method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
+    method public boolean getVarB(int);
+    method public double getVarD(int);
+    method public float getVarF(int);
+    method public int getVarI(int);
+    method public long getVarJ(int);
+    method public void getVarV(int, android.renderscript.FieldPacker);
     method protected void invoke(int);
     method protected void invoke(int, android.renderscript.FieldPacker);
     method public void setTimeZone(java.lang.String);
