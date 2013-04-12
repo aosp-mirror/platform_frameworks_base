@@ -1,6 +1,5 @@
 page.title=Creating a Search Interface
-parent.title=Search
-parent.link=index.html
+page.tags="searchview"
 @jd:body
 
 <div id="qv-wrapper">

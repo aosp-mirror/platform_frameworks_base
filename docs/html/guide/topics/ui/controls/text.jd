@@ -1,6 +1,5 @@
 page.title=Text Fields
-parent.title=Input Controls
-parent.link=../controls.html
+page.tags="edittext","autocompletetextview"
 @jd:body
 
 <div id="qv-wrapper">

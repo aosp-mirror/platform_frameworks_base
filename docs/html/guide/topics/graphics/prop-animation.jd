@@ -1,6 +1,5 @@
 page.title=Property Animation
-parent.title=Animation
-parent.link=animation.html
+page.tags="valueanimator","objectanimator","layouttransition","ViewPropertyAnimator"
 @jd:body
 
   <div id="qv-wrapper">
