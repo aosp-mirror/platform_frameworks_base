@@ -132,11 +132,6 @@ public final class MessageQueue {
             nativePollOnce(mPtr, nextPollTimeoutMillis);
 
             synchronized (this) {
-                if (mQuiting) {
-                    dispose();
-                    return null;
-                }
-
                 // Try to retrieve the next message.  Return if found.
                 final long now = SystemClock.uptimeMillis();
                 Message prevMsg = null;
@@ -168,6 +163,12 @@ public final class MessageQueue {
                 } else {
                     // No more messages.
                     nextPollTimeoutMillis = -1;
+                }
+
+                // Process the quit message now that all pending messages have been handled.
+                if (mQuiting) {
+                    dispose();
+                    return null;
                 }
 
                 // If first time idle, then get the number of idlers to run.

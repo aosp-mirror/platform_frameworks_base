@@ -201,8 +201,16 @@ public final class Looper {
 
     /**
      * Quits the looper.
-     *
-     * Causes the {@link #loop} method to terminate as soon as possible.
+     * <p>
+     * Causes the {@link #loop} method to terminate as soon as all remaining messages
+     * in the message queue that are already due to be delivered have been handled.
+     * However delayed messages with due times in the future may not be handled before
+     * the loop terminates.
+     * </p><p>
+     * Any attempt to post messages to the queue after {@link #quit} has been called
+     * will fail.  For example, the {@link Handler#sendMessage(Message)} method will
+     * return false when the looper is being terminated.
+     * </p>
      */
     public void quit() {
         mQueue.quit();
