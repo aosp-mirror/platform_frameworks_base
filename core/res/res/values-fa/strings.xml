@@ -621,10 +621,8 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"به برنامه اجازه می‎دهد تا نحوه محاسبه کاربرد شبکه در برنامه را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"اعلان‌های دسترسی"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"به برنامه اجازه می‌دهد به بازیابی، بررسی و پاک کردن اعلان‌ها از جمله موارد پست شده توسط سایر برنامه‌ها بپردازد."</string>
-    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
-    <skip />
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"اتصال به یک سرویس شنونده اعلان"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"به دارنده اجازه می‌دهد به یک رابط سطح بالای سرویس شنونده اعلان متصل شود. این هرگز برای برنامه‌های عادی ضروری نیست."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"طول و نویسه‎های مجاز در گذرواژه‌های بازکردن قفل صفحه را کنترل کنید."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
@@ -1052,10 +1050,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"عملکردهای متنی"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"فضای ذخیره‌سازی رو به اتمام است"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
-    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> در حال اجرا است"</string>
+    <string name="app_running_notification_text" msgid="4653586947747330058">"برای کسب اطلاعات بیشتر یا توقف برنامه لمس کنید."</string>
     <string name="ok" msgid="5970060430562524910">"تأیید"</string>
     <string name="cancel" msgid="6442560571259935130">"لغو"</string>
     <string name="yes" msgid="5362982303337969312">"تأیید"</string>
@@ -1273,8 +1269,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"قابلیت دسترسی"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"تصویر زمینه"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغییر تصویر زمینه"</string>
-    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
-    <skip />
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"شنونده اعلان"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN فعال شد"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN توسط <xliff:g id="APP">%s</xliff:g> فعال شده است"</string>
     <string name="vpn_text" msgid="3011306607126450322">"برای مدیریت شبکه لمس کنید."</string>
@@ -1378,10 +1373,8 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحهٔ اصلی"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"حرکت به بالا"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه‌ها"</string>
-    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
-    <skip />
-    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
-    <skip />
+    <string name="action_bar_home_description_format" msgid="7965984360903693903">"‎%1$s, %2$s"</string>
+    <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"‎%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"حافظهٔ داخلی"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"کارت SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"حافظهٔ USB"</string>
@@ -1491,6 +1484,5 @@
     <string name="error_message_title" msgid="4510373083082500195">"خطا"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"این برنامه حساب‌های تعداد محدودی از کاربران را پشتیبانی نمی‌کند"</string>
     <string name="app_not_found" msgid="3429141853498927379">"برنامه‌ای برای انجام این عملکرد موجود نیست"</string>
-    <!-- no translation found for revoke (5404479185228271586) -->
-    <skip />
+    <string name="revoke" msgid="5404479185228271586">"لغو"</string>
 </resources>

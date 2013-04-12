@@ -621,10 +621,8 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Mengizinkan apl memodifikasi cara penggunaan jaringan diperhitungkan terhadap apl. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"mengakses pemberitahuan"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposkan oleh aplikasi lain."</string>
-    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
-    <skip />
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mengikat layanan pendengar pemberitahuan"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Memungkinkan pemegang mengikat antarmuka tingkat teratas dari suatu layanan pendengar pemberitahuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrol panjang dan karakter yang diizinkan dalam sandi pembuka layar."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Upaya pembukaan kunci layar monitor"</string>
@@ -1052,10 +1050,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ruang penyimpanan hampir habis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Beberapa fungsi sistem mungkin tidak dapat bekerja"</string>
-    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan"</string>
+    <string name="app_running_notification_text" msgid="4653586947747330058">"Sentuh untuk informasi selengkapnya atau hentikan aplikasi."</string>
     <string name="ok" msgid="5970060430562524910">"Oke"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
     <string name="yes" msgid="5362982303337969312">"Oke"</string>
@@ -1273,8 +1269,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Aksesibilitas"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ubah wallpaper"</string>
-    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
-    <skip />
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Pendengar pemberitahuan"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN diaktifkan"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN diaktifkan oleh <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Sentuh untuk mengelola jaringan."</string>
@@ -1378,10 +1373,8 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi ke beranda"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi naik"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Opsi lainnya"</string>
-    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
-    <skip />
-    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
-    <skip />
+    <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
+    <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Penyimpanan internal"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Kartu SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Penyimpanan USB"</string>
@@ -1491,6 +1484,5 @@
     <string name="error_message_title" msgid="4510373083082500195">"Kesalahan"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Aplikasi ini tidak mendukung akun untuk pengguna terbatas"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Tidak ada aplikasi yang ditemukan untuk menangani tindakan ini"</string>
-    <!-- no translation found for revoke (5404479185228271586) -->
-    <skip />
+    <string name="revoke" msgid="5404479185228271586">"Cabut"</string>
 </resources>
