@@ -1,6 +1,5 @@
 page.title=Position Sensors
-parent.title=Sensors
-parent.link=index.html
+page.tags="sensorevent","orientation","proximity"
 @jd:body
 
 <div id="qv-wrapper">

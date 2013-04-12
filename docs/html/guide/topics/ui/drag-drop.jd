@@ -1,6 +1,5 @@
 page.title=Drag and Drop
-parent.title=User Interface
-parent.link=index.html
+page.tags="clipdata","dragevent","onlongclicklistener"
 @jd:body
 
 <div id="qv-wrapper">
