@@ -25,13 +25,12 @@
         android:scaleType="centerCrop"
         />
     <TextView
-        style="@style/TextAppearance.QuickSettings.TileView"
+        style="@style/TextAppearance.QuickSettings.TileView.User"
         android:id="@+id/user_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         android:gravity="center"
         android:text="@string/quick_settings_user_label"
-        android:background="#CC000000"
         />
 </FrameLayout>
