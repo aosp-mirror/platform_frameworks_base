@@ -1,6 +1,5 @@
-page.title= Pickers
-parent.title=Form Controls
-parent.link=controls-form.html
+page.title=Pickers
+page.tags="datepicker","timepicker"
 @jd:body
 
 <div id="qv-wrapper">
