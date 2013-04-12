@@ -1,5 +1,5 @@
 page.title=Spinners
-page.tags="spinner","drop down"
+page.tags="spinner","dropdown"
 @jd:body
 
 <p>Spinners provide a quick way to select one value from a set. In the default state, a spinner shows
