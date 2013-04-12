@@ -1470,8 +1470,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             loge("Error modifying route - no interface name");
             return false;
         }
-
-        if (r.isHostRoute() == false) {
+        if (r.hasGateway()) {
             RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getAllRoutes(), r.getGateway());
             if (bestRoute != null) {
                 if (bestRoute.getGateway().equals(r.getGateway())) {
