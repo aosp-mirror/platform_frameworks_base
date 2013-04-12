@@ -4577,7 +4577,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
             ActivityRecord r = getCallingRecordLocked(token);
-            return r != null && r.app != null ? r.info.packageName : null;
+            return r != null ? r.info.packageName : null;
         }
     }
 
