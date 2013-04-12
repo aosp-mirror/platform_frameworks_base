@@ -1,5 +1,5 @@
 page.title=Selection
-page.tags="actionmode","navigation"
+page.tags="actionmode","navigation","contextual"
 @jd:body
 
 <p>Android 3.0 changed the <em>long press</em> gesture&mdash;that is, a touch that's held in the same position for a moment&mdash;to be the global gesture to select data.. This affects the way you should
