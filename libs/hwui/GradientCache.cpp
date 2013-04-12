@@ -148,8 +148,11 @@ void GradientCache::getGradientInfo(const uint32_t* colors, const int count,
         GradientInfo& info) {
     uint32_t width = 256 * (count - 1);
 
-    if (!mHasNpot) {
-        width = 1 << (31 - __builtin_clz(width));
+    // If the npot extension is not supported we cannot use non-clamp
+    // wrap modes. We therefore find the nearest largest power of 2
+    // unless width is already a power of 2
+    if (!mHasNpot && (width & (width - 1)) != 0) {
+        width = 1 << (32 - __builtin_clz(width));
     }
 
     bool hasAlpha = false;
