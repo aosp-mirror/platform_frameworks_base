@@ -105,7 +105,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = DEBUG;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
-    public static final boolean DEBUG_GESTURES = true;
+    public static final boolean DEBUG_GESTURES = false;
 
     public static final boolean DEBUG_CLINGS = false;
 
