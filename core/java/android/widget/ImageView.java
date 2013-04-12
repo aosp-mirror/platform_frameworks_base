@@ -348,7 +348,7 @@ public class ImageView extends View {
      * {@link #setImageBitmap(android.graphics.Bitmap)} and
      * {@link android.graphics.BitmapFactory} instead.</p>
      *
-     * @param resId the resource identifier of the the drawable
+     * @param resId the resource identifier of the drawable
      *
      * @attr ref android.R.styleable#ImageView_src
      */

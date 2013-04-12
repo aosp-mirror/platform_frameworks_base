@@ -854,6 +854,7 @@ public class ValueAnimator extends Animator {
      *
      * @return The timing interpolator for this ValueAnimator.
      */
+    @Override
     public TimeInterpolator getInterpolator() {
         return mInterpolator;
     }

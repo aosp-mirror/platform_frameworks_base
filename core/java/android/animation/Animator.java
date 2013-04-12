@@ -22,13 +22,20 @@ import java.util.ArrayList;
  * This is the superclass for classes which provide basic support for animations which can be
  * started, ended, and have <code>AnimatorListeners</code> added to them.
  */
-public abstract class Animator implements Cloneable {
-
+public abstract class Animator implements Cloneable, Animatable {
 
     /**
      * The set of listeners to be sent events through the life of an animation.
      */
     ArrayList<AnimatorListener> mListeners = null;
+
+    @Override
+    public abstract Animator setDuration(long duration);
+
+    @Override
+    public TimeInterpolator getInterpolator() {
+        return null;
+    }
 
     /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
@@ -68,47 +75,6 @@ public abstract class Animator implements Cloneable {
      */
     public void end() {
     }
-
-    /**
-     * The amount of time, in milliseconds, to delay starting the animation after
-     * {@link #start()} is called.
-     *
-     * @return the number of milliseconds to delay running the animation
-     */
-    public abstract long getStartDelay();
-
-    /**
-     * The amount of time, in milliseconds, to delay starting the animation after
-     * {@link #start()} is called.
-
-     * @param startDelay The amount of the delay, in milliseconds
-     */
-    public abstract void setStartDelay(long startDelay);
-
-
-    /**
-     * Sets the length of the animation.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     */
-    public abstract Animator setDuration(long duration);
-
-    /**
-     * Gets the length of the animation.
-     *
-     * @return The length of the animation, in milliseconds.
-     */
-    public abstract long getDuration();
-
-    /**
-     * The time interpolator used in calculating the elapsed fraction of this animation. The
-     * interpolator determines whether the animation runs with linear or non-linear motion,
-     * such as acceleration and deceleration. The default value is
-     * {@link android.view.animation.AccelerateDecelerateInterpolator}
-     *
-     * @param value the interpolator to be used by this animation
-     */
-    public abstract void setInterpolator(TimeInterpolator value);
 
     /**
      * Returns whether this Animator is currently running (having been started and gone past any

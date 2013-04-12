@@ -3080,6 +3080,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Returns whether ths group's children are clipped to their bounds before drawing.
+     * The default value is true.
+     * @see #setClipChildren(boolean)
+     *
+     * @return True if the group's children will be clipped to their bounds,
+     * false otherwise.
+     */
+    public boolean getClipChildren() {
+        return ((mGroupFlags & FLAG_CLIP_CHILDREN) != 0);
+    }
+
+    /**
      * By default, children are clipped to their bounds before drawing. This
      * allows view groups to override this behavior for animations, etc.
      *
@@ -4525,7 +4537,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public final void layout(int l, int t, int r, int b) {
-        if (mTransition == null || !mTransition.isChangingLayout()) {
+        if (!mSuppressLayout && (mTransition == null || !mTransition.isChangingLayout())) {
             if (mTransition != null) {
                 mTransition.layoutChange(this);
             }
