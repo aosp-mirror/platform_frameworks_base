@@ -1,6 +1,5 @@
 page.title=Radio Buttons
-parent.title=Input Controls
-parent.link=../controls.html
+page.tags="radiobutton","radiogroup"
 @jd:body
 
 <div id="qv-wrapper">

@@ -1,6 +1,5 @@
 page.title=Toggle Buttons
-parent.title=Input Controls
-parent.link=../controls.html
+page.tags="switch","togglebutton"
 @jd:body
 
 <div id="qv-wrapper">
