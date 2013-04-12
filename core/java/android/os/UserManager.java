@@ -198,16 +198,15 @@ public class UserManager {
     }
 
     /**
-     * Used to check if the user making this call is a restricted user. Restricted users may have
-     * application restrictions imposed on them. All apps should default to the most restrictive
-     * version, unless they have specific restrictions available through a call to
-     * {@link Context#getApplicationRestrictions()}.
+     * Used to check if the user making this call is a limited user. Limited users may have
+     * a reduced number of available apps, app restrictions and account restrictions.
+     * @return whether the user making this call is a limited user
      */
-    public boolean isUserRestricted() {
+    public boolean isUserLimited() {
         try {
             return mService.isRestricted();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not check if user restricted ", re);
+            Log.w(TAG, "Could not check if user is limited ", re);
             return false;
         }
     }
