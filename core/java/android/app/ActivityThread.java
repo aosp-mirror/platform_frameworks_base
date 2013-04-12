@@ -1595,6 +1595,12 @@ public final class ActivityThread {
     public static String currentPackageName() {
         ActivityThread am = currentActivityThread();
         return (am != null && am.mBoundApplication != null)
+            ? am.mBoundApplication.appInfo.packageName : null;
+    }
+
+    public static String currentProcessName() {
+        ActivityThread am = currentActivityThread();
+        return (am != null && am.mBoundApplication != null)
             ? am.mBoundApplication.processName : null;
     }
 
