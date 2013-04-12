@@ -113,13 +113,14 @@ redirects:
 - from: /guide/appendix/install-location.html
   to: /guide/topics/data/install-location.html
 
-- from: /guide/basics/what-is-android.html
+- from: /guide/basics/...
   to: /about/index.html
 
 - from: /guide/topics/security/security.html
   to: /training/articles/security-tips.html
-#  type: permanent
-#  comment: Move content and then adjust this
+
+- from: /guide/topics/security/index.html
+  to: /training/articles/security-tips.html
 
 - from: /guide/appendix/market-filters.html
   to: /google/play/filters.html
