@@ -1648,15 +1648,7 @@ public class WifiStateMachine extends StateMachine {
     private void handleNetworkDisconnect() {
         if (DBG) log("Stopping DHCP and clearing IP");
 
-        /*
-         * stop DHCP
-         */
-        if (mDhcpStateMachine != null) {
-            /* In case we were in middle of DHCP operation
-               restore back powermode */
-            handlePostDhcpSetup();
-            mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
-        }
+        stopDhcp();
 
         try {
             mNwService.clearInterfaceAddresses(mInterfaceName);
@@ -1734,6 +1726,24 @@ public class WifiStateMachine extends StateMachine {
     }
 
 
+    void startDhcp() {
+        if (mDhcpStateMachine == null) {
+            mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
+                    mContext, WifiStateMachine.this, mInterfaceName);
+
+        }
+        mDhcpStateMachine.registerForPreDhcpNotification();
+        mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
+    }
+
+    void stopDhcp() {
+        if (mDhcpStateMachine != null) {
+            /* In case we were in middle of DHCP operation restore back powermode */
+            handlePostDhcpSetup();
+            mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
+        }
+    }
+
     void handlePostDhcpSetup() {
         /* Restore power save and suspend optimizations */
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, true);
@@ -1751,7 +1761,7 @@ public class WifiStateMachine extends StateMachine {
             mDhcpResults = dhcpResults;
         }
         LinkProperties linkProperties = dhcpResults.linkProperties;
-        mWifiConfigStore.setLinkProperties(mLastNetworkId, linkProperties);
+        mWifiConfigStore.setLinkProperties(mLastNetworkId, new LinkProperties(linkProperties));
         InetAddress addr = null;
         Iterator<InetAddress> addrs = linkProperties.getAddresses().iterator();
         if (addrs.hasNext()) {
@@ -2996,15 +3006,10 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-                //start DHCP
-                if (mDhcpStateMachine == null) {
-                    mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
-                            mContext, WifiStateMachine.this, mInterfaceName);
-
-                }
-                mDhcpStateMachine.registerForPreDhcpNotification();
-                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
+                startDhcp();
             } else {
+                // stop any running dhcp before assigning static IP
+                stopDhcp();
                 DhcpResults dhcpResults = new DhcpResults(
                         mWifiConfigStore.getLinkProperties(mLastNetworkId));
                 dhcpResults.linkProperties.setInterfaceName(mInterfaceName);
