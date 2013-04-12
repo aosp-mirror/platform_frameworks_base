@@ -621,10 +621,8 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ከመተግበሪያዎች በተለየ መልኩ እንዴት የአውታረ መረብ አጠቃቀም እንደተመዘገበ ለመቀየር ለመተግበሪያው ይፈቅዳሉ።ለመደበኛ መተግበሪያዎች አገልግሎት አይውልም።"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"ማሳወቂያዎችን ይድረሱ"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"መተግበሪያው ማሳወቂያዎችን እንዲያስመጣ፣ እንዲመረምር እና እንዲያጸዳ ያስችለዋል፣ በሌሎች መተግበሪያዎች የተለጠፉትንም ጨምሮ።"</string>
-    <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
-    <skip />
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ከአንድ የማሳወቂያ አዳማጭ አገልግሎት ጋር ይሰሩ"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ያዢው የማሳወቂያ አዳማጭ አገልግሎቱን ከከፍተኛ-ደረጃ በይነገጹ ጋር እንዲያስር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ድንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"በማያ-መክፈት የተፈቀዱ የይለፍ ቃል ርዝመት እና ቁምፊዎች ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"የማሳያ-ክፈት ሙከራዎችን አሳይ"</string>
@@ -1052,10 +1050,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"የፅሁፍ እርምጃዎች"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"የማከማቻ ቦታ እያለቀ ነው"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"አንዳንድ የስርዓት ተግባራት ላይሰሩ ይችላሉ"</string>
-    <!-- no translation found for app_running_notification_title (8718335121060787914) -->
-    <skip />
-    <!-- no translation found for app_running_notification_text (4653586947747330058) -->
-    <skip />
+    <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> እያሄደ ነው"</string>
+    <string name="app_running_notification_text" msgid="4653586947747330058">"ተጨማሪ መረጃ ለማግኘት ወይም መተግበሪያውን ለማቆም ይንኩ።"</string>
     <string name="ok" msgid="5970060430562524910">"እሺ"</string>
     <string name="cancel" msgid="6442560571259935130">"ይቅር"</string>
     <string name="yes" msgid="5362982303337969312">"እሺ"</string>
@@ -1104,7 +1100,7 @@
     <string name="new_app_description" msgid="1932143598371537340">"የድሮውን ትግበራ ሳታስቀምጥ አቁም።"</string>
     <string name="sendText" msgid="5209874571959469142">"ለፅሁፍ ድርጊት ምረጥ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"የስልክ ጥሪ ድምፅ"</string>
-    <string name="volume_music" msgid="5421651157138628171">"ማህደረመረጃ ክፍልፍል"</string>
+    <string name="volume_music" msgid="5421651157138628171">" ማህደረ መረጃ  ክፍልፍል"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"በብሉቱዝ በኩል ማጫወት"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"የፀጥታ የስልክ የደውል ድምፅ ተዘጋጅቷል"</string>
     <string name="volume_call" msgid="3941680041282788711">"የጥሪ ላይ ድም ፅ መጨመሪያ/መቀነሻ"</string>
@@ -1273,8 +1269,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ተደራሽነት"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"ልጣፍ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"ልጣፍ ለውጥ"</string>
-    <!-- no translation found for notification_listener_binding_label (2014162835481906429) -->
-    <skip />
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"ማሳወቂያ አዳማጭ"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN ነቅቷል።"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN በ<xliff:g id="APP">%s</xliff:g>ገብሯል"</string>
     <string name="vpn_text" msgid="3011306607126450322">"አውታረመረብ ለማደራጀት  ንካ።"</string>
@@ -1378,10 +1373,8 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"መነሻ ዳስስ"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"አስስ"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"ተጨማሪ አማራጮች"</string>
-    <!-- no translation found for action_bar_home_description_format (7965984360903693903) -->
-    <skip />
-    <!-- no translation found for action_bar_home_subtitle_description_format (6985546530471780727) -->
-    <skip />
+    <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s፣ %2$s"</string>
+    <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s፣ %2$s፣ %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"ውስጣዊ ማከማቻ"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD ካርድ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"የUSB  ማከማቻ"</string>
@@ -1398,7 +1391,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"የተንቀሳቃሽ ውሂብ ወሰን አልፏል"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ውሂብ ገደብ ታልፏል"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ከተወሰነለት በላይ።"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"በስተጀርባ ውሂብ የተገደበ ነው"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"ዳራ ውሂብ የተገደበ ነው"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"ገደብ ለማስወገድ ንካ።"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"የደህንነት ዕውቅና ማረጋገጫ"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ይህ የዐዕውቅና ማረጋገጫ ትክክል ነው።"</string>
@@ -1491,6 +1484,5 @@
     <string name="error_message_title" msgid="4510373083082500195">"ስህተት"</string>
     <string name="app_no_restricted_accounts" msgid="5322164210667258876">"ይህ መተግበሪያ የተገደቡ ተጠቃሚዎች መለያዎችን አይደግፍም"</string>
     <string name="app_not_found" msgid="3429141853498927379">"ይህን እርምጃ የሚያከናውን ምንም መተግበሪያ አልተገኘም"</string>
-    <!-- no translation found for revoke (5404479185228271586) -->
-    <skip />
+    <string name="revoke" msgid="5404479185228271586">"ሻር"</string>
 </resources>
