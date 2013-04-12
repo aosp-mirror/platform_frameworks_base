@@ -17089,6 +17089,9 @@ package android.os {
     field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
     field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
+    field public static final java.lang.String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
+    field public static final java.lang.String DISALLOW_REMOVE_USER = "no_remove_user";
+
   }
 
   public abstract class Vibrator {
