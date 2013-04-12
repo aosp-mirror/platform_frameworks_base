@@ -1,6 +1,5 @@
 page.title=Audio Capture
-parent.title=Multimedia and Camera 
-parent.link=index.html
+page.tags="mediarecorder"
 @jd:body
 
     <div id="qv-wrapper">

@@ -1,6 +1,5 @@
 page.title=Location Strategies
-parent.title=Location and Maps
-parent.link=index.html
+page.tags="geolocation","maps","mapview"
 @jd:body
 
 <div id="qv-wrapper">
