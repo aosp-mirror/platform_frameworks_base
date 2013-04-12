@@ -17083,23 +17083,22 @@ package android.os {
     method public android.os.Bundle getUserRestrictions();
     method public android.os.Bundle getUserRestrictions(android.os.UserHandle);
     method public boolean isUserAGoat();
-    method public boolean isUserRestricted();
+    method public boolean isUserLimited();
     method public boolean isUserRunning(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);
     method public void setUserRestriction(java.lang.String, boolean);
     method public void setUserRestrictions(android.os.Bundle);
     method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
     field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
+    field public static final java.lang.String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
     field public static final java.lang.String DISALLOW_CONFIG_WIFI = "no_config_wifi";
     field public static final java.lang.String DISALLOW_INSTALL_APPS = "no_install_apps";
     field public static final java.lang.String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final java.lang.String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
+    field public static final java.lang.String DISALLOW_REMOVE_USER = "no_remove_user";
     field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
     field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
-    field public static final java.lang.String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
-    field public static final java.lang.String DISALLOW_REMOVE_USER = "no_remove_user";
-
   }
 
   public abstract class Vibrator {
