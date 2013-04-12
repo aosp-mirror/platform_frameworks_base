@@ -2595,12 +2595,12 @@ public final class ViewRootImpl implements ViewParent,
             // requestChildRectangleOnScreen() call (in which case 'rectangle'
             // is non-null and we just want to scroll to whatever that
             // rectangle is).
-            View focus = mView.findFocus();
+            final View focus = mView.findFocus();
             if (focus == null) {
                 return false;
             }
             View lastScrolledFocus = (mLastScrolledFocus != null) ? mLastScrolledFocus.get() : null;
-            if (lastScrolledFocus != null && focus != lastScrolledFocus) {
+            if (focus != lastScrolledFocus) {
                 // If the focus has changed, then ignore any requests to scroll
                 // to a rectangle; first we want to make sure the entire focus
                 // view is visible.
@@ -2615,7 +2615,7 @@ public final class ViewRootImpl implements ViewParent,
                 // as they are.
                 if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Keeping scroll y="
                         + mScrollY + " vi=" + vi.toShortString());
-            } else if (focus != null) {
+            } else {
                 // We need to determine if the currently focused view is
                 // within the visible part of the window and, if not, apply
                 // a pan so it can be seen.
