@@ -26,6 +26,7 @@ import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
@@ -240,6 +241,11 @@ public class WebView extends AbsoluteLayout
         ViewGroup.OnHierarchyChangeListener, ViewDebug.HierarchyHandler {
 
     private static final String LOGTAG = "webview_proxy";
+
+    // Throwing an exception for incorrect thread usage if the
+    // build target is JB MR2 or newer. Defaults to false, and is
+    // set in the WebView constructor.
+    private static Boolean sEnforceThreadChecking = false;
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -483,6 +489,8 @@ public class WebView extends AbsoluteLayout
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
         }
+        sEnforceThreadChecking = context.getApplicationInfo().targetSdkVersion >=
+                Build.VERSION_CODES.JELLY_BEAN_MR2;
         checkThread();
 
         ensureProviderCreated();
@@ -1915,6 +1923,10 @@ public class WebView extends AbsoluteLayout
                     "Future versions of WebView may not support use on other threads.");
             Log.w(LOGTAG, Log.getStackTraceString(throwable));
             StrictMode.onWebViewMethodCalledOnWrongThread(throwable);
+
+            if (sEnforceThreadChecking) {
+                throw new RuntimeException(throwable);
+            }
         }
     }
 
