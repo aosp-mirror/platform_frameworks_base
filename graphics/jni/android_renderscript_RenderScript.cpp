@@ -987,6 +987,15 @@ nScriptSetVarI(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
     rsScriptSetVarI(con, (RsScript)script, slot, val);
 }
 
+static jint
+nScriptGetVarI(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot)
+{
+    LOG_API("nScriptGetVarI, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    int value = 0;
+    rsScriptGetVarV(con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
+}
+
 static void
 nScriptSetVarObj(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, jint val)
 {
@@ -1001,11 +1010,29 @@ nScriptSetVarJ(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
     rsScriptSetVarJ(con, (RsScript)script, slot, val);
 }
 
+static jlong
+nScriptGetVarJ(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot)
+{
+    LOG_API("nScriptGetVarJ, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jlong value = 0;
+    rsScriptGetVarV(con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
+}
+
 static void
 nScriptSetVarF(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, float val)
 {
     LOG_API("nScriptSetVarF, con(%p), s(%p), slot(%i), val(%f)", con, (void *)script, slot, val);
     rsScriptSetVarF(con, (RsScript)script, slot, val);
+}
+
+static jfloat
+nScriptGetVarF(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot)
+{
+    LOG_API("nScriptGetVarF, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jfloat value = 0;
+    rsScriptGetVarV(con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
 }
 
 static void
@@ -1015,6 +1042,15 @@ nScriptSetVarD(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
     rsScriptSetVarD(con, (RsScript)script, slot, val);
 }
 
+static jdouble
+nScriptGetVarD(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot)
+{
+    LOG_API("nScriptGetVarD, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jdouble value = 0;
+    rsScriptGetVarV(con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
+}
+
 static void
 nScriptSetVarV(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, jbyteArray data)
 {
@@ -1022,6 +1058,16 @@ nScriptSetVarV(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
     jint len = _env->GetArrayLength(data);
     jbyte *ptr = _env->GetByteArrayElements(data, NULL);
     rsScriptSetVarV(con, (RsScript)script, slot, ptr, len);
+    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nScriptGetVarV(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, jbyteArray data)
+{
+    LOG_API("nScriptSetVarV, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jint len = _env->GetArrayLength(data);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsScriptGetVarV(con, (RsScript)script, slot, ptr, len);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -1600,10 +1646,15 @@ static JNINativeMethod methods[] = {
 {"rsnScriptForEachClipped",          "(IIIIIIIIIII)V",                        (void*)nScriptForEachClipped },
 {"rsnScriptForEachClipped",          "(IIIII[BIIIIII)V",                      (void*)nScriptForEachClippedV },
 {"rsnScriptSetVarI",                 "(IIII)V",                               (void*)nScriptSetVarI },
+{"rsnScriptGetVarI",                 "(III)I",                                (void*)nScriptGetVarI },
 {"rsnScriptSetVarJ",                 "(IIIJ)V",                               (void*)nScriptSetVarJ },
+{"rsnScriptGetVarJ",                 "(III)J",                                (void*)nScriptGetVarJ },
 {"rsnScriptSetVarF",                 "(IIIF)V",                               (void*)nScriptSetVarF },
+{"rsnScriptGetVarF",                 "(III)F",                                (void*)nScriptGetVarF },
 {"rsnScriptSetVarD",                 "(IIID)V",                               (void*)nScriptSetVarD },
+{"rsnScriptGetVarD",                 "(III)D",                                (void*)nScriptGetVarD },
 {"rsnScriptSetVarV",                 "(III[B)V",                              (void*)nScriptSetVarV },
+{"rsnScriptGetVarV",                 "(III[B)V",                              (void*)nScriptGetVarV },
 {"rsnScriptSetVarVE",                "(III[BI[I)V",                           (void*)nScriptSetVarVE },
 {"rsnScriptSetVarObj",               "(IIII)V",                               (void*)nScriptSetVarObj },
 

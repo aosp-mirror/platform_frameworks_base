@@ -220,6 +220,9 @@ public class Script extends BaseObj {
     public void setVar(int index, float v) {
         mRS.nScriptSetVarF(getID(mRS), index, v);
     }
+    public float getVarF(int index) {
+        return mRS.nScriptGetVarF(getID(mRS), index);
+    }
 
     /**
      * Only intended for use by generated reflected code.
@@ -229,6 +232,9 @@ public class Script extends BaseObj {
      */
     public void setVar(int index, double v) {
         mRS.nScriptSetVarD(getID(mRS), index, v);
+    }
+    public double getVarD(int index) {
+        return mRS.nScriptGetVarD(getID(mRS), index);
     }
 
     /**
@@ -240,6 +246,10 @@ public class Script extends BaseObj {
     public void setVar(int index, int v) {
         mRS.nScriptSetVarI(getID(mRS), index, v);
     }
+    public int getVarI(int index) {
+        return mRS.nScriptGetVarI(getID(mRS), index);
+    }
+
 
     /**
      * Only intended for use by generated reflected code.
@@ -250,6 +260,10 @@ public class Script extends BaseObj {
     public void setVar(int index, long v) {
         mRS.nScriptSetVarJ(getID(mRS), index, v);
     }
+    public long getVarJ(int index) {
+        return mRS.nScriptGetVarJ(getID(mRS), index);
+    }
+
 
     /**
      * Only intended for use by generated reflected code.
@@ -259,6 +273,9 @@ public class Script extends BaseObj {
      */
     public void setVar(int index, boolean v) {
         mRS.nScriptSetVarI(getID(mRS), index, v ? 1 : 0);
+    }
+    public boolean getVarB(int index) {
+        return mRS.nScriptGetVarI(getID(mRS), index) > 0 ? true : false;
     }
 
     /**
@@ -291,6 +308,10 @@ public class Script extends BaseObj {
      */
     public void setVar(int index, FieldPacker v, Element e, int[] dims) {
         mRS.nScriptSetVarVE(getID(mRS), index, v.getData(), e.getID(mRS), dims);
+    }
+
+    public void getVarV(int index, FieldPacker v) {
+        mRS.nScriptGetVarV(getID(mRS), index, v.getData());
     }
 
     public void setTimeZone(String timeZone) {
