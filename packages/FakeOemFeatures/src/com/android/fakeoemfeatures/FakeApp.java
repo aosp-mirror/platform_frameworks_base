@@ -86,7 +86,7 @@ public class FakeApp extends Application {
 
     @Override
     public void onCreate() {
-        String processName = ActivityThread.currentPackageName();
+        String processName = ActivityThread.currentProcessName();
         Slog.i("FakeOEMFeatures", "Creating app in process: " + processName);
         if (!getApplicationInfo().packageName.equals(processName)) {
             // If we are not in the main process of the app, then don't do
