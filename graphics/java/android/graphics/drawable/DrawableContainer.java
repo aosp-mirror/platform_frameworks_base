@@ -517,7 +517,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations | mChildrenChangingConfigurations;
         }
 
         public final int addChild(Drawable dr) {
