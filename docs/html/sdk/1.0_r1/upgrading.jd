@@ -1,5 +1,6 @@
 page.title=Upgrading the SDK
 sdk.version=1.0_r1
+excludeFromSuggestions=true
 @jd:body
 
 <p>For the current SDK release, see the links under <strong>Current SDK Release</strong> in the side navigation.</p>

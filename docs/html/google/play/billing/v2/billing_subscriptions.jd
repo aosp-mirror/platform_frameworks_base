@@ -1,4 +1,5 @@
 page.title=Implementing Subscriptions  <span style="font-size:16px;">(IAB Version 2)</span>
+excludeFromSuggestions=true
 @jd:body
 
 <div style="background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">In-app Billing Version 2 is superseded. Please <a href="{@docRoot}google/play/billing/billing_overview.html#migration">migrate to Version 3</a> at your earliest convenience.</div>
