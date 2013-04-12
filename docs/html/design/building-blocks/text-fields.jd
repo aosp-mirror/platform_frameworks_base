@@ -1,5 +1,5 @@
 page.title=Text Fields
-page.tags="text","edittext","input",
+page.tags="text","edittext","input"
 @jd:body
 
 <p>Text fields allow the user to type text into your app. They can be either single line or multi-line.
