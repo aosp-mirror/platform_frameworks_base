@@ -24,6 +24,9 @@ redirects:
 - from: /sdk/installing/next.html
   to: /training/basics/firstapp/index.html
 
+- from: /sdk/ndk/overview.html
+  to: /tools/sdk/ndk/index.html
+
 - from: /sdk/ndk/...
   to: /tools/sdk/ndk/...
 
