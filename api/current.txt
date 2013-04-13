@@ -4195,6 +4195,7 @@ package android.app {
     method public final boolean performGlobalAction(int);
     method public void setOnAccessibilityEventListener(android.app.UiAutomation.OnAccessibilityEventListener);
     method public boolean setRotation(int);
+    method public void setRunAsMonkey(boolean);
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
     method public android.graphics.Bitmap takeScreenshot();
     method public void waitForIdle(long, long) throws java.util.concurrent.TimeoutException;
