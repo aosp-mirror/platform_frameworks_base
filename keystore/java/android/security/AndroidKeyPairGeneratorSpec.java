@@ -32,10 +32,9 @@ import javax.security.auth.x500.X500Principal;
  * {@code KeyPairGenerator} that works with <a href="{@docRoot}
  * guide/topics/security/keystore.html">Android KeyStore facility</a>. The
  * Android KeyStore facility is accessed through a
- * {@link java.security.KeyPairGenerator} API using the
- * {@code AndroidKeyPairGenerator} provider. The {@code context} passed in may
- * be used to pop up some UI to ask the user to unlock or initialize the Android
- * keystore facility.
+ * {@link java.security.KeyPairGenerator} API using the {@code AndroidKeyStore}
+ * provider. The {@code context} passed in may be used to pop up some UI to ask
+ * the user to unlock or initialize the Android KeyStore facility.
  * <p>
  * After generation, the {@code keyStoreAlias} is used with the
  * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter)}
@@ -47,10 +46,10 @@ import javax.security.auth.x500.X500Principal;
  * Distinguished Name along with the other parameters specified with the
  * {@link Builder}.
  * <p>
- * The self-signed certificate may be replaced at a later time by a certificate
- * signed by a real Certificate Authority.
+ * The self-signed X.509 certificate may be replaced at a later time by a
+ * certificate signed by a real Certificate Authority.
  */
-public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
+public final class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
     private final String mKeystoreAlias;
 
     private final Context mContext;
@@ -62,6 +61,8 @@ public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
     private final Date mStartDate;
 
     private final Date mEndDate;
+
+    private final int mFlags;
 
     /**
      * Parameter specification for the "{@code AndroidKeyPairGenerator}"
@@ -93,7 +94,8 @@ public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * @hide should be built with AndroidKeyPairGeneratorSpecBuilder
      */
     public AndroidKeyPairGeneratorSpec(Context context, String keyStoreAlias,
-            X500Principal subjectDN, BigInteger serialNumber, Date startDate, Date endDate) {
+            X500Principal subjectDN, BigInteger serialNumber, Date startDate, Date endDate,
+            int flags) {
         if (context == null) {
             throw new IllegalArgumentException("context == null");
         } else if (TextUtils.isEmpty(keyStoreAlias)) {
@@ -116,48 +118,69 @@ public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
         mSerialNumber = serialNumber;
         mStartDate = startDate;
         mEndDate = endDate;
+        mFlags = flags;
     }
 
     /**
-     * @hide
+     * Returns the alias that will be used in the {@code java.security.KeyStore}
+     * in conjunction with the {@code AndroidKeyStore}.
      */
-    String getKeystoreAlias() {
+    public String getKeystoreAlias() {
         return mKeystoreAlias;
     }
 
     /**
-     * @hide
+     * Gets the Android context used for operations with this instance.
      */
-    Context getContext() {
+    public Context getContext() {
         return mContext;
     }
 
     /**
-     * @hide
+     * Gets the subject distinguished name to be used on the X.509 certificate
+     * that will be put in the {@link java.security.KeyStore}.
      */
-    X500Principal getSubjectDN() {
+    public X500Principal getSubjectDN() {
         return mSubjectDN;
     }
 
     /**
-     * @hide
+     * Gets the serial number to be used on the X.509 certificate that will be
+     * put in the {@link java.security.KeyStore}.
      */
-    BigInteger getSerialNumber() {
+    public BigInteger getSerialNumber() {
         return mSerialNumber;
     }
 
     /**
-     * @hide
+     * Gets the start date to be used on the X.509 certificate that will be put
+     * in the {@link java.security.KeyStore}.
      */
-    Date getStartDate() {
+    public Date getStartDate() {
         return mStartDate;
+    }
+
+    /**
+     * Gets the end date to be used on the X.509 certificate that will be put in
+     * the {@link java.security.KeyStore}.
+     */
+    public Date getEndDate() {
+        return mEndDate;
     }
 
     /**
      * @hide
      */
-    Date getEndDate() {
-        return mEndDate;
+    int getFlags() {
+        return mFlags;
+    }
+
+    /**
+     * Returns {@code true} if this parameter will require generated keys to be
+     * encrypted in the {@link java.security.KeyStore}.
+     */
+    public boolean isEncryptionRequired() {
+        return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
     }
 
     /**
@@ -175,16 +198,17 @@ public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Calendar end = new Calendar();
      * end.add(1, Calendar.YEAR);
      *
-     * AndroidKeyPairGeneratorSpec spec = new AndroidKeyPairGeneratorSpec.Builder(mContext)
-     *         .setAlias("myKey")
-     *         .setSubject(new X500Principal("CN=myKey"))
-     *         .setSerial(BigInteger.valueOf(1337))
-     *         .setStartDate(start.getTime())
-     *         .setEndDate(end.getTime())
-     *         .build();
+     * AndroidKeyPairGeneratorSpec spec =
+     *         new AndroidKeyPairGeneratorSpec.Builder(mContext)
+     *                 .setAlias(&quot;myKey&quot;)
+     *                 .setSubject(new X500Principal(&quot;CN=myKey&quot;))
+     *                 .setSerial(BigInteger.valueOf(1337))
+     *                 .setStartDate(start.getTime())
+     *                 .setEndDate(end.getTime())
+     *                 .build();
      * </pre>
      */
-    public static class Builder {
+    public final static class Builder {
         private final Context mContext;
 
         private String mKeystoreAlias;
@@ -197,6 +221,14 @@ public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
         private Date mEndDate;
 
+        private int mFlags;
+
+        /**
+         * Creates a new instance of the {@code Builder} with the given
+         * {@code context}. The {@code context} passed in may be used to pop up
+         * some UI to ask the user to unlock or initialize the Android KeyStore
+         * facility.
+         */
         public Builder(Context context) {
             if (context == null) {
                 throw new NullPointerException("context == null");
@@ -266,6 +298,17 @@ public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Indicates that this key must be encrypted at rest on storage. Note
+         * that enabling this will require that the user enable a strong lock
+         * screen (e.g., PIN, password) before creating or using the generated
+         * key is successful.
+         */
+        public Builder setEncryptionRequired() {
+            mFlags |= KeyStore.FLAG_ENCRYPTED;
+            return this;
+        }
+
+        /**
          * Builds the instance of the {@code AndroidKeyPairGeneratorSpec}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -273,7 +316,7 @@ public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
          */
         public AndroidKeyPairGeneratorSpec build() {
             return new AndroidKeyPairGeneratorSpec(mContext, mKeystoreAlias, mSubjectDN,
-                    mSerialNumber, mStartDate, mEndDate);
+                    mSerialNumber, mStartDate, mEndDate, mFlags);
         }
     }
 }
