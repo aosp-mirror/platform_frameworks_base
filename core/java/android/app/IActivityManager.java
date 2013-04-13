@@ -285,7 +285,9 @@ public interface IActivityManager extends IInterface {
             int enterAnim, int exitAnim) throws RemoteException;
     
     public boolean isUserAMonkey() throws RemoteException;
-    
+
+    public void setUserIsMonkey(boolean monkey) throws RemoteException;
+
     public void finishHeavyWeightApp() throws RemoteException;
 
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
@@ -635,4 +637,5 @@ public interface IActivityManager extends IInterface {
     int REPORT_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+162;
     int GET_LAUNCHED_FROM_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+163;
     int KILL_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
+    int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
 }

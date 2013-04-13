@@ -189,6 +189,10 @@ public class Instrumentation {
         if (mPerfMetrics != null) {
             results.putAll(mPerfMetrics);
         }
+        if (mUiAutomation != null) {
+            mUiAutomation.disconnect();
+            mUiAutomation = null;
+        }
         mThread.finishInstrumentation(resultCode, results);
     }
     
@@ -1695,10 +1699,6 @@ public class Instrumentation {
                 startPerformanceSnapshot();
             }
             onStart();
-            if (mUiAutomation != null) {
-                mUiAutomation.disconnect();
-                mUiAutomation = null;
-            }
         }
     }
 
