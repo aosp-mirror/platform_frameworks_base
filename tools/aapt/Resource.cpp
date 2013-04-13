@@ -1597,7 +1597,7 @@ static String16 getAttributeComment(const sp<AaptAssets>& assets,
 
 static status_t writeLayoutClasses(
     FILE* fp, const sp<AaptAssets>& assets,
-    const sp<AaptSymbols>& symbols, int indent, bool includePrivate)
+    const sp<AaptSymbols>& symbols, int indent, bool includePrivate, bool nonConstantId)
 {
     const char* indentStr = getIndentSpace(indent);
     if (!includePrivate) {
@@ -1611,6 +1611,14 @@ static status_t writeLayoutClasses(
 
     indentStr = getIndentSpace(indent);
     bool hasErrors = false;
+
+    const char * id_array_format = nonConstantId ?
+            "%spublic static int[] %s = {\n%s" :
+            "%spublic static final int[] %s = {\n%s";
+
+    const char * id_array_index_format = nonConstantId ?
+            "%spublic static int %s_%s = %d;\n" :
+            "%spublic static final int %s_%s = %d;\n";
 
     size_t i;
     size_t N = symbols->getNestedSymbols().size();
@@ -1745,8 +1753,7 @@ static status_t writeLayoutClasses(
         }
         
         fprintf(fp,
-                "%spublic static final int[] %s = {\n"
-                "%s",
+                id_array_format,
                 indentStr, nclassName.string(),
                 getIndentSpace(indent+1));
 
@@ -1840,7 +1847,7 @@ static status_t writeLayoutClasses(
                     fprintf(fp, "%s@Deprecated\n", indentStr);
                 }
                 fprintf(fp,
-                        "%spublic static final int %s_%s = %d;\n",
+                        id_array_index_format,
                         indentStr, nclassName.string(),
                         String8(name).string(), (int)pos);
             }
@@ -2083,7 +2090,7 @@ static status_t writeSymbolClass(
     }
 
     if (styleableSymbols != NULL) {
-        err = writeLayoutClasses(fp, assets, styleableSymbols, indent, includePrivate);
+        err = writeLayoutClasses(fp, assets, styleableSymbols, indent, includePrivate, nonConstantId);
         if (err != NO_ERROR) {
             return err;
         }
