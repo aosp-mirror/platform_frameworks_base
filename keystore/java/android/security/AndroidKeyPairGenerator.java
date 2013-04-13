@@ -49,10 +49,7 @@ import java.security.spec.X509EncodedKeySpec;
  *
  * {@hide}
  */
-@SuppressWarnings("deprecation")
 public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
-    public static final String NAME = "AndroidKeyPairGenerator";
-
     private android.security.KeyStore mKeyStore;
 
     private AndroidKeyPairGeneratorSpec mSpec;
@@ -79,12 +76,21 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
                     "Must call initialize with an AndroidKeyPairGeneratorSpec first");
         }
 
+        if (((mSpec.getFlags() & KeyStore.FLAG_ENCRYPTED) != 0)
+                && (mKeyStore.state() != KeyStore.State.UNLOCKED)) {
+            throw new IllegalStateException(
+                    "Android keystore must be in initialized and unlocked state "
+                            + "if encryption is required");
+        }
+
         final String alias = mSpec.getKeystoreAlias();
 
         Credentials.deleteAllTypesForAlias(mKeyStore, alias);
 
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
-        mKeyStore.generate(privateKeyAlias);
+        if (!mKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF, mSpec.getFlags())) {
+            throw new IllegalStateException("could not generate key in keystore");
+        }
 
         final PrivateKey privKey;
         final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
@@ -131,7 +137,8 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
             throw new IllegalStateException("Can't get encoding of certificate", e);
         }
 
-        if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, certBytes)) {
+        if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, certBytes, KeyStore.UID_SELF,
+                mSpec.getFlags())) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new IllegalStateException("Can't store certificate in AndroidKeyStore");
         }
