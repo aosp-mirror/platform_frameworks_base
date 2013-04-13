@@ -504,11 +504,13 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         assertAliases(new String[] {});
 
-        assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1));
+        assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertAliases(new String[] { TEST_ALIAS_1 });
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertAliases(new String[] { TEST_ALIAS_1, TEST_ALIAS_2 });
     }
@@ -530,11 +532,13 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         assertAliases(new String[] {});
 
-        assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1));
+        assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertTrue("Should contain generated private key", mKeyStore.containsAlias(TEST_ALIAS_1));
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertTrue("Should contain added CA certificate", mKeyStore.containsAlias(TEST_ALIAS_2));
 
@@ -547,7 +551,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertTrue("Should contain added CA certificate", mKeyStore.containsAlias(TEST_ALIAS_2));
     }
@@ -567,15 +572,19 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         // TEST_ALIAS_1
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         // TEST_ALIAS_2
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         // TEST_ALIAS_3
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_3, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_3, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertAliases(new String[] { TEST_ALIAS_1, TEST_ALIAS_2, TEST_ALIAS_3 });
 
@@ -608,9 +617,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         // TEST_ALIAS_1
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         // Should not throw when a non-existent entry is requested for delete.
         mKeyStore.deleteEntry(TEST_ALIAS_2);
@@ -621,7 +632,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertAliases(new String[] { TEST_ALIAS_1 });
 
@@ -652,7 +664,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         CertificateFactory f = CertificateFactory.getInstance("X.509");
         Certificate actual = f.generateCertificate(new ByteArrayInputStream(FAKE_CA_1));
@@ -668,9 +681,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         CertificateFactory f = CertificateFactory.getInstance("X.509");
         Certificate actual = f.generateCertificate(new ByteArrayInputStream(FAKE_USER_1));
@@ -686,13 +701,16 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         // Insert TrustedCertificateEntry with CA name
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         // Insert PrivateKeyEntry that uses the same CA
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         CertificateFactory f = CertificateFactory.getInstance("X.509");
         Certificate actual = f.generateCertificate(new ByteArrayInputStream(FAKE_CA_1));
@@ -719,7 +737,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         CertificateFactory f = CertificateFactory.getInstance("X.509");
         Certificate userCert = f.generateCertificate(new ByteArrayInputStream(FAKE_USER_1));
@@ -734,9 +753,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         Certificate[] expected = new Certificate[2];
@@ -771,9 +792,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         Date now = new Date();
         Date actual = mKeyStore.getCreationDate(TEST_ALIAS_1);
@@ -810,7 +833,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         Date now = new Date();
         Date actual = mKeyStore.getCreationDate(TEST_ALIAS_1);
@@ -829,9 +853,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         Entry entry = mKeyStore.getEntry(TEST_ALIAS_1, null);
         assertNotNull("Entry should exist", entry);
@@ -930,9 +956,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         Key key = mKeyStore.getKey(TEST_ALIAS_1, null);
         assertNotNull("Key should exist", key);
@@ -977,7 +1005,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertNull("Certificate entries should return null", mKeyStore.getKey(TEST_ALIAS_1, null));
     }
@@ -1006,7 +1035,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         setupPassword();
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertTrue("Should return true for CA certificate",
                 mKeyStore.isCertificateEntry(TEST_ALIAS_1));
@@ -1017,9 +1047,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertFalse("Should return false for PrivateKeyEntry",
                 mKeyStore.isCertificateEntry(TEST_ALIAS_1));
@@ -1045,9 +1077,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertTrue("Should return true for PrivateKeyEntry", mKeyStore.isKeyEntry(TEST_ALIAS_1));
     }
@@ -1056,7 +1090,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         setupPassword();
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertFalse("Should return false for CA certificate", mKeyStore.isKeyEntry(TEST_ALIAS_1));
     }
@@ -1089,7 +1124,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         setupPassword();
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertAliases(new String[] { TEST_ALIAS_1 });
 
@@ -1107,9 +1143,11 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         mKeyStore.load(null, null);
 
         assertTrue(mAndroidKeyStore.importKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                FAKE_KEY_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1));
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+                FAKE_KEY_1, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1, FAKE_USER_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertAliases(new String[] { TEST_ALIAS_1 });
 
@@ -1596,7 +1634,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         // Create key #1
         {
             final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
-            assertTrue(mAndroidKeyStore.generate(privateKeyAlias));
+            assertTrue(mAndroidKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF,
+                    KeyStore.FLAG_ENCRYPTED));
 
             Key key = mKeyStore.getKey(TEST_ALIAS_1, null);
 
@@ -1608,7 +1647,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
                     TEST_SERIAL_1, TEST_DN_1, NOW, NOW_PLUS_10_YEARS);
 
             assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1,
-                    expectedCert.getEncoded()));
+                    expectedCert.getEncoded(), KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
             Entry entry = mKeyStore.getEntry(TEST_ALIAS_1, null);
 
@@ -1651,25 +1690,27 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         // Create key #1
         {
             final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
-            assertTrue(mAndroidKeyStore.generate(privateKeyAlias));
+            assertTrue(mAndroidKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF,
+                    KeyStore.FLAG_ENCRYPTED));
 
             X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_1,
                     TEST_SERIAL_1, TEST_DN_1, NOW, NOW_PLUS_10_YEARS);
 
             assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1,
-                    cert.getEncoded()));
+                    cert.getEncoded(), KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
         }
 
         // Create key #2
         {
             final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_2;
-            assertTrue(mAndroidKeyStore.generate(privateKeyAlias));
+            assertTrue(mAndroidKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF,
+                    KeyStore.FLAG_ENCRYPTED));
 
             X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_2,
                     TEST_SERIAL_2, TEST_DN_2, NOW, NOW_PLUS_10_YEARS);
 
             assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_2,
-                    cert.getEncoded()));
+                    cert.getEncoded(), KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
         }
 
         // Replace key #1 with key #2
@@ -1731,17 +1772,20 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         setupPassword();
         mKeyStore.load(null, null);
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_1, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertEquals("The keystore size should match expected", 1, mKeyStore.size());
         assertAliases(new String[] { TEST_ALIAS_1 });
 
-        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1));
+        assertTrue(mAndroidKeyStore.put(Credentials.CA_CERTIFICATE + TEST_ALIAS_2, FAKE_CA_1,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertEquals("The keystore size should match expected", 2, mKeyStore.size());
         assertAliases(new String[] { TEST_ALIAS_1, TEST_ALIAS_2 });
 
-        assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_3));
+        assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_3,
+                KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertEquals("The keystore size should match expected", 3, mKeyStore.size());
         assertAliases(new String[] { TEST_ALIAS_1, TEST_ALIAS_2, TEST_ALIAS_3 });
@@ -1807,13 +1851,14 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
     private void setupKey() throws Exception {
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
-        assertTrue(mAndroidKeyStore.generate(privateKeyAlias));
+        assertTrue(mAndroidKeyStore
+                .generate(privateKeyAlias, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_1, TEST_SERIAL_1,
                 TEST_DN_1, NOW, NOW_PLUS_10_YEARS);
 
         assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1,
-                cert.getEncoded()));
+                cert.getEncoded(), KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
     }
 
     public void testKeyStore_KeyOperations_Wrap_Encrypted_Success() throws Exception {
