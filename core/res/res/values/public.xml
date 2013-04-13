@@ -2042,6 +2042,7 @@
   <public type="attr" name="childIndicatorStart" />
   <public type="attr" name="childIndicatorEnd" />
   <public type="attr" name="restrictedAccountType" />
+  <public type="attr" name="requiredAccountType" />
 
   <public type="style" name="Theme.NoTitleBar.Overscan" />
   <public type="style" name="Theme.Light.NoTitleBar.Overscan" />
