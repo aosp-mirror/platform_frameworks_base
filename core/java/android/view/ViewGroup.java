@@ -1474,10 +1474,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final float y = event.getY();
             final int childrenCount = mChildrenCount;
             if (childrenCount != 0) {
+                final boolean customChildOrder = isChildrenDrawingOrderEnabled();
                 final View[] children = mChildren;
                 HoverTarget lastHoverTarget = null;
                 for (int i = childrenCount - 1; i >= 0; i--) {
-                    final View child = children[i];
+                    final int childIndex = customChildOrder
+                            ? getChildDrawingOrder(childrenCount, i) : i;
+                    final View child = children[childIndex];
                     if (!canViewReceivePointerEvents(child)
                             || !isTransformedTouchPointInView(x, y, child, null)) {
                         continue;
