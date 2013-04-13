@@ -103,14 +103,6 @@ public class KeyStore {
         }
     }
 
-    public boolean put(String key, byte[] value, int uid) {
-        return put(key, value, uid, FLAG_ENCRYPTED);
-    }
-
-    public boolean put(String key, byte[] value) {
-        return put(key, value, UID_SELF);
-    }
-
     public boolean delete(String key, int uid) {
         try {
             return mBinder.del(key, uid) == NO_ERROR;
@@ -205,14 +197,6 @@ public class KeyStore {
         }
     }
 
-    public boolean generate(String key, int uid) {
-        return generate(key, uid, FLAG_ENCRYPTED);
-    }
-
-    public boolean generate(String key) {
-        return generate(key, UID_SELF);
-    }
-
     public boolean importKey(String keyName, byte[] key, int uid, int flags) {
         try {
             return mBinder.import_key(keyName, key, uid, flags) == NO_ERROR;
@@ -220,14 +204,6 @@ public class KeyStore {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
-    }
-
-    public boolean importKey(String keyName, byte[] key, int uid) {
-        return importKey(keyName, key, uid, FLAG_ENCRYPTED);
-    }
-
-    public boolean importKey(String keyName, byte[] key) {
-        return importKey(keyName, key, UID_SELF);
     }
 
     public byte[] getPubkey(String key) {
