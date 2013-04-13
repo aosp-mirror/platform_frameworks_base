@@ -181,6 +181,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean DEBUG_WINDOW_TRACE = false;
     static final boolean DEBUG_TASK_MOVEMENT = false;
+    static final boolean DEBUG_STACK = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -2318,9 +2319,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (localLOGV || DEBUG_FOCUS) Slog.v(
             TAG, "Remove " + win + " client="
-            + Integer.toHexString(System.identityHashCode(
-                win.mClient.asBinder()))
-            + ", surface=" + win.mWinAnimator.mSurfaceControl);
+            + Integer.toHexString(System.identityHashCode(win.mClient.asBinder()))
+            + ", surface=" + win.mWinAnimator.mSurfaceControl,
+            new RuntimeException("here").fillInStackTrace());
 
         final long origId = Binder.clearCallingIdentity();
 
@@ -7676,8 +7677,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mRebuilding = true;
                 mRebuildTmp[numRemoved] = win;
                 mWindowsChanged = true;
-                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
-                        "Rebuild removing window: " + win);
+                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Rebuild removing window: " + win);
                 NW--;
                 numRemoved++;
                 continue;

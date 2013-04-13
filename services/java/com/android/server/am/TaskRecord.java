@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerService.TAG;
+import static com.android.server.am.ActivityStack.DEBUG_ADD_REMOVE;
+
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
@@ -126,6 +129,20 @@ class TaskRecord extends ThumbnailHolder {
             return r;
         }
         return null;
+    }
+
+    /**
+     * Reorder the history stack so that the activity at the given index is
+     * brought to the front.
+     */
+    final void moveActivityToFrontLocked(ActivityRecord newTop) {
+        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + newTop
+            + " to stack at top", new RuntimeException("here").fillInStackTrace());
+
+        getTopActivity().frontOfTask = false;
+        mActivities.remove(newTop);
+        mActivities.add(newTop);
+        newTop.frontOfTask = true;
     }
 
     void addActivityAtBottom(ActivityRecord r) {
@@ -289,10 +306,16 @@ class TaskRecord extends ThumbnailHolder {
 
     @Override
     public String toString() {
-        if (stringName != null) {
-            return stringName;
-        }
         StringBuilder sb = new StringBuilder(128);
+        if (stringName != null) {
+            sb.append(stringName);
+            sb.append(" U=");
+            sb.append(userId);
+            sb.append(" sz=");
+            sb.append(mActivities.size());
+            sb.append('}');
+            return sb.toString();
+        }
         sb.append("TaskRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" #");
@@ -309,11 +332,7 @@ class TaskRecord extends ThumbnailHolder {
         } else {
             sb.append(" ??");
         }
-        sb.append(" U=");
-        sb.append(userId);
-        sb.append(" sz=");
-        sb.append(mActivities.size());
-        sb.append('}');
-        return stringName = sb.toString();
+        stringName = sb.toString();
+        return toString();
     }
 }

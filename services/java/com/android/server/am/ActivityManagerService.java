@@ -2610,7 +2610,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
-            final ActivityStack stack = getMainStack();
+            final ActivityStack stack = getTopStack();
             if (stack.mResumedActivity != null &&
                     stack.mResumedActivity.info.applicationInfo.uid == Binder.getCallingUid()) {
                 mAppSwitchesAllowedTime = 0;
@@ -5898,6 +5898,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
+        mRecentTasks.remove(tr);
+        mStackSupervisor.removeTask(tr);
         final boolean killProcesses = (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0;
         Intent baseIntent = new Intent(
                 tr.intent != null ? tr.intent : tr.affinityIntent);
@@ -5955,14 +5957,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (tr != null) {
                     ActivityRecord r = tr.stack.removeTaskActivitiesLocked(taskId, -1, false);
                     if (r != null) {
-                        mRecentTasks.remove(tr);
                         cleanUpRemovedTaskLocked(tr, flags);
                         return true;
                     }
                     if (tr.mActivities.size() == 0) {
                         // Caller is just removing a recent task that is
                         // not actively running.  That is easy!
-                        mRecentTasks.remove(tr);
                         cleanUpRemovedTaskLocked(tr, flags);
                         return true;
                     }
@@ -6003,12 +6003,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void moveTaskToBack(int task) {
+    public void moveTaskToBack(int taskId) {
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
                 "moveTaskToBack()");
 
         synchronized(this) {
-            TaskRecord tr = recentTaskForIdLocked(task);
+            TaskRecord tr = recentTaskForIdLocked(taskId);
             if (tr != null) {
                 ActivityStack stack = tr.stack;
                 if (stack.mResumedActivity != null && stack.mResumedActivity.task == tr) {
@@ -6018,7 +6018,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
                 final long origId = Binder.clearCallingIdentity();
-                stack.moveTaskToBackLocked(task, null);
+                stack.moveTaskToBackLocked(taskId, null);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -6071,7 +6071,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int createStack(int relativeStackId, int position, float weight) {
         synchronized (this) {
             int stackId = mStackSupervisor.createStack(relativeStackId, position, weight);
-            mWindowManager.createStack(stackId, position, relativeStackId, weight);
+            mWindowManager.createStack(stackId, relativeStackId, position, weight);
             return stackId;
         }
     }
@@ -7003,7 +7003,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                getMainStack().unhandledBackLocked();
+                getTopStack().unhandledBackLocked();
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -7393,7 +7393,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         PendingActivityExtras pae;
         Bundle extras = new Bundle();
         synchronized (this) {
-            ActivityRecord activity = getMainStack().mResumedActivity;
+            ActivityRecord activity = getTopStack().mResumedActivity;
             if (activity == null) {
                 Slog.w(TAG, "getTopActivityExtras failed: no resumed activity");
                 return null;
@@ -7489,7 +7489,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("startActivity");
         synchronized (this) {
-            ActivityRecord r = getMainStack().topRunningActivityLocked(null);
+            ActivityRecord r = getTopStack().topRunningActivityLocked(null);
             return (r != null) ? r.immersive : false;
         }
     }
@@ -9391,7 +9391,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         pw.println("  mConfiguration: " + mConfiguration);
         if (dumpAll) {
-            pw.println("  mConfigWillChange: " + getMainStack().mConfigWillChange);
+            pw.println("  mConfigWillChange: " + getTopStack().mConfigWillChange);
             if (mCompatModePackages.getPackages().size() > 0) {
                 boolean printed = false;
                 for (Map.Entry<String, Integer> entry
@@ -9451,8 +9451,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.print("  mLastPowerCheckUptime=");
                     TimeUtils.formatDuration(mLastPowerCheckUptime, pw);
                     pw.println("");
-            pw.println("  mGoingToSleep=" + getMainStack().mGoingToSleep);
-            pw.println("  mLaunchingActivity=" + getMainStack().mLaunchingActivity);
+            pw.println("  mGoingToSleep=" + getTopStack().mGoingToSleep);
+            pw.println("  mLaunchingActivity=" + getTopStack().mLaunchingActivity);
             pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
             pw.println("  mNumNonHiddenProcs=" + mNumNonHiddenProcs
                     + " mNumHiddenProcs=" + mNumHiddenProcs
@@ -12185,8 +12185,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return config;
     }
 
-    ActivityStack getMainStack() {
-        return mStackSupervisor.getMainStack();
+    ActivityStack getTopStack() {
+        return mStackSupervisor.getTopStack();
     }
 
     public Configuration getConfiguration() {
@@ -12250,9 +12250,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mHeadless) return true;
 
         int changes = 0;
-        
-        boolean kept = true;
-        
+
         if (values != null) {
             Configuration newConfig = new Configuration(mConfiguration);
             changes = newConfig.updateFrom(values);
@@ -12331,7 +12329,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        kept = mStackSupervisor.updateConfigurationLocked(changes, starting);
+        boolean kept = true;
+        final ActivityStack mainStack = mStackSupervisor.getTopStack();
+        if (changes != 0 && starting == null) {
+            // If the configuration changed, and the caller is not already
+            // in the process of starting an activity, then find the top
+            // activity to check if its configuration needs to change.
+            starting = mainStack.topRunningActivityLocked(null);
+        }
+        
+        if (starting != null) {
+            kept = mainStack.ensureActivityConfigurationLocked(starting, changes);
+            // And we need to make sure at this point that all other activities
+            // are made visible with the correct configuration.
+            mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
+        }
 
         if (values != null && mWindowManager != null) {
             mWindowManager.setNewConfiguration(mConfiguration);
@@ -13409,15 +13421,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final ActivityRecord resumedAppLocked() {
-        final ActivityStack stack = mStackSupervisor.getMainStack();
-        ActivityRecord resumedActivity = stack.mResumedActivity;
-        if (resumedActivity == null || resumedActivity.app == null) {
-            resumedActivity = stack.mPausingActivity;
-            if (resumedActivity == null || resumedActivity.app == null) {
-                resumedActivity = stack.topRunningActivityLocked(null);
-            }
-        }
-        return resumedActivity;
+        return mStackSupervisor.resumedAppLocked();
     }
 
     final boolean updateOomAdjLocked(ProcessRecord app) {

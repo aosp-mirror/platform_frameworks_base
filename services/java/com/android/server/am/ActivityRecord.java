@@ -127,8 +127,12 @@ final class ActivityRecord {
     long lastLaunchTime;    // time of last lauch of this activity
 
     String stringName;      // for caching of toString().
-    
+
     private boolean inHistory;  // are we in the history stack?
+    final ActivityStackSupervisor mStackSupervisor;
+
+    /** Launch the home activity rather than the activity at the top of stack */
+    boolean mLaunchHomeTaskNext;
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -268,28 +272,28 @@ final class ActivityRecord {
             weakActivity = new WeakReference<ActivityRecord>(activity);
         }
 
-        @Override public void windowsDrawn() throws RemoteException {
+        @Override public void windowsDrawn() {
             ActivityRecord activity = weakActivity.get();
             if (activity != null) {
                 activity.windowsDrawn();
             }
         }
 
-        @Override public void windowsVisible() throws RemoteException {
+        @Override public void windowsVisible() {
             ActivityRecord activity = weakActivity.get();
             if (activity != null) {
                 activity.windowsVisible();
             }
         }
 
-        @Override public void windowsGone() throws RemoteException {
+        @Override public void windowsGone() {
             ActivityRecord activity = weakActivity.get();
             if (activity != null) {
                 activity.windowsGone();
             }
         }
 
-        @Override public boolean keyDispatchingTimedOut() throws RemoteException {
+        @Override public boolean keyDispatchingTimedOut() {
             ActivityRecord activity = weakActivity.get();
             if (activity != null) {
                 return activity.keyDispatchingTimedOut();
@@ -297,7 +301,7 @@ final class ActivityRecord {
             return false;
         }
 
-        @Override public long getKeyDispatchingTimeout() throws RemoteException {
+        @Override public long getKeyDispatchingTimeout() {
             ActivityRecord activity = weakActivity.get();
             if (activity != null) {
                 return activity.getKeyDispatchingTimeout();
@@ -305,6 +309,7 @@ final class ActivityRecord {
             return 0;
         }
 
+        @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(128);
             sb.append("Token{");
@@ -329,7 +334,7 @@ final class ActivityRecord {
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
-            boolean _componentSpecified) {
+            boolean _componentSpecified, ActivityStackSupervisor supervisor) {
         service = _service;
         appToken = new Token(this);
         info = aInfo;
@@ -359,6 +364,7 @@ final class ActivityRecord {
         thumbnailNeeded = false;
         idle = false;
         hasBeenLaunched = false;
+        mStackSupervisor = supervisor;
 
         // This starts out true, since the initial state of an activity
         // is that we have everything, and we shouldn't never consider it
@@ -466,6 +472,9 @@ final class ActivityRecord {
     }
 
     void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
+        if (task != null && task.removeActivity(this)) {
+            mStackSupervisor.removeTask(task);
+        }
         if (inHistory && !finishing) {
             if (task != null) {
                 task.numActivities--;
@@ -522,6 +531,11 @@ final class ActivityRecord {
                 clearOptionsLocked();
             }
         }
+    }
+
+    boolean isRootActivity() {
+        ArrayList<ActivityRecord> activities = task.mActivities;
+        return activities.size() == 0 || this == task.mActivities.get(0);
     }
 
     UriPermissionOwner getUriPermissionsLocked() {
@@ -814,23 +828,23 @@ final class ActivityRecord {
                     // Instead of doing the full stop routine here, let's just
                     // hide any activities we now can, and let them stop when
                     // the normal idle happens.
-                    stack.processStoppingActivitiesLocked(false);
+                    mStackSupervisor.processStoppingActivitiesLocked(false);
                 } else {
                     // If this activity was already idle, then we now need to
                     // make sure we perform the full stop of any activities
                     // that are waiting to do so.  This is because we won't
                     // do that while they are still waiting for this one to
                     // become visible.
-                    final int N = stack.mWaitingVisibleActivities.size();
+                    final int N = mStackSupervisor.mWaitingVisibleActivities.size();
                     if (N > 0) {
                         for (int i=0; i<N; i++) {
-                            ActivityRecord r = stack.mWaitingVisibleActivities.get(i);
+                            ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
                             r.waitingVisible = false;
                             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                                     ActivityManagerService.TAG,
                                     "Was waiting for visible: " + r);
                         }
-                        stack.mWaitingVisibleActivities.clear();
+                        mStackSupervisor.mWaitingVisibleActivities.clear();
                         Message msg = Message.obtain();
                         msg.what = ActivityStack.IDLE_NOW_MSG;
                         stack.mHandler.sendMessage(msg);

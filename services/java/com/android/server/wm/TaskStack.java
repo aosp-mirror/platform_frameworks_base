@@ -85,17 +85,10 @@ public class TaskStack {
      * Delete a Task from this stack. If it is the last Task in the stack, remove this stack from
      * its parent StackBox and merge the parent.
      * @param task The Task to delete.
-     * @return True if #task was in this stack.
      */
-    boolean removeTask(Task task) {
+    void removeTask(Task task) {
         mParent.makeDirty();
-        if (mTasks.remove(task)) {
-            if (mTasks.size() == 0) {
-                mParent.removeStack();
-            }
-            return true;
-        }
-        return false;
+        mTasks.remove(task);
     }
 
     int remove() {

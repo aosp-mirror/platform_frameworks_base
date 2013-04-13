@@ -212,7 +212,7 @@ public class StackBox {
             mParent.absorb(mParent.mFirst);
         }
         mParent.makeDirty();
-        return getStackId();
+        return mParent.getStackId();
     }
 
     /** TODO: */
@@ -222,19 +222,26 @@ public class StackBox {
 
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mParent="); pw.println(mParent);
-        pw.print(prefix); pw.print("mFirst="); pw.println(mFirst);
-        pw.print(prefix); pw.print("mSecond="); pw.println(mSecond);
         pw.print(prefix); pw.print("mBounds="); pw.print(mBounds.toShortString());
             pw.print(" mVertical="); pw.print(mVertical);
             pw.print(" layoutNeeded="); pw.println(layoutNeeded);
-        if (mStack != null) {
-            pw.print(prefix); pw.print("mStack="); pw.println(mStack);
-            mStack.dump(prefix + "  ", pw);
-        } else {
+        if (mFirst != null) {
             pw.print(prefix); pw.print("mFirst="); pw.println(mStack);
             mFirst.dump(prefix + "  ", pw);
             pw.print(prefix); pw.print("mSecond="); pw.println(mStack);
             mSecond.dump(prefix + "  ", pw);
+        } else {
+            pw.print(prefix); pw.print("mStack="); pw.println(mStack);
+            mStack.dump(prefix + "  ", pw);
         }
+    }
+
+    @Override
+    public String toString() {
+        if (mStack != null) {
+            return "Box{" + hashCode() + " stack=" + mStack.mStackId + "}";
+        }
+        return "Box{" + hashCode() + " parent=" + mParent.hashCode()
+                + " first=" + mFirst.hashCode() + " second=" + mSecond.hashCode() + "}";
     }
 }
