@@ -27,6 +27,7 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
@@ -64,22 +65,34 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
 
         assertFalse(mAndroidKeyStore.isUnlocked());
 
+        mGenerator = java.security.KeyPairGenerator.getInstance("AndroidKeyStore");
+    }
+
+    private void setupPassword() {
         assertTrue(mAndroidKeyStore.password("1111"));
         assertTrue(mAndroidKeyStore.isUnlocked());
 
         String[] aliases = mAndroidKeyStore.saw("");
         assertNotNull(aliases);
         assertEquals(0, aliases.length);
-
-        mGenerator = java.security.KeyPairGenerator.getInstance(AndroidKeyPairGenerator.NAME);
     }
 
-    public void testKeyPairGenerator_Initialize_Params_Success() throws Exception {
-        mGenerator.initialize(new AndroidKeyPairGeneratorSpec(getContext(), TEST_ALIAS_1,
-                TEST_DN_1, TEST_SERIAL_1, NOW, NOW_PLUS_10_YEARS));
+    public void testKeyPairGenerator_Initialize_Params_Encrypted_Success() throws Exception {
+        setupPassword();
+
+        mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                .setAlias(TEST_ALIAS_1)
+                .setSubject(TEST_DN_1)
+                .setSerialNumber(TEST_SERIAL_1)
+                .setStartDate(NOW)
+                .setEndDate(NOW_PLUS_10_YEARS)
+                .setEncryptionRequired()
+                .build());
     }
 
-    public void testKeyPairGenerator_Initialize_KeySize_Failure() throws Exception {
+    public void testKeyPairGenerator_Initialize_KeySize_Encrypted_Failure() throws Exception {
+        setupPassword();
+
         try {
             mGenerator.initialize(1024);
             fail("KeyPairGenerator should not support setting the key size");
@@ -87,7 +100,10 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         }
     }
 
-    public void testKeyPairGenerator_Initialize_KeySizeAndSecureRandom_Failure() throws Exception {
+    public void testKeyPairGenerator_Initialize_KeySizeAndSecureRandom_Encrypted_Failure()
+            throws Exception {
+        setupPassword();
+
         try {
             mGenerator.initialize(1024, new SecureRandom());
             fail("KeyPairGenerator should not support setting the key size");
@@ -95,14 +111,48 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         }
     }
 
-    public void testKeyPairGenerator_Initialize_ParamsAndSecureRandom_Failure() throws Exception {
-        mGenerator.initialize(new AndroidKeyPairGeneratorSpec(getContext(), TEST_ALIAS_1,
-                TEST_DN_1, TEST_SERIAL_1, NOW, NOW_PLUS_10_YEARS), new SecureRandom());
+    public void testKeyPairGenerator_Initialize_ParamsAndSecureRandom_Encrypted_Failure()
+            throws Exception {
+        setupPassword();
+
+        mGenerator.initialize(
+                new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                        .setAlias(TEST_ALIAS_1)
+                        .setSubject(TEST_DN_1)
+                        .setSerialNumber(TEST_SERIAL_1)
+                        .setStartDate(NOW)
+                        .setEndDate(NOW_PLUS_10_YEARS)
+                        .setEncryptionRequired()
+                        .build(),
+                new SecureRandom());
     }
 
-    public void testKeyPairGenerator_GenerateKeyPair_Success() throws Exception {
-        mGenerator.initialize(new AndroidKeyPairGeneratorSpec(getContext(), TEST_ALIAS_1,
-                TEST_DN_1, TEST_SERIAL_1, NOW, NOW_PLUS_10_YEARS));
+    public void testKeyPairGenerator_GenerateKeyPair_Encrypted_Success() throws Exception {
+        setupPassword();
+
+        mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                .setAlias(TEST_ALIAS_1)
+                .setSubject(TEST_DN_1)
+                .setSerialNumber(TEST_SERIAL_1)
+                .setStartDate(NOW)
+                .setEndDate(NOW_PLUS_10_YEARS)
+                .setEncryptionRequired()
+                .build());
+
+        final KeyPair pair = mGenerator.generateKeyPair();
+        assertNotNull("The KeyPair returned should not be null", pair);
+
+        assertKeyPairCorrect(pair, TEST_ALIAS_1, TEST_DN_1, TEST_SERIAL_1, NOW, NOW_PLUS_10_YEARS);
+    }
+
+    public void testKeyPairGenerator_GenerateKeyPair_Unencrypted_Success() throws Exception {
+        mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                .setAlias(TEST_ALIAS_1)
+                .setSubject(TEST_DN_1)
+                .setSerialNumber(TEST_SERIAL_1)
+                .setStartDate(NOW)
+                .setEndDate(NOW_PLUS_10_YEARS)
+                .build());
 
         final KeyPair pair = mGenerator.generateKeyPair();
         assertNotNull("The KeyPair returned should not be null", pair);
@@ -113,8 +163,13 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
     public void testKeyPairGenerator_GenerateKeyPair_Replaced_Success() throws Exception {
         // Generate the first key
         {
-            mGenerator.initialize(new AndroidKeyPairGeneratorSpec(getContext(), TEST_ALIAS_1,
-                    TEST_DN_1, TEST_SERIAL_1, NOW, NOW_PLUS_10_YEARS));
+            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                    .setAlias(TEST_ALIAS_1)
+                    .setSubject(TEST_DN_1)
+                    .setSerialNumber(TEST_SERIAL_1)
+                    .setStartDate(NOW)
+                    .setEndDate(NOW_PLUS_10_YEARS)
+                    .build());
             final KeyPair pair1 = mGenerator.generateKeyPair();
             assertNotNull("The KeyPair returned should not be null", pair1);
             assertKeyPairCorrect(pair1, TEST_ALIAS_1, TEST_DN_1, TEST_SERIAL_1, NOW,
@@ -123,11 +178,59 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
 
         // Replace the original key
         {
-            mGenerator.initialize(new AndroidKeyPairGeneratorSpec(getContext(), TEST_ALIAS_2,
-                    TEST_DN_2, TEST_SERIAL_2, NOW, NOW_PLUS_10_YEARS));
+            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                    .setAlias(TEST_ALIAS_2)
+                    .setSubject(TEST_DN_2)
+                    .setSerialNumber(TEST_SERIAL_2)
+                    .setStartDate(NOW)
+                    .setEndDate(NOW_PLUS_10_YEARS)
+                    .build());
             final KeyPair pair2 = mGenerator.generateKeyPair();
             assertNotNull("The KeyPair returned should not be null", pair2);
             assertKeyPairCorrect(pair2, TEST_ALIAS_2, TEST_DN_2, TEST_SERIAL_2, NOW,
+                    NOW_PLUS_10_YEARS);
+        }
+    }
+
+    public void testKeyPairGenerator_GenerateKeyPair_Replaced_UnencryptedToEncrypted_Success()
+            throws Exception {
+        // Generate the first key
+        {
+            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                    .setAlias(TEST_ALIAS_1)
+                    .setSubject(TEST_DN_1)
+                    .setSerialNumber(TEST_SERIAL_1)
+                    .setStartDate(NOW)
+                    .setEndDate(NOW_PLUS_10_YEARS)
+                    .build());
+            final KeyPair pair1 = mGenerator.generateKeyPair();
+            assertNotNull("The KeyPair returned should not be null", pair1);
+            assertKeyPairCorrect(pair1, TEST_ALIAS_1, TEST_DN_1, TEST_SERIAL_1, NOW,
+                    NOW_PLUS_10_YEARS);
+        }
+
+        // Attempt to replace previous key
+        {
+            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                    .setAlias(TEST_ALIAS_1)
+                    .setSubject(TEST_DN_2)
+                    .setSerialNumber(TEST_SERIAL_2)
+                    .setStartDate(NOW)
+                    .setEndDate(NOW_PLUS_10_YEARS)
+                    .setEncryptionRequired()
+                    .build());
+            try {
+                mGenerator.generateKeyPair();
+                fail("Should not be able to generate encrypted key while not initialized");
+            } catch (IllegalStateException expected) {
+            }
+
+            assertTrue(mAndroidKeyStore.password("1111"));
+            assertTrue(mAndroidKeyStore.isUnlocked());
+
+            final KeyPair pair2 = mGenerator.generateKeyPair();
+            assertNotNull("The KeyPair returned should not be null", pair2);
+            assertKeyPairCorrect(pair2, TEST_ALIAS_1, TEST_DN_2, TEST_SERIAL_2, NOW,
                     NOW_PLUS_10_YEARS);
         }
     }
@@ -163,10 +266,10 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         assertEquals("The Serial should be the one passed into the params", serial,
                 x509userCert.getSerialNumber());
 
-        assertEquals("The notBefore date should be the one passed into the params", start,
+        assertDateEquals("The notBefore date should be the one passed into the params", start,
                 x509userCert.getNotBefore());
 
-        assertEquals("The notAfter date should be the one passed into the params", end,
+        assertDateEquals("The notAfter date should be the one passed into the params", end,
                 x509userCert.getNotAfter());
 
         x509userCert.verify(pubKey);
@@ -177,5 +280,14 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         final byte[] pubKeyBytes = mAndroidKeyStore.getPubkey(Credentials.USER_PRIVATE_KEY + alias);
         assertNotNull("The keystore should return the public key for the generated key",
                 pubKeyBytes);
+    }
+
+    private static void assertDateEquals(String message, Date date1, Date date2) throws Exception {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
+
+        String result1 = formatter.format(date1);
+        String result2 = formatter.format(date2);
+
+        assertEquals(message, result1, result2);
     }
 }

@@ -27,6 +27,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.KeyStore.Entry;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.ProtectionParameter;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
@@ -198,14 +202,14 @@ public class AndroidKeyStore extends KeyStoreSpi {
         }
 
         if (key instanceof PrivateKey) {
-            setPrivateKeyEntry(alias, (PrivateKey) key, chain);
+            setPrivateKeyEntry(alias, (PrivateKey) key, chain, null);
         } else {
             throw new KeyStoreException("Only PrivateKeys are supported");
         }
     }
 
-    private void setPrivateKeyEntry(String alias, PrivateKey key, Certificate[] chain)
-            throws KeyStoreException {
+    private void setPrivateKeyEntry(String alias, PrivateKey key, Certificate[] chain,
+            AndroidKeyStoreParameter params) throws KeyStoreException {
         byte[] keyBytes = null;
 
         final String pkeyAlias;
@@ -317,15 +321,20 @@ public class AndroidKeyStore extends KeyStoreSpi {
             Credentials.deleteCertificateTypesForAlias(mKeyStore, alias);
         }
 
+        final int flags = (params == null) ? 0 : params.getFlags();
+
         if (shouldReplacePrivateKey
-                && !mKeyStore.importKey(Credentials.USER_PRIVATE_KEY + alias, keyBytes)) {
+                && !mKeyStore.importKey(Credentials.USER_PRIVATE_KEY + alias, keyBytes,
+                        android.security.KeyStore.UID_SELF, flags)) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new KeyStoreException("Couldn't put private key in keystore");
-        } else if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, userCertBytes)) {
+        } else if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, userCertBytes,
+                android.security.KeyStore.UID_SELF, flags)) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new KeyStoreException("Couldn't put certificate #1 in keystore");
         } else if (chainBytes != null
-                && !mKeyStore.put(Credentials.CA_CERTIFICATE + alias, chainBytes)) {
+                && !mKeyStore.put(Credentials.CA_CERTIFICATE + alias, chainBytes,
+                        android.security.KeyStore.UID_SELF, flags)) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new KeyStoreException("Couldn't put certificate chain in keystore");
         }
@@ -355,7 +364,8 @@ public class AndroidKeyStore extends KeyStoreSpi {
             throw new KeyStoreException(e);
         }
 
-        if (!mKeyStore.put(Credentials.CA_CERTIFICATE + alias, encoded)) {
+        if (!mKeyStore.put(Credentials.CA_CERTIFICATE + alias, encoded,
+                android.security.KeyStore.UID_SELF, android.security.KeyStore.FLAG_NONE)) {
             throw new KeyStoreException("Couldn't insert certificate; is KeyStore initialized?");
         }
     }
@@ -515,6 +525,39 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
         // Unfortunate name collision.
         mKeyStore = android.security.KeyStore.getInstance();
+    }
+
+    @Override
+    public void engineSetEntry(String alias, Entry entry, ProtectionParameter param)
+            throws KeyStoreException {
+        if (entry == null) {
+            throw new KeyStoreException("entry == null");
+        }
+
+        if (engineContainsAlias(alias)) {
+            engineDeleteEntry(alias);
+        }
+
+        if (entry instanceof KeyStore.TrustedCertificateEntry) {
+            KeyStore.TrustedCertificateEntry trE = (KeyStore.TrustedCertificateEntry) entry;
+            engineSetCertificateEntry(alias, trE.getTrustedCertificate());
+            return;
+        }
+
+        if (param != null && !(param instanceof AndroidKeyStoreParameter)) {
+            throw new KeyStoreException("protParam should be AndroidKeyStoreParameter; was: "
+                    + param.getClass().getName());
+        }
+
+        if (entry instanceof PrivateKeyEntry) {
+            PrivateKeyEntry prE = (PrivateKeyEntry) entry;
+            setPrivateKeyEntry(alias, prE.getPrivateKey(), prE.getCertificateChain(),
+                    (AndroidKeyStoreParameter) param);
+            return;
+        }
+
+        throw new KeyStoreException(
+                "Entry must be a PrivateKeyEntry or TrustedCertificateEntry; was " + entry);
     }
 
 }
