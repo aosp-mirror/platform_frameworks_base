@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.os.Trace;
 import dalvik.system.PathClassLoader;
 
 import java.util.HashMap;
@@ -54,14 +55,19 @@ class ApplicationLoaders
                     return loader;
                 }
     
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
                 PathClassLoader pathClassloader =
                     new PathClassLoader(zip, libPath, parent);
-                
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
                 mLoaders.put(zip, pathClassloader);
                 return pathClassloader;
             }
 
-            return new PathClassLoader(zip, parent);
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
+            PathClassLoader pathClassloader = new PathClassLoader(zip, parent);
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            return pathClassloader;
         }
     }
 

@@ -1642,7 +1642,7 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getAssetLength },
     { "getAssetRemainingLength", "(I)J",
         (void*) android_content_AssetManager_getAssetRemainingLength },
-    { "addAssetPath",   "(Ljava/lang/String;)I",
+    { "addAssetPathNative", "(Ljava/lang/String;)I",
         (void*) android_content_AssetManager_addAssetPath },
     { "isUpToDate",     "()Z",
         (void*) android_content_AssetManager_isUpToDate },

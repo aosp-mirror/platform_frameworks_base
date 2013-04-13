@@ -63,6 +63,8 @@ public final class Trace {
     public static final long TRACE_TAG_HAL = 1L << 11;
     /** @hide */
     public static final long TRACE_TAG_APP = 1L << 12;
+    /** @hide */
+    public static final long TRACE_TAG_RESOURCES = 1L << 13;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;
