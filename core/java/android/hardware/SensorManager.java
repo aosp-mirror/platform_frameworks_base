@@ -1387,14 +1387,14 @@ public abstract class SensorManager {
      * @throws IllegalArgumentException when sensor is a trigger sensor.
      */
     public boolean cancelTriggerSensor(TriggerEventListener listener, Sensor sensor) {
-        return cancelTriggerSensorImpl(listener, sensor);
+        return cancelTriggerSensorImpl(listener, sensor, true);
     }
 
     /**
      * @hide
      */
     protected abstract boolean cancelTriggerSensorImpl(TriggerEventListener listener,
-            Sensor sensor);
+            Sensor sensor, boolean disable);
 
 
     private LegacySensorManager getLegacySensorManager() {

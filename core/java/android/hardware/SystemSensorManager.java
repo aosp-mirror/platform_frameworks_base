@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -135,7 +136,7 @@ public class SystemSensorManager extends SensorManager {
                 if (sensor == null) {
                     result = queue.removeAllSensors();
                 } else {
-                    result = queue.removeSensor(sensor);
+                    result = queue.removeSensor(sensor, true);
                 }
                 if (result && !queue.hasSensors()) {
                     mSensorListeners.remove(listener);
@@ -170,7 +171,8 @@ public class SystemSensorManager extends SensorManager {
 
     /** @hide */
     @Override
-    protected boolean cancelTriggerSensorImpl(TriggerEventListener listener, Sensor sensor) {
+    protected boolean cancelTriggerSensorImpl(TriggerEventListener listener, Sensor sensor,
+            boolean disable) {
         if (sensor != null && Sensor.getReportingMode(sensor) != Sensor.REPORTING_MODE_ONE_SHOT) {
             return false;
         }
@@ -181,7 +183,7 @@ public class SystemSensorManager extends SensorManager {
                 if (sensor == null) {
                     result = queue.removeAllSensors();
                 } else {
-                    result = queue.removeSensor(sensor);
+                    result = queue.removeSensor(sensor, disable);
                 }
                 if (result && !queue.hasSensors()) {
                     mTriggerListeners.remove(listener);
@@ -225,14 +227,17 @@ public class SystemSensorManager extends SensorManager {
 
         public boolean addSensor(Sensor sensor, int delay) {
             // Check if already present.
-            if (mActiveSensors.get(sensor.getHandle())) return false;
+            int handle = sensor.getHandle();
+            if (mActiveSensors.get(handle)) return false;
 
-            if (enableSensor(sensor, delay) == 0) {
-                mActiveSensors.put(sensor.getHandle(), true);
-                addSensorEvent(sensor);
-                return true;
+            // Get ready to receive events before calling enable.
+            mActiveSensors.put(handle, true);
+            addSensorEvent(sensor);
+            if (enableSensor(sensor, delay) != 0) {
+                removeSensor(sensor, false);
+                return false;
             }
-            return false;
+            return true;
         }
 
         public boolean removeAllSensors() {
@@ -252,10 +257,10 @@ public class SystemSensorManager extends SensorManager {
             return true;
         }
 
-        public boolean removeSensor(Sensor sensor) {
+        public boolean removeSensor(Sensor sensor, boolean disable) {
             final int handle = sensor.getHandle();
             if (mActiveSensors.get(handle)) {
-                disableSensor(sensor);
+                if (disable) disableSensor(sensor);
                 mActiveSensors.put(sensor.getHandle(), false);
                 removeSensorEvent(sensor);
                 return true;
@@ -334,6 +339,10 @@ public class SystemSensorManager extends SensorManager {
                 long timestamp) {
             final Sensor sensor = sHandleToSensor.get(handle);
             SensorEvent t = mSensorsEvents.get(handle);
+            if (t == null) {
+                Log.e(TAG, "Error: Sensor Event is null for Sensor: " + sensor);
+                return;
+            }
             // Copy from the values array.
             System.arraycopy(values, 0, t.values, 0, t.values.length);
             t.timestamp = timestamp;
@@ -390,14 +399,19 @@ public class SystemSensorManager extends SensorManager {
                 long timestamp) {
             final Sensor sensor = sHandleToSensor.get(handle);
             TriggerEvent t = mTriggerEvents.get(handle);
+            if (t == null) {
+                Log.e(TAG, "Error: Trigger Event is null for Sensor: " + sensor);
+                return;
+            }
 
             // Copy from the values array.
             System.arraycopy(values, 0, t.values, 0, t.values.length);
             t.timestamp = timestamp;
             t.sensor = sensor;
 
-            // A trigger sensor should be auto disabled.
-            mManager.cancelTriggerSensorImpl(mListener, sensor);
+            // A trigger sensor is auto disabled. So just clean up and don't call native
+            // disable.
+            mManager.cancelTriggerSensorImpl(mListener, sensor, false);
 
             mListener.onTrigger(t);
         }
