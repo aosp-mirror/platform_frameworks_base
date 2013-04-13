@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.os.Trace;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -2055,20 +2056,24 @@ public class Resources {
                         + value.assetCookie + ": " + file);
 
                 if (file.endsWith(".xml")) {
+                    Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
                     try {
                         XmlResourceParser rp = loadXmlResourceParser(
                                 file, id, value.assetCookie, "drawable");
                         dr = Drawable.createFromXml(this, rp);
                         rp.close();
                     } catch (Exception e) {
+                        Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
                         NotFoundException rnf = new NotFoundException(
                             "File " + file + " from drawable resource ID #0x"
                             + Integer.toHexString(id));
                         rnf.initCause(e);
                         throw rnf;
                     }
+                    Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
 
                 } else {
+                    Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
                     try {
                         InputStream is = mAssets.openNonAsset(
                                 value.assetCookie, file, AssetManager.ACCESS_STREAMING);
@@ -2078,12 +2083,14 @@ public class Resources {
                         is.close();
         //                System.out.println("Created stream: " + dr);
                     } catch (Exception e) {
+                        Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
                         NotFoundException rnf = new NotFoundException(
                             "File " + file + " from drawable resource ID #0x"
                             + Integer.toHexString(id));
                         rnf.initCause(e);
                         throw rnf;
                     }
+                    Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
                 }
             }
         }
@@ -2189,18 +2196,21 @@ public class Resources {
         String file = value.string.toString();
 
         if (file.endsWith(".xml")) {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
             try {
                 XmlResourceParser rp = loadXmlResourceParser(
                         file, id, value.assetCookie, "colorstatelist"); 
                 csl = ColorStateList.createFromXml(this, rp);
                 rp.close();
             } catch (Exception e) {
+                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
                 NotFoundException rnf = new NotFoundException(
                     "File " + file + " from color state list resource ID #0x"
                     + Integer.toHexString(id));
                 rnf.initCause(e);
                 throw rnf;
             }
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         } else {
             throw new NotFoundException(
                     "File " + file + " from drawable resource ID #0x"

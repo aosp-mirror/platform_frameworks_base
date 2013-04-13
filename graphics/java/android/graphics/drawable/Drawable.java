@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.graphics.Insets;
+import android.os.Trace;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -745,7 +746,12 @@ public abstract class Drawable {
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {
-        return createFromResourceStream(null, null, is, srcName, null);
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, srcName != null ? srcName : "Unknown drawable");
+        try {
+            return createFromResourceStream(null, null, is, srcName, null);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
     }
 
     /**
@@ -754,7 +760,12 @@ public abstract class Drawable {
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName) {
-        return createFromResourceStream(res, value, is, srcName, null);
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, srcName != null ? srcName : "Unknown drawable");
+        try {
+            return createFromResourceStream(res, value, is, srcName, null);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
     }
 
     /**
@@ -900,9 +911,14 @@ public abstract class Drawable {
             return null;
         }
 
-        Bitmap bm = BitmapFactory.decodeFile(pathName);
-        if (bm != null) {
-            return drawableFromBitmap(null, bm, null, null, null, pathName);
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, pathName);
+        try {
+            Bitmap bm = BitmapFactory.decodeFile(pathName);
+            if (bm != null) {
+                return drawableFromBitmap(null, bm, null, null, null, pathName);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
 
         return null;
