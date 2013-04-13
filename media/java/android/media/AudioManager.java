@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1205,6 +1206,11 @@ public class AudioManager {
      * call {@link #stopBluetoothSco()} to clear the request and turn down the bluetooth connection.
      * <p>Even if a SCO connection is established, the following restrictions apply on audio
      * output streams so that they can be routed to SCO headset:
+     * <p>NOTE: up to and including API version
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method initiates a virtual
+     * voice call to the bluetooth headset.
+     * After API version {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2} only a raw SCO audio
+     * connection is established.
      * <ul>
      *   <li> the stream type must be {@link #STREAM_VOICE_CALL} </li>
      *   <li> the format must be mono </li>
@@ -1226,7 +1232,7 @@ public class AudioManager {
     public void startBluetoothSco(){
         IAudioService service = getService();
         try {
-            service.startBluetoothSco(mICallBack);
+            service.startBluetoothSco(mICallBack, mContext.getApplicationInfo().targetSdkVersion);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in startBluetoothSco", e);
         }
