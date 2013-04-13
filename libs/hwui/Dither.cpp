@@ -75,6 +75,7 @@ void Dither::bindDitherTexture() {
 void Dither::clear() {
     if (mInitialized) {
         glDeleteTextures(1, &mDitherTexture);
+        mInitialized = false;
     }
 }
 
