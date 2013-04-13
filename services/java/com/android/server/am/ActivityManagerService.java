@@ -932,6 +932,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     CompatModeDialog mCompatModeDialog;
     long mLastMemUsageReportTime = 0;
 
+    /**
+     * Flag whether the current user is a "monkey", i.e. whether
+     * the UI is driven by a UI automation tool.
+     */
+    private boolean mUserIsMonkey;
+
     final Handler mHandler = new Handler() {
         //public Handler() {
         //    if (localLOGV) Slog.v(TAG, "Handler started!");
@@ -7296,11 +7302,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public boolean isUserAMonkey() {
-        // For now the fact that there is a controller implies
-        // we have a monkey.
+    public void setUserIsMonkey(boolean userIsMonkey) {
         synchronized (this) {
-            return mController != null;
+            synchronized (mPidsSelfLocked) {
+                final int callingPid = Binder.getCallingPid();
+                ProcessRecord precessRecord = mPidsSelfLocked.get(callingPid);
+                if (precessRecord == null) {
+                    throw new SecurityException("Unknown process: " + callingPid);
+                }
+                if (precessRecord.instrumentationUiAutomationConnection  == null) {
+                    throw new SecurityException("Only an instrumentation process "
+                            + "with a UiAutomation can call setUserIsMonkey");
+                }
+            }
+            mUserIsMonkey = userIsMonkey;
+        }
+    }
+
+    public boolean isUserAMonkey() {
+        synchronized (this) {
+            // If there is a controller also implies the user is a monkey.
+            return (mUserIsMonkey || mController != null);
         }
     }
 
@@ -12131,6 +12153,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             } catch (RemoteException re) {
                 /* ignore */
             }
+            // Only a UiAutomation can set this flag and now that
+            // it is finished we make sure it is reset to its default.
+            mUserIsMonkey = false;
         }
         app.instrumentationWatcher = null;
         app.instrumentationUiAutomationConnection = null;

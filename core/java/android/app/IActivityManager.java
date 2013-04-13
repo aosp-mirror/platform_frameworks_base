@@ -290,7 +290,9 @@ public interface IActivityManager extends IInterface {
             int enterAnim, int exitAnim) throws RemoteException;
     
     public boolean isUserAMonkey() throws RemoteException;
-    
+
+    public void setUserIsMonkey(boolean monkey) throws RemoteException;
+
     public void finishHeavyWeightApp() throws RemoteException;
 
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
@@ -643,4 +645,5 @@ public interface IActivityManager extends IInterface {
     int CREATE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
     int MOVE_TASK_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+166;
     int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
+    int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+168;
 }

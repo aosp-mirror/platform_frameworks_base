@@ -619,6 +619,25 @@ public final class UiAutomation {
         return screenShot;
     }
 
+    /**
+     * Sets whether this UiAutomation to run in a "monkey" mode. Applications can query whether
+     * they are executed in a "monkey" mode, i.e. run by a test framework, and avoid doing
+     * potentially undesirable actions such as calling 911 or posting on public forums etc.
+     *
+     * @param enable whether to run in a "monkey" mode or not. Default is not.
+     * @see {@link ActivityManager#isUserAMonkey()}
+     */
+    public void setRunAsMonkey(boolean enable) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            ActivityManagerNative.getDefault().setUserIsMonkey(enable);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while setting run as monkey!", re);
+        }
+    }
+
     private static float getDegreesForRotation(int value) {
         switch (value) {
             case Surface.ROTATION_90: {
