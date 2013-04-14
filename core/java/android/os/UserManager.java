@@ -198,11 +198,11 @@ public class UserManager {
     }
 
     /**
-     * Used to check if the user making this call is a limited user. Limited users may have
+     * Used to check if the user making this call is linked to another user. Linked users may have
      * a reduced number of available apps, app restrictions and account restrictions.
-     * @return whether the user making this call is a limited user
+     * @return whether the user making this call is a linked user
      */
-    public boolean isUserLimited() {
+    public boolean isLinkedUser() {
         try {
             return mService.isRestricted();
         } catch (RemoteException re) {
