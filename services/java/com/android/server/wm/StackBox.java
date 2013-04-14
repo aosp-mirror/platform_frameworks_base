@@ -24,12 +24,17 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class StackBox {
-    /** For use with {@link WindowManagerService#createStack} */
-    public static final int TASK_STACK_GOES_BEFORE = 0;
+    /** Used with {@link WindowManagerService#createStack}. To left of, lower l/r Rect values. */
+    public static final int TASK_STACK_GOES_BEFORE = 0; // 
+    /** Used with {@link WindowManagerService#createStack}. To right of, higher l/r Rect values. */
     public static final int TASK_STACK_GOES_AFTER = 1;
+    /** Used with {@link WindowManagerService#createStack}. Vertical: lower t/b Rect values. */
     public static final int TASK_STACK_GOES_ABOVE = 2;
+    /** Used with {@link WindowManagerService#createStack}. Vertical: higher t/b Rect values. */
     public static final int TASK_STACK_GOES_BELOW = 3;
+    /** Used with {@link WindowManagerService#createStack}. Put on a higher layer on display. */
     public static final int TASK_STACK_GOES_OVER = 4;
+    /** Used with {@link WindowManagerService#createStack}. Put on a lower layer on display. */
     public static final int TASK_STACK_GOES_UNDER = 5;
 
     /** The display this box sits in. */
@@ -37,7 +42,7 @@ public class StackBox {
 
     /** Non-null indicates this is mFirst or mSecond of a parent StackBox. Null indicates this
      * is this entire size of mDisplayContent. */
-    StackBox mParent;
+    final StackBox mParent;
 
     /** First child, this is null exactly when mStack is non-null. */
     StackBox mFirst;
@@ -49,10 +54,13 @@ public class StackBox {
     TaskStack mStack;
 
     /** Content limits relative to the DisplayContent this sits in. */
-    Rect mBounds;
+    Rect mBounds = new Rect();
 
     /** Relative orientation of mFirst and mSecond. */
     boolean mVertical;
+
+    /** Fraction of mBounds to devote to mFirst, remainder goes to mSecond */
+    float mWeight;
 
     /** Dirty flag. Something inside this or some descendant of this has changed. */
     boolean layoutNeeded;
@@ -60,9 +68,12 @@ public class StackBox {
     /** Used to keep from reallocating a temporary array to hold the list of Tasks below */
     ArrayList<Task> mTmpTasks = new ArrayList<Task>();
 
-    StackBox(DisplayContent displayContent, Rect bounds) {
+    /** Used to keep from reallocating a temporary Rect for propagating bounds to child boxes */
+    Rect mTmpRect = new Rect();
+
+    StackBox(DisplayContent displayContent, StackBox parent) {
         mDisplayContent = displayContent;
-        mBounds = bounds;
+        mParent = parent;
     }
 
     /** Propagate #layoutNeeded bottom up. */
@@ -83,7 +94,7 @@ public class StackBox {
     }
 
     /**
-     * Detremine if a particular TaskStack is in this StackBox or any of its descendants.
+     * Determine if a particular TaskStack is in this StackBox or any of its descendants.
      * @param stackId The TaskStack being considered.
      * @return true if the specified TaskStack is in this box or its descendants. False otherwise.
      */
@@ -92,6 +103,30 @@ public class StackBox {
             return mStack.mStackId == stackId;
         }
         return mFirst.contains(stackId) || mSecond.contains(stackId);
+    }
+
+    /** Determine if the specified stack is the first child or second child. Presumes that this
+     * is called on mParent of the specified stack.
+     * @param stack the stack to determine.
+     * @return true if stack is the first child.
+     */
+    boolean isFirstChild(TaskStack stack) {
+        return mFirst.mStack == stack;
+    }
+
+    /** Returns the bounds of the specified TaskStack if it is contained in this StackBox.
+     * @param stackId the TaskStack to find the bounds of.
+     * @return a new Rect with the bounds of stackId if it is within this StackBox, null otherwise.
+     */
+    Rect getStackBounds(int stackId) {
+        if (mStack != null) {
+            return mStack.mStackId == stackId ? new Rect(mBounds) : null;
+        }
+        Rect bounds = mFirst.getStackBounds(stackId);
+        if (bounds != null) {
+            return bounds;
+        }
+        return mSecond.getStackBounds(stackId);
     }
 
     /**
@@ -105,65 +140,65 @@ public class StackBox {
      * @return The new TaskStack.
      */
     TaskStack split(int stackId, int relativeStackId, int position, float weight) {
-        if (mStack != null) {
-            if (mStack.mStackId == relativeStackId) {
-                // Found it!
-                TaskStack stack = new TaskStack(stackId, this);
-                TaskStack firstStack;
-                TaskStack secondStack;
-                int width, height, split;
-                switch (position) {
-                    default:
-                    case TASK_STACK_GOES_BEFORE:
-                    case TASK_STACK_GOES_AFTER:
-                        mVertical = false;
-                        width = (int)(weight * mBounds.width());
-                        height = mBounds.height();
-                        if (position == TASK_STACK_GOES_BEFORE) {
-                            firstStack = stack;
-                            secondStack = mStack;
-                            split = mBounds.left + width;
-                        } else {
-                            firstStack = mStack;
-                            secondStack = stack;
-                            split = mBounds.right - width;
-                        }
-                        break;
-                    case TASK_STACK_GOES_ABOVE:
-                    case TASK_STACK_GOES_BELOW:
-                        mVertical = true;
-                        width = mBounds.width();
-                        height = (int)(weight * mBounds.height());
-                        if (position == TASK_STACK_GOES_ABOVE) {
-                            firstStack = stack;
-                            secondStack = mStack;
-                            split = mBounds.top + height;
-                        } else {
-                            firstStack = mStack;
-                            secondStack = stack;
-                            split = mBounds.bottom - height;
-                        }
-                        break;
-                }
-                mFirst = new StackBox(mDisplayContent, new Rect(mBounds.left, mBounds.top,
-                        mVertical ? mBounds.right : split, mVertical ? split : mBounds.bottom));
-                mFirst.mStack = firstStack;
-                mSecond = new StackBox(mDisplayContent, new Rect(mVertical ? mBounds.left : split,
-                        mVertical ? split : mBounds.top, mBounds.right, mBounds.bottom));
-                mSecond.mStack = secondStack;
-                mStack = null;
+        if (mStack == null) {
+            // Propagate the split to see if the target task stack is in either sub box.
+            TaskStack stack = mFirst.split(stackId, relativeStackId, position, weight);
+            if (stack != null) {
                 return stack;
             }
-            // Not the intended TaskStack.
+            return mSecond.split(stackId, relativeStackId, position, weight);
+        }
+
+        // This StackBox contains just a TaskStack.
+        if (mStack.mStackId != relativeStackId) {
+            // Barking down the wrong stack.
             return null;
         }
 
-        // Propagate the split to see if the target task stack is in either sub box.
-        TaskStack stack = mFirst.split(stackId, relativeStackId, position, weight);
-        if (stack != null) {
-            return stack;
+        // Found it!
+        TaskStack stack = new TaskStack(stackId, mDisplayContent);
+        TaskStack firstStack;
+        TaskStack secondStack;
+        switch (position) {
+            default:
+            case TASK_STACK_GOES_AFTER:
+            case TASK_STACK_GOES_BEFORE:
+                mVertical = false;
+                if (position == TASK_STACK_GOES_BEFORE) {
+                    mWeight = weight;
+                    firstStack = stack;
+                    secondStack = mStack;
+                } else {
+                    mWeight = 1.0f - weight;
+                    firstStack = mStack;
+                    secondStack = stack;
+                }
+                break;
+            case TASK_STACK_GOES_ABOVE:
+            case TASK_STACK_GOES_BELOW:
+                mVertical = true;
+                if (position == TASK_STACK_GOES_ABOVE) {
+                    mWeight = weight;
+                    firstStack = stack;
+                    secondStack = mStack;
+                } else {
+                    mWeight = 1.0f - weight;
+                    firstStack = mStack;
+                    secondStack = stack;
+                }
+                break;
         }
-        return mSecond.split(stackId, relativeStackId, position, weight);
+
+        mFirst = new StackBox(mDisplayContent, this);
+        firstStack.mStackBox = mFirst;
+        mFirst.mStack = firstStack;
+
+        mSecond = new StackBox(mDisplayContent, this);
+        secondStack.mStackBox = mSecond;
+        mSecond.mStack = secondStack;
+
+        mStack = null;
+        return stack;
     }
 
     /**
@@ -215,9 +250,46 @@ public class StackBox {
         return mParent.getStackId();
     }
 
-    /** TODO: */
     boolean resize(int stackId, float weight) {
+        if (mStack == null) {
+            return mFirst.resize(stackId, weight) || mSecond.resize(stackId, weight);
+        }
+        if (mStack.mStackId == stackId) {
+            mParent.mWeight = mParent.isFirstChild(mStack) ? weight : 1.0f - weight;
+            return true;
+        }
         return false;
+    }
+
+    /** If this is a terminal StackBox (contains a TaskStack) set the bounds.
+     * @param bounds The rectangle to set the bounds to.
+     * @return True if the bounds changed, false otherwise. */
+    boolean setStackBoxSizes(Rect bounds) {
+        boolean change;
+        if (mStack != null) {
+            change = !mBounds.equals(bounds);
+            mBounds.set(bounds);
+        } else {
+            mTmpRect.set(bounds);
+            if (mVertical) {
+                final int height = bounds.height();
+                int firstHeight = (int)(height * mWeight);
+                mTmpRect.bottom = bounds.top + firstHeight;
+                change = mFirst.setStackBoxSizes(mTmpRect);
+                mTmpRect.top = mTmpRect.bottom;
+                mTmpRect.bottom = bounds.top + height;
+                change |= mSecond.setStackBoxSizes(mTmpRect);
+            } else {
+                final int width = bounds.width();
+                int firstWidth = (int)(width * mWeight);
+                mTmpRect.right = bounds.left + firstWidth;
+                change = mFirst.setStackBoxSizes(mTmpRect);
+                mTmpRect.left = mTmpRect.right;
+                mTmpRect.right = bounds.left + width;
+                change |= mSecond.setStackBoxSizes(mTmpRect);
+            }
+        }
+        return change;
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -226,9 +298,9 @@ public class StackBox {
             pw.print(" mVertical="); pw.print(mVertical);
             pw.print(" layoutNeeded="); pw.println(layoutNeeded);
         if (mFirst != null) {
-            pw.print(prefix); pw.print("mFirst="); pw.println(mStack);
+            pw.print(prefix); pw.print("mFirst="); pw.println(System.identityHashCode(mFirst));
             mFirst.dump(prefix + "  ", pw);
-            pw.print(prefix); pw.print("mSecond="); pw.println(mStack);
+            pw.print(prefix); pw.print("mSecond="); pw.println(System.identityHashCode(mSecond));
             mSecond.dump(prefix + "  ", pw);
         } else {
             pw.print(prefix); pw.print("mStack="); pw.println(mStack);
@@ -241,7 +313,8 @@ public class StackBox {
         if (mStack != null) {
             return "Box{" + hashCode() + " stack=" + mStack.mStackId + "}";
         }
-        return "Box{" + hashCode() + " parent=" + mParent.hashCode()
-                + " first=" + mFirst.hashCode() + " second=" + mSecond.hashCode() + "}";
+        return "Box{" + hashCode() + " parent=" + System.identityHashCode(mParent)
+                + " first=" + System.identityHashCode(mFirst)
+                + " second=" + System.identityHashCode(mSecond) + "}";
     }
 }

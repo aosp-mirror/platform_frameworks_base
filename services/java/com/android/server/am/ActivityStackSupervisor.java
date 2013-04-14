@@ -167,7 +167,7 @@ public class ActivityStackSupervisor {
     }
 
     boolean isFrontStack(ActivityStack stack) {
-        return stack == getTopStack();
+        return !(stack.isHomeStack() ^ getTopStack().isHomeStack());
     }
 
     boolean homeIsInFront() {
@@ -299,10 +299,9 @@ public class ActivityStackSupervisor {
     }
 
     boolean allResumedActivitiesComplete() {
-        final boolean homeInBack = !homeIsInFront();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.isHomeStack() ^ homeInBack) {
+            if (isFrontStack(stack)) {
                 final ActivityRecord r = stack.mResumedActivity;
                 if (r != null && r.state != ActivityState.RESUMED) {
                     return false;
@@ -1512,7 +1511,7 @@ public class ActivityStackSupervisor {
         }
     }
 
-    private ActivityStack getStack(int stackId) {
+    ActivityStack getStack(int stackId) {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             if (stack.getStackId() == stackId) {
@@ -1522,7 +1521,11 @@ public class ActivityStackSupervisor {
         return null;
     }
 
-    int createStack(int relativeStackId, int position, float weight) {
+    ArrayList<ActivityStack> getStacks() {
+        return new ArrayList<ActivityStack>(mStacks);
+    }
+
+    int createStack() {
         synchronized (this) {
             while (true) {
                 if (++mLastStackId <= HOME_STACK_ID) {
@@ -1545,6 +1548,7 @@ public class ActivityStackSupervisor {
             return;
         }
         stack.moveTask(taskId, toTop);
+        stack.resumeTopActivityLocked(null);
     }
 
     ActivityRecord findTaskLocked(Intent intent, ActivityInfo info) {

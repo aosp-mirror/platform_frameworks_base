@@ -639,6 +639,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_STACKS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            List<ActivityManager.StackInfo> list = getStacks();
+            reply.writeNoException();
+            reply.writeTypedList(list);
+            return true;
+        }
+
         case GET_TASK_FOR_ACTIVITY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -2591,6 +2599,7 @@ class ActivityManagerProxy implements IActivityManager
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(position);
         data.writeInt(relativeStackId);
         data.writeFloat(weight);
@@ -2606,6 +2615,7 @@ class ActivityManagerProxy implements IActivityManager
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(taskId);
         data.writeInt(stackId);
         data.writeInt(toTop ? 1 : 0);
@@ -2619,12 +2629,27 @@ class ActivityManagerProxy implements IActivityManager
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(stackId);
         data.writeFloat(weight);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    @Override
+    public List<ActivityManager.StackInfo> getStacks() throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_STACKS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        ArrayList<ActivityManager.StackInfo> list
+                = reply.createTypedArrayList(ActivityManager.StackInfo.CREATOR);
+        data.recycle();
+        reply.recycle();
+        return list;
     }
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException
     {

@@ -439,14 +439,19 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf) {
         mHaveFrame = true;
 
-        final Rect container = mContainingFrame;
-        container.set(pf);
+        final int type = mAttrs.type;
+        if (mAppToken != null) {
+            StackBox stack = mService.mTaskIdToTask.get(mAppToken.groupId).mStack.mStackBox;
+            mContainingFrame.set(stack.mBounds);
+        } else {
+            mContainingFrame.set(pf);
+        }
 
         final Rect display = mDisplayFrame;
         display.set(df);
 
-        final int pw = container.right - container.left;
-        final int ph = container.bottom - container.top;
+        final int pw = mContainingFrame.width();
+        final int ph = mContainingFrame.height();
 
         int w,h;
         if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SCALED) != 0) {
@@ -518,7 +523,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             y = mAttrs.y;
         }
 
-        Gravity.apply(mAttrs.gravity, w, h, container,
+        Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
                 (int) (x + mAttrs.horizontalMargin * pw),
                 (int) (y + mAttrs.verticalMargin * ph), frame);
 

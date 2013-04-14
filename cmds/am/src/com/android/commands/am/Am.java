@@ -74,6 +74,7 @@ public class Am extends BaseCommand {
         (new Am()).run(args);
     }
 
+    @Override
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: am [subcommand] [options]\n" +
@@ -99,6 +100,9 @@ public class Am extends BaseCommand {
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
+                "       am stack create <RELATIVE_STACK_ID> <POSITION> <WEIGHT>\n" +
+                "       am stack movetask <STACK_ID> <TASK_ID> [true|false]\n" +
+                "       am stack dump\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -181,6 +185,16 @@ public class Am extends BaseCommand {
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit switch to it.\n" +
                 "\n" +
+                "am stack create: create a new stack relative to an existing one.\n" +
+                "   <RELATIVE_STACK_ID>: existing stack's id.\n" +
+                "   <POSITION>: 0: to left of, 1: to right of, 2: above, 3: below\n" +
+                "   <WEIGHT>: float between 0.2 and 0.8 inclusive.\n" +
+                "\n" +
+                "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
+                "   bottom (false) of <STACK_ID>.\n" +
+                "\n" +
+                "am stack dump: list the hierarchy of stacks.\n" +
+                "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
                 "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
@@ -213,6 +227,7 @@ public class Am extends BaseCommand {
                 );
     }
 
+    @Override
     public void onRun() throws Exception {
 
         mAm = ActivityManagerNative.getDefault();
@@ -259,6 +274,8 @@ public class Am extends BaseCommand {
             runSwitchUser();
         } else if (op.equals("stop-user")) {
             runStopUser();
+        } else if (op.equals("stack")) {
+            runStack();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -1029,7 +1046,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public boolean activityResuming(String pkg) throws RemoteException {
+        public boolean activityResuming(String pkg) {
             synchronized (this) {
                 System.out.println("** Activity resuming: " + pkg);
             }
@@ -1037,7 +1054,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public boolean activityStarting(Intent intent, String pkg) throws RemoteException {
+        public boolean activityStarting(Intent intent, String pkg) {
             synchronized (this) {
                 System.out.println("** Activity starting: " + pkg);
             }
@@ -1046,7 +1063,7 @@ public class Am extends BaseCommand {
 
         @Override
         public boolean appCrashed(String processName, int pid, String shortMsg, String longMsg,
-                long timeMillis, String stackTrace) throws RemoteException {
+                long timeMillis, String stackTrace) {
             synchronized (this) {
                 System.out.println("** ERROR: PROCESS CRASHED");
                 System.out.println("processName: " + processName);
@@ -1063,8 +1080,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public int appEarlyNotResponding(String processName, int pid, String annotation)
-                throws RemoteException {
+        public int appEarlyNotResponding(String processName, int pid, String annotation) {
             synchronized (this) {
                 System.out.println("** ERROR: EARLY PROCESS NOT RESPONDING");
                 System.out.println("processName: " + processName);
@@ -1077,8 +1093,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public int appNotResponding(String processName, int pid, String processStats)
-                throws RemoteException {
+        public int appNotResponding(String processName, int pid, String processStats) {
             synchronized (this) {
                 System.out.println("** ERROR: PROCESS NOT RESPONDING");
                 System.out.println("processName: " + processName);
@@ -1326,7 +1341,7 @@ public class Am extends BaseCommand {
 
         @Override
         public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
-                boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
+                boolean ordered, boolean sticky, int sendingUser) {
             String line = "Broadcast completed: result=" + resultCode;
             if (data != null) line = line + ", data=\"" + data + "\"";
             if (extras != null) line = line + ", extras: " + extras;
@@ -1359,6 +1374,7 @@ public class Am extends BaseCommand {
             mRawMode = rawMode;
         }
 
+        @Override
         public void instrumentationStatus(ComponentName name, int resultCode, Bundle results) {
             synchronized (this) {
                 // pretty printer mode?
@@ -1381,6 +1397,7 @@ public class Am extends BaseCommand {
             }
         }
 
+        @Override
         public void instrumentationFinished(ComponentName name, int resultCode,
                 Bundle results) {
             synchronized (this) {
@@ -1419,6 +1436,67 @@ public class Am extends BaseCommand {
                 }
             }
             return true;
+        }
+    }
+
+    private void runStack() throws Exception {
+        String op = nextArgRequired();
+        if (op.equals("create")) {
+            runStackCreate();
+        } else if (op.equals("movetask")) {
+            runStackMoveTask();
+        } else if (op.equals("dump")) {
+            runStackDump();
+        } else {
+            showError("Error: unknown command '" + op + "'");
+            return;
+        }
+    }
+
+    private void runStackCreate() throws Exception {
+        String relativeToStr = nextArgRequired();
+        int relativeTo = Integer.valueOf(relativeToStr);
+        String positionStr = nextArgRequired();
+        int position = Integer.valueOf(positionStr);
+        String weightStr = nextArgRequired();
+        float weight = Float.valueOf(weightStr);
+
+        try {
+            int stackId = mAm.createStack(relativeTo, position, weight);
+            System.out.println("createStack returned " + stackId + "\n\n");
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackMoveTask() throws Exception {
+        String taskIdStr = nextArgRequired();
+        int taskId = Integer.valueOf(taskIdStr);
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.valueOf(stackIdStr);
+        String toTopStr = nextArgRequired();
+        final boolean toTop;
+        if ("true".equals(toTopStr)) {
+            toTop = true;
+        } else if ("false".equals(toTopStr)) {
+            toTop = false;
+        } else {
+            System.err.println("Error: bad toTop arg: " + toTopStr);
+            return;
+        }
+
+        try {
+            mAm.moveTaskToStack(taskId, stackId, toTop);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackDump() throws Exception {
+        try {
+            List<ActivityManager.StackInfo> stacks = mAm.getStacks();
+            for (ActivityManager.StackInfo stack : stacks) {
+                System.out.println(stack);
+            }
+        } catch (RemoteException e) {
         }
     }
 }

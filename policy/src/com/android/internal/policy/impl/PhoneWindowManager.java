@@ -87,7 +87,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -202,13 +201,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Vibrator pattern for haptic feedback of virtual key press.
     long[] mVirtualKeyVibePattern;
-    
+
     // Vibrator pattern for a short vibration.
     long[] mKeyboardTapVibePattern;
 
     // Vibrator pattern for haptic feedback during boot when safe mode is disabled.
     long[] mSafeModeDisabledVibePattern;
-    
+
     // Vibrator pattern for haptic feedback during boot when safe mode is enabled.
     long[] mSafeModeEnabledVibePattern;
 
@@ -275,7 +274,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
-    
+
     int mPointerLocationMode = 0; // guarded by mLock
 
     // The last window we were told about in focusChanged.
@@ -372,7 +371,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpContentFrame = new Rect();
     static final Rect mTmpVisibleFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
-    
+
     WindowState mTopFullscreenOpaqueWindowState;
     boolean mTopIsFullscreen;
     boolean mForceStatusBar;
@@ -530,12 +529,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             updateRotation(false);
         }
     }
-    
+
     class MyOrientationListener extends WindowOrientationListener {
         MyOrientationListener(Context context, Handler handler) {
             super(context, handler);
         }
-        
+
         @Override
         public void onProposedRotationChanged(int rotation) {
             if (localLOGV) Log.v(TAG, "onProposedRotationChanged, rotation=" + rotation);
@@ -1264,6 +1263,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         != PackageManager.PERMISSION_GRANTED;
     }
 
+    @Override
     public void adjustWindowParamsLw(WindowManager.LayoutParams attrs) {
         switch (attrs.type) {
             case TYPE_SYSTEM_OVERLAY:
@@ -1292,11 +1292,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private boolean isBuiltInKeyboardVisible() {
-        return mHaveBuiltInKeyboard && !isHidden(mLidKeyboardAccessibility);
-    }
-
     /** {@inheritDoc} */
+    @Override
     public void adjustConfigurationLw(Configuration config, int keyboardPresence,
             int navigationPresence) {
         mHaveBuiltInKeyboard = (keyboardPresence & PRESENCE_INTERNAL) != 0;
@@ -1321,6 +1318,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int windowTypeToLayerLw(int type) {
         if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
             return 2;
@@ -2746,6 +2744,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getSystemDecorRectLw(Rect systemRect) {
         systemRect.left = mSystemLeft;
         systemRect.top = mSystemTop;
@@ -2754,6 +2753,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
         if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
         return 0;
+    }
+
+    @Override
+    public void getContentRectLw(Rect r) {
+        r.set(mContentLeft, mContentTop, mContentRight, mContentBottom);
     }
 
     void setAttachedWindowFrames(WindowState win, int fl, int adjust, WindowState attached,

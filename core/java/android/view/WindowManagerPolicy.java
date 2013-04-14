@@ -816,6 +816,14 @@ public interface WindowManagerPolicy {
     public int getSystemDecorRectLw(Rect systemRect);
 
     /**
+     * Return the rectangle of the screen that is available for applications to run in.
+     * This will be called immediately after {@link #beginLayoutLw}.
+     *
+     * @param r The rectangle to be filled with the boundaries available to applications.
+     */
+    public void getContentRectLw(Rect r);
+
+    /**
      * Called for each window attached to the window manager as layout is
      * proceeding.  The implementation of this function must take care of
      * setting the window's frame, either here or in finishLayout().
