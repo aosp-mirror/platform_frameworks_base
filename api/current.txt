@@ -17081,8 +17081,8 @@ package android.os {
     method public java.lang.String getUserName();
     method public android.os.Bundle getUserRestrictions();
     method public android.os.Bundle getUserRestrictions(android.os.UserHandle);
+    method public boolean isLinkedUser();
     method public boolean isUserAGoat();
-    method public boolean isUserLimited();
     method public boolean isUserRunning(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);
     method public void setUserRestriction(java.lang.String, boolean);
