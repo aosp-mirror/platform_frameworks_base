@@ -71,9 +71,6 @@ public class BaseObj {
     private int mID;
     private boolean mDestroyed;
     private String mName;
-
-    int mGCSize;
-
     RenderScript mRS;
 
     /**
@@ -138,9 +135,6 @@ public class BaseObj {
             throw new RSInvalidStateException("Object already destroyed.");
         }
         mDestroyed = true;
-        if (mGCSize != 0) {
-            mRS.removeAllocSizeForGC(mGCSize);
-        }
         mRS.nObjDestroy(mID);
     }
 
