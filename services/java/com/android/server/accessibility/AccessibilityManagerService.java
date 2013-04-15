@@ -2501,7 +2501,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public void flush() {
                 synchronized (mLock) {
                     cancelAllPendingEventsLocked();
-                    mSentEventsVerifier.reset();
+                    if (mSentEventsVerifier != null) {
+                        mSentEventsVerifier.reset();
+                    }
                 }
             }
 
