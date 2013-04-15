@@ -1181,7 +1181,8 @@ public class MediaPlayer
     /**
      * Gets the duration of the file.
      *
-     * @return the duration in milliseconds
+     * @return the duration in milliseconds, if no duration is available
+     *         (for example, if streaming live content), -1 is returned.
      */
     public native int getDuration();
 
