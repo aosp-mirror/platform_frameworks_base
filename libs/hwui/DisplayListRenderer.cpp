@@ -276,6 +276,15 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float 
     bitmap = refBitmap(bitmap);
     paint = refPaint(paint);
 
+    if (srcLeft == 0 && srcTop == 0 &&
+            srcRight == bitmap->width() && srcBottom == bitmap->height() &&
+            (srcBottom - srcTop == dstBottom - dstTop) &&
+            (srcRight - srcLeft == dstRight - dstLeft)) {
+        // transform simple rect to rect drawing case into position bitmap ops, since they merge
+        addDrawOp(new (alloc()) DrawBitmapOp(bitmap, dstLeft, dstTop, paint));
+        return DrawGlInfo::kStatusDone;
+    }
+
     addDrawOp(new (alloc()) DrawBitmapRectOp(bitmap,
                     srcLeft, srcTop, srcRight, srcBottom,
                     dstLeft, dstTop, dstRight, dstBottom, paint));
@@ -413,7 +422,9 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
 }
 
 status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, const float* positions, SkPaint* paint, float length) {
+        float x, float y, const float* positions, SkPaint* paint,
+        float length, DrawOpMode drawOpMode) {
+
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
     if (length < 0.0f) length = paint->measureText(text, bytesCount);

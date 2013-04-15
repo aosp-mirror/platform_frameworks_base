@@ -68,7 +68,8 @@ public:
     // bounds is an out parameter
     bool renderPosText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y, const float* positions, Rect* bounds,
-            Functor* functor);
+            Functor* functor, bool forceFinish = true);
+
     // bounds is an out parameter
     bool renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, SkPath* path, float hOffset, float vOffset, Rect* bounds);
@@ -102,6 +103,8 @@ public:
 
 private:
     friend class Font;
+
+    static const uint32_t gMaxNumberOfQuads = 2048;
 
     const uint8_t* mGammaTable;
 
@@ -156,7 +159,6 @@ private:
 
     bool mUploadTexture;
 
-    uint32_t mMaxNumberOfQuads;
     uint32_t mIndexBufferID;
 
     Functor* mFunctor;

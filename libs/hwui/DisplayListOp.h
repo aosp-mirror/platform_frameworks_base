@@ -121,6 +121,7 @@ public:
 };
 
 class DrawOp : public DisplayListOp {
+friend class MergingDrawBatch;
 public:
     DrawOp(SkPaint* paint)
             : mPaint(paint), mQuickRejected(false) {}
@@ -145,12 +146,41 @@ public:
             return;
         }
 
-        replayStruct.mDrawGlStatus |= applyDraw(replayStruct.mRenderer, replayStruct.mDirty, level);
+        replayStruct.mDrawGlStatus |= applyDraw(replayStruct.mRenderer, replayStruct.mDirty);
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) = 0;
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) = 0;
 
-    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+    /**
+     * Draw multiple instances of an operation, must be overidden for operations that merge
+     *
+     * Currently guarantees certain similarities between ops (see MergingDrawBatch::canMergeWith),
+     * and pure translation transformations. Other guarantees of similarity should be enforced by
+     * reducing which operations are tagged as mergeable.
+     */
+    virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
+            const Vector<DrawOp*>& ops, const Rect& bounds) {
+        status_t status = DrawGlInfo::kStatusDone;
+        for (unsigned int i = 0; i < ops.size(); i++) {
+            renderer.restoreDisplayState(ops[i]->state);
+            status |= ops[i]->applyDraw(renderer, dirty);
+        }
+        return status;
+    }
+
+    /*
+     * When this method is invoked the state field is initialized to have the
+     * final rendering state. We can thus use it to process data as it will be
+     * used at draw time.
+     *
+     * Additionally, this method allows subclasses to provide defer-time preferences for batching
+     * and merging.
+     *
+     * Return true if the op can merge with others of its kind (such subclasses should implement
+     * multiDraw)
+     */
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        return false;
     }
 
     // returns true if bounds exist
@@ -160,12 +190,11 @@ public:
     void setQuickRejected(bool quickRejected) { mQuickRejected = quickRejected; }
     bool getQuickRejected() { return mQuickRejected; }
 
-    /** Batching disabled by default, turned on for individual ops */
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_None;
+    inline int getPaintAlpha() {
+        return OpenGLRenderer::getAlphaDirect(mPaint);
     }
 
-    float strokeWidthOutset() {
+    inline float strokeWidthOutset() {
         float width = mPaint->getStrokeWidth();
         if (width == 0) return 0.5f; // account for hairline
         return width * 0.5f;
@@ -205,6 +234,14 @@ public:
     bool getLocalBounds(Rect& localBounds) {
         localBounds.set(mLocalBounds);
         return true;
+    }
+
+    bool mergeAllowed() {
+        // checks that we're unclipped, and srcover
+        const Rect& opBounds = state.mBounds;
+        return fabs(opBounds.getWidth() - mLocalBounds.getWidth()) < 0.1 &&
+                fabs(opBounds.getHeight() - mLocalBounds.getHeight()) < 0.1 &&
+                (OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode);
     }
 
 protected:
@@ -686,9 +723,40 @@ public:
                     paint),
             mBitmap(bitmap) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmap(mBitmap, mLocalBounds.left, mLocalBounds.top,
                 getPaint(renderer));
+    }
+
+#define SET_TEXTURE(ptr, posRect, offsetRect, texCoordsRect, xDim, yDim) \
+    TextureVertex::set(ptr++, posRect.xDim - offsetRect.left, posRect.yDim - offsetRect.top, \
+            texCoordsRect.xDim, texCoordsRect.yDim)
+
+    virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
+            const Vector<DrawOp*>& ops, const Rect& bounds) {
+        renderer.restoreDisplayState(state, true); // restore all but the clip
+        renderer.setFullScreenClip(); // ensure merged ops aren't clipped
+        TextureVertex vertices[6 * ops.size()];
+        TextureVertex* vertex = &vertices[0];
+
+        // TODO: manually handle rect clip for bitmaps by adjusting texCoords per op, and allowing
+        // them to be merged in getBatchId()
+        const Rect texCoords(0, 0, 1, 1);
+
+        const float width = mBitmap->width();
+        const float height = mBitmap->height();
+        for (unsigned int i = 0; i < ops.size(); i++) {
+            const Rect& opBounds = ops[i]->state.mBounds;
+            SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, top);
+            SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, top);
+            SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, bottom);
+
+            SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, bottom);
+            SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, top);
+            SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, bottom);
+        }
+
+        return renderer.drawBitmaps(mBitmap, ops.size(), &vertices[0], bounds, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) {
@@ -696,10 +764,17 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmap"; }
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_Bitmap;
+
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = DeferredDisplayList::kOpBatch_Bitmap;
+        *mergeId = (mergeid_t)mBitmap;
+
+        // don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
+        // MergingDrawBatch::canMergeWith
+        return mergeAllowed() && (mBitmap->getConfig() != SkBitmap::kA8_Config);
     }
 
+    const SkBitmap* bitmap() { return mBitmap; }
 protected:
     SkBitmap* mBitmap;
 };
@@ -713,7 +788,7 @@ public:
         transform.mapRect(mLocalBounds);
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmap(mBitmap, mMatrix, getPaint(renderer));
     }
 
@@ -721,9 +796,11 @@ public:
         OP_LOG("Draw bitmap %p matrix " MATRIX_STRING, mBitmap, MATRIX_ARGS(mMatrix));
     }
 
-    virtual const char* name() { return "DrawBitmap"; }
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_Bitmap;
+    virtual const char* name() { return "DrawBitmapMatrix"; }
+
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = DeferredDisplayList::kOpBatch_Bitmap;
+        return false;
     }
 
 private:
@@ -738,7 +815,7 @@ public:
             : DrawBoundedOp(dstLeft, dstTop, dstRight, dstBottom, paint),
             mBitmap(bitmap), mSrc(srcLeft, srcTop, srcRight, srcBottom) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmap(mBitmap, mSrc.left, mSrc.top, mSrc.right, mSrc.bottom,
                 mLocalBounds.left, mLocalBounds.top, mLocalBounds.right, mLocalBounds.bottom,
                 getPaint(renderer));
@@ -750,8 +827,10 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmapRect"; }
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_Bitmap;
+
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = DeferredDisplayList::kOpBatch_Bitmap;
+        return false;
     }
 
 private:
@@ -764,7 +843,7 @@ public:
     DrawBitmapDataOp(SkBitmap* bitmap, float left, float top, SkPaint* paint)
             : DrawBitmapOp(bitmap, left, top, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmapData(mBitmap, mLocalBounds.left,
                 mLocalBounds.top, getPaint(renderer));
     }
@@ -774,8 +853,10 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmapData"; }
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_Bitmap;
+
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = DeferredDisplayList::kOpBatch_Bitmap;
+        return false;
     }
 };
 
@@ -787,7 +868,7 @@ public:
             mBitmap(bitmap), mMeshWidth(meshWidth), mMeshHeight(meshHeight),
             mVertices(vertices), mColors(colors) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmapMesh(mBitmap, mMeshWidth, mMeshHeight,
                 mVertices, mColors, getPaint(renderer));
     }
@@ -797,8 +878,10 @@ public:
     }
 
     virtual const char* name() { return "DrawBitmapMesh"; }
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_Bitmap;
+
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = DeferredDisplayList::kOpBatch_Bitmap;
+        return false;
     }
 
 private:
@@ -820,7 +903,7 @@ public:
             mColors(colors), mxDivsCount(width), myDivsCount(height),
             mNumColors(numColors), mAlpha(alpha), mMode(mode) {};
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         // NOTE: not calling the virtual method, which takes a paint
         return renderer.drawPatch(mBitmap, mxDivs, myDivs, mColors,
                 mxDivsCount, myDivsCount, mNumColors,
@@ -833,8 +916,11 @@ public:
     }
 
     virtual const char* name() { return "DrawPatch"; }
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_Patch;
+
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = DeferredDisplayList::kOpBatch_Patch;
+        *mergeId = (mergeid_t)mBitmap;
+        return true;
     }
 
 private:
@@ -854,7 +940,7 @@ public:
     DrawColorOp(int color, SkXfermode::Mode mode)
             : DrawOp(0), mColor(color), mMode(mode) {};
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawColor(mColor, mMode);
     }
 
@@ -882,13 +968,15 @@ public:
         return true;
     }
 
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
         if (mPaint->getPathEffect()) {
-            return DeferredDisplayList::kOpBatch_AlphaMaskTexture;
+            *batchId = DeferredDisplayList::kOpBatch_AlphaMaskTexture;
+        } else {
+            *batchId = mPaint->isAntiAlias() ?
+                    DeferredDisplayList::kOpBatch_AlphaVertices :
+                    DeferredDisplayList::kOpBatch_Vertices;
         }
-        return mPaint->isAntiAlias() ?
-                DeferredDisplayList::kOpBatch_AlphaVertices :
-                DeferredDisplayList::kOpBatch_Vertices;
+        return false;
     }
 };
 
@@ -897,7 +985,7 @@ public:
     DrawRectOp(float left, float top, float right, float bottom, SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawRect(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
     }
@@ -915,7 +1003,7 @@ public:
             : DrawBoundedOp(rects, count, paint),
             mRects(rects), mCount(count) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawRects(mRects, mCount, getPaint(renderer));
     }
 
@@ -925,8 +1013,9 @@ public:
 
     virtual const char* name() { return "DrawRects"; }
 
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_Vertices;
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = DeferredDisplayList::kOpBatch_Vertices;
+        return false;
     }
 
 private:
@@ -940,7 +1029,7 @@ public:
             float rx, float ry, SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint), mRx(rx), mRy(ry) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawRoundRect(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, mRx, mRy, getPaint(renderer));
     }
@@ -962,7 +1051,7 @@ public:
             : DrawStrokableOp(x - radius, y - radius, x + radius, y + radius, paint),
             mX(x), mY(y), mRadius(radius) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawCircle(mX, mY, mRadius, getPaint(renderer));
     }
 
@@ -983,7 +1072,7 @@ public:
     DrawOvalOp(float left, float top, float right, float bottom, SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawOval(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
     }
@@ -1002,7 +1091,7 @@ public:
             : DrawStrokableOp(left, top, right, bottom, paint),
             mStartAngle(startAngle), mSweepAngle(sweepAngle), mUseCenter(useCenter) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawArc(mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom,
                 mStartAngle, mSweepAngle, mUseCenter, getPaint(renderer));
@@ -1033,13 +1122,16 @@ public:
         mLocalBounds.set(left, top, left + width, top + height);
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawPath(mPath, getPaint(renderer));
     }
 
-    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
         SkPaint* paint = getPaint(renderer);
         renderer.getCaches().pathCache.precache(mPath, paint);
+
+        *batchId = DeferredDisplayList::kOpBatch_AlphaMaskTexture;
+        return false;
     }
 
     virtual void output(int level, uint32_t logFlags) {
@@ -1048,9 +1140,6 @@ public:
 
     virtual const char* name() { return "DrawPath"; }
 
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return DeferredDisplayList::kOpBatch_AlphaMaskTexture;
-    }
 private:
     SkPath* mPath;
 };
@@ -1063,7 +1152,7 @@ public:
         mLocalBounds.outset(strokeWidthOutset());
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawLines(mPoints, mCount, getPaint(renderer));
     }
 
@@ -1073,10 +1162,11 @@ public:
 
     virtual const char* name() { return "DrawLines"; }
 
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return mPaint->isAntiAlias() ?
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
+        *batchId = mPaint->isAntiAlias() ?
                 DeferredDisplayList::kOpBatch_AlphaVertices :
                 DeferredDisplayList::kOpBatch_Vertices;
+        return false;
     }
 
 protected:
@@ -1089,7 +1179,7 @@ public:
     DrawPointsOp(float* points, int count, SkPaint* paint)
             : DrawLinesOp(points, count, paint) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawPoints(mPoints, mCount, getPaint(renderer));
     }
 
@@ -1109,17 +1199,18 @@ public:
         OP_LOG("Draw some text, %d bytes", mBytesCount);
     }
 
-    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
         SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         fontRenderer.precache(paint, mText, mCount, mat4::identity());
-    }
 
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return mPaint->getColor() == 0xff000000 ?
+        *batchId = mPaint->getColor() == 0xff000000 ?
                 DeferredDisplayList::kOpBatch_Text :
                 DeferredDisplayList::kOpBatch_ColorText;
+
+        return false;
     }
+
 protected:
     const char* mText;
     int mBytesCount;
@@ -1135,7 +1226,7 @@ public:
         /* TODO: inherit from DrawBounded and init mLocalBounds */
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawTextOnPath(mText, mBytesCount, mCount, mPath,
                 mHOffset, mVOffset, getPaint(renderer));
     }
@@ -1156,7 +1247,7 @@ public:
         /* TODO: inherit from DrawBounded and init mLocalBounds */
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawPosText(mText, mBytesCount, mCount, mPositions, getPaint(renderer));
     }
 
@@ -1189,12 +1280,7 @@ public:
         memset(&mPrecacheTransform.data[0], 0xff, 16 * sizeof(float));
     }
 
-    /*
-     * When this method is invoked the state field  is initialized to have the
-     * final rendering state. We can thus use it to process data as it will be
-     * used at draw time.
-     */
-    virtual void onDrawOpDeferred(OpenGLRenderer& renderer) {
+    virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
         SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         const mat4& transform = renderer.findBestFontTransform(state.mMatrix);
@@ -1202,11 +1288,36 @@ public:
             fontRenderer.precache(paint, mText, mCount, transform);
             mPrecacheTransform = transform;
         }
+        *batchId = mPaint->getColor() == 0xff000000 ?
+                DeferredDisplayList::kOpBatch_Text :
+                DeferredDisplayList::kOpBatch_ColorText;
+
+        *mergeId = (mergeid_t)mPaint->getColor();
+
+        // don't merge decorated text - the decorations won't draw in order
+        bool noDecorations = !(mPaint->getFlags() & (SkPaint::kUnderlineText_Flag |
+                        SkPaint::kStrikeThruText_Flag));
+        return mergeAllowed() && noDecorations;
     }
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawText(mText, mBytesCount, mCount, mX, mY,
                 mPositions, getPaint(renderer), mLength);
+    }
+
+    virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
+            const Vector<DrawOp*>& ops, const Rect& bounds) {
+        status_t status = DrawGlInfo::kStatusDone;
+        renderer.setFullScreenClip(); // ensure merged ops aren't clipped
+        for (unsigned int i = 0; i < ops.size(); i++) {
+            DrawOpMode drawOpMode = (i == ops.size() - 1) ? kDrawOpMode_Flush : kDrawOpMode_Defer;
+            renderer.restoreDisplayState(ops[i]->state, true); // restore all but the clip
+
+            DrawTextOp& op = *((DrawTextOp*)ops[i]);
+            status |= renderer.drawText(op.mText, op.mBytesCount, op.mCount, op.mX, op.mY,
+                    op.mPositions, op.getPaint(renderer), op.mLength, drawOpMode);
+        }
+        return status;
     }
 
     virtual void output(int level, uint32_t logFlags) {
@@ -1214,12 +1325,6 @@ public:
     }
 
     virtual const char* name() { return "DrawText"; }
-
-    virtual DeferredDisplayList::OpBatchId getBatchId() {
-        return mPaint->getColor() == 0xff000000 ?
-                DeferredDisplayList::kOpBatch_Text :
-                DeferredDisplayList::kOpBatch_ColorText;
-    }
 
 private:
     const char* mText;
@@ -1241,7 +1346,7 @@ public:
     DrawFunctorOp(Functor* functor)
             : DrawOp(0), mFunctor(functor) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         renderer.startMark("GL functor");
         status_t ret = renderer.callDrawGLFunction(mFunctor, dirty);
         renderer.endMark();
@@ -1269,14 +1374,14 @@ public:
             mDisplayList->defer(deferStruct, level + 1);
         }
     }
-virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level) {
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level) {
         if (mDisplayList && mDisplayList->isRenderable()) {
             mDisplayList->replay(replayStruct, level + 1);
         }
     }
 
     // NOT USED since replay() is overridden
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -1299,7 +1404,7 @@ public:
     DrawLayerOp(Layer* layer, float x, float y)
             : DrawOp(0), mLayer(layer), mX(x), mY(y) {}
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty, int level) {
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawLayer(mLayer, mX, mY);
     }
 

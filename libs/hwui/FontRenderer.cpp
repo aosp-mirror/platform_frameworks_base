@@ -59,7 +59,6 @@ FontRenderer::FontRenderer() :
 
     mGammaTable = NULL;
     mInitialized = false;
-    mMaxNumberOfQuads = 1024;
 
     mCurrentCacheTexture = NULL;
 
@@ -295,7 +294,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 }
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool allocate) {
-    CacheTexture* cacheTexture = new CacheTexture(width, height, mMaxNumberOfQuads);
+    CacheTexture* cacheTexture = new CacheTexture(width, height, gMaxNumberOfQuads);
 
     if (allocate) {
         Caches::getInstance().activeTexture(0);
@@ -322,12 +321,12 @@ void FontRenderer::initTextTexture() {
 
 // Avoid having to reallocate memory and render quad by quad
 void FontRenderer::initVertexArrayBuffers() {
-    uint32_t numIndices = mMaxNumberOfQuads * 6;
+    uint32_t numIndices = gMaxNumberOfQuads * 6;
     uint32_t indexBufferSizeBytes = numIndices * sizeof(uint16_t);
     uint16_t* indexBufferData = (uint16_t*) malloc(indexBufferSizeBytes);
 
     // Four verts, two triangles , six indices per quad
-    for (uint32_t i = 0; i < mMaxNumberOfQuads; i++) {
+    for (uint32_t i = 0; i < gMaxNumberOfQuads; i++) {
         int i6 = i * 6;
         int i4 = i * 4;
 
@@ -601,7 +600,7 @@ void FontRenderer::endPrecaching() {
 
 bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
-        const float* positions, Rect* bounds, Functor* functor) {
+        const float* positions, Rect* bounds, Functor* functor, bool forceFinish) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
@@ -609,7 +608,10 @@ bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *t
 
     initRender(clip, bounds, functor);
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y, positions);
-    finishRender();
+
+    if (forceFinish) {
+        finishRender();
+    }
 
     return mDrawn;
 }

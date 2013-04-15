@@ -71,10 +71,17 @@ enum StateDeferFlags {
     kStateDeferFlag_Clip = 0x2
 };
 
+enum DrawOpMode {
+    kDrawOpMode_Immediate,
+    kDrawOpMode_Defer,
+    kDrawOpMode_Flush
+};
+
 struct DeferredDisplayState {
-    Rect mBounds; // local bounds, mapped with matrix to be in screen space coordinates, clipped.
+    Rect mBounds; // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped.
 
     // the below are set and used by the OpenGLRenderer at record and deferred playback
+    bool mClipValid;
     Rect mClip;
     mat4 mMatrix;
     DrawModifiers mDrawModifiers;
@@ -232,6 +239,8 @@ public:
     virtual void outputDisplayList(DisplayList* displayList);
     virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
+    status_t drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
+            const Rect& bounds, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
@@ -261,7 +270,8 @@ public:
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
             const float* positions, SkPaint* paint);
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float length = -1.0f);
+            const float* positions, SkPaint* paint, float length = -1.0f,
+            DrawOpMode drawOpMode = kDrawOpMode_Immediate);
     virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
 
     virtual void resetShader();
@@ -282,7 +292,8 @@ public:
     SkPaint* filterPaint(SkPaint* paint);
 
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
-    void restoreDisplayState(const DeferredDisplayState& state);
+    void restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore = false);
+    void setFullScreenClip();
 
     const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
@@ -336,20 +347,18 @@ public:
      * @param mode Where to store the resulting xfermode
      */
     static inline void getAlphaAndModeDirect(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
-        if (paint) {
-            *mode = getXfermode(paint->getXfermode());
+        *mode = getXfermodeDirect(paint);
+        *alpha = getAlphaDirect(paint);
+    }
 
-            // Skia draws using the color's alpha channel if < 255
-            // Otherwise, it uses the paint's alpha
-            int color = paint->getColor();
-            *alpha = (color >> 24) & 0xFF;
-            if (*alpha == 255) {
-                *alpha = paint->getAlpha();
-            }
-        } else {
-            *mode = SkXfermode::kSrcOver_Mode;
-            *alpha = 255;
-        }
+    static inline SkXfermode::Mode getXfermodeDirect(SkPaint* paint) {
+        if (!paint) return SkXfermode::kSrcOver_Mode;
+        return getXfermode(paint->getXfermode());
+    }
+
+    static inline int getAlphaDirect(SkPaint* paint) {
+        if (!paint) return 255;
+        return paint->getAlpha();
     }
 
     /**
@@ -357,6 +366,20 @@ public:
      * transform matrix.
      */
     mat4 findBestFontTransform(const mat4& transform) const;
+
+#if DEBUG_MERGE_BEHAVIOR
+    void drawScreenSpaceColorRect(float left, float top, float right, float bottom, int color) {
+        mCaches.setScissorEnabled(false);
+
+        // should only be called outside of other draw ops, so stencil can only be in test state
+        bool stencilWasEnabled = mCaches.stencil.isTestEnabled();
+        mCaches.stencil.disable();
+
+        drawColorRect(left, top, right, bottom, color, SkXfermode::kSrcOver_Mode, true);
+
+        if (stencilWasEnabled) mCaches.stencil.enableTest();
+    }
+#endif
 
 protected:
     /**
@@ -778,7 +801,7 @@ private:
     void drawAlpha8TextureMesh(float left, float top, float right, float bottom,
             GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-            bool ignoreTransform, bool dirty = true);
+            bool ignoreTransform, bool ignoreScale = false, bool dirty = true);
 
     /**
      * Draws text underline and strike-through if needed.
