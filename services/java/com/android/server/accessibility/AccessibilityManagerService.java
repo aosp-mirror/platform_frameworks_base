@@ -1817,11 +1817,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 addServiceLocked(this, userState);
                 if (userState.mBindingServices.contains(mComponentName)) {
                     userState.mBindingServices.remove(mComponentName);
-                    onUserStateChangedLocked(userState);
                     try {
-                        mServiceInterface.setConnection(this, mId);
+                       mServiceInterface.setConnection(this, mId);
+                       onUserStateChangedLocked(userState);
                     } catch (RemoteException re) {
-                        Slog.w(LOG_TAG, "Error while setting connection for service: " + service, re);
+                        Slog.w(LOG_TAG, "Error while setting connection for service: "
+                                + service, re);
+                        binderDied();
                     }
                 } else {
                     binderDied();
