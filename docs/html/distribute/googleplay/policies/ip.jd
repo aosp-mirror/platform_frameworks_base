@@ -1,0 +1,345 @@
+page.title=Intellectual Property
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In This Document</h2>
+  <ol>
+    <li><a href="#copyright">Copyright Infringement</a></li>
+    <li><a href="#impersonation">Impersonation</a></li>
+    <li><a href="#trademarks">Trademark Infringement</a></li>
+    <li><a href="#other">DDA 4.4 Prohibited Actions</a></li>
+  </ol>
+
+  <h2>More Resources</h2>
+  <ol>
+    <li><a href="http://play.google.com/about/developer-content-policy.html"
+    target="_policies">Developer Program Policies</a></li>
+    <li><a href="http://www.android.com/us/developer-distribution-agreement.html#showlanguages"
+    target="_policies">Developer Distribution Agreement</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+  Google Play policies protect your intellectual property (IP) as well as that
+  of other app developers and content creators in the store. The policies and
+  their enforcements help ensure proper use of copyright, trademarks, and
+  developer identity in Google Play.
+</p>
+
+<p>
+  As an app developer, these IP policies benefit you. At the same time, it's
+  your responsibility to ensure that your app does not violate the IP of other
+  developers or content creators. Violations of IP-related policy may result in
+  suspension of your apps from the store and termination of your developer
+  account.
+</p>
+
+<p>
+  This document introduces several key areas of IP-related policy that you
+  should understand before publishing on Google Play. In each area you'll find
+  best practices and examples to help you avoid common types of mistakes and
+  violations.
+</p>
+
+<p>
+  For more information about Google Play policies that apply to your apps and
+  content, please see the <a href=
+  "http://play.google.com/about/developer-content-policy.html" target=
+  "_policies">Developer Program Policies</a> and <a href=
+  "http://play.google.com/about/developer-distribution-agreement.html" target=
+  "_policies">Developer Distribution Agreement</a>.
+</p>
+
+
+
+<h2 id="copyright">Copyright Infringement</h2>
+
+<p>
+  Copyright is the legal right granted to an author or creator for a literary,
+  dramatic or artistic piece of work. As soon as you create an original piece
+  of work and fix it in a tangible medium, the work is automatically protected
+  by copyright law and you are the owner of the copyright. Likewise, when other
+  people create content, they may own the copyrights for those works.
+</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>How to report infringements</h2>
+<p>If you feel your copyright is being infringed, you may file a Digital Millenium
+   Copyright Act (DMCA) request. Please see <a 
+   href="http://support.google.com/bin/request.py?&product=androidmarket&contact_type=lr_dmca"
+   target="_policies">copyright procedures</a> for more information.</p>
+</div>
+</div>
+
+<p>
+  Copyright infringement is an improper or unauthorized use of a copyrighted
+  work. If you publish an app in Google Play that uses another party's copyrighted
+  works improperly or without permission, your apps can be suspended and your
+  developer account terminated.
+</p>
+
+<p>
+  As you design your app and prepare for publishing, make sure to review Google
+  Play policies and analyze all of your content. If your app uses or links to
+  another party's original work, make sure that your app is not infringing on
+  copyright. Not all uses of another party’s work are infringements on
+  copyright, and the rules vary by country and can be complex.
+</p>
+
+<p>
+  If you are unsure whether your use of another party's work infringes on a
+  copyright, consider getting legal advice before publishing, or simply request
+  permission to use the work from the copyright owner.
+</p>
+
+<p>
+  Here are some guidelines to help you avoid copyright infringement policy
+  violations:
+</p>
+
+<ul>
+  <li>
+    <strong>Respect copyright laws</strong>&mdash;Do not let your app infringe
+    on the copyrights of others. That includes linking to other apps or web
+    sites that contain obviously infringing material (please refer to the <a href="
+    {@docRoot}distribute/googleplay/policies/spam.html#webview-spam">Spam in WebViews</a> guidelines), and using icons or images that are obvious infringements.
+  </li>
+
+  <li>
+    <strong>Know your app's content</strong>&mdash;Before you publish, look
+    for content that may be protected by trademark or copyright in your app
+    and get legal advice if necessary. Protected work could typically include
+    product names, brands, images, music, and similar works.
+  </li>
+
+  <li>
+    <strong>Create original work</strong>&mdash;If you’re not sure whether
+    something will violate another party's copyright, the safest approach is to
+    create something that's completely original, such as images or audio
+    that you’ve created yourself. When you create your own original content,
+    you rarely have to worry about infringing on existing copyright.
+  </li>
+
+  <li>
+    <strong>Ask permission to use copyrighted work</strong>&mdash;If you want
+    to use another party's copyrighted work in your app, you should ask for
+    permission from the work's creator or copyright owner and include
+    appropriate copyright attribution.
+  </li>
+</ul>
+
+<p>
+  A common misunderstanding is believing that your app may use copyrighted
+  content without permission, provided that you clearly indicate that your app
+  is not the "official" app that readers may be familiar with. That is not the
+  case. Even if you let users know that your app is "unofficial", it still
+  violates Google Play policies if it uses or links to copyrighted content
+  without permission. Also, this type of "unofficial" app may violate <a
+  href="#impersonation">impersonation policies</a>.
+</p>
+
+<p>
+  The example app below shows an app that uses screenshots/images of known
+  artists without their authorization and lists popular songs. The combination
+  of these may induce users to download music ringtones that infringe on
+  copyright. This is a violation of Google Play policy.
+</p>
+
+<div class="example-block bad" style="width:100%;float:none;margin:.5em auto 2em 0;">
+  <div class="heading">Images and downloads that violate copyright</div>
+  <img src="{@docRoot}images/gp-policy-ip-copyright-violation.png">
+</div>
+
+
+<h2 id="impersonation">Impersonation</h2>
+
+<p>
+  Impersonation is when an app attempts to imply a relationship to another app
+  or developer, where no relationship actually exists.
+</p>
+
+<p>
+  For example, if your app displays the brand, icon, or title from another app
+  in order to get to users to download your app, you are leading users to
+  believe that your app is developed by the same entity as the other app and
+  offers similar content or experience. This is an impersonation of the other
+  app and developer, and it is a violation of Google Play policy. If you
+  publish apps that violate impersonation policies, your apps can be suspended
+  and your developer account terminated.
+</p>
+
+<p>
+  No matter what type of app you offer or what your motivation, don’t try to
+  imply an endorsement or relationship to another company or product where none
+  exists. Don’t try to establish your app as the "official" version of another
+  party's work by prominently featuring their brand names or trademarks in your
+  app title or description.
+</p>
+
+<p>
+  Even if your app description states that your app is an "unofficial" version,
+  the use of the other app's branding, trademarks, and other content still can
+  violate policy by presenting content that isn’t yours.
+</p>
+
+<p>
+  Here are some guidelines:
+</p>
+
+<ul>
+  <li>
+    <strong>Don't pretend to be someone else</strong>&mdash; Don't represent
+    that your content is produced by another company or organization if that is
+    not the case.
+  </li>
+
+  <li>
+    <strong>Don't support infringing sites or apps</strong>&mdash; Don't divert
+    users or provide links to any other site that mimics Google Play or
+    represents itself as another application or service.
+  </li>
+
+  <li>
+    <strong>Don't use another app's branding</strong>&mdash; Don’t try to pass
+    off your app as the official version of someone else’s property by using a
+    person or entity (or brand) name in your app title or description.
+  </li>
+</ul>
+
+<p>
+  Below is an example of an "unofficial" app that violates Google Play policy
+  by impersonating another company and an existing product. Specifically:
+</p>
+
+<ul>
+  <li>The example app has a name and icon that appear to be impersonating an
+  existing product.
+  </li>
+
+  <li>The example developer name implies an endorsement or relationship to
+  another company and their products where none exists.
+  </li>
+</ul>
+
+<div class="example-block bad" style="width:100%;float:none;margin:.5em auto 2em 0;">
+  <div class="heading">App name, icon, and developer name that impersonate another</div>
+  <img src="{@docRoot}images/gp-policy-ip-impersonation-violation.png">
+</div>
+
+
+<h2 id="trademarks">Trademark Infringement</h2>
+
+<p>
+  A trademark is a brand that uniquely identifies a product and distinguishes
+  it from other products. It can be a word, name, symbol, or combination of
+  those that is intended to identify the source of the product. A trademark is
+  specifically acquired by a company or other entity through a legal process
+  and once acquired gives the owner exclusive rights to the trademark usage.
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>How to report infringements</h2>
+<p>If you feel your trademark is being infringed, you can request a content review.
+See <a href="http://support.google.com/bin/static.py?&ts=1114905&page=ts.cs"
+target="_policies">Removing content from Google</a> for more information.</p>
+</div>
+</div>
+
+<p>
+  Trademark infringement is improper or unauthorized use of a trademark. Google
+  Play policies prohibit apps that infringe trademarks. If you publish apps in
+  Google Play that use another party's trademarks, your apps can be suspended
+  and your developer account terminated.
+</p>
+
+<p>
+  As you design your app and prepare for publishing, make sure to review Google
+  Play policies and analyze all of your content. If your app uses a trademark
+  not owned by you, or if you are not sure whether a brand is a trademark, you
+  should get legal advice before publishing. As with copyright, the rules vary
+  by country and can be complex.
+</p>
+
+<p>
+  Here are some guidelines for avoiding trademark infringement policy
+  violations:
+</p>
+
+<ul>
+  <li>
+    <strong>Understand and follow trademark laws</strong>&mdash;Don't let your
+    app infringe on the trademarks of others.
+  </li>
+
+  <li>
+    <strong>Know your app's content</strong>&mdash;Before you publish, look for
+    brands and potential trademarks used in your app and store listing and get
+    legal advice if necessary.
+  </li>
+
+  <li>
+    <strong>Use a distinct name</strong>&mdash;Don't give your app a name that
+    is confusingly similar to another company's trademark.
+  </li>
+
+  <li>
+    <strong>Don't use trademarks to imply a relationship</strong>&mdash;Don't
+    describe your app using another company's trademarks in a way that implies
+    an endorsement by or affiliation with the other company.
+  </li>
+
+  <li>
+    <strong>Use a distinct app icon and logo</strong>&mdash;Don't use a
+    modified version of another company’s trademarked logo.
+  </li>
+</ul>
+
+<p>
+  A common misunderstanding is believing that your app may use a brand or
+  trademark without permission, provided you clearly indicate that the app is
+  not the "official" or original app. That is not the case. Even if you let
+  users know that your app is "unofficial", it still violates Google Play
+  policies if it uses another party's trademarks. Also, this type of
+  "unofficial" app may violate <a href="#impersonation">impersonation
+  policies</a>.
+</p>
+
+<p>
+  Below is an example app that violates Google Play policies by infringing on
+  another party's trademarks. Specifically:
+</p>
+
+<ul>
+  <li>The example app name is confusingly similar to another party's trademark.</li>
+  <li>The example app icon is a modified version of a another party's logo.</li>
+</ul>
+
+<div class="example-block bad" style="width:100%;float:none;margin:.5em auto 2em 0;">
+  <div class="heading">App name and icon that infringe trademarks</div>
+  <img src="{@docRoot}images/gp-policy-ip-trademark-violation.png">
+</div>
+
+
+<h2 id="other">DDA 4.4 Prohibited Actions</h2>
+
+<p>
+  When you publish an app on Google Play, you agree to the terms of the
+  Developer Distribution Agreement (DDA). Section 4.4 of the DDA prohibits certain
+  types of actions on your part. For reference, you agree that you will not
+  engage in any activity with the Market, including the development or
+  distribution of Products, that interferes with, disrupts, damages, or
+  accesses in an unauthorized manner the devices, servers, networks, or other
+  properties or services of any third party including, but not limited to,
+  Android users, Google or any mobile network operator.
+</p>
+
+<p>
+  For details, please refer to the complete <a href=
+  "http://play.google.com/about/developer-distribution-agreement.html" target=
+  "_policies">Developer Distribution Agreement</a>.
+</p>
