@@ -84,6 +84,9 @@
 // Turn on to insert an event marker for each display list op
 #define DEBUG_DISPLAY_LIST_OPS_AS_EVENTS 0
 
+// Turn on to highlight drawing batches and merged batches with different colors
+#define DEBUG_MERGE_BEHAVIOR 0
+
 #if DEBUG_INIT
     #define INIT_LOGD(...) ALOGD(__VA_ARGS__)
 #else

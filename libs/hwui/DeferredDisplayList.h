@@ -22,6 +22,9 @@
 
 #include "Matrix.h"
 #include "Rect.h"
+#include "utils/TinyHashMap.h"
+
+class SkBitmap;
 
 namespace android {
 namespace uirenderer {
@@ -31,8 +34,13 @@ class DrawOp;
 class SaveOp;
 class SaveLayerOp;
 class StateOp;
-class DrawOpBatch;
 class OpenGLRenderer;
+
+class Batch;
+class DrawBatch;
+class MergingDrawBatch;
+
+typedef void* mergeid_t;
 
 class DeferredDisplayList {
 public:
@@ -40,7 +48,7 @@ public:
     ~DeferredDisplayList() { clear(); }
 
     enum OpBatchId {
-        kOpBatch_None = -1, // Don't batch
+        kOpBatch_None = 0, // Don't batch
         kOpBatch_Bitmap,
         kOpBatch_Patch,
         kOpBatch_AlphaVertices,
@@ -96,8 +104,20 @@ private:
     Vector<int> mSaveStack;
     int mComplexClipStackStart;
 
-    Vector<DrawOpBatch*> mBatches;
-    int mBatchIndices[kOpBatch_Count];
+    Vector<Batch*> mBatches;
+
+    // Maps batch ids to the most recent *non-merging* batch of that id
+    Batch* mBatchLookup[kOpBatch_Count];
+
+    // Points to the index after the most recent barrier
+    int mEarliestBatchIndex;
+
+    /**
+     * Maps the mergeid_t returned by an op's getMergeId() to the most recently seen
+     * MergingDrawBatch of that id. These ids are unique per draw type and guaranteed to not
+     * collide, which avoids the need to resolve mergeid collisions.
+     */
+    TinyHashMap<mergeid_t, DrawBatch*> mMergingBatches[kOpBatch_Count];
 };
 
 }; // namespace uirenderer
