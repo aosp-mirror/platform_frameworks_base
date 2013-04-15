@@ -124,6 +124,8 @@ public class KeyguardUpdateMonitor {
             mCallbacks = Lists.newArrayList();
     private ContentObserver mDeviceProvisionedObserver;
 
+    private boolean mSwitchingUser;
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -461,11 +463,13 @@ public class KeyguardUpdateMonitor {
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
                                     newUserId, 0, reply));
+                            mSwitchingUser = true;
                         }
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
                                     newUserId));
+                            mSwitchingUser = false;
                         }
                     });
         } catch (RemoteException e) {
@@ -529,7 +533,6 @@ public class KeyguardUpdateMonitor {
                 cb.onUserSwitching(userId);
             }
         }
-        setAlternateUnlockEnabled(false);
         try {
             reply.sendResult(null);
         } catch (RemoteException e) {
@@ -731,6 +734,10 @@ public class KeyguardUpdateMonitor {
 
     public boolean isKeyguardVisible() {
         return mKeyguardIsVisible;
+    }
+
+    public boolean isSwitchingUser() {
+        return mSwitchingUser;
     }
 
     private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {

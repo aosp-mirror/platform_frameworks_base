@@ -319,8 +319,9 @@ public class KeyguardViewMediator {
                 mSwitchingUser = true;
                 resetStateLocked(null);
                 adjustStatusBarLocked();
-                // Disable face unlock when the user switches.
-                KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(false);
+                // When we switch users we want to bring the new user to the biometric unlock even
+                // if the current user has gone to the backup.
+                KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
             }
         }
 
