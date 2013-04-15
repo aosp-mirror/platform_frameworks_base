@@ -2411,9 +2411,14 @@
     <string name="js_dialog_title">The page at \"<xliff:g id="title">%s</xliff:g>\" says:</string>
     <!-- Default title for a javascript dialog -->
     <string name="js_dialog_title_default">JavaScript</string>
-    <!-- Message in a javascript dialog asking if the user wishes to leave the
-             current page -->
-    <string name="js_dialog_before_unload">Navigate away from this page?\n\n<xliff:g id="message">%s</xliff:g>\n\nTouch OK to continue, or Cancel to stay on the current page.</string>
+    <!-- Title for the unload javascript dialog -->
+    <string name="js_dialog_before_unload_title">Confirm Navigation</string>
+    <!-- Text for the positive button on the unload javascript dialog -->
+    <string name="js_dialog_before_unload_positive_button">Leave this Page</string>
+    <!-- Text for the negative button on the unload javascript dialog -->
+    <string name="js_dialog_before_unload_negative_button">Stay on this Page</string>
+    <!-- Message in a javascript dialog asking if the user wishes to leave the current page -->
+    <string name="js_dialog_before_unload"><xliff:g id="message">%s</xliff:g>\n\nAre you sure you want to navigate away from this page?</string>
 
     <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
     <string name="save_password_label">Confirm</string>

@@ -17,10 +17,8 @@
 package android.webkit;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -33,10 +31,6 @@ import android.os.SystemClock;
 import android.provider.Browser;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 import com.android.internal.R;
 
 import java.net.MalformedURLException;
@@ -92,10 +86,7 @@ class CallbackProxy extends Handler {
     private static final int CREATE_WINDOW                        = 109;
     private static final int CLOSE_WINDOW                         = 110;
     private static final int SAVE_PASSWORD                        = 111;
-    private static final int JS_ALERT                             = 112;
-    private static final int JS_CONFIRM                           = 113;
-    private static final int JS_PROMPT                            = 114;
-    private static final int JS_UNLOAD                            = 115;
+    private static final int JS_DIALOG                            = 112;
     private static final int ASYNC_KEYEVENTS                      = 116;
     private static final int DOWNLOAD_FILE                        = 118;
     private static final int REPORT_ERROR                         = 119;
@@ -566,188 +557,12 @@ class CallbackProxy extends Handler {
                 }
                 break;
 
-            case JS_ALERT:
+            case JS_DIALOG:
                 if (mWebChromeClient != null) {
                     final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
-                    final JsResult res = receiver.mJsResult;
-                    String message = msg.getData().getString("message");
-                    String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsAlert(mWebView.getWebView(), url, message,
-                            res)) {
-                        if (!canShowAlertDialog()) {
-                            res.cancel();
-                            receiver.setReady();
-                            break;
-                        }
-                        new AlertDialog.Builder(mContext)
-                                .setTitle(getJsDialogTitle(url))
-                                .setMessage(message)
-                                .setPositiveButton(R.string.ok,
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int which) {
-                                                res.confirm();
-                                            }
-                                        })
-                                .setOnCancelListener(
-                                        new DialogInterface.OnCancelListener() {
-                                            public void onCancel(
-                                                    DialogInterface dialog) {
-                                                res.cancel();
-                                            }
-                                        })
-                                .show();
-                    }
-                    receiver.setReady();
-                }
-                break;
-
-            case JS_CONFIRM:
-                if (mWebChromeClient != null) {
-                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
-                    final JsResult res = receiver.mJsResult;
-                    String message = msg.getData().getString("message");
-                    String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsConfirm(mWebView.getWebView(), url, message,
-                            res)) {
-                        if (!canShowAlertDialog()) {
-                            res.cancel();
-                            receiver.setReady();
-                            break;
-                        }
-                        new AlertDialog.Builder(mContext)
-                                .setTitle(getJsDialogTitle(url))
-                                .setMessage(message)
-                                .setPositiveButton(R.string.ok,
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int which) {
-                                                res.confirm();
-                                            }})
-                                .setNegativeButton(R.string.cancel,
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int which) {
-                                                res.cancel();
-                                            }})
-                                .setOnCancelListener(
-                                        new DialogInterface.OnCancelListener() {
-                                            public void onCancel(
-                                                    DialogInterface dialog) {
-                                                res.cancel();
-                                            }
-                                        })
-                                .show();
-                    }
-                    // Tell the JsResult that it is ready for client
-                    // interaction.
-                    receiver.setReady();
-                }
-                break;
-
-            case JS_PROMPT:
-                if (mWebChromeClient != null) {
-                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
-                    final JsPromptResult res = receiver.mJsResult;
-                    String message = msg.getData().getString("message");
-                    String defaultVal = msg.getData().getString("default");
-                    String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsPrompt(mWebView.getWebView(), url, message,
-                                defaultVal, res)) {
-                        if (!canShowAlertDialog()) {
-                            res.cancel();
-                            receiver.setReady();
-                            break;
-                        }
-                        final LayoutInflater factory = LayoutInflater
-                                .from(mContext);
-                        final View view = factory.inflate(R.layout.js_prompt,
-                                null);
-                        final EditText v = (EditText) view
-                                .findViewById(R.id.value);
-                        v.setText(defaultVal);
-                        ((TextView) view.findViewById(R.id.message))
-                                .setText(message);
-                        new AlertDialog.Builder(mContext)
-                                .setTitle(getJsDialogTitle(url))
-                                .setView(view)
-                                .setPositiveButton(R.string.ok,
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int whichButton) {
-                                                res.confirm(v.getText()
-                                                        .toString());
-                                            }
-                                        })
-                                .setNegativeButton(R.string.cancel,
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int whichButton) {
-                                                res.cancel();
-                                            }
-                                        })
-                                .setOnCancelListener(
-                                        new DialogInterface.OnCancelListener() {
-                                            public void onCancel(
-                                                    DialogInterface dialog) {
-                                                res.cancel();
-                                            }
-                                        })
-                                .show();
-                    }
-                    // Tell the JsResult that it is ready for client
-                    // interaction.
-                    receiver.setReady();
-                }
-                break;
-
-            case JS_UNLOAD:
-                if (mWebChromeClient != null) {
-                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
-                    final JsResult res = receiver.mJsResult;
-                    String message = msg.getData().getString("message");
-                    String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsBeforeUnload(mWebView.getWebView(), url,
-                            message, res)) {
-                        if (!canShowAlertDialog()) {
-                            res.cancel();
-                            receiver.setReady();
-                            break;
-                        }
-                        final String m = mContext.getString(
-                                R.string.js_dialog_before_unload, message);
-                        new AlertDialog.Builder(mContext)
-                                .setMessage(m)
-                                .setPositiveButton(R.string.ok,
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int which) {
-                                                res.confirm();
-                                            }
-                                        })
-                                .setNegativeButton(R.string.cancel,
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int which) {
-                                                res.cancel();
-                                            }
-                                        })
-                                .setOnCancelListener(
-                                        new DialogInterface.OnCancelListener() {
-                                            @Override
-                                            public void onCancel(
-                                                    DialogInterface dialog) {
-                                                res.cancel();
-                                            }
-                                        })
-                                .show();
+                    JsDialogHelper helper = new JsDialogHelper(receiver.mJsResult, msg);
+                    if (!helper.invokeCallback(mWebChromeClient, mWebView.getWebView())) {
+                        helper.showDialog(mContext);
                     }
                     receiver.setReady();
                 }
@@ -757,7 +572,7 @@ class CallbackProxy extends Handler {
                 if(mWebChromeClient != null) {
                     final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
                     final JsResult res = receiver.mJsResult;
-                    if(mWebChromeClient.onJsTimeout()) {
+                    if (mWebChromeClient.onJsTimeout()) {
                         res.confirm();
                     } else {
                         res.cancel();
@@ -893,24 +708,6 @@ class CallbackProxy extends Handler {
      */
     void switchOutDrawHistory() {
         sendMessage(obtainMessage(SWITCH_OUT_HISTORY));
-    }
-
-    private String getJsDialogTitle(String url) {
-        String title = url;
-        if (URLUtil.isDataUrl(url)) {
-            // For data: urls, we just display 'JavaScript' similar to Safari.
-            title = mContext.getString(R.string.js_dialog_title_default);
-        } else {
-            try {
-                URL aUrl = new URL(url);
-                // For example: "The page at 'http://www.mit.edu' says:"
-                title = mContext.getString(R.string.js_dialog_title,
-                        aUrl.getProtocol() + "://" + aUrl.getHost());
-            } catch (MalformedURLException ex) {
-                // do nothing. just use the url as the title
-            }
-        }
-        return title;
     }
 
     //--------------------------------------------------------------------------
@@ -1332,9 +1129,10 @@ class CallbackProxy extends Handler {
             return;
         }
         JsResultReceiver result = new JsResultReceiver();
-        Message alert = obtainMessage(JS_ALERT, result);
+        Message alert = obtainMessage(JS_DIALOG, result);
         alert.getData().putString("message", message);
         alert.getData().putString("url", url);
+        alert.getData().putInt("type", JsDialogHelper.ALERT);
         sendMessageToUiThreadSync(alert);
     }
 
@@ -1345,9 +1143,10 @@ class CallbackProxy extends Handler {
             return false;
         }
         JsResultReceiver result = new JsResultReceiver();
-        Message confirm = obtainMessage(JS_CONFIRM, result);
+        Message confirm = obtainMessage(JS_DIALOG, result);
         confirm.getData().putString("message", message);
         confirm.getData().putString("url", url);
+        confirm.getData().putInt("type", JsDialogHelper.CONFIRM);
         sendMessageToUiThreadSync(confirm);
         return result.mJsResult.getResult();
     }
@@ -1359,10 +1158,11 @@ class CallbackProxy extends Handler {
             return null;
         }
         JsResultReceiver result = new JsResultReceiver();
-        Message prompt = obtainMessage(JS_PROMPT, result);
+        Message prompt = obtainMessage(JS_DIALOG, result);
         prompt.getData().putString("message", message);
         prompt.getData().putString("default", defaultValue);
         prompt.getData().putString("url", url);
+        prompt.getData().putInt("type", JsDialogHelper.PROMPT);
         sendMessageToUiThreadSync(prompt);
         return result.mJsResult.getStringResult();
     }
@@ -1374,10 +1174,11 @@ class CallbackProxy extends Handler {
             return true;
         }
         JsResultReceiver result = new JsResultReceiver();
-        Message confirm = obtainMessage(JS_UNLOAD, result);
-        confirm.getData().putString("message", message);
-        confirm.getData().putString("url", url);
-        sendMessageToUiThreadSync(confirm);
+        Message unload = obtainMessage(JS_DIALOG, result);
+        unload.getData().putString("message", message);
+        unload.getData().putString("url", url);
+        unload.getData().putInt("type", JsDialogHelper.UNLOAD);
+        sendMessageToUiThreadSync(unload);
         return result.mJsResult.getResult();
     }
 
@@ -1593,16 +1394,6 @@ class CallbackProxy extends Handler {
         }
         Message msg = obtainMessage(HISTORY_INDEX_CHANGED, index, 0, item);
         sendMessage(msg);
-    }
-
-    boolean canShowAlertDialog() {
-        // We can only display the alert dialog if mContext is
-        // an Activity context.
-        // FIXME: Should we display dialogs if mContext does
-        // not have the window focus (e.g. if the user is viewing
-        // another Activity when the alert should be displayed?
-        // See bug 3166409
-        return mContext instanceof Activity;
     }
 
     private synchronized void sendMessageToUiThreadSync(Message msg) {
