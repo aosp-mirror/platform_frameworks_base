@@ -56,9 +56,9 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
 
     private static final String UPDATE_CERTIFICATE_KEY = "config_update_certificate";
 
-    protected final File updateDir;
-    protected final File updateContent;
-    protected final File updateVersion;
+    private final File updateDir;
+    private final File updateContent;
+    private final File updateVersion;
 
     public ConfigUpdateInstallReceiver(String updateDir, String updateContentPath,
                                        String updateMetadataPath, String updateVersionPath) {
@@ -222,7 +222,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         return signer.verify(Base64.decode(signature.getBytes(), Base64.DEFAULT));
     }
 
-    protected void writeUpdate(File dir, File file, byte[] content) throws IOException {
+    private void writeUpdate(File dir, File file, byte[] content) throws IOException {
         FileOutputStream out = null;
         File tmp = null;
         try {
