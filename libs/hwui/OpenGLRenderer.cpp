@@ -112,11 +112,9 @@ static const Blender gBlendsSwap[] = {
 
 OpenGLRenderer::OpenGLRenderer():
         mCaches(Caches::getInstance()), mExtensions(Extensions::getInstance()) {
-    mDrawModifiers.mShader = NULL;
-    mDrawModifiers.mColorFilter = NULL;
+    // *set* draw modifiers to be 0
+    memset(&mDrawModifiers, 0, sizeof(mDrawModifiers));
     mDrawModifiers.mOverrideLayerAlpha = 1.0f;
-    mDrawModifiers.mHasShadow = false;
-    mDrawModifiers.mHasDrawFilter = false;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
@@ -1330,10 +1328,9 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
         }
     }
 
-    if (stateDeferFlags & kStateDeferFlag_Clip) {
+    state.mClipValid = (stateDeferFlags & kStateDeferFlag_Clip);
+    if (state.mClipValid) {
         state.mClip.set(currentClip);
-    } else {
-        state.mClip.setEmpty();
     }
 
     // Transform, drawModifiers, and alpha always deferred, since they are used by state operations
@@ -1344,15 +1341,20 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
     return false;
 }
 
-void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state) {
+void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore) {
     currentTransform().load(state.mMatrix);
     mDrawModifiers = state.mDrawModifiers;
     mSnapshot->alpha = state.mAlpha;
 
-    if (!state.mClip.isEmpty()) {
+    if (state.mClipValid && !skipClipRestore) {
         mSnapshot->setClip(state.mClip.left, state.mClip.top, state.mClip.right, state.mClip.bottom);
         dirtyClip();
     }
+}
+
+void OpenGLRenderer::setFullScreenClip() {
+    mSnapshot->setClip(0, 0, mWidth, mHeight);
+    dirtyClip();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1961,6 +1963,42 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     drawAlpha8TextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
             paint != NULL, color, alpha, mode, (GLvoid*) NULL,
             (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
+}
+
+status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
+        const Rect& bounds, SkPaint* paint) {
+
+    // merged draw operations don't need scissor, but clip should still be valid
+    mCaches.setScissorEnabled(mScissorOptimizationDisabled);
+
+    mCaches.activeTexture(0);
+    Texture* texture = mCaches.textureCache.get(bitmap);
+    if (!texture) return DrawGlInfo::kStatusDone;
+    const AutoTexture autoCleanup(texture);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(GL_NEAREST, true); // merged ops are always pure-translation for now
+
+    const float x = (int) floorf(bounds.left + 0.5f);
+    const float y = (int) floorf(bounds.top + 0.5f);
+    if (CC_UNLIKELY(bitmap->getConfig() == SkBitmap::kA8_Config)) {
+        int color = paint != NULL ? paint->getColor() : 0;
+        drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
+                texture->id, paint != NULL, color, alpha, mode,
+                &vertices[0].position[0], &vertices[0].texture[0],
+                GL_TRIANGLES, bitmapCount * 6, true, true);
+    } else {
+        drawTextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
+                texture->id, alpha / 255.0f, mode, texture->blend,
+                &vertices[0].position[0], &vertices[0].texture[0],
+                GL_TRIANGLES, bitmapCount * 6, false, true, 0, true);
+    }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
@@ -2796,8 +2834,11 @@ mat4 OpenGLRenderer::findBestFontTransform(const mat4& transform) const {
 }
 
 status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, const float* positions, SkPaint* paint, float length) {
-    if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
+        float x, float y, const float* positions, SkPaint* paint, float length,
+        DrawOpMode drawOpMode) {
+
+    if (drawOpMode == kDrawOpMode_Immediate &&
+            (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint))) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2815,8 +2856,13 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     SkPaint::FontMetrics metrics;
     paint->getFontMetrics(&metrics, 0.0f);
-    if (quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom)) {
-        return DrawGlInfo::kStatusDone;
+    if (drawOpMode == kDrawOpMode_Immediate) {
+        if (quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom)) {
+            return DrawGlInfo::kStatusDone;
+        }
+    } else {
+        // merged draw operations don't need scissor, but clip should still be valid
+        mCaches.setScissorEnabled(mScissorOptimizationDisabled);
     }
 
     const float oldX = x;
@@ -2868,17 +2914,20 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     bool status;
     TextSetupFunctor functor(*this, x, y, pureTranslate, alpha, mode, paint);
+
+    // don't call issuedrawcommand, do it at end of batch
+    bool forceFinish = (drawOpMode != kDrawOpMode_Defer);
     if (CC_UNLIKELY(paint->getTextAlign() != SkPaint::kLeft_Align)) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
         status = fontRenderer.renderPosText(&paintCopy, clip, text, 0, bytesCount, count, x, y,
-                positions, hasActiveLayer ? &bounds : NULL, &functor);
+                positions, hasActiveLayer ? &bounds : NULL, &functor, forceFinish);
     } else {
         status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
-                positions, hasActiveLayer ? &bounds : NULL, &functor);
+                positions, hasActiveLayer ? &bounds : NULL, &functor, forceFinish);
     }
 
-    if (status && hasActiveLayer) {
+    if ((status || drawOpMode != kDrawOpMode_Immediate) && hasActiveLayer) {
         if (!pureTranslate) {
             transform.mapRect(bounds);
         }
@@ -3093,7 +3142,11 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::resetPaintFilter() {
+    // when clearing the PaintFilter, the masks should also be cleared for simple DrawModifier
+    // comparison, see MergingDrawBatch::canMergeWith
     mDrawModifiers.mHasDrawFilter = false;
+    mDrawModifiers.mPaintFilterClearBits = 0;
+    mDrawModifiers.mPaintFilterSetBits = 0;
 }
 
 void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
@@ -3365,7 +3418,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, float bottom,
         GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool ignoreTransform, bool dirty) {
+        bool ignoreTransform, bool ignoreScale, bool dirty) {
 
     setupDraw();
     setupDrawWithTexture(true);
@@ -3377,7 +3430,11 @@ void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, f
     setupDrawBlending(true, mode);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(left, top, right, bottom, ignoreTransform);
+    if (!ignoreScale) {
+        setupDrawModelView(left, top, right, bottom, ignoreTransform);
+    } else {
+        setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
+    }
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
