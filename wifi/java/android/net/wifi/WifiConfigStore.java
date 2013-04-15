@@ -1111,7 +1111,8 @@ class WifiConfigStore {
                 break setVariables;
             }
 
-            if (config.enterpriseConfig != null) {
+            if (config.enterpriseConfig != null &&
+                    config.enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE) {
 
                 WifiEnterpriseConfig enterpriseConfig = config.enterpriseConfig;
 
