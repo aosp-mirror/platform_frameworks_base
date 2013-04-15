@@ -278,7 +278,7 @@ public class RemoteControlClient
     public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
     /**
      * Flag indicating a RemoteControlClient can receive changes in the media playback position
-     * through the {@link #OnPlaybackPositionUpdateListener} interface. This flag must be set
+     * through the {@link OnPlaybackPositionUpdateListener} interface. This flag must be set
      * in order for components that display the RemoteControlClient information, to display and
      * let the user control media playback position.
      * @see #setTransportControlFlags(int)
@@ -679,7 +679,7 @@ public class RemoteControlClient
          * Called on the implementer to notify it that the playback head should be set at the given
          * position. If the position can be changed from its current value, the implementor of
          * the interface must also update the playback position using
-         * {@link RemoteControlClient#setPlaybackState(int, long, int)} to reflect the actual new
+         * {@link #setPlaybackState(int, long, float)} to reflect the actual new
          * position being used, regardless of whether it differs from the requested position.
          * Failure to do so would cause the system to not know the new actual playback position,
          * and user interface components would fail to show the user where playback resumed after
