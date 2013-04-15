@@ -60,8 +60,6 @@ public class ScriptC extends Script {
             throw new RSRuntimeException("Loading of ScriptC script failed.");
         }
         setID(id);
-        mGCSize = 2 * 1024 * 1024;
-        rs.addAllocSizeForGC(mGCSize);
     }
 
     /**

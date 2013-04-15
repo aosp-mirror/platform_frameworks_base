@@ -198,9 +198,6 @@ public class RenderScriptGL extends RenderScript {
         }
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
-        mGCThread = new GCThread(this);
-        mGCThread.start();
-
     }
 
     /**
