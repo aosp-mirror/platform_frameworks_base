@@ -1012,6 +1012,12 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FORCE_SHOW_NAV_BAR = 0x00000020;
 
         /**
+         * Never animate position changes of the window.
+         *
+         * {@hide} */
+        public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 0x00000040;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
