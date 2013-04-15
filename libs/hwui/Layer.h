@@ -317,6 +317,7 @@ struct Layer {
     DisplayList* displayList;
     Rect dirtyRect;
     bool debugDrawUpdate;
+    bool hasDrawnSinceUpdate;
 
 private:
     /**
