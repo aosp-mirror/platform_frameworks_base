@@ -116,6 +116,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private static final int MSG_LOCATION_CHANGED = 1;
 
+    private static final long NANOS_PER_MILLI = 1000000L;
+
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
     // we don't unnecessarily filter events that are otherwise on
@@ -178,6 +180,11 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // mapping from provider name to last known location
     private final HashMap<String, Location> mLastLocation = new HashMap<String, Location>();
+
+    // same as mLastLocation, but is not updated faster than LocationFudger.FASTEST_INTERVAL_MS.
+    // locations stored here are not fudged for coarse permissions.
+    private final HashMap<String, Location> mLastLocationCoarseInterval =
+            new HashMap<String, Location>();
 
     // all providers that operate over proxy, for authorizing incoming location
     private final ArrayList<LocationProviderProxy> mProxyProviders =
@@ -423,6 +430,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         mLocationHandler.removeMessages(MSG_LOCATION_CHANGED);
         synchronized (mLock) {
             mLastLocation.clear();
+            mLastLocationCoarseInterval.clear();
             for (LocationProviderInterface p : mProviders) {
                 updateProviderListenersLocked(p.getName(), false, mCurrentUserId);
             }
@@ -1407,7 +1415,14 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                 if (!isAllowedByUserSettingsLocked(name, uid)) return null;
 
-                Location location = mLastLocation.get(name);
+                Location location;
+                if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
+                    // Make sure that an app with coarse permissions can't get frequent location
+                    // updates by calling LocationManager.getLastKnownLocation repeatedly.
+                    location = mLastLocationCoarseInterval.get(name);
+                } else {
+                    location = mLastLocation.get(name);
+                }
                 if (location == null) {
                     return null;
                 }
@@ -1673,7 +1688,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // Check whether sufficient time has passed
         long minTime = record.mRequest.getFastestInterval();
-        long delta = (loc.getElapsedRealtimeNanos() - lastLoc.getElapsedRealtimeNanos()) / 1000000L;
+        long delta = (loc.getElapsedRealtimeNanos() - lastLoc.getElapsedRealtimeNanos())
+                / NANOS_PER_MILLI;
         if (delta < minTime - MAX_PROVIDER_SCHEDULING_JITTER_MS) {
             return false;
         }
@@ -1726,13 +1742,30 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         lastLocation.set(location);
 
+        // Update last known coarse interval location if enough time has passed.
+        Location lastLocationCoarseInterval = mLastLocationCoarseInterval.get(provider);
+        if (lastLocationCoarseInterval == null) {
+            lastLocationCoarseInterval = new Location(location);
+            mLastLocationCoarseInterval.put(provider, lastLocationCoarseInterval);
+        }
+        long timeDiffNanos = location.getElapsedRealtimeNanos()
+                - lastLocationCoarseInterval.getElapsedRealtimeNanos();
+        if (timeDiffNanos > LocationFudger.FASTEST_INTERVAL_MS * NANOS_PER_MILLI) {
+            lastLocationCoarseInterval.set(location);
+        }
+        // Don't ever return a coarse location that is more recent than the allowed update
+        // interval (i.e. don't allow an app to keep registering and unregistering for
+        // location updates to overcome the minimum interval).
+        noGPSLocation =
+                lastLocationCoarseInterval.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
+
         // Skip if there are no UpdateRecords for this provider.
         ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
         if (records == null || records.size() == 0) return;
 
         // Fetch coarse location
         Location coarseLocation = null;
-        if (noGPSLocation != null && !noGPSLocation.equals(lastNoGPSLocation)) {
+        if (noGPSLocation != null) {
             coarseLocation = mLocationFudger.getOrCreate(noGPSLocation);
         }
 
@@ -2021,6 +2054,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             addProviderLocked(provider);
             mMockProviders.put(name, provider);
             mLastLocation.put(name, null);
+            mLastLocationCoarseInterval.put(name, null);
             updateProvidersLocked();
         }
         Binder.restoreCallingIdentity(identity);
@@ -2043,6 +2077,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 addProviderLocked(realProvider);
             }
             mLastLocation.put(provider, null);
+            mLastLocationCoarseInterval.put(provider, null);
             updateProvidersLocked();
             Binder.restoreCallingIdentity(identity);
         }
@@ -2169,6 +2204,13 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             pw.println("  Last Known Locations:");
             for (Map.Entry<String, Location> entry : mLastLocation.entrySet()) {
+                String provider = entry.getKey();
+                Location location = entry.getValue();
+                pw.println("    " + provider + ": " + location);
+            }
+
+            pw.println("  Last Known Locations Coarse Intervals:");
+            for (Map.Entry<String, Location> entry : mLastLocationCoarseInterval.entrySet()) {
                 String provider = entry.getKey();
                 Location location = entry.getValue();
                 pw.println("    " + provider + ": " + location);
