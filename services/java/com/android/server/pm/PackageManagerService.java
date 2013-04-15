@@ -8224,15 +8224,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (outInfo != null) {
             // A user ID was deleted here. Go through all users and remove it
             // from KeyStore.
-            final int appId = outInfo.removedAppId;
-            if (appId != -1) {
-                final KeyStore keyStore = KeyStore.getInstance();
-                if (keyStore != null) {
-                    for (final int userId : sUserManager.getUserIds()) {
-                        keyStore.clearUid(UserHandle.getUid(userId, appId));
-                    }
-                }
-            }
+            removeKeystoreDataIfNeeded(UserHandle.USER_ALL, outInfo.removedAppId);
         }
     }
 
@@ -8371,6 +8363,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 outInfo.removedUsers = new int[] {removeUser};
             }
             mInstaller.clearUserData(packageName, removeUser);
+            removeKeystoreDataIfNeeded(removeUser, appId);
             schedulePackageCleaning(packageName, removeUser, false);
             return true;
         }
@@ -8522,29 +8515,34 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         PackageParser.Package p;
         boolean dataOnly = false;
+        final int appId;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
-            if(p == null) {
+            if (p == null) {
                 dataOnly = true;
                 PackageSetting ps = mSettings.mPackages.get(packageName);
-                if((ps == null) || (ps.pkg == null)) {
-                    Slog.w(TAG, "Package named '" + packageName +"' doesn't exist.");
+                if ((ps == null) || (ps.pkg == null)) {
+                    Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
                     return false;
                 }
                 p = ps.pkg;
             }
-        }
-
-        if (!dataOnly) {
-            //need to check this only for fully installed applications
-            if (p == null) {
-                Slog.w(TAG, "Package named '" + packageName +"' doesn't exist.");
-                return false;
+            if (!dataOnly) {
+                // need to check this only for fully installed applications
+                if (p == null) {
+                    Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
+                    return false;
+                }
+                final ApplicationInfo applicationInfo = p.applicationInfo;
+                if (applicationInfo == null) {
+                    Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
+                    return false;
+                }
             }
-            final ApplicationInfo applicationInfo = p.applicationInfo;
-            if (applicationInfo == null) {
-                Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
-                return false;
+            if (p != null && p.applicationInfo != null) {
+                appId = p.applicationInfo.uid;
+            } else {
+                appId = -1;
             }
         }
         int retCode = mInstaller.clearUserData(packageName, userId);
@@ -8553,7 +8551,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + packageName);
             return false;
         }
+        removeKeystoreDataIfNeeded(userId, appId);
         return true;
+    }
+
+    /**
+     * Remove entries from the keystore daemon. Will only remove it if the
+     * {@code appId} is valid.
+     */
+    private static void removeKeystoreDataIfNeeded(int userId, int appId) {
+        if (appId < 0) {
+            return;
+        }
+
+        final KeyStore keyStore = KeyStore.getInstance();
+        if (keyStore != null) {
+            if (userId == UserHandle.USER_ALL) {
+                for (final int individual : sUserManager.getUserIds()) {
+                    keyStore.clearUid(UserHandle.getUid(individual, appId));
+                }
+            } else {
+                keyStore.clearUid(UserHandle.getUid(userId, appId));
+            }
+        } else {
+            Slog.w(TAG, "Could not contact keystore to clear entries for app id " + appId);
+        }
     }
 
     public void deleteApplicationCacheFiles(final String packageName,
