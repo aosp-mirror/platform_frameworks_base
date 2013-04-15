@@ -18,9 +18,7 @@ package android.renderscript;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.concurrent.locks.*;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -812,8 +810,6 @@ public class RenderScript {
     int     mContext;
     @SuppressWarnings({"FieldCanBeLocal"})
     MessageThread mMessageThread;
-    GCThread mGCThread;
-
 
     Element mElement_U8;
     Element mElement_I8;
@@ -1103,60 +1099,6 @@ public class RenderScript {
         }
     }
 
-    static class GCThread extends Thread {
-        RenderScript mRS;
-        boolean mRun = true;
-
-        long currentSize = 0;
-        long targetSize; // call System.gc after 512MB of allocs
-
-        final Lock lock = new ReentrantLock();
-        final Condition cond = lock.newCondition();
-
-        GCThread(RenderScript rs) {
-            super("RSGCThread");
-            mRS = rs;
-
-        }
-
-        public void run() {
-            ActivityManager am = (ActivityManager)mRS.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-            ActivityManager.MemoryInfo meminfo = new ActivityManager.MemoryInfo();
-            am.getMemoryInfo(meminfo);
-            targetSize = (long)(meminfo.totalMem * .5f);
-
-            while(mRun) {
-                System.gc();
-                lock.lock();
-                try {
-                    cond.awaitUninterruptibly();
-                } finally {
-                    lock.unlock();
-                }
-            }
-
-            Log.d(LOG_TAG, "GCThread exiting.");
-        }
-
-        public synchronized void addAllocSize(long bytes) {
-            currentSize += bytes;
-            if (currentSize >= targetSize) {
-                lock.lock();
-                try {
-                    cond.signal();
-                } finally {
-                    lock.unlock();
-                }
-            }
-        }
-
-        public synchronized void removeAllocSize(long bytes) {
-            currentSize -= bytes;
-        }
-
-    }
-
-
     RenderScript(Context ctx) {
         if (ctx != null) {
             mApplicationContext = ctx.getApplicationContext();
@@ -1179,15 +1121,6 @@ public class RenderScript {
         return create(ctx, sdkVersion, ContextType.NORMAL);
     }
 
-    void addAllocSizeForGC(int bytes) {
-        mGCThread.addAllocSize(bytes);
-    }
-
-    void removeAllocSizeForGC(int bytes) {
-        mGCThread.removeAllocSize(bytes);
-    }
-
-
     /**
      * Create a basic RenderScript context.
      *
@@ -1209,9 +1142,7 @@ public class RenderScript {
             throw new RSDriverException("Failed to create RS context.");
         }
         rs.mMessageThread = new MessageThread(rs);
-        rs.mGCThread = new GCThread(rs);
         rs.mMessageThread.start();
-        rs.mGCThread.start();
         return rs;
     }
 
@@ -1266,11 +1197,8 @@ public class RenderScript {
         validate();
         nContextDeinitToClient(mContext);
         mMessageThread.mRun = false;
-        mGCThread.mRun = false;
-        mGCThread.addAllocSize(0);
         try {
             mMessageThread.join();
-            mGCThread.join();
         } catch(InterruptedException e) {
         }
 
