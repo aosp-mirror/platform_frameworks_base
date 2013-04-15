@@ -28048,11 +28048,11 @@ package android.webkit {
   public class WebViewDatabase {
     method public void clearFormData();
     method public void clearHttpAuthUsernamePassword();
-    method public void clearUsernamePassword();
+    method public deprecated void clearUsernamePassword();
     method public static android.webkit.WebViewDatabase getInstance(android.content.Context);
     method public boolean hasFormData();
     method public boolean hasHttpAuthUsernamePassword();
-    method public boolean hasUsernamePassword();
+    method public deprecated boolean hasUsernamePassword();
   }
 
   public class WebViewFragment extends android.app.Fragment {
