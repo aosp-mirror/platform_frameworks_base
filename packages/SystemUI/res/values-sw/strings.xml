@@ -130,7 +130,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ukingo"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Hakuna SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ufungaji wa Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Shiriki intaneti kwa Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modi ya ndege."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Asilimia <xliff:g id="NUMBER">%d</xliff:g> ya betri"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Mipangilio ya mfumo."</string>
