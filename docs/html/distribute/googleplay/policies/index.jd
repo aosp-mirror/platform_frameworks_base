@@ -1,0 +1,59 @@
+page.title=Google Play Policies and Guidelines
+page.metaDescription=Guidelines and tips for creating apps that comply with Google Play content and distribution policies.
+@jd:body
+
+<p>
+  Before publishing your apps on Google Play, take a few minutes to read and
+  understand the content and distribution policies that apply to all apps
+  in the store. These policies help to keep Android and Google Play an enjoyable
+  and trusted platform for content consumers and developers alike.
+</p>
+
+<p>
+  The documents below highlight important policy areas and provide tips to help
+  you create policy-compliant apps. You'll also find examples and guidance on common
+  policy questions that can help your app stay clear of practices that can result in
+  low ratings or even suspensions from the store.
+</p>
+
+<p>
+  For complete information about Google Play policies, please see the full
+  <a href="http://play.google.com/about/developer-content-policy.html" target=
+  "_policies">Developer Program Policies</a> and <a href=
+  "http://play.google.com/about/developer-distribution-agreement.html" target=
+  "_policies">Developer Distribution Agreement</a> documents.
+</p>
+
+<div class="vspace size-1">
+  &nbsp;
+</div>
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+    <h4>
+      Spam
+    </h4>
+    <p>
+      Make sure that your app does not present content that is unwanted,
+      deceptive, repetitive, or unrelated to the core function of the app.
+    </p><a href="{@docRoot}distribute/googleplay/policies/spam.html">Learn more &raquo;</a>
+  </div>
+  <div class="layout-content-col span-4">
+    <h4>
+      Intellectual Property
+    </h4>
+    <p>
+      Tips and examples of how to use intelletual property (IP) properly,
+      including when to ask permission to use someone else's copyright or
+      trademark.
+    </p><a href="{@docRoot}distribute/googleplay/policies/ip.html">Learn more &raquo;</a>
+  </div>
+  <div class="layout-content-col span-4">
+    <h4>
+      Ads
+    </h4>
+    <p>
+      Make sure that the ads displayed in your app follow the Google Play Content
+      Policy and meet the maturity rating that you have selected for your app.
+    </p><a href="{@docRoot}distribute/googleplay/policies/ads.html">Learn more &raquo;</a>
+  </div>
+</div>

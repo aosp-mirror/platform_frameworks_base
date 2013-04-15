@@ -1,0 +1,352 @@
+page.title=Ads
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In This Document</h2>
+  <ol>
+    <li><a href="#content-maturity">Content and Maturity</a></li>
+    <li><a href="#context">Context and Behavior</a></li>
+    <li><a href="#disclosure" style="clear:right">Disclosure</a></li>
+    <li><a href="#impersonation">Impersonation of System UI</a></li>
+    <li><a href="#adwalls">Adwalls</a></li>
+    <li><a href="#interfering" style="clear:right;">Interference with Ads and Websites</a></li>
+  </ol>
+
+  <h2>More Resources</h2>
+  <ol>
+    <li><a href="http://play.google.com/about/developer-content-policy.html" target="_policies">Developer Program Policies</a></li>
+    <li><a href="http://www.android.com/us/developer-distribution-agreement.html#showlanguages" target="_policies">Developer Distribution Agreement</a></li>
+    <li><a href="http://support.google.com/googleplay/android-developer/answer/188189" target="_policies">Maturity Ratings</a></p>
+  </ol>
+</div>
+</div>
+
+<p>
+  Google Play policies guide how you can use ads in your apps, to help ensure
+  the best experience for users visiting and downloading apps from the store.
+</p>
+
+<p>
+  In general, for the purposes of policy, the content of ads displayed by your
+  app is considered part of your app. As an app developer, it is your
+  responsibility to ensure that the content, context, and behavior of ads in
+  your apps conforms to Google Play policies.
+</p>
+
+<p>
+  Before you publish, make sure you understand Google Play ad policies and how
+  to display ads in conformance with those policies. The sections below
+  highlight best practices and common examples to help you avoid the most
+  common types of policy violations.
+</p>
+
+<p>
+  For more information about Google Play policies that apply to your apps and
+  content, please see the <a href=
+  "http://play.google.com/about/developer-content-policy.html" target=
+  "_policies">Developer Program Policies</a> and <a href=
+  "http://play.google.com/about/developer-distribution-agreement.html" target=
+  "_policies">Developer Distribution Agreement</a>.
+</p>
+
+
+<h2 id="content-maturity">Content and Maturity</h2>
+
+<div class="example-block bad">
+  <div class="heading">Ad maturity exceeds app</div>
+  <img src="{@docRoot}images/gp-policy-ads-maturity-violation.png">
+</div>
+
+<p>
+  From a policy perspective, ads shown in your app are part of your content
+  and your app is responsible for any violations. If an ad shown in your app
+  violates Google Play policies, your app may be suspended or your developer
+  account terminated.
+</p>
+
+<p>
+  For this reason, it's important for you to be be aware of what ads will be
+  displayed in your app and to manage the ads content according to Google Play
+  policies. Here are some guidelines:
+</p>
+
+<ul>
+    <li>
+        <strong>Ads must not violate Content Policy</strong>&mdash;Ads in
+        your app must not violate the terms of Google Play’s Content Policy,
+        including those concerning illegal activities, violence, sexually
+        explicit content, or privacy violations.
+    </li>
+    <li>
+        <strong>Ads maturity must be consistent with your app's
+        maturity</strong>&mdash;Content shown in your ads must be consistent
+        with the app’s maturity rating in Google Play. Especially, ads content
+        should never exceed your app's maturity rating, even if the ads content
+        by itself complies with general policies.
+    </li>
+</ul>
+
+<p>
+  In the example at right, the app's maturity rating is set to
+  "Everyone", which is the lowest maturity level on Google Play. By choosing
+  the "Everyone" maturity level, the developer is declaring that all of the
+  content in the app, <em>including ads</em>, is suitable for all users
+  regardless of age.
+</p>
+
+<p>
+  The example app violates Google Play policies by displaying ad content with a
+  higher maturity level&mdash;ad content showing gambling, profanity, user
+  location, suggestive content, or content from another app with higher
+  maturity exceeds the "Everyone" maturity rating. Because the ad's
+  maturity is higher than the app's maturity level, the app itself is in
+  violation of policy. To correct the problem, the developer must either
+  restrict ads content to "Everyone" level or raise the app's maturity rating.
+</p>
+
+<p>
+  For detailed information about how to choose the appropriate maturity level
+  for your app, or to assess the maturity requirement of ads in your app, see
+  <a href=
+  "http://support.google.com/googleplay/android-developer/answer/188189"
+  target="_policies">Rating your application content for Google Play</a>.
+</p>
+
+
+<h2 id="context">Context and Behavior</h2>
+
+<p>
+  If your app displays ads, it should do so in ways that do not interrupt users,
+  mislead them into clicking on ads, or make changes outside the app without
+  the user's knowledge or consent. Here are some guidelines:
+</p>
+
+<ul>
+  <li>
+    <strong>Display your ads within your UI</strong>&mdash;If possible,
+    display ads only within your app's UI. This leads to a better user
+    experience and helps avoid policy violations
+  </li>
+
+  <li>
+    <strong>Make sure app origin is clear</strong>&mdash;When you display an
+    ad, it must be clear to the user that the ad has originated from your app.
+    If you show the ad in your app's UI while your app has focus, the user
+    understands the ad origin without explicit attribution. However, if you
+    display the ad outside of your app, such as in a notification, you must
+    explicitly indicate the origin.
+  </li>
+
+  <li>
+    <strong>Don't make changes outside of the app without consent</strong>
+   &mdash;Ads must not make changes outside of the app without the user's
+    full knowledge and consent. For example, ads should not install shortcuts,
+    bookmarks, or icons, or change default settings without user consent.
+  </li>
+
+  <li>
+    <strong>Changes outside the app must be reversible</strong>&mdash;If an
+    ad makes changes outside the app as described above, the changes (and
+    origin app) must be evident and easily reversible. For example, the user
+    must be able to locate and reverse the changes by adjusting settings,
+    changing ad preferences in the app, or uninstalling the app altogether.
+  </li>
+
+  <li>
+    <strong>Notification ads require user opt-in</strong>&mdash;Your app
+    should not create <a href=
+    "{@docRoot}design/patterns/notifications.html">notifications</a>
+    containing ads unless the user has specifically opted-in to this behavior
+    and is able to easily opt-out.
+  </li>
+
+  <li>
+    <strong>Use low priority for notification ads</strong>&mdash;Always
+    assign your notification ads <a href="
+    {@docRoot}reference/android/app/Notification.html#PRIORITY_LOW">low
+    priority</a> (for API level 16 and above).
+  </li>
+</ul>
+
+<div class="example-block bad" style="width:400px;margin:.5em 0 0 2em;">
+    <div class="heading">Does not fully indicate origin app</div>
+    <img src="{@docRoot}images/gp-policy-ads-notif-attr-violation.png">
+</div>
+<div class="example-block good" style="width:400px;margin:.5em 0 0 2em;">
+    <div class="heading">Indicates origin app by name and icon</div>
+    <img src="{@docRoot}images/gp-policy-ads-notif-attr.png">
+</div>
+
+<p>
+  In particular, note that notification ads must clearly identify your app as
+  the ad origin. If your app sends notification ads that do not sufficiently
+  identify your app as the origin, the app will be in violation of policy.
+</p>
+
+<p>
+  To identify your app as the origin, you should display the <strong>app's full
+  name and and icon</strong> in the notification to provide the clearest
+  identification and best policy compliance. Displaying a partial app name can
+  also be sufficient, provided the name unambiguously identifies your app.
+</p>
+
+<p>
+  Above right is an example notification ad that violates ad policy by not
+  providing attribution of the origin app. Below right, the notification ads
+  comply with policy by providing both the app icon and full app name (in this
+  case, "Turtle Test").
+</p>
+
+
+<h2 id="disclosure" style="clear:right">Disclosure of Ads to Users</h2>
+
+<p>
+  It's important to sufficiently disclose to users how your app will use ads.
+  You must make it easy for users to understand what ads will be shown in your
+  app, where they will be shown, and what the associated behaviors are, if any.
+  Further, you should ask for user consent and provide options for managing ads
+  or opt-out. Here are some guidelines:
+</p>
+
+<ul>
+  <li>
+    <strong>Tell users about your ads</strong>&mdash;Create a simple,
+    complete disclosure that tells users how your app uses ads, where the ads
+    are shown, and how they can manage ad options. Take common-sense steps to
+    make the disclosure as clear as possible.
+  </li>
+
+  <li>
+    <strong>Make sure users know</strong>&mdash;Present your ads disclosure
+    is an easy-to-see location, rather than hiding it where users are not
+    likely to find it.
+  </li>
+
+  <li>
+    <strong>Ask for consent (opt-in) at launch</strong>&mdash;Where possible,
+    include your ads disclosure in the app description as well as in an Ads
+    Terms, End User License Agreement (EULA), or similar document. Display the
+    terms at first launch and ask for the user's consent before continuing to
+    the app.
+  </li>
+</ul>
+
+<p>
+  A recommended approach is to provide an ads disclosure in an End-User License
+  Agreement (EULA). The disclosure should be clear and succinct and displayed
+  in a modal dialog that asks the user to agree to the terms before using the
+  app.
+</p>
+
+<p>
+  If your app adds homescreen icons and/or browser bookmarks, an acceptable
+  practice for revealing that behavior is to provide a disclosure in both the
+  app description and an opt-in EULA on app launch. This ensures that the
+  behaviors are clearly explained to the user up-front and requires the user’s
+  consent in a pop-up EULA to continue using the app.
+</p>
+
+<div class="example-block good" style="width:213px;margin-right:2em;">
+  <div class="heading">Disclosure in Terms</div>
+  <img src="{@docRoot}images/gp-policy-ads-terms.png">
+</div>
+
+<div class="example-block good" style="width:213px;">
+  <div class="heading">Disclosure in EULA</div>
+  <img src="{@docRoot}images/gp-policy-ads-eula.png">
+</div>
+
+<div class="example-block bad" style="width:213px;margin-left:0em;">
+  <div class="heading">Disclosure is hidden</div>
+  <img src="{@docRoot}images/gp-policy-ads-eula-violation.png">
+</div>
+
+<p style="clear:right">
+  Above left is an example of ads disclosure that is hidden in a long EULA. The
+  disclosure information itself is not clearly indicated in the document text
+  and it's not visible unless the user happens to scroll down far enough in the
+  EULA. Above middle and right show two alternative approaches that
+  present the disclosure in an obvious and clear manner at the top of a
+  EULA and in a dedicated Terms agreement. 
+</p>
+
+
+<h2 id="impersonation">Impersonation of System UI</h2>
+
+<div class="example-block bad">
+  <div class="heading">Ad impersonates system dialog</div>
+  <img src="{@docRoot}images/gp-policy-ads-impersonate-violation.png">
+</div>
+
+<p>
+  Your app must not display any ad that attempts to impersonate or represent a
+  system function or UI component. If such an ad is displayed in your app, your
+  app will be in violation of policy and subject to suspension. Here are some
+  guidelines:
+</p>
+
+<ul>
+  <li>
+    <strong>No fake system dialogs or warnings</strong>&mdash;Any ad that
+    presents itself as a system dialog or warning and asks for user input is in
+    violation of Google Play policies.
+  </li>
+
+  <li>
+    <strong>No fake app updates</strong>&mdash;Ads should not impersonate
+    system UI for app updates.
+  </li>
+</ul>
+
+<p>
+  At right is an example of a pop-up ad impersonating a system dialog, warning
+  the user about viruses. This is a violation of policy.
+</p>
+
+
+<h2 id="adwalls">Adwalls</h2>
+
+<div class="example-block good" style="width:213px;">
+  <div class="heading">Adwall lets user cancel</div>
+  <img src="{@docRoot}images/gp-policy-ads-paywall.png">
+</div>
+
+<div class="example-block bad" style="width:213px;">
+  <div class="heading">Adwall forces user action</div>
+  <img src="{@docRoot}images/gp-policy-ads-paywall-violation.png">
+</div>
+
+<p>
+  If your app uses adwalls to drive affiliate traffic, those adwalls must not
+  force the user to click on ads or submit personal information for advertising
+  purposes before using the app.
+</p>
+
+<p>
+  Forcing a user action in an adwall is not only a poor user experience, it is
+  a violation of Google Play policies.
+</p>
+
+<p>
+  For this reason, <strong>all adwalls must give the user the option to
+  cancel</strong> or otherwise dismiss the ad without penalty.
+</p>
+
+<p>
+  At right is an example of an app that requires the user to click through the
+  ad to fully use the app. This is a violation of policy.
+</p>
+
+<p>
+  The adjacent example demonstrates an adequate option to let the user dismiss
+  the ad wall easily by cancelling.
+</p>
+
+
+<h2 id="interfering" style="clear:right;">Interference with Third-party Ads and Websites</h2>
+
+<p>
+  Ads associated with your app <strong>must not interfere</strong> with any
+  other ads originating in other applications.
+</p>
