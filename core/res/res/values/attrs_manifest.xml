@@ -909,7 +909,7 @@
         <!-- Declare that this application requires access to restricted accounts of a certain
              type. The default value is null and restricted accounts won\'t be visible to this
              application. The type should correspond to the account authenticator type, such as
-             "com.google". Only usable by system apps. -->
+             "com.google". -->
         <attr name="restrictedAccountType" format="string"/>
         <!-- Declare that this application requires an account of a certain
              type. The default value is null and indicates that the application can work without

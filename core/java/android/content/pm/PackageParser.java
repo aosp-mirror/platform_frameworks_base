@@ -1817,11 +1817,12 @@ public class PackageParser {
                     false)) {
                 owner.mRequiredForAllUsers = true;
             }
-            String restrictedAccountType = sa.getString(com.android.internal.R.styleable
-                    .AndroidManifestApplication_restrictedAccountType);
-            if (restrictedAccountType != null && restrictedAccountType.length() > 0) {
-                owner.mRestrictedAccountType = restrictedAccountType;
-            }
+        }
+
+        String restrictedAccountType = sa.getString(com.android.internal.R.styleable
+                .AndroidManifestApplication_restrictedAccountType);
+        if (restrictedAccountType != null && restrictedAccountType.length() > 0) {
+            owner.mRestrictedAccountType = restrictedAccountType;
         }
 
         String requiredAccountType = sa.getString(com.android.internal.R.styleable
