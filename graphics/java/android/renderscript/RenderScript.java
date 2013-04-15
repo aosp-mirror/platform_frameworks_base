@@ -99,9 +99,29 @@ public class RenderScript {
         mCacheDir = cacheDir;
     }
 
+    /**
+     * ContextType specifies the specific type of context to be created.
+     *
+     */
     public enum ContextType {
+        /**
+         * NORMAL context, this is the default and what shipping apps should
+         * use.
+         */
         NORMAL (0),
+
+        /**
+         * DEBUG context, perform extra runtime checks to validate the
+         * kernels and APIs are being used as intended.  Get and SetElementAt
+         * will be bounds checked in this mode.
+         */
         DEBUG (1),
+
+        /**
+         * PROFILE context, Intended to be used once the first time an
+         * application is run on a new device.  This mode allows the runtime to
+         * do additional testing and performance tuning.
+         */
         PROFILE (2);
 
         int mID;
@@ -915,7 +935,8 @@ public class RenderScript {
     }
 
     /**
-     * @hide
+     * Place a message into the message queue to be sent back to the message
+     * handler once all previous commands have been executed.
      *
      * @param id
      * @param data
@@ -1194,9 +1215,9 @@ public class RenderScript {
     /**
      * Create a basic RenderScript context.
      *
-     * @hide
      *
      * @param ctx The context.
+     * @param ct The type of context to be created.
      * @return RenderScript
      */
     public static RenderScript create(Context ctx, ContextType ct) {
