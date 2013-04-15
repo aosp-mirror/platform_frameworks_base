@@ -277,14 +277,12 @@ public class RemoteControlClient
      */
     public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
     /**
-     * @hide
-     * TODO un-hide and add in javadoc of setTransportControlFlags(int)
      * Flag indicating a RemoteControlClient can receive changes in the media playback position
      * through the {@link #OnPlaybackPositionUpdateListener} interface. This flag must be set
      * in order for components that display the RemoteControlClient information, to display and
      * let the user control media playback position.
      * @see #setTransportControlFlags(int)
-     * @see #setPlaybackPositionProvider(PlaybackPositionProvider)
+     * @see #setOnGetPlaybackPositionListener(OnGetPlaybackPositionListener)
      * @see #setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener)
      */
     public final static int FLAG_KEY_MEDIA_POSITION_UPDATE = 1 << 8;
@@ -607,8 +605,6 @@ public class RemoteControlClient
     }
 
     /**
-     * @hide
-     * TODO un-hide
      * Sets the current playback state and the matching media position for the current playback
      *   speed.
      * @param state The current playback state, one of the following values:
@@ -660,7 +656,8 @@ public class RemoteControlClient
      *      {@link #FLAG_KEY_MEDIA_PAUSE},
      *      {@link #FLAG_KEY_MEDIA_STOP},
      *      {@link #FLAG_KEY_MEDIA_FAST_FORWARD},
-     *      {@link #FLAG_KEY_MEDIA_NEXT}
+     *      {@link #FLAG_KEY_MEDIA_NEXT},
+     *      {@link #FLAG_KEY_MEDIA_POSITION_UPDATE}
      */
     public void setTransportControlFlags(int transportControlFlags) {
         synchronized(mCacheLock) {
@@ -673,8 +670,6 @@ public class RemoteControlClient
     }
 
     /**
-     * @hide
-     * TODO un-hide
      * Interface definition for a callback to be invoked when the media playback position is
      * requested to be updated.
      * @see RemoteControlClient#FLAG_KEY_MEDIA_POSITION_UPDATE
@@ -695,30 +690,26 @@ public class RemoteControlClient
     }
 
     /**
-     * @hide
-     * TODO un-hide
      * Interface definition for a callback to be invoked when the media playback position is
      * queried.
      * @see RemoteControlClient#FLAG_KEY_MEDIA_POSITION_UPDATE
      */
-    public interface PlaybackPositionProvider {
+    public interface OnGetPlaybackPositionListener {
         /**
          * Called on the implementer of the interface to query the current playback position.
          * @return a negative value if the current playback position (or the last valid playback
          *     position) is not known, or a zero or positive value expressed in ms indicating the
          *     current position, or the last valid known position.
          */
-        long getPlaybackPosition();
+        long onGetPlaybackPosition();
     }
 
     /**
-     * @hide
-     * TODO un-hide
      * Sets the listener to be called whenever the media playback position is requested
      * to be updated.
      * Notifications will be received in the same thread as the one in which RemoteControlClient
      * was created.
-     * @param l
+     * @param l the position update listener to be called
      */
     public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener l) {
         synchronized(mCacheLock) {
@@ -737,14 +728,12 @@ public class RemoteControlClient
     }
 
     /**
-     * @hide
-     * TODO un-hide
      * Sets the listener to be called whenever the media current playback position is needed.
      * Queries will be received in the same thread as the one in which RemoteControlClient
      * was created.
-     * @param l
+     * @param l the listener to be called to retrieve the playback position
      */
-    public void setPlaybackPositionProvider(PlaybackPositionProvider l) {
+    public void setOnGetPlaybackPositionListener(OnGetPlaybackPositionListener l) {
         synchronized(mCacheLock) {
             int oldCapa = mPlaybackPositionCapabilities;
             if (l != null) {
@@ -942,7 +931,7 @@ public class RemoteControlClient
     /**
      * Provider registered by user of RemoteControlClient to provide the current playback position.
      */
-    private PlaybackPositionProvider mPositionProvider;
+    private OnGetPlaybackPositionListener mPositionProvider;
     /**
      * The current remote control client generation ID across the system, as known by this object
      */
