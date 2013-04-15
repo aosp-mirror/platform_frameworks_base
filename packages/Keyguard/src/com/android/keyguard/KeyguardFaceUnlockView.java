@@ -150,7 +150,9 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     public void onResume(int reason) {
         if (DEBUG) Log.d(TAG, "onResume()");
         mIsShowing = KeyguardUpdateMonitor.getInstance(mContext).isKeyguardVisible();
-        maybeStartBiometricUnlock();
+        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
+          maybeStartBiometricUnlock();
+        }
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
 
         // Registers a callback which handles stopping the biometric unlock and restarting it in
@@ -265,6 +267,14 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             }
             // No longer required; static value set by KeyguardViewMediator
             // mLockPatternUtils.setCurrentUser(userId);
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            if (DEBUG) Log.d(TAG, "onUserSwitchComplete(" + userId + ")");
+            if (mBiometricUnlock != null) {
+                maybeStartBiometricUnlock();
+            }
         }
 
         @Override
