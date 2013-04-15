@@ -12267,13 +12267,17 @@ package android.media {
     ctor public RemoteControlClient(android.app.PendingIntent);
     ctor public RemoteControlClient(android.app.PendingIntent, android.os.Looper);
     method public android.media.RemoteControlClient.MetadataEditor editMetadata(boolean);
+    method public void setOnGetPlaybackPositionListener(android.media.RemoteControlClient.OnGetPlaybackPositionListener);
+    method public void setPlaybackPositionUpdateListener(android.media.RemoteControlClient.OnPlaybackPositionUpdateListener);
     method public void setPlaybackState(int);
+    method public void setPlaybackState(int, long, float);
     method public void setTransportControlFlags(int);
     field public static final int FLAG_KEY_MEDIA_FAST_FORWARD = 64; // 0x40
     field public static final int FLAG_KEY_MEDIA_NEXT = 128; // 0x80
     field public static final int FLAG_KEY_MEDIA_PAUSE = 16; // 0x10
     field public static final int FLAG_KEY_MEDIA_PLAY = 4; // 0x4
     field public static final int FLAG_KEY_MEDIA_PLAY_PAUSE = 8; // 0x8
+    field public static final int FLAG_KEY_MEDIA_POSITION_UPDATE = 256; // 0x100
     field public static final int FLAG_KEY_MEDIA_PREVIOUS = 1; // 0x1
     field public static final int FLAG_KEY_MEDIA_REWIND = 2; // 0x2
     field public static final int FLAG_KEY_MEDIA_STOP = 32; // 0x20
@@ -12295,6 +12299,14 @@ package android.media {
     method public synchronized android.media.RemoteControlClient.MetadataEditor putLong(int, long) throws java.lang.IllegalArgumentException;
     method public synchronized android.media.RemoteControlClient.MetadataEditor putString(int, java.lang.String) throws java.lang.IllegalArgumentException;
     field public static final int BITMAP_KEY_ARTWORK = 100; // 0x64
+  }
+
+  public static abstract interface RemoteControlClient.OnGetPlaybackPositionListener {
+    method public abstract long onGetPlaybackPosition();
+  }
+
+  public static abstract interface RemoteControlClient.OnPlaybackPositionUpdateListener {
+    method public abstract void onPlaybackPositionUpdate(long);
   }
 
   public class Ringtone {
