@@ -40,7 +40,11 @@ public class KeyStore {
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
 
-    // Flags for "put" and "import"
+    // Used for UID field to indicate the calling UID.
+    public static final int UID_SELF = -1;
+
+    // Flags for "put" "import" and "generate"
+    public static final int FLAG_NONE = 0;
     public static final int FLAG_ENCRYPTED = 1;
 
     // States
@@ -104,7 +108,7 @@ public class KeyStore {
     }
 
     public boolean put(String key, byte[] value) {
-        return put(key, value, -1);
+        return put(key, value, UID_SELF);
     }
 
     public boolean delete(String key, int uid) {
@@ -117,7 +121,7 @@ public class KeyStore {
     }
 
     public boolean delete(String key) {
-        return delete(key, -1);
+        return delete(key, UID_SELF);
     }
 
     public boolean contains(String key, int uid) {
@@ -130,7 +134,7 @@ public class KeyStore {
     }
 
     public boolean contains(String key) {
-        return contains(key, -1);
+        return contains(key, UID_SELF);
     }
 
     public String[] saw(String prefix, int uid) {
@@ -143,7 +147,7 @@ public class KeyStore {
     }
 
     public String[] saw(String prefix) {
-        return saw(prefix, -1);
+        return saw(prefix, UID_SELF);
     }
 
     public boolean reset() {
@@ -206,7 +210,7 @@ public class KeyStore {
     }
 
     public boolean generate(String key) {
-        return generate(key, -1);
+        return generate(key, UID_SELF);
     }
 
     public boolean importKey(String keyName, byte[] key, int uid, int flags) {
@@ -223,7 +227,7 @@ public class KeyStore {
     }
 
     public boolean importKey(String keyName, byte[] key) {
-        return importKey(keyName, key, -1);
+        return importKey(keyName, key, UID_SELF);
     }
 
     public byte[] getPubkey(String key) {
@@ -245,7 +249,7 @@ public class KeyStore {
     }
 
     public boolean delKey(String key) {
-        return delKey(key, -1);
+        return delKey(key, UID_SELF);
     }
 
     public byte[] sign(String key, byte[] data) {
