@@ -622,7 +622,7 @@
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"fikia arifa"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Huruhusu programu kurejesha, kuchunguza, na kuondoa arifa, ikiwa ni pamoja na zile zilizochapishwa na programu nyingine."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"unganisha kwenye huduma ya kisikilizi cha arifa"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Inaruhusu kishikilizi kuunganishwa kwenye kiolesura cha kiwango cha juu cha huduma ya kisikilizi cha arifa. Haipaswi kuhitajika tena kwa programu za kawaida."</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Inaruhusu kishikilizi kuunganishwa kwenye kusano cha kiwango cha juu cha huduma ya kisikilizi cha arifa. Haipaswi kuhitajika tena kwa programu za kawaida."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Weka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Dhibiti urefu na vibambo vinavyoruhusiwa katika manenosiri ya kufungua skrini."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Chunguza majaribio ya kutofun gua skrini"</string>
@@ -1284,7 +1284,7 @@
     <string name="submit" msgid="1602335572089911941">"Wasilisha"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mtindo wa gari umewezeshwa"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Gusa ili kutoka katika modi ya gari."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Amilisha uzuiaji au mahali maalum"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Kushiriki au kusambaza intaneti kumewashwa"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Gusa ili kusanidi."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Nyuma"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Ifuatayo"</string>
