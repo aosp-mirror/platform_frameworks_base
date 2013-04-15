@@ -20201,11 +20201,13 @@ package android.renderscript {
   public class RenderScript {
     method public void contextDump();
     method public static android.renderscript.RenderScript create(android.content.Context);
+    method public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType);
     method public void destroy();
     method public void finish();
     method public final android.content.Context getApplicationContext();
     method public android.renderscript.RenderScript.RSErrorHandler getErrorHandler();
     method public android.renderscript.RenderScript.RSMessageHandler getMessageHandler();
+    method public void sendMessage(int, int[]);
     method public void setErrorHandler(android.renderscript.RenderScript.RSErrorHandler);
     method public void setMessageHandler(android.renderscript.RenderScript.RSMessageHandler);
     method public void setPriority(android.renderscript.RenderScript.Priority);
@@ -20368,6 +20370,13 @@ package android.renderscript {
   public abstract class ScriptIntrinsic extends android.renderscript.Script {
   }
 
+  public final class ScriptIntrinsic3DLUT extends android.renderscript.ScriptIntrinsic {
+    method public static android.renderscript.ScriptIntrinsic3DLUT create(android.renderscript.RenderScript, android.renderscript.Element);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public android.renderscript.Script.KernelID getKernelID();
+    method public void setLUT(android.renderscript.Allocation);
+  }
+
   public class ScriptIntrinsicBlend extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicBlend create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation);
@@ -20487,6 +20496,7 @@ package android.renderscript {
     method public android.renderscript.Element getElement();
     method public int getX();
     method public int getY();
+    method public int getYuv();
     method public int getZ();
     method public boolean hasFaces();
     method public boolean hasMipmaps();
@@ -20499,6 +20509,7 @@ package android.renderscript {
     method public android.renderscript.Type.Builder setMipmaps(boolean);
     method public android.renderscript.Type.Builder setX(int);
     method public android.renderscript.Type.Builder setY(int);
+    method public android.renderscript.Type.Builder setYuvFormat(int);
     method public android.renderscript.Type.Builder setZ(int);
   }
 
