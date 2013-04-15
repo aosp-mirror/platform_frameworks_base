@@ -11819,10 +11819,10 @@ package android.media {
     method public void seekTo(long, int);
     method public void selectTrack(int);
     method public final void setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
-    method public final void setDataSource(java.lang.String, java.util.Map<java.lang.String, java.lang.String>);
-    method public final void setDataSource(java.lang.String);
-    method public final void setDataSource(java.io.FileDescriptor);
-    method public final void setDataSource(java.io.FileDescriptor, long, long);
+    method public final void setDataSource(java.lang.String, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
+    method public final void setDataSource(java.lang.String) throws java.io.IOException;
+    method public final void setDataSource(java.io.FileDescriptor) throws java.io.IOException;
+    method public final void setDataSource(java.io.FileDescriptor, long, long) throws java.io.IOException;
     method public void unselectTrack(int);
     field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
     field public static final int SAMPLE_FLAG_SYNC = 1; // 0x1
