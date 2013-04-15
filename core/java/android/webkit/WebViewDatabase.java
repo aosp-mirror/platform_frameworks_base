@@ -50,8 +50,10 @@ public class WebViewDatabase {
      *
      * @return true if there are any saved username/password pairs
      * @see WebView#savePassword
-     * @see #clearUsernamePassword
+     * @see #clearUsernamePassworda
+     * @deprecated Saving passwords in WebView will not be supported in future versions.
      */
+    @Deprecated
     public boolean hasUsernamePassword() {
         throw new MustOverrideException();
     }
@@ -62,7 +64,9 @@ public class WebViewDatabase {
      *
      * @see WebView#savePassword
      * @see #hasUsernamePassword
+     * @deprecated Saving passwords in WebView will not be supported in future versions.
      */
+    @Deprecated
     public void clearUsernamePassword() {
         throw new MustOverrideException();
     }
