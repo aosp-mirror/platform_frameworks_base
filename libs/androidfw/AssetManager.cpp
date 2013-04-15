@@ -33,7 +33,9 @@
 #include <utils/threads.h>
 #include <utils/Timers.h>
 #include <utils/ZipFileRO.h>
+#ifdef HAVE_ANDROID_OS
 #include <cutils/trace.h>
+#endif
 
 #include <assert.h>
 #include <dirent.h>
