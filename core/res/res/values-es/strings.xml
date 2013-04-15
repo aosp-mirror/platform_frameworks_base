@@ -559,8 +559,8 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permite que la aplicación modifique el estado de la conectividad de red."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"cambiar conectividad de anclaje a red"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite que la aplicación cambie el estado de la conectividad de red de anclaje."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"cambiar configuración de uso de datos de referencia"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permite que la aplicación cambie los ajustes de uso de datos de referencia."</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"cambiar configuración de uso de conexiones automáticas"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permite que la aplicación cambie los ajustes de uso de conexiones automáticas."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"ver conexiones Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Permite que la aplicación vea información sobre conexión a redes Wi-Fi (por ejemplo, si está habilitada la conexión Wi-Fi y el nombre de los dispositivos Wi-Fi conectados)."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"conectarse a redes Wi-Fi y desconectarse"</string>
@@ -569,14 +569,14 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos de una red Wi-Fi que utilicen direcciones de multidifusión, no solo al tablet. Utiliza más batería que el modo de no multidifusión."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos de una red Wi-Fi que utilicen direcciones de multidifusión, no solo al teléfono. Utiliza más batería que el modo de no multidifusión."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"acceder a los ajustes de Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite que la aplicación configure el tablet Bluetooth local y que detecte dispositivos remotos y se sincronice con ellos."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que la aplicación configure el teléfono Bluetooth local y que detecte dispositivos remotos y se sincronice con ellos."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite que la aplicación configure el tablet Bluetooth local y que detecte dispositivos remotos y se vincule con ellos."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que la aplicación configure el teléfono Bluetooth local y que detecte dispositivos remotos y se vincule con ellos."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"conectarse a WiMAX y desconectarse de esta red"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite que la aplicación determine si está habilitada la conexión WiMAX y obtenga información sobre las redes WiMAX que están conectadas."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Cambiar estado de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite que la aplicación conecte el tablet a redes WiMAX y lo desconecte de ellas."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite que la aplicación conecte el teléfono a redes WiMAX y lo desconecte de ellas."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"sincronizarse con dispositivos Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"vincular con dispositivos Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite que la aplicación acceda a la configuración de Bluetooth del tablet y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite que la aplicación acceda a la configuración de Bluetooth del teléfono y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar Comunicación de campo cercano (NFC)"</string>
@@ -702,7 +702,7 @@
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"RDSI"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Otro fax"</string>
-    <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Señal móvil"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Télex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Móvil del trabajo"</string>
@@ -1391,7 +1391,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Límite de datos móviles superado"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Límite superado en <xliff:g id="SIZE">%s</xliff:g>"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Datos de referencia restringidos"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Conexiones automáticas restringidas"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Toca para eliminar la restricción."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado es válido."</string>
@@ -1420,7 +1420,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Teléfono"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculares"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altavoces del conector"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altavoces de la base"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>

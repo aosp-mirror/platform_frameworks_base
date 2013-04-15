@@ -622,7 +622,7 @@
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"adgang til underretninger"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Tillader, at appen kan hente, undersøge og rydde underretninger, herunder dem, der er sendt af andre apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"forpligte sig til en underretningslyttertjeneste"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Tillader, at brugeren kan forpligte sig til en grænseflade for en underretningslyttertjeneste på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Tillader brugeren at forpligte sig til en underretningslyttertjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
