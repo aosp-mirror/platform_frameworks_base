@@ -672,6 +672,9 @@ public class StateMachine {
 
     private static class SmHandler extends Handler {
 
+        /** true if StateMachine has quit */
+        private boolean mHasQuit = false;
+
         /** The debug flag */
         private boolean mDbg = false;
 
@@ -773,29 +776,31 @@ public class StateMachine {
          */
         @Override
         public final void handleMessage(Message msg) {
-            if (mDbg) mSm.log("handleMessage: E msg.what=" + msg.what);
+            if (!mHasQuit) {
+                if (mDbg) mSm.log("handleMessage: E msg.what=" + msg.what);
 
-            /** Save the current message */
-            mMsg = msg;
+                /** Save the current message */
+                mMsg = msg;
 
-            /** State that processed the message */
-            State msgProcessedState = null;
-            if (mIsConstructionCompleted) {
-                /** Normal path */
-                msgProcessedState = processMsg(msg);
-            } else if (!mIsConstructionCompleted && (mMsg.what == SM_INIT_CMD)
-                    && (mMsg.obj == mSmHandlerObj)) {
-                /** Initial one time path. */
-                mIsConstructionCompleted = true;
-                invokeEnterMethods(0);
-            } else {
-                throw new RuntimeException("StateMachine.handleMessage: "
-                        + "The start method not called, received msg: " + msg);
+                /** State that processed the message */
+                State msgProcessedState = null;
+                if (mIsConstructionCompleted) {
+                    /** Normal path */
+                    msgProcessedState = processMsg(msg);
+                } else if (!mIsConstructionCompleted && (mMsg.what == SM_INIT_CMD)
+                        && (mMsg.obj == mSmHandlerObj)) {
+                    /** Initial one time path. */
+                    mIsConstructionCompleted = true;
+                    invokeEnterMethods(0);
+                } else {
+                    throw new RuntimeException("StateMachine.handleMessage: "
+                            + "The start method not called, received msg: " + msg);
+                }
+                performTransitions(msgProcessedState, msg);
+
+                // We need to check if mSm == null here as we could be quitting.
+                if (mDbg && mSm != null) mSm.log("handleMessage: X");
             }
-            performTransitions(msgProcessedState, msg);
-
-            // We need to check if mSm == null here as we could be quitting.
-            if (mDbg && mSm != null) mSm.log("handleMessage: X");
         }
 
         /**
@@ -908,6 +913,7 @@ public class StateMachine {
             mInitialState = null;
             mDestState = null;
             mDeferredMessages.clear();
+            mHasQuit = true;
         }
 
         /**
