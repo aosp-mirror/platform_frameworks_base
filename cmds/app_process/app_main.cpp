@@ -12,6 +12,7 @@
 #include <utils/Log.h>
 #include <cutils/process_name.h>
 #include <cutils/memory.h>
+#include <cutils/trace.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <sys/personality.h>
 
@@ -95,6 +96,9 @@ public:
 
     virtual void onZygoteInit()
     {
+        // Re-enable tracing now that we're no longer in Zygote.
+        atrace_set_tracing_enabled(true);
+
         sp<ProcessState> proc = ProcessState::self();
         ALOGV("App process: starting thread pool.\n");
         proc->startThreadPool();

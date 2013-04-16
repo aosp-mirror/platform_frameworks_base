@@ -86,6 +86,11 @@ static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv* env,
     atrace_set_debuggable(allowed);
 }
 
+static void android_os_Trace_nativeSetTracingEnabled(JNIEnv* env,
+        jclass clazz, jboolean enabled) {
+    atrace_set_tracing_enabled(enabled);
+}
+
 static JNINativeMethod gTraceMethods[] = {
     /* name, signature, funcPtr */
     { "nativeGetEnabledTags",
@@ -109,6 +114,9 @@ static JNINativeMethod gTraceMethods[] = {
     { "nativeSetAppTracingAllowed",
             "(Z)V",
             (void*)android_os_Trace_nativeSetAppTracingAllowed },
+    { "nativeSetTracingEnabled",
+            "(Z)V",
+            (void*)android_os_Trace_nativeSetTracingEnabled },
 };
 
 int register_android_os_Trace(JNIEnv* env) {

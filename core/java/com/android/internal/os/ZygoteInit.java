@@ -25,6 +25,7 @@ import android.net.LocalServerSocket;
 import android.os.Debug;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -527,6 +528,10 @@ public class ZygoteInit {
 
             // Do an initial gc to clean up after startup
             gc();
+
+            // Disable tracing so that forked processes do not inherit stale tracing tags from
+            // Zygote.
+            Trace.setTracingEnabled(false);
 
             // If requested, start system server directly from Zygote
             if (argv.length != 2) {
