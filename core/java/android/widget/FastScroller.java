@@ -216,8 +216,22 @@ class FastScroller {
                 mHandler.removeCallbacks(mScrollFade);
                 break;
             case STATE_EXIT:
-                int viewWidth = mList.getWidth();
-                mList.invalidate(viewWidth - mThumbW, mThumbY, viewWidth, mThumbY + mThumbH);
+                final int viewWidth = mList.getWidth();
+                final int top = mThumbY;
+                final int bottom = mThumbY + mThumbH;
+                final int left;
+                final int right;
+                switch (mList.getLayoutDirection()) {
+                    case View.LAYOUT_DIRECTION_RTL:
+                        left = 0;
+                        right = mThumbW;
+                        break;
+                    case View.LAYOUT_DIRECTION_LTR:
+                    default:
+                        left = viewWidth - mThumbW;
+                        right = viewWidth;
+                }
+                mList.invalidate(left, top, right, bottom);
                 break;
         }
         mState = state;
@@ -398,10 +412,26 @@ class FastScroller {
         } else if (mState == STATE_EXIT) {
             if (alpha == 0) { // Done with exit
                 setState(STATE_NONE);
-            } else if (mTrackDrawable != null) {
-                mList.invalidate(viewWidth - mThumbW, 0, viewWidth, mList.getHeight());
             } else {
-                mList.invalidate(viewWidth - mThumbW, y, viewWidth, y + mThumbH);
+                final int left, right, top, bottom;
+                if (mTrackDrawable != null) {
+                    top = 0;
+                    bottom = mList.getHeight();
+                } else {
+                    top = y;
+                    bottom = y + mThumbH;
+                }
+                switch (mList.getLayoutDirection()) {
+                    case View.LAYOUT_DIRECTION_RTL:
+                        left = 0;
+                        right = mThumbW;
+                        break;
+                    case View.LAYOUT_DIRECTION_LTR:
+                    default:
+                        left = viewWidth - mThumbW;
+                        right = viewWidth;
+                }
+                mList.invalidate(left, top, right, bottom);
             }
         }
     }
