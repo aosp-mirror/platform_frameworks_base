@@ -459,7 +459,7 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.height = getSnapshot()->height;
     getSnapshot()->transform->copyTo(&info.transform[0]);
 
-    status_t result = (*functor)(DrawGlInfo::kModeDraw, &info) | DrawGlInfo::kStatusDrew;
+    status_t result = (*functor)(DrawGlInfo::kModeDraw, &info);
 
     if (result != DrawGlInfo::kStatusDone) {
         Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
@@ -471,7 +471,7 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     }
 
     resume();
-    return result;
+    return result | DrawGlInfo::kStatusDrew;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
