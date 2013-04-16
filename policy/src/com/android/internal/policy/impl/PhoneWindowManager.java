@@ -3272,7 +3272,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mDismissKeyguard = mWinDismissingKeyguard == win ?
                             DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
                     mWinDismissingKeyguard = win;
-                    mForceStatusBarFromKeyguard = false;
+                    mForceStatusBarFromKeyguard =
+                            mShowingLockscreen && mKeyguardMediator.isSecure();
                 }
                 if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
                     mAllowLockscreenWhenOn = true;
