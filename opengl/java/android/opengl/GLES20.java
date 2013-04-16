@@ -299,6 +299,7 @@ public class GLES20 {
     // GL_STENCIL_INDEX does not appear in gl2.h or gl2ext.h, and there is no
     // token with value 0x1901.
     //
+    @Deprecated
     public static final int GL_STENCIL_INDEX                           = 0x1901;
     public static final int GL_STENCIL_INDEX8                          = 0x8D48;
     public static final int GL_RENDERBUFFER_WIDTH                      = 0x8D42;
