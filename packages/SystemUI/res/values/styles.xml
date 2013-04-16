@@ -92,17 +92,20 @@
     <style name="TextAppearance.QuickSettings" />
 
     <style name="TextAppearance.QuickSettings.TileView">
-        <item name="android:paddingLeft">6dp</item>
-        <item name="android:paddingRight">6dp</item>
-        <item name="android:paddingBottom">2dp</item>
-        <item name="android:drawablePadding">12dp</item>
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#CCCCCC</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">marquee</item>
-        <item name="android:fadingEdge">horizontal</item>
+        <item name="android:paddingStart">6dp</item>
+        <item name="android:paddingEnd">6dp</item>
+    </style>
+
+    <style name="TextAppearance.QuickSettings.TileView.AllInOne" parent="@style/TextAppearance.QuickSettings.TileView">
+        <item name="android:lines">2</item>
+        <item name="android:gravity">top</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:drawablePadding">8dp</item>
     </style>
 
     <style name="TextAppearance.QuickSettings.Clock" parent="@style/TextAppearance.QuickSettings.TileView">
@@ -117,6 +120,13 @@
     <style name="TextAppearance.QuickSettings.Alarm" parent="@style/TextAppearance.QuickSettings.TileView">
         <item name="android:textSize">14dp</item>
         <item name="android:textColor">#ff3a3b39</item>
+    </style>
+
+    <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
+        <item name="android:background">#CC000000</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:fadingEdge">horizontal</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer">

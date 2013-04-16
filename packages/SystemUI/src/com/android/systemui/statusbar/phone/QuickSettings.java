@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import com.android.internal.view.RotationPolicy;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 
 import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
@@ -38,7 +37,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -80,6 +78,7 @@ import java.util.ArrayList;
  *
  */
 class QuickSettings {
+    static final boolean DEBUG_GONE_TILES = false;
     private static final String TAG = "QuickSettings";
     public static final boolean SHOW_IME_TILE = false;
 
@@ -271,6 +270,10 @@ class QuickSettings {
         startSettingsActivity(intent, true);
     }
 
+    private void collapsePanels() {
+        getService().animateCollapsePanels();
+    }
+
     private void startSettingsActivity(Intent intent, boolean onlyProvisioned) {
         if (onlyProvisioned && !getService().isDeviceProvisioned()) return;
         try {
@@ -280,7 +283,7 @@ class QuickSettings {
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-        getService().animateCollapsePanels();
+        collapsePanels();
     }
 
     private void addUserTiles(ViewGroup parent, LayoutInflater inflater) {
@@ -290,7 +293,7 @@ class QuickSettings {
         userTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBar.collapseAllPanels(true);
+                collapsePanels();
                 final UserManager um = UserManager.get(mContext);
                 if (um.getUsers(true).size() > 1) {
                     try {
@@ -322,24 +325,18 @@ class QuickSettings {
         mDynamicSpannedTiles.add(userTile);
 
         // Brightness
-        QuickSettingsTileView brightnessTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        brightnessTile.setContent(R.layout.quick_settings_tile_brightness, inflater);
+        final QuickSettingsBasicTile brightnessTile
+                = new QuickSettingsBasicTile(mContext);
+        brightnessTile.setImageResource(R.drawable.ic_qs_brightness_auto_off);
         brightnessTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBar.collapseAllPanels(true);
+                collapsePanels();
                 showBrightnessDialog();
             }
         });
-        mModel.addBrightnessTile(brightnessTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
-                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
-                tv.setText(state.label);
-            }
-        });
+        mModel.addBrightnessTile(brightnessTile,
+                new QuickSettingsModel.BasicRefreshCallback(brightnessTile));
         parent.addView(brightnessTile);
         mDynamicSpannedTiles.add(brightnessTile);
 
@@ -364,31 +361,24 @@ class QuickSettings {
         */
 
         // Settings tile
-        QuickSettingsTileView settingsTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        settingsTile.setContent(R.layout.quick_settings_tile_settings, inflater);
+        final QuickSettingsBasicTile settingsTile = new QuickSettingsBasicTile(mContext);
+        settingsTile.setImageResource(R.drawable.ic_qs_settings);
         settingsTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startSettingsActivity(android.provider.Settings.ACTION_SETTINGS);
             }
         });
-        mModel.addSettingsTile(settingsTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.settings_tileview);
-                tv.setText(state.label);
-            }
-        });
+        mModel.addSettingsTile(settingsTile,
+                new QuickSettingsModel.BasicRefreshCallback(settingsTile));
         parent.addView(settingsTile);
         mDynamicSpannedTiles.add(settingsTile);
     }
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
         // Wi-fi
-        final QuickSettingsTileView wifiTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        wifiTile.setContent(R.layout.quick_settings_tile_wifi, inflater);
+        final QuickSettingsBasicTile wifiTile
+                = new QuickSettingsBasicTile(mContext);
         wifiTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -421,12 +411,11 @@ class QuickSettings {
         }
         mModel.addWifiTile(wifiTile, new QuickSettingsModel.RefreshCallback() {
             @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
+            public void refreshView(QuickSettingsTileView unused, State state) {
                 WifiState wifiState = (WifiState) state;
-                TextView tv = (TextView) view.findViewById(R.id.wifi_textview);
-                tv.setCompoundDrawablesWithIntrinsicBounds(0, wifiState.iconId, 0, 0);
-                tv.setText(wifiState.label);
-                view.setContentDescription(mContext.getString(
+                wifiTile.setImageResource(wifiState.iconId);
+                wifiTile.setText(wifiState.label);
+                wifiTile.setContentDescription(mContext.getString(
                         R.string.accessibility_quick_settings_wifi,
                         wifiState.signalContentDescription,
                         (wifiState.connected) ? wifiState.label : ""));
@@ -476,10 +465,10 @@ class QuickSettings {
         }
 
         // Rotation Lock
-        if (mContext.getResources().getBoolean(R.bool.quick_settings_show_rotation_lock)) {
-            QuickSettingsTileView rotationLockTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
-            rotationLockTile.setContent(R.layout.quick_settings_tile_rotation_lock, inflater);
+        if (mContext.getResources().getBoolean(R.bool.quick_settings_show_rotation_lock)
+                || DEBUG_GONE_TILES) {
+            final QuickSettingsBasicTile rotationLockTile
+                    = new QuickSettingsBasicTile(mContext);
             rotationLockTile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -487,21 +476,13 @@ class QuickSettings {
                     RotationPolicy.setRotationLock(mContext, !locked);
                 }
             });
-            mModel.addRotationLockTile(rotationLockTile, new QuickSettingsModel.RefreshCallback() {
-                @Override
-                public void refreshView(QuickSettingsTileView view, State state) {
-                    TextView tv = (TextView) view.findViewById(R.id.rotation_lock_textview);
-                    tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
-                    tv.setText(state.label);
-                }
-            });
+            mModel.addRotationLockTile(rotationLockTile,
+                    new QuickSettingsModel.BasicRefreshCallback(rotationLockTile));
             parent.addView(rotationLockTile);
         }
 
         // Battery
-        QuickSettingsTileView batteryTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        batteryTile.setContent(R.layout.quick_settings_tile_battery, inflater);
+        final QuickSettingsBasicTile batteryTile = new QuickSettingsBasicTile(mContext);
         batteryTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -510,11 +491,9 @@ class QuickSettings {
         });
         mModel.addBatteryTile(batteryTile, new QuickSettingsModel.RefreshCallback() {
             @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
+            public void refreshView(QuickSettingsTileView unused, State state) {
                 QuickSettingsModel.BatteryState batteryState =
                         (QuickSettingsModel.BatteryState) state;
-                TextView tv = (TextView) view.findViewById(R.id.battery_textview);
-                ImageView iv = (ImageView) view.findViewById(R.id.battery_image);
                 Drawable d = batteryState.pluggedIn
                         ? mChargingBatteryLevels
                         : mBatteryLevels;
@@ -528,40 +507,38 @@ class QuickSettings {
                         : mContext.getString(R.string.status_bar_settings_battery_meter_format,
                                 batteryState.batteryLevel);
                 }
-                iv.setImageDrawable(d);
-                iv.setImageLevel(batteryState.batteryLevel);
-                tv.setText(t);
-                view.setContentDescription(
+                d.setLevel(batteryState.batteryLevel);
+                batteryTile.setImageDrawable(d);
+                batteryTile.setText(t);
+                batteryTile.setContentDescription(
                         mContext.getString(R.string.accessibility_quick_settings_battery, t));
             }
         });
         parent.addView(batteryTile);
 
         // Airplane Mode
-        QuickSettingsTileView airplaneTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        airplaneTile.setContent(R.layout.quick_settings_tile_airplane, inflater);
+        final QuickSettingsBasicTile airplaneTile
+                = new QuickSettingsBasicTile(mContext);
         mModel.addAirplaneModeTile(airplaneTile, new QuickSettingsModel.RefreshCallback() {
             @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.airplane_mode_textview);
-                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+            public void refreshView(QuickSettingsTileView unused, State state) {
+                airplaneTile.setImageResource(state.iconId);
 
                 String airplaneState = mContext.getString(
                         (state.enabled) ? R.string.accessibility_desc_on
                                 : R.string.accessibility_desc_off);
-                view.setContentDescription(
+                airplaneTile.setContentDescription(
                         mContext.getString(R.string.accessibility_quick_settings_airplane, airplaneState));
-                tv.setText(state.label);
+                airplaneTile.setText(state.label);
             }
         });
         parent.addView(airplaneTile);
 
         // Bluetooth
-        if (mModel.deviceSupportsBluetooth()) {
-            final QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
-            bluetoothTile.setContent(R.layout.quick_settings_tile_bluetooth, inflater);
+        if (mModel.deviceSupportsBluetooth()
+                || DEBUG_GONE_TILES) {
+            final QuickSettingsBasicTile bluetoothTile
+                    = new QuickSettingsBasicTile(mContext);
             bluetoothTile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -583,14 +560,12 @@ class QuickSettings {
             }
             mModel.addBluetoothTile(bluetoothTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
-                public void refreshView(QuickSettingsTileView view, State state) {
+                public void refreshView(QuickSettingsTileView unused, State state) {
                     BluetoothState bluetoothState = (BluetoothState) state;
-                    TextView tv = (TextView) view.findViewById(R.id.bluetooth_textview);
-                    tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    bluetoothTile.setImageResource(state.iconId);
 
-                    Resources r = mContext.getResources();
-                    String label = state.label;
                     /*
+                    Resources r = mContext.getResources();
                     //TODO: Show connected bluetooth device label
                     Set<BluetoothDevice> btDevices =
                             mBluetoothController.getBondedBluetoothDevices();
@@ -603,10 +578,10 @@ class QuickSettings {
                                 btDevices.size());
                     }
                     */
-                    view.setContentDescription(mContext.getString(
+                    bluetoothTile.setContentDescription(mContext.getString(
                             R.string.accessibility_quick_settings_bluetooth,
                             bluetoothState.stateContentDescription));
-                    tv.setText(label);
+                    bluetoothTile.setText(state.label);
                 }
             });
             parent.addView(bluetoothTile);
@@ -616,9 +591,9 @@ class QuickSettings {
 
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {
         // Alarm tile
-        QuickSettingsTileView alarmTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        alarmTile.setContent(R.layout.quick_settings_tile_alarm, inflater);
+        final QuickSettingsBasicTile alarmTile
+                = new QuickSettingsBasicTile(mContext);
+        alarmTile.setImageResource(R.drawable.ic_qs_alarm_on);
         alarmTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -632,94 +607,77 @@ class QuickSettings {
         });
         mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
             @Override
-            public void refreshView(QuickSettingsTileView view, State alarmState) {
-                TextView tv = (TextView) view.findViewById(R.id.alarm_textview);
-                tv.setText(alarmState.label);
-                view.setVisibility(alarmState.enabled ? View.VISIBLE : View.GONE);
-                view.setContentDescription(mContext.getString(
+            public void refreshView(QuickSettingsTileView unused, State alarmState) {
+                alarmTile.setText(alarmState.label);
+                alarmTile.setVisibility(alarmState.enabled ? View.VISIBLE : View.GONE);
+                alarmTile.setContentDescription(mContext.getString(
                         R.string.accessibility_quick_settings_alarm, alarmState.label));
             }
         });
         parent.addView(alarmTile);
 
         // Location
-        QuickSettingsTileView locationTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        locationTile.setContent(R.layout.quick_settings_tile_location, inflater);
+        final QuickSettingsBasicTile locationTile
+                = new QuickSettingsBasicTile(mContext);
+        locationTile.setImageResource(R.drawable.ic_qs_location);
+        locationTile.setTextResource(R.string.quick_settings_location_label);
         locationTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startSettingsActivity(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             }
         });
-        mModel.addLocationTile(locationTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.location_textview);
-                tv.setText(state.label);
-                view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
-            }
-        });
+        mModel.addLocationTile(locationTile,
+                new QuickSettingsModel.BasicRefreshCallback(locationTile)
+                        .setShowWhenEnabled(true));
         parent.addView(locationTile);
 
         // Wifi Display
-        QuickSettingsTileView wifiDisplayTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        wifiDisplayTile.setContent(R.layout.quick_settings_tile_wifi_display, inflater);
+        QuickSettingsBasicTile wifiDisplayTile
+                = new QuickSettingsBasicTile(mContext);
+        wifiDisplayTile.setImageResource(R.drawable.ic_qs_remote_display);
         wifiDisplayTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startSettingsActivity(android.provider.Settings.ACTION_WIFI_DISPLAY_SETTINGS);
             }
         });
-        mModel.addWifiDisplayTile(wifiDisplayTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.wifi_display_textview);
-                tv.setText(state.label);
-                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
-                view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
-            }
-        });
+        mModel.addWifiDisplayTile(wifiDisplayTile,
+                new QuickSettingsModel.BasicRefreshCallback(wifiDisplayTile)
+                        .setShowWhenEnabled(true));
         parent.addView(wifiDisplayTile);
 
-        if (SHOW_IME_TILE) {
+        if (SHOW_IME_TILE || DEBUG_GONE_TILES) {
             // IME
-            QuickSettingsTileView imeTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
-            imeTile.setContent(R.layout.quick_settings_tile_ime, inflater);
+            final QuickSettingsBasicTile imeTile
+                    = new QuickSettingsBasicTile(mContext);
+            imeTile.setImageResource(R.drawable.ic_qs_ime);
             imeTile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
-                        mBar.collapseAllPanels(true);
+                        collapsePanels();
                         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
                         pendingIntent.send();
                     } catch (Exception e) {}
                 }
             });
-            mModel.addImeTile(imeTile, new QuickSettingsModel.RefreshCallback() {
-                @Override
-                public void refreshView(QuickSettingsTileView view, State state) {
-                    TextView tv = (TextView) view.findViewById(R.id.ime_textview);
-                    if (state.label != null) {
-                        tv.setText(state.label);
-                    }
-                    view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
-                }
-            });
+            mModel.addImeTile(imeTile,
+                    new QuickSettingsModel.BasicRefreshCallback(imeTile)
+                            .setShowWhenEnabled(true));
             parent.addView(imeTile);
         }
 
         // Bug reports
-        QuickSettingsTileView bugreportTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        bugreportTile.setContent(R.layout.quick_settings_tile_bugreport, inflater);
+        final QuickSettingsBasicTile bugreportTile
+                = new QuickSettingsBasicTile(mContext);
+        bugreportTile.setImageResource(com.android.internal.R.drawable.stat_sys_adb);
+        bugreportTile.setTextResource(com.android.internal.R.string.bugreport_title);
         bugreportTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBar.collapseAllPanels(true);
+                collapsePanels();
                 showBugreportDialog();
             }
         });

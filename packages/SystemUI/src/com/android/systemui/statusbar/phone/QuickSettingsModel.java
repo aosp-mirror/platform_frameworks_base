@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
@@ -94,6 +93,31 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     /** The callback to update a given tile. */
     interface RefreshCallback {
         public void refreshView(QuickSettingsTileView view, State state);
+    }
+
+    public static class BasicRefreshCallback implements RefreshCallback {
+        private final QuickSettingsBasicTile mView;
+        private boolean mShowWhenEnabled;
+
+        public BasicRefreshCallback(QuickSettingsBasicTile v) {
+            mView = v;
+        }
+        public void refreshView(QuickSettingsTileView ignored, State state) {
+            if (mShowWhenEnabled) {
+                mView.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
+            }
+            if (state.iconId != 0) {
+                mView.setImageDrawable(null); // needed to flush any cached IDs
+                mView.setImageResource(state.iconId);
+            }
+            if (state.label != null) {
+                mView.setText(state.label);
+            }
+        }
+        public BasicRefreshCallback setShowWhenEnabled(boolean swe) {
+            mShowWhenEnabled = swe;
+            return this;
+        }
     }
 
     /** Broadcast receive to determine if there is an alarm set. */
