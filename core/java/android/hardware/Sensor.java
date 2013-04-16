@@ -188,6 +188,8 @@ public final class Sensor {
     // Upon detection of an event, the sensor deactivates itself and then sends a single event.
     static int REPORTING_MODE_ONE_SHOT = 3;
 
+    // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
+
     // Note: This needs to be updated, whenever a new sensor is added.
     private static int[] sSensorReportingModes = {
             REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS,
@@ -201,7 +203,7 @@ public final class Sensor {
     // Holds the maximum length of the values array associated with {@link SensorEvent} or
     // {@link TriggerEvent} for the Sensor
     private static int[] sMaxLengthValuesArray = {
-            3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 3, 3, 3,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 3, 3,
             6, 4, 6, 1 };
 
     static int getReportingMode(Sensor sensor) {
