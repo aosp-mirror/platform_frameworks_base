@@ -60,14 +60,14 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_MODULE := libhwui
 	LOCAL_MODULE_TAGS := optional
 
-        ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
-            LOCAL_CFLAGS += -DANDROID_ENABLE_RENDERSCRIPT
-            LOCAL_SHARED_LIBRARIES += libRS libRScpp
-            LOCAL_C_INCLUDES += \
-		$(intermediates) \
-		frameworks/rs/cpp \
-		frameworks/rs
-        endif
+	ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
+		LOCAL_CFLAGS += -DANDROID_ENABLE_RENDERSCRIPT
+		LOCAL_SHARED_LIBRARIES += libRS libRScpp
+		LOCAL_C_INCLUDES += \
+			$(intermediates) \
+			frameworks/rs/cpp \
+			frameworks/rs
+	endif
 
 	ifndef HWUI_COMPILE_SYMBOLS
 		LOCAL_CFLAGS += -fvisibility=hidden
