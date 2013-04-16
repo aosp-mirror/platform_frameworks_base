@@ -205,4 +205,11 @@
     <!-- How far to slide the panel out when you touch it -->
     <!-- For phones, this is close_handle_height + header_height -->
     <dimen name="peek_height">84dp</dimen>
+
+    <!-- Quick Settings tile geometry: top interior margin, above icon -->
+    <dimen name="qs_tile_margin_above_icon">27dp</dimen>
+    <!-- Quick Settings tile geometry: gap between icon and text -->
+    <dimen name="qs_tile_margin_below_icon">17dp</dimen>
+    <!-- Quick Settings tile geometry: icon size -->
+    <dimen name="qs_tile_icon_size">32dp</dimen>
 </resources>
