@@ -47,7 +47,8 @@ public class ViewGroupOverlay extends ViewOverlay {
      * animation effect.</p>
      *
      * <p>If the view has a parent, the view will be removed from that parent
-     * before being added to the overlay. Also, the view will be repositioned
+     * before being added to the overlay. Also, if that parent is attached
+     * in the current view hierarchy, the view will be repositioned
      * such that it is in the same relative location inside the activity. For
      * example, if the view's current parent lies 100 pixels to the right
      * and 200 pixels down from the origin of the overlay's
