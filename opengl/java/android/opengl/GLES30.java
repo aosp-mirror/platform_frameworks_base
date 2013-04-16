@@ -20,7 +20,6 @@
 package android.opengl;
 
 /** OpenGL ES 3.0
- * @hide
  */
 public class GLES30 extends GLES20 {
     public static final int GL_READ_BUFFER                             = 0x0C02;
