@@ -427,22 +427,48 @@ public class Notification implements Parcelable
     public String[] kind;
 
     /**
-     * Extra key for people values (type TBD).
-     *
+     * Additional semantic data to be carried around with this Notification.
      * @hide
      */
-    public static final String EXTRA_PEOPLE = "android.people";
+    public Bundle extras = new Bundle();
+
+    // extras keys for Builder inputs
     /** @hide */
     public static final String EXTRA_TITLE = "android.title";
     /** @hide */
+    public static final String EXTRA_TITLE_BIG = EXTRA_TITLE + ".big";
+    /** @hide */
     public static final String EXTRA_TEXT = "android.text";
     /** @hide */
-    public static final String EXTRA_SUBTEXT = "android.subtext";
+    public static final String EXTRA_SUB_TEXT = "android.subText";
+    /** @hide */
+    public static final String EXTRA_INFO_TEXT = "android.infoText";
+    /** @hide */
+    public static final String EXTRA_SUMMARY_TEXT = "android.summaryText";
     /** @hide */
     public static final String EXTRA_SMALL_ICON = "android.icon";
-
     /** @hide */
-    public Bundle extras = new Bundle();
+    public static final String EXTRA_LARGE_ICON = "android.largeIcon";
+    /** @hide */
+    public static final String EXTRA_LARGE_ICON_BIG = EXTRA_LARGE_ICON + ".big";
+    /** @hide */
+    public static final String EXTRA_PROGRESS = "android.progress";
+    /** @hide */
+    public static final String EXTRA_PROGRESS_MAX = "android.progressMax";
+    /** @hide */
+    public static final String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
+    /** @hide */
+    public static final String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
+    /** @hide */
+    public static final String EXTRA_SHOW_WHEN = "android.showWhen";
+    /** @hide from BigPictureStyle */
+    public static final String EXTRA_PICTURE = "android.picture";
+    /** @hide from InboxStyle */
+    public static final String EXTRA_TEXT_LINES = "android.textLines";
+
+    // extras keys for other interesting pieces of information
+    /** @hide */
+    public static final String EXTRA_PEOPLE = "android.people";
 
     /**
      * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
@@ -1621,16 +1647,26 @@ public class Notification implements Parcelable
                 mActions.toArray(n.actions);
             }
 
-            n.extras = mExtras != null ? new Bundle(mExtras) : new Bundle();
-
-            // Store original information used in the construction of this object
-            n.extras.putCharSequence(EXTRA_TITLE, mContentTitle);
-            n.extras.putCharSequence(EXTRA_TEXT, mContentText);
-            n.extras.putCharSequence(EXTRA_SUBTEXT, mSubText);
-            n.extras.putInt(EXTRA_SMALL_ICON, mSmallIcon);
-            //n.extras.putByteArray(EXTRA_LARGE_ICON, ...
-
             return n;
+        }
+
+        /**
+         * Capture, in the provided bundle, semantic information used in the construction of
+         * this Notification object.
+         * @hide
+         */
+        public void addExtras(Bundle extras) {
+            // Store original information used in the construction of this object
+            extras.putCharSequence(EXTRA_TITLE, mContentTitle);
+            extras.putCharSequence(EXTRA_TEXT, mContentText);
+            extras.putCharSequence(EXTRA_SUB_TEXT, mSubText);
+            extras.putCharSequence(EXTRA_INFO_TEXT, mContentInfo);
+            extras.putInt(EXTRA_SMALL_ICON, mSmallIcon);
+            extras.putInt(EXTRA_PROGRESS, mProgress);
+            extras.putInt(EXTRA_PROGRESS_MAX, mProgressMax);
+            extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mProgressIndeterminate);
+            extras.putBoolean(EXTRA_SHOW_CHRONOMETER, mUseChronometer);
+            extras.putBoolean(EXTRA_SHOW_WHEN, mShowWhen);
         }
 
         /**
@@ -1646,11 +1682,22 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
+            final Notification n;
+
             if (mStyle != null) {
-                return mStyle.build();
+                n = mStyle.build();
             } else {
-                return buildUnstyled();
+                n = buildUnstyled();
             }
+
+            n.extras = mExtras != null ? new Bundle(mExtras) : new Bundle();
+
+            addExtras(n.extras);
+            if (mStyle != null) {
+                mStyle.addExtras(n.extras);
+            }
+
+            return n;
         }
 
         /**
@@ -1663,7 +1710,6 @@ public class Notification implements Parcelable
             return n;
         }
     }
-
 
     /**
      * An object that can apply a rich notification style to a {@link Notification.Builder}
@@ -1737,6 +1783,18 @@ public class Notification implements Parcelable
             }
 
             return contentView;
+        }
+
+        /**
+         * @hide
+         */
+        public void addExtras(Bundle extras) {
+            if (mSummaryTextSet) {
+                extras.putCharSequence(EXTRA_SUMMARY_TEXT, mSummaryText);
+            }
+            if (mBigContentTitle != null) {
+                extras.putCharSequence(EXTRA_TITLE_BIG, mBigContentTitle);
+            }
         }
 
         public abstract Notification build();
@@ -1813,6 +1871,18 @@ public class Notification implements Parcelable
             return contentView;
         }
 
+        /**
+         * @hide
+         */
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+
+            if (mBigLargeIconSet) {
+                extras.putParcelable(EXTRA_LARGE_ICON_BIG, mBigLargeIcon);
+            }
+            extras.putParcelable(EXTRA_PICTURE, mPicture);
+        }
+
         @Override
         public Notification build() {
             checkBuilder();
@@ -1876,6 +1946,15 @@ public class Notification implements Parcelable
         public BigTextStyle bigText(CharSequence cs) {
             mBigText = cs;
             return this;
+        }
+
+        /**
+         * @hide
+         */
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+
+            extras.putCharSequence(EXTRA_TEXT, mBigText);
         }
 
         private RemoteViews makeBigContentView() {
@@ -1964,6 +2043,15 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * @hide
+         */
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+            CharSequence[] a = new CharSequence[mTexts.size()];
+            extras.putCharSequenceArray(EXTRA_TEXT_LINES, mTexts.toArray(a));
+        }
+
         private RemoteViews makeBigContentView() {
             // Remove the content text so line3 disappears unless you have a summary
             mBuilder.mContentText = null;
@@ -2004,13 +2092,6 @@ public class Notification implements Parcelable
             checkBuilder();
             Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
-
-            StringBuilder builder = new StringBuilder();
-            for (CharSequence str : mTexts) {
-                builder.append(str);
-                builder.append("\n");
-            }
-            wip.extras.putCharSequence(EXTRA_TEXT, builder);
 
             return wip;
         }

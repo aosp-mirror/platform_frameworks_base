@@ -43,6 +43,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.IRingtonePlayer;
@@ -81,6 +82,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -815,22 +817,61 @@ public class NotificationManagerService extends INotificationManager.Stub
         void dump(PrintWriter pw, String prefix, Context baseContext) {
             final Notification notification = sbn.notification;
             pw.println(prefix + this);
+            pw.println(prefix + "  uid=" + sbn.uid + " userId=" + sbn.getUserId());
             pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
-                    + " / " + idDebugString(baseContext, this.sbn.pkg, notification.icon));
-            pw.println(prefix + "  pri=" + notification.priority);
-            pw.println(prefix + "  score=" + this.sbn.score);
+                    + " / " + idDebugString(baseContext, sbn.pkg, notification.icon));
+            pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.score);
             pw.println(prefix + "  contentIntent=" + notification.contentIntent);
             pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
             pw.println(prefix + "  tickerText=" + notification.tickerText);
             pw.println(prefix + "  contentView=" + notification.contentView);
-            pw.println(prefix + "  uid=" + this.sbn.uid + " userId=" + this.sbn.getUserId());
-            pw.println(prefix + "  defaults=0x" + Integer.toHexString(notification.defaults));
-            pw.println(prefix + "  flags=0x" + Integer.toHexString(notification.flags));
+            pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
+                    notification.defaults, notification.flags));
             pw.println(prefix + "  sound=" + notification.sound);
             pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
-            pw.println(prefix + "  ledARGB=0x" + Integer.toHexString(notification.ledARGB)
-                    + " ledOnMS=" + notification.ledOnMS
-                    + " ledOffMS=" + notification.ledOffMS);
+            pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
+                    notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
+            if (notification.actions != null && notification.actions.length > 0) {
+                pw.println(prefix + "  actions={");
+                final int N = notification.actions.length;
+                for (int i=0; i<N; i++) {
+                    final Notification.Action action = notification.actions[i];
+                    pw.println(String.format("%s    [%d] \"%s\" -> %s",
+                            prefix,
+                            i,
+                            action.title,
+                            action.actionIntent.toString()
+                            ));
+                }
+                pw.println(prefix + "  }");
+            }
+            if (notification.extras != null && notification.extras.size() > 0) {
+                pw.println(prefix + "  extras={");
+                for (String key : notification.extras.keySet()) {
+                    pw.print(prefix + "    " + key + "=");
+                    Object val = notification.extras.get(key);
+                    if (val == null) {
+                        pw.println("null");
+                    } else {
+                        pw.print(val.toString());
+                        if (val instanceof Bitmap) {
+                            pw.print(String.format(" (%dx%d)",
+                                    ((Bitmap) val).getWidth(),
+                                    ((Bitmap) val).getHeight()));
+                        } else if (val.getClass().isArray()) {
+                            pw.println(" {");
+                            final int N = Array.getLength(val);
+                            for (int i=0; i<N; i++) {
+                                if (i > 0) pw.println(",");
+                                pw.print(prefix + "      " + Array.get(val, i));
+                            }
+                            pw.print("\n" + prefix + "    }");
+                        }
+                        pw.println();
+                    }
+                }
+                pw.println(prefix + "  }");
+            }
         }
 
         @Override
@@ -2081,7 +2122,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             if (N > 0) {
                 pw.println("  Lights List:");
                 for (int i=0; i<N; i++) {
-                    mLights.get(i).dump(pw, "    ", mContext);
+                    pw.println("    " + mLights.get(i));
                 }
                 pw.println("  ");
             }
