@@ -33,6 +33,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.location.LocationRequest;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -259,6 +260,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // true if we started navigation
     private boolean mStarted;
 
+    // true if single shot request is in progress
+    private boolean mSingleShot;
+
     // capabilities of the GPS engine
     private int mEngineCapabilities;
 
@@ -373,7 +377,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
             if (action.equals(ALARM_WAKEUP)) {
                 if (DEBUG) Log.d(TAG, "ALARM_WAKEUP");
-                startNavigating();
+                startNavigating(false);
             } else if (action.equals(ALARM_TIMEOUT)) {
                 if (DEBUG) Log.d(TAG, "ALARM_TIMEOUT");
                 hibernate();
@@ -794,10 +798,22 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     private void handleSetRequest(ProviderRequest request, WorkSource source) {
+        boolean singleShot = false;
+
+        // see if the request is for a single update
+        if (request.locationRequests != null && request.locationRequests.size() > 0) {
+            // if any request has zero or more than one updates
+            // requested, then this is not single-shot mode
+            singleShot = true;
+
+            for (LocationRequest lr : request.locationRequests) {
+                if (lr.getNumUpdates() != 1) {
+                    singleShot = false;
+                }
+            }
+        }
+
         if (DEBUG) Log.d(TAG, "setRequest " + request);
-
-
-
         if (request.reportLocation) {
             // update client uids
             updateClientUids(source);
@@ -819,7 +835,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 }
             } else if (!mStarted) {
                 // start GPS
-                startNavigating();
+                startNavigating(singleShot);
             }
         } else {
             updateClientUids(new WorkSource());
@@ -948,19 +964,42 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return false;
     }
 
-    private void startNavigating() {
+    private void startNavigating(boolean singleShot) {
         if (!mStarted) {
-            if (DEBUG) Log.d(TAG, "startNavigating");
+            if (DEBUG) Log.d(TAG, "startNavigating, singleShot is " + singleShot);
             mTimeToFirstFix = 0;
             mLastFixTime = 0;
             mStarted = true;
+            mSingleShot = singleShot;
             mPositionMode = GPS_POSITION_MODE_STANDALONE;
 
              if (Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ASSISTED_GPS_ENABLED, 1) != 0) {
-                if (hasCapability(GPS_CAPABILITY_MSB)) {
+                if (singleShot && hasCapability(GPS_CAPABILITY_MSA)) {
+                    mPositionMode = GPS_POSITION_MODE_MS_ASSISTED;
+                } else if (hasCapability(GPS_CAPABILITY_MSB)) {
                     mPositionMode = GPS_POSITION_MODE_MS_BASED;
                 }
+            }
+
+            if (DEBUG) {
+                String mode;
+
+                switch(mPositionMode) {
+                    case GPS_POSITION_MODE_STANDALONE:
+                        mode = "standalone";
+                        break;
+                    case GPS_POSITION_MODE_MS_ASSISTED:
+                        mode = "MS_ASSISTED";
+                        break;
+                    case GPS_POSITION_MODE_MS_BASED:
+                        mode = "MS_BASED";
+                        break;
+                    default:
+                        mode = "unknown";
+                        break;
+                }
+                Log.d(TAG, "setting position_mode to " + mode);
             }
 
             int interval = (hasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
@@ -994,6 +1033,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (DEBUG) Log.d(TAG, "stopNavigating");
         if (mStarted) {
             mStarted = false;
+            mSingleShot = false;
             native_stop();
             mTimeToFirstFix = 0;
             mLastFixTime = 0;
@@ -1085,6 +1125,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     }
                 }
             }
+        }
+
+        if (mSingleShot) {
+            stopNavigating();
         }
 
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {
@@ -1248,7 +1292,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     if (DEBUG) Log.d(TAG, "PhoneConstants.APN_REQUEST_STARTED");
                     // Nothing to do here
                 } else {
-                    if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed");
+                    if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed, value is " +
+                                     result);
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                     native_agps_data_conn_failed();
                 }
