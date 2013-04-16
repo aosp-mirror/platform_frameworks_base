@@ -2699,6 +2699,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mLastTouchMode = touchMode;
     }
 
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        if (mFastScroller != null) {
+           mFastScroller.setScrollbarPosition(getVerticalScrollbarPosition());
+        }
+    }
+
     /**
      * Creates the ContextMenuInfo returned from {@link #getContextMenuInfo()}. This
      * methods knows the view, position and ID of the item that received the
