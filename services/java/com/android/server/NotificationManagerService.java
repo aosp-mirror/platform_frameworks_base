@@ -49,6 +49,7 @@ import android.media.IAudioService;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -266,10 +267,20 @@ public class NotificationManagerService extends INotificationManager.Stub
     }
 
     private static class Archive {
-        static final int BUFFER_SIZE = 1000;
+        static final int BUFFER_SIZE = 250;
         ArrayDeque<StatusBarNotification> mBuffer = new ArrayDeque<StatusBarNotification>(BUFFER_SIZE);
 
         public Archive() {
+        }
+
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            final int N = mBuffer.size();
+            sb.append("Archive (");
+            sb.append(N);
+            sb.append(" notification");
+            sb.append((N==1)?")":"s)");
+            return sb.toString();
         }
 
         public void record(StatusBarNotification nr) {
@@ -278,12 +289,17 @@ public class NotificationManagerService extends INotificationManager.Stub
             nr.notification.contentView = null;
             nr.notification.bigContentView = null;
             nr.notification.largeIcon = null;
+            final Bundle extras = nr.notification.extras;
+            extras.remove(Notification.EXTRA_LARGE_ICON);
+            extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
+            extras.remove(Notification.EXTRA_PICTURE);
 
             if (mBuffer.size() == BUFFER_SIZE) {
                 mBuffer.removeFirst();
             }
             mBuffer.addLast(nr);
         }
+
 
         public void clear() {
             mBuffer.clear();
@@ -2131,6 +2147,17 @@ public class NotificationManagerService extends INotificationManager.Stub
             pw.println("  mVibrateNotification=" + mVibrateNotification);
             pw.println("  mDisabledNotifications=0x" + Integer.toHexString(mDisabledNotifications));
             pw.println("  mSystemReady=" + mSystemReady);
+            pw.println("  mArchive=" + mArchive.toString());
+            Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
+            int i=0;
+            while (iter.hasNext()) {
+                pw.println("    " + iter.next());
+                if (++i >= 5) {
+                    if (iter.hasNext()) pw.println("    ...");
+                    break;
+                }
+            }
+
         }
     }
 }
