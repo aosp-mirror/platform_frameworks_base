@@ -970,7 +970,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void addServiceLocked(Service service, UserState userState) {
         try {
-            service.linkToOwnDeath();
+            service.linkToOwnDeathLocked();
             userState.mBoundServices.add(service);
             userState.mComponentNameToServiceMap.put(service.mComponentName, service);
         } catch (RemoteException re) {
@@ -987,7 +987,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void removeServiceLocked(Service service, UserState userState) {
         userState.mBoundServices.remove(service);
         userState.mComponentNameToServiceMap.remove(service.mComponentName);
-        service.unlinkToOwnDeath();
+        service.unlinkToOwnDeathLocked();
     }
 
     /**
@@ -1765,7 +1765,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 userState.destroyUiAutomationService();
             }
             removeServiceLocked(this, userState);
-            dispose();
+            resetLocked();
             return true;
         }
 
@@ -2150,15 +2150,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             /* do nothing - #binderDied takes care */
         }
 
-        public void linkToOwnDeath() throws RemoteException {
+        public void linkToOwnDeathLocked() throws RemoteException {
             mService.linkToDeath(this, 0);
         }
 
-        public void unlinkToOwnDeath() {
+        public void unlinkToOwnDeathLocked() {
             mService.unlinkToDeath(this, 0);
         }
 
-        public void dispose() {
+        public void resetLocked() {
             try {
                 // Clear the proxy in the other process so this
                 // IAccessibilityServiceConnection can be garbage collected.
@@ -2170,13 +2170,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mServiceInterface = null;
         }
 
+        public boolean isInitializedLocked() {
+            return (mService != null);
+        }
+
         public void binderDied() {
             synchronized (mLock) {
+                // It is possible that this service's package was force stopped during
+                // whose handling the death recipient is unlinked and still get a call
+                // on binderDied since the call was made before we unlink but was
+                // waiting on the lock we held during the force stop handling.
+                if (!isInitializedLocked()) {
+                    return;
+                }
                 mKeyEventDispatcher.flush();
                 UserState userState = getUserStateLocked(mUserId);
                 // The death recipient is unregistered in removeServiceLocked
                 removeServiceLocked(this, userState);
-                dispose();
+                resetLocked();
                 if (mIsAutomation) {
                     // We no longer have an automation service, so restore
                     // the state based on values in the settings database.
