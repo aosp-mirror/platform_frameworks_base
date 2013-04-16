@@ -31,7 +31,6 @@ import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
@@ -68,6 +67,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * 
      * Called by the InputManager.
      */
+    @Override
     public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
         if (inputWindowHandle == null) {
             return;
@@ -87,6 +87,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * 
      * Called by the InputManager.
      */
+    @Override
     public long notifyANR(InputApplicationHandle inputApplicationHandle,
             InputWindowHandle inputWindowHandle) {
         AppWindowToken appWindowToken = null;
@@ -163,10 +164,20 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
-            final WindowState child, final int flags, final int type,
+            final WindowState child, int flags, final int type,
             final boolean isVisible, final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
+        final boolean modal = (flags & (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)) == 0;
+        if (modal && child.mAppToken != null) {
+            // Limit the outer touch to the activity stack region.
+            flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            inputWindowHandle.touchableRegion.set(child.getStackBounds());
+        } else {
+            // Not modal or full screen modal
+            child.getTouchableRegion(inputWindowHandle.touchableRegion);
+        }
         inputWindowHandle.layoutParamsFlags = flags;
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
@@ -195,7 +206,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             inputWindowHandle.scaleFactor = 1;
         }
 
-        child.getTouchableRegion(inputWindowHandle.touchableRegion);
 
         addInputWindowHandleLw(inputWindowHandle);
     }
@@ -259,10 +269,10 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 // Skip this window because it cannot possibly receive input.
                 continue;
             }
-            
+
             final int flags = child.mAttrs.flags;
             final int type = child.mAttrs.type;
-            
+
             final boolean hasFocus = (child == mInputFocus);
             final boolean isVisible = child.isVisibleLw();
             final boolean hasWallpaper = (child == mService.mWallpaperTarget)

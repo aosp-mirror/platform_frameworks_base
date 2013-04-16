@@ -6261,13 +6261,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public int createStack(int relativeStackId, int position, float weight) {
+    public int createStack(int taskId, int relativeStackId, int position, float weight) {
         synchronized (this) {
             if (mStackSupervisor.getStack(relativeStackId) == null) {
                 return -1;
             }
             int stackId = mStackSupervisor.createStack();
             mWindowManager.createStack(stackId, relativeStackId, position, weight);
+            if (taskId > 0) {
+                moveTaskToStack(taskId, stackId, true);
+            }
             return stackId;
         }
     }

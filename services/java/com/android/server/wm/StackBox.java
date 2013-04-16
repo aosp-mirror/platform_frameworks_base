@@ -42,7 +42,7 @@ public class StackBox {
 
     /** Non-null indicates this is mFirst or mSecond of a parent StackBox. Null indicates this
      * is this entire size of mDisplayContent. */
-    final StackBox mParent;
+    StackBox mParent;
 
     /** First child, this is null exactly when mStack is non-null. */
     StackBox mFirst;
@@ -105,13 +105,14 @@ public class StackBox {
         return mFirst.contains(stackId) || mSecond.contains(stackId);
     }
 
-    /** Determine if the specified stack is the first child or second child. Presumes that this
-     * is called on mParent of the specified stack.
-     * @param stack the stack to determine.
-     * @return true if stack is the first child.
+    /** Determine if this StackBox is the first child or second child.
+     * @return true if this is the first child.
      */
-    boolean isFirstChild(TaskStack stack) {
-        return mFirst.mStack == stack;
+    boolean isFirstChild() {
+        if (mParent == null) {
+            return false;
+        }
+        return mParent.mFirst == this;
     }
 
     /** Returns the bounds of the specified TaskStack if it is contained in this StackBox.
@@ -217,15 +218,6 @@ public class StackBox {
         return mTmpTasks;
     }
 
-    /** Combine a child StackBox into its parent.
-     * @param child The surviving child to be merge up into this StackBox. */
-    void absorb(StackBox child) {
-        mFirst = child.mFirst;
-        mSecond = child.mSecond;
-        mStack = child.mStack;
-        layoutNeeded = true;
-    }
-
     /** Return the stackId of the first mFirst StackBox with a non-null mStack */
     int getStackId() {
         if (mStack != null) {
@@ -236,18 +228,33 @@ public class StackBox {
 
     /** Remove this box and propagate its sibling's content up to their parent.
      * @return The first stackId of the resulting StackBox. */
-    int removeStack() {
+    int remove() {
+        if (mStack != null) {
+            mDisplayContent.mStackHistory.remove(mStack);
+        }
+        mDisplayContent.layoutNeeded = true;
+
         if (mParent == null) {
+            // This is the top-plane stack.
             mDisplayContent.removeStackBox(this);
             return HOME_STACK_ID;
         }
-        if (mParent.mFirst == this) {
-            mParent.absorb(mParent.mSecond);
+
+        StackBox sibling = isFirstChild() ? mParent.mSecond : mParent.mFirst;
+        StackBox grandparent = mParent.mParent;
+        if (grandparent == null) {
+            // mParent is a top-plane stack. Now sibling will be.
+            mDisplayContent.removeStackBox(mParent);
+            mDisplayContent.addStackBox(sibling, true);
         } else {
-            mParent.absorb(mParent.mFirst);
+            sibling.mParent = grandparent;
+            if (mParent.isFirstChild()) {
+                grandparent.mFirst = sibling;
+            } else {
+                grandparent.mSecond = sibling;
+            }
         }
-        mParent.makeDirty();
-        return mParent.getStackId();
+        return sibling.getStackId();
     }
 
     boolean resize(int stackId, float weight) {
@@ -255,7 +262,7 @@ public class StackBox {
             return mFirst.resize(stackId, weight) || mSecond.resize(stackId, weight);
         }
         if (mStack.mStackId == stackId) {
-            mParent.mWeight = mParent.isFirstChild(mStack) ? weight : 1.0f - weight;
+            mParent.mWeight = isFirstChild() ? weight : 1.0f - weight;
             return true;
         }
         return false;

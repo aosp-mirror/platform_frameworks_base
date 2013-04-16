@@ -3383,6 +3383,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 task = new Task(atoken, stack);
                 stack.addTask(task, true);
+                stack.getDisplayContent().moveStack(stack, true);
                 mTaskIdToTask.put(taskId, task);
             } else {
                 task.addAppToken(addPos, atoken);
@@ -3703,6 +3704,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Attempted to set focus to non-existing app token: " + token);
                     return;
                 }
+                Task task = mTaskIdToTask.get(newFocus.groupId);
+                task.getDisplayContent().moveStack(task.mStack, true);
                 changed = mFocusedApp != newFocus;
                 mFocusedApp = newFocus;
                 if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp
@@ -4675,6 +4678,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.moveHomeStackBox(true);
                 }
                 stack.moveTaskToTop(task);
+                displayContent.moveStack(stack, true);
                 moveTaskWindowsLocked(task);
             }
         } finally {
@@ -4694,6 +4698,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 task.mStack.moveTaskToBottom(task);
                 moveTaskWindowsLocked(task);
+                task.getDisplayContent().moveStack(task.mStack, false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4721,15 +4726,22 @@ public class WindowManagerService extends IWindowManager.Stub
                         "createStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
                         STACK_WEIGHT_MAX + ", weight=" + weight);
             }
-            final TaskStack relativeStack = mStackIdToStack.get(relativeStackId);
-            DisplayContent displayContent = relativeStack != null ?
-                    relativeStack.getDisplayContent() : getDefaultDisplayContentLocked();
-            TaskStack stack = displayContent.createStack(stackId, relativeStackId, position,
-                    weight);
-            if (stack != null) {
-                mStackIdToStack.put(stackId, stack);
-                performLayoutAndPlaceSurfacesLocked();
+            final DisplayContent displayContent;
+            if (stackId != HOME_STACK_ID) {
+                // TODO: What to do for the first stack on a non-default display?
+                final TaskStack relativeStack = mStackIdToStack.get(relativeStackId);
+                if (relativeStack == null) {
+                    throw new IllegalArgumentException("createStack: Invalid relativeStackId=" +
+                            relativeStackId);
+                }
+                displayContent = relativeStack.getDisplayContent();
+            } else {
+                displayContent = getDefaultDisplayContentLocked();
             }
+            TaskStack stack =
+                    displayContent.createStack(stackId, relativeStackId, position, weight);
+            mStackIdToStack.put(stackId, stack);
+            displayContent.moveStack(stack, true);
         }
     }
 
@@ -4748,10 +4760,15 @@ public class WindowManagerService extends IWindowManager.Stub
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                return;
+            }
             task.mStack.removeTask(task);
-            TaskStack newStack = mStackIdToStack.get(stackId);
-            newStack.addTask(task, toTop);
-            newStack.getDisplayContent().layoutNeeded = true;
+
+            TaskStack stack = mStackIdToStack.get(stackId);
+            stack.addTask(task, toTop);
+            stack.getDisplayContent().layoutNeeded = true;
+
             performLayoutAndPlaceSurfacesLocked();
         }
     }

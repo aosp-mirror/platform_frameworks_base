@@ -236,13 +236,10 @@ public class ActivityStackSupervisor {
         final ActivityStack stack = task.stack;
         if (stack.removeTask(task) && !stack.isHomeStack()) {
             mStacks.remove(stack);
-            final int oldStackId = stack.mStackId;
-            final int newMainStackId = mService.mWindowManager.removeStack(oldStackId);
-            if (newMainStackId == HOME_STACK_ID) {
-                return;
-            }
-            if (mMainStack.mStackId == oldStackId) {
-                mMainStack = getStack(newMainStackId);
+            final int stackId = stack.mStackId;
+            final int nextStackId = mService.mWindowManager.removeStack(stackId);
+            if (mMainStack.mStackId == stackId) {
+                mMainStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
             }
         }
     }
@@ -1044,8 +1041,8 @@ public class ActivityStackSupervisor {
         if (!r.isHomeActivity) {
             if (mStacks.size() == 1) {
                 // Time to create the first app stack.
-                int stackId =
-                        mService.createStack(HOME_STACK_ID, StackBox.TASK_STACK_GOES_OVER, 1.0f);
+                int stackId = mService.createStack(-1, HOME_STACK_ID,
+                        StackBox.TASK_STACK_GOES_OVER, 1.0f);
                 mMainStack = getStack(stackId);
             }
             return mMainStack;
