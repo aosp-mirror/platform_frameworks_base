@@ -480,6 +480,7 @@ public class SurfaceView extends View {
                 if (!getContext().getResources().getCompatibilityInfo().supportsScreen()) {
                     mLayout.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
                 }
+                mLayout.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 
                 if (mWindow == null) {
                     Display display = getDisplay();

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
@@ -936,6 +937,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mContentChanged && !mExiting && !mWinAnimator.mLastHidden && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top
                         || mFrame.left != mLastFrame.left)
+                && (mAttrs.privateFlags&PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove());
     }
 
