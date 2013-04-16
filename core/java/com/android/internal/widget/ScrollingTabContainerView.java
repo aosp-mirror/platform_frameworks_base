@@ -31,6 +31,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -378,6 +380,29 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         public void bindTab(ActionBar.Tab tab) {
             mTab = tab;
             update();
+        }
+
+        @Override
+        public void setSelected(boolean selected) {
+            final boolean changed = (isSelected() != selected);
+            super.setSelected(selected);
+            if (changed && selected) {
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            }
+        }
+
+        @Override
+        public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+            super.onInitializeAccessibilityEvent(event);
+            // This view masquerades as an action bar tab.
+            event.setClassName(ActionBar.Tab.class.getName());
+        }
+
+        @Override
+        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(info);
+            // This view masquerades as an action bar tab.
+            info.setClassName(ActionBar.Tab.class.getName());
         }
 
         @Override
