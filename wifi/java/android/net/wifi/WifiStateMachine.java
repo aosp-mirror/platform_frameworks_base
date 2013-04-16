@@ -2383,6 +2383,8 @@ public class WifiStateMachine extends StateMachine {
                 mWifiNative.disconnect();
                 transitionTo(mScanModeState);
             } else {
+                /* Driver stop may have disabled networks, enable right after start */
+                mWifiConfigStore.enableAllNetworks();
                 mWifiNative.reconnect();
                 // Status pulls in the current supplicant state and network connection state
                 // events over the monitor connection. This helps framework sync up with
