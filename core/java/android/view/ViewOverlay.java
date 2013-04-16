@@ -157,7 +157,8 @@ public class ViewOverlay {
         public void add(View child) {
             if (child.getParent() instanceof ViewGroup) {
                 ViewGroup parent = (ViewGroup) child.getParent();
-                if (parent != mHostView) {
+                if (parent != mHostView && parent.getParent() != null &&
+                        parent.mAttachInfo != null) {
                     // Moving to different container; figure out how to position child such that
                     // it is in the same location on the screen
                     int[] parentLocation = new int[2];
