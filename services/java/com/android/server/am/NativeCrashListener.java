@@ -43,13 +43,14 @@ import java.net.InetUnixAddress;
 class NativeCrashListener extends Thread {
     static final String TAG = "NativeCrashListener";
     static final boolean DEBUG = false;
+    static final boolean MORE_DEBUG = DEBUG && false;
 
     // Must match the path defined in debuggerd.c.
     static final String DEBUGGERD_SOCKET_PATH = "/data/system/ndebugsocket";
 
     // Use a short timeout on socket operations and abandon the connection
     // on hard errors
-    static final long SOCKET_TIMEOUT_MILLIS = 1000;  // 1 second
+    static final long SOCKET_TIMEOUT_MILLIS = 2000;  // 2 seconds
 
     final ActivityManagerService mAm;
 
@@ -124,9 +125,9 @@ class NativeCrashListener extends Thread {
                 InetSocketAddress peer = new InetSocketAddress();
                 FileDescriptor peerFd = null;
                 try {
-                    if (DEBUG) Slog.v(TAG, "Waiting for debuggerd connection");
+                    if (MORE_DEBUG) Slog.v(TAG, "Waiting for debuggerd connection");
                     peerFd = Libcore.os.accept(serverFd, peer);
-                    if (DEBUG) Slog.v(TAG, "Got debuggerd socket " + peerFd);
+                    if (MORE_DEBUG) Slog.v(TAG, "Got debuggerd socket " + peerFd);
                     if (peerFd != null) {
                         // Only the superuser is allowed to talk to us over this socket
                         StructUcred credentials =
@@ -145,7 +146,12 @@ class NativeCrashListener extends Thread {
                     if (peerFd != null) {
                         try {
                             Libcore.os.write(peerFd, ackSignal, 0, 1);
-                        } catch (Exception e) { /* we don't care about failures here */ }
+                        } catch (Exception e) {
+                            /* we don't care about failures here */
+                            if (MORE_DEBUG) {
+                                Slog.d(TAG, "Exception writing ack: " + e.getMessage());
+                            }
+                        }
                     }
                 }
             }
@@ -183,7 +189,7 @@ class NativeCrashListener extends Thread {
 
     // Read the crash report from the debuggerd connection
     void consumeNativeCrashData(FileDescriptor fd) {
-        if (DEBUG) Slog.i(TAG, "debuggerd connected");
+        if (MORE_DEBUG) Slog.i(TAG, "debuggerd connected");
         final byte[] buf = new byte[4096];
         final ByteArrayOutputStream os = new ByteArrayOutputStream(4096);
 
@@ -218,7 +224,7 @@ class NativeCrashListener extends Thread {
                         // get some data
                         bytes = Libcore.os.read(fd, buf, 0, buf.length);
                         if (bytes > 0) {
-                            if (DEBUG) {
+                            if (MORE_DEBUG) {
                                 String s = new String(buf, 0, bytes, "UTF-8");
                                 Slog.v(TAG, "READ=" + bytes + "> " + s);
                             }
