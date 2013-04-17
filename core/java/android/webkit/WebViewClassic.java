@@ -2149,7 +2149,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     public void destroy() {
         if (mWebView.getViewRootImpl() != null) {
-            Log.e(LOGTAG, "Error: WebView.destroy() called while still attached!");
+            Log.e(LOGTAG, Log.getStackTraceString(
+                    new Throwable("Error: WebView.destroy() called while still attached!")));
         }
         ensureFunctorDetached();
         destroyJava();
