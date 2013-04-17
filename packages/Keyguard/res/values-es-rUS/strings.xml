@@ -91,7 +91,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Desliza el dedo hacia la izquierda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_right" msgid="8034433242579600980">"Desliza el dedo hacia la derecha para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuario actual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Realizar llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Olvidaste el patrón?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patrón incorrecto"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Contraseña incorrecta"</string>
