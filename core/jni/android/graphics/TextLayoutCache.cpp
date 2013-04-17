@@ -339,23 +339,11 @@ uint32_t TextLayoutValue::getElapsedTime() {
 }
 
 TextLayoutShaper::TextLayoutShaper() {
-    init();
-
     mBuffer = hb_buffer_create();
-}
-
-void TextLayoutShaper::init() {
-    mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, SkTypeface::kNormal);
-}
-
-void TextLayoutShaper::unrefTypefaces() {
-    SkSafeUnref(mDefaultTypeface);
 }
 
 TextLayoutShaper::~TextLayoutShaper() {
     hb_buffer_destroy(mBuffer);
-
-    unrefTypefaces();
 }
 
 void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* paint, const UChar* chars,
@@ -839,23 +827,27 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint) {
     }
 
     if (baseGlyphCount != 0) {
+        SkTypeface::Style style = SkTypeface::kNormal;
+        if (typeface != NULL) {
+            style = typeface->style();
+        }
         typeface = typefaceForScript(paint, typeface, hb_buffer_get_script(mBuffer));
         if (!typeface) {
             baseGlyphCount = 0;
-            typeface = mDefaultTypeface;
-            SkSafeRef(typeface);
+            typeface = SkFontHost::CreateTypeface(NULL, NULL, style);
 #if DEBUG_GLYPHS
             ALOGD("Using Default Typeface");
 #endif
         }
     } else {
         if (!typeface) {
-            typeface = mDefaultTypeface;
+            typeface = SkFontHost::CreateTypeface(NULL, NULL, SkTypeface::kNormal);
 #if DEBUG_GLYPHS
-            ALOGD("Using Default Typeface");
+            ALOGD("Using Default Typeface (normal style)");
 #endif
+        } else {
+            SkSafeRef(typeface);
         }
-        SkSafeRef(typeface);
     }
 
     mShapingPaint.setTypeface(typeface);
@@ -899,8 +891,6 @@ void TextLayoutShaper::purgeCaches() {
         hb_face_destroy(mCachedHBFaces.valueAt(i));
     }
     mCachedHBFaces.clear();
-    unrefTypefaces();
-    init();
 }
 
 TextLayoutEngine::TextLayoutEngine() {

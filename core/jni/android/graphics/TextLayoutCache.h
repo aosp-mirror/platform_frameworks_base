@@ -197,17 +197,9 @@ private:
     SkPaint mShapingPaint;
 
     /**
-     * Skia default typeface to be returned if we cannot resolve script
-     */
-    SkTypeface* mDefaultTypeface;
-
-    /**
      * Cache of Harfbuzz faces
      */
     KeyedVector<SkFontID, hb_face_t*> mCachedHBFaces;
-
-    void init();
-    void unrefTypefaces();
 
     SkTypeface* typefaceForScript(const SkPaint* paint, SkTypeface* typeface,
         hb_script_t script);
@@ -228,7 +220,6 @@ private:
     hb_face_t* referenceCachedHBFace(SkTypeface* typeface);
 
     bool isComplexScript(hb_script_t script);
-
 }; // TextLayoutShaper
 
 /**
