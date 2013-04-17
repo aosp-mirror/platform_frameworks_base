@@ -2108,6 +2108,8 @@ public class RemoteViews implements Parcelable, Filter {
      *      RemoteViews. This count cannot change during the life-cycle of a given widget, so this
      *      parameter should account for the maximum possible number of types that may appear in the
      *      See {@link Adapter#getViewTypeCount()}.
+     *
+     * @hide
      */
     public void setRemoteAdapter(int viewId, ArrayList<RemoteViews> list, int viewTypeCount) {
         addAction(new SetRemoteViewsAdapterList(viewId, list, viewTypeCount));
