@@ -23,12 +23,16 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.View;
 import android.widget.TextView;
 
@@ -37,6 +41,8 @@ import libcore.util.MutableInt;
 import java.lang.ref.WeakReference;
 
 import com.android.internal.R;
+import com.android.internal.widget.ILockSettings;
+import com.android.internal.widget.LockPatternUtils;
 
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
@@ -56,6 +62,8 @@ class KeyguardMessageArea extends TextView {
 
     static final int SECURITY_MESSAGE_DURATION = 5000;
     protected static final int FADE_DURATION = 750;
+
+    private static final String TAG = "KeyguardMessageArea";
 
     // are we showing battery information?
     boolean mShowingBatteryInfo = false;
@@ -82,6 +90,9 @@ class KeyguardMessageArea extends TextView {
 
     CharSequence mMessage;
     boolean mShowingMessage;
+    private CharSequence mSeparator;
+    private LockPatternUtils mLockPatternUtils;
+
     Runnable mClearMessageRunnable = new Runnable() {
         @Override
         public void run() {
@@ -156,14 +167,14 @@ class KeyguardMessageArea extends TextView {
         }
     };
 
-    private CharSequence mSeparator;
-
     public KeyguardMessageArea(Context context) {
         this(context, null);
     }
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mLockPatternUtils = new LockPatternUtils(context);
 
         // This is required to ensure marquee works
         setSelected(true);
@@ -228,11 +239,12 @@ class KeyguardMessageArea extends TextView {
 
     String getOwnerInfo() {
         ContentResolver res = getContext().getContentResolver();
-        final boolean ownerInfoEnabled = Settings.Secure.getIntForUser(res,
-                Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
-        return ownerInfoEnabled && !mShowingMessage ?
-                Settings.Secure.getStringForUser(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO,
-                        UserHandle.USER_CURRENT) : null;
+        String info = null;
+        final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled();
+        if (ownerInfoEnabled && !mShowingMessage) {
+            info = mLockPatternUtils.getOwnerInfo(mLockPatternUtils.getCurrentUser());
+        }
+        return info;
     }
 
     private CharSequence getChargeInfo(MutableInt icon) {

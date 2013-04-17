@@ -3260,6 +3260,7 @@ public final class Settings {
         /**
          * This preference contains the string that shows for owner info on LockScreen.
          * @hide
+         * @deprecated
          */
         public static final String LOCK_SCREEN_OWNER_INFO = "lock_screen_owner_info";
 
@@ -3287,6 +3288,7 @@ public final class Settings {
         /**
          * This preference enables showing the owner info on LockScreen.
          * @hide
+         * @deprecated
          */
         public static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             "lock_screen_owner_info_enabled";
@@ -4102,9 +4104,7 @@ public final class Settings {
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
-            UI_NIGHT_MODE,
-            LOCK_SCREEN_OWNER_INFO,
-            LOCK_SCREEN_OWNER_INFO_ENABLED
+            UI_NIGHT_MODE
         };
 
         /**
