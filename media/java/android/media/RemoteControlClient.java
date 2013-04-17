@@ -999,7 +999,7 @@ public class RemoteControlClient
             if (mEventHandler != null) {
                 // signal new client
                 mEventHandler.removeMessages(MSG_NEW_INTERNAL_CLIENT_GEN);
-                mEventHandler.dispatchMessage(
+                mEventHandler.sendMessage(
                         mEventHandler.obtainMessage(MSG_NEW_INTERNAL_CLIENT_GEN,
                                 /*arg1*/ generationId, /*arg2, ignored*/ 0));
                 // send the information
@@ -1007,12 +1007,12 @@ public class RemoteControlClient
                 mEventHandler.removeMessages(MSG_REQUEST_METADATA);
                 mEventHandler.removeMessages(MSG_REQUEST_TRANSPORTCONTROL);
                 mEventHandler.removeMessages(MSG_REQUEST_ARTWORK);
-                mEventHandler.dispatchMessage(
+                mEventHandler.sendMessage(
                         mEventHandler.obtainMessage(MSG_REQUEST_PLAYBACK_STATE));
-                mEventHandler.dispatchMessage(
+                mEventHandler.sendMessage(
                         mEventHandler.obtainMessage(MSG_REQUEST_TRANSPORTCONTROL));
-                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(MSG_REQUEST_METADATA));
-                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(MSG_REQUEST_ARTWORK));
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(MSG_REQUEST_METADATA));
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(MSG_REQUEST_ARTWORK));
             }
         }
 
@@ -1020,7 +1020,7 @@ public class RemoteControlClient
             // only post messages, we can't block here
             if (mEventHandler != null) {
                 mEventHandler.removeMessages(MSG_NEW_CURRENT_CLIENT_GEN);
-                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
                         MSG_NEW_CURRENT_CLIENT_GEN, clientGeneration, 0/*ignored*/));
             }
         }
@@ -1028,7 +1028,7 @@ public class RemoteControlClient
         public void plugRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
             // only post messages, we can't block here
             if ((mEventHandler != null) && (rcd != null)) {
-                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
                         MSG_PLUG_DISPLAY, w, h, rcd));
             }
         }
@@ -1036,7 +1036,7 @@ public class RemoteControlClient
         public void unplugRemoteControlDisplay(IRemoteControlDisplay rcd) {
             // only post messages, we can't block here
             if ((mEventHandler != null) && (rcd != null)) {
-                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
                         MSG_UNPLUG_DISPLAY, rcd));
             }
         }
@@ -1044,7 +1044,7 @@ public class RemoteControlClient
         public void setBitmapSizeForDisplay(IRemoteControlDisplay rcd, int w, int h) {
             // only post messages, we can't block here
             if ((mEventHandler != null) && (rcd != null)) {
-                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
                         MSG_UPDATE_DISPLAY_ARTWORK_SIZE, w, h, rcd));
             }
         }
@@ -1053,7 +1053,7 @@ public class RemoteControlClient
             // only post messages, we can't block here
             if (mEventHandler != null) {
                 mEventHandler.removeMessages(MSG_SEEK_TO);
-                mEventHandler.dispatchMessage(mEventHandler.obtainMessage(
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
                         MSG_SEEK_TO, generationId /* arg1 */, 0 /* arg2, ignored */,
                         new Long(timeMs)));
             }
@@ -1145,6 +1145,7 @@ public class RemoteControlClient
                     break;
                 case MSG_SEEK_TO:
                     onSeekTo(msg.arg1, ((Long)msg.obj).longValue());
+                    break;
                 default:
                     Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
             }
