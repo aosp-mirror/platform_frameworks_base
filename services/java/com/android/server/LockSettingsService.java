@@ -19,9 +19,11 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 
 import static android.content.Context.USER_SERVICE;
+import static android.Manifest.permission.READ_PROFILE;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -150,12 +152,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private static final void checkReadPermission(int userId) {
+    private final void checkReadPermission(String requestedKey, int userId) {
         final int callingUid = Binder.getCallingUid();
-        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID
-                && UserHandle.getUserId(callingUid) != userId) {
-            throw new SecurityException("uid=" + callingUid
-                    + " not authorized to read settings of user " + userId);
+        for (int i = 0; i < READ_PROFILE_PROTECTED_SETTINGS.length; i++) {
+            String key = READ_PROFILE_PROTECTED_SETTINGS[i];
+            if (key.equals(requestedKey) && mContext.checkCallingOrSelfPermission(READ_PROFILE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("uid=" + callingUid
+                        + " needs permission " + READ_PROFILE + " to read "
+                        + requestedKey + " for user " + userId);
+            }
         }
     }
 
@@ -182,7 +188,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean getBoolean(String key, boolean defaultValue, int userId) throws RemoteException {
-        //checkReadPermission(userId);
+        checkReadPermission(key, userId);
 
         String value = readFromDb(key, null, userId);
         return TextUtils.isEmpty(value) ?
@@ -191,7 +197,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public long getLong(String key, long defaultValue, int userId) throws RemoteException {
-        //checkReadPermission(userId);
+        checkReadPermission(key, userId);
 
         String value = readFromDb(key, null, userId);
         return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
@@ -199,7 +205,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public String getString(String key, String defaultValue, int userId) throws RemoteException {
-        //checkReadPermission(userId);
+        checkReadPermission(key, userId);
 
         return readFromDb(key, defaultValue, userId);
     }
@@ -445,4 +451,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
         Secure.LOCK_SCREEN_OWNER_INFO
     };
+
+    // These are protected with a read permission
+    private static final String[] READ_PROFILE_PROTECTED_SETTINGS = MIGRATE_SETTINGS_PER_USER;
 }
