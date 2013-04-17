@@ -545,6 +545,31 @@
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_accessibilityFeatures">Features that assistive technology can request.</string>
 
+    <!-- Title for the capability of an accessibility service to retrieve window content. -->
+    <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
+    <!-- Description for the capability of an accessibility service to retrieve window content. -->
+    <string name="capability_desc_canRetrieveWindowContent">Inspect the content of a window you\'re
+        interacting with.</string>
+
+    <!-- Title for the capability of an accessibility service to request touch exploration. -->
+    <string name="capability_title_canRequestTouchExploration">Turn on Explore by Touch</string>
+    <!-- Description for the capability of an accessibility service to request touch exploration. -->
+    <string name="capability_desc_canRequestTouchExploration">Touched items will be spoken aloud
+        and the screen can be explored using gestures.</string>
+
+    <!-- Title for the capability of an accessibility service to request enhanced web accessibility. -->
+    <string name="capability_title_canRequestEnhancedWebAccessibility">Turn on enhanced web
+        accessibility</string>
+    <!-- Description for the capability of an accessibility service to request enhanced web accessibility. -->
+    <string name="capability_desc_canRequestEnhancedWebAccessibility">Scripts may be installed to
+        make app content more accessible.</string>
+
+    <!-- Title for the capability of an accessibility service to request to filter key events. -->
+    <string name="capability_title_canRequestFilterKeyEvents">Observe text you type</string>
+    <!-- Description for the capability of an accessibility service to request to filter key events. -->
+    <string name="capability_desc_canRequestFilterKeyEvents">Includes personal data such as credit
+        card numbers and passwords.</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -943,20 +968,6 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindAccessibilityService">Allows the holder to bind to the top-level
         interface of an accessibility service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_canRequestTouchExplorationMode">request explore by touch</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_canRequestTouchExplorationMode">Allows the hoder to request an
-        interaction mode in which touched items are spoken aloud and the UI can be explored
-        via gestures.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_canRequestEnahncedWebAccessibility">request enhanced web accessibility</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_canRequestEnahncedWebAccessibility">Allows the hoder to request
-        enabling of web accessibility enhancements. For example, installing scripts to make
-        app content more accessible.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindTextService">bind to a text service</string>
