@@ -6,7 +6,6 @@ import android.graphics.PixelFormat;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
@@ -255,15 +254,16 @@ public class DimLayer {
     }
 
     public void printTo(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("mDimSurface="); pw.println(mDimSurface);
-        pw.print(prefix); pw.print(" mLayer="); pw.print(mLayer);
+        pw.print(prefix); pw.print("mDimSurface="); pw.print(mDimSurface);
+                pw.print(" mLayer="); pw.print(mLayer);
                 pw.print(" mAlpha="); pw.println(mAlpha);
         pw.print(prefix); pw.print("mLastDimWidth="); pw.print(mLastDimWidth);
-                pw.print(" mLastDimWidth="); pw.println(mLastDimWidth);
-        pw.print(prefix); pw.print("Last animation: mStartTime="); pw.print(mStartTime);
+                pw.print(" mLastDimHeight="); pw.println(mLastDimHeight);
+        pw.print(prefix); pw.print("Last animation: ");
                 pw.print(" mDuration="); pw.print(mDuration);
+                pw.print(" mStartTime="); pw.print(mStartTime);
                 pw.print(" curTime="); pw.println(SystemClock.uptimeMillis());
-        pw.print(" mStartAlpha="); pw.println(mStartAlpha);
-                pw.print(" mTargetAlpha="); pw.print(mTargetAlpha);
+        pw.print(prefix); pw.print(" mStartAlpha="); pw.print(mStartAlpha);
+                pw.print(" mTargetAlpha="); pw.println(mTargetAlpha);
     }
 }

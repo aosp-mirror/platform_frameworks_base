@@ -33,12 +33,11 @@ public class TaskStack {
     private ArrayList<Task> mTasks = new ArrayList<Task>();
 
     /** The StackBox this sits in. */
-    private final StackBox mParent;
+    StackBox mStackBox;
 
-    TaskStack(int stackId, StackBox parent) {
+    TaskStack(int stackId, DisplayContent displayContent) {
         mStackId = stackId;
-        mParent = parent;
-        mDisplayContent = mParent.mDisplayContent;
+        mDisplayContent = displayContent;
     }
 
     DisplayContent getDisplayContent() {
@@ -66,8 +65,9 @@ public class TaskStack {
      * @param toTop Whether to add it to the top or bottom.
      */
     boolean addTask(Task task, boolean toTop) {
-        mParent.makeDirty();
+        mStackBox.makeDirty();
         mTasks.add(toTop ? mTasks.size() : 0, task);
+        task.mStack = this;
         return mDisplayContent.moveHomeStackBox(mStackId == HOME_STACK_ID);
     }
 
@@ -87,12 +87,12 @@ public class TaskStack {
      * @param task The Task to delete.
      */
     void removeTask(Task task) {
-        mParent.makeDirty();
+        mStackBox.makeDirty();
         mTasks.remove(task);
     }
 
     int remove() {
-        return mParent.removeStack();
+        return mStackBox.removeStack();
     }
 
     int numTokens() {

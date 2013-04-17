@@ -167,10 +167,10 @@ class DisplayContent {
                 throw new IllegalArgumentException("createStack: First stackId not "
                         + HOME_STACK_ID);
             }
-            StackBox newBox = new StackBox(this, new Rect(0, 0, mDisplayInfo.logicalWidth,
-                    mDisplayInfo.logicalHeight));
+            StackBox newBox = new StackBox(this, null);
             mStackBoxes.add(newBox);
-            newStack = new TaskStack(stackId, newBox);
+            newStack = new TaskStack(stackId, this);
+            newStack.mStackBox = newBox;
             newBox.mStack = newStack;
             mHomeStack = newStack;
         } else {
@@ -181,8 +181,9 @@ class DisplayContent {
                         || position == StackBox.TASK_STACK_GOES_UNDER) {
                     // Position indicates a new box is added at top level only.
                     if (box.contains(relativeStackId)) {
-                        StackBox newBox = new StackBox(this, box.mBounds);
-                        newStack = new TaskStack(stackId, newBox);
+                        StackBox newBox = new StackBox(this, null);
+                        newStack = new TaskStack(stackId, this);
+                        newStack.mStackBox = newBox;
                         newBox.mStack = newStack;
                         final int offset = position == StackBox.TASK_STACK_GOES_OVER ? 1 : 0;
                         if (DEBUG_STACK) Slog.d(TAG, "createStack: inserting stack at " +
@@ -203,13 +204,15 @@ class DisplayContent {
                         + " not found.");
             }
         }
+        if (newStack != null) {
+            layoutNeeded = true;
+        }
         return newStack;
     }
 
     /** Refer to {@link WindowManagerService#resizeStack(int, float)} */
     boolean resizeStack(int stackId, float weight) {
-        int stackBoxNdx;
-        for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
             final StackBox box = mStackBoxes.get(stackBoxNdx);
             if (box.resize(stackId, weight)) {
                 return true;
@@ -248,6 +251,26 @@ class DisplayContent {
                 return false;
             default: throw new RuntimeException("moveHomeStackBox: Too many toplevel StackBoxes!");
         }
+    }
+
+    /**
+     * Propagate the new bounds to all child stack boxes, applying weights as we move down.
+     * @param contentRect The bounds to apply at the top level.
+     */
+    void setStackBoxSize(Rect contentRect) {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            mStackBoxes.get(stackBoxNdx).setStackBoxSizes(contentRect);
+        }
+    }
+
+    Rect getStackBounds(int stackId) {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            Rect bounds = mStackBoxes.get(stackBoxNdx).getStackBounds(stackId);
+            if (bounds != null) {
+                return bounds;
+            }
+        }
+        return null;
     }
 
     public void dump(String prefix, PrintWriter pw) {

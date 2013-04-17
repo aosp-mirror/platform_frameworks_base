@@ -261,6 +261,12 @@ public class WindowManagerService extends IWindowManager.Stub
     // Default input dispatching timeout in nanoseconds.
     static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
 
+    /** Minimum value for createStack and resizeStack weight value */
+    public static final float STACK_WEIGHT_MIN = 0.2f;
+
+    /** Maximum value for createStack and resizeStack weight value */
+    public static final float STACK_WEIGHT_MAX = 0.8f;
+
     static final int UPDATE_FOCUS_NORMAL = 0;
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
@@ -4708,11 +4714,22 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param weight Relative weight for determining how big to make the new TaskStack.
      */
     public void createStack(int stackId, int relativeStackId, int position, float weight) {
-        // TODO: Create a stack on other displays.
         synchronized (mWindowMap) {
-            TaskStack stack = getDefaultDisplayContentLocked().createStack(stackId,
-                    relativeStackId, position, weight);
-            mStackIdToStack.put(stackId, stack);
+            if (position <= StackBox.TASK_STACK_GOES_BELOW &&
+                    (weight < STACK_WEIGHT_MIN || weight > STACK_WEIGHT_MAX)) {
+                throw new IllegalArgumentException(
+                        "createStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
+                        STACK_WEIGHT_MAX + ", weight=" + weight);
+            }
+            final TaskStack relativeStack = mStackIdToStack.get(relativeStackId);
+            DisplayContent displayContent = relativeStack != null ?
+                    relativeStack.getDisplayContent() : getDefaultDisplayContentLocked();
+            TaskStack stack = displayContent.createStack(stackId, relativeStackId, position,
+                    weight);
+            if (stack != null) {
+                mStackIdToStack.put(stackId, stack);
+                performLayoutAndPlaceSurfacesLocked();
+            }
         }
     }
 
@@ -4720,7 +4737,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final TaskStack stack = mStackIdToStack.get(stackId);
         if (stack != null) {
             mStackIdToStack.delete(stackId);
-            return stack.remove();
+            int nextStackId = stack.remove();
+            stack.getDisplayContent().layoutNeeded = true;
+            performLayoutAndPlaceSurfacesLocked();
+            return nextStackId;
         }
         return HOME_STACK_ID;
     }
@@ -4731,11 +4751,17 @@ public class WindowManagerService extends IWindowManager.Stub
             task.mStack.removeTask(task);
             TaskStack newStack = mStackIdToStack.get(stackId);
             newStack.addTask(task, toTop);
+            newStack.getDisplayContent().layoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
         }
     }
 
     public void resizeStack(int stackId, float weight) {
+        if (weight < STACK_WEIGHT_MIN || weight > STACK_WEIGHT_MAX) {
+            throw new IllegalArgumentException(
+                    "resizeStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
+                    STACK_WEIGHT_MAX + ", weight=" + weight);
+        }
         synchronized (mWindowMap) {
             Task task = null;
             DisplayContentsIterator iterator = new DisplayContentsIterator();
@@ -4748,6 +4774,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
+    }
+
+    public Rect getStackBounds(int stackId) {
+        DisplayContentsIterator iterator = new DisplayContentsIterator();
+        while (iterator.hasNext()) {
+            Rect bounds = iterator.next().getStackBounds(stackId);
+            if (bounds != null) {
+                return bounds;
+            }
+        }
+        return null;
     }
 
     // -------------------------------------------------------------
@@ -7934,6 +7971,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mSystemDecorLayer = mPolicy.getSystemDecorRectLw(mSystemDecorRect);
             mScreenRect.set(0, 0, dw, dh);
         }
+
+        Rect contentRect = new Rect();
+        mPolicy.getContentRectLw(contentRect);
+        displayContent.setStackBoxSize(contentRect);
 
         int seq = mLayoutSeq+1;
         if (seq < 0) seq = 0;

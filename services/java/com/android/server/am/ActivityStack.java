@@ -1358,7 +1358,7 @@ final class ActivityStack {
         // We need to start pausing the current activity so the top one
         // can be resumed...
         final ActivityStack lastStack = mStackSupervisor.getLastStack();
-        if (lastStack.mResumedActivity != null) {
+        if ((isHomeStack() ^ lastStack.isHomeStack()) && lastStack.mResumedActivity != null) {
             if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
             // at the top of the LRU list, since we know we will be needing it
@@ -1464,7 +1464,7 @@ final class ActivityStack {
                 mService.mWindowManager.setAppWillBeHidden(prev.appToken);
                 mService.mWindowManager.setAppVisibility(prev.appToken, false);
             }
-        } else if (numActivities() > 1) {
+        } else {
             if (DEBUG_TRANSITION) Slog.v(TAG,
                     "Prepare open transition: no previous");
             if (mNoAnimActivities.contains(next)) {

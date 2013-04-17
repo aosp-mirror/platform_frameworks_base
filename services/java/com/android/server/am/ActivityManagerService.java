@@ -2866,11 +2866,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /**
      * This is the internal entry point for handling Activity.finish().
-     * 
+     *
      * @param token The Binder token referencing the Activity we want to finish.
      * @param resultCode Result code, if any, from this Activity.
      * @param resultData Result data (Intent), if any, from this Activity.
-     * 
+     *
      * @return Returns true if the activity successfully finished, or false if it is still running.
      */
     @Override
@@ -2896,7 +2896,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     } catch (RemoteException e) {
                         mController = null;
                     }
-    
+
                     if (!resumeOK) {
                         return false;
                     }
@@ -2921,12 +2921,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        
+
         synchronized(this) {
             if (mHeavyWeightProcess == null) {
                 return;
             }
-            
+
             ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>(
                     mHeavyWeightProcess.activities);
             for (int i=0; i<activities.size(); i++) {
@@ -2936,13 +2936,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                             null, "finish-heavy", true);
                 }
             }
-            
+
             mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
                     mHeavyWeightProcess.userId, 0));
             mHeavyWeightProcess = null;
         }
     }
-    
+
     @Override
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) {
@@ -4632,6 +4632,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
+    @Override
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
             ActivityRecord r = getCallingRecordLocked(token);
@@ -4639,6 +4640,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public ComponentName getCallingActivity(IBinder token) {
         synchronized (this) {
             ActivityRecord r = getCallingRecordLocked(token);
@@ -4665,6 +4667,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public String getPackageForToken(IBinder token) {
         synchronized(this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
@@ -4675,6 +4678,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
@@ -5961,6 +5965,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return list;
     }
 
+    @Override
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) {
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
@@ -6262,7 +6267,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public int createStack(int relativeStackId, int position, float weight) {
         synchronized (this) {
-            int stackId = mStackSupervisor.createStack(relativeStackId, position, weight);
+            if (mStackSupervisor.getStack(relativeStackId) == null) {
+                return -1;
+            }
+            int stackId = mStackSupervisor.createStack();
             mWindowManager.createStack(stackId, relativeStackId, position, weight);
             return stackId;
         }
@@ -6271,14 +6279,44 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
         synchronized (this) {
-            mStackSupervisor.moveTaskToStack(taskId, stackId, toTop);
             mWindowManager.moveTaskToStack(taskId, stackId, toTop);
+            mStackSupervisor.moveTaskToStack(taskId, stackId, toTop);
         }
     }
 
     @Override
     public void resizeStack(int stackId, float weight) {
         mWindowManager.resizeStack(stackId, weight);
+    }
+
+    @Override
+    public List<ActivityManager.StackInfo> getStacks() {
+        synchronized (this) {
+            ArrayList<ActivityManager.StackInfo> list = new ArrayList<ActivityManager.StackInfo>();
+            ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
+            for (ActivityStack stack : stacks) {
+                ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
+                int stackId = stack.mStackId;
+                stackInfo.stackId = stackId;
+                stackInfo.bounds = mWindowManager.getStackBounds(stackId);
+                ArrayList<TaskRecord> tasks = stack.getAllTasks();
+                final int numTasks = tasks.size();
+                int[] taskIds = new int[numTasks];
+                String[] taskNames = new String[numTasks];
+                for (int i = 0; i < numTasks; ++i) {
+                    final TaskRecord task = tasks.get(i);
+                    taskIds[i] = task.taskId;
+                    taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
+                            : task.realActivity != null ? task.realActivity.flattenToString()
+                            : task.getTopActivity() != null ? task.getTopActivity().packageName
+                            : "unknown";
+                }
+                stackInfo.taskIds = taskIds;
+                stackInfo.taskNames = taskNames;
+                list.add(stackInfo);
+            }
+            return list;
+        }
     }
 
     @Override
