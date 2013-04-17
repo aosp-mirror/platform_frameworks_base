@@ -5020,6 +5020,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             return ActivityManagerService.this.checkComponentPermission(permission, pid, uid,
                     owningUid, exported);
         }
+
+        public Object getAMSLock() {
+            return ActivityManagerService.this;
+        }
     }
 
     /**
