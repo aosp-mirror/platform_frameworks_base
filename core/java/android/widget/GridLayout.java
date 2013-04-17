@@ -944,15 +944,17 @@ public class GridLayout extends ViewGroup {
 
     // Measurement
 
+    // Note: padding has already been removed from the supplied specs
     private void measureChildWithMargins2(View child, int parentWidthSpec, int parentHeightSpec,
             int childWidth, int childHeight) {
         int childWidthSpec = getChildMeasureSpec(parentWidthSpec,
-                mPaddingLeft + mPaddingRight + getTotalMargin(child, true), childWidth);
+                getTotalMargin(child, true), childWidth);
         int childHeightSpec = getChildMeasureSpec(parentHeightSpec,
-                mPaddingTop + mPaddingBottom + getTotalMargin(child, false), childHeight);
+                getTotalMargin(child, false), childHeight);
         child.measure(childWidthSpec, childHeightSpec);
     }
 
+    // Note: padding has already been removed from the supplied specs
     private void measureChildrenWithMargins(int widthSpec, int heightSpec, boolean firstPass) {
         for (int i = 0, N = getChildCount(); i < N; i++) {
             View c = getChildAt(i);
@@ -979,6 +981,11 @@ public class GridLayout extends ViewGroup {
         }
     }
 
+    static int adjust(int measureSpec, int delta) {
+        return makeMeasureSpec(
+                MeasureSpec.getSize(measureSpec + delta),  MeasureSpec.getMode(measureSpec));
+    }
+
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         consistencyCheck();
@@ -987,29 +994,33 @@ public class GridLayout extends ViewGroup {
          *  is  likely to have changed. We must invalidate if so. */
         invalidateValues();
 
-        measureChildrenWithMargins(widthSpec, heightSpec, true);
+        int hPadding = getPaddingLeft() + getPaddingRight();
+        int vPadding = getPaddingTop()  + getPaddingBottom();
 
-        int width, height;
+        int widthSpecSansPadding =  adjust( widthSpec, -hPadding);
+        int heightSpecSansPadding = adjust(heightSpec, -vPadding);
+
+        measureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, true);
+
+        int widthSansPadding;
+        int heightSansPadding;
 
         // Use the orientation property to decide which axis should be laid out first.
         if (orientation == HORIZONTAL) {
-            width = horizontalAxis.getMeasure(widthSpec);
-            measureChildrenWithMargins(widthSpec, heightSpec, false);
-            height = verticalAxis.getMeasure(heightSpec);
+            widthSansPadding = horizontalAxis.getMeasure(widthSpecSansPadding);
+            measureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, false);
+            heightSansPadding = verticalAxis.getMeasure(heightSpecSansPadding);
         } else {
-            height = verticalAxis.getMeasure(heightSpec);
-            measureChildrenWithMargins(widthSpec, heightSpec, false);
-            width = horizontalAxis.getMeasure(widthSpec);
+            heightSansPadding = verticalAxis.getMeasure(heightSpecSansPadding);
+            measureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, false);
+            widthSansPadding = horizontalAxis.getMeasure(widthSpecSansPadding);
         }
 
-        int hPadding = getPaddingLeft() + getPaddingRight();
-        int vPadding = getPaddingTop() + getPaddingBottom();
-
-        int measuredWidth = Math.max(hPadding + width, getSuggestedMinimumWidth());
-        int measuredHeight = Math.max(vPadding + height, getSuggestedMinimumHeight());
+        int measuredWidth  = Math.max(widthSansPadding  + hPadding, getSuggestedMinimumWidth());
+        int measuredHeight = Math.max(heightSansPadding + vPadding, getSuggestedMinimumHeight());
 
         setMeasuredDimension(
-                resolveSizeAndState(measuredWidth, widthSpec, 0),
+                resolveSizeAndState(measuredWidth,   widthSpec, 0),
                 resolveSizeAndState(measuredHeight, heightSpec, 0));
     }
 
