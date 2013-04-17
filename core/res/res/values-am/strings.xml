@@ -387,7 +387,7 @@
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"በሌሎች መተግበሪያዎች የመሸጎጫ ማውጫዎች ውስጥ ያሉትን ፋይሎች በመሰረዝ መተግበሪያው የጡባዊ ማከማቻ ቦታ ነጻ እንዲያስለቅቅ ያስችለዋል። ይሄ ሌሎች መተግበሪያዎች ውሂባቸውን ዳግም ማምጣት ስላለባቸው ይበልጥ ዘግየት ብለው እንዲጀምሩ ሊያደርጋቸው ይችላል።"</string>
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"በሌሎች መተግበሪያዎች የመሸጎጫ ማውጫዎች ውስጥ ያሉትን ፋይሎች በመሰረዝ መተግበሪያው የስልክ ማከማቻ ቦታ ነጻ እንዲያስለቅቅ ያስችለዋል። ይሄ ሌሎች መተግበሪያዎች ውሂባቸውን ዳግም ማምጣት ስላለባቸው ይበልጥ ዘግየት ብለው እንዲጀምሩ ሊያደርጋቸው ይችላል።"</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"የመተግበሪያ ሃብቶችን አንቀሳቅስ"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"ከውስጣዊ ወደ  ውጫዊ ሚዲያ እና በተገላቢጦሽ የመተግበሪያ ሃብቶችን ለማንቀሳቀስ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
+    <string name="permdesc_movePackage" msgid="319562217778244524">"ከውስጣዊ ወደ  ውጫዊ ማህደረ  መረጃ  እና በተገላቢጦሽ የመተግበሪያ ሃብቶችን ለማንቀሳቀስ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"ወሳኝ የማስታወሻ ውሂብ አንብብ"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">" ከስርዓቱ የተለያዩ የማስታወሻ ፋይሎች ውስጥ ለማንበብ ለመተግበሪያ ይፈቅዳሉ። ይህ ስለ ጡባዊ ተኮህ ምን እያደረክበት እንደሆነ የግላዊ  ወይም የግል መረጃን ጨምሮ ጠቅላላ መረጃ ለማግኘት ይፈቅዳል።"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">" ከስርዓቱ የተለያዩ የማስታወሻ ፋይሎች ውስጥ ለማንበብ ለመተግበሪያይፈቅዳሉ። ይህ ስለ ስልክህ ምን እያደረክበት እንደሆነ የግላዊ  ወይም የግል መረጃን ጨምሮ ጠቅላላ መረጃ ለማግኘት ይፈቅዳል።"</string>
@@ -403,9 +403,9 @@
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ተመራጭ መተግበሪያዎች አዘጋጅ"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"ተመራጭ መተግበሪያዎችህን ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ ከአንተ የግል ውሂብ ለመሰብሰብ ያሉትን መተግበሪያዎች በመላክ፤ በመሄድ ላይ ያሉ መተግበሪያዎችን  ተንኮል አዘል መተግበሪያዎች በዝምታ ሊለውጡ ይችላሉ፡፡"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"የስርዓት ቅንብሮችን አስተካክል"</string>
-    <string name="permdesc_writeSettings" msgid="7775723441558907181">"የስርዓት ቅንጅቶችን ውሂብ ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች የስርዓትህን አወቃቀር ብልሹ ሊያደርጉት ይችላሉ፡፡"</string>
+    <string name="permdesc_writeSettings" msgid="7775723441558907181">"የስርዓት ቅንብሮችን ውሂብ ለመቀየር ለመተግበሪያው ይፈቅዳሉ። ተንኮል አዘል መተግበሪያዎች የስርዓትዎን አወቃቀር ብልሹ ሊያደርጉት ይችላሉ።"</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"የስርዓት ቅንብሮችንደህንነት ቀይር"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"የስርዓቱን ደህንነቱ የተጠበቀ ቅንጅቶችን ውሂብ ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ለመደበኛ ትግበራዎች  አያስፈልግም።"</string>
+    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"የስርዓቱን ደህንነቱ የተጠበቀ ቅንብሮችን ውሂብ ለመቀየር ለመተግበሪያው ይፈቅዳሉ። ለመደበኛ ትግበራዎች አያስፈልግም።"</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"የGoogle አገልግሎቶች ካርታን ቀይር"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"ትግበራ የGoogle ካርታ አገልግሎቶችን ለመቀየር ይፈቅዳል።ለመደበኛ ትግበራዎች ጥቅም አይደለም።"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"መነሻ ላይ አሂድ"</string>
@@ -541,8 +541,8 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"እንደ አውርድአዸራጅአገልግሎት"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">" ወደ መለያ አረጋጋጮች ጥሪ ለማድረግ ለመተግበሪያ ይፈቅዳሉ።"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"መሣሪያው ላይ ያሉ መለያዎችን አግኝ"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"መተግበሪያው በጡባዊ ተኮው የሚታወቁትን መለያዎች ዝርዝር እንዲያገኝ ይፈቅድለታል። ይህ በጫንካቸው ማናቸውም መተግበሪያዎች የተፈጠሩ መለያዎችን ሊያጠቃልል ይችላል።"</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"መተግበሪያው በስልኩ የሚታወቁትን መለያዎች ዝርዝር እንዲያገኝ ይፈቅድለታል። ይህ በጫንካቸው ማናቸውም መተግበሪያዎች የተፈጠሩ መለያዎችን ሊያጠቃልል ይችላል።"</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"መተግበሪያው በጡባዊ ተኮው የሚታወቁትን መለያዎች ዝርዝር እንዲያገኝ ይፈቅድለታል። ይህ በጫንዋቸው ማናቸውም መተግበሪያዎች የተፈጠሩ መለያዎችን ሊያጠቃልል ይችላል።"</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"መተግበሪያው በስልኩ የሚታወቁትን መለያዎች ዝርዝር እንዲያገኝ ይፈቅድለታል። ይህ በጫንዋቸው ማናቸውም መተግበሪያዎች የተፈጠሩ መለያዎችን ሊያጠቃልል ይችላል።"</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"መለያዎችን ፍጠርና የይለፍ ቃላትን አስቀምጥ"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"የመለያ አረጋጋጭ መለያ መናጅ ችሎታን ለመጠቀም፣ መለያ መፍጠር እና የይለፍ ቃሎችን ለማግኘት እና ለማቀናጀት አክሎ ለመተግበሪያው ይፈቅዳሉ ።"</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"መለያዎችን አክል ወይም አስወግድ"</string>
@@ -554,7 +554,7 @@
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ሙሉ የአውታረ መረብ መዳረሻ"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"መተግበሪያው የአውታረ መረብ መሰኪያዎችን እንዲፈጥር እና ብጁ የአውታረ መረብ ፕሮቶኮሎችን እንዲጠቀም ይፈቅድለታል። አሳሹ እና ሌሎች መተግበሪያዎች ውሂብ ወደ በይነመረብ የመላኪያ መንገዶችን ስለሚያቀርቡውሂብ ወደ በይነመረብ ለመላክ ይህ ፍቃድ አያስፈልግም።"</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"የአውታረ መረብ ቅንብሮች እና ትራፊክ ለውጥ/ አቋርጥ"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"የአውታረ መረብ ቅንጅቶችን ለመለወጥ እና ለማቋረጥ እና ሁሉንም የአውታረ መረብ ትራፊክ ለመመርመር፤ለምሳሌ ወኪል እና የማንኛውም APN ወደብ ለመለወጥ ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች ሊቆጣጠሩ፣ አቅጣጫ ሊያስቀይሩ ፣ ወይም ያለአንተ እውቅና የአውታረ መረብ ፓኬቶችን ሊቀይሩ ይችላሉ፡፡"</string>
+    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"የአውታረ መረብ ቅንብሮችን ለመለወጥ እና ለማቋረጥ እና ሁሉንም የአውታረ መረብ ትራፊክ ለመመርመር፤ለምሳሌ ወኪል እና የማንኛውም APN ወደብ ለመለወጥ ለመተግበሪያው ይፈቅዳሉ። ተንኮል አዘል መተግበሪያዎች ሊቆጣጠሩ፣ አቅጣጫ ሊያስቀይሩ ፣ ወይም ያለእርስዎ እውቅና የአውታረ መረብ ፓኬቶችን ሊቀይሩ ይችላሉ።"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"የአውታረ መረብ ተያያዥነትን ለውጥ"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"የእውታረ መረቡን ግንኙነት  ሁኔታ ለመለወጥ ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"የተያያዘ ግንኙነት ለውጥ"</string>
@@ -601,7 +601,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ጥበቃ ወደሚደረግለት ማከማቻ ያለ መዳረሻን ፈትሽ"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"መተግበሪያው በወደፊት መሳሪዎች ላይ ለሚኖር የUSB ማህደረ ትውስታ ፈቃድ እንዲሞክር ይፈቅድለታል።"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"መተግበሪያው በወደፊት መሳሪዎች ላይ ለሚኖረው SD ካርድ ፈቃድ እንዲሞክር ይፈቅድለታል።"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"የUSB ማከማቻህን ይዘቶች ቀይር ወይም ሰርዝ"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"የUSB ማከማቻዎን ይዘቶች ይቀይሩ ወይም ይሰርዙ"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"የSD ካርድህን ይዘቶች ቀይር ወይም ሰርዝ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ወደ USB ማህደረ ትውስታው ለመፃፍ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"መተግበሪያውን ወደ SD ካርድ ለመፃፍ ይፈቅዳል።"</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"ድጋሚ አስነሳ"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"በ«<xliff:g id="TITLE">%s</xliff:g>» ያለው ገጽ ይህን ይላል፦"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"ጃቫስክሪፕት"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"ከዚህ ገፅ ወጣ ብሎ ይዳስ? "\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n" ለመቀጠል እሺ ፣ወይም የአሁኑ ገፅ ላይ ለመቆየት ይቅር ምረጥ።"</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"አረጋግጥ"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"ጠቃሚ ምክር፦ ለማጉላት እና ለማሳነስ ሁለቴ-መታ አድርግ።"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ራስ ሙላ"</string>
@@ -1174,20 +1181,20 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"አዲስ፦ "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"በ<xliff:g id="APP_NAME">%1$s</xliff:g> የቀረበ።"</string>
     <string name="no_permissions" msgid="7283357728219338112">"ምንም ፍቃዶች አይጠየቁም"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"ይህ ገንዘብ ሊያስወጣዎብዎት ይችላል"</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"ይህ ገንዘብ ሊያስወጣዎት ይችላል"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB ብዙ ማከማቻ"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB ተያይዟል"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"ከኮምፒዩተርህ ጋር በUSB በኩል አገናኝተሃል። በኮምፒዩተርህ እና በAndroid SD ማከማቻህ መካከል ፋይሎች ለመቅዳት ከፈለግህ ከዚህ በታች ያለውን አዝራር ንካ።"</string>
     <string name="usb_storage_message" product="default" msgid="805351000446037811">"ከኮምፒዩተርህ ጋር በUSB በኩል አገናኝተሃል። በኮምፒዩተርህ እና በAndroid SD ማከማቻህ መካከል ፋይሎች ለመቅዳት ከፈለግህ ከዚህ በታች ያለውን አዝራር ንካ።"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"የUSB ማከማቻ አብራ"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"የUSB ማከማቻህን ለUSB ብዙማከማቻ መጠቀም ችግር አለ።"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"የUSB ማከማቻዎን ለUSB ብዙ ማከማቻ መጠቀም ችግር አለ።"</string>
     <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"የ SD ካርድህን ለUSB ብዙማከማቻ መጠቀም ችግር አለ።"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB ተያይዟል"</string>
     <string name="usb_storage_notification_message" msgid="939822783828183763">"ፋይሎችን ከ/ወደ ኮምፒዩተርህ ለመቅዳት ንካ።"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"የUSB ማከማቻ አጥፋ"</string>
     <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"የUSB ማከማቻ ለማጥፋት ንካ።"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB ማከማቻ በጥቅም ላይ"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB ማከማቻን ከማጥፋትህ በፊት፤ የAndroid USB ማከማቻህን ከኮምውተርህ ንቀል (\"አውጣ\")።"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB ማከማቻን ከማጥፋትዎ በፊት፤ የAndroid USB ማከማቻዎን ከኮምውተርዎ ይንቀሉ (\"ያውጡ\")።"</string>
     <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"የUSB ማከማቻ ከማጥፋት በፊት የAndroid SD ካርድህን ከኮምፒዩተርህ ላይ ንቀል(“አውጣ”)።"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB ማከማቻ አጥፋ"</string>
     <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"የ USB ማከማቻ ለማጥፋት ችግር ነበር። USB አስተናጋጅ መንቀልህን አረጋግጥ፤ ከዛም እንደገና ሞክር።"</string>
@@ -1382,7 +1389,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"የUSB  ማከማቻ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"አርትዕ"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"የውሂብ አጠቃቀም ማስጠንቀቂየ"</string>
-    <string name="data_usage_warning_body" msgid="2814673551471969954">"ቅንጅቶችን እና አጠቃቀምን ለማየት ንካ።"</string>
+    <string name="data_usage_warning_body" msgid="2814673551471969954">"ቅንብሮችን እና አጠቃቀምን ለማየት ይንኩ።"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G ውሂብ ቦዝኗል"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G ውሂብ ቦዝኗል"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"የተንቀሳቃሽ ውሂብ ቦዝኗል"</string>

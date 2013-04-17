@@ -144,7 +144,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Campainha ativada"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"A encerrar..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"O seu tablet irá encerrar."</string>
-    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"O seu telefone irá encerrar."</string>
+    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"O seu telefone será encerrado."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Pretende encerrar?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reiniciar no modo de segurança"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Pretende reiniciar no modo de segurança? Se sim, irá desativar todas as aplicações de terceiros instaladas. Estas serão restauradas quando reiniciar novamente."</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"A página em \"<xliff:g id="TITLE">%s</xliff:g>\" indica:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Navegar para outra página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Toque em OK para continuar ou Cancelar para permanecer na página atual."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Sugestão: toque duas vezes para aumentar ou diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Preenchimento Automático"</string>

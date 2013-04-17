@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"La página \"<xliff:g id="TITLE">%s</xliff:g>\" dice:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"¿Quieres salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Toca Aceptar para continuar o Cancelar para permanecer en la página actual."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Sugerencia: toca dos veces para ampliar o reducir el contenido."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autocompletar"</string>
@@ -1195,7 +1202,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Si activas el almacenamiento USB, se detendrán algunas aplicaciones que estás usando y es posible que no estén disponibles hasta que lo desactives."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Error de funcionamiento de USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como disp. multimedia"</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como dispositivo multimedia"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectado como una cámara"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>

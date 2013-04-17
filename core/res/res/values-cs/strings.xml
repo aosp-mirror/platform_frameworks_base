@@ -155,7 +155,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Zámek obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnout"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlášení chyb"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Zaznamenat zprávu o chybě"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Vytvořit chybové hlášení"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Restartovat"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Stránka <xliff:g id="TITLE">%s</xliff:g> uvádí:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Chcete-li pokračovat, dotkněte se možnosti OK. Chcete-li zůstat na aktuální stránce, dotkněte se možnosti Zrušit."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut.vyp."</string>

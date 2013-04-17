@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"重新開機"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"「<xliff:g id="TITLE">%s</xliff:g>」網頁指出："</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"離開這個頁面？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"輕觸 [確定] 離開這個頁面，或輕觸 [取消] 停留在這個頁面。"</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕按兩下即可縮放。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動填入功能"</string>
@@ -1477,7 +1484,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"要將音量調高到建議等級以上嗎？"\n"長時間聆聽偏高音量可能會損害您的聽力。"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"要將音量調高到建議等級以上嗎？"\n"長時間聆聽高音量可能會損害您的聽力。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持續用兩指按住即可啟用協助工具。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"協助工具已啟用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"協助工具已取消。"</string>
