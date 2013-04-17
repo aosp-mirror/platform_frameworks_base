@@ -442,8 +442,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         final int type = mAttrs.type;
         if (mAppToken != null) {
-            StackBox stack = mService.mTaskIdToTask.get(mAppToken.groupId).mStack.mStackBox;
-            mContainingFrame.set(stack.mBounds);
+            mContainingFrame.set(getStackBounds());
         } else {
             mContainingFrame.set(pf);
         }
@@ -702,6 +701,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return mService.mTaskIdToTask.get(mAppToken.groupId).mStack;
         }
         return null;
+    }
+
+    Rect getStackBounds() {
+        TaskStack stack = getStack();
+        if (stack != null) {
+            return stack.mStackBox.mBounds;
+        }
+        return mFrame;
     }
 
     public long getInputDispatchingTimeoutNanos() {

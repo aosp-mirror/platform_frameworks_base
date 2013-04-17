@@ -92,7 +92,7 @@ public class TaskStack {
     }
 
     int remove() {
-        return mStackBox.removeStack();
+        return mStackBox.remove();
     }
 
     int numTokens() {
@@ -108,5 +108,10 @@ public class TaskStack {
         for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
             pw.print(prefix); pw.println(mTasks.get(taskNdx));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "{stackId=" + mStackId + " tasks=" + mTasks + "}";
     }
 }

@@ -100,7 +100,7 @@ public class Am extends BaseCommand {
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
-                "       am stack create <RELATIVE_STACK_ID> <POSITION> <WEIGHT>\n" +
+                "       am stack create <TASK_ID> <RELATIVE_STACK_ID> <POSITION> <WEIGHT>\n" +
                 "       am stack movetask <STACK_ID> <TASK_ID> [true|false]\n" +
                 "       am stack dump\n" +
                 "\n" +
@@ -186,6 +186,7 @@ public class Am extends BaseCommand {
                 "  code until a later explicit switch to it.\n" +
                 "\n" +
                 "am stack create: create a new stack relative to an existing one.\n" +
+                "   <TASK_ID>: the task to populate the new stack with. Must exist.\n" +
                 "   <RELATIVE_STACK_ID>: existing stack's id.\n" +
                 "   <POSITION>: 0: to left of, 1: to right of, 2: above, 3: below\n" +
                 "   <WEIGHT>: float between 0.2 and 0.8 inclusive.\n" +
@@ -1454,6 +1455,8 @@ public class Am extends BaseCommand {
     }
 
     private void runStackCreate() throws Exception {
+        String taskIdStr = nextArgRequired();
+        int taskId = Integer.valueOf(taskIdStr);
         String relativeToStr = nextArgRequired();
         int relativeTo = Integer.valueOf(relativeToStr);
         String positionStr = nextArgRequired();
@@ -1462,8 +1465,8 @@ public class Am extends BaseCommand {
         float weight = Float.valueOf(weightStr);
 
         try {
-            int stackId = mAm.createStack(relativeTo, position, weight);
-            System.out.println("createStack returned " + stackId + "\n\n");
+            int stackId = mAm.createStack(taskId, relativeTo, position, weight);
+            System.out.println("createStack returned new stackId=" + stackId + "\n\n");
         } catch (RemoteException e) {
         }
     }

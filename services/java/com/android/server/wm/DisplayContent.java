@@ -90,10 +90,11 @@ class DisplayContent {
     /** True when the home StackBox is at the top of mStackBoxes, false otherwise */
     private TaskStack mHomeStack = null;
 
-    /**
-     * Sorted most recent at top, oldest at [0].
-     */
+    /** Save allocating when retrieving tasks */
     ArrayList<Task> mTmpTasks = new ArrayList<Task>();
+
+    /** Sorted most recent at top, oldest at [0]. */
+    ArrayList<TaskStack> mStackHistory = new ArrayList<TaskStack>();
 
     /**
      * @param display May not be null.
@@ -125,17 +126,23 @@ class DisplayContent {
         return mStackBoxes.get(0).mStack != mHomeStack;
     }
 
+    void moveStack(TaskStack stack, boolean toTop) {
+        mStackHistory.remove(stack);
+        mStackHistory.add(toTop ? mStackHistory.size() : 0, stack);
+    }
+
     /**
-     * Retrieve the tasks on this display in stack order from the topmost TaskStack down.
-     * Note that the order of TaskStacks in the same StackBox is defined within StackBox.
+     * Retrieve the tasks on this display in stack order from the bottommost TaskStack up.
      * @return All the Tasks, in order, on this display.
      */
     ArrayList<Task> getTasks() {
         mTmpTasks.clear();
-        int numBoxes = mStackBoxes.size();
-        for (int boxNdx = 0; boxNdx < numBoxes; ++boxNdx) {
-            mTmpTasks.addAll(mStackBoxes.get(boxNdx).getTasks());
+        final int numStacks = mStackHistory.size();
+        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            mTmpTasks.addAll(mStackHistory.get(stackNdx).getTasks());
         }
+        if (WindowManagerService.DEBUG_LAYERS) Slog.i(TAG, "getTasks: mStackHistory=" +
+                mStackHistory);
         return mTmpTasks;
     }
 
@@ -219,6 +226,13 @@ class DisplayContent {
             }
         }
         return false;
+    }
+
+    void addStackBox(StackBox box, boolean toTop) {
+        if (mStackBoxes.size() >= 2) {
+            throw new RuntimeException("addStackBox: Too many toplevel StackBoxes!");
+        }
+        mStackBoxes.add(toTop ? mStackBoxes.size() : 0, box);
     }
 
     void removeStackBox(StackBox box) {
