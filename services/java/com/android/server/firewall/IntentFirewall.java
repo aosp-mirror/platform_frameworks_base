@@ -25,6 +25,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.os.FileObserver;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.Xml;
@@ -58,19 +61,18 @@ public class IntentFirewall {
     private static final String TAG_BROADCAST = "broadcast";
 
     private static final int TYPE_ACTIVITY = 0;
-    private static final int TYPE_SERVICE = 1;
-    private static final int TYPE_BROADCAST = 2;
+    private static final int TYPE_BROADCAST = 1;
+    private static final int TYPE_SERVICE = 2;
 
     private static final HashMap<String, FilterFactory> factoryMap;
 
     private final AMSInterface mAms;
 
-    private final IntentResolver<FirewallIntentFilter, Rule> mActivityResolver =
-            new FirewallIntentResolver();
-    private final IntentResolver<FirewallIntentFilter, Rule> mServiceResolver =
-            new FirewallIntentResolver();
-    private final IntentResolver<FirewallIntentFilter, Rule> mBroadcastResolver =
-            new FirewallIntentResolver();
+    private final RuleObserver mObserver;
+
+    private FirewallIntentResolver mActivityResolver = new FirewallIntentResolver();
+    private FirewallIntentResolver mBroadcastResolver = new FirewallIntentResolver();
+    private FirewallIntentResolver mServiceResolver = new FirewallIntentResolver();
 
     static {
         FilterFactory[] factories = new FilterFactory[] {
@@ -104,9 +106,18 @@ public class IntentFirewall {
 
     public IntentFirewall(AMSInterface ams) {
         mAms = ams;
-        readRules(getRulesFile());
+        File rulesFile = getRulesFile();
+
+        readRules(rulesFile);
+
+        mObserver = new RuleObserver(rulesFile);
+        mObserver.startWatching();
     }
 
+    /**
+     * This is called from ActivityManager to check if a start activity intent should be allowed.
+     * It is assumed the caller is already holding the global ActivityManagerService lock.
+     */
     public boolean checkStartActivity(Intent intent, ApplicationInfo callerApp, int callerUid,
             int callerPid, String resolvedType, ActivityInfo resolvedActivity) {
         List<Rule> matchingRules = mActivityResolver.queryIntent(intent, resolvedType, false, 0);
@@ -208,7 +219,18 @@ public class IntentFirewall {
         return RULES_FILE;
     }
 
+    /**
+     * Reads rules from the given file and replaces our set of rules with the newly read rules
+     *
+     * All calls to this method from the file observer come through a handler and are inherently
+     * serialized
+     */
     private void readRules(File rulesFile) {
+        FirewallIntentResolver[] resolvers = new FirewallIntentResolver[3];
+        for (int i=0; i<resolvers.length; i++) {
+            resolvers[i] = new FirewallIntentResolver();
+        }
+
         FileInputStream fis;
         try {
             fis = new FileInputStream(rulesFile);
@@ -224,46 +246,81 @@ public class IntentFirewall {
 
             XmlUtils.beginDocument(parser, TAG_RULES);
 
+            int[] numRules = new int[3];
+
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                IntentResolver<FirewallIntentFilter, Rule> resolver = null;
+                int ruleType = -1;
+
                 String tagName = parser.getName();
                 if (tagName.equals(TAG_ACTIVITY)) {
-                    resolver = mActivityResolver;
-                } else if (tagName.equals(TAG_SERVICE)) {
-                    resolver = mServiceResolver;
+                    ruleType = TYPE_ACTIVITY;
                 } else if (tagName.equals(TAG_BROADCAST)) {
-                    resolver = mBroadcastResolver;
+                    ruleType = TYPE_BROADCAST;
+                } else if (tagName.equals(TAG_SERVICE)) {
+                    ruleType = TYPE_SERVICE;
                 }
 
-                if (resolver != null) {
+                if (ruleType != -1) {
                     Rule rule = new Rule();
 
+                    FirewallIntentResolver resolver = resolvers[ruleType];
+
+                    // if we get an error while parsing a particular rule, we'll just ignore
+                    // that rule and continue on with the next rule
                     try {
                         rule.readFromXml(parser);
                     } catch (XmlPullParserException ex) {
                         Slog.e(TAG, "Error reading intent firewall rule", ex);
                         continue;
-                    } catch (IOException ex) {
-                        Slog.e(TAG, "Error reading intent firewall rule", ex);
-                        continue;
                     }
+
+                    numRules[ruleType]++;
 
                     for (int i=0; i<rule.getIntentFilterCount(); i++) {
                         resolver.addFilter(rule.getIntentFilter(i));
                     }
                 }
             }
+
+            Slog.i(TAG, "Read new rules (A:" + numRules[TYPE_ACTIVITY] +
+                    " B:" + numRules[TYPE_BROADCAST] + " S:" + numRules[TYPE_SERVICE] + ")");
+
+            synchronized (mAms.getAMSLock()) {
+                mActivityResolver = resolvers[TYPE_ACTIVITY];
+                mBroadcastResolver = resolvers[TYPE_BROADCAST];
+                mServiceResolver = resolvers[TYPE_SERVICE];
+            }
         } catch (XmlPullParserException ex) {
+            // if there was an error outside of a specific rule, then there are probably
+            // structural problems with the xml file, and we should completely ignore it
             Slog.e(TAG, "Error reading intent firewall rules", ex);
+            clearRules();
         } catch (IOException ex) {
             Slog.e(TAG, "Error reading intent firewall rules", ex);
+            clearRules();
         } finally {
             try {
                 fis.close();
             } catch (IOException ex) {
                 Slog.e(TAG, "Error while closing " + rulesFile, ex);
             }
+        }
+    }
+
+    /**
+     * Clears out all of our rules
+     *
+     * All calls to this method from the file observer come through a handler and are inherently
+     * serialized
+     */
+    private void clearRules() {
+        Slog.i(TAG, "Clearing all rules");
+
+        synchronized (mAms.getAMSLock())  {
+            mActivityResolver = new FirewallIntentResolver();
+            mBroadcastResolver = new FirewallIntentResolver();
+            mServiceResolver = new FirewallIntentResolver();
         }
     }
 
@@ -363,6 +420,58 @@ public class IntentFirewall {
         }
     }
 
+    private static final int READ_RULES = 0;
+    private static final int CLEAR_RULES = 1;
+
+    final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case READ_RULES:
+                    readRules(getRulesFile());
+                    break;
+                case CLEAR_RULES:
+                    clearRules();
+                    break;
+            }
+        }
+    };
+
+    /**
+     * Monitors for the creation/deletion/modification of the rule file
+     */
+    private class RuleObserver extends FileObserver {
+        // The file name we're monitoring, with no path component
+        private final String mMonitoredFile;
+
+        private static final int CREATED_FLAGS = FileObserver.CREATE|FileObserver.MOVED_TO|
+                FileObserver.CLOSE_WRITE;
+        private static final int DELETED_FLAGS = FileObserver.DELETE|FileObserver.MOVED_FROM;
+
+        public RuleObserver(File monitoredFile) {
+            super(monitoredFile.getParentFile().getAbsolutePath(), CREATED_FLAGS|DELETED_FLAGS);
+            mMonitoredFile = monitoredFile.getName();
+        }
+
+        @Override
+        public void onEvent(int event, String path) {
+            if (path.equals(mMonitoredFile)) {
+                // we wait 250ms before taking any action on an event, in order to dedup multiple
+                // events. E.g. a delete event followed by a create event followed by a subsequent
+                // write+close event;
+                if ((event & CREATED_FLAGS) != 0) {
+                    mHandler.removeMessages(READ_RULES);
+                    mHandler.removeMessages(CLEAR_RULES);
+                    mHandler.sendEmptyMessageDelayed(READ_RULES, 250);
+                } else if ((event & DELETED_FLAGS) != 0) {
+                    mHandler.removeMessages(READ_RULES);
+                    mHandler.removeMessages(CLEAR_RULES);
+                    mHandler.sendEmptyMessageDelayed(CLEAR_RULES, 250);
+                }
+            }
+        }
+    }
+
     /**
      * This interface contains the methods we need from ActivityManagerService. This allows AMS to
      * export these methods to us without making them public, and also makes it easier to test this
@@ -371,6 +480,7 @@ public class IntentFirewall {
     public interface AMSInterface {
         int checkComponentPermission(String permission, int pid, int uid,
                 int owningUid, boolean exported);
+        Object getAMSLock();
     }
 
     /**
