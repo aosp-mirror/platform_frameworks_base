@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.animation.Animatable;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.animation.TimeInterpolator;
