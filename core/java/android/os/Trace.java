@@ -79,6 +79,7 @@ public final class Trace {
     private static native void nativeAsyncTraceBegin(long tag, String name, int cookie);
     private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
     private static native void nativeSetAppTracingAllowed(boolean allowed);
+    private static native void nativeSetTracingEnabled(boolean allowed);
 
     static {
         // We configure two separate change callbacks, one in Trace.cpp and one here.  The
@@ -115,10 +116,6 @@ public final class Trace {
      */
     private static long cacheEnabledTags() {
         long tags = nativeGetEnabledTags();
-        if (tags == TRACE_TAG_NOT_READY) {
-            Log.w(TAG, "Unexpected value from nativeGetEnabledTags: " + tags);
-            // keep going
-        }
         sEnabledTags = tags;
         return tags;
     }
@@ -165,6 +162,22 @@ public final class Trace {
 
         // Setting whether app tracing is allowed may change the tags, so we update the cached
         // tags here.
+        cacheEnabledTags();
+    }
+
+    /**
+     * Set whether tracing is enabled in this process.  Tracing is disabled shortly after Zygote
+     * initializes and re-enabled after processes fork from Zygote.  This is done because Zygote
+     * has no way to be notified about changes to the tracing tags, and if Zygote ever reads and
+     * caches the tracing tags, forked processes will inherit those stale tags.
+     *
+     * @hide
+     */
+    public static void setTracingEnabled(boolean enabled) {
+        nativeSetTracingEnabled(enabled);
+
+        // Setting whether tracing is enabled may change the tags, so we update the cached tags
+        // here.
         cacheEnabledTags();
     }
 
