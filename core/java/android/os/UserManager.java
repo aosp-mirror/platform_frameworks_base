@@ -142,6 +142,7 @@ public class UserManager {
 
     private static UserManager sInstance = null;
 
+    /** @hide */
     public synchronized static UserManager get(Context context) {
         if (sInstance == null) {
             sInstance = (UserManager) context.getSystemService(Context.USER_SERVICE);
@@ -578,13 +579,29 @@ public class UserManager {
         return -1;
     }
 
+    /**
+     * Returns a Bundle containing any saved application restrictions for this user, for the
+     * given package name. Only an application with this package name can call this method.
+     * @param packageName the package name of the calling application
+     * @return a Bundle with the restrictions as key/value pairs, or null if there are no
+     * saved restrictions. The values can be of type Boolean, String or String[], depending
+     * on the restriction type, as defined by the application.
+     */
+    public Bundle getApplicationRestrictions(String packageName) {
+        try {
+            return mService.getApplicationRestrictions(packageName);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get application restrictions for package " + packageName);
+        }
+        return null;
+    }
 
     /**
      * @hide
      */
-    public List<RestrictionEntry> getApplicationRestrictions(String packageName, UserHandle user) {
+    public Bundle getApplicationRestrictions(String packageName, UserHandle user) {
         try {
-            return mService.getApplicationRestrictions(packageName, user.getIdentifier());
+            return mService.getApplicationRestrictionsForUser(packageName, user.getIdentifier());
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get application restrictions for user " + user.getIdentifier());
         }
@@ -594,10 +611,10 @@ public class UserManager {
     /**
      * @hide
      */
-    public void setApplicationRestrictions(String packageName, List<RestrictionEntry> entries,
+    public void setApplicationRestrictions(String packageName, Bundle restrictions,
             UserHandle user) {
         try {
-            mService.setApplicationRestrictions(packageName, entries, user.getIdentifier());
+            mService.setApplicationRestrictions(packageName, restrictions, user.getIdentifier());
         } catch (RemoteException re) {
             Log.w(TAG, "Could not set application restrictions for user " + user.getIdentifier());
         }
