@@ -19,6 +19,9 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.UserInfo;
+
+import static android.content.Context.USER_SERVICE;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -27,8 +30,10 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -40,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Keeps the lock pattern/password data and related settings for each user.
@@ -79,23 +85,52 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void migrateOldData() {
         try {
-            if (getString("migrated", null, 0) != null) {
-                // Already migrated
-                return;
+            // These Settings moved before multi-user was enabled, so we only have to do it for the
+            // root user.
+            if (getString("migrated", null, 0) == null) {
+                final ContentResolver cr = mContext.getContentResolver();
+                for (String validSetting : VALID_SETTINGS) {
+                    String value = Settings.Secure.getString(cr, validSetting);
+                    if (value != null) {
+                        setString(validSetting, value, 0);
+                    }
+                }
+                // No need to move the password / pattern files. They're already in the right place.
+                setString("migrated", "true", 0);
+                Slog.i(TAG, "Migrated lock settings to new location");
             }
 
-            final ContentResolver cr = mContext.getContentResolver();
-            for (String validSetting : VALID_SETTINGS) {
-                String value = Settings.Secure.getString(cr, validSetting);
-                if (value != null) {
-                    setString(validSetting, value, 0);
+            // These Settings changed after multi-user was enabled, hence need to be moved per user.
+            if (getString("migrated_user_specific", null, 0) == null) {
+                final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+                final ContentResolver cr = mContext.getContentResolver();
+                List<UserInfo> users = um.getUsers();
+                for (int user = 0; user < users.size(); user++) {
+                    int userId = users.get(user).getUserHandle().getIdentifier();
+                    for (String perUserSetting : MIGRATE_SETTINGS_PER_USER) {
+                        // Handle Strings
+                        String value = Settings.Secure.getStringForUser(cr, perUserSetting, userId);
+                        if (value != null) {
+                            setString(perUserSetting, value, userId);
+                            Settings.Secure.putStringForUser(cr, perUserSetting, "", userId);
+                            continue;
+                        }
+
+                        // Handle integers
+                        try {
+                            int ivalue = Settings.Secure.getIntForUser(cr, perUserSetting, userId);
+                            setLong(perUserSetting, ivalue, userId);
+                            Settings.Secure.putIntForUser(cr, perUserSetting, 0, userId);
+                        } catch (SettingNotFoundException e) {
+                        }
+                    }
                 }
+                // No need to move the password / pattern files. They're already in the right place.
+                setString("migrated_user_specific", "true", 0);
+                Slog.i(TAG, "Migrated per-user lock settings to new location");
             }
-            // No need to move the password / pattern files. They're already in the right place.
-            setString("migrated", "true", 0);
-            Slog.i(TAG, "Migrated lock settings to new location");
         } catch (RemoteException re) {
-            Slog.e(TAG, "Unable to migrate old data");
+            Slog.e(TAG, "Unable to migrate old data", re);
         }
     }
 
@@ -404,5 +439,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
         Secure.LOCK_PATTERN_VISIBLE,
         Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
-        };
+    };
+
+    private static final String[] MIGRATE_SETTINGS_PER_USER = new String[] {
+        Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
+        Secure.LOCK_SCREEN_OWNER_INFO
+    };
 }
