@@ -550,6 +550,7 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
         }
 
         layer->debugDrawUpdate = mCaches.debugLayersUpdates;
+        layer->hasDrawnSinceUpdate = false;
 
         return true;
     }
@@ -1088,11 +1089,28 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
     }
 }
 
+/**
+ * Issues the command X, and if we're composing a save layer to the fbo or drawing a newly updated
+ * hardware layer with overdraw debug on, draws again to the stencil only, so that these draw
+ * operations are correctly counted twice for overdraw. NOTE: assumes composeLayerRegion only used
+ * by saveLayer's restore
+ */
+#define DRAW_DOUBLE_STENCIL_IF(COND, DRAW_COMMAND) {                             \
+        DRAW_COMMAND;                                                            \
+        if (CC_UNLIKELY(mCaches.debugOverdraw && getTargetFbo() == 0 && COND)) { \
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);                 \
+            DRAW_COMMAND;                                                        \
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);                     \
+        }                                                                        \
+    }
+
+#define DRAW_DOUBLE_STENCIL(DRAW_COMMAND) DRAW_DOUBLE_STENCIL_IF(true, DRAW_COMMAND)
+
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     if (layer->region.isRect()) {
         layer->setRegionAsRect();
 
-        composeLayerRect(layer, layer->regionRect);
+        DRAW_DOUBLE_STENCIL(composeLayerRect(layer, layer->regionRect));
 
         layer->region.clear();
         return;
@@ -1162,14 +1180,16 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             numQuads++;
 
             if (numQuads >= REGION_MESH_QUAD_COUNT) {
-                glDrawElements(GL_TRIANGLES, numQuads * 6, GL_UNSIGNED_SHORT, NULL);
+                DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
+                                GL_UNSIGNED_SHORT, NULL));
                 numQuads = 0;
                 mesh = mCaches.getRegionMesh();
             }
         }
 
         if (numQuads > 0) {
-            glDrawElements(GL_TRIANGLES, numQuads * 6, GL_UNSIGNED_SHORT, NULL);
+            DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
+                            GL_UNSIGNED_SHORT, NULL));
         }
 
         finishDrawTexture();
@@ -3042,7 +3062,8 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
         mDrawModifiers.mColorFilter = layer->getColorFilter();
 
         if (layer->region.isRect()) {
-            composeLayerRect(layer, layer->regionRect);
+            DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
+                    composeLayerRect(layer, layer->regionRect));
         } else if (layer->mesh) {
             const float a = getLayerAlpha(layer);
             setupDraw();
@@ -3068,8 +3089,9 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             }
             setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
 
-            glDrawElements(GL_TRIANGLES, layer->meshElementCount,
-                    GL_UNSIGNED_SHORT, layer->meshIndices);
+            DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
+                    glDrawElements(GL_TRIANGLES, layer->meshElementCount,
+                            GL_UNSIGNED_SHORT, layer->meshIndices));
 
             finishDrawTexture();
 
@@ -3086,6 +3108,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
                     0x7f00ff00, SkXfermode::kSrcOver_Mode);
         }
     }
+    layer->hasDrawnSinceUpdate = true;
 
     if (transform && !transform->isIdentity()) {
         restore();
