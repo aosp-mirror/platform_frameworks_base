@@ -208,25 +208,19 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
         return NULL;
     }
 
-    // get dirty region
-    Region dirtyRegion;
+    Rect dirtyRect;
+    Rect* dirtyRectPtr = NULL;
+
     if (dirtyRectObj) {
-        Rect dirty;
-        dirty.left = env->GetIntField(dirtyRectObj, gRectClassInfo.left);
-        dirty.top = env->GetIntField(dirtyRectObj, gRectClassInfo.top);
-        dirty.right = env->GetIntField(dirtyRectObj, gRectClassInfo.right);
-        dirty.bottom = env->GetIntField(dirtyRectObj, gRectClassInfo.bottom);
-        if (!dirty.isEmpty()) {
-            dirtyRegion.set(dirty);
-        }
-    } else {
-        dirtyRegion.set(Rect(0x3FFF, 0x3FFF));
+        dirtyRect.left   = env->GetIntField(dirtyRectObj, gRectClassInfo.left);
+        dirtyRect.top    = env->GetIntField(dirtyRectObj, gRectClassInfo.top);
+        dirtyRect.right  = env->GetIntField(dirtyRectObj, gRectClassInfo.right);
+        dirtyRect.bottom = env->GetIntField(dirtyRectObj, gRectClassInfo.bottom);
+        dirtyRectPtr = &dirtyRect;
     }
 
     ANativeWindow_Buffer outBuffer;
-    Rect dirtyBounds(dirtyRegion.getBounds());
-    status_t err = surface->lock(&outBuffer, &dirtyBounds);
-    dirtyRegion.set(dirtyBounds);
+    status_t err = surface->lock(&outBuffer, dirtyRectPtr);
     if (err < 0) {
         const char* const exception = (err == NO_MEMORY) ?
                 OutOfResourcesException :
@@ -255,27 +249,15 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
     SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
     swapCanvasPtr(env, canvasObj, nativeCanvas);
 
-    SkRegion clipReg;
-    if (dirtyRegion.isRect()) { // very common case
-        const Rect b(dirtyRegion.getBounds());
-        clipReg.setRect(b.left, b.top, b.right, b.bottom);
-    } else {
-        size_t count;
-        Rect const* r = dirtyRegion.getArray(&count);
-        while (count) {
-            clipReg.op(r->left, r->top, r->right, r->bottom, SkRegion::kUnion_Op);
-            r++, count--;
-        }
+    if (dirtyRectPtr) {
+        nativeCanvas->clipRect( SkRect::Make(reinterpret_cast<const SkIRect&>(dirtyRect)) );
     }
 
-    nativeCanvas->clipRegion(clipReg);
-
     if (dirtyRectObj) {
-        const Rect& bounds(dirtyRegion.getBounds());
-        env->SetIntField(dirtyRectObj, gRectClassInfo.left, bounds.left);
-        env->SetIntField(dirtyRectObj, gRectClassInfo.top, bounds.top);
-        env->SetIntField(dirtyRectObj, gRectClassInfo.right, bounds.right);
-        env->SetIntField(dirtyRectObj, gRectClassInfo.bottom, bounds.bottom);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.left,   dirtyRect.left);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.top,    dirtyRect.top);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.right,  dirtyRect.right);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.bottom, dirtyRect.bottom);
     }
 
     return canvasObj;
