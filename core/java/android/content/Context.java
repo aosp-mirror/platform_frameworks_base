@@ -293,15 +293,6 @@ public abstract class Context {
     public abstract Context getApplicationContext();
 
     /**
-     * Returns the list of restrictions for the application, or null if there are no
-     * restrictions.
-     * @return
-     */
-    public List<RestrictionEntry> getApplicationRestrictions() {
-        return getApplicationContext().getApplicationRestrictions();
-    }
-
-    /**
      * Add a new {@link ComponentCallbacks} to the base application of the
      * Context, which will be called at the same times as the ComponentCallbacks
      * methods of activities and other components are called.  Note that you
