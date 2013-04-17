@@ -42,7 +42,8 @@ interface IUserManager {
     int getUserHandle(int userSerialNumber);
     Bundle getUserRestrictions(int userHandle);
     void setUserRestrictions(in Bundle restrictions, int userHandle);
-    void setApplicationRestrictions(in String packageName, in List<RestrictionEntry> entries,
+    void setApplicationRestrictions(in String packageName, in Bundle restrictions,
             int userHandle);
-    List<RestrictionEntry> getApplicationRestrictions(in String packageName, int userHandle);
+    Bundle getApplicationRestrictions(in String packageName);
+    Bundle getApplicationRestrictionsForUser(in String packageName, int userHandle);
 }
