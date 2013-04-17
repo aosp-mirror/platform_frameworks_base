@@ -141,6 +141,10 @@ public class LockPatternUtils {
 
     public final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
+    private static final String LOCK_SCREEN_OWNER_INFO = Settings.Secure.LOCK_SCREEN_OWNER_INFO;
+    private static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
+            Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
+
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
@@ -532,6 +536,22 @@ public class LockPatternUtils {
         } catch (RemoteException re) {
             Log.e(TAG, "Couldn't save lock pattern " + re);
         }
+    }
+
+    public void setOwnerInfo(String info, int userId) {
+        setString(LOCK_SCREEN_OWNER_INFO, info, userId);
+    }
+
+    public void setOwnerInfoEnabled(boolean enabled) {
+        setBoolean(LOCK_SCREEN_OWNER_INFO_ENABLED, enabled);
+    }
+
+    public String getOwnerInfo(int userId) {
+        return getString(LOCK_SCREEN_OWNER_INFO);
+    }
+
+    public boolean isOwnerInfoEnabled() {
+        return getBoolean(LOCK_SCREEN_OWNER_INFO_ENABLED, false);
     }
 
     /**
