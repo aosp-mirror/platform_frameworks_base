@@ -9514,7 +9514,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 TAG, "Changing focus from " + mCurrentFocus + " to " + newFocus);
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
-            mAnimator.setCurrentFocus(newFocus);
             mLosingFocus.remove(newFocus);
             int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
 
