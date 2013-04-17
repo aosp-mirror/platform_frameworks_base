@@ -1676,8 +1676,12 @@ public class NotificationManagerService extends INotificationManager.Stub
                 .getSystemService(Context.AUDIO_SERVICE);
 
                 // sound
+
+                // should we use the default notification sound? (indicated either by DEFAULT_SOUND
+                // or because notification.sound is pointing at Settings.System.NOTIFICATION_SOUND)
                 final boolean useDefaultSound =
-                    (notification.defaults & Notification.DEFAULT_SOUND) != 0;
+                       (notification.defaults & Notification.DEFAULT_SOUND) != 0
+                    || Settings.System.DEFAULT_NOTIFICATION_URI.equals(notification.sound);
 
                 Uri soundUri = null;
                 boolean hasValidSound = false;
