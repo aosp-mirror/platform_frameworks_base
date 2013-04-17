@@ -13395,18 +13395,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Sets a rectangular area on this view to which the view will be clipped
-     * it is drawn. Setting the value to null will remove the clip bounds
+     * when it is drawn. Setting the value to null will remove the clip bounds
      * and the view will draw normally, using its full bounds.
      *
      * @param clipBounds The rectangular area, in the local coordinates of
      * this view, to which future drawing operations will be clipped.
      */
     public void setClipBounds(Rect clipBounds) {
-        mClipBounds = clipBounds;
         if (clipBounds != null) {
-            invalidate(clipBounds);
+            if (clipBounds.equals(mClipBounds)) {
+                return;
+            }
+            if (mClipBounds == null) {
+                invalidate();
+                mClipBounds = new Rect(clipBounds);
+            } else {
+                invalidate(Math.min(mClipBounds.left, clipBounds.left),
+                        Math.min(mClipBounds.top, clipBounds.top),
+                        Math.max(mClipBounds.right, clipBounds.right),
+                        Math.max(mClipBounds.bottom, clipBounds.bottom));
+                mClipBounds.set(clipBounds);
+            }
         } else {
-            invalidate();
+            if (mClipBounds != null) {
+                invalidate();
+                mClipBounds = null;
+            }
         }
     }
 
