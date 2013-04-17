@@ -2307,28 +2307,23 @@ package android.accounts {
 
 package android.animation {
 
-  public abstract interface Animatable {
-    method public abstract long getDuration();
-    method public abstract android.animation.TimeInterpolator getInterpolator();
-    method public abstract long getStartDelay();
-    method public abstract android.animation.Animatable setDuration(long);
-    method public abstract void setInterpolator(android.animation.TimeInterpolator);
-    method public abstract void setStartDelay(long);
-  }
-
-  public abstract class Animator implements android.animation.Animatable java.lang.Cloneable {
+  public abstract class Animator implements java.lang.Cloneable {
     ctor public Animator();
     method public void addListener(android.animation.Animator.AnimatorListener);
     method public void cancel();
     method public android.animation.Animator clone();
     method public void end();
+    method public abstract long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
+    method public abstract long getStartDelay();
     method public abstract boolean isRunning();
     method public boolean isStarted();
     method public void removeAllListeners();
     method public void removeListener(android.animation.Animator.AnimatorListener);
     method public abstract android.animation.Animator setDuration(long);
+    method public abstract void setInterpolator(android.animation.TimeInterpolator);
+    method public abstract void setStartDelay(long);
     method public void setTarget(java.lang.Object);
     method public void setupEndValues();
     method public void setupStartValues();
