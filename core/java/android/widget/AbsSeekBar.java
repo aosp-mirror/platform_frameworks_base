@@ -292,7 +292,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         // The extra space for the thumb to move on the track
         available += mThumbOffset * 2;
 
-        int thumbPos = (int) (scale * available);
+        int thumbPos = (int) (scale * available + 0.5f);
 
         int topBound, bottomBound;
         if (gap == Integer.MIN_VALUE) {
