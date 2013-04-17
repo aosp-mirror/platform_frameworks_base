@@ -30,6 +30,7 @@
 #include <media/IDrm.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/MediaErrors.h>
 
 namespace android {
 
@@ -191,10 +192,62 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
 static bool throwExceptionAsNecessary(
         JNIEnv *env, status_t err, const char *msg = NULL) {
 
+    const char *drmMessage = NULL;
+
+    switch(err) {
+    case ERROR_DRM_UNKNOWN:
+        drmMessage = "General DRM error";
+        break;
+    case ERROR_DRM_NO_LICENSE:
+        drmMessage = "No license";
+        break;
+    case ERROR_DRM_LICENSE_EXPIRED:
+        drmMessage = "License expired";
+        break;
+    case ERROR_DRM_SESSION_NOT_OPENED:
+        drmMessage = "Session not opened";
+        break;
+    case ERROR_DRM_DECRYPT_UNIT_NOT_INITIALIZED:
+        drmMessage = "Not initialized";
+        break;
+    case ERROR_DRM_DECRYPT:
+        drmMessage = "Decrypt error";
+        break;
+    case ERROR_DRM_CANNOT_HANDLE:
+        drmMessage = "Unsupported scheme or data format";
+        break;
+    case ERROR_DRM_TAMPER_DETECTED:
+        drmMessage = "Invalid state";
+        break;
+    case ERROR_DRM_NOT_PROVISIONED:
+        drmMessage = "Not provisioned";
+        break;
+    case ERROR_DRM_DEVICE_REVOKED:
+        drmMessage = "Device revoked";
+        break;
+    default:
+        break;
+    }
+
+    String8 vendorMessage;
+    if (err >= ERROR_DRM_VENDOR_MIN && err <= ERROR_DRM_VENDOR_MAX) {
+        vendorMessage.format("DRM vendor-defined error: %d", err);
+        drmMessage = vendorMessage.string();
+    }
+
     if (err == BAD_VALUE) {
         jniThrowException(env, "java/lang/IllegalArgumentException", msg);
         return true;
     } else if (err != OK) {
+        String8 errbuf;
+        if (drmMessage != NULL) {
+            if (msg == NULL) {
+                msg = drmMessage;
+            } else {
+                errbuf.format("%s: %s", msg, drmMessage);
+                msg = errbuf.string();
+            }
+        }
         jniThrowException(env, "java/lang/IllegalStateException", msg);
         return true;
     }
