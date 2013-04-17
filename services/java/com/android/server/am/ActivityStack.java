@@ -75,7 +75,7 @@ final class ActivityStack {
     static final boolean localLOGV = ActivityManagerService.localLOGV;
     static final boolean DEBUG_SWITCH = ActivityManagerService.DEBUG_SWITCH;
     static final boolean DEBUG_PAUSE = ActivityManagerService.DEBUG_PAUSE;
-    static final boolean DEBUG_VISBILITY = ActivityManagerService.DEBUG_VISBILITY || true;
+    static final boolean DEBUG_VISBILITY = ActivityManagerService.DEBUG_VISBILITY;
     static final boolean DEBUG_USER_LEAVING = ActivityManagerService.DEBUG_USER_LEAVING;
     static final boolean DEBUG_TRANSITION = ActivityManagerService.DEBUG_TRANSITION;
     static final boolean DEBUG_RESULTS = ActivityManagerService.DEBUG_RESULTS;
@@ -984,10 +984,12 @@ final class ActivityStack {
                     destroyActivityLocked(prev, true, false, "pause-config");
                 } else {
                     mStackSupervisor.mStoppingActivities.add(prev);
-                    if (mStackSupervisor.mStoppingActivities.size() > 3) {
+                    if (mStackSupervisor.mStoppingActivities.size() > 3 ||
+                            prev.frontOfTask && mTaskHistory.size() <= 1) {
                         // If we already have a few activities waiting to stop,
                         // then give up on things going idle and start clearing
-                        // them out.
+                        // them out. Or if r is the last of activity of the last task the stack
+                        // will be empty and must be cleared immediately.
                         if (DEBUG_PAUSE) Slog.v(TAG, "To many pending stops, forcing idle");
                         scheduleIdleLocked();
                     } else {
@@ -1750,9 +1752,13 @@ final class ActivityStack {
                 if (prev != null) {
                     // We don't want to reuse the previous starting preview if:
                     // (1) The current activity is in a different task.
-                    if (prev.task != r.task) prev = null;
+                    if (prev.task != r.task) {
+                        prev = null;
+                    }
                     // (2) The current activity is already displayed.
-                    else if (prev.nowVisible) prev = null;
+                    else if (prev.nowVisible) {
+                        prev = null;
+                    }
                 }
                 mService.mWindowManager.setAppStartingWindow(
                         r.appToken, r.packageName, r.theme,
@@ -1774,7 +1780,7 @@ final class ActivityStack {
         }
 
         if (doResume) {
-            mStackSupervisor.getTopStack().resumeTopActivityLocked(null);
+            mStackSupervisor.resumeTopActivitiesLocked();
         }
     }
 
@@ -2569,7 +2575,7 @@ final class ActivityStack {
         r.pauseKeyDispatchingLocked();
         if (mStackSupervisor.isFrontStack(this)) {
             if (mService.mFocusedActivity == r) {
-                mService.setFocusedActivityLocked(topRunningActivityLocked(null));
+                mService.setFocusedActivityLocked(mStackSupervisor.topRunningActivityLocked());
             }
         }
 
@@ -2623,10 +2629,12 @@ final class ActivityStack {
         if (mode == FINISH_AFTER_VISIBLE && r.nowVisible) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
                 mStackSupervisor.mStoppingActivities.add(r);
-                if (mStackSupervisor.mStoppingActivities.size() > 3) {
+                if (mStackSupervisor.mStoppingActivities.size() > 3
+                        || r.frontOfTask && mTaskHistory.size() <= 1) {
                     // If we already have a few activities waiting to stop,
                     // then give up on things going idle and start clearing
-                    // them out.
+                    // them out. Or if r is the last of activity of the last task the stack
+                    // will be empty and must be cleared immediately.
                     scheduleIdleLocked();
                 } else {
                     checkReadyForSleepLocked();

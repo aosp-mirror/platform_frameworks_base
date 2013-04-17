@@ -2398,7 +2398,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return True if the selector should be shown
      */
     boolean shouldShowSelector() {
-        return (hasFocus() && !isInTouchMode()) || touchModeDrawsInPressedState();
+        return (!isInTouchMode()) || touchModeDrawsInPressedState();
     }
 
     private void drawSelector(Canvas canvas) {
@@ -2736,7 +2736,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         public boolean sameWindow() {
-            return hasWindowFocus() && getWindowAttachCount() == mOriginalAttachCount;
+            return getWindowAttachCount() == mOriginalAttachCount;
         }
     }
 

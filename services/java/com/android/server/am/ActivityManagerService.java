@@ -1925,6 +1925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void setFocusedActivityLocked(ActivityRecord r) {
         if (mFocusedActivity != r) {
             mFocusedActivity = r;
+            mStackSupervisor.setFocusedStack(r);
             if (r != null) {
                 mWindowManager.setFocusedApp(r.appToken, true);
             }
@@ -2955,10 +2956,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        
+
         synchronized(this) {
             ProcessRecord proc = null;
-            
+
             // Figure out which process to kill.  We don't trust that initialPid
             // still has any relation to current pids, so must scan through the
             // list.
@@ -2979,14 +2980,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             }
-            
+
             if (proc == null) {
                 Slog.w(TAG, "crashApplication: nothing for uid=" + uid
                         + " initialPid=" + initialPid
                         + " packageName=" + packageName);
                 return;
             }
-            
+
             if (proc.thread != null) {
                 if (proc.pid == Process.myPid()) {
                     Log.w(TAG, "crashApplication: trying to crash self!");
@@ -3001,7 +3002,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-    
+
     @Override
     public final void finishSubActivity(IBinder token, String resultWho,
             int requestCode) {
@@ -3050,17 +3051,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             final long origId = Binder.clearCallingIdentity();
-            
+
             if (self.state == ActivityState.RESUMED
                     || self.state == ActivityState.PAUSING) {
                 mWindowManager.overridePendingAppTransition(packageName,
                         enterAnim, exitAnim, null);
             }
-            
+
             Binder.restoreCallingIdentity(origId);
         }
     }
-    
+
     /**
      * Main function for removing an existing process from the activity manager
      * as a result of that process going away.  Clears out all connections
@@ -4815,6 +4816,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return rec;
     }
 
+    @Override
     public void cancelIntentSender(IIntentSender sender) {
         if (!(sender instanceof PendingIntentRecord)) {
             return;
@@ -4848,6 +4850,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public String getPackageForIntentSender(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return null;
@@ -4860,6 +4863,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return null;
     }
 
+    @Override
     public int getUidForIntentSender(IIntentSender sender) {
         if (sender instanceof PendingIntentRecord) {
             try {
@@ -4871,6 +4875,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return -1;
     }
 
+    @Override
     public boolean isIntentSenderTargetedToPackage(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return false;
@@ -4892,6 +4897,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
+    @Override
     public boolean isIntentSenderAnActivity(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return false;

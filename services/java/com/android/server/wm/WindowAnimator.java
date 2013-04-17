@@ -305,7 +305,8 @@ public class WindowAnimator {
                                     wallpaperInUnForceHiding = true;
                                 }
                             }
-                            if (mCurrentFocus == null || mCurrentFocus.mLayer < win.mLayer) {
+                            final WindowState currentFocus = mService.mCurrentFocus;
+                            if (currentFocus == null || currentFocus.mLayer < win.mLayer) {
                                 // We are showing on to of the current
                                 // focus, so re-evaluate focus to make
                                 // sure it is correct.
@@ -668,11 +669,6 @@ public class WindowAnimator {
                 + " mPendingLayoutChanges(DEFAULT_DISPLAY)="
                 + Integer.toHexString(getPendingLayoutChanges(Display.DEFAULT_DISPLAY)));
         }
-    }
-
-    WindowState mCurrentFocus;
-    void setCurrentFocus(final WindowState currentFocus) {
-        mCurrentFocus = currentFocus;
     }
 
     boolean isDimmingLocked(int displayId) {

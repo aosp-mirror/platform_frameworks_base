@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.am.ActivityManagerService.localLOGV;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
@@ -99,8 +101,8 @@ public class ActivityStackSupervisor {
     private ActivityStack mHomeStack;
 
     /** The non-home stack currently receiving input or launching the next activity. If home is
-     * in front then mHomeStack overrides mMainStack. */
-    private ActivityStack mMainStack;
+     * in front then mHomeStack overrides mFocusedStack. */
+    private ActivityStack mFocusedStack;
 
     /** All the non-launcher stacks */
     private ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
@@ -150,7 +152,7 @@ public class ActivityStackSupervisor {
             case STACK_STATE_HOME_IN_BACK:
             case STACK_STATE_HOME_TO_BACK:
             default:
-                return mMainStack;
+                return mFocusedStack;
         }
     }
 
@@ -162,7 +164,7 @@ public class ActivityStackSupervisor {
             case STACK_STATE_HOME_TO_FRONT:
             case STACK_STATE_HOME_IN_BACK:
             default:
-                return mMainStack;
+                return mFocusedStack;
         }
     }
 
@@ -238,8 +240,8 @@ public class ActivityStackSupervisor {
             mStacks.remove(stack);
             final int stackId = stack.mStackId;
             final int nextStackId = mService.mWindowManager.removeStack(stackId);
-            if (mMainStack.mStackId == stackId) {
-                mMainStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
+            if (mFocusedStack.mStackId == stackId) {
+                mFocusedStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
             }
         }
     }
@@ -329,10 +331,9 @@ public class ActivityStackSupervisor {
     }
 
     boolean allPausedActivitiesComplete() {
-        final boolean homeInBack = !homeIsInFront();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.isHomeStack() ^ homeInBack) {
+            if (isFrontStack(stack)) {
                 final ActivityRecord r = stack.mLastPausedActivity;
                 if (r != null && r.state != ActivityState.PAUSED
                         && r.state != ActivityState.STOPPED
@@ -351,6 +352,35 @@ public class ActivityStackSupervisor {
                 break;
         }
         return true;
+    }
+
+    ActivityRecord topRunningActivityLocked() {
+        ActivityRecord r = null;
+        if (mFocusedStack != null) {
+            r = mFocusedStack.topRunningActivityLocked(null);
+            if (r != null) {
+                return r;
+            }
+        }
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (stack != mFocusedStack && isFrontStack(stack)) {
+                r = stack.topRunningActivityLocked(null);
+                if (r != null) {
+                    return r;
+                }
+            }
+        }
+        return null;
+    }
+
+    void resumeTopActivitiesLocked() {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (isFrontStack(stack)) {
+                stack.resumeTopActivityLocked(null);
+            }
+        }
     }
 
     ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
@@ -1043,11 +1073,27 @@ public class ActivityStackSupervisor {
                 // Time to create the first app stack.
                 int stackId = mService.createStack(-1, HOME_STACK_ID,
                         StackBox.TASK_STACK_GOES_OVER, 1.0f);
-                mMainStack = getStack(stackId);
+                mFocusedStack = getStack(stackId);
             }
-            return mMainStack;
+            return mFocusedStack;
         }
         return mHomeStack;
+    }
+
+    void setFocusedStack(ActivityRecord r) {
+        if (r == null) {
+            return;
+        }
+        if (r.isHomeActivity) {
+            if (mStackState != STACK_STATE_HOME_IN_FRONT) {
+                mStackState = STACK_STATE_HOME_TO_FRONT;
+            }
+        } else {
+            mFocusedStack = r.task.stack;
+            if (mStackState != STACK_STATE_HOME_IN_BACK) {
+                mStackState = STACK_STATE_HOME_TO_BACK;
+            }
+        }
     }
 
     final int startActivityUncheckedLocked(ActivityRecord r,
@@ -1091,8 +1137,8 @@ public class ActivityStackSupervisor {
             // This activity is not being started from another...  in this
             // case we -always- start a new task.
             if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
-                Slog.w(TAG, "startActivity called from non-Activity context; forcing Intent.FLAG_ACTIVITY_NEW_TASK for: "
-                      + intent);
+                Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
+                        "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
                 launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
             }
         } else if (sourceRecord.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
@@ -1150,6 +1196,9 @@ public class ActivityStackSupervisor {
                         ? findTaskLocked(intent, r.info)
                         : findActivityLocked(intent, r.info);
                 if (intentActivity != null) {
+                    if (r.task == null) {
+                        r.task = intentActivity.task;
+                    }
                     targetStack = intentActivity.task.stack;
                     moveHomeStack(targetStack.isHomeStack());
                     if (intentActivity.task.intent == null) {
@@ -1174,8 +1223,8 @@ public class ActivityStackSupervisor {
                             // user's face, right now.
                             movedHome = true;
                             if ((launchFlags &
-                                    (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME))
-                                    == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME)) {
+                                    (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
+                                    == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
                                 // Caller wants to appear on home activity, so before starting
                                 // their own activity we will bring home to the front.
                                 r.mLaunchHomeTaskNext = true;
@@ -1200,6 +1249,9 @@ public class ActivityStackSupervisor {
                         } else {
                             ActivityOptions.abort(options);
                         }
+                        if (r.task == null)  Slog.v(TAG,
+                                "startActivityUncheckedLocked: task left null",
+                                new RuntimeException("here").fillInStackTrace());
                         return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags &
@@ -1293,6 +1345,9 @@ public class ActivityStackSupervisor {
                         } else {
                             ActivityOptions.abort(options);
                         }
+                        if (r.task == null)  Slog.v(TAG,
+                            "startActivityUncheckedLocked: task left null",
+                            new RuntimeException("here").fillInStackTrace());
                         return ActivityManager.START_TASK_TO_FRONT;
                     }
                 }
@@ -1330,9 +1385,15 @@ public class ActivityStackSupervisor {
                                 // We don't need to start a new activity, and
                                 // the client said not to do anything if that
                                 // is the case, so this is it!
+                                if (r.task == null)  Slog.v(TAG,
+                                    "startActivityUncheckedLocked: task left null",
+                                    new RuntimeException("here").fillInStackTrace());
                                 return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                             }
                             top.deliverNewIntentLocked(callingUid, r.intent);
+                            if (r.task == null)  Slog.v(TAG,
+                                "startActivityUncheckedLocked: task left null",
+                                new RuntimeException("here").fillInStackTrace());
                             return ActivityManager.START_DELIVERED_TO_TOP;
                         }
                     }
@@ -1345,6 +1406,9 @@ public class ActivityStackSupervisor {
                         r.requestCode, Activity.RESULT_CANCELED, null);
             }
             ActivityOptions.abort(options);
+            if (r.task == null)  Slog.v(TAG,
+                "startActivityUncheckedLocked: task left null",
+                new RuntimeException("here").fillInStackTrace());
             return ActivityManager.START_CLASS_NOT_FOUND;
         }
 
@@ -1394,6 +1458,9 @@ public class ActivityStackSupervisor {
                         targetStack.resumeTopActivityLocked(null);
                     }
                     ActivityOptions.abort(options);
+                    if (r.task == null)  Slog.v(TAG,
+                        "startActivityUncheckedLocked: task left null",
+                        new RuntimeException("here").fillInStackTrace());
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
             } else if (!addingToTask &&
@@ -1413,6 +1480,9 @@ public class ActivityStackSupervisor {
                         setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
                         targetStack.resumeTopActivityLocked(null);
                     }
+                    if (r.task == null)  Slog.v(TAG,
+                        "startActivityUncheckedLocked: task left null",
+                        new RuntimeException("here").fillInStackTrace());
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
             }
