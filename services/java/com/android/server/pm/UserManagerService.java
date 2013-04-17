@@ -88,7 +88,12 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String ATTR_KEY = "key";
+    private static final String ATTR_VALUE_TYPE = "type";
     private static final String ATTR_MULTIPLE = "m";
+
+    private static final String ATTR_TYPE_STRING_ARRAY = "sa";
+    private static final String ATTR_TYPE_STRING = "s";
+    private static final String ATTR_TYPE_BOOLEAN = "b";
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
@@ -965,7 +970,12 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public List<RestrictionEntry> getApplicationRestrictions(String packageName, int userId) {
+    public Bundle getApplicationRestrictions(String packageName) {
+        return getApplicationRestrictionsForUser(packageName, UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public Bundle getApplicationRestrictionsForUser(String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
             checkManageUsersPermission("Only system can get restrictions for other users/apps");
@@ -977,7 +987,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public void setApplicationRestrictions(String packageName, List<RestrictionEntry> entries,
+    public void setApplicationRestrictions(String packageName, Bundle restrictions,
             int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
@@ -985,7 +995,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         synchronized (mPackagesLock) {
             // Write the restrictions to XML
-            writeApplicationRestrictionsLocked(packageName, entries, userId);
+            writeApplicationRestrictionsLocked(packageName, restrictions, userId);
         }
     }
 
@@ -1001,9 +1011,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private List<RestrictionEntry> readApplicationRestrictionsLocked(String packageName,
+    private Bundle readApplicationRestrictionsLocked(String packageName,
             int userId) {
-        final ArrayList<RestrictionEntry> entries = new ArrayList<RestrictionEntry>();
+        final Bundle restrictions = new Bundle();
         final ArrayList<String> values = new ArrayList<String>();
 
         FileInputStream fis = null;
@@ -1023,12 +1033,13 @@ public class UserManagerService extends IUserManager.Stub {
             if (type != XmlPullParser.START_TAG) {
                 Slog.e(LOG_TAG, "Unable to read restrictions file "
                         + restrictionsFile.getBaseFile());
-                return entries;
+                return restrictions;
             }
 
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
                     String key = parser.getAttributeValue(null, ATTR_KEY);
+                    String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
                     String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
                     if (multiple != null) {
                         int count = Integer.parseInt(multiple);
@@ -1041,14 +1052,13 @@ public class UserManagerService extends IUserManager.Stub {
                         }
                         String [] valueStrings = new String[values.size()];
                         values.toArray(valueStrings);
-                        Slog.d(LOG_TAG, "Got RestrictionEntry " + key + "," + valueStrings);
-                        RestrictionEntry entry = new RestrictionEntry(key, valueStrings);
-                        entries.add(entry);
+                        restrictions.putStringArray(key, valueStrings);
+                    } else if (ATTR_TYPE_BOOLEAN.equals(valType)) {
+                        restrictions.putBoolean(key, Boolean.parseBoolean(
+                                parser.nextText().trim()));
                     } else {
                         String value = parser.nextText().trim();
-                        Slog.d(LOG_TAG, "Got RestrictionEntry " + key + "," + value);
-                        RestrictionEntry entry = new RestrictionEntry(key, value);
-                        entries.add(entry);
+                        restrictions.putString(key, value);
                     }
                 }
             }
@@ -1063,11 +1073,11 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
         }
-        return entries;
+        return restrictions;
     }
 
     private void writeApplicationRestrictionsLocked(String packageName,
-            List<RestrictionEntry> entries, int userId) {
+            Bundle restrictions, int userId) {
         FileOutputStream fos = null;
         AtomicFile restrictionsFile = new AtomicFile(
                 new File(Environment.getUserSystemDirectory(userId),
@@ -1084,18 +1094,24 @@ public class UserManagerService extends IUserManager.Stub {
 
             serializer.startTag(null, TAG_RESTRICTIONS);
 
-            for (RestrictionEntry entry : entries) {
+            for (String key : restrictions.keySet()) {
+                Object value = restrictions.get(key);
                 serializer.startTag(null, TAG_ENTRY);
-                serializer.attribute(null, ATTR_KEY, entry.getKey());
-                if (entry.getSelectedString() != null || entry.getAllSelectedStrings() == null) {
-                    String value = entry.getSelectedString();
-                    serializer.text(value != null ? value : "");
+                serializer.attribute(null, ATTR_KEY, key);
+
+                if (value instanceof Boolean) {
+                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BOOLEAN);
+                    serializer.text(value.toString());
+                } else if (value == null || value instanceof String) {
+                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING);
+                    serializer.text(value != null ? (String) value : "");
                 } else {
-                    String[] values = entry.getAllSelectedStrings();
+                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING_ARRAY);
+                    String[] values = (String[]) value;
                     serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
-                    for (String value : values) {
+                    for (String choice : values) {
                         serializer.startTag(null, TAG_VALUE);
-                        serializer.text(value != null ? value : "");
+                        serializer.text(choice != null ? choice : "");
                         serializer.endTag(null, TAG_VALUE);
                     }
                 }

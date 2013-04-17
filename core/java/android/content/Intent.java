@@ -2416,11 +2416,16 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast to a specific application to query any supported restrictions to impose
-     * on restricted users. The response should contain an extra {@link #EXTRA_RESTRICTIONS},
+     * on restricted users. The broadcast intent contains an extra
+     * {@link #EXTRA_RESTRICTIONS_BUNDLE} with the currently persisted
+     * restrictions as a Bundle of key/value pairs. The value types can be Boolean, String or
+     * String[] depending on the restriction type.<p/>
+     * The response should contain an extra {@link #EXTRA_RESTRICTIONS_LIST},
      * which is of type <code>ArrayList&lt;RestrictionEntry&gt;</code>. It can also
      * contain an extra {@link #EXTRA_RESTRICTIONS_INTENT}, which is of type <code>Intent</code>.
      * The activity specified by that intent will be launched for a result which must contain
-     * the extra {@link #EXTRA_RESTRICTIONS}. The returned restrictions will be persisted.
+     * the extra {@link #EXTRA_RESTRICTIONS_LIST}. The keys and values of the returned restrictions
+     * will be persisted.
      * @see RestrictionEntry
      */
     public static final String ACTION_GET_RESTRICTION_ENTRIES =
@@ -3159,7 +3164,8 @@ public class Intent implements Parcelable, Cloneable {
         "android.intent.extra.ALLOW_MULTIPLE";
 
     /**
-     * The userHandle carried with broadcast intents related to addition, removal and switching of users
+     * The userHandle carried with broadcast intents related to addition, removal and switching of
+     * users
      * - {@link #ACTION_USER_ADDED}, {@link #ACTION_USER_REMOVED} and {@link #ACTION_USER_SWITCHED}.
      * @hide
      */
@@ -3168,9 +3174,18 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Extra used in the response from a BroadcastReceiver that handles
-     * {@link #ACTION_GET_RESTRICTION_ENTRIES}.
+     * {@link #ACTION_GET_RESTRICTION_ENTRIES}. The type of the extra is
+     * <code>ArrayList&lt;RestrictionEntry&gt;</code>.
      */
-    public static final String EXTRA_RESTRICTIONS = "android.intent.extra.restrictions";
+    public static final String EXTRA_RESTRICTIONS_LIST = "android.intent.extra.restrictions_list";
+
+    /**
+     * Extra sent in the intent to the BroadcastReceiver that handles
+     * {@link #ACTION_GET_RESTRICTION_ENTRIES}. The type of the extra is a Bundle containing
+     * the restrictions as key/value pairs.
+     */
+    public static final String EXTRA_RESTRICTIONS_BUNDLE =
+            "android.intent.extra.restrictions_bundle";
 
     /**
      * Extra used in the response from a BroadcastReceiver that handles

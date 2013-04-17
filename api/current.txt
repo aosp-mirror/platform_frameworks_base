@@ -5614,7 +5614,6 @@ package android.content {
     method public abstract java.lang.String[] fileList();
     method public abstract android.content.Context getApplicationContext();
     method public abstract android.content.pm.ApplicationInfo getApplicationInfo();
-    method public java.util.List<android.content.RestrictionEntry> getApplicationRestrictions();
     method public abstract android.content.res.AssetManager getAssets();
     method public abstract java.io.File getCacheDir();
     method public abstract java.lang.ClassLoader getClassLoader();
@@ -6202,8 +6201,9 @@ package android.content {
     field public static final java.lang.String EXTRA_REFERRER = "android.intent.extra.REFERRER";
     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
     field public static final java.lang.String EXTRA_REPLACING = "android.intent.extra.REPLACING";
-    field public static final java.lang.String EXTRA_RESTRICTIONS = "android.intent.extra.restrictions";
+    field public static final java.lang.String EXTRA_RESTRICTIONS_BUNDLE = "android.intent.extra.restrictions_bundle";
     field public static final java.lang.String EXTRA_RESTRICTIONS_INTENT = "android.intent.extra.restrictions_intent";
+    field public static final java.lang.String EXTRA_RESTRICTIONS_LIST = "android.intent.extra.restrictions_list";
     field public static final java.lang.String EXTRA_RETURN_RESULT = "android.intent.extra.RETURN_RESULT";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON = "android.intent.extra.shortcut.ICON";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON_RESOURCE = "android.intent.extra.shortcut.ICON_RESOURCE";
@@ -17555,7 +17555,7 @@ package android.os {
   }
 
   public class UserManager {
-    method public static synchronized android.os.UserManager get(android.content.Context);
+    method public android.os.Bundle getApplicationRestrictions(java.lang.String);
     method public long getSerialNumberForUser(android.os.UserHandle);
     method public int getUserCount();
     method public android.os.UserHandle getUserForSerialNumber(long);

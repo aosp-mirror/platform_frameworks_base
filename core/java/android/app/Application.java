@@ -134,11 +134,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    public List<RestrictionEntry> getApplicationRestrictions() {
-        return ((UserManager) getSystemService(USER_SERVICE))
-                .getApplicationRestrictions(getPackageName(), android.os.Process.myUserHandle());
-    }
-
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         synchronized (mComponentCallbacks) {
             mComponentCallbacks.add(callback);
