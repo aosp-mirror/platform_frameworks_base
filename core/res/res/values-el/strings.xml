@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Επανεκκίνηση"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Η σελίδα στον τίτλο \"<xliff:g id="TITLE">%s</xliff:g>\" λέει:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Απομάκρυνση από αυτή τη σελίδα;"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Αγγίξτε το στοιχείο \"OK\" για συνέχεια ή \"Ακύρωση\" για παραμονή στην τρέχουσα σελίδα."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Επιβεβαίωση"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Συμβουλή: Πατήστε δύο φορές για μεγέθυνση και σμίκρυνση."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Αυτόματη συμπλήρωση"</string>

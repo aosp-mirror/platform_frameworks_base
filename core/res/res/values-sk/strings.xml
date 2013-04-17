@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reštartovať"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Stránka „<xliff:g id="TITLE">%s</xliff:g>“ uvádza:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Chcete opustiť túto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Ak chcete pokračovať, dotknite sa tlačidla OK. Ak chcete zostať na stránke, dotknite sa tlačidla Zrušiť."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdiť"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Dvojitým klepnutím môžete zobrazenie priblížiť alebo oddialiť."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut.dop."</string>
@@ -1051,7 +1058,7 @@
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je spustená"</string>
-    <string name="app_running_notification_text" msgid="4653586947747330058">"Dotknutím sa zobrazíte viac informácií alebo zastavíte aplikáciu."</string>
+    <string name="app_running_notification_text" msgid="4653586947747330058">"Dotykom si zobrazíte viac informácií alebo zastavíte aplikáciu."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Zrušiť"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>

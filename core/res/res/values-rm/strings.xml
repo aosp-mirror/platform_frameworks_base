@@ -1398,7 +1398,13 @@
     <!-- no translation found for js_dialog_title (1987483977834603872) -->
     <skip />
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload (730366588032430474) -->
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
     <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Confermar"</string>
     <!-- no translation found for double_tap_toast (4595046515400268881) -->
