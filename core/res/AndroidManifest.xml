@@ -918,7 +918,8 @@
     <permission android:name="android.permission.RECORD_AUDIO"
         android:permissionGroup="android.permission-group.MICROPHONE"
         android:protectionLevel="dangerous"
-        android:label="@string/permlab_recordAudio" />
+        android:label="@string/permlab_recordAudio"
+        android:description="@string/permdesc_recordAudio" />
 
 
     <!-- =========================================== -->
