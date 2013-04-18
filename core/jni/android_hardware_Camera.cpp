@@ -586,6 +586,30 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
     }
 }
 
+static void android_hardware_Camera_setPreviewCallbackSurface(JNIEnv *env,
+        jobject thiz, jobject jSurface)
+{
+    ALOGV("setPreviewCallbackSurface");
+    JNICameraContext* context;
+    sp<Camera> camera = get_native_camera(env, thiz, &context);
+    if (camera == 0) return;
+
+    sp<IGraphicBufferProducer> gbp;
+    sp<Surface> surface;
+    if (jSurface) {
+        surface = android_view_Surface_getSurface(env, jSurface);
+        if (surface != NULL) {
+            gbp = surface->getIGraphicBufferProducer();
+        }
+    }
+    // Clear out normal preview callbacks
+    context->setCallbackMode(env, false, false);
+    // Then set up callback surface
+    if (camera->setPreviewCallbackTarget(gbp) != NO_ERROR) {
+        jniThrowException(env, "java/io/IOException", "setPreviewCallbackTarget failed");
+    }
+}
+
 static void android_hardware_Camera_startPreview(JNIEnv *env, jobject thiz)
 {
     ALOGV("startPreview");
@@ -881,6 +905,9 @@ static JNINativeMethod camMethods[] = {
   { "setPreviewTexture",
     "(Landroid/graphics/SurfaceTexture;)V",
     (void *)android_hardware_Camera_setPreviewTexture },
+  { "setPreviewCallbackSurface",
+    "(Landroid/view/Surface;)V",
+    (void *)android_hardware_Camera_setPreviewCallbackSurface },
   { "startPreview",
     "()V",
     (void *)android_hardware_Camera_startPreview },
