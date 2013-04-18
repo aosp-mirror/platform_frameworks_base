@@ -127,7 +127,7 @@ public final class BluetoothManager {
 
         try {
             IBluetoothManager managerService = mAdapter.getBluetoothManager();
-            IBluetoothGatt iGatt = (IBluetoothGatt) managerService.getBluetoothGatt();
+            IBluetoothGatt iGatt = managerService.getBluetoothGatt();
             if (iGatt == null) return connectedDevices;
 
             connectedDevices = iGatt.getDevicesMatchingConnectionStates(
@@ -172,7 +172,7 @@ public final class BluetoothManager {
 
         try {
             IBluetoothManager managerService = mAdapter.getBluetoothManager();
-            IBluetoothGatt iGatt = (IBluetoothGatt) managerService.getBluetoothGatt();
+            IBluetoothGatt iGatt = managerService.getBluetoothGatt();
             if (iGatt == null) return devices;
             devices = iGatt.getDevicesMatchingConnectionStates(states);
         } catch (RemoteException e) {
@@ -203,7 +203,7 @@ public final class BluetoothManager {
 
         try {
             IBluetoothManager managerService = mAdapter.getBluetoothManager();
-            IBluetoothGatt iGatt = (IBluetoothGatt) managerService.getBluetoothGatt();
+            IBluetoothGatt iGatt = managerService.getBluetoothGatt();
             if (iGatt == null) {
                 Log.e(TAG, "Fail to get GATT Server connection");
                 return null;
