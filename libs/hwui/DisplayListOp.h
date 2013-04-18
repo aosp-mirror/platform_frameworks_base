@@ -237,6 +237,8 @@ public:
     }
 
     bool mergeAllowed() {
+        if (!state.mMatrix.isPureTranslate()) return false;
+
         // checks that we're unclipped, and srcover
         const Rect& opBounds = state.mBounds;
         return fabs(opBounds.getWidth() - mLocalBounds.getWidth()) < 0.1 &&
