@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.transition.Scene;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 
 public class Demo5 extends Activity {

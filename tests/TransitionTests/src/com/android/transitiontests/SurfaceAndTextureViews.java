@@ -33,7 +33,6 @@ import android.view.transition.Scene;
 import android.view.transition.TransitionGroup;
 import android.view.transition.TransitionManager;
 import android.widget.Button;
-import com.android.transitiontest.R;
 
 import static android.widget.LinearLayout.LayoutParams;
 

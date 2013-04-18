@@ -24,7 +24,6 @@ import android.view.transition.Move;
 import android.view.transition.Scene;
 import android.view.transition.TransitionGroup;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 
 public class CrossFadeDemo extends Activity {

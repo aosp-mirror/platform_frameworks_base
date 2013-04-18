@@ -23,7 +23,6 @@ import android.view.transition.Move;
 import android.view.transition.Scene;
 import android.view.transition.TransitionManager;
 import android.widget.Button;
-import com.android.transitiontest.R;
 
 public class Reparenting extends Activity {
 

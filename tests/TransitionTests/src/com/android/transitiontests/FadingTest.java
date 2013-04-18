@@ -23,7 +23,6 @@ import android.view.transition.Scene;
 import android.widget.Button;
 import android.view.transition.Fade;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 
 public class FadingTest extends Activity {

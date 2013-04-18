@@ -31,7 +31,6 @@ import android.view.transition.Move;
 import android.view.transition.Rotate;
 import android.view.transition.TransitionGroup;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 public class ContactsExpansion extends Activity {
 

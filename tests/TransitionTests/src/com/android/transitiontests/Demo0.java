@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.android.transitiontest.R;
 
 
 public class Demo0 extends Activity {

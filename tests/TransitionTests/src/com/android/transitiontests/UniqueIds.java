@@ -25,7 +25,6 @@ import android.view.transition.Transition;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 
 import java.util.HashMap;

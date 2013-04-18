@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import com.android.transitiontest.R;
 
 
 public class HitRectBug extends Activity {
