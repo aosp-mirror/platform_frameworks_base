@@ -450,11 +450,16 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
         checkCallerIsSystem();
-        if (true||DBG) {
-            Slog.v(TAG, (enabled?"en":"dis") + "abling notifications for " + pkg);
-        }
+
+        Slog.v(TAG, (enabled?"en":"dis") + "abling notifications for " + pkg);
+
         mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
                 enabled ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
+
+        // Now, cancel any outstanding notifications that are part of a just-disabled app
+        if (ENABLE_BLOCKED_NOTIFICATIONS && !enabled) {
+            cancelAllNotificationsInt(pkg, 0, 0, true, UserHandle.getUserId(uid));
+        }
     }
 
 
