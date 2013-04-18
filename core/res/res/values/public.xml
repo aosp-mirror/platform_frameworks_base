@@ -2044,9 +2044,6 @@
   <public type="attr" name="restrictedAccountType" />
   <public type="attr" name="requiredAccountType" />
 
-  <public type="style" name="Theme.NoTitleBar.Overscan" />
-  <public type="style" name="Theme.Light.NoTitleBar.Overscan" />
-  <public type="style" name="Theme.Black.NoTitleBar.Overscan" />
   <public type="style" name="Theme.Holo.NoActionBar.Overscan" />
   <public type="style" name="Theme.Holo.Light.NoActionBar.Overscan" />
   <public type="style" name="Theme.DeviceDefault.NoActionBar.Overscan" />
