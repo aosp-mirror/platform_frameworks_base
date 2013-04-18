@@ -2380,7 +2380,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                         false /*updateInputWindows*/);
                 performLayoutAndPlaceSurfacesLocked();
-                mInputMonitor.updateInputWindowsLw(false /*force*/);
                 if (win.mAppToken != null) {
                     win.mAppToken.updateReportedVisibilityLocked();
                 }
