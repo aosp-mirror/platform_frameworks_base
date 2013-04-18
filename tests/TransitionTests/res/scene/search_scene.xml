@@ -1,0 +1,3 @@
+<scene xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout="@layout/search_screen">
+</scene>

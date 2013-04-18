@@ -1,0 +1,22 @@
+<transitionGroup xmlns:android="http://schemas.android.com/apk/res/android">
+    <slide>
+        <targets>
+            <target android:targetID="@id/retype"/>
+            <target android:targetID="@id/retypeEdit"/>
+        </targets>
+    </slide>
+    <recolor>
+        <targets>
+            <target android:targetID="@id/password"/>
+            <target android:targetID="@id/passwordEdit"/>
+        </targets>
+    </recolor>
+    <fade/>
+</transitionGroup>
+
+<!--
+                TransitionGroup slider = new TransitionGroup();
+        slider.addTransition(new Slide(R.id.retype, R.id.retypeEdit));
+        slider.addTransition(new Recolor(R.id.password, R.id.passwordEdit));
+        slider.addTransition(new Fade());
+-->
