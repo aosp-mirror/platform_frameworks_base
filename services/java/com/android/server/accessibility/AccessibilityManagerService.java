@@ -237,6 +237,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                     // We will update when the automation service dies.
                     UserState userState = getCurrentUserStateLocked();
+                    // We have to reload the installed services since some services may
+                    // have different attributes, resolve info (does not support equals),
+                    // etc. Remove them then to force reload. Do it even if automation is
+                    // running since when it goes away, we will have to reload as well.
+                    userState.mInstalledServices.clear();
                     if (userState.mUiAutomationService == null) {
                         if (readConfigurationForUserStateLocked(userState)) {
                             onUserStateChangedLocked(userState);
