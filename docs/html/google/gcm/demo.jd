@@ -30,6 +30,8 @@ page.title=GCM Demo Application
 </div>
 </div>
 
+<p class="note"><strong>Note:</strong> This tutorial describes how to develop GCM-enabled apps using the helper libraries. This is just one approach. For a more comprehensive discussion of the available APIs and development paths, see <a href="gs.html">Getting Started</a>.
+
 <p>The Google Cloud Messaging (GCM) Demo demonstrates how to use the Google Cloud Messaging framework in your Android application. This tutorial walks you through setting up and running the demo.</p>
 
 
@@ -106,7 +108,7 @@ Total time: 0 seconds
   </li>
 </ol>
 <p class="note"><strong>Note:</strong> You can get the IP by running <code>ifconfig</code> on Linux or MacOS, or <code>ipconfig</code> on Windows. </p>
-<p><img src="{@docRoot}images/gcm/gcm-demo-homepage.png" class="screenshot" /></p>
+
 <p> You server is now ready.</p>
 <h3 id="appengine-setup">Using App Engine for Java</h3>
 
@@ -157,7 +159,6 @@ runserver:
   
   <p class="note"><strong>Note:</strong> You can get the IP by running <code>ifconfig</code> on Linux or MacOS, or <code>ipconfig</code> on Windows.</p>
   
-  <p><img src="{@docRoot}images/gcm/gcm-demo-homepage-appengine.png" class="screenshot" /></p>
 </ol>
 <p> You server is now ready.</p>
 <h2 id="device-setup">Setting Up the Device</h2>
