@@ -1,6 +1,6 @@
 package com.android.test.hwuicompare;
 
-import com.android.test.hwuicompare.AutomaticActivity.TestCallback;
+import com.android.test.hwuicompare.AutomaticActivity.FinalCallback;
 
 import android.os.Bundle;
 import android.test.ActivityInstrumentationTestCase2;
@@ -18,7 +18,7 @@ public class Test extends ActivityInstrumentationTestCase2<AutomaticActivity> {
         super.setUp();
         mBundle = new Bundle();
         mActivity = getActivity();
-        mActivity.setCallback(new TestCallback() {
+        mActivity.setFinalCallback(new FinalCallback() {
 
             @Override
             void report(String key, float value) {
