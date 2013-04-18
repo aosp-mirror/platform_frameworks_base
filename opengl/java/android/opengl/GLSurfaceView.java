@@ -184,7 +184,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private int mDebugFlags;
     private int mEGLContextClientVersion;
     private boolean mPreserveEGLContextOnPause;
-    private int mUserRenderMode;
 
     /**
      * The renderer only renders
@@ -258,7 +257,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         // underlying surface is created and destroyed
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
-        mUserRenderMode = RENDERMODE_CONTINUOUSLY;
     }
 
     /**
@@ -516,7 +514,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             default:
                 throw new IllegalArgumentException("renderMode");
         }
-        mUserRenderMode = renderMode;
         mGLThread.setRenderMode(renderMode);
     }
 
@@ -528,7 +525,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * @see #RENDERMODE_WHEN_DIRTY
      */
     public int getRenderMode() {
-        return mUserRenderMode;
+        return mGLThread.getRenderMode();
     }
 
     /**
@@ -608,9 +605,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         if (LOG_ATTACH_DETACH) {
             Log.d(TAG, "onAttachedToWindow reattach =" + mDetached);
         }
+
+        final int renderMode = mGLThread != null ?
+                mGLThread.mRenderMode : RENDERMODE_CONTINUOUSLY;
+
         if (mDetached && (mRenderer != null)) {
             mGLThread = new GLThread(mThisWeakRef);
-            mGLThread.setRenderMode(mUserRenderMode);
+            mGLThread.setRenderMode(renderMode);
             mGLThread.start();
         }
         mDetached = false;
@@ -1265,6 +1266,17 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private Handler mGLHandler;
         private Choreographer mChoreographer;
 
+        // this runnable could be called often, so we keep an instance around
+        class GetRenderModeRunnable implements Runnable {
+            volatile public int renderMode;
+            @Override
+            public void run() {
+                renderMode = doGetRenderMode();
+            }
+        };
+
+        private final GetRenderModeRunnable mGetRenderModeRunnable = new GetRenderModeRunnable();
+
         /*
          * Set once at thread construction time, nulled out when the parent view is garbage
          * called. This weak reference allows the GLSurfaceView to be garbage collected while
@@ -1515,7 +1527,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             }
         }
 
-        private void doWindowResize(final int width, final int height) {
+        private void doWindowResize(int width, int height) {
             // we were not drawing yet. Update the window size and
             // state and attempt to draw a frame.
             mSizeChanged = (mWidth != width || mHeight != height);
@@ -1526,9 +1538,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             executeDraw();
         }
 
-        private void doSetRenderMode(final int renderMode) {
+        private void doSetRenderMode(int renderMode) {
             mRenderMode = renderMode;
-            requestRender();
+        }
+
+
+        private int doGetRenderMode() {
+            return mRenderMode;
         }
 
         /*
