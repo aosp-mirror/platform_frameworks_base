@@ -23,10 +23,10 @@ key 0x127    DPAD_LEFT
 
 key 0x120    BUTTON_SELECT
 key 0x123    BUTTON_START
-key 0x12f    BUTTON_A
-key 0x12c    BUTTON_B
-key 0x12e    BUTTON_X
-key 0x12d    BUTTON_Y
+key 0x12e    BUTTON_A
+key 0x12d    BUTTON_B
+key 0x12f    BUTTON_X
+key 0x12c    BUTTON_Y
 key 0x12a    BUTTON_L1
 key 0x12b    BUTTON_R1
 key 0x128    BUTTON_L2
@@ -35,7 +35,7 @@ key 0x121    BUTTON_THUMBL
 key 0x122    BUTTON_THUMBR
 
 # PS key
-key 0x2d0    BUTTON_1
+key 0x2d0    BUTTON_HOME
 
 # Left Analog Stick
 axis 0x00    X
