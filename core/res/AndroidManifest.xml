@@ -134,6 +134,7 @@
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
     <protected-broadcast android:name="android.net.conn.DATA_ACTIVITY_CHANGE" />
+    <protected-broadcast android:name="android.net.conn.BACKGROUND_DATA_SETTING_CHANGED" />
     <protected-broadcast android:name="android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
