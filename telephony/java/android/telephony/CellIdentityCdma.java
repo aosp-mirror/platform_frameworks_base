@@ -93,21 +93,21 @@ public final class CellIdentityCdma implements Parcelable {
     }
 
     /**
-     * @return Network Id 0..65535
+     * @return Network Id 0..65535, Integer.MAX_VALUE if unknown
      */
     public int getNetworkId() {
         return mNetworkId;
     }
 
     /**
-     * @return System Id 0..32767
+     * @return System Id 0..32767, Integer.MAX_VALUE if unknown
      */
     public int getSystemId() {
         return mSystemId;
     }
 
     /**
-     * @return Base Station Id 0..65535
+     * @return Base Station Id 0..65535, Integer.MAX_VALUE if unknown
      */
     public int getBasestationId() {
         return mBasestationId;
@@ -118,7 +118,7 @@ public final class CellIdentityCdma implements Parcelable {
      * specified in 3GPP2 C.S0005-A v6.0. It is represented in units
      * of 0.25 seconds and ranges from -2592000 to 2592000, both
      * values inclusive (corresponding to a range of -180
-     * to +180 degrees).
+     * to +180 degrees). Integer.MAX_VALUE if unknown.
      */
     public int getLongitude() {
         return mLongitude;
@@ -129,7 +129,7 @@ public final class CellIdentityCdma implements Parcelable {
      * specified in 3GPP2 C.S0005-A v6.0. It is represented in units
      * of 0.25 seconds and ranges from -1296000 to 1296000, both
      * values inclusive (corresponding to a range of -90
-     * to +90 degrees).
+     * to +90 degrees). Integer.MAX_VALUE if unknown.
      */
     public int getLatitude() {
         return mLatitude;
@@ -162,7 +162,7 @@ public final class CellIdentityCdma implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CellIdentitiyCdma:{");
+        StringBuilder sb = new StringBuilder("CellIdentityCdma:{");
         sb.append(" mNetworkId="); sb.append(mNetworkId);
         sb.append(" mSystemId="); sb.append(mSystemId);
         sb.append(" mBasestationId="); sb.append(mBasestationId);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,63 +21,62 @@ import android.os.Parcelable;
 import android.telephony.Rlog;
 
 /**
- * CellIdentity is to represent a unique LTE cell
+ * CellIdentity to represent a unique UMTS cell
  */
-public final class CellIdentityLte implements Parcelable {
+public final class CellIdentityWcdma implements Parcelable {
 
-    private static final String LOG_TAG = "CellIdentityLte";
+    private static final String LOG_TAG = "CellIdentityWcdma";
     private static final boolean DBG = false;
 
     // 3-digit Mobile Country Code, 0..999
     private final int mMcc;
     // 2 or 3-digit Mobile Network Code, 0..999
     private final int mMnc;
-    // 28-bit cell identity
-    private final int mCi;
-    // physical cell id 0..503
-    private final int mPci;
-    // 16-bit tracking area code
-    private final int mTac;
+    // 16-bit Location Area Code, 0..65535
+    private final int mLac;
+    // 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455
+    private final int mCid;
+    // 9-bit UMTS Primary Scrambling Code described in TS 25.331, 0..511
+    private final int mPsc;
 
     /**
      * @hide
      */
-    public CellIdentityLte() {
+    public CellIdentityWcdma() {
         mMcc = Integer.MAX_VALUE;
         mMnc = Integer.MAX_VALUE;
-        mCi = Integer.MAX_VALUE;
-        mPci = Integer.MAX_VALUE;
-        mTac = Integer.MAX_VALUE;
+        mLac = Integer.MAX_VALUE;
+        mCid = Integer.MAX_VALUE;
+        mPsc = Integer.MAX_VALUE;
     }
-
     /**
-     *
+     * public constructor
      * @param mcc 3-digit Mobile Country Code, 0..999
      * @param mnc 2 or 3-digit Mobile Network Code, 0..999
-     * @param ci 28-bit Cell Identity
-     * @param pci Physical Cell Id 0..503
-     * @param tac 16-bit Tracking Area Code
+     * @param lac 16-bit Location Area Code, 0..65535
+     * @param cid 28-bit UMTS Cell Identity
+     * @param psc 9-bit UMTS Primary Scrambling Code
      *
      * @hide
      */
-    public CellIdentityLte (int mcc, int mnc, int ci, int pci, int tac) {
+    public CellIdentityWcdma (int mcc, int mnc, int lac, int cid, int psc) {
         mMcc = mcc;
         mMnc = mnc;
-        mCi = ci;
-        mPci = pci;
-        mTac = tac;
+        mLac = lac;
+        mCid = cid;
+        mPsc = psc;
     }
 
-    private CellIdentityLte(CellIdentityLte cid) {
+    private CellIdentityWcdma(CellIdentityWcdma cid) {
         mMcc = cid.mMcc;
         mMnc = cid.mMnc;
-        mCi = cid.mCi;
-        mPci = cid.mPci;
-        mTac = cid.mTac;
+        mLac = cid.mLac;
+        mCid = cid.mCid;
+        mPsc = cid.mPsc;
     }
 
-    CellIdentityLte copy() {
-        return new CellIdentityLte(this);
+    CellIdentityWcdma copy() {
+       return new CellIdentityWcdma(this);
     }
 
     /**
@@ -95,43 +94,45 @@ public final class CellIdentityLte implements Parcelable {
     }
 
     /**
-     * @return 28-bit Cell Identity, Integer.MAX_VALUE if unknown
+     * @return 16-bit Location Area Code, 0..65535, Integer.MAX_VALUE if unknown
      */
-    public int getCi() {
-        return mCi;
+    public int getLac() {
+        return mLac;
     }
 
     /**
-     * @return Physical Cell Id 0..503, Integer.MAX_VALUE if unknown
+     * @return CID
+     * 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, Integer.MAX_VALUE if unknown
      */
-    public int getPci() {
-        return mPci;
+    public int getCid() {
+        return mCid;
     }
 
     /**
-     * @return 16-bit Tracking Area Code, Integer.MAX_VALUE if unknown
+     * @return 9-bit UMTS Primary Scrambling Code described in TS 25.331, 0..511, Integer.MAX_VALUE
+     * if unknown
      */
-    public int getTac() {
-        return mTac;
+    public int getPsc() {
+        return mPsc;
     }
 
     @Override
     public int hashCode() {
         int primeNum = 31;
-        return (mMcc * primeNum) + (mMnc * primeNum) + (mCi * primeNum) + (mPci * primeNum) +
-                (mTac * primeNum);
+        return (mMcc * primeNum) + (mMnc * primeNum) + (mLac * primeNum) + (mCid * primeNum) +
+                (mPsc * primeNum);
     }
 
     @Override
     public boolean equals(Object other) {
         if (super.equals(other)) {
             try {
-                CellIdentityLte o = (CellIdentityLte)other;
+                CellIdentityWcdma o = (CellIdentityWcdma)other;
                 return mMcc == o.mMcc &&
                         mMnc == o.mMnc &&
-                        mCi == o.mCi &&
-                        mPci == o.mCi &&
-                        mTac == o.mTac;
+                        mLac == o.mLac &&
+                        mCid == o.mCid &&
+                        mPsc == o.mPsc;
             } catch (ClassCastException e) {
                 return false;
             }
@@ -142,12 +143,12 @@ public final class CellIdentityLte implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CellIdentityLte:{");
-        sb.append(" mMcc="); sb.append(mMcc);
-        sb.append(" mMnc="); sb.append(mMnc);
-        sb.append(" mCi="); sb.append(mCi);
-        sb.append(" mPci="); sb.append(mPci);
-        sb.append(" mTac="); sb.append(mTac);
+        StringBuilder sb = new StringBuilder("CellIdentityWcdma:{");
+        sb.append(" mMcc=").append(mMcc);
+        sb.append(" mMnc=").append(mMnc);
+        sb.append(" mLac=").append(mLac);
+        sb.append(" mCid=").append(mCid);
+        sb.append(" mPsc=").append(mPsc);
         sb.append("}");
 
         return sb.toString();
@@ -165,33 +166,33 @@ public final class CellIdentityLte implements Parcelable {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
         dest.writeInt(mMcc);
         dest.writeInt(mMnc);
-        dest.writeInt(mCi);
-        dest.writeInt(mPci);
-        dest.writeInt(mTac);
+        dest.writeInt(mLac);
+        dest.writeInt(mCid);
+        dest.writeInt(mPsc);
     }
 
     /** Construct from Parcel, type has already been processed */
-    private CellIdentityLte(Parcel in) {
+    private CellIdentityWcdma(Parcel in) {
         mMcc = in.readInt();
         mMnc = in.readInt();
-        mCi = in.readInt();
-        mPci = in.readInt();
-        mTac = in.readInt();
-        if (DBG) log("CellIdentityLte(Parcel): " + toString());
+        mLac = in.readInt();
+        mCid = in.readInt();
+        mPsc = in.readInt();
+        if (DBG) log("CellIdentityWcdma(Parcel): " + toString());
     }
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Creator<CellIdentityLte> CREATOR =
-            new Creator<CellIdentityLte>() {
+    public static final Creator<CellIdentityWcdma> CREATOR =
+            new Creator<CellIdentityWcdma>() {
         @Override
-        public CellIdentityLte createFromParcel(Parcel in) {
-            return new CellIdentityLte(in);
+        public CellIdentityWcdma createFromParcel(Parcel in) {
+            return new CellIdentityWcdma(in);
         }
 
         @Override
-        public CellIdentityLte[] newArray(int size) {
-            return new CellIdentityLte[size];
+        public CellIdentityWcdma[] newArray(int size) {
+            return new CellIdentityWcdma[size];
         }
     };
 

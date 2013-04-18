@@ -21575,7 +21575,7 @@ package android.telephony {
     method public int getLac();
     method public int getMcc();
     method public int getMnc();
-    method public int getPsc();
+    method public deprecated int getPsc();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -21587,6 +21587,17 @@ package android.telephony {
     method public int getMnc();
     method public int getPci();
     method public int getTac();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellIdentityWcdma implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCid();
+    method public int getLac();
+    method public int getMcc();
+    method public int getMnc();
+    method public int getPsc();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -21616,6 +21627,13 @@ package android.telephony {
   public final class CellInfoLte extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityLte getCellIdentity();
     method public android.telephony.CellSignalStrengthLte getCellSignalStrength();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellInfoWcdma extends android.telephony.CellInfo implements android.os.Parcelable {
+    method public android.telephony.CellIdentityWcdma getCellIdentity();
+    method public android.telephony.CellSignalStrengthWcdma getCellSignalStrength();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -21670,6 +21688,17 @@ package android.telephony {
     method public int getDbm();
     method public int getLevel();
     method public int getTimingAdvance();
+    method public int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellSignalStrengthWcdma extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean equals(java.lang.Object);
+    method public int getAsuLevel();
+    method public int getDbm();
+    method public int getLevel();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
