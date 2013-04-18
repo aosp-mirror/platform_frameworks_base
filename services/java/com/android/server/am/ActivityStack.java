@@ -1266,7 +1266,7 @@ final class ActivityStack {
             // There are no more activities!  Let's just start up the
             // Launcher...
             ActivityOptions.abort(options);
-            return mService.startHomeActivityLocked(mCurrentUser);
+            return mStackSupervisor.resumeHomeActivity(prev);
         }
 
         next.delayedResume = false;
@@ -1284,8 +1284,7 @@ final class ActivityStack {
 
         if (prev != null && prev.mLaunchHomeTaskNext && prev.finishing &&
                 prev.task.getTopActivity() == null) {
-            prev.mLaunchHomeTaskNext = false;
-            return mService.startHomeActivityLocked(mCurrentUser);
+            return mStackSupervisor.resumeHomeActivity(prev);
         }
 
         // If we are sleeping, and there is no resumed activity, and the top
@@ -1323,9 +1322,8 @@ final class ActivityStack {
 
         // If we are currently pausing an activity, then don't do anything
         // until that is done.
-        if (mPausingActivity != null) {
-            if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG,
-                    "Skip resume: pausing=" + mPausingActivity);
+        if (!mStackSupervisor.allPausedActivitiesComplete()) {
+            if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG, "Skip resume: some activity pausing");
             return false;
         }
 
@@ -1362,6 +1360,7 @@ final class ActivityStack {
         // can be resumed...
         final ActivityStack lastStack = mStackSupervisor.getLastStack();
         if ((isHomeStack() ^ lastStack.isHomeStack()) && lastStack.mResumedActivity != null) {
+            // TODO: Don't pause when launching to the sibling task.
             if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
             // at the top of the LRU list, since we know we will be needing it
@@ -3274,7 +3273,7 @@ final class ActivityStack {
         if (mResumedActivity != null && mResumedActivity.task == tr &&
                 mResumedActivity.mLaunchHomeTaskNext) {
             mResumedActivity.mLaunchHomeTaskNext = false;
-            return mService.startHomeActivityLocked(mCurrentUser);
+            return mStackSupervisor.resumeHomeActivity(null);
         }
 
         mStackSupervisor.getTopStack().resumeTopActivityLocked(null);
