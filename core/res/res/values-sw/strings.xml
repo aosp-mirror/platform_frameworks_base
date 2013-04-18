@@ -138,7 +138,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandao-hewa"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Zima pasiwaya"</string>
     <string name="screen_lock" msgid="799094655496098153">"Funga skrini"</string>
-    <string name="power_off" msgid="4266614107412865048">"Nishati imezimwa"</string>
+    <string name="power_off" msgid="4266614107412865048">"Zima simu"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Programu ya milio imezimwa"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Mtetemo wa programu ya milio"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Programu ya milio imewashwa"</string>
@@ -153,7 +153,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Chaguo za kompyuta ndogo"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Chaguo za simu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Funga skrini"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Nishati imezimwa"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Zima simu"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ripoti ya hitilafu"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Chukua ripoti ya hitilafu"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali yako ya sasa ya kifaa, ili kutuma ujumbe wa barua pepe. Itachukua muda mfupi kuanza ripoti ya hitilafu mpaka itakapokuwa tayari kutumwa; tafadhali vumilia."</string>
@@ -519,7 +519,7 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zuia simu dhidi ya kulala"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Inaruhusu programu kuzuia kompyuta kibao  kwenda kulala."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Inaruhusu programu kuzuia simu isiende kulala."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Washa au zima kompyuta ndogo"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Washa au zima kompyuta kibao"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"washa au zima simu"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Inaruhusu programu kuwasha au kuzima kompyuta kibao."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Inaruhusu programu kuwasha au kuzima simu."</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Washa tena"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Ukurasa ulio \"<xliff:g id="TITLE">%s</xliff:g>\" unasema:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"HatiJava"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Toka kwa ukurasa huu?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Gusa Sawa ili kuendelea, au Ghairi ili kubaki kwenye ukurasa wa sasa."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Thibitisha"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kidokezo: Gonga mara mbili ili kukuza ndani na nje."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Kujaza kiotomatiki"</string>
@@ -1060,7 +1067,7 @@
     <string name="loading" msgid="7933681260296021180">"Inapakia…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Washa"</string>
     <string name="capital_off" msgid="6815870386972805832">"ZIMA"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"Kamilisha kitendo kwa kutumia"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Kamilisha kitendo ukitumia"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Tumia kama chaguo-msingi la kitendo hiki."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Futa chaguo-msingi katika mipangilio ya Mfumo &gt; Apps &gt; iliyopakuliwa."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Chagua kitendo"</string>
