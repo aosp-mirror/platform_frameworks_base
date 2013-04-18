@@ -4628,13 +4628,11 @@ package android.bluetooth {
     method public boolean isEnabled();
     method public android.bluetooth.BluetoothServerSocket listenUsingInsecureRfcommWithServiceRecord(java.lang.String, java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothServerSocket listenUsingRfcommWithServiceRecord(java.lang.String, java.util.UUID) throws java.io.IOException;
-    method public boolean registerCallback(android.bluetooth.BluetoothAdapterCallback);
     method public boolean setName(java.lang.String);
     method public boolean startDiscovery();
-    method public boolean startLeScan();
-    method public boolean startLeScan(java.util.UUID[]);
-    method public void stopLeScan();
-    method public boolean unRegisterCallback(android.bluetooth.BluetoothAdapterCallback);
+    method public boolean startLeScan(android.bluetooth.BluetoothAdapter.LeScanCallback);
+    method public boolean startLeScan(java.util.UUID[], android.bluetooth.BluetoothAdapter.LeScanCallback);
+    method public void stopLeScan(android.bluetooth.BluetoothAdapter.LeScanCallback);
     field public static final java.lang.String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED";
     field public static final java.lang.String ACTION_DISCOVERY_FINISHED = "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
     field public static final java.lang.String ACTION_DISCOVERY_STARTED = "android.bluetooth.adapter.action.DISCOVERY_STARTED";
@@ -4665,12 +4663,8 @@ package android.bluetooth {
     field public static final int STATE_TURNING_ON = 11; // 0xb
   }
 
-  public abstract class BluetoothAdapterCallback {
-    ctor public BluetoothAdapterCallback();
-    method public void onCallbackRegistration(int);
-    method public void onLeScan(android.bluetooth.BluetoothDevice, int, byte[]);
-    field public static final int CALLBACK_REGISTERED = 0; // 0x0
-    field public static final int CALLBACK_REGISTRATION_FAILURE = 1; // 0x1
+  public static abstract interface BluetoothAdapter.LeScanCallback {
+    method public abstract void onLeScan(android.bluetooth.BluetoothDevice, int, byte[]);
   }
 
   public class BluetoothAssignedNumbers {
