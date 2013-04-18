@@ -458,22 +458,22 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
                          "(Ljava/lang/Object;IILjava/lang/Object;)V");
 
     jfieldID field;
-    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_PROVISION_REQUIRED", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "EVENT_PROVISION_REQUIRED", "I");
     gEventTypes.kEventProvisionRequired = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_KEY_REQUIRED", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "EVENT_KEY_REQUIRED", "I");
     gEventTypes.kEventKeyRequired = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_KEY_EXPIRED", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "EVENT_KEY_EXPIRED", "I");
     gEventTypes.kEventKeyExpired = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "MEDIA_DRM_EVENT_VENDOR_DEFINED", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "EVENT_VENDOR_DEFINED", "I");
     gEventTypes.kEventVendorDefined = env->GetStaticIntField(clazz, field);
 
     FIND_CLASS(clazz, "android/media/MediaDrm$KeyRequest");
-    GET_FIELD_ID(gFields.keyRequest.data, clazz, "data", "[B");
-    GET_FIELD_ID(gFields.keyRequest.defaultUrl, clazz, "defaultUrl", "Ljava/lang/String;");
+    GET_FIELD_ID(gFields.keyRequest.data, clazz, "mData", "[B");
+    GET_FIELD_ID(gFields.keyRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
 
     FIND_CLASS(clazz, "android/media/MediaDrm$ProvisionRequest");
-    GET_FIELD_ID(gFields.provisionRequest.data, clazz, "data", "[B");
-    GET_FIELD_ID(gFields.provisionRequest.defaultUrl, clazz, "defaultUrl", "Ljava/lang/String;");
+    GET_FIELD_ID(gFields.provisionRequest.data, clazz, "mData", "[B");
+    GET_FIELD_ID(gFields.provisionRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
 
     FIND_CLASS(clazz, "java/util/ArrayList");
     GET_METHOD_ID(gFields.arraylist.init, clazz, "<init>", "()V");
