@@ -68,23 +68,28 @@ public class GeofenceHardwareService extends Service {
             mGeofenceHardwareImpl.setGpsHardwareGeofence(service);
         }
 
-        public int[] getMonitoringTypesAndStatus() {
+        public int[] getMonitoringTypes() {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
 
-            return mGeofenceHardwareImpl.getMonitoringTypesAndStatus();
+            return mGeofenceHardwareImpl.getMonitoringTypes();
         }
 
-        public boolean addCircularFence(int id, double lat, double longitude, double radius,
-                int lastTransition, int monitorTransitions, int
-                notificationResponsiveness, int unknownTimer, int monitoringType,
-                IGeofenceHardwareCallback callback) {
+        public int getStatusOfMonitoringType(int monitoringType) {
+            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
+                    "Location Hardware permission not granted to access hardware geofence");
+
+            return mGeofenceHardwareImpl.getStatusOfMonitoringType(monitoringType);
+        }
+        public boolean addCircularFence(int id, int monitoringType, double lat, double longitude,
+                double radius, int lastTransition, int monitorTransitions, int
+                notificationResponsiveness, int unknownTimer, IGeofenceHardwareCallback callback) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
-            return mGeofenceHardwareImpl.addCircularFence(id, lat, longitude, radius,
-                    lastTransition, monitorTransitions, notificationResponsiveness, unknownTimer,
-                    monitoringType, callback);
+            return mGeofenceHardwareImpl.addCircularFence(id, monitoringType, lat, longitude,
+                    radius, lastTransition, monitorTransitions, notificationResponsiveness,
+                    unknownTimer, callback);
         }
 
         public boolean removeGeofence(int id, int monitoringType) {
@@ -103,16 +108,16 @@ public class GeofenceHardwareService extends Service {
             return mGeofenceHardwareImpl.pauseGeofence(id, monitoringType);
         }
 
-        public boolean resumeGeofence(int id, int monitorTransitions, int monitoringType) {
+        public boolean resumeGeofence(int id, int monitoringType, int monitorTransitions) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
-            return mGeofenceHardwareImpl.resumeGeofence(id, monitorTransitions, monitoringType);
+            return mGeofenceHardwareImpl.resumeGeofence(id, monitoringType, monitorTransitions);
         }
 
         public boolean registerForMonitorStateChangeCallback(int monitoringType,
-                IGeofenceHardwareCallback callback) {
+                IGeofenceHardwareMonitorCallback callback) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
 
@@ -122,7 +127,7 @@ public class GeofenceHardwareService extends Service {
         }
 
         public boolean unregisterForMonitorStateChangeCallback(int monitoringType,
-                IGeofenceHardwareCallback callback) {
+                IGeofenceHardwareMonitorCallback callback) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
 

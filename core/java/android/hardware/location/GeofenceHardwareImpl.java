@@ -21,8 +21,10 @@ import android.content.pm.PackageManager;
 import android.location.IGpsGeofenceHardware;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -48,8 +50,9 @@ public final class GeofenceHardwareImpl {
     private PowerManager.WakeLock mWakeLock;
     private SparseArray<IGeofenceHardwareCallback> mGeofences =
             new SparseArray<IGeofenceHardwareCallback>();
-    private ArrayList<IGeofenceHardwareCallback>[] mCallbacks =
+    private ArrayList<IGeofenceHardwareMonitorCallback>[] mCallbacks =
             new ArrayList[GeofenceHardware.NUM_MONITORS];
+    private ArrayList<Reaper> mReapers = new ArrayList<Reaper>();
 
     private IGpsGeofenceHardware mGpsService;
 
@@ -63,11 +66,18 @@ public final class GeofenceHardwareImpl {
     private static final int RESUME_GEOFENCE_CALLBACK = 5;
     private static final int ADD_GEOFENCE = 6;
     private static final int REMOVE_GEOFENCE = 7;
+    private static final int GEOFENCE_CALLBACK_BINDER_DIED = 8;
 
     // mCallbacksHandler message types
     private static final int GPS_GEOFENCE_STATUS = 1;
     private static final int CALLBACK_ADD = 2;
     private static final int CALLBACK_REMOVE = 3;
+    private static final int MONITOR_CALLBACK_BINDER_DIED = 4;
+
+    // mReaperHandler message types
+    private static final int REAPER_GEOFENCE_ADDED = 1;
+    private static final int REAPER_MONITOR_CALLBACK_ADDED = 2;
+    private static final int REAPER_REMOVED = 3;
 
     // The following constants need to match GpsLocationFlags enum in gps.h
     private static final int LOCATION_INVALID = 0;
@@ -151,15 +161,28 @@ public final class GeofenceHardwareImpl {
         }
     }
 
-    public int[] getMonitoringTypesAndStatus() {
+    public int[] getMonitoringTypes() {
         synchronized (mSupportedMonitorTypes) {
-            return mSupportedMonitorTypes;
+            if (mSupportedMonitorTypes[GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE] !=
+                        GeofenceHardware.MONITOR_UNSUPPORTED) {
+                return new int[] {GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE};
+            }
+            return new int[0];
         }
     }
 
-    public boolean addCircularFence(int geofenceId, double latitude, double longitude,
-            double radius, int lastTransition,int monitorTransitions, int notificationResponsivenes,
-            int unknownTimer, int monitoringType, IGeofenceHardwareCallback callback) {
+    public int getStatusOfMonitoringType(int monitoringType) {
+        synchronized (mSupportedMonitorTypes) {
+            if (monitoringType >= mSupportedMonitorTypes.length || monitoringType < 0) {
+                throw new IllegalArgumentException("Unknown monitoring type");
+            }
+            return mSupportedMonitorTypes[monitoringType];
+        }
+    }
+
+    public boolean addCircularFence(int geofenceId,  int monitoringType, double latitude,
+            double longitude, double radius, int lastTransition,int monitorTransitions,
+            int notificationResponsivenes, int unknownTimer, IGeofenceHardwareCallback callback) {
         // This API is not thread safe. Operations on the same geofence need to be serialized
         // by upper layers
         if (DEBUG) {
@@ -190,7 +213,11 @@ public final class GeofenceHardwareImpl {
             default:
                 result = false;
         }
-        if (!result) {
+        if (result) {
+            m = mReaperHandler.obtainMessage(REAPER_GEOFENCE_ADDED, callback);
+            m.arg1 = monitoringType;
+            mReaperHandler.sendMessage(m);
+        } else {
             m = mGeofenceHandler.obtainMessage(REMOVE_GEOFENCE);
             m.arg1 = geofenceId;
             mGeofenceHandler.sendMessage(m);
@@ -245,7 +272,7 @@ public final class GeofenceHardwareImpl {
     }
 
 
-    public boolean resumeGeofence(int geofenceId, int monitorTransition, int monitoringType) {
+    public boolean resumeGeofence(int geofenceId,  int monitoringType, int monitorTransition) {
         // This API is not thread safe. Operations on the same geofence need to be serialized
         // by upper layers
         if (DEBUG) Log.d(TAG, "Resume Geofence: GeofenceId: " + geofenceId);
@@ -268,7 +295,12 @@ public final class GeofenceHardwareImpl {
     }
 
     public boolean registerForMonitorStateChangeCallback(int monitoringType,
-            IGeofenceHardwareCallback callback) {
+            IGeofenceHardwareMonitorCallback callback) {
+        Message reaperMessage =
+                mReaperHandler.obtainMessage(REAPER_MONITOR_CALLBACK_ADDED, callback);
+        reaperMessage.arg1 = monitoringType;
+        mReaperHandler.sendMessage(reaperMessage);
+
         Message m = mCallbacksHandler.obtainMessage(CALLBACK_ADD, callback);
         m.arg1 = monitoringType;
         mCallbacksHandler.sendMessage(m);
@@ -276,7 +308,7 @@ public final class GeofenceHardwareImpl {
     }
 
     public boolean unregisterForMonitorStateChangeCallback(int monitoringType,
-            IGeofenceHardwareCallback callback) {
+            IGeofenceHardwareMonitorCallback callback) {
         Message m = mCallbacksHandler.obtainMessage(CALLBACK_REMOVE, callback);
         m.arg1 = monitoringType;
         mCallbacksHandler.sendMessage(m);
@@ -477,13 +509,25 @@ public final class GeofenceHardwareImpl {
                             "Location: " + geofenceTransition.mLocation + ":" + mGeofences);
 
                     try {
-                        callback.onGeofenceChange(
+                        callback.onGeofenceTransition(
                                 geofenceTransition.mGeofenceId, geofenceTransition.mTransition,
                                 geofenceTransition.mLocation, geofenceTransition.mTimestamp,
                                 GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE);
                     } catch (RemoteException e) {}
                     releaseWakeLock();
                     break;
+                case GEOFENCE_CALLBACK_BINDER_DIED:
+                   // Find all geofences associated with this callback and remove them.
+                   callback = (IGeofenceHardwareCallback) (msg.obj);
+                   if (DEBUG) Log.d(TAG, "Geofence callback reaped:" + callback);
+                   int monitoringType = msg.arg1;
+                   for (int i = 0; i < mGeofences.size(); i++) {
+                        if (mGeofences.valueAt(i).equals(callback)) {
+                            geofenceId = mGeofences.keyAt(i);
+                            removeGeofence(mGeofences.keyAt(i), monitoringType);
+                            mGeofences.remove(geofenceId);
+                        }
+                   }
             }
         }
     };
@@ -493,8 +537,8 @@ public final class GeofenceHardwareImpl {
         @Override
         public void handleMessage(Message msg) {
             int monitoringType;
-            ArrayList<IGeofenceHardwareCallback> callbackList;
-            IGeofenceHardwareCallback callback;
+            ArrayList<IGeofenceHardwareMonitorCallback> callbackList;
+            IGeofenceHardwareMonitorCallback callback;
 
             switch (msg.what) {
                 case GPS_GEOFENCE_STATUS:
@@ -508,7 +552,7 @@ public final class GeofenceHardwareImpl {
 
                     if (DEBUG) Log.d(TAG, "MonitoringSystemChangeCallback: GPS : " + available);
 
-                    for (IGeofenceHardwareCallback c: callbackList) {
+                    for (IGeofenceHardwareMonitorCallback c: callbackList) {
                         try {
                             c.onMonitoringSystemChange(
                                     GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE, available,
@@ -519,22 +563,71 @@ public final class GeofenceHardwareImpl {
                     break;
                 case CALLBACK_ADD:
                     monitoringType = msg.arg1;
-                    callback = (IGeofenceHardwareCallback) msg.obj;
+                    callback = (IGeofenceHardwareMonitorCallback) msg.obj;
                     callbackList = mCallbacks[monitoringType];
                     if (callbackList == null) {
-                        callbackList = new ArrayList<IGeofenceHardwareCallback>();
+                        callbackList = new ArrayList<IGeofenceHardwareMonitorCallback>();
                         mCallbacks[monitoringType] = callbackList;
                     }
                     if (!callbackList.contains(callback)) callbackList.add(callback);
                     break;
                 case CALLBACK_REMOVE:
                     monitoringType = msg.arg1;
-                    callback = (IGeofenceHardwareCallback) msg.obj;
+                    callback = (IGeofenceHardwareMonitorCallback) msg.obj;
                     callbackList = mCallbacks[monitoringType];
                     if (callbackList != null) {
                         callbackList.remove(callback);
                     }
                     break;
+                case MONITOR_CALLBACK_BINDER_DIED:
+                    callback = (IGeofenceHardwareMonitorCallback) msg.obj;
+                    if (DEBUG) Log.d(TAG, "Monitor callback reaped:" + callback);
+                    callbackList = mCallbacks[msg.arg1];
+                    if (callbackList != null && callbackList.contains(callback)) {
+                        callbackList.remove(callback);
+                    }
+            }
+        }
+    };
+
+    // All operations on mReaper
+    private Handler mReaperHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Reaper r;
+            IGeofenceHardwareCallback callback;
+            IGeofenceHardwareMonitorCallback monitorCallback;
+            int monitoringType;
+
+            switch (msg.what) {
+                case REAPER_GEOFENCE_ADDED:
+                    callback = (IGeofenceHardwareCallback) msg.obj;
+                    monitoringType = msg.arg1;
+                    r = new Reaper(callback, monitoringType);
+                    if (!mReapers.contains(r)) {
+                        mReapers.add(r);
+                        IBinder b = callback.asBinder();
+                        try {
+                            b.linkToDeath(r, 0);
+                        } catch (RemoteException e) {}
+                    }
+                    break;
+                case REAPER_MONITOR_CALLBACK_ADDED:
+                    monitorCallback = (IGeofenceHardwareMonitorCallback) msg.obj;
+                    monitoringType = msg.arg1;
+
+                    r = new Reaper(monitorCallback, monitoringType);
+                    if (!mReapers.contains(r)) {
+                        mReapers.add(r);
+                        IBinder b = monitorCallback.asBinder();
+                        try {
+                            b.linkToDeath(r, 0);
+                        } catch (RemoteException e) {}
+                    }
+                    break;
+                case REAPER_REMOVED:
+                    r = (Reaper) msg.obj;
+                    mReapers.remove(r);
             }
         }
     };
@@ -565,6 +658,57 @@ public final class GeofenceHardwareImpl {
                 return RESOLUTION_LEVEL_FINE;
         }
         return RESOLUTION_LEVEL_NONE;
+    }
+
+    class Reaper implements IBinder.DeathRecipient {
+        private IGeofenceHardwareMonitorCallback mMonitorCallback;
+        private IGeofenceHardwareCallback mCallback;
+        private int mMonitoringType;
+
+        Reaper(IGeofenceHardwareCallback c, int monitoringType) {
+            mCallback = c;
+            mMonitoringType = monitoringType;
+        }
+
+        Reaper(IGeofenceHardwareMonitorCallback c, int monitoringType) {
+            mMonitorCallback = c;
+            mMonitoringType = monitoringType;
+        }
+
+        @Override
+        public void binderDied() {
+            Message m;
+            if (mCallback != null) {
+                m = mGeofenceHandler.obtainMessage(GEOFENCE_CALLBACK_BINDER_DIED, mCallback);
+                m.arg1 = mMonitoringType;
+                mGeofenceHandler.sendMessage(m);
+            } else if (mMonitorCallback != null) {
+                m = mCallbacksHandler.obtainMessage(MONITOR_CALLBACK_BINDER_DIED, mMonitorCallback);
+                m.arg1 = mMonitoringType;
+                mCallbacksHandler.sendMessage(m);
+            }
+            Message reaperMessage = mReaperHandler.obtainMessage(REAPER_REMOVED, this);
+            mReaperHandler.sendMessage(reaperMessage);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 17;
+            result = 31 * result + (mCallback != null ? mCallback.hashCode() : 0);
+            result = 31 * result + (mMonitorCallback != null ? mMonitorCallback.hashCode() : 0);
+            result = 31 * result + mMonitoringType;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) return false;
+            if (obj == this) return true;
+
+            Reaper rhs = (Reaper) obj;
+            return rhs.mCallback == mCallback && rhs.mMonitorCallback == mMonitorCallback &&
+                    rhs.mMonitoringType == mMonitoringType;
+        }
     }
 
     int getAllowedResolutionLevel(int pid, int uid) {

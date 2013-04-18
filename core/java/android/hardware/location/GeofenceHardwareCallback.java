@@ -22,19 +22,6 @@ import android.location.Location;
  * The callback class associated with the APIs in {@link GeofenceHardware}
  */
 public abstract class GeofenceHardwareCallback {
-
-    /**
-     * The callback called when the state of a monitoring system changes.
-     * {@link GeofenceHardware#MONITORING_TYPE_GPS_HARDWARE} is an example of a
-     * monitoring system.
-     *
-     * @param monitoringType The type of the monitoring system.
-     * @param available Indicates whether the system is currently available or not.
-     * @param location The last known location according to the monitoring system.
-     */
-    public void onMonitoringSystemChange(int monitoringType, boolean available, Location location) {
-    }
-
     /**
      * The callback called when there is a transition to report for the specific
      * geofence.
@@ -47,7 +34,7 @@ public abstract class GeofenceHardwareCallback {
      *        detected
      * @param monitoringType Type of the monitoring system.
      */
-    public void onGeofenceChange(int geofenceId, int transition, Location location,
+    public void onGeofenceTransition(int geofenceId, int transition, Location location,
             long timestamp, int monitoringType) {
     }
 
