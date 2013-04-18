@@ -622,7 +622,7 @@
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"accesare notificări"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite aplicației să recupereze, să examineze și să șteargă notificări, inclusiv pe cele postate de alte aplicații."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"conectare la un serviciu de citire a notificărilor"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Stabiliţi lungimea şi tipul de caractere permise în parolele pentru deblocarea ecranului."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizaţi încercările de deblocare a ecranului"</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reporniţi"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"La pagina de la „<xliff:g id="TITLE">%s</xliff:g>” apare:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Doriţi să părăsiţi această pagină?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Apăsaţi pe OK pentru a continua sau pe Anulaţi pentru a rămâne pe pagina curentă."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Confirmaţi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Sfat: măriţi şi micşoraţi prin dublă atingere."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Automat"</string>

@@ -773,7 +773,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Presiona el Menú para desbloquear o realizar una llamada de emergencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Presionar Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Dibujar el patrón de desbloqueo"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Llamada de emergencia"</string>
+    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Realizar llamada de emergencia"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Regresar a llamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Vuelve a intentarlo."</string>
@@ -783,7 +783,7 @@
     <string name="lockscreen_charged" msgid="321635745684060624">"Cargado"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta tu cargador."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"No hay tarjeta SIM."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sin tarjeta SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hay tarjeta SIM en el tablet."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"No hay tarjeta SIM en el dispositivo."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Inserta una tarjeta SIM."</string>
@@ -795,7 +795,7 @@
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Botón Pausa"</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Botón Reproducir"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Botón Detener"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Sólo llamadas de emergencia"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Solo llamadas de emergencia"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Red bloqueada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La tarjeta SIM está bloqueada con PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consulta la guía del usuario o comunícate con el servicio de atención al cliente."</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"La página \"<xliff:g id="TITLE">%s</xliff:g>\" dice:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"¿Deseas salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Toca Aceptar para continuar o Cancelar para permanecer en la página actual."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Consejo: Toca dos veces para acercar y alejar la imagen."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autocompletar"</string>
@@ -1439,7 +1446,7 @@
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Se conectó la pantalla inalámbrica"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Esta pantalla se muestra en otro dispositivo."</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desconectar"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Realizar llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Olvidaste el patrón?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patrón incorrecto"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Contraseña incorrecta"</string>
