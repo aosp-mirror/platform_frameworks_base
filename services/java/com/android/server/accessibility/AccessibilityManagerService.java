@@ -1160,7 +1160,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         boolean setInputFilter = false;
         AccessibilityInputFilter inputFilter = null;
         synchronized (mLock) {
-            if (userState.mIsAccessibilityEnabled) {
+            // Accessibility enabled means at least one service is enabled.
+            if (userState.mIsAccessibilityEnabled
+                    || userState.mIsDisplayMagnificationEnabled) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
                     if (mInputFilter == null) {
@@ -1174,7 +1176,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (userState.mIsDisplayMagnificationEnabled) {
                     flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
                 }
-                if (userState.mIsTouchExplorationEnabled) {
+                // Touch exploration without accessibility makes no sense.
+                if (userState.mIsAccessibilityEnabled && userState.mIsTouchExplorationEnabled) {
                     flags |= AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
                 }
                 mInputFilter.setEnabledFeatures(flags);
