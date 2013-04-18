@@ -5567,6 +5567,7 @@ public class WindowManagerService extends IWindowManager.Stub
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
         matrix.postTranslate(-FloatMath.ceil(frame.left*scale), -FloatMath.ceil(frame.top*scale));
         Canvas canvas = new Canvas(bm);
+        canvas.drawColor(0xFF000000);
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
 
