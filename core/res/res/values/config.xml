@@ -345,6 +345,12 @@
          A value of -1 means no change in orientation by default. -->
     <integer name="config_carDockRotation">-1</integer>
 
+    <!-- The number of degrees to rotate the display when the device has HDMI connected
+         but is not in a dock.  A value of -1 means no change in orientation by default.
+         Use -1 except on older devices whose Hardware Composer HAL does not
+         provide full support for multiple displays.  -->
+    <integer name="config_undockedHdmiRotation">-1</integer>
+
     <!-- Control the default UI mode type to use when there is no other type override
          happening.  One of the following values (See Configuration.java):
              1  UI_MODE_TYPE_NORMAL
