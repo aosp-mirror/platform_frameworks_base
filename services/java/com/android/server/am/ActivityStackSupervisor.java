@@ -72,6 +72,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityStackSupervisor {
+    static final boolean DEBUG_STACK = ActivityManagerService.DEBUG_STACK;
+
     static final boolean DEBUG = ActivityManagerService.DEBUG || false;
     static final boolean DEBUG_ADD_REMOVE = DEBUG || false;
     static final boolean DEBUG_APP = DEBUG || false;
@@ -237,9 +239,11 @@ public class ActivityStackSupervisor {
     void removeTask(TaskRecord task) {
         final ActivityStack stack = task.stack;
         if (stack.removeTask(task) && !stack.isHomeStack()) {
+            if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing stack " + stack);
             mStacks.remove(stack);
             final int stackId = stack.mStackId;
             final int nextStackId = mService.mWindowManager.removeStack(stackId);
+            // TODO: Perhaps we need to let the ActivityManager determine the next focus...
             if (mFocusedStack.mStackId == stackId) {
                 mFocusedStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
             }
