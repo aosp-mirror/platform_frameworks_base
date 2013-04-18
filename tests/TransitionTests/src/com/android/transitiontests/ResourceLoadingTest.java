@@ -23,7 +23,6 @@ import android.view.transition.Scene;
 import android.view.transition.TransitionInflater;
 import android.view.transition.Transition;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 
 public class ResourceLoadingTest extends Activity {

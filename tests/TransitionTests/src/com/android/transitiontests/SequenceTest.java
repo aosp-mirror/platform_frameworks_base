@@ -26,7 +26,6 @@ import android.view.transition.Fade;
 import android.view.transition.Move;
 import android.view.transition.TransitionGroup;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 
 public class SequenceTest extends Activity {

@@ -26,7 +26,6 @@ import android.view.transition.Scene;
 import android.view.transition.TransitionManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import com.android.transitiontest.R;
 
 import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;

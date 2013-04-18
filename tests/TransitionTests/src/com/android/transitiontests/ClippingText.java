@@ -26,7 +26,6 @@ import android.view.transition.Move;
 import android.view.transition.TextChange;
 import android.view.transition.TransitionGroup;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 public class ClippingText extends Activity {
 

@@ -27,7 +27,6 @@ import android.view.transition.Slide;
 import android.view.transition.Transition;
 import android.view.transition.TransitionGroup;
 import android.view.transition.TransitionManager;
-import com.android.transitiontest.R;
 
 
 public class LoginActivity extends Activity {
