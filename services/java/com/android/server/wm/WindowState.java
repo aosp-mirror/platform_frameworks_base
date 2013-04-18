@@ -698,7 +698,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     TaskStack getStack() {
         if (mAppToken != null) {
-            return mService.mTaskIdToTask.get(mAppToken.groupId).mStack;
+            Task task = mService.mTaskIdToTask.get(mAppToken.groupId);
+            if (task != null) {
+                return task.mStack;
+            }
         }
         return null;
     }
