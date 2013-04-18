@@ -30,6 +30,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,7 +55,10 @@ public class UsbDebuggingActivity extends AlertActivity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mDisconnectedReceiver = new UsbDisconnectedReceiver(this);
+        if (SystemProperties.getInt("service.adb.tcp.port", 0) == 0) {
+            mDisconnectedReceiver = new UsbDisconnectedReceiver(this);
+        }
+
         Intent intent = getIntent();
         String fingerprints = intent.getStringExtra("fingerprints");
         mKey = intent.getStringExtra("key");
