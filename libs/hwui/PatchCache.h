@@ -17,8 +17,13 @@
 #ifndef ANDROID_HWUI_PATCH_CACHE_H
 #define ANDROID_HWUI_PATCH_CACHE_H
 
-#include <utils/KeyedVector.h>
+#include <GLES2/gl2.h>
 
+#include <utils/LruCache.h>
+
+#include <androidfw/ResourceTypes.h>
+
+#include "AssetAtlas.h"
 #include "Debug.h"
 #include "Patch.h"
 
@@ -40,44 +45,46 @@ namespace uirenderer {
 // Cache
 ///////////////////////////////////////////////////////////////////////////////
 
+class Caches;
+
 class PatchCache {
 public:
     PatchCache();
-    PatchCache(uint32_t maxCapacity);
     ~PatchCache();
+    void init(Caches& caches);
 
-    Patch* get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-            const float pixelWidth, const float pixelHeight,
-            const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
-            const uint32_t width, const uint32_t height, const int8_t numColors);
+    const Patch* get(const AssetAtlas::Entry* entry,
+            const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+            const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch);
     void clear();
 
     uint32_t getSize() const {
-        return mCache.size();
+        return mSize;
     }
 
     uint32_t getMaxSize() const {
-        return mMaxEntries;
+        return mMaxSize;
+    }
+
+    GLuint getMeshBuffer() const {
+        return mMeshBuffer;
     }
 
 private:
-    /**
-     * Description of a patch.
-     */
+    void clearCache();
+
     struct PatchDescription {
-        PatchDescription(): bitmapWidth(0), bitmapHeight(0), pixelWidth(0), pixelHeight(0),
-                xCount(0), yCount(0), emptyCount(0), colorKey(0) {
+        PatchDescription(): mPatch(NULL), mBitmapWidth(0), mBitmapHeight(0),
+                mPixelWidth(0), mPixelHeight(0) {
         }
 
         PatchDescription(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-                const float pixelWidth, const float pixelHeight,
-                const uint32_t xCount, const uint32_t yCount,
-                const int8_t emptyCount, const uint32_t colorKey):
-                bitmapWidth(bitmapWidth), bitmapHeight(bitmapHeight),
-                pixelWidth(pixelWidth), pixelHeight(pixelHeight),
-                xCount(xCount), yCount(yCount),
-                emptyCount(emptyCount), colorKey(colorKey) {
+                const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch):
+                mPatch(patch), mBitmapWidth(bitmapWidth), mBitmapHeight(bitmapHeight),
+                mPixelWidth(pixelWidth), mPixelHeight(pixelHeight) {
         }
+
+        hash_t hash() const;
 
         static int compare(const PatchDescription& lhs, const PatchDescription& rhs);
 
@@ -99,21 +106,24 @@ private:
             return PatchDescription::compare(lhs, rhs);
         }
 
+        friend inline hash_t hash_type(const PatchDescription& entry) {
+            return entry.hash();
+        }
+
     private:
-        uint32_t bitmapWidth;
-        uint32_t bitmapHeight;
-        float pixelWidth;
-        float pixelHeight;
-        uint32_t xCount;
-        uint32_t yCount;
-        int8_t emptyCount;
-        uint32_t colorKey;
+        const Res_png_9patch* mPatch;
+        uint32_t mBitmapWidth;
+        uint32_t mBitmapHeight;
+        float mPixelWidth;
+        float mPixelHeight;
 
     }; // struct PatchDescription
 
-    uint32_t mMaxEntries;
-    KeyedVector<PatchDescription, Patch*> mCache;
+    uint32_t mMaxSize;
+    uint32_t mSize;
+    LruCache<PatchDescription, Patch*> mCache;
 
+    GLuint mMeshBuffer;
 }; // class PatchCache
 
 }; // namespace uirenderer

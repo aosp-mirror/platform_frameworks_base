@@ -257,7 +257,8 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top
     bitmap = refBitmap(bitmap);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, left, top, paint));
+    const AssetAtlas::Entry* entry = mCaches.assetAtlas.getEntry(bitmap);
+    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, left, top, paint, entry));
     return DrawGlInfo::kStatusDone;
 }
 
@@ -281,7 +282,8 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float 
             (srcBottom - srcTop == dstBottom - dstTop) &&
             (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
-        addDrawOp(new (alloc()) DrawBitmapOp(bitmap, dstLeft, dstTop, paint));
+        const AssetAtlas::Entry* entry = mCaches.assetAtlas.getEntry(bitmap);
+        addDrawOp(new (alloc()) DrawBitmapOp(bitmap, dstLeft, dstTop, paint, entry));
         return DrawGlInfo::kStatusDone;
     }
 
@@ -313,20 +315,15 @@ status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, in
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs,
-        const int32_t* yDivs, const uint32_t* colors, uint32_t width, uint32_t height,
-        int8_t numColors, float left, float top, float right, float bottom, SkPaint* paint) {
+status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
+        float left, float top, float right, float bottom, SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
 
     bitmap = refBitmap(bitmap);
-    xDivs = refBuffer<int>(xDivs, width);
-    yDivs = refBuffer<int>(yDivs, height);
-    colors = refBuffer<uint32_t>(colors, numColors);
 
-    addDrawOp(new (alloc()) DrawPatchOp(bitmap, xDivs, yDivs, colors, width, height, numColors,
-                    left, top, right, bottom, alpha, mode));
+    addDrawOp(new (alloc()) DrawPatchOp(bitmap, patch, left, top, right, bottom, alpha, mode));
     return DrawGlInfo::kStatusDone;
 }
 

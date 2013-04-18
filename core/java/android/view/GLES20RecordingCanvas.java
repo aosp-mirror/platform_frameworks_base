@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Matrix;
+import android.graphics.NinePatch;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -62,8 +63,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     }
 
     void start() {
-        mDisplayList.mBitmaps.clear();
-        mDisplayList.mChildDisplayLists.clear();
+        mDisplayList.clearReferences();
     }
 
     int end(int nativeDisplayList) {
@@ -80,9 +80,10 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     }
 
     @Override
-    public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
-        super.drawPatch(bitmap, chunks, dst, paint);
-        mDisplayList.mBitmaps.add(bitmap);
+    public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
+        super.drawPatch(patch, dst, paint);
+        mDisplayList.mBitmaps.add(patch.getBitmap());
+        mDisplayList.mNinePatches.add(patch);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 

@@ -126,12 +126,12 @@ static void android_view_TextureView_destroyNativeWindow(JNIEnv* env, jobject te
 }
 
 static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
-  jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
-  SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
+    jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
+    SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
           env->GetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas));
-  env->SetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas, (int)newCanvas);
-  env->SetIntField(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (int)newCanvas);
-  SkSafeUnref(previousCanvas);
+    env->SetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas, (int)newCanvas);
+    env->SetIntField(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (int)newCanvas);
+    SkSafeUnref(previousCanvas);
 }
 
 static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,

@@ -16,8 +16,6 @@
 
 package android.content.res;
 
-import android.os.Trace;
-import android.view.View;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -30,6 +28,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable.ConstantState;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -1983,6 +1982,13 @@ public class Resources {
             mPreloading = false;
             flushLayoutCache();
         }
+    }
+
+    /**
+     * @hide
+     */
+    public LongSparseArray<Drawable.ConstantState> getPreloadedDrawables() {
+        return sPreloadedDrawables[0];
     }
 
     private boolean verifyPreloadConfig(int changingConfigurations, int allowVarying,

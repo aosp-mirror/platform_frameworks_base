@@ -16,17 +16,18 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <EGL/egl.h>
-
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
 
+#include "android_view_GraphicBuffer.h"
+
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
-#include <gui/GLConsumer.h>
 
 #include <androidfw/ResourceTypes.h>
+
+#include <gui/GLConsumer.h>
 
 #include <private/hwui/DrawGlInfo.h>
 
@@ -99,16 +100,32 @@ static void android_view_GLES20Canvas_flushCaches(JNIEnv* env, jobject clazz,
     }
 }
 
-static void android_view_GLES20Canvas_initCaches(JNIEnv* env, jobject clazz) {
+static bool android_view_GLES20Canvas_initCaches(JNIEnv* env, jobject clazz) {
     if (Caches::hasInstance()) {
-        Caches::getInstance().init();
+        return Caches::getInstance().init();
     }
+    return false;
 }
 
 static void android_view_GLES20Canvas_terminateCaches(JNIEnv* env, jobject clazz) {
     if (Caches::hasInstance()) {
         Caches::getInstance().terminate();
     }
+}
+
+// ----------------------------------------------------------------------------
+// Caching
+// ----------------------------------------------------------------------------
+
+static void android_view_GLES20Canvas_initAtlas(JNIEnv* env, jobject clazz,
+        jobject graphicBuffer, jintArray atlasMapArray, jint count) {
+
+    sp<GraphicBuffer> buffer = graphicBufferForJavaObject(env, graphicBuffer);
+    jint* atlasMap = env->GetIntArrayElements(atlasMapArray, NULL);
+
+    Caches::getInstance().assetAtlas.init(buffer, atlasMap, count);
+
+    env->ReleaseIntArrayElements(atlasMapArray, atlasMap, 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -350,31 +367,20 @@ static void android_view_GLES20Canvas_concatMatrix(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 static void android_view_GLES20Canvas_drawBitmap(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer,
-        jfloat left, jfloat top, SkPaint* paint) {
-    // This object allows the renderer to allocate a global JNI ref to the buffer object.
-    JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
-
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jfloat left, jfloat top, SkPaint* paint) {
     renderer->drawBitmap(bitmap, left, top, paint);
 }
 
 static void android_view_GLES20Canvas_drawBitmapRect(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer,
+        OpenGLRenderer* renderer, SkBitmap* bitmap,
         float srcLeft, float srcTop, float srcRight, float srcBottom,
         float dstLeft, float dstTop, float dstRight, float dstBottom, SkPaint* paint) {
-    // This object allows the renderer to allocate a global JNI ref to the buffer object.
-    JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
-
     renderer->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
             dstLeft, dstTop, dstRight, dstBottom, paint);
 }
 
 static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer, SkMatrix* matrix,
-        SkPaint* paint) {
-    // This object allows the renderer to allocate a global JNI ref to the buffer object.
-    JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
-
+        OpenGLRenderer* renderer, SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
     renderer->drawBitmap(bitmap, matrix, paint);
 }
 
@@ -404,12 +410,8 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer,
-        jint meshWidth, jint meshHeight, jfloatArray vertices, jint offset,
-        jintArray colors, jint colorOffset, SkPaint* paint) {
-    // This object allows the renderer to allocate a global JNI ref to the buffer object.
-    JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
-
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jint meshWidth, jint meshHeight,
+         jfloatArray vertices, jint offset, jintArray colors, jint colorOffset, SkPaint* paint) {
     jfloat* verticesArray = vertices ? env->GetFloatArrayElements(vertices, NULL) + offset : NULL;
     jint* colorsArray = colors ? env->GetIntArrayElements(colors, NULL) + colorOffset : NULL;
 
@@ -420,18 +422,13 @@ static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer, jbyteArray chunks,
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray chunks,
         float left, float top, float right, float bottom, SkPaint* paint) {
-    // This object allows the renderer to allocate a global JNI ref to the buffer object.
-    JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
-
     jbyte* storage = env->GetByteArrayElements(chunks, NULL);
     Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(storage);
     Res_png_9patch::deserialize(patch);
 
-    renderer->drawPatch(bitmap, &patch->xDivs[0], &patch->yDivs[0],
-            &patch->colors[0], patch->numXDivs, patch->numYDivs, patch->numColors,
-            left, top, right, bottom, paint);
+    renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
 
     env->ReleaseByteArrayElements(chunks, storage, 0);
 }
@@ -932,8 +929,11 @@ static JNINativeMethod gMethods[] = {
 
 #ifdef USE_OPENGL_RENDERER
     { "nFlushCaches",       "(I)V",            (void*) android_view_GLES20Canvas_flushCaches },
-    { "nInitCaches",        "()V",             (void*) android_view_GLES20Canvas_initCaches },
+    { "nInitCaches",        "()Z",             (void*) android_view_GLES20Canvas_initCaches },
     { "nTerminateCaches",   "()V",             (void*) android_view_GLES20Canvas_terminateCaches },
+
+    { "nInitAtlas",         "(Landroid/view/GraphicBuffer;[II)V",
+            (void*) android_view_GLES20Canvas_initAtlas },
 
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
@@ -977,14 +977,14 @@ static JNINativeMethod gMethods[] = {
     { "nGetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_getMatrix },
     { "nConcatMatrix",      "(II)V",           (void*) android_view_GLES20Canvas_concatMatrix },
 
-    { "nDrawBitmap",        "(II[BFFI)V",      (void*) android_view_GLES20Canvas_drawBitmap },
-    { "nDrawBitmap",        "(II[BFFFFFFFFI)V",(void*) android_view_GLES20Canvas_drawBitmapRect },
-    { "nDrawBitmap",        "(II[BII)V",       (void*) android_view_GLES20Canvas_drawBitmapMatrix },
+    { "nDrawBitmap",        "(IIFFI)V",        (void*) android_view_GLES20Canvas_drawBitmap },
+    { "nDrawBitmap",        "(IIFFFFFFFFI)V",  (void*) android_view_GLES20Canvas_drawBitmapRect },
+    { "nDrawBitmap",        "(IIII)V",         (void*) android_view_GLES20Canvas_drawBitmapMatrix },
     { "nDrawBitmap",        "(I[IIIFFIIZI)V",  (void*) android_view_GLES20Canvas_drawBitmapData },
 
-    { "nDrawBitmapMesh",    "(II[BII[FI[III)V",(void*) android_view_GLES20Canvas_drawBitmapMesh },
+    { "nDrawBitmapMesh",    "(IIII[FI[III)V",  (void*) android_view_GLES20Canvas_drawBitmapMesh },
 
-    { "nDrawPatch",         "(II[B[BFFFFI)V",  (void*) android_view_GLES20Canvas_drawPatch },
+    { "nDrawPatch",         "(II[BFFFFI)V",    (void*) android_view_GLES20Canvas_drawPatch },
 
     { "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     { "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },

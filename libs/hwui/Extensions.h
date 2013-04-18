@@ -33,9 +33,6 @@ namespace uirenderer {
 
 class Extensions: public Singleton<Extensions> {
 public:
-    Extensions();
-    ~Extensions();
-
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
@@ -53,6 +50,9 @@ public:
     void dump() const;
 
 private:
+    Extensions();
+    ~Extensions();
+
     friend class Singleton<Extensions>;
 
     SortedVector<String8> mExtensionList;

@@ -373,6 +373,7 @@ class ServerThread extends Thread {
         TextServicesManagerService tsms = null;
         LockSettingsService lockSettings = null;
         DreamManagerService dreamy = null;
+        AssetAtlasService atlas = null;
 
         // Bring up services needed for UI.
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -796,6 +797,16 @@ class ServerThread extends Thread {
                 }
             }
 
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Assets Atlas Service");
+                    atlas = new AssetAtlasService(context);
+                    ServiceManager.addService(AssetAtlasService.ASSET_ATLAS_SERVICE, atlas);
+                } catch (Throwable e) {
+                    reportWtf("starting AssetAtlasService", e);
+                }
+            }
+
             try {
                 Slog.i(TAG, "IdleMaintenanceService");
                 new IdleMaintenanceService(context);
@@ -910,6 +921,7 @@ class ServerThread extends Thread {
         final TextServicesManagerService textServiceManagerServiceF = tsms;
         final StatusBarManagerService statusBarF = statusBar;
         final DreamManagerService dreamyF = dreamy;
+        final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
 
@@ -1034,6 +1046,11 @@ class ServerThread extends Thread {
                     if (dreamyF != null) dreamyF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making DreamManagerService ready", e);
+                }
+                try {
+                    if (atlasF != null) atlasF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making AssetAtlasService ready", e);
                 }
                 try {
                     // TODO(BT) Pass parameter to input manager

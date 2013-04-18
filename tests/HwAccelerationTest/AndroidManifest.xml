@@ -41,6 +41,16 @@
         </activity>
 
         <activity
+                android:name="AssetsAtlasActivity"
+                android:label="Atlas/Framework"
+                android:theme="@android:style/Theme.Holo.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="ScaledTextActivity"
                 android:label="Text/Scaled"
                 android:theme="@android:style/Theme.Holo.Light">

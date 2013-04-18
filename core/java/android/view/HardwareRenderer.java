@@ -24,7 +24,10 @@ import android.opengl.EGL14;
 import android.opengl.GLUtils;
 import android.opengl.ManagedEGLContext;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -968,7 +971,7 @@ public abstract class HardwareRenderer {
             if (fallback) {
                 // we'll try again if it was context lost
                 setRequested(false);
-                Log.w(LOG_TAG, "Mountain View, we've had a problem here. " 
+                Log.w(LOG_TAG, "Mountain View, we've had a problem here. "
                         + "Switching back to software rendering.");
             }
         }
@@ -976,7 +979,7 @@ public abstract class HardwareRenderer {
         @Override
         boolean initialize(Surface surface) throws Surface.OutOfResourcesException {
             if (isRequested() && !isEnabled()) {
-                initializeEgl();
+                boolean contextCreated = initializeEgl();
                 mGl = createEglSurface(surface);
                 mDestroyed = false;
 
@@ -991,6 +994,10 @@ public abstract class HardwareRenderer {
                             mCanvas.setName(mName);
                         }
                         setEnabled(true);
+
+                        if (contextCreated) {
+                            initAtlas();
+                        }
                     }
 
                     return mCanvas != null;
@@ -1010,7 +1017,7 @@ public abstract class HardwareRenderer {
 
         abstract int[] getConfig(boolean dirtyRegions);
 
-        void initializeEgl() {
+        boolean initializeEgl() {
             synchronized (sEglLock) {
                 if (sEgl == null && sEglConfig == null) {
                     sEgl = (EGL10) EGLContext.getEGL();
@@ -1043,7 +1050,10 @@ public abstract class HardwareRenderer {
             if (mEglContext == null) {
                 mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
                 sEglContextStorage.set(createManagedContext(mEglContext));
+                return true;
             }
+
+            return false;
         }
 
         private EGLConfig loadEglConfig() {
@@ -1181,6 +1191,7 @@ public abstract class HardwareRenderer {
         }
 
         abstract void initCaches();
+        abstract void initAtlas();
 
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
             int[] attribs = { EGL14.EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL_NONE };
@@ -1193,6 +1204,7 @@ public abstract class HardwareRenderer {
                         "Could not create an EGL context. eglCreateContext failed with error: " +
                         GLUtils.getEGLErrorString(sEgl.eglGetError()));
             }
+
             return context;
         }
 
@@ -1788,7 +1800,27 @@ public abstract class HardwareRenderer {
 
         @Override
         void initCaches() {
-            GLES20Canvas.initCaches();
+            if (GLES20Canvas.initCaches()) {
+                // Caches were (re)initialized, rebind atlas
+                initAtlas();
+            }
+        }
+
+        @Override
+        void initAtlas() {
+            IBinder binder = ServiceManager.getService("assetatlas");
+            IAssetAtlas atlas = IAssetAtlas.Stub.asInterface(binder);
+            try {
+                GraphicBuffer buffer = atlas.getBuffer();
+                if (buffer != null) {
+                    int[] map = atlas.getMap();
+                    if (map != null) {
+                        GLES20Canvas.initAtlas(buffer, map);
+                    }
+                }
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Could not acquire atlas", e);
+            }
         }
 
         @Override

@@ -53,8 +53,6 @@
 
 // Turn on to display debug info about 9patch objects
 #define DEBUG_PATCHES 0
-// Turn on to "explode" 9patch objects
-#define DEBUG_EXPLODE_PATCHES 0
 // Turn on to display vertex and tex coords data about 9patch objects
 // This flag requires DEBUG_PATCHES to be turned on
 #define DEBUG_PATCHES_VERTICES 0

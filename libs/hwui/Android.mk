@@ -10,6 +10,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		thread/TaskManager.cpp \
 		font/CacheTexture.cpp \
 		font/Font.cpp \
+		AssetAtlas.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
 		Caches.cpp \
@@ -54,9 +55,9 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		external/skia/src/ports \
 		external/skia/include/utils
 
-	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DGL_GLEXT_PROTOTYPES
+	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
 	LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-	LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libGLESv2 libskia libui
+	LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libEGL libGLESv2 libskia libui
 	LOCAL_MODULE := libhwui
 	LOCAL_MODULE_TAGS := optional
 

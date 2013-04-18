@@ -1873,7 +1873,7 @@ void OpenGLRenderer::setupDrawTextureTransformUniforms(mat4& transform) {
 
 void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {
     bool force = false;
-    if (!vertices) {
+    if (!vertices || vbo) {
         force = mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
     } else {
         force = mCaches.unbindMeshBuffer();
@@ -1904,8 +1904,18 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* 
     mCaches.unbindIndicesBuffer();
 }
 
-void OpenGLRenderer::setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords) {
-    bool force = mCaches.unbindMeshBuffer();
+void OpenGLRenderer::setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {
+    bool force = false;
+    // If vbo is != 0 we want to treat the vertices parameter as an offset inside
+    // a VBO. However, if vertices is set to NULL and vbo == 0 then we want to
+    // use the default VBO found in Caches
+    if (!vertices || vbo) {
+        force = mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
+    } else {
+        force = mCaches.unbindMeshBuffer();
+    }
+    mCaches.bindIndicesBuffer();
+
     mCaches.bindPositionVertexPointer(force, vertices);
     if (mCaches.currentProgram->texCoords >= 0) {
         mCaches.bindTexCoordsVertexPointer(force, texCoords);
@@ -1980,9 +1990,11 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
         texture->setFilter(FILTER(paint), true);
     }
 
+    // No need to check for a UV mapper on the texture object, only ARGB_8888
+    // bitmaps get packed in the atlas
     drawAlpha8TextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
-            paint != NULL, color, alpha, mode, (GLvoid*) NULL,
-            (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
+            paint != NULL, color, alpha, mode, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
+            GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
 }
 
 status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
@@ -1992,8 +2004,9 @@ status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureV
     mCaches.setScissorEnabled(mScissorOptimizationDisabled);
 
     mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = getTexture(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
+
     const AutoTexture autoCleanup(texture);
 
     int alpha;
@@ -2030,7 +2043,7 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkP
     }
 
     mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = getTexture(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
@@ -2053,7 +2066,7 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint*
     }
 
     mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = getTexture(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
@@ -2116,6 +2129,10 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
         cleanupColors = true;
     }
 
+    mCaches.activeTexture(0);
+    Texture* texture = mCaches.assetAtlas.getEntryTexture(bitmap);
+    const UvMapper& mapper(getMapper(texture));
+
     for (int32_t y = 0; y < meshHeight; y++) {
         for (int32_t x = 0; x < meshWidth; x++) {
             uint32_t i = (y * (meshWidth + 1) + x) * 2;
@@ -2124,6 +2141,8 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
             float u2 = float(x + 1) / meshWidth;
             float v1 = float(y) / meshHeight;
             float v2 = float(y + 1) / meshHeight;
+
+            mapper.map(u1, v1, u2, v2);
 
             int ax = i + (meshWidth + 1) * 2;
             int ay = ax + 1;
@@ -2154,11 +2173,12 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
         return DrawGlInfo::kStatusDone;
     }
 
-    mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) {
-        if (cleanupColors) delete[] colors;
-        return DrawGlInfo::kStatusDone;
+        texture = mCaches.textureCache.get(bitmap);
+        if (!texture) {
+            if (cleanupColors) delete[] colors;
+            return DrawGlInfo::kStatusDone;
+        }
     }
     const AutoTexture autoCleanup(texture);
 
@@ -2211,17 +2231,19 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     }
 
     mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = getTexture(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
     const float width = texture->width;
     const float height = texture->height;
 
-    const float u1 = fmax(0.0f, srcLeft / width);
-    const float v1 = fmax(0.0f, srcTop / height);
-    const float u2 = fmin(1.0f, srcRight / width);
-    const float v2 = fmin(1.0f, srcBottom / height);
+    float u1 = fmax(0.0f, srcLeft / width);
+    float v1 = fmax(0.0f, srcTop / height);
+    float u2 = fmin(1.0f, srcRight / width);
+    float v2 = fmin(1.0f, srcBottom / height);
+
+    getMapper(texture).map(u1, v1, u2, v2);
 
     mCaches.unbindMeshBuffer();
     resetDrawTextureTexCoords(u1, v1, u2, v2);
@@ -2292,34 +2314,32 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-        const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
         float left, float top, float right, float bottom, SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    return drawPatch(bitmap, xDivs, yDivs, colors, width, height, numColors,
+    return drawPatch(bitmap, patch, mCaches.assetAtlas.getEntry(bitmap),
             left, top, right, bottom, alpha, mode);
 }
 
-status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-        const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
-        float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode) {
+status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
+        AssetAtlas::Entry* entry, float left, float top, float right, float bottom,
+        int alpha, SkXfermode::Mode mode) {
     if (quickReject(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    alpha *= mSnapshot->alpha;
-
-    const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
-            right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
+    const Patch* mesh = mCaches.patchCache.get(entry, bitmap->width(), bitmap->height(),
+            right - left, bottom - top, patch);
 
     if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
         mCaches.activeTexture(0);
-        Texture* texture = mCaches.textureCache.get(bitmap);
+        Texture* texture = entry ? &entry->texture : mCaches.textureCache.get(bitmap);
         if (!texture) return DrawGlInfo::kStatusDone;
         const AutoTexture autoCleanup(texture);
+
         texture->setWrap(GL_CLAMP_TO_EDGE, true);
         texture->setFilter(GL_LINEAR, true);
 
@@ -2342,19 +2362,23 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
             }
         }
 
+        alpha *= mSnapshot->alpha;
+
         if (CC_LIKELY(pureTranslate)) {
             const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
             const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
 
-            drawTextureMesh(x, y, x + right - left, y + bottom - top, texture->id, alpha / 255.0f,
-                    mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
-                    GL_TRIANGLES, mesh->verticesCount, false, true, mesh->meshBuffer,
-                    true, !mesh->hasEmptyQuads);
+            right = x + right - left;
+            bottom = y + bottom - top;
+            drawIndexedTextureMesh(x, y, right, bottom, texture->id, alpha / 255.0f,
+                    mode, texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
+                    GL_TRIANGLES, mesh->indexCount, false, true,
+                    mCaches.patchCache.getMeshBuffer(), true, !mesh->hasEmptyQuads);
         } else {
-            drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
-                    mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
-                    GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer,
-                    true, !mesh->hasEmptyQuads);
+            drawIndexedTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
+                    mode, texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
+                    GL_TRIANGLES, mesh->indexCount, false, false,
+                    mCaches.patchCache.getMeshBuffer(), true, !mesh->hasEmptyQuads);
         }
     }
 
@@ -3196,6 +3220,14 @@ SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
 // Drawing implementation
 ///////////////////////////////////////////////////////////////////////////////
 
+Texture* OpenGLRenderer::getTexture(SkBitmap* bitmap) {
+    Texture* texture = mCaches.assetAtlas.getEntryTexture(bitmap);
+    if (!texture) {
+        return mCaches.textureCache.get(bitmap);
+    }
+    return texture;
+}
+
 void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
         float x, float y, SkPaint* paint) {
     if (quickReject(x, y, x + texture->width, y + texture->height)) {
@@ -3389,19 +3421,35 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
+    GLvoid* vertices = (GLvoid*) NULL;
+    GLvoid* texCoords = (GLvoid*) gMeshTextureOffset;
+
+    if (texture->uvMapper) {
+        vertices = &mMeshVertices[0].position[0];
+        texCoords = &mMeshVertices[0].texture[0];
+
+        Rect uvs(0.0f, 0.0f, 1.0f, 1.0f);
+        texture->uvMapper->map(uvs);
+
+        resetDrawTextureTexCoords(uvs.left, uvs.top, uvs.right, uvs.bottom);
+    }
+
     if (CC_LIKELY(currentTransform().isPureTranslate())) {
         const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
         const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
 
         texture->setFilter(GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
-                alpha / 255.0f, mode, texture->blend, (GLvoid*) NULL,
-                (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount, false, true);
+                alpha / 255.0f, mode, texture->blend, vertices, texCoords,
+                GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
         texture->setFilter(FILTER(paint), true);
         drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
-                texture->blend, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
-                GL_TRIANGLE_STRIP, gMeshCount);
+                texture->blend, vertices, texCoords, GL_TRIANGLE_STRIP, gMeshCount);
+    }
+
+    if (texture->uvMapper) {
+        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
     }
 }
 
@@ -3434,6 +3482,33 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     setupDrawMesh(vertices, texCoords, vbo);
 
     glDrawArrays(drawMode, 0, elementsCount);
+
+    finishDrawTexture();
+}
+
+void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, float bottom,
+        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
+        GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
+        bool swapSrcDst, bool ignoreTransform, GLuint vbo, bool ignoreScale, bool dirty) {
+
+    setupDraw();
+    setupDrawWithTexture();
+    setupDrawColor(alpha, alpha, alpha, alpha);
+    setupDrawColorFilter();
+    setupDrawBlending(blend, mode, swapSrcDst);
+    setupDrawProgram();
+    if (!dirty) setupDrawDirtyRegionsDisabled();
+    if (!ignoreScale) {
+        setupDrawModelView(left, top, right, bottom, ignoreTransform);
+    } else {
+        setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
+    }
+    setupDrawTexture(texture);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawMeshIndices(vertices, texCoords, vbo);
+
+    glDrawElements(drawMode, elementsCount, GL_UNSIGNED_SHORT, NULL);
 
     finishDrawTexture();
 }

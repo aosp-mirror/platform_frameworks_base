@@ -22,6 +22,8 @@
 namespace android {
 namespace uirenderer {
 
+class UvMapper;
+
 /**
  * Represents an OpenGL texture.
  */
@@ -42,6 +44,8 @@ struct Texture {
         firstWrap = true;
 
         id = 0;
+
+        uvMapper = NULL;
     }
 
     void setWrap(GLenum wrap, bool bindTexture = false, bool force = false,
@@ -124,6 +128,11 @@ struct Texture {
      * Indicates whether this texture will use trilinear filtering.
      */
     bool mipMap;
+
+    /**
+     * Optional, pointer to a texture coordinates mapper.
+     */
+    const UvMapper* uvMapper;
 
 private:
     /**

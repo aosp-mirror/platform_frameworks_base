@@ -34,6 +34,8 @@
 
 #include <cutils/compiler.h>
 
+#include <androidfw/ResourceTypes.h>
+
 #include "Debug.h"
 #include "Extensions.h"
 #include "Matrix.h"
@@ -43,6 +45,7 @@
 #include "Vertex.h"
 #include "SkiaShader.h"
 #include "SkiaColorFilter.h"
+#include "UvMapper.h"
 #include "Caches.h"
 
 namespace android {
@@ -78,7 +81,8 @@ enum DrawOpMode {
 };
 
 struct DeferredDisplayState {
-    Rect mBounds; // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped.
+    // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped
+    Rect mBounds;
 
     // the below are set and used by the OpenGLRenderer at record and deferred playback
     bool mClipValid;
@@ -248,11 +252,9 @@ public:
     virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint);
-    virtual status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
             float left, float top, float right, float bottom, SkPaint* paint);
-    status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+    status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch, AssetAtlas::Entry* entry,
             float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode);
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
     virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
@@ -798,6 +800,12 @@ private:
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
             bool ignoreScale = false, bool dirty = true);
 
+    void drawIndexedTextureMesh(float left, float top, float right, float bottom, GLuint texture,
+            float alpha, SkXfermode::Mode mode, bool blend,
+            GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
+            bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
+            bool ignoreScale = false, bool dirty = true);
+
     void drawAlpha8TextureMesh(float left, float top, float right, float bottom,
             GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
@@ -943,7 +951,7 @@ private:
     void setupDrawTextGammaUniforms();
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors);
-    void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords);
+    void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
     void setupDrawVertices(GLvoid* vertices);
     void finishDrawTexture();
     void accountForClear(SkXfermode::Mode mode);
@@ -985,6 +993,17 @@ private:
         return *mSnapshot->transform;
     }
 
+    inline const UvMapper& getMapper(const Texture* texture) {
+        return texture && texture->uvMapper ? *texture->uvMapper : mUvMapper;
+    }
+
+    /**
+     * Returns a texture object for the specified bitmap. The texture can
+     * come from the texture cache or an atlas. If this method returns
+     * NULL, the texture could not be found and/or allocated.
+     */
+    Texture* getTexture(SkBitmap* bitmap);
+
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
@@ -1009,6 +1028,9 @@ private:
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
+
+    // Default UV mapper
+    const UvMapper mUvMapper;
 
     // shader, filters, and shadow
     DrawModifiers mDrawModifiers;

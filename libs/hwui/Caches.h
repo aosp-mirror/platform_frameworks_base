@@ -21,13 +21,18 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+#include <GLES3/gl3.h>
+
+#include <utils/KeyedVector.h>
 #include <utils/Singleton.h>
+#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
 #include "thread/TaskProcessor.h"
 #include "thread/TaskManager.h"
 
+#include "AssetAtlas.h"
 #include "FontRenderer.h"
 #include "GammaFontRenderer.h"
 #include "TextureCache.h"
@@ -113,7 +118,7 @@ public:
     /**
      * Initialize caches.
      */
-    void init();
+    bool init();
 
     /**
      * Initialize global system properties.
@@ -172,6 +177,11 @@ public:
      */
     bool unbindMeshBuffer();
 
+    /**
+     * Binds a global indices buffer that can draw up to
+     * REGION_MESH_QUAD_COUNT quads.
+     */
+    bool bindIndicesBuffer();
     bool bindIndicesBuffer(const GLuint buffer);
     bool unbindIndicesBuffer();
 
@@ -290,6 +300,8 @@ public:
     Dither dither;
     Stencil stencil;
 
+    AssetAtlas assetAtlas;
+
     // Debug methods
     PFNGLINSERTEVENTMARKEREXTPROC eventMark;
     PFNGLPUSHGROUPMARKEREXTPROC startMark;
@@ -336,7 +348,9 @@ private:
 
     // Used to render layers
     TextureVertex* mRegionMesh;
-    GLuint mRegionMeshIndices;
+
+    // Global index buffer
+    GLuint mMeshIndices;
 
     mutable Mutex mGarbageLock;
     Vector<Layer*> mLayerGarbage;

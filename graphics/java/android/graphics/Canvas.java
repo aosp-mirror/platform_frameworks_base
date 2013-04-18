@@ -1058,14 +1058,13 @@ public class Canvas {
      *
      * Note: Only supported by hardware accelerated canvas at the moment.
      *
-     * @param bitmap The bitmap to draw as an N-patch
-     * @param chunks The patches information (matches the native struct Res_png_9patch)
+     * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
      * @param paint The paint to draw the bitmap with. may be null
      * 
      * @hide
      */
-    public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
+    public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
     }    
     
     /**

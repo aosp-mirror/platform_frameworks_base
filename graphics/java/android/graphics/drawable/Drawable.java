@@ -996,6 +996,13 @@ public abstract class Drawable {
          * this drawable (and thus require completely reloading it).
          */
         public abstract int getChangingConfigurations();
+
+        /**
+         * @hide
+         */
+        public Bitmap getBitmap() {
+            return null;
+        }
     }
 
     /**

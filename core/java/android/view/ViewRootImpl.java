@@ -23,7 +23,6 @@ import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -108,8 +107,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_FPS = false;
     private static final boolean DEBUG_INPUT_PROCESSING = false || LOCAL_LOGV;
 
-    private static final boolean USE_RENDER_THREAD = false;
-
     /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
@@ -130,10 +127,6 @@ public final class ViewRootImpl implements ViewParent,
     
     static final ArrayList<ComponentCallbacks> sConfigCallbacks
             = new ArrayList<ComponentCallbacks>();
-
-    private static boolean sUseRenderThread = false;
-    private static boolean sRenderThreadQueried = false;
-    private static final Object[] sRenderThreadQueryLock = new Object[0];
 
     final Context mContext;
     final IWindowSession mWindowSession;
@@ -375,35 +368,6 @@ public final class ViewRootImpl implements ViewParent,
         loadSystemProperties();
     }
 
-    /**
-     * @return True if the application requests the use of a separate render thread,
-     *         false otherwise
-     */
-    private static boolean isRenderThreadRequested(Context context) {
-        if (USE_RENDER_THREAD) {
-            synchronized (sRenderThreadQueryLock) {
-                if (!sRenderThreadQueried) {
-                    final PackageManager packageManager = context.getPackageManager();
-                    final String packageName = context.getApplicationInfo().packageName;
-                    try {
-                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName,
-                                PackageManager.GET_META_DATA);
-                        if (applicationInfo.metaData != null) {
-                            sUseRenderThread = applicationInfo.metaData.getBoolean(
-                                    "android.graphics.renderThread", false);
-                        }
-                    } catch (PackageManager.NameNotFoundException e) {
-                    } finally {
-                        sRenderThreadQueried = true;
-                    }
-                }
-                return sUseRenderThread;
-            }
-        } else {
-            return false;
-        }
-    }
-
     public static void addFirstDrawHandler(Runnable callback) {
         synchronized (sFirstDrawHandlers) {
             if (!sFirstDrawComplete) {
@@ -481,7 +445,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 // If the application owns the surface, don't enable hardware acceleration
                 if (mSurfaceHolder == null) {
-                    enableHardwareAcceleration(mView.getContext(), attrs);
+                    enableHardwareAcceleration(attrs);
                 }
 
                 boolean restore = false;
@@ -689,7 +653,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void enableHardwareAcceleration(Context context, WindowManager.LayoutParams attrs) {
+    private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
         mAttachInfo.mHardwareAccelerationRequested = false;
 
@@ -727,11 +691,6 @@ public final class ViewRootImpl implements ViewParent,
                     Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware " 
                             + "acceleration outside of the main thread, aborting");
                     return;
-                }
-
-                final boolean renderThread = isRenderThreadRequested(context);
-                if (renderThread) {
-                    Log.i(HardwareRenderer.LOG_TAG, "Render threat initiated");
                 }
 
                 if (mAttachInfo.mHardwareRenderer != null) {

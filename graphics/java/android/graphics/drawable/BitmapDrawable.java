@@ -584,6 +584,11 @@ public class BitmapDrawable extends Drawable {
         }
 
         @Override
+        public Bitmap getBitmap() {
+            return mBitmap;
+        }
+
+        @Override
         public Drawable newDrawable() {
             return new BitmapDrawable(this, null);
         }

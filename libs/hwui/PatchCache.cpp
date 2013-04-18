@@ -16,8 +16,10 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include <utils/JenkinsHash.h>
 #include <utils/Log.h>
 
+#include "Caches.h"
 #include "PatchCache.h"
 #include "Properties.h"
 
@@ -28,107 +30,107 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-PatchCache::PatchCache(): mMaxEntries(DEFAULT_PATCH_CACHE_SIZE) {
-}
-
-PatchCache::PatchCache(uint32_t maxEntries): mMaxEntries(maxEntries) {
+PatchCache::PatchCache(): mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity) {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_PATCH_CACHE_SIZE, property, NULL) > 0) {
+        INIT_LOGD("  Setting patch cache size to %skB", property);
+        mMaxSize = KB(atoi(property));
+    } else {
+        INIT_LOGD("  Using default patch cache size of %.2fkB", DEFAULT_PATCH_CACHE_SIZE);
+        mMaxSize = KB(DEFAULT_PATCH_CACHE_SIZE);
+    }
+    mSize = 0;
 }
 
 PatchCache::~PatchCache() {
     clear();
 }
 
+void PatchCache::init(Caches& caches) {
+    glGenBuffers(1, &mMeshBuffer);
+    caches.bindMeshBuffer(mMeshBuffer);
+    caches.resetVertexPointers();
+
+    glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-int PatchCache::PatchDescription::compare(
-        const PatchCache::PatchDescription& lhs, const PatchCache::PatchDescription& rhs) {
-    int deltaInt = lhs.bitmapWidth - rhs.bitmapWidth;
-    if (deltaInt != 0) return deltaInt;
+hash_t PatchCache::PatchDescription::hash() const {
+    uint32_t hash = JenkinsHashMix(0, android::hash_type(mPatch));
+    hash = JenkinsHashMix(hash, mBitmapWidth);
+    hash = JenkinsHashMix(hash, mBitmapHeight);
+    hash = JenkinsHashMix(hash, mPixelWidth);
+    hash = JenkinsHashMix(hash, mPixelHeight);
+    return JenkinsHashWhiten(hash);
+}
 
-    deltaInt = lhs.bitmapHeight - rhs.bitmapHeight;
-    if (deltaInt != 0) return deltaInt;
-
-    if (lhs.pixelWidth < rhs.pixelWidth) return -1;
-    if (lhs.pixelWidth > rhs.pixelWidth) return +1;
-
-    if (lhs.pixelHeight < rhs.pixelHeight) return -1;
-    if (lhs.pixelHeight > rhs.pixelHeight) return +1;
-
-    deltaInt = lhs.xCount - rhs.xCount;
-    if (deltaInt != 0) return deltaInt;
-
-    deltaInt = lhs.yCount - rhs.yCount;
-    if (deltaInt != 0) return deltaInt;
-
-    deltaInt = lhs.emptyCount - rhs.emptyCount;
-    if (deltaInt != 0) return deltaInt;
-
-    deltaInt = lhs.colorKey - rhs.colorKey;
-    if (deltaInt != 0) return deltaInt;
-
-    return 0;
+int PatchCache::PatchDescription::compare(const PatchCache::PatchDescription& lhs,
+            const PatchCache::PatchDescription& rhs) {
+    return memcmp(&lhs, &rhs, sizeof(PatchDescription));
 }
 
 void PatchCache::clear() {
-    size_t count = mCache.size();
-    for (size_t i = 0; i < count; i++) {
-        delete mCache.valueAt(i);
+    glDeleteBuffers(1, &mMeshBuffer);
+    clearCache();
+    mSize = 0;
+}
+
+void PatchCache::clearCache() {
+    LruCache<PatchDescription, Patch*>::Iterator i(mCache);
+    while (i.next()) {
+        ALOGD("Delete %p", i.value());
+        delete i.value();
     }
     mCache.clear();
 }
 
-Patch* PatchCache::get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-        const float pixelWidth, const float pixelHeight,
-        const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
-        const uint32_t width, const uint32_t height, const int8_t numColors) {
+const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
+        const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+        const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch) {
 
-    int8_t transparentQuads = 0;
-    uint32_t colorKey = 0;
-
-    if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
-        for (int8_t i = 0; i < numColors; i++) {
-            if (colors[i] == 0x0) {
-                transparentQuads++;
-                colorKey |= 0x1 << i;
-            }
-        }
-    }
-
-    // If the 9patch is made of only transparent quads
-    if (transparentQuads == int8_t((width + 1) * (height + 1))) {
-        return NULL;
-    }
-
-    const PatchDescription description(bitmapWidth, bitmapHeight,
-            pixelWidth, pixelHeight, width, height, transparentQuads, colorKey);
-
-    ssize_t index = mCache.indexOfKey(description);
-    Patch* mesh = NULL;
-    if (index >= 0) {
-        mesh = mCache.valueAt(index);
-    }
+    const PatchDescription description(bitmapWidth, bitmapHeight, pixelWidth, pixelHeight, patch);
+    const Patch* mesh = mCache.get(description);
 
     if (!mesh) {
-        PATCH_LOGD("New patch mesh "
-                "xCount=%d yCount=%d, w=%.2f h=%.2f, bw=%.2f bh=%.2f",
-                width, height, pixelWidth, pixelHeight, bitmapWidth, bitmapHeight);
+        Patch* newMesh = new Patch();
+        TextureVertex* vertices;
 
-        mesh = new Patch(width, height, transparentQuads);
-        mesh->updateColorKey(colorKey);
-        mesh->copy(xDivs, yDivs);
-        mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f, pixelWidth, pixelHeight);
-
-        if (mCache.size() >= mMaxEntries) {
-            delete mCache.valueAt(mCache.size() - 1);
-            mCache.removeItemsAt(mCache.size() - 1, 1);
+        if (entry) {
+            vertices = newMesh->createMesh(bitmapWidth, bitmapHeight,
+                    0.0f, 0.0f, pixelWidth, pixelHeight, entry->uvMapper, patch);
+        } else {
+            vertices = newMesh->createMesh(bitmapWidth, bitmapHeight,
+                    0.0f, 0.0f, pixelWidth, pixelHeight, patch);
         }
 
-        mCache.add(description, mesh);
-    } else if (!mesh->matches(xDivs, yDivs, colorKey, transparentQuads)) {
-        PATCH_LOGD("Patch mesh does not match, refreshing vertices");
-        mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f, pixelWidth, pixelHeight);
+        if (vertices) {
+            Caches& caches = Caches::getInstance();
+            caches.bindMeshBuffer(mMeshBuffer);
+            caches.resetVertexPointers();
+
+            // TODO: Simply remove the oldest items until we have enough room
+            // This will require to keep a list of free blocks in the VBO
+            uint32_t size = newMesh->getSize();
+            if (mSize + size > mMaxSize) {
+                clearCache();
+                glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
+                mSize = 0;
+            }
+
+            newMesh->offset = (GLintptr) mSize;
+            newMesh->textureOffset = newMesh->offset + gMeshTextureOffset;
+            mSize += size;
+
+            glBufferSubData(GL_ARRAY_BUFFER, newMesh->offset, size, vertices);
+
+            delete[] vertices;
+        }
+
+        mCache.put(description, newMesh);
+        return newMesh;
     }
 
     return mesh;

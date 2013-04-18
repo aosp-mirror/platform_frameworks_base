@@ -26,8 +26,10 @@
 #include <private/hwui/DrawGlInfo.h>
 
 #include "OpenGLRenderer.h"
+#include "AssetAtlas.h"
 #include "DeferredDisplayList.h"
 #include "DisplayListRenderer.h"
+#include "UvMapper.h"
 #include "utils/LinearAllocator.h"
 
 #define CRASH() do { \
@@ -721,7 +723,6 @@ private:
     int mSetBits;
 };
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // DRAW OPERATIONS - these are operations that can draw to the canvas's device
 ///////////////////////////////////////////////////////////////////////////////
@@ -729,9 +730,16 @@ private:
 class DrawBitmapOp : public DrawBoundedOp {
 public:
     DrawBitmapOp(SkBitmap* bitmap, float left, float top, SkPaint* paint)
-            : DrawBoundedOp(left, top, left + bitmap->width(), top + bitmap->height(),
-                    paint),
-            mBitmap(bitmap) {}
+            : DrawBoundedOp(left, top, left + bitmap->width(), top + bitmap->height(), paint),
+            mBitmap(bitmap), mAtlasEntry(NULL) {
+    }
+
+    DrawBitmapOp(SkBitmap* bitmap, float left, float top, SkPaint* paint,
+            const AssetAtlas::Entry* entry)
+            : DrawBoundedOp(left, top, left + bitmap->width(), top + bitmap->height(), paint),
+            mBitmap(bitmap), mAtlasEntry(entry) {
+        if (entry) mUvMapper = entry->uvMapper;
+    }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawBitmap(mBitmap, mLocalBounds.left, mLocalBounds.top,
@@ -749,14 +757,14 @@ public:
         TextureVertex vertices[6 * ops.size()];
         TextureVertex* vertex = &vertices[0];
 
-        // TODO: manually handle rect clip for bitmaps by adjusting texCoords per op, and allowing
-        // them to be merged in getBatchId()
-        const Rect texCoords(0, 0, 1, 1);
-
-        const float width = mBitmap->width();
-        const float height = mBitmap->height();
+        // TODO: manually handle rect clip for bitmaps by adjusting texCoords per op,
+        // and allowing them to be merged in getBatchId()
         for (unsigned int i = 0; i < ops.size(); i++) {
             const Rect& opBounds = ops[i]->state.mBounds;
+
+            Rect texCoords(0, 0, 1, 1);
+            ((DrawBitmapOp*) ops[i])->mUvMapper.map(texCoords);
+
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, top);
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, top);
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, bottom);
@@ -777,7 +785,7 @@ public:
 
     virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
         *batchId = DeferredDisplayList::kOpBatch_Bitmap;
-        *mergeId = (mergeid_t)mBitmap;
+        *mergeId = mAtlasEntry ? (mergeid_t) &mAtlasEntry->atlas : (mergeid_t) mBitmap;
 
         // don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
         // MergingDrawBatch::canMergeWith
@@ -787,6 +795,8 @@ public:
     const SkBitmap* bitmap() { return mBitmap; }
 protected:
     SkBitmap* mBitmap;
+    const AssetAtlas::Entry* mAtlasEntry;
+    UvMapper mUvMapper;
 };
 
 class DrawBitmapMatrixOp : public DrawBoundedOp {
@@ -904,20 +914,16 @@ private:
 
 class DrawPatchOp : public DrawBoundedOp {
 public:
-    DrawPatchOp(SkBitmap* bitmap, const int32_t* xDivs,
-            const int32_t* yDivs, const uint32_t* colors, uint32_t width, uint32_t height,
-            int8_t numColors, float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode)
+    DrawPatchOp(SkBitmap* bitmap, Res_png_9patch* patch,
+            float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode)
             : DrawBoundedOp(left, top, right, bottom, 0),
-            mBitmap(bitmap), mxDivs(xDivs), myDivs(yDivs),
-            mColors(colors), mxDivsCount(width), myDivsCount(height),
-            mNumColors(numColors), mAlpha(alpha), mMode(mode) {};
+            mBitmap(bitmap), mPatch(patch), mAlpha(alpha), mMode(mode) {
+        mEntry = Caches::getInstance().assetAtlas.getEntry(bitmap);
+    };
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         // NOTE: not calling the virtual method, which takes a paint
-        return renderer.drawPatch(mBitmap, mxDivs, myDivs, mColors,
-                mxDivsCount, myDivsCount, mNumColors,
-                mLocalBounds.left, mLocalBounds.top,
+        return renderer.drawPatch(mBitmap, mPatch, mEntry, mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, mAlpha, mMode);
     }
 
@@ -929,20 +935,16 @@ public:
 
     virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
         *batchId = DeferredDisplayList::kOpBatch_Patch;
-        *mergeId = (mergeid_t)mBitmap;
+        *mergeId = (mergeid_t) mBitmap;
         return true;
     }
 
 private:
     SkBitmap* mBitmap;
-    const int32_t* mxDivs;
-    const int32_t* myDivs;
-    const uint32_t* mColors;
-    uint32_t mxDivsCount;
-    uint32_t myDivsCount;
-    int8_t mNumColors;
+    Res_png_9patch* mPatch;
     int mAlpha;
     SkXfermode::Mode mMode;
+    AssetAtlas::Entry* mEntry;
 };
 
 class DrawColorOp : public DrawOp {

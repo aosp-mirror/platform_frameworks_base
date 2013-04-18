@@ -36,7 +36,10 @@ package android.graphics;
  */
 public class NinePatch {
     private final Bitmap mBitmap;
-    private final byte[] mChunk;
+    /**
+     * @hide
+     */
+    public final byte[] mChunk;
     private Paint mPaint;
     private String mSrcName;  // Useful for debugging
     private final RectF mRect = new RectF();
@@ -72,6 +75,13 @@ public class NinePatch {
     public void setPaint(Paint p) {
         mPaint = p;
     }
+
+    /**
+     * @hide
+     */
+    public Bitmap getBitmap() {
+        return mBitmap;
+    }
     
     /** 
      * Draw a bitmap of nine patches.
@@ -86,7 +96,7 @@ public class NinePatch {
                        mPaint != null ? mPaint.mNativePaint : 0,
                        canvas.mDensity, mBitmap.mDensity);
         } else {
-            canvas.drawPatch(mBitmap, mChunk, location, mPaint);
+            canvas.drawPatch(this, location, mPaint);
         }
     }
     
@@ -104,7 +114,7 @@ public class NinePatch {
                         canvas.mDensity, mBitmap.mDensity);
         } else {
             mRect.set(location);
-            canvas.drawPatch(mBitmap, mChunk, mRect, mPaint);
+            canvas.drawPatch(this, mRect, mPaint);
         }
     }
 
@@ -122,7 +132,7 @@ public class NinePatch {
                     canvas.mDensity, mBitmap.mDensity);
         } else {
             mRect.set(location);
-            canvas.drawPatch(mBitmap, mChunk, mRect, paint);
+            canvas.drawPatch(this, mRect, paint);
         }
     }
 

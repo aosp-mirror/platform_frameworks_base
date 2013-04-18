@@ -430,10 +430,13 @@ private:
     bool mUse;
     bool mInitialized;
 
+    // Uniforms caching
     bool mHasColorUniform;
     int mColorUniform;
 
     bool mHasSampler;
+
+    mat4 mProjection;
 }; // class Program
 
 }; // namespace uirenderer

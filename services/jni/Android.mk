@@ -3,6 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
     com_android_server_AlarmManagerService.cpp \
+    com_android_server_AssetAtlasService.cpp \
     com_android_server_BatteryService.cpp \
     com_android_server_input_InputApplicationHandle.cpp \
     com_android_server_input_InputManagerService.cpp \
@@ -43,7 +44,11 @@ LOCAL_SHARED_LIBRARIES := \
     libskia \
     libgui \
     libusbhost \
-    libsuspend
+    libsuspend \
+    libEGL \
+    libGLESv2
+
+LOCAL_CFLAGS += -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
 
 ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
     LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK

@@ -45,12 +45,9 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Backing buffer for the Bitmap.
-     * Made public for quick access from drawing methods -- do NOT modify
-     * from outside this class.
-     *
-     * @hide
      */
-    public byte[] mBuffer;
+    @SuppressWarnings("UnusedDeclaration") // native code only
+    private byte[] mBuffer;
 
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"}) // Keep to finalize native resources
     private final BitmapFinalizer mFinalizer;
@@ -701,12 +698,10 @@ public final class Bitmap implements Parcelable {
         if (config == Config.ARGB_8888 && !hasAlpha) {
             nativeErase(bm.mNativeBitmap, 0xff000000);
             nativeSetHasAlpha(bm.mNativeBitmap, hasAlpha);
-        } else {
-            // No need to initialize it to zeroes; it is backed by a VM byte array
-            // which is by definition preinitialized to all zeroes.
-            //
-            //nativeErase(bm.mNativeBitmap, 0);
         }
+        // No need to initialize the bitmap to zeroes with other configs;
+        // it is backed by a VM byte array which is by definition preinitialized
+        // to all zeroes.
         return bm;
     }
 

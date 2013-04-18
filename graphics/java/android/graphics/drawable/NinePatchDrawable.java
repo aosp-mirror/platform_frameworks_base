@@ -403,7 +403,7 @@ public class NinePatchDrawable extends Drawable {
         return this;
     }
 
-    private final static class NinePatchState extends ConstantState {
+    final static class NinePatchState extends ConstantState {
         final NinePatch mNinePatch;
         final Rect mPadding;
         final Insets mOpticalInsets;
@@ -436,6 +436,11 @@ public class NinePatchDrawable extends Drawable {
             mDither = state.mDither;
             mChangingConfigurations = state.mChangingConfigurations;
             mTargetDensity = state.mTargetDensity;
+        }
+
+        @Override
+        public Bitmap getBitmap() {
+            return mNinePatch.getBitmap();
         }
 
         @Override

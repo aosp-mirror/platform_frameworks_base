@@ -58,8 +58,8 @@ Caches::Caches(): Singleton<Caches>(), mExtensions(Extensions::getInstance()), m
     ALOGD("Enabling debug mode %d", mDebugLevel);
 }
 
-void Caches::init() {
-    if (mInitialized) return;
+bool Caches::init() {
+    if (mInitialized) return false;
 
     glGenBuffers(1, &meshBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
@@ -82,6 +82,7 @@ void Caches::init() {
     mTextureUnit = 0;
 
     mRegionMesh = NULL;
+    mMeshIndices = 0;
 
     blend = false;
     lastSrcMode = GL_ZERO;
@@ -94,7 +95,11 @@ void Caches::init() {
     debugOverdraw = false;
     debugStencilClip = kStencilHide;
 
+    patchCache.init(*this);
+
     mInitialized = true;
+
+    return true;
 }
 
 void Caches::initFont() {
@@ -191,14 +196,19 @@ void Caches::terminate() {
     glDeleteBuffers(1, &meshBuffer);
     mCurrentBuffer = 0;
 
-    glDeleteBuffers(1, &mRegionMeshIndices);
+    glDeleteBuffers(1, &mMeshIndices);
     delete[] mRegionMesh;
+    mMeshIndices = 0;
     mRegionMesh = NULL;
 
     fboCache.clear();
 
     programCache.clear();
     currentProgram = NULL;
+
+    assetAtlas.terminate();
+
+    patchCache.clear();
 
     mInitialized = false;
 }
@@ -227,6 +237,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
             pathCache.getSize(), pathCache.getMaxSize());
     log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
+    log.appendFormat("  PatchCache           %8d / %8d\n",
+            patchCache.getSize(), patchCache.getMaxSize());
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
         const uint32_t size = fontRenderer->getFontRendererSize(i);
         log.appendFormat("  FontRenderer %d       %8d / %8d\n", i, size, size);
@@ -234,8 +246,6 @@ void Caches::dumpMemoryUsage(String8 &log) {
     log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n",
             fboCache.getSize(), fboCache.getMaxSize());
-    log.appendFormat("  PatchCache           %8d / %8d\n",
-            patchCache.getSize(), patchCache.getMaxSize());
 
     uint32_t total = 0;
     total += textureCache.getSize();
@@ -244,6 +254,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += gradientCache.getSize();
     total += pathCache.getSize();
     total += dropShadowCache.getSize();
+    total += patchCache.getSize();
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
         total += fontRenderer->getFontRendererSize(i);
     }
@@ -355,6 +366,32 @@ bool Caches::bindIndicesBuffer(const GLuint buffer) {
         return true;
     }
     return false;
+}
+
+bool Caches::bindIndicesBuffer() {
+    if (!mMeshIndices) {
+        uint16_t* regionIndices = new uint16_t[REGION_MESH_QUAD_COUNT * 6];
+        for (int i = 0; i < REGION_MESH_QUAD_COUNT; i++) {
+            uint16_t quad = i * 4;
+            int index = i * 6;
+            regionIndices[index    ] = quad;       // top-left
+            regionIndices[index + 1] = quad + 1;   // top-right
+            regionIndices[index + 2] = quad + 2;   // bottom-left
+            regionIndices[index + 3] = quad + 2;   // bottom-left
+            regionIndices[index + 4] = quad + 1;   // top-right
+            regionIndices[index + 5] = quad + 3;   // bottom-right
+        }
+
+        glGenBuffers(1, &mMeshIndices);
+        bool force = bindIndicesBuffer(mMeshIndices);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, REGION_MESH_QUAD_COUNT * 6 * sizeof(uint16_t),
+                regionIndices, GL_STATIC_DRAW);
+
+        delete[] regionIndices;
+        return force;
+    }
+
+    return bindIndicesBuffer(mMeshIndices);
 }
 
 bool Caches::unbindIndicesBuffer() {
@@ -546,27 +583,6 @@ TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
     if (!mRegionMesh) {
         mRegionMesh = new TextureVertex[REGION_MESH_QUAD_COUNT * 4];
-
-        uint16_t* regionIndices = new uint16_t[REGION_MESH_QUAD_COUNT * 6];
-        for (int i = 0; i < REGION_MESH_QUAD_COUNT; i++) {
-            uint16_t quad = i * 4;
-            int index = i * 6;
-            regionIndices[index    ] = quad;       // top-left
-            regionIndices[index + 1] = quad + 1;   // top-right
-            regionIndices[index + 2] = quad + 2;   // bottom-left
-            regionIndices[index + 3] = quad + 2;   // bottom-left
-            regionIndices[index + 4] = quad + 1;   // top-right
-            regionIndices[index + 5] = quad + 3;   // bottom-right
-        }
-
-        glGenBuffers(1, &mRegionMeshIndices);
-        bindIndicesBuffer(mRegionMeshIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, REGION_MESH_QUAD_COUNT * 6 * sizeof(uint16_t),
-                regionIndices, GL_STATIC_DRAW);
-
-        delete[] regionIndices;
-    } else {
-        bindIndicesBuffer(mRegionMeshIndices);
     }
 
     return mRegionMesh;
