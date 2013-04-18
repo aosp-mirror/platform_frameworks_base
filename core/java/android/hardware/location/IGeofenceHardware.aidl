@@ -18,19 +18,21 @@ package android.hardware.location;
 
 import android.location.IGpsGeofenceHardware;
 import android.hardware.location.IGeofenceHardwareCallback;
+import android.hardware.location.IGeofenceHardwareMonitorCallback;
 
 /** @hide */
 interface IGeofenceHardware {
     void setGpsGeofenceHardware(in IGpsGeofenceHardware service);
-    int[] getMonitoringTypesAndStatus();
-    boolean addCircularFence(int id, double lat, double longitude, double radius,
-            int lastTransition, int monitorTransitions, int notificationResponsiveness,
-            int unknownTimer, int monitoringType, in IGeofenceHardwareCallback callback);
+    int[] getMonitoringTypes();
+    int getStatusOfMonitoringType(int monitoringType);
+    boolean addCircularFence(int id,  int monitoringType, double lat, double longitude,
+            double radius, int lastTransition, int monitorTransitions,
+            int notificationResponsiveness, int unknownTimer,in IGeofenceHardwareCallback callback);
     boolean removeGeofence(int id, int monitoringType);
     boolean pauseGeofence(int id, int monitoringType);
-    boolean resumeGeofence(int id, int monitorTransitions, int monitoringType);
+    boolean resumeGeofence(int id, int monitoringType, int monitorTransitions);
     boolean registerForMonitorStateChangeCallback(int monitoringType,
-            IGeofenceHardwareCallback callback);
+            IGeofenceHardwareMonitorCallback callback);
     boolean unregisterForMonitorStateChangeCallback(int monitoringType,
-            IGeofenceHardwareCallback callback);
+            IGeofenceHardwareMonitorCallback callback);
 }
