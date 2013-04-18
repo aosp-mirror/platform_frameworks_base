@@ -40,7 +40,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Mipangilio"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Mtandao-Hewa"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Hali ya Ndege"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Zungusha otomatiki skrini"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Skrini ijizungushe kiotomatiki"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"PUUZA"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"KIOTOMATIKI"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Arifa"</string>
