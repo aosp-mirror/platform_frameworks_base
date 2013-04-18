@@ -479,7 +479,6 @@ public class ZygoteInit {
             OsConstants.CAP_NET_BIND_SERVICE,
             OsConstants.CAP_NET_BROADCAST,
             OsConstants.CAP_NET_RAW,
-            OsConstants.CAP_SYS_BOOT,
             OsConstants.CAP_SYS_MODULE,
             OsConstants.CAP_SYS_NICE,
             OsConstants.CAP_SYS_RESOURCE,
