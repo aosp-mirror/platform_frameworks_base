@@ -481,6 +481,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             mRemoteDisplayConnected = false;
             mHandler.removeCallbacks(mRtspTimeout);
 
+            mWifiP2pManager.setMiracastMode(WifiP2pManager.MIRACAST_DISABLED);
             setRemoteSubmixOn(false);
             unadvertiseDisplay();
 
@@ -626,6 +627,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             }
 
             setRemoteSubmixOn(true);
+            mWifiP2pManager.setMiracastMode(WifiP2pManager.MIRACAST_SOURCE);
 
             final WifiP2pDevice oldDevice = mConnectedDevice;
             final int port = getPortNumber(mConnectedDevice);
