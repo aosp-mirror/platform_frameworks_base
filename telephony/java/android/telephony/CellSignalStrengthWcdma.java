@@ -21,16 +21,16 @@ import android.os.Parcelable;
 import android.telephony.Rlog;
 
 /**
- * GSM signal strength related information.
+ * Wcdma signal strength related information.
  */
-public final class CellSignalStrengthGsm extends CellSignalStrength implements Parcelable {
+public final class CellSignalStrengthWcdma extends CellSignalStrength implements Parcelable {
 
-    private static final String LOG_TAG = "CellSignalStrengthGsm";
+    private static final String LOG_TAG = "CellSignalStrengthWcdma";
     private static final boolean DBG = false;
 
-    private static final int GSM_SIGNAL_STRENGTH_GREAT = 12;
-    private static final int GSM_SIGNAL_STRENGTH_GOOD = 8;
-    private static final int GSM_SIGNAL_STRENGTH_MODERATE = 5;
+    private static final int WCDMA_SIGNAL_STRENGTH_GREAT = 12;
+    private static final int WCDMA_SIGNAL_STRENGTH_GOOD = 8;
+    private static final int WCDMA_SIGNAL_STRENGTH_MODERATE = 5;
 
     private int mSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
     private int mBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5
@@ -40,7 +40,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
      *
      * @hide
      */
-    public CellSignalStrengthGsm() {
+    public CellSignalStrengthWcdma() {
         setDefaultValues();
     }
 
@@ -49,7 +49,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
      *
      * @hide
      */
-    public CellSignalStrengthGsm(int ss, int ber) {
+    public CellSignalStrengthWcdma(int ss, int ber) {
         initialize(ss, ber);
     }
 
@@ -60,7 +60,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
      *
      * @hide
      */
-    public CellSignalStrengthGsm(CellSignalStrengthGsm s) {
+    public CellSignalStrengthWcdma(CellSignalStrengthWcdma s) {
         copyFrom(s);
     }
 
@@ -80,7 +80,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     /**
      * @hide
      */
-    protected void copyFrom(CellSignalStrengthGsm s) {
+    protected void copyFrom(CellSignalStrengthWcdma s) {
         mSignalStrength = s.mSignalStrength;
         mBitErrorRate = s.mBitErrorRate;
     }
@@ -89,8 +89,8 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
      * @hide
      */
     @Override
-    public CellSignalStrengthGsm copy() {
-        return new CellSignalStrengthGsm(this);
+    public CellSignalStrengthWcdma copy() {
+        return new CellSignalStrengthWcdma(this);
     }
 
     /** @hide */
@@ -113,9 +113,9 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
         // asu = 99 is a special case, where the signal strength is unknown.
         int asu = mSignalStrength;
         if (asu <= 2 || asu == 99) level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        else if (asu >= GSM_SIGNAL_STRENGTH_GREAT) level = SIGNAL_STRENGTH_GREAT;
-        else if (asu >= GSM_SIGNAL_STRENGTH_GOOD)  level = SIGNAL_STRENGTH_GOOD;
-        else if (asu >= GSM_SIGNAL_STRENGTH_MODERATE)  level = SIGNAL_STRENGTH_MODERATE;
+        else if (asu >= WCDMA_SIGNAL_STRENGTH_GREAT) level = SIGNAL_STRENGTH_GREAT;
+        else if (asu >= WCDMA_SIGNAL_STRENGTH_GOOD)  level = SIGNAL_STRENGTH_GOOD;
+        else if (asu >= WCDMA_SIGNAL_STRENGTH_MODERATE)  level = SIGNAL_STRENGTH_MODERATE;
         else level = SIGNAL_STRENGTH_POOR;
         if (DBG) log("getLevel=" + level);
         return level;
@@ -162,10 +162,10 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     @Override
     public boolean equals (Object o) {
-        CellSignalStrengthGsm s;
+        CellSignalStrengthWcdma s;
 
         try {
-            s = (CellSignalStrengthGsm) o;
+            s = (CellSignalStrengthWcdma) o;
         } catch (ClassCastException ex) {
             return false;
         }
@@ -182,7 +182,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
      */
     @Override
     public String toString() {
-        return "CellSignalStrengthGsm:"
+        return "CellSignalStrengthWcdma:"
                 + " ss=" + mSignalStrength
                 + " ber=" + mBitErrorRate;
     }
@@ -199,10 +199,10 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
      * Construct a SignalStrength object from the given parcel
      * where the token is already been processed.
      */
-    private CellSignalStrengthGsm(Parcel in) {
+    private CellSignalStrengthWcdma(Parcel in) {
         mSignalStrength = in.readInt();
         mBitErrorRate = in.readInt();
-        if (DBG) log("CellSignalStrengthGsm(Parcel): " + toString());
+        if (DBG) log("CellSignalStrengthWcdma(Parcel): " + toString());
     }
 
     /** Implement the Parcelable interface */
@@ -213,16 +213,16 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Parcelable.Creator<CellSignalStrengthGsm> CREATOR =
-            new Parcelable.Creator<CellSignalStrengthGsm>() {
+    public static final Parcelable.Creator<CellSignalStrengthWcdma> CREATOR =
+            new Parcelable.Creator<CellSignalStrengthWcdma>() {
         @Override
-        public CellSignalStrengthGsm createFromParcel(Parcel in) {
-            return new CellSignalStrengthGsm(in);
+        public CellSignalStrengthWcdma createFromParcel(Parcel in) {
+            return new CellSignalStrengthWcdma(in);
         }
 
         @Override
-        public CellSignalStrengthGsm[] newArray(int size) {
-            return new CellSignalStrengthGsm[size];
+        public CellSignalStrengthWcdma[] newArray(int size) {
+            return new CellSignalStrengthWcdma[size];
         }
     };
 
