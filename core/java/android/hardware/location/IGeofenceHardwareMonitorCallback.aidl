@@ -19,11 +19,6 @@ package android.hardware.location;
 import android.location.Location;
 
 /** @hide */
-oneway interface IGeofenceHardwareCallback {
-   void onGeofenceTransition(int geofenceId, int transition, in Location location,
-            long timestamp, int monitoringType);
-   void onGeofenceAdd(int geofenceId, int status);
-   void onGeofenceRemove(int geofenceId, int status);
-   void onGeofencePause(int geofenceId, int status);
-   void onGeofenceResume(int geofenceId, int status);
+oneway interface IGeofenceHardwareMonitorCallback {
+   void onMonitoringSystemChange(int monitoringType, boolean available, in Location location);
 }

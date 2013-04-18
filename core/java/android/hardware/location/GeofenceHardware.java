@@ -129,6 +129,9 @@ public final class GeofenceHardware {
 
     private HashMap<GeofenceHardwareCallback, GeofenceHardwareCallbackWrapper>
             mCallbacks = new HashMap<GeofenceHardwareCallback, GeofenceHardwareCallbackWrapper>();
+    private HashMap<GeofenceHardwareMonitorCallback, GeofenceHardwareMonitorCallbackWrapper>
+            mMonitorCallbacks = new HashMap<GeofenceHardwareMonitorCallback,
+                    GeofenceHardwareMonitorCallbackWrapper>();
     /**
      * @hide
      */
@@ -137,8 +140,29 @@ public final class GeofenceHardware {
     }
 
     /**
-     * Returns all the hardware geofence monitoring systems and their status.
-     * Status can be one of {@link #MONITOR_CURRENTLY_AVAILABLE},
+     * Returns all the hardware geofence monitoring systems which are supported
+     *
+     * <p> Call {@link #getStatusOfMonitoringType(int)} to know the current state
+     * of a monitoring system.
+     *
+     * <p> Requires {@link android.Manifest.permission#LOCATION_HARDWARE} permission to access
+     * geofencing in hardware.
+     *
+     * @return An array of all the monitoring types.
+     *         An array of length 0 is returned in case of errors.
+     */
+    public int[] getMonitoringTypes() {
+        try {
+            return mService.getMonitoringTypes();
+        } catch (RemoteException e) {
+        }
+        return new int[0];
+    }
+
+    /**
+     * Returns current status of a hardware geofence monitoring system.
+     *
+     * <p>Status can be one of {@link #MONITOR_CURRENTLY_AVAILABLE},
      * {@link #MONITOR_CURRENTLY_UNAVAILABLE} or {@link #MONITOR_UNSUPPORTED}
      *
      * <p> Some supported hardware monitoring systems might not be available
@@ -147,18 +171,15 @@ public final class GeofenceHardware {
      * geofences and will change from {@link #MONITOR_CURRENTLY_AVAILABLE} to
      * {@link #MONITOR_CURRENTLY_UNAVAILABLE}.
      *
-     * <p> Requires {@link android.Manifest.permission#LOCATION_HARDWARE} permission to access
-     * geofencing in hardware.
-     *
-     * @return An array indexed by the various monitoring types and their status.
-     *         An array of length 0 is returned in case of errors.
+     * @param monitoringType
+     * @return Current status of the monitoring type.
      */
-    public int[] getMonitoringTypesAndStatus() {
+    public int getStatusOfMonitoringType(int monitoringType) {
         try {
-            return mService.getMonitoringTypesAndStatus();
+            return mService.getStatusOfMonitoringType(monitoringType);
         } catch (RemoteException e) {
+            return MONITOR_UNSUPPORTED;
         }
-        return new int[0];
     }
 
     /**
@@ -167,8 +188,10 @@ public final class GeofenceHardware {
      * <p> When the device detects that is has entered, exited or is uncertain
      * about the area specified by the geofence, the given callback will be called.
      *
-     * <p> The {@link GeofenceHardwareCallback#onGeofenceChange} callback will be called,
-     * with the following parameters
+     * <p> If this call returns true, it means that the geofence has been sent to the hardware.
+     * {@link GeofenceHardwareCallback#onGeofenceAdd} will be called with the result of the
+     * add call from the hardware. The {@link GeofenceHardwareCallback#onGeofenceAdd} will be
+     * called with the following parameters when a transition event occurs.
      * <ul>
      * <li> The geofence Id
      * <li> The location object indicating the last known location.
@@ -195,43 +218,46 @@ public final class GeofenceHardware {
      * which abstracts the hardware should be used instead. All the checks are done by the higher
      * level public API. Any needed locking should be handled by the higher level API.
      *
-     * @param latitude Latitude of the area to be monitored.
-     * @param longitude Longitude of the area to be monitored.
-     * @param radius Radius (in meters) of the area to be monitored.
-     * @param lastTransition The current state of the geofence. Can be one of
-     *        {@link #GEOFENCE_ENTERED}, {@link #GEOFENCE_EXITED},
-     *        {@link #GEOFENCE_UNCERTAIN}.
-     * @param monitorTransitions Bitwise OR of {@link #GEOFENCE_ENTERED},
-     *        {@link #GEOFENCE_EXITED}, {@link #GEOFENCE_UNCERTAIN}
-     * @param notificationResponsivenes Defines the best-effort description
-     *        of how soon should the callback be called when the transition
-     *        associated with the Geofence is triggered. For instance, if
-     *        set to 1000 millseconds with {@link #GEOFENCE_ENTERED},
-     *        the callback will be called 1000 milliseconds within entering
-     *        the geofence. This parameter is defined in milliseconds.
-     * @param unknownTimer The time limit after which the
-     *        {@link #GEOFENCE_UNCERTAIN} transition
-     *        should be triggered. This paramter is defined in milliseconds.
+     * <p> Create a geofence request object using the methods in {@link GeofenceHardwareRequest} to
+     * set all the characteristics of the geofence. Use the created GeofenceHardwareRequest object
+     * in this call.
+     *
+     * @param geofenceId The id associated with the geofence.
      * @param monitoringType The type of the hardware subsystem that should be used
      *        to monitor the geofence.
+     * @param geofenceRequest The {@link GeofenceHardwareRequest} object associated with the
+     *        geofence.
      * @param callback {@link GeofenceHardwareCallback} that will be use to notify the
      *        transition.
-     * @return true on success.
+     * @return true when the geofence is successfully sent to the hardware for addition.
+     * @throws IllegalArgumentException when the geofence request type is not supported.
      */
-    public boolean addCircularFence(int geofenceId, double latitude, double longitude,
-            double radius, int lastTransition,int monitorTransitions, int notificationResponsivenes,
-            int unknownTimer, int monitoringType, GeofenceHardwareCallback callback) {
+    public boolean addGeofence(int geofenceId, int monitoringType, GeofenceHardwareRequest
+            geofenceRequest, GeofenceHardwareCallback callback) {
         try {
-            return mService.addCircularFence(geofenceId, latitude, longitude, radius,
-                    lastTransition, monitorTransitions, notificationResponsivenes, unknownTimer,
-                    monitoringType, getCallbackWrapper(callback));
+            if (geofenceRequest.getType() == GeofenceHardwareRequest.GEOFENCE_TYPE_CIRCLE) {
+                return mService.addCircularFence(geofenceId, monitoringType,
+                        geofenceRequest.getLatitude(),
+                        geofenceRequest.getLongitude(), geofenceRequest.getRadius(),
+                        geofenceRequest.getLastTransition(),
+                        geofenceRequest.getMonitorTransitions(),
+                        geofenceRequest.getNotificationResponsiveness(),
+                        geofenceRequest.getUnknownTimer(),
+                        getCallbackWrapper(callback));
+            } else {
+                throw new IllegalArgumentException("Geofence Request type not supported");
+            }
         } catch (RemoteException e) {
         }
         return false;
     }
 
     /**
-     * Removes a geofence added by {@link #addCircularFence} call.
+     * Removes a geofence added by {@link #addGeofence} call.
+     *
+     * <p> If this call returns true, it means that the geofence has been sent to the hardware.
+     * {@link GeofenceHardwareCallback#onGeofenceRemove} will be called with the result of the
+     * remove call from the hardware.
      *
      * <p> Requires {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission when
      * {@link #MONITORING_TYPE_GPS_HARDWARE} is used.
@@ -246,7 +272,7 @@ public final class GeofenceHardware {
      * @param geofenceId The id of the geofence.
      * @param monitoringType The type of the hardware subsystem that should be used
      *        to monitor the geofence.
-     * @return true on success.
+     * @return true when the geofence is successfully sent to the hardware for removal.                     .
      */
    public boolean removeGeofence(int geofenceId, int monitoringType) {
        try {
@@ -257,7 +283,11 @@ public final class GeofenceHardware {
    }
 
     /**
-     * Pauses the monitoring of a geofence added by {@link #addCircularFence} call.
+     * Pauses the monitoring of a geofence added by {@link #addGeofence} call.
+     *
+     * <p> If this call returns true, it means that the geofence has been sent to the hardware.
+     * {@link GeofenceHardwareCallback#onGeofencePause} will be called with the result of the
+     * pause call from the hardware.
      *
      * <p> Requires {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission when
      * {@link #MONITORING_TYPE_GPS_HARDWARE} is used.
@@ -272,7 +302,7 @@ public final class GeofenceHardware {
      * @param geofenceId The id of the geofence.
      * @param monitoringType The type of the hardware subsystem that should be used
      *        to monitor the geofence.
-     * @return true on success.
+     * @return true when the geofence is successfully sent to the hardware for pausing.
      */
     public boolean pauseGeofence(int geofenceId, int monitoringType) {
         try {
@@ -285,6 +315,10 @@ public final class GeofenceHardware {
     /**
      * Resumes the monitoring of a geofence added by {@link #pauseGeofence} call.
      *
+     * <p> If this call returns true, it means that the geofence has been sent to the hardware.
+     * {@link GeofenceHardwareCallback#onGeofenceResume} will be called with the result of the
+     * resume call from the hardware.
+     *
      * <p> Requires {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission when
      * {@link #MONITORING_TYPE_GPS_HARDWARE} is used.
      *
@@ -296,15 +330,15 @@ public final class GeofenceHardware {
      * level public API. Any needed locking should be handled by the higher level API.
      *
      * @param geofenceId The id of the geofence.
-     * @param monitorTransition Bitwise OR of {@link #GEOFENCE_ENTERED},
-     *        {@link #GEOFENCE_EXITED}, {@link #GEOFENCE_UNCERTAIN}
      * @param monitoringType The type of the hardware subsystem that should be used
      *        to monitor the geofence.
-     * @return true on success.
+     * @param monitorTransition Bitwise OR of {@link #GEOFENCE_ENTERED},
+     *        {@link #GEOFENCE_EXITED}, {@link #GEOFENCE_UNCERTAIN}
+     * @return true when the geofence is successfully sent to the hardware for resumption.
      */
-    public boolean resumeGeofence(int geofenceId, int monitorTransition, int monitoringType) {
+    public boolean resumeGeofence(int geofenceId, int monitoringType, int monitorTransition) {
         try {
-            return mService.resumeGeofence(geofenceId, monitorTransition, monitoringType);
+            return mService.resumeGeofence(geofenceId, monitoringType, monitorTransition);
         } catch (RemoteException e) {
         }
         return false;
@@ -333,10 +367,10 @@ public final class GeofenceHardware {
      * @return true on success
      */
     public boolean registerForMonitorStateChangeCallback(int monitoringType,
-            GeofenceHardwareCallback callback) {
+            GeofenceHardwareMonitorCallback callback) {
         try {
             return mService.registerForMonitorStateChangeCallback(monitoringType,
-                    getCallbackWrapper(callback));
+                    getMonitorCallbackWrapper(callback));
         } catch (RemoteException e) {
         }
         return false;
@@ -361,12 +395,12 @@ public final class GeofenceHardware {
      * @return true on success
      */
     public boolean unregisterForMonitorStateChangeCallback(int monitoringType,
-            GeofenceHardwareCallback callback) {
+            GeofenceHardwareMonitorCallback callback) {
         boolean  result = false;
         try {
             result = mService.unregisterForMonitorStateChangeCallback(monitoringType,
-                    getCallbackWrapper(callback));
-            if (result) removeCallback(callback);
+                    getMonitorCallbackWrapper(callback));
+            if (result) removeMonitorCallback(callback);
 
         } catch (RemoteException e) {
         }
@@ -391,6 +425,38 @@ public final class GeofenceHardware {
         }
     }
 
+    private void removeMonitorCallback(GeofenceHardwareMonitorCallback callback) {
+        synchronized (mMonitorCallbacks) {
+            mMonitorCallbacks.remove(callback);
+        }
+    }
+
+    private GeofenceHardwareMonitorCallbackWrapper getMonitorCallbackWrapper(
+            GeofenceHardwareMonitorCallback callback) {
+        synchronized (mMonitorCallbacks) {
+            GeofenceHardwareMonitorCallbackWrapper wrapper = mMonitorCallbacks.get(callback);
+            if (wrapper == null) {
+                wrapper = new GeofenceHardwareMonitorCallbackWrapper(callback);
+                mMonitorCallbacks.put(callback, wrapper);
+            }
+            return wrapper;
+        }
+    }
+
+    class GeofenceHardwareMonitorCallbackWrapper extends IGeofenceHardwareMonitorCallback.Stub {
+        private WeakReference<GeofenceHardwareMonitorCallback> mCallback;
+
+        GeofenceHardwareMonitorCallbackWrapper(GeofenceHardwareMonitorCallback c) {
+            mCallback = new WeakReference<GeofenceHardwareMonitorCallback>(c);
+        }
+
+        public void onMonitoringSystemChange(int monitoringType, boolean available,
+                Location location) {
+            GeofenceHardwareMonitorCallback c = mCallback.get();
+            if (c != null) c.onMonitoringSystemChange(monitoringType, available, location);
+        }
+    }
+
     class GeofenceHardwareCallbackWrapper extends IGeofenceHardwareCallback.Stub {
         private WeakReference<GeofenceHardwareCallback> mCallback;
 
@@ -398,17 +464,11 @@ public final class GeofenceHardware {
             mCallback = new WeakReference<GeofenceHardwareCallback>(c);
         }
 
-        public void onMonitoringSystemChange(int monitoringType, boolean available,
-                Location location) {
-            GeofenceHardwareCallback c = mCallback.get();
-            if (c != null) c.onMonitoringSystemChange(monitoringType, available, location);
-        }
-
-        public void onGeofenceChange(int geofenceId, int transition, Location location,
+        public void onGeofenceTransition(int geofenceId, int transition, Location location,
                 long timestamp, int monitoringType) {
             GeofenceHardwareCallback c = mCallback.get();
             if (c != null) {
-                c.onGeofenceChange(geofenceId, transition, location, timestamp,
+                c.onGeofenceTransition(geofenceId, transition, location, timestamp,
                         monitoringType);
             }
         }
@@ -428,7 +488,9 @@ public final class GeofenceHardware {
 
         public void onGeofencePause(int geofenceId, int status) {
             GeofenceHardwareCallback c = mCallback.get();
-            if (c != null) c.onGeofencePause(geofenceId, status);
+            if (c != null) {
+                c.onGeofencePause(geofenceId, status);
+            }
         }
 
         public void onGeofenceResume(int geofenceId, int status) {
