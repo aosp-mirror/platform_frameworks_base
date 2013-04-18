@@ -220,14 +220,14 @@ public class Surface implements Parcelable {
     /**
      * Gets a {@link Canvas} for drawing into this surface.
      *
-     * After drawing into the provided {@link Canvas}, the caller should
+     * After drawing into the provided {@link Canvas}, the caller must
      * invoke {@link #unlockCanvasAndPost} to post the new contents to the surface.
      *
      * @param inOutDirty A rectangle that represents the dirty region that the caller wants
      * to redraw.  This function may choose to expand the dirty rectangle if for example
      * the surface has been resized or if the previous contents of the surface were
-     * not available.  The caller should redraw the entire dirty region as represented
-     * by the contents of the dirty rect upon return from this function.
+     * not available.  The caller must redraw the entire dirty region as represented
+     * by the contents of the inOutDirty rectangle upon return from this function.
      * The caller may also pass <code>null</code> instead, in the case where the
      * entire surface should be redrawn.
      * @return A canvas for drawing into the surface.
