@@ -19,8 +19,6 @@ package android.media;
 /**
  * Exception thrown if MediaDrm object could not be instantiated for
  * whatever reason.
- *
- * @hide -- don't expose yet
  */
 public final class MediaDrmException extends Exception {
     public MediaDrmException(String detailMessage) {

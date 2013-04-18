@@ -11817,6 +11817,66 @@ package android.media {
     ctor public MediaCryptoException(java.lang.String);
   }
 
+  public final class MediaDrm {
+    ctor public MediaDrm(java.util.UUID) throws android.media.MediaDrmException;
+    method public void closeSession(byte[]);
+    method public android.media.MediaDrm.CryptoSession getCryptoSession(byte[], java.lang.String, java.lang.String);
+    method public android.media.MediaDrm.KeyRequest getKeyRequest(byte[], byte[], java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
+    method public byte[] getPropertyByteArray(java.lang.String);
+    method public java.lang.String getPropertyString(java.lang.String);
+    method public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
+    method public java.util.List<byte[]> getSecureStops();
+    method public static final boolean isCryptoSchemeSupported(java.util.UUID);
+    method public byte[] openSession();
+    method public byte[] provideKeyResponse(byte[], byte[]);
+    method public void provideProvisionResponse(byte[]);
+    method public java.util.HashMap<java.lang.String, java.lang.String> queryKeyStatus(byte[]);
+    method public final void release();
+    method public void releaseSecureStops(byte[]);
+    method public void removeKeys(byte[]);
+    method public void restoreKeys(byte[], byte[]);
+    method public void setOnEventListener(android.media.MediaDrm.OnEventListener);
+    method public void setPropertyByteArray(java.lang.String, byte[]);
+    method public void setPropertyString(java.lang.String, java.lang.String);
+    field public static final int EVENT_KEY_EXPIRED = 3; // 0x3
+    field public static final int EVENT_KEY_REQUIRED = 2; // 0x2
+    field public static final int EVENT_PROVISION_REQUIRED = 1; // 0x1
+    field public static final int EVENT_VENDOR_DEFINED = 4; // 0x4
+    field public static final int KEY_TYPE_OFFLINE = 2; // 0x2
+    field public static final int KEY_TYPE_RELEASE = 3; // 0x3
+    field public static final int KEY_TYPE_STREAMING = 1; // 0x1
+    field public static final java.lang.String PROPERTY_ALGORITHM = "algorithm";
+    field public static final java.lang.String PROPERTY_DESCRIPTION = "description";
+    field public static final java.lang.String PROPERTY_DEVICE_UNIQUE_ID = "deviceUniqueId";
+    field public static final java.lang.String PROPERTY_VENDOR = "vendor";
+    field public static final java.lang.String PROPERTY_VERSION = "version";
+  }
+
+  public final class MediaDrm.CryptoSession {
+    method public byte[] decrypt(byte[], byte[], byte[]);
+    method public byte[] encrypt(byte[], byte[], byte[]);
+    method public byte[] sign(byte[], byte[]);
+    method public boolean verify(byte[], byte[], byte[]);
+  }
+
+  public static final class MediaDrm.KeyRequest {
+    method public byte[] getData();
+    method public java.lang.String getDefaultUrl();
+  }
+
+  public static abstract interface MediaDrm.OnEventListener {
+    method public abstract void onEvent(android.media.MediaDrm, byte[], int, int, byte[]);
+  }
+
+  public static final class MediaDrm.ProvisionRequest {
+    method public byte[] getData();
+    method public java.lang.String getDefaultUrl();
+  }
+
+  public final class MediaDrmException extends java.lang.Exception {
+    ctor public MediaDrmException(java.lang.String);
+  }
+
   public final class MediaExtractor {
     ctor public MediaExtractor();
     method public boolean advance();
