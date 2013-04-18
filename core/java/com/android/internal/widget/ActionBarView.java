@@ -1354,7 +1354,7 @@ public class ActionBarView extends AbsActionBarView {
 
     public void setHomeActionContentDescription(int resId) {
         mHomeDescriptionRes = resId;
-        mHomeDescription = getResources().getText(resId);
+        mHomeDescription = resId != 0 ? getResources().getText(resId) : null;
     }
 
     static class SavedState extends BaseSavedState {
