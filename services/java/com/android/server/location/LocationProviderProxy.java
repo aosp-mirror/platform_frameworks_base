@@ -53,10 +53,13 @@ public class LocationProviderProxy implements LocationProviderInterface {
     private ProviderRequest mRequest = null;
     private WorkSource mWorksource = new WorkSource();
 
-    public static LocationProviderProxy createAndBind(Context context, String name, String action,
-            List<String> initialPackageNames, Handler handler) {
+    public static LocationProviderProxy createAndBind(
+            Context context, String name, String action,
+            int overlaySwitchResId, int defaultServicePackageNameResId,
+            int initialPackageNamesResId, Handler handler) {
         LocationProviderProxy proxy = new LocationProviderProxy(context, name, action,
-                initialPackageNames, handler);
+                overlaySwitchResId, defaultServicePackageNameResId, initialPackageNamesResId,
+                handler);
         if (proxy.bind()) {
             return proxy;
         } else {
@@ -65,10 +68,12 @@ public class LocationProviderProxy implements LocationProviderInterface {
     }
 
     private LocationProviderProxy(Context context, String name, String action,
-            List<String> initialPackageNames, Handler handler) {
+            int overlaySwitchResId, int defaultServicePackageNameResId,
+            int initialPackageNamesResId, Handler handler) {
         mContext = context;
         mName = name;
-        mServiceWatcher = new ServiceWatcher(mContext, TAG, action, initialPackageNames,
+        mServiceWatcher = new ServiceWatcher(mContext, TAG + "-" + name, action, overlaySwitchResId,
+                defaultServicePackageNameResId, initialPackageNamesResId,
                 mNewServiceWork, handler);
     }
 
