@@ -44,7 +44,16 @@ public final class MediaCodecInfo {
         return MediaCodecList.getSupportedTypes(mIndex);
     }
 
+    /**
+     * Encapsulates the capabilities of a given codec component,
+     * i.e. what profile/level combinations it supports and what colorspaces
+     * it is capable of providing the decoded data in.
+     */
     public static final class CodecCapabilities {
+        // Enumerates supported profile/level combinations as defined
+        // by the type of encoded data. These combinations impose restrictions
+        // on video resolution, bitrate... and limit the available encoder tools
+        // such as B-frame support, arithmetic coding...
         public CodecProfileLevel[] profileLevels;
 
         // from OMX_COLOR_FORMATTYPE
@@ -219,6 +228,11 @@ public final class MediaCodecInfo {
         public int level;
     };
 
+    /**
+     * Enumerates the capabilities of the codec component. Since a single
+     * component can support data of a variety of types, the type has to be
+     * specified to yield a meaningful result.
+     */
     public final CodecCapabilities getCapabilitiesForType(
             String type) {
         return MediaCodecList.getCodecCapabilities(mIndex, type);
