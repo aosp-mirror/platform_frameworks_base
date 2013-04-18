@@ -1595,7 +1595,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ApplicationInfo ai = mIPackageManager.getApplicationInfo(imm.getPackageName(),
                             PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
                             mSettings.getCurrentUserId());
-                    if (ai.enabledSetting
+                    if (ai != null && ai.enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
                         mIPackageManager.setApplicationEnabledSetting(imm.getPackageName(),
                                 PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
