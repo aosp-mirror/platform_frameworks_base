@@ -401,6 +401,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final SurfaceSession mFxSession;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
+    FocusedStackFrame mFocusedStackFrame;
 
     final float[] mTmpFloats = new float[9];
 
@@ -793,6 +794,8 @@ public class WindowManagerService extends IWindowManager.Stub
         SurfaceControl.openTransaction();
         try {
             createWatermarkInTransaction();
+            mFocusedStackFrame = new FocusedStackFrame(
+                    getDefaultDisplayContentLocked().getDisplay(), mFxSession);
         } finally {
             SurfaceControl.closeTransaction();
         }
@@ -3682,6 +3685,25 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void setFocusedStackFrame(TaskStack stack) {
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setFocusedStackFrame");
+        SurfaceControl.openTransaction();
+        try {
+            if (stack == null) {
+                mFocusedStackFrame.setVisibility(false);
+            } else {
+                final StackBox box = stack.mStackBox;
+                final Rect bounds = box.mBounds;
+                final boolean multipleStacks = box.mParent != null;
+                mFocusedStackFrame.setBounds(bounds);
+                mFocusedStackFrame.setVisibility(multipleStacks);
+            }
+        } finally {
+            SurfaceControl.closeTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
+        }
+    }
+
     @Override
     public void setFocusedApp(IBinder token, boolean moveFocusNow) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
@@ -4746,13 +4768,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int removeStack(int stackId) {
-        final TaskStack stack = mStackIdToStack.get(stackId);
-        if (stack != null) {
-            mStackIdToStack.delete(stackId);
-            int nextStackId = stack.remove();
-            stack.getDisplayContent().layoutNeeded = true;
-            performLayoutAndPlaceSurfacesLocked();
-            return nextStackId;
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack != null) {
+                mStackIdToStack.delete(stackId);
+                int nextStackId = stack.remove();
+                stack.getDisplayContent().layoutNeeded = true;
+                performLayoutAndPlaceSurfacesLocked();
+                return nextStackId;
+            }
+            if (DEBUG_STACK) Slog.i(TAG, "removeStack: could not find stackId=" + stackId);
         }
         return HOME_STACK_ID;
     }
@@ -9234,6 +9259,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.layoutNeeded = true;
             }
         }
+
+        final TaskStack stack = mFocusedApp != null ?
+                mTaskIdToTask.get(mFocusedApp.groupId).mStack : null;
+        setFocusedStackFrame(stack);
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.

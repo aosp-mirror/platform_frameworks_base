@@ -82,6 +82,7 @@ final class ActivityStack {
     static final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
     static final boolean DEBUG_TASKS = ActivityManagerService.DEBUG_TASKS;
     static final boolean DEBUG_CLEANUP = ActivityManagerService.DEBUG_CLEANUP;
+    static final boolean DEBUG_STACK = ActivityManagerService.DEBUG_STACK;
 
     static final boolean DEBUG_STATES = ActivityStackSupervisor.DEBUG_STATES;
     static final boolean DEBUG_ADD_REMOVE = ActivityStackSupervisor.DEBUG_ADD_REMOVE;
@@ -2836,6 +2837,8 @@ final class ActivityStack {
         }
         final TaskRecord task = r.task;
         if (task != null && task.removeActivity(r)) {
+            if (DEBUG_STACK) Slog.i(TAG,
+                    "removeActivityFromHistoryLocked: last activity removed from " + this);
             mStackSupervisor.removeTask(task);
         }
         r.takeFromHistory();

@@ -17,8 +17,11 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
+import android.util.Slog;
 
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerService.TAG;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -230,24 +233,28 @@ public class StackBox {
      * @return The first stackId of the resulting StackBox. */
     int remove() {
         if (mStack != null) {
+            if (DEBUG_STACK) Slog.i(TAG, "StackBox.remove: removing stackId=" + mStack.mStackId);
             mDisplayContent.mStackHistory.remove(mStack);
         }
         mDisplayContent.layoutNeeded = true;
 
         if (mParent == null) {
             // This is the top-plane stack.
+            if (DEBUG_STACK) Slog.i(TAG, "StackBox.remove: removing top plane.");
             mDisplayContent.removeStackBox(this);
             return HOME_STACK_ID;
         }
 
         StackBox sibling = isFirstChild() ? mParent.mSecond : mParent.mFirst;
         StackBox grandparent = mParent.mParent;
+        sibling.mParent = grandparent;
         if (grandparent == null) {
             // mParent is a top-plane stack. Now sibling will be.
+            if (DEBUG_STACK) Slog.i(TAG, "StackBox.remove: grandparent null");
             mDisplayContent.removeStackBox(mParent);
             mDisplayContent.addStackBox(sibling, true);
         } else {
-            sibling.mParent = grandparent;
+            if (DEBUG_STACK) Slog.i(TAG, "StackBox.remove: grandparent getting sibling");
             if (mParent.isFirstChild()) {
                 grandparent.mFirst = sibling;
             } else {
