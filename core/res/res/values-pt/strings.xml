@@ -160,9 +160,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Som DESATIVADO"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"O som está ATIVADO"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo de avião"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo de avião ATIVADO"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modo de avião DESATIVADO"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo avião"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo avião ATIVADO"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modo avião DESATIVADO"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo de segurança"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"A página em \"<xliff:g id="TITLE">%s</xliff:g>\" diz:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Deseja sair desta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecione OK para continuar ou Cancelar para permanecer na página atual."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Dica: toque duas vezes para aumentar e diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Preench. aut."</string>

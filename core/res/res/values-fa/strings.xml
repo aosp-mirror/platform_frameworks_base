@@ -622,7 +622,7 @@
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"اعلان‌های دسترسی"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"به برنامه اجازه می‌دهد به بازیابی، بررسی و پاک کردن اعلان‌ها از جمله موارد پست شده توسط سایر برنامه‌ها بپردازد."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"اتصال به یک سرویس شنونده اعلان"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"به دارنده اجازه می‌دهد به یک رابط سطح بالای سرویس شنونده اعلان متصل شود. این هرگز برای برنامه‌های عادی ضروری نیست."</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"به دارنده اجازه می‌دهد به یک رابط سطح بالای سرویس شنونده اعلان متصل شود. هرگز نباید برای برنامه‌های عادی لازم شود."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"طول و نویسه‎های مجاز در گذرواژه‌های بازکردن قفل صفحه را کنترل کنید."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"راه‌اندازی مجدد"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"صفحه در \"<xliff:g id="TITLE">%s</xliff:g>\" می‎گوید:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"جاوا اسکریپت"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"از این صفحه خارج می‎شوید؟"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"برای ادامه روی تأیید و برای ماندن در همین صفحه روی لغو کلیک کنید."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگنمایی و کوچکنمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>

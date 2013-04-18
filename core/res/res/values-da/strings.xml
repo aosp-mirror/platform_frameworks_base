@@ -156,7 +156,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Sluk"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Fejlrapport"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Lav fejlrapport"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Der indsamles oplysninger om din enheds aktuelle status, der efterfølgende sendes i en e-mail. Der går lidt tid, fra fejlrapporten påbegyndes, til den er klar til at blive sendt. Tak for tålmodigheden."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Der indsamles oplysninger om din enheds aktuelle status, der efterfølgende sendes i en e-mail. Der går lidt tid fra, at fejlrapporten påbegyndes, til den er klar til at blive sendt. Tak for tålmodigheden."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Lydløs"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Lyden er slået FRA"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Lyden er TIL"</string>
@@ -864,7 +864,14 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Genstart"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"På siden på \"<xliff:g id="TITLE">%s</xliff:g>\" står der:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"Javascript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Vil du gå væk fra denne side?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tryk på OK for at fortsætte eller Annuller for at blive på den aktuelle side."</string>
+    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
+    <skip />
     <string name="save_password_label" msgid="6860261758665825069">"Bekræft"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip! Dobbeltklik for at zoome ind eller ud."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofyld"</string>
