@@ -185,6 +185,17 @@ public class ActivityStackSupervisor {
         }
     }
 
+    boolean resumeHomeActivity(ActivityRecord prev) {
+        moveHomeStack(true);
+        if (prev != null) {
+            prev.mLaunchHomeTaskNext = false;
+        }
+        if (mHomeStack.topRunningActivityLocked(null) != null) {
+            return mHomeStack.resumeTopActivityLocked(prev);
+        }
+        return mService.startHomeActivityLocked(mCurrentUser);
+    }
+
     final void setLaunchHomeTaskNextFlag(ActivityRecord sourceRecord, ActivityRecord r,
             ActivityStack stack) {
         if (stack == mHomeStack) {
@@ -337,23 +348,12 @@ public class ActivityStackSupervisor {
     boolean allPausedActivitiesComplete() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if (isFrontStack(stack)) {
-                final ActivityRecord r = stack.mLastPausedActivity;
-                if (r != null && r.state != ActivityState.PAUSED
-                        && r.state != ActivityState.STOPPED
-                        && r.state != ActivityState.STOPPING) {
-                    return false;
-                }
+            final ActivityRecord r = stack.mPausingActivity;
+            if (r != null && r.state != ActivityState.PAUSED
+                    && r.state != ActivityState.STOPPED
+                    && r.state != ActivityState.STOPPING) {
+                return false;
             }
-        }
-        // TODO: Not sure if this should check if all Resumed are complete too.
-        switch (mStackState) {
-            case STACK_STATE_HOME_TO_BACK:
-                mStackState = STACK_STATE_HOME_IN_BACK;
-                break;
-            case STACK_STATE_HOME_TO_FRONT:
-                mStackState = STACK_STATE_HOME_IN_FRONT;
-                break;
         }
         return true;
     }
