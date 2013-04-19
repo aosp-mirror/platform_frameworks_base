@@ -17,7 +17,7 @@
 package android.security;
 
 import android.content.Context;
-import android.security.AndroidKeyPairGeneratorSpec.Builder;
+import android.security.KeyPairGeneratorSpec.Builder;
 
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -26,9 +26,9 @@ import java.security.cert.Certificate;
 
 /**
  * This provides the optional parameters that can be specified for
- * {@code KeyStore} entries that work with <a href="{@docRoot}
- * guide/topics/security/keystore.html">Android KeyStore facility</a>. The
- * Android KeyStore facility is accessed through a
+ * {@code KeyStore} entries that work with
+ * <a href="{@docRoot}guide/topics/security/keystore.html">Android KeyStore
+ * facility</a>. The Android KeyStore facility is accessed through a
  * {@link java.security.KeyStore} API using the {@code AndroidKeyStore}
  * provider. The {@code context} passed in may be used to pop up some UI to ask
  * the user to unlock or initialize the Android KeyStore facility.
@@ -39,15 +39,15 @@ import java.security.cert.Certificate;
  * {@code KeyStore}.
  * <p>
  * Keys may be generated using the {@link KeyPairGenerator} facility with a
- * {@link AndroidKeyPairGeneratorSpec} to specify the entry's {@code alias}. A
+ * {@link KeyPairGeneratorSpec} to specify the entry's {@code alias}. A
  * self-signed X.509 certificate will be attached to generated entries, but that
  * may be replaced at a later time by a certificate signed by a real Certificate
  * Authority.
  */
-public final class AndroidKeyStoreParameter implements ProtectionParameter {
+public final class KeyStoreParameter implements ProtectionParameter {
     private int mFlags;
 
-    private AndroidKeyStoreParameter(int flags) {
+    private KeyStoreParameter(int flags) {
         mFlags = flags;
     }
 
@@ -67,10 +67,10 @@ public final class AndroidKeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Builder class for {@link AndroidKeyStoreParameter} objects.
+     * Builder class for {@link KeyStoreParameter} objects.
      * <p>
-     * This will build protection parameters for use with the <a
-     * href="{@docRoot} guide/topics/security/keystore.html">Android KeyStore
+     * This will build protection parameters for use with the
+     * <a href="{@docRoot}guide/topics/security/keystore.html">Android KeyStore
      * facility</a>.
      * <p>
      * This can be used to require that KeyStore entries be stored encrypted.
@@ -78,8 +78,9 @@ public final class AndroidKeyStoreParameter implements ProtectionParameter {
      * Example:
      *
      * <pre class="prettyprint">
-     * AndroidKeyStoreParameter params =
-     *         new AndroidKeyStoreParameter.Builder(mContext).setEncryptionRequired().build();
+     * KeyStoreParameter params = new KeyStoreParameter.Builder(mContext)
+     *         .setEncryptionRequired()
+     *         .build();
      * </pre>
      */
     public final static class Builder {
@@ -105,19 +106,23 @@ public final class AndroidKeyStoreParameter implements ProtectionParameter {
          * screen (e.g., PIN, password) before creating or using the generated
          * key is successful.
          */
-        public Builder setEncryptionRequired() {
-            mFlags |= KeyStore.FLAG_ENCRYPTED;
+        public Builder setEncryptionRequired(boolean required) {
+            if (required) {
+                mFlags |= KeyStore.FLAG_ENCRYPTED;
+            } else {
+                mFlags &= ~KeyStore.FLAG_ENCRYPTED;
+            }
             return this;
         }
 
         /**
-         * Builds the instance of the {@code AndroidKeyPairGeneratorSpec}.
+         * Builds the instance of the {@code KeyPairGeneratorSpec}.
          *
          * @throws IllegalArgumentException if a required field is missing
-         * @return built instance of {@code AndroidKeyPairGeneratorSpec}
+         * @return built instance of {@code KeyPairGeneratorSpec}
          */
-        public AndroidKeyStoreParameter build() {
-            return new AndroidKeyStoreParameter(mFlags);
+        public KeyStoreParameter build() {
+            return new KeyStoreParameter(mFlags);
         }
     }
 }

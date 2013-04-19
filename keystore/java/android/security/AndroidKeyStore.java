@@ -209,7 +209,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
     }
 
     private void setPrivateKeyEntry(String alias, PrivateKey key, Certificate[] chain,
-            AndroidKeyStoreParameter params) throws KeyStoreException {
+            KeyStoreParameter params) throws KeyStoreException {
         byte[] keyBytes = null;
 
         final String pkeyAlias;
@@ -544,15 +544,16 @@ public class AndroidKeyStore extends KeyStoreSpi {
             return;
         }
 
-        if (param != null && !(param instanceof AndroidKeyStoreParameter)) {
-            throw new KeyStoreException("protParam should be AndroidKeyStoreParameter; was: "
+        if (param != null && !(param instanceof KeyStoreParameter)) {
+            throw new KeyStoreException(
+                    "protParam should be android.security.KeyStoreParameter; was: "
                     + param.getClass().getName());
         }
 
         if (entry instanceof PrivateKeyEntry) {
             PrivateKeyEntry prE = (PrivateKeyEntry) entry;
             setPrivateKeyEntry(alias, prE.getPrivateKey(), prE.getCertificateChain(),
-                    (AndroidKeyStoreParameter) param);
+                    (KeyStoreParameter) param);
             return;
         }
 
