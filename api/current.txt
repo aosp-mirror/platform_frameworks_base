@@ -17121,6 +17121,7 @@ package android.os {
     method public int getThreadId();
     method protected void onLooperPrepared();
     method public boolean quit();
+    method public boolean quitSafely();
   }
 
   public abstract interface IBinder {
@@ -17161,6 +17162,7 @@ package android.os {
     method public static void prepare();
     method public static void prepareMainLooper();
     method public void quit();
+    method public void quitSafely();
     method public void setMessageLogging(android.util.Printer);
   }
 
