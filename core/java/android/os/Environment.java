@@ -51,6 +51,7 @@ public class Environment {
     private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
 
     private static UserEnvironment sCurrentUser;
+    private static boolean sUserRequired;
 
     private static final Object sLock = new Object();
 
@@ -223,7 +224,7 @@ public class Environment {
      * @hide
      */
     public static File getMediaStorageDirectory() {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getMediaStorageDirectory();
     }
 
@@ -318,7 +319,7 @@ public class Environment {
      * @see #isExternalStorageRemovable()
      */
     public static File getExternalStorageDirectory() {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStorageDirectory();
     }
 
@@ -465,7 +466,7 @@ public class Environment {
      * using it such as with {@link File#mkdirs File.mkdirs()}.
      */
     public static File getExternalStoragePublicDirectory(String type) {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStoragePublicDirectory(type);
     }
 
@@ -474,7 +475,7 @@ public class Environment {
      * @hide
      */
     public static File getExternalStorageAndroidDataDir() {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStorageAndroidDataDir();
     }
     
@@ -483,7 +484,7 @@ public class Environment {
      * @hide
      */
     public static File getExternalStorageAppDataDirectory(String packageName) {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStorageAppDataDirectory(packageName);
     }
     
@@ -492,7 +493,7 @@ public class Environment {
      * @hide
      */
     public static File getExternalStorageAppMediaDirectory(String packageName) {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStorageAppMediaDirectory(packageName);
     }
     
@@ -501,7 +502,7 @@ public class Environment {
      * @hide
      */
     public static File getExternalStorageAppObbDirectory(String packageName) {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStorageAppObbDirectory(packageName);
     }
     
@@ -510,7 +511,7 @@ public class Environment {
      * @hide
      */
     public static File getExternalStorageAppFilesDirectory(String packageName) {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStorageAppFilesDirectory(packageName);
     }
 
@@ -519,7 +520,7 @@ public class Environment {
      * @hide
      */
     public static File getExternalStorageAppCacheDirectory(String packageName) {
-        throwIfSystem();
+        throwIfUserRequired();
         return sCurrentUser.getExternalStorageAppCacheDirectory(packageName);
     }
     
@@ -650,9 +651,15 @@ public class Environment {
         }
     }
 
-    private static void throwIfSystem() {
-        if (Process.myUid() == Process.SYSTEM_UID) {
-            Log.wtf(TAG, "Static storage paths aren't available from AID_SYSTEM", new Throwable());
+    /** {@hide} */
+    public static void setUserRequired(boolean userRequired) {
+        sUserRequired = userRequired;
+    }
+
+    private static void throwIfUserRequired() {
+        if (sUserRequired) {
+            Log.wtf(TAG, "Path requests must specify a user by using UserEnvironment",
+                    new Throwable());
         }
     }
 
