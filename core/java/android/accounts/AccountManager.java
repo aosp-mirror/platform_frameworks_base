@@ -405,6 +405,23 @@ public class AccountManager {
     }
 
     /**
+     * Returns the accounts visible to the specified package, in an environment where some apps
+     * are not authorized to view all accounts. This method can only be called by system apps.
+     * @param type The type of accounts to return, null to retrieve all accounts
+     * @param packageName The package name of the app for which the accounts are to be returned
+     * @return An array of {@link Account}, one per matching account.  Empty
+     *     (never null) if no accounts of the specified type have been added.
+     */
+    public Account[] getAccountsByTypeForPackage(String type, String packageName) {
+        try {
+            return mService.getAccountsByTypeForPackage(type, packageName);
+        } catch (RemoteException re) {
+            // possible security exception
+            throw new RuntimeException(re);
+        }
+    }
+
+    /**
      * Lists all accounts of a particular type.  The account type is a
      * string token corresponding to the authenticator and useful domain
      * of the account.  For example, there are types corresponding to Google

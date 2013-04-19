@@ -30,6 +30,7 @@ import android.accounts.IAccountManager;
 import android.accounts.IAccountManagerResponse;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -1872,6 +1873,20 @@ public class AccountManagerService
                     + callingUid + " with uid=" + uid);
         }
         return getAccountsAsUser(null, UserHandle.getCallingUserId(), packageName, uid);
+    }
+
+    @Override
+    public Account[] getAccountsByTypeForPackage(String type, String packageName) {
+        checkBinderPermission(android.Manifest.permission.INTERACT_ACROSS_USERS);
+        int packageUid = -1;
+        try {
+            packageUid = AppGlobals.getPackageManager().getPackageUid(
+                    packageName, UserHandle.getCallingUserId());
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Couldn't determine the packageUid for " + packageName + re);
+            return new Account[0];
+        }
+        return getAccountsAsUser(type, UserHandle.getCallingUserId(), packageName, packageUid);
     }
 
     public void getAccountsByFeatures(IAccountManagerResponse response,

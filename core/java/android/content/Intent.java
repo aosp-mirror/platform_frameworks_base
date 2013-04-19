@@ -2425,8 +2425,8 @@ public class Intent implements Parcelable, Cloneable {
      * which is of type <code>ArrayList&lt;RestrictionEntry&gt;</code>. It can also
      * contain an extra {@link #EXTRA_RESTRICTIONS_INTENT}, which is of type <code>Intent</code>.
      * The activity specified by that intent will be launched for a result which must contain
-     * the extra {@link #EXTRA_RESTRICTIONS_LIST}. The keys and values of the returned restrictions
-     * will be persisted.
+     * one of the extras {@link #EXTRA_RESTRICTIONS_LIST} or {@link #EXTRA_RESTRICTIONS_BUNDLE}.
+     * The keys and values of the returned restrictions will be persisted.
      * @see RestrictionEntry
      */
     public static final String ACTION_GET_RESTRICTION_ENTRIES =
