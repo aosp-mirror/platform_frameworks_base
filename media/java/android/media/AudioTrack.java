@@ -1062,7 +1062,7 @@ public class AudioTrack
      * @param audioData the array that holds the data to play.
      * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
      *     starts.
-     * @param sizeInShorts the number of bytes to read in audioData after the offset.
+     * @param sizeInShorts the number of shorts to read in audioData after the offset.
      * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
       *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
       *    the parameters don't resolve to valid data and indexes.
