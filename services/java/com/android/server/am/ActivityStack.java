@@ -850,9 +850,7 @@ final class ActivityStack {
                         prev.shortComponentName);
                 prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
                         userLeaving, prev.configChangeFlags);
-                if (mStackSupervisor.isFrontStack(this)) {
-                    mService.updateUsageStats(prev, false);
-                }
+                mService.updateUsageStats(prev, false);
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
                 Slog.w(TAG, "Exception thrown during pause", e);
