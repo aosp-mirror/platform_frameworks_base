@@ -147,6 +147,9 @@ public class ActivityStackSupervisor {
     }
 
     ActivityStack getTopStack() {
+        if (mFocusedStack == null) {
+            return mHomeStack;
+        }
         switch (mStackState) {
             case STACK_STATE_HOME_IN_FRONT:
             case STACK_STATE_HOME_TO_FRONT:
@@ -376,15 +379,6 @@ public class ActivityStackSupervisor {
             }
         }
         return null;
-    }
-
-    void resumeTopActivitiesLocked() {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (isFrontStack(stack)) {
-                stack.resumeTopActivityLocked(null);
-            }
-        }
     }
 
     ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
@@ -1501,9 +1495,10 @@ public class ActivityStackSupervisor {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            targetStack = getLastStack();
+            ActivityStack lastStack = getLastStack();
+            targetStack = lastStack != null ? lastStack : mHomeStack;
             moveHomeStack(targetStack.isHomeStack());
-            ActivityRecord prev = targetStack.topActivity();
+            ActivityRecord prev = lastStack == null ? null : targetStack.topActivity();
             r.setTask(prev != null ? prev.task
                     : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
                     null, true);
@@ -1556,7 +1551,10 @@ public class ActivityStackSupervisor {
 
     void resumeTopActivityLocked() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).resumeTopActivityLocked(null);
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (isFrontStack(stack)) {
+                stack.resumeTopActivityLocked(null);
+            }
         }
     }
 

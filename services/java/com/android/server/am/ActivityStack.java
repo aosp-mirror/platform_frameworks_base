@@ -532,6 +532,25 @@ final class ActivityStack {
         return null;
     }
 
+    boolean containsApp(ProcessRecord app) {
+        if (app == null) {
+            return false;
+        }
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.finishing) {
+                    continue;
+                }
+                if (r.app == app) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     final boolean updateLRUListLocked(ActivityRecord r) {
         final boolean hadit = mLRUActivities.remove(r);
         mLRUActivities.add(r);
@@ -1359,7 +1378,8 @@ final class ActivityStack {
         // We need to start pausing the current activity so the top one
         // can be resumed...
         final ActivityStack lastStack = mStackSupervisor.getLastStack();
-        if ((isHomeStack() ^ lastStack.isHomeStack()) && lastStack.mResumedActivity != null) {
+        if (lastStack != null && (isHomeStack() ^ lastStack.isHomeStack()) &&
+                lastStack.mResumedActivity != null) {
             // TODO: Don't pause when launching to the sibling task.
             if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
@@ -1493,7 +1513,8 @@ final class ActivityStack {
             // schedule launch ticks to collect information about slow apps.
             next.startLaunchTickingLocked();
 
-            ActivityRecord lastResumedActivity = lastStack.mResumedActivity;
+            ActivityRecord lastResumedActivity =
+                    lastStack == null ? null :lastStack.mResumedActivity;
             ActivityState lastState = next.state;
 
             mService.updateCpuStats();
@@ -1579,20 +1600,19 @@ final class ActivityStack {
                 if (DEBUG_STATES) Slog.v(TAG, "Resume failed; resetting state to "
                         + lastState + ": " + next);
                 next.state = lastState;
-                lastStack.mResumedActivity = lastResumedActivity;
+                if (lastStack != null) {
+                    lastStack.mResumedActivity = lastResumedActivity;
+                }
                 Slog.i(TAG, "Restarting because process died: " + next);
                 if (!next.hasBeenLaunched) {
                     next.hasBeenLaunched = true;
-                } else {
-                    if (SHOW_APP_STARTING_PREVIEW && mStackSupervisor.isFrontStack(lastStack)) {
-                        mService.mWindowManager.setAppStartingWindow(
-                                next.appToken, next.packageName, next.theme,
-                                mService.compatibilityInfoForPackageLocked(
-                                        next.info.applicationInfo),
-                                next.nonLocalizedLabel,
-                                next.labelRes, next.icon, next.windowFlags,
-                                null, true);
-                    }
+                } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
+                        mStackSupervisor.isFrontStack(lastStack)) {
+                    mService.mWindowManager.setAppStartingWindow(
+                            next.appToken, next.packageName, next.theme,
+                            mService.compatibilityInfoForPackageLocked(next.info.applicationInfo),
+                            next.nonLocalizedLabel, next.labelRes, next.icon, next.windowFlags,
+                            null, true);
                 }
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 return true;
@@ -1780,7 +1800,7 @@ final class ActivityStack {
         }
 
         if (doResume) {
-            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.resumeTopActivityLocked();
         }
     }
 
@@ -3723,6 +3743,10 @@ final class ActivityStack {
     }
 
     void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
+        if (!containsApp(app)) {
+            return;
+        }
+        // TODO: handle the case where an app spans multiple stacks.
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG,
                     "App died while pausing: " + mPausingActivity);
@@ -3736,7 +3760,10 @@ final class ActivityStack {
         boolean hasVisibleActivities = removeHistoryRecordsForAppLocked(app);
 
         if (!restarting) {
-            if (!mStackSupervisor.getTopStack().resumeTopActivityLocked(null)) {
+            ActivityStack stack = mStackSupervisor.getTopStack();
+            if (stack == null) {
+                mStackSupervisor.resumeHomeActivity(null);
+            } else if (!stack.resumeTopActivityLocked(null)) {
                 // If there was nothing to resume, and we are not already
                 // restarting this process, but there is a visible activity that
                 // is hosted by the process...  then make sure all visible
