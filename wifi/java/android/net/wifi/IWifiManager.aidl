@@ -71,7 +71,7 @@ interface IWifiManager
 
     DhcpInfo getDhcpInfo();
 
-    boolean isScanningAlwaysAvailable();
+    boolean isScanAlwaysAvailable();
 
     boolean acquireWifiLock(IBinder lock, int lockType, String tag, in WorkSource ws);
 

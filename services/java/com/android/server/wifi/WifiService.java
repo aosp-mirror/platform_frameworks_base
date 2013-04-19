@@ -404,7 +404,7 @@ public final class WifiService extends IWifiManager.Stub {
         try {
 
             /* Turning off Wi-Fi when scans are still available */
-            if (!enable && isScanningAlwaysAvailable()) {
+            if (!enable && isScanAlwaysAvailable()) {
                 /* Notify if device is provisioned and user has not opted out of the notification */
                 if (mNotifyScanMode.get() && mDeviceProvisioned.get()) {
                     Intent intent = new Intent(WifiManager.ACTION_NOTIFY_SCAN_ALWAYS_AVAILABLE);
@@ -497,7 +497,7 @@ public final class WifiService extends IWifiManager.Stub {
      * @return {@code true} if the enable/disable operation was
      *         started or is already in the queue.
      */
-    public boolean isScanningAlwaysAvailable() {
+    public boolean isScanAlwaysAvailable() {
         enforceAccessPermission();
         return mSettingsStore.isScanAlwaysAvailable();
     }
