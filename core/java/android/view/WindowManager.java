@@ -1274,10 +1274,11 @@ public interface WindowManager extends ViewManager {
         public static final int ROTATION_ANIMATION_JUMPCUT = 2;
 
         /**
-         * Define the animation used on this window for entry or exit following
-         * a rotation. This only works if the incoming and outgoing topmost
+         * Define the exit and entry animations used on this window when the device is rotated.
+         * This only has an affect if the incoming and outgoing topmost
          * opaque windows have the #FLAG_FULLSCREEN bit set and are not covered
-         * by other windows.
+         * by other windows. All other situations default to the
+         * {@link #ROTATION_ANIMATION_ROTATE} behavior.
          * 
          * @see #ROTATION_ANIMATION_ROTATE
          * @see #ROTATION_ANIMATION_CROSSFADE
@@ -1362,7 +1363,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Control special features of the input subsystem.
          *
-         * @see #INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES
+         * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
          * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
          * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
          * @hide
