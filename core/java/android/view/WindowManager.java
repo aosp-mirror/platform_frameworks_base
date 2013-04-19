@@ -795,9 +795,7 @@ public interface WindowManager extends ViewManager {
          * <p>This flag can be controlled in your theme through the
          * {@link android.R.attr#windowOverscan} attribute; this attribute
          * is automatically set for you in the standard overscan themes
-         * such as {@link android.R.style#Theme_NoTitleBar_Overscan},
-         * {@link android.R.style#Theme_Black_NoTitleBar_Overscan},
-         * {@link android.R.style#Theme_Light_NoTitleBar_Overscan},
+         * such as
          * {@link android.R.style#Theme_Holo_NoActionBar_Overscan},
          * {@link android.R.style#Theme_Holo_Light_NoActionBar_Overscan},
          * {@link android.R.style#Theme_DeviceDefault_NoActionBar_Overscan}, and
