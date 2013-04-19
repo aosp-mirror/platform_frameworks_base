@@ -144,7 +144,7 @@ static jint getBatteryHealth(const char* status)
 
 static int readFromFile(const String8& path, char* buf, size_t size)
 {
-    if (!path)
+    if (path.isEmpty())
         return -1;
     int fd = open(path.string(), O_RDONLY, 0);
     if (fd == -1) {
@@ -378,19 +378,19 @@ int register_android_server_BatteryService(JNIEnv* env)
 
     if (!gChargerNames.size())
         ALOGE("No charger supplies found");
-    if (!gPaths.batteryStatusPath)
+    if (gPaths.batteryStatusPath.isEmpty())
         ALOGE("batteryStatusPath not found");
-    if (!gPaths.batteryHealthPath)
+    if (gPaths.batteryHealthPath.isEmpty())
         ALOGE("batteryHealthPath not found");
-    if (!gPaths.batteryPresentPath)
+    if (gPaths.batteryPresentPath.isEmpty())
         ALOGE("batteryPresentPath not found");
-    if (!gPaths.batteryCapacityPath)
+    if (gPaths.batteryCapacityPath.isEmpty())
         ALOGE("batteryCapacityPath not found");
-    if (!gPaths.batteryVoltagePath)
+    if (gPaths.batteryVoltagePath.isEmpty())
         ALOGE("batteryVoltagePath not found");
-    if (!gPaths.batteryTemperaturePath)
+    if (gPaths.batteryTemperaturePath.isEmpty())
         ALOGE("batteryTemperaturePath not found");
-    if (!gPaths.batteryTechnologyPath)
+    if (gPaths.batteryTechnologyPath.isEmpty())
         ALOGE("batteryTechnologyPath not found");
 
     jclass clazz = env->FindClass("com/android/server/BatteryService");
