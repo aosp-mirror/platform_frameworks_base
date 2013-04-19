@@ -1,4 +1,5 @@
 page.title=Android 2.0, Release 1
+excludeFromSuggestions=true
 sdk.platform.version=2.0
 sdk.platform.apiLevel=5
 sdk.platform.majorMinor=major
