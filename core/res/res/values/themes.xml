@@ -405,16 +405,6 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
-    <!-- Variant of {@link #Theme} that has no title bar and no status bar and extending
-        into the display overscan region.  This theme
-        sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
-        to true. -->
-    <style name="Theme.NoTitleBar.Overscan">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowOverscan">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
     <!-- Theme for a light background with dark text on top.  Set your activity
          to this theme if you would like such an appearance.  As with the
          default theme, you should try to assume little more than that the
@@ -508,16 +498,6 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
-    <!-- Variant of {@link #Theme_Light} that has no title bar and
-         no status bar and extending into the display overscan region.  This theme
-         sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
-         to true. -->
-    <style name="Theme.Light.NoTitleBar.Overscan">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowOverscan">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
     <!-- Variant on {@link #Theme} that ensures the background is
          completely black.  This is useful for things like image viewers and
          media players.   If you want the normal (dark background) theme
@@ -537,16 +517,6 @@ please see themes_device_defaults.xml.
          sets {@link android.R.attr#windowFullscreen} to true.  -->
     <style name="Theme.Black.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-    
-    <!-- Variant of {@link #Theme_Black} that has no title bar and
-         no status bar and extending into the display overscan region.  This theme
-         sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
-         to true. -->
-    <style name="Theme.Black.NoTitleBar.Overscan">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowOverscan">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
 

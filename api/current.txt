@@ -1704,7 +1704,6 @@ package android {
     field public static final int Theme_Black = 16973832; // 0x1030008
     field public static final int Theme_Black_NoTitleBar = 16973833; // 0x1030009
     field public static final int Theme_Black_NoTitleBar_Fullscreen = 16973834; // 0x103000a
-    field public static final int Theme_Black_NoTitleBar_Overscan = 16974303; // 0x10301df
     field public static final int Theme_DeviceDefault = 16974120; // 0x1030128
     field public static final int Theme_DeviceDefault_Dialog = 16974126; // 0x103012e
     field public static final int Theme_DeviceDefault_DialogWhenLarge = 16974134; // 0x1030136
@@ -1723,11 +1722,11 @@ package android {
     field public static final int Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth = 16974133; // 0x1030135
     field public static final int Theme_DeviceDefault_Light_NoActionBar = 16974124; // 0x103012c
     field public static final int Theme_DeviceDefault_Light_NoActionBar_Fullscreen = 16974125; // 0x103012d
-    field public static final int Theme_DeviceDefault_Light_NoActionBar_Overscan = 16974307; // 0x10301e3
+    field public static final int Theme_DeviceDefault_Light_NoActionBar_Overscan = 16974304; // 0x10301e0
     field public static final int Theme_DeviceDefault_Light_Panel = 16974139; // 0x103013b
     field public static final int Theme_DeviceDefault_NoActionBar = 16974121; // 0x1030129
     field public static final int Theme_DeviceDefault_NoActionBar_Fullscreen = 16974122; // 0x103012a
-    field public static final int Theme_DeviceDefault_NoActionBar_Overscan = 16974306; // 0x10301e2
+    field public static final int Theme_DeviceDefault_NoActionBar_Overscan = 16974303; // 0x10301df
     field public static final int Theme_DeviceDefault_Panel = 16974138; // 0x103013a
     field public static final int Theme_DeviceDefault_Wallpaper = 16974140; // 0x103013c
     field public static final int Theme_DeviceDefault_Wallpaper_NoTitleBar = 16974141; // 0x103013d
@@ -1750,11 +1749,11 @@ package android {
     field public static final int Theme_Holo_Light_Dialog_NoActionBar_MinWidth = 16973942; // 0x1030076
     field public static final int Theme_Holo_Light_NoActionBar = 16974064; // 0x10300f0
     field public static final int Theme_Holo_Light_NoActionBar_Fullscreen = 16974065; // 0x10300f1
-    field public static final int Theme_Holo_Light_NoActionBar_Overscan = 16974305; // 0x10301e1
+    field public static final int Theme_Holo_Light_NoActionBar_Overscan = 16974302; // 0x10301de
     field public static final int Theme_Holo_Light_Panel = 16973948; // 0x103007c
     field public static final int Theme_Holo_NoActionBar = 16973932; // 0x103006c
     field public static final int Theme_Holo_NoActionBar_Fullscreen = 16973933; // 0x103006d
-    field public static final int Theme_Holo_NoActionBar_Overscan = 16974304; // 0x10301e0
+    field public static final int Theme_Holo_NoActionBar_Overscan = 16974301; // 0x10301dd
     field public static final int Theme_Holo_Panel = 16973947; // 0x103007b
     field public static final int Theme_Holo_Wallpaper = 16973949; // 0x103007d
     field public static final int Theme_Holo_Wallpaper_NoTitleBar = 16973950; // 0x103007e
@@ -1762,14 +1761,12 @@ package android {
     field public static final int Theme_Light = 16973836; // 0x103000c
     field public static final int Theme_Light_NoTitleBar = 16973837; // 0x103000d
     field public static final int Theme_Light_NoTitleBar_Fullscreen = 16973838; // 0x103000e
-    field public static final int Theme_Light_NoTitleBar_Overscan = 16974302; // 0x10301de
     field public static final int Theme_Light_Panel = 16973914; // 0x103005a
     field public static final int Theme_Light_WallpaperSettings = 16973922; // 0x1030062
     field public static final int Theme_NoDisplay = 16973909; // 0x1030055
     field public static final int Theme_NoTitleBar = 16973830; // 0x1030006
     field public static final int Theme_NoTitleBar_Fullscreen = 16973831; // 0x1030007
     field public static final int Theme_NoTitleBar_OverlayActionModes = 16973930; // 0x103006a
-    field public static final int Theme_NoTitleBar_Overscan = 16974301; // 0x10301dd
     field public static final int Theme_Panel = 16973913; // 0x1030059
     field public static final int Theme_Translucent = 16973839; // 0x103000f
     field public static final int Theme_Translucent_NoTitleBar = 16973840; // 0x1030010
@@ -3125,9 +3122,9 @@ package android.app {
     method public void onTerminate();
     method public void onTrimMemory(int);
     method public void registerActivityLifecycleCallbacks(android.app.Application.ActivityLifecycleCallbacks);
-    method public void registerOnProvideAssistData(android.app.Application.OnProvideAssistData);
+    method public void registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener);
     method public void unregisterActivityLifecycleCallbacks(android.app.Application.ActivityLifecycleCallbacks);
-    method public void unregisterOnProvideAssistData(android.app.Application.OnProvideAssistData);
+    method public void unregisterOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener);
   }
 
   public static abstract interface Application.ActivityLifecycleCallbacks {
@@ -3140,7 +3137,7 @@ package android.app {
     method public abstract void onActivityStopped(android.app.Activity);
   }
 
-  public static abstract interface Application.OnProvideAssistData {
+  public static abstract interface Application.OnProvideAssistDataListener {
     method public abstract void onProvideAssistData(android.app.Activity, android.os.Bundle);
   }
 
