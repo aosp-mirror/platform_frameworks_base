@@ -17,6 +17,7 @@
 package android.content.res;
 
 import android.os.Trace;
+import android.view.View;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -80,16 +81,16 @@ public class Resources {
 
     private static final Object sSync = new Object();
     /*package*/ static Resources mSystem = null;
-    
+
     // Information about preloaded resources.  Note that they are not
     // protected by a lock, because while preloading in zygote we are all
     // single-threaded, and after that these are immutable.
-    private static final LongSparseArray<Drawable.ConstantState> sPreloadedDrawables
+    private static final LongSparseArray<Drawable.ConstantState>[] sPreloadedDrawables;
+    private static final LongSparseArray<Drawable.ConstantState> sPreloadedColorDrawables
             = new LongSparseArray<Drawable.ConstantState>();
     private static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
             = new LongSparseArray<ColorStateList>();
-    private static final LongSparseArray<Drawable.ConstantState> sPreloadedColorDrawables
-            = new LongSparseArray<Drawable.ConstantState>();
+
     private static boolean sPreloaded;
     private static int sPreloadedDensity;
 
@@ -119,6 +120,12 @@ public class Resources {
     private NativePluralRules mPluralRule;
     
     private CompatibilityInfo mCompatibilityInfo;
+
+    static {
+        sPreloadedDrawables = new LongSparseArray[2];
+        sPreloadedDrawables[0] = new LongSparseArray<Drawable.ConstantState>();
+        sPreloadedDrawables[1] = new LongSparseArray<Drawable.ConstantState>();
+    }
 
     /** @hide */
     public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
@@ -1982,6 +1989,7 @@ public class Resources {
             ActivityInfo.CONFIG_LAYOUT_DIRECTION);
 
     private boolean verifyPreloadConfig(int changingConfigurations, int resourceId, String name) {
+        // We dont want to preloadd a Drawable when there is both a LTR and RTL version of it
         if (((changingConfigurations&~(ActivityInfo.CONFIG_FONT_SCALE |
                 ActivityInfo.CONFIG_DENSITY)) & VARYING_CONFIGS) != 0) {
             String resName;
@@ -1994,6 +2002,17 @@ public class Resources {
                     + Integer.toHexString(resourceId)
                     + " (" + resName + ") that varies with configuration!!");
             return false;
+        }
+        if (TRACE_FOR_PRELOAD) {
+            String resName;
+            try {
+                resName = getResourceName(resourceId);
+            } catch (NotFoundException e) {
+                resName = "?";
+            }
+            Log.w(TAG, "Preloading " + name + " resource #0x"
+                    + Integer.toHexString(resourceId)
+                    + " (" + resName + ")");
         }
         return true;
     }
@@ -2022,11 +2041,11 @@ public class Resources {
         if (dr != null) {
             return dr;
         }
-
+        final int layoutDirection = mConfiguration.getLayoutDirection();
         Drawable.ConstantState cs = isColorDrawable
                 ? sPreloadedColorDrawables.get(key)
                 : (sPreloadedDensity == mConfiguration.densityDpi
-                        ? sPreloadedDrawables.get(key) : null);
+                        ? sPreloadedDrawables[layoutDirection].get(key) : null);
         if (cs != null) {
             dr = cs.newDrawable(this);
         } else {
@@ -2100,11 +2119,12 @@ public class Resources {
             cs = dr.getConstantState();
             if (cs != null) {
                 if (mPreloading) {
-                    if (verifyPreloadConfig(cs.getChangingConfigurations(), value.resourceId, "drawable")) {
+                    if (verifyPreloadConfig(cs.getChangingConfigurations(), value.resourceId,
+                            "drawable")) {
                         if (isColorDrawable) {
                             sPreloadedColorDrawables.put(key, cs);
                         } else {
-                            sPreloadedDrawables.put(key, cs);
+                            sPreloadedDrawables[layoutDirection].put(key, cs);
                         }
                     }
                 } else {
