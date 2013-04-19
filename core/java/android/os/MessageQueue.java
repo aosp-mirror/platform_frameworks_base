@@ -219,7 +219,7 @@ public final class MessageQueue {
         }
     }
 
-    void quit() {
+    void quit(boolean safe) {
         if (!mQuitAllowed) {
             throw new RuntimeException("Main thread not allowed to quit.");
         }
@@ -229,6 +229,12 @@ public final class MessageQueue {
                 return;
             }
             mQuiting = true;
+
+            if (safe) {
+                removeAllFutureMessagesLocked();
+            } else {
+                removeAllMessagesLocked();
+            }
         }
         nativeWake(mPtr);
     }
@@ -470,6 +476,44 @@ public final class MessageQueue {
                     }
                 }
                 p = n;
+            }
+        }
+    }
+
+    private void removeAllMessagesLocked() {
+        Message p = mMessages;
+        while (p != null) {
+            Message n = p.next;
+            p.recycle();
+            p = n;
+        }
+        mMessages = null;
+    }
+
+    private void removeAllFutureMessagesLocked() {
+        final long now = SystemClock.uptimeMillis();
+        Message p = mMessages;
+        if (p != null) {
+            if (p.when > now) {
+                removeAllMessagesLocked();
+            } else {
+                Message n;
+                for (;;) {
+                    n = p.next;
+                    if (n == null) {
+                        return;
+                    }
+                    if (n.when > now) {
+                        break;
+                    }
+                    p = n;
+                }
+                p.next = null;
+                do {
+                    p = n;
+                    n = p.next;
+                    p.recycle();
+                } while (n != null);
             }
         }
     }
