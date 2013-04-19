@@ -554,20 +554,6 @@
         android:description="@string/permgroupdesc_accessibilityFeatures"
         android:priority="380" />
 
-    <!-- Allows an accessibility service to request touch exploration mode. -->
-    <permission android:name="android.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE"
-        android:permissionGroup="android.permission-group.ACCESSIBILITY_FEATURES"
-        android:label="@string/permlab_canRequestTouchExplorationMode"
-        android:description="@string/permdesc_canRequestTouchExplorationMode"
-        android:protectionLevel="dangerous" />
-
-    <!-- Allows an accessibility service to request enhanced web accessibility. -->
-    <permission android:name="android.permission.CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY"
-        android:permissionGroup="android.permission-group.ACCESSIBILITY_FEATURES"
-        android:label="@string/permlab_canRequestEnahncedWebAccessibility"
-        android:description="@string/permdesc_canRequestEnahncedWebAccessibility"
-        android:protectionLevel="dangerous" />
-
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
