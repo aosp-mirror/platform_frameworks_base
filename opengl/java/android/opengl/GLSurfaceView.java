@@ -245,7 +245,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             if (mGLThread != null) {
                 // GLThread may still be running if this view was never
                 // attached to a window.
-                mGLThread.requestExitAndWait();
+                mGLThread.quitSafely();
             }
         } finally {
             super.finalize();
@@ -628,7 +628,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             Log.d(TAG, "onDetachedFromWindow");
         }
         if (mGLThread != null) {
-            mGLThread.requestExitAndWait();
+            mGLThread.quitSafely();
+            try {
+                mGLThread.join();
+            } catch (InterruptedException ex) {
+            }
         }
         mDetached = true;
         super.onDetachedFromWindow();
@@ -1626,14 +1630,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         public int getRenderMode() {
             mGLHandler.runWithScissors(mGetRenderModeRunnable, 0);
             return mGetRenderModeRunnable.renderMode;
-        }
-
-        public void requestExitAndWait() {
-            getLooper().quit();
-            try {
-                this.join();
-            } catch (InterruptedException e) {
-            }
         }
     } // class GLThread
 
