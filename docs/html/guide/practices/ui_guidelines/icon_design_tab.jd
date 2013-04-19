@@ -1,4 +1,5 @@
 page.title=Tab Icons
+excludeFromSuggestions=true
 parent.title=Icon Design Guidelines
 parent.link=icon_design.html
 @jd:body
