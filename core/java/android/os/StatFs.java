@@ -57,9 +57,9 @@ public class StatFs {
     }
 
     /**
-     * The size, in bytes, of a block on the file system. This corresponds to
-     * the Unix {@code statfs.f_bsize} field.
+     * @deprecated Use {@link #getBlockSizeLong()} instead.
      */
+    @Deprecated
     public int getBlockSize() {
         return (int) mStat.f_bsize;
     }
@@ -73,27 +73,25 @@ public class StatFs {
     }
 
     /**
-     * The total number of blocks on the file system. This corresponds to the
-     * Unix {@code statfs.f_blocks} field.
+     * @deprecated Use {@link #getBlockCountLong()} instead.
      */
+    @Deprecated
     public int getBlockCount() {
         return (int) mStat.f_blocks;
     }
 
     /**
-     * The size, in bytes, of a block on the file system. This corresponds to
-     * the Unix {@code statfs.f_bsize} field.
+     * The total number of blocks on the file system. This corresponds to the
+     * Unix {@code statfs.f_blocks} field.
      */
     public long getBlockCountLong() {
         return mStat.f_blocks;
     }
 
     /**
-     * The total number of blocks that are free on the file system, including
-     * reserved blocks (that are not available to normal applications). This
-     * corresponds to the Unix {@code statfs.f_bfree} field. Most applications
-     * will want to use {@link #getAvailableBlocks()} instead.
+     * @deprecated Use {@link #getFreeBlocksLong()} instead.
      */
+    @Deprecated
     public int getFreeBlocks() {
         return (int) mStat.f_bfree;
     }
@@ -109,17 +107,18 @@ public class StatFs {
     }
 
     /**
-     * The number of bytes that are free on the file system, including
-     * reserved blocks (that are not available to normal applications).
+     * The number of bytes that are free on the file system, including reserved
+     * blocks (that are not available to normal applications). Most applications
+     * will want to use {@link #getAvailableBytes()} instead.
      */
     public long getFreeBytes() {
         return mStat.f_bfree * mStat.f_bsize;
     }
 
     /**
-     * The number of blocks that are free on the file system and available to
-     * applications. This corresponds to the Unix {@code statfs.f_bavail} field.
+     * @deprecated Use {@link #getAvailableBlocksLong()} instead.
      */
+    @Deprecated
     public int getAvailableBlocks() {
         return (int) mStat.f_bavail;
     }
@@ -138,5 +137,12 @@ public class StatFs {
      */
     public long getAvailableBytes() {
         return mStat.f_bavail * mStat.f_bsize;
+    }
+
+    /**
+     * The total number of bytes supported by the file system.
+     */
+    public long getTotalBytes() {
+        return mStat.f_blocks * mStat.f_bsize;
     }
 }
