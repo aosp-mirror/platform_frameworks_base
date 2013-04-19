@@ -228,6 +228,9 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int PWD     = 3;
         /** @hide */
         public static final String[] strings = { "PEAP", "TLS", "TTLS", "PWD" };
+
+        /** Prevent initialization */
+        private Eap() {}
     }
 
     /** The inner authentication method used */
@@ -244,6 +247,9 @@ public class WifiEnterpriseConfig implements Parcelable {
         private static final String PREFIX = "auth=";
         /** @hide */
         public static final String[] strings = {EMPTY_VALUE, "PAP", "MSCHAP", "MSCHAPV2", "GTC" };
+
+        /** Prevent initialization */
+        private Phase2() {}
     }
 
     /** Internal use only */
@@ -368,6 +374,16 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
+     * Get the password.
+     *
+     * Returns locally set password value. For networks fetched from
+     * framework, returns "*".
+     */
+    public String getPassword() {
+        return getFieldValue(PASSWORD_KEY, "");
+    }
+
+    /**
      * Set CA certificate alias.
      *
      * <p> See the {@link android.security.KeyChain} for details on installing or choosing
@@ -406,6 +422,15 @@ public class WifiEnterpriseConfig implements Parcelable {
         } else {
             throw new IllegalArgumentException("Not a CA certificate");
         }
+    }
+
+    /**
+     * Get CA certificate
+     *
+     * @return X.509 CA certificate
+     */
+    public X509Certificate getCaCertificate() {
+        return mCaCert;
     }
 
     /**
@@ -466,6 +491,15 @@ public class WifiEnterpriseConfig implements Parcelable {
 
         mClientPrivateKey = privateKey;
         mClientCertificate = clientCertificate;
+    }
+
+    /**
+     * Get client certificate
+     *
+     * @return X.509 client certificate
+     */
+    public X509Certificate getClientCertificate() {
+        return mClientCertificate;
     }
 
     boolean needsKeyStore() {
