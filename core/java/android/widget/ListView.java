@@ -41,6 +41,7 @@ import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
@@ -1715,11 +1716,17 @@ public class ListView extends AbsListView {
             }
 
             // Attempt to restore accessibility focus.
-            if (accessibilityFocusLayoutRestoreNode != null) {
-                accessibilityFocusLayoutRestoreNode.performAction(
-                        AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
-            } else if (accessibilityFocusLayoutRestoreView != null) {
-                accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
+            if (accessibilityFocusLayoutRestoreView != null) {
+                final AccessibilityNodeProvider provider =
+                        accessibilityFocusLayoutRestoreView.getAccessibilityNodeProvider();
+                if ((accessibilityFocusLayoutRestoreNode != null) && (provider != null)) {
+                    final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(
+                            accessibilityFocusLayoutRestoreNode.getSourceNodeId());
+                    provider.performAction(virtualViewId,
+                            AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+                } else {
+                    accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
+                }
             } else if (accessibilityFocusPosition != INVALID_POSITION) {
                 // Bound the position within the visible children.
                 final int position = MathUtils.constrain(
