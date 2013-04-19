@@ -1537,14 +1537,21 @@ public class DevicePolicyManager {
         return false;
     }
 
+
     /**
-     * Used to determine if a particular package has been registered as a Device Owner admin.
-     * Device Owner admins cannot be deactivated by the user unless the Device Owner itself allows
-     * it. And Device Owner packages cannot be uninstalled, once registered.
-     * @param packageName the package name to check against the registered device owner.
-     * @return whether or not the package is registered as the Device Owner.
+     * Used to determine if a particular package has been registered as a Device Owner app.
+     * A device owner app is a special device admin that cannot be deactivated by the user, once
+     * activated as a device admin. It also cannot be uninstalled. To check if a particular
+     * package is currently registered as the device owner app, pass in the package name from
+     * {@link Context#getPackageName()} to this method.<p/>This is useful for device
+     * admin apps that want to check if they are also registered as the device owner app. The
+     * exact mechanism by which a device admin app is registered as a device owner app is defined by
+     * the setup process.
+     * @param packageName the package name of the app, to compare with the registered device owner
+     * app, if any.
+     * @return whether or not the package is registered as the device owner app.
      */
-    public boolean isDeviceOwner(String packageName) {
+    public boolean isDeviceOwnerApp(String packageName) {
         if (mService != null) {
             try {
                 return mService.isDeviceOwner(packageName);
@@ -1553,6 +1560,14 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * @hide
+     * Redirect to isDeviceOwnerApp.
+     */
+    public boolean isDeviceOwner(String packageName) {
+        return isDeviceOwnerApp(packageName);
     }
 
     /** @hide */
