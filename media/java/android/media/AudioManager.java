@@ -2283,6 +2283,32 @@ public class AudioManager {
 
     /**
      * @hide
+     * Controls whether a remote control display needs periodic checks of the RemoteControlClient
+     * playback position to verify that the estimated position has not drifted from the actual
+     * position. By default the check is not performed.
+     * The IRemoteControlDisplay must have been previously registered for this to have any effect.
+     * @param rcd the IRemoteControlDisplay for which the anti-drift mechanism will be enabled
+     *     or disabled. No effect is null.
+     * @param wantsSync if true, RemoteControlClient instances which expose their playback position
+     *     to the framework will regularly compare the estimated playback position with the actual
+     *     position, and will update the IRemoteControlDisplay implementation whenever a drift is
+     *     detected.
+     */
+    public void remoteControlDisplayWantsPlaybackPositionSync(IRemoteControlDisplay rcd,
+            boolean wantsSync) {
+        if (rcd == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.remoteControlDisplayWantsPlaybackPositionSync(rcd, wantsSync);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in remoteControlDisplayWantsPlaybackPositionSync " + e);
+        }
+    }
+
+    /**
+     * @hide
      * Request the user of a RemoteControlClient to seek to the given playback position.
      * @param generationId the RemoteControlClient generation counter for which this request is
      *         issued. Requests for an older generation than current one will be ignored.
