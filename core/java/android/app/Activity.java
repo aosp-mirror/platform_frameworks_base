@@ -1353,8 +1353,8 @@ public class Activity extends ContextThemeWrapper
      * of the assist Intent.  The default implementation does nothing.
      *
      * <p>This function will be called after any global assist callbacks that had
-     * been registered with {@link Application#registerOnProvideAssistData
-     * Application.registerOnProvideAssistData}.
+     * been registered with {@link Application#registerOnProvideAssistDataListener
+     * Application.registerOnProvideAssistDataListener}.
      */
     public void onProvideAssistData(Bundle data) {
     }
