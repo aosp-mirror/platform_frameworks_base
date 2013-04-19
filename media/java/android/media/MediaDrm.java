@@ -480,7 +480,7 @@ public final class MediaDrm {
      * supported by CryptoSession.  The list may be empty if the DRM engine
      * plugin does not support CryptoSession operations.
      */
-    public static final String PROPERTY_ALGORITHM = "algorithm";
+    public static final String PROPERTY_ALGORITHMS = "algorithms";
 
     /**
      * Read a DRM engine plugin String property value, given the property name string.
@@ -493,8 +493,8 @@ public final class MediaDrm {
 
 
     /**
-     * The device unique identifier is established during device provisioning and
-     * provides a means of uniquely identifying each device
+     * Byte array property name: the device unique identifier is established during
+     * device provisioning and provides a means of uniquely identifying each device.
      */
     public static final String PROPERTY_DEVICE_UNIQUE_ID = "deviceUniqueId";
 

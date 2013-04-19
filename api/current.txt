@@ -11852,7 +11852,7 @@ package android.media {
     field public static final int KEY_TYPE_OFFLINE = 2; // 0x2
     field public static final int KEY_TYPE_RELEASE = 3; // 0x3
     field public static final int KEY_TYPE_STREAMING = 1; // 0x1
-    field public static final java.lang.String PROPERTY_ALGORITHM = "algorithm";
+    field public static final java.lang.String PROPERTY_ALGORITHMS = "algorithms";
     field public static final java.lang.String PROPERTY_DESCRIPTION = "description";
     field public static final java.lang.String PROPERTY_DEVICE_UNIQUE_ID = "deviceUniqueId";
     field public static final java.lang.String PROPERTY_VENDOR = "vendor";
