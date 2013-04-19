@@ -44,6 +44,7 @@ import android.text.style.TextAppearanceSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 import android.util.Printer;
 
 import android.view.View;
@@ -57,6 +58,8 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class TextUtils {
+    private static final String TAG = "TextUtils";
+
 
     private TextUtils() { /* cannot be instantiated */ }
 
@@ -550,6 +553,8 @@ public class TextUtils {
     /** @hide */
     public static final int ALIGNMENT_SPAN = 1;
     /** @hide */
+    public static final int FIRST_SPAN = ALIGNMENT_SPAN;
+    /** @hide */
     public static final int FOREGROUND_COLOR_SPAN = 2;
     /** @hide */
     public static final int RELATIVE_SIZE_SPAN = 3;
@@ -593,6 +598,8 @@ public class TextUtils {
     public static final int EASY_EDIT_SPAN = 22;
     /** @hide */
     public static final int LOCALE_SPAN = 23;
+    /** @hide */
+    public static final int LAST_SPAN = LOCALE_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -622,9 +629,16 @@ public class TextUtils {
 
                 if (prop instanceof ParcelableSpan) {
                     ParcelableSpan ps = (ParcelableSpan)prop;
-                    p.writeInt(ps.getSpanTypeId());
-                    ps.writeToParcel(p, parcelableFlags);
-                    writeWhere(p, sp, o);
+                    int spanTypeId = ps.getSpanTypeId();
+                    if (spanTypeId < FIRST_SPAN || spanTypeId > LAST_SPAN) {
+                        Log.e(TAG, "external class \"" + ps.getClass().getSimpleName()
+                                + "\" is attempting to use the frameworks-only ParcelableSpan"
+                                + " interface");
+                    } else {
+                        p.writeInt(spanTypeId);
+                        ps.writeToParcel(p, parcelableFlags);
+                        writeWhere(p, sp, o);
+                    }
                 }
             }
 
