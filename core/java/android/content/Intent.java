@@ -2591,6 +2591,46 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
 
+    /**
+     * Activity Action: Allow the user to select and open one or more existing
+     * documents. Both read and write access to the documents will be granted
+     * until explicitly revoked by the user.
+     * <p>
+     * Callers can restrict selection to a specific kind of data, such as
+     * photos, by setting one or more MIME types in {@link #EXTRA_MIME_TYPES}.
+     * <p>
+     * If the caller can handle multiple returned items (the user performing
+     * multiple selection), then it can specify {@link #EXTRA_ALLOW_MULTIPLE} to
+     * indicate this.
+     * <p>
+     * All returned URIs can be opened as a stream with
+     * {@link ContentResolver#openInputStream(Uri)}.
+     * <p>
+     * Output: The URI of the item that was picked. This must be a content: URI
+     * so that any receiver can access it.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_OPEN_DOCUMENT = "android.intent.action.OPEN_DOCUMENT";
+
+    /**
+     * Activity Action: Allow the user to create a new document. Both read and
+     * write access to the document will be granted until explicitly revoked by
+     * the user.
+     * <p>
+     * Callers can provide a hint document name by setting {@link #EXTRA_TITLE},
+     * but the user may change this value before creating the file. Callers can
+     * optionally hint at the MIME type being created by setting
+     * {@link #setType(String)}.
+     * <p>
+     * All returned URIs can be opened as a stream with
+     * {@link ContentResolver#openOutputStream(Uri)}.
+     * <p>
+     * Output: The URI of the item that was created. This must be a content: URI
+     * so that any receiver can access it.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
@@ -3193,6 +3233,14 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_RESTRICTIONS_INTENT =
             "android.intent.extra.restrictions_intent";
+
+    /**
+     * Extra used to communicate set of acceptable MIME types for
+     * {@link #ACTION_GET_CONTENT} or {@link #ACTION_OPEN_DOC}. The type of the
+     * extra is <code>ArrayList&lt;String&gt;</code>.
+     * @hide
+     */
+    public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

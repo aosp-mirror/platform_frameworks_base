@@ -1078,6 +1078,14 @@
         android:description="@string/permdesc_mediaStorageWrite"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to manage access to documents, usually as part
+         of a document picker. -->
+    <permission android:name="android.permission.MANAGE_DOCUMENTS"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_manageDocs"
+        android:description="@string/permdesc_manageDocs"
+        android:protectionLevel="signature|system" />
+
     <!-- ================================== -->
     <!-- Permissions for screenlock         -->
     <!-- ================================== -->
