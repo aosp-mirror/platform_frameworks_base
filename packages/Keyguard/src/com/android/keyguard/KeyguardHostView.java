@@ -1587,7 +1587,13 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void cleanUp() {
-
+        // Make sure we let go of all widgets and their package contexts promptly. If we don't do
+        // this, and the associated application is uninstalled, it can cause a soft reboot.
+        int count = mAppWidgetContainer.getChildCount();
+        for (int i = 0; i < count; i++) {
+            KeyguardWidgetFrame frame = mAppWidgetContainer.getWidgetPageAt(i);
+            frame.removeAllViews();
+        }
     }
 
     /**
