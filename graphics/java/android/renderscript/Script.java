@@ -166,6 +166,15 @@ public class Script extends BaseObj {
         mRS.nScriptForEach(getID(mRS), slot, in_id, out_id, params);
     }
 
+    /**
+     * Only intended for use by generated reflected code.
+     *
+     * @param slot
+     * @param ain
+     * @param aout
+     * @param v
+     * @param sc
+     */
     protected void forEach(int slot, Allocation ain, Allocation aout, FieldPacker v, LaunchOptions sc) {
         if (ain == null && aout == null) {
             throw new RSIllegalArgumentException(
@@ -310,6 +319,12 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarVE(getID(mRS), index, v.getData(), e.getID(mRS), dims);
     }
 
+    /**
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param v
+     */
     public void getVarV(int index, FieldPacker v) {
         mRS.nScriptGetVarV(getID(mRS), index, v.getData());
     }
@@ -332,6 +347,10 @@ public class Script extends BaseObj {
     }
 
 
+    /**
+     * Only intended for use by generated reflected code.
+     *
+     */
     public static class FieldBase {
         protected Element mElement;
         protected Allocation mAllocation;
@@ -364,16 +383,29 @@ public class Script extends BaseObj {
         }
     }
 
+
+    /**
+     * Class used to specify clipping for a kernel launch.
+     *
+     */
     public static final class LaunchOptions {
-        protected int xstart = 0;
-        protected int ystart = 0;
-        protected int xend = 0;
-        protected int yend = 0;
-        protected int zstart = 0;
-        protected int zend = 0;
+        private int xstart = 0;
+        private int ystart = 0;
+        private int xend = 0;
+        private int yend = 0;
+        private int zstart = 0;
+        private int zend = 0;
+        private int strategy;
 
-        protected int strategy;
-
+        /**
+         * Set the X range.  If the end value is set to 0 the X dimension is not
+         * clipped.
+         *
+         * @param xstartArg Must be >= 0
+         * @param xendArg Must be >= xstartArg
+         *
+         * @return LaunchOptions
+         */
         public LaunchOptions setX(int xstartArg, int xendArg) {
             if (xstartArg < 0 || xendArg <= xstartArg) {
                 throw new RSIllegalArgumentException("Invalid dimensions");
@@ -383,6 +415,15 @@ public class Script extends BaseObj {
             return this;
         }
 
+        /**
+         * Set the Y range.  If the end value is set to 0 the Y dimension is not
+         * clipped.
+         *
+         * @param ystartArg Must be >= 0
+         * @param yendArg Must be >= ystartArg
+         *
+         * @return LaunchOptions
+         */
         public LaunchOptions setY(int ystartArg, int yendArg) {
             if (ystartArg < 0 || yendArg <= ystartArg) {
                 throw new RSIllegalArgumentException("Invalid dimensions");
@@ -392,6 +433,15 @@ public class Script extends BaseObj {
             return this;
         }
 
+        /**
+         * Set the Z range.  If the end value is set to 0 the Z dimension is not
+         * clipped.
+         *
+         * @param zstartArg Must be >= 0
+         * @param zendArg Must be >= zstartArg
+         *
+         * @return LaunchOptions
+         */
         public LaunchOptions setZ(int zstartArg, int zendArg) {
             if (zstartArg < 0 || zendArg <= zstartArg) {
                 throw new RSIllegalArgumentException("Invalid dimensions");
@@ -402,21 +452,51 @@ public class Script extends BaseObj {
         }
 
 
+        /**
+         * Returns the current X start
+         *
+         * @return int current value
+         */
         public int getXStart() {
             return xstart;
         }
+        /**
+         * Returns the current X end
+         *
+         * @return int current value
+         */
         public int getXEnd() {
             return xend;
         }
+        /**
+         * Returns the current Y start
+         *
+         * @return int current value
+         */
         public int getYStart() {
             return ystart;
         }
+        /**
+         * Returns the current Y end
+         *
+         * @return int current value
+         */
         public int getYEnd() {
             return yend;
         }
+        /**
+         * Returns the current Z start
+         *
+         * @return int current value
+         */
         public int getZStart() {
             return zstart;
         }
+        /**
+         * Returns the current Z end
+         *
+         * @return int current value
+         */
         public int getZEnd() {
             return zend;
         }
