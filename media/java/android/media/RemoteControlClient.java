@@ -65,6 +65,7 @@ import java.util.Iterator;
 public class RemoteControlClient
 {
     private final static String TAG = "RemoteControlClient";
+    private final static boolean DEBUG = false;
 
     /**
      * Playback state of a RemoteControlClient which is stopped.
@@ -219,7 +220,7 @@ public class RemoteControlClient
     public final static int PLAYBACKINFO_USES_STREAM = 5;
 
     //==========================================
-    // Public flags for the supported transport control capabililities
+    // Public flags for the supported transport control capabilities
     /**
      * Flag indicating a RemoteControlClient makes use of the "previous" media key.
      *
@@ -642,6 +643,57 @@ public class RemoteControlClient
                 sendPlaybackState_syncCacheLock();
                 // update AudioService
                 sendAudioServiceNewPlaybackState_syncCacheLock();
+
+                // handle automatic playback position refreshes
+                if (mEventHandler == null) {
+                    return;
+                }
+                mEventHandler.removeMessages(MSG_POSITION_DRIFT_CHECK);
+                if (timeInMs == PLAYBACK_POSITION_INVALID) {
+                    // this playback state refresh has no known playback position, it's no use
+                    // trying to see if there is any drift at this point
+                    // (this also bypasses this mechanism for older apps that use the old
+                    //  setPlaybackState(int) API)
+                    return;
+                }
+                if (playbackPositionShouldMove(mPlaybackState)) {
+                    // playback position moving, schedule next position drift check
+                    mEventHandler.sendMessageDelayed(
+                            mEventHandler.obtainMessage(MSG_POSITION_DRIFT_CHECK),
+                            getCheckPeriodFromSpeed(playbackSpeed));
+                }
+            }
+        }
+    }
+
+    private void onPositionDriftCheck() {
+        if (DEBUG) { Log.d(TAG, "onPositionDriftCheck()"); }
+        synchronized(mCacheLock) {
+            if ((mEventHandler == null) || (mPositionProvider == null)) {
+                return;
+            }
+            if ((mPlaybackPositionMs == PLAYBACK_POSITION_INVALID) || (mPlaybackSpeed == 0.0f)) {
+                if (DEBUG) { Log.d(TAG, " no position or 0 speed, no check needed"); }
+                return;
+            }
+            long estPos = mPlaybackPositionMs + (long)
+                    ((SystemClock.elapsedRealtime() - mPlaybackStateChangeTimeMs) / mPlaybackSpeed);
+            long actPos = mPositionProvider.onGetPlaybackPosition();
+            if (actPos >= 0) {
+                if (Math.abs(estPos - actPos) > POSITION_DRIFT_MAX_MS) {
+                    // drift happened, report the new position
+                    if (DEBUG) { Log.w(TAG, " drift detected: actual=" +actPos +"  est=" +estPos); }
+                    setPlaybackState(mPlaybackState, actPos, mPlaybackSpeed);
+                } else {
+                    if (DEBUG) { Log.d(TAG, " no drift: actual=" + actPos +"  est=" + estPos); }
+                    // no drift, schedule the next drift check
+                    mEventHandler.sendMessageDelayed(
+                            mEventHandler.obtainMessage(MSG_POSITION_DRIFT_CHECK),
+                            getCheckPeriodFromSpeed(mPlaybackSpeed));
+                }
+            } else {
+                // invalid position (negative value), can't check for drift
+                mEventHandler.removeMessages(MSG_POSITION_DRIFT_CHECK);
             }
         }
     }
@@ -745,6 +797,14 @@ public class RemoteControlClient
             if (oldCapa != mPlaybackPositionCapabilities) {
                 // tell RCDs that this RCC's playback position capabilities have changed
                 sendTransportControlInfo_syncCacheLock();
+            }
+            if ((mPositionProvider != null) && (mEventHandler != null)
+                    && playbackPositionShouldMove(mPlaybackState)) {
+                // playback position is already moving, but now we have a position provider,
+                // so schedule a drift check right now
+                mEventHandler.sendMessageDelayed(
+                        mEventHandler.obtainMessage(MSG_POSITION_DRIFT_CHECK),
+                        0 /*check now*/);
             }
         }
     }
@@ -1099,6 +1159,7 @@ public class RemoteControlClient
     private final static int MSG_UNPLUG_DISPLAY = 8;
     private final static int MSG_UPDATE_DISPLAY_ARTWORK_SIZE = 9;
     private final static int MSG_SEEK_TO = 10;
+    private final static int MSG_POSITION_DRIFT_CHECK = 11;
 
     private class EventHandler extends Handler {
         public EventHandler(RemoteControlClient rcc, Looper looper) {
@@ -1145,6 +1206,9 @@ public class RemoteControlClient
                     break;
                 case MSG_SEEK_TO:
                     onSeekTo(msg.arg1, ((Long)msg.obj).longValue());
+                    break;
+                case MSG_POSITION_DRIFT_CHECK:
+                    onPositionDriftCheck();
                     break;
                 default:
                     Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
@@ -1438,6 +1502,59 @@ public class RemoteControlClient
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
+        }
+    }
+
+    /**
+     * Returns whether, for the given playback state, the playback position is expected to
+     * be changing.
+     * @param playstate the playback state to evaluate
+     * @return true during any form of playback, false if it's not playing anything while in this
+     *     playback state
+     */
+    private static boolean playbackPositionShouldMove(int playstate) {
+        switch(playstate) {
+            case PLAYSTATE_STOPPED:
+            case PLAYSTATE_PAUSED:
+            case PLAYSTATE_BUFFERING:
+            case PLAYSTATE_ERROR:
+            case PLAYSTATE_SKIPPING_FORWARDS:
+            case PLAYSTATE_SKIPPING_BACKWARDS:
+                return false;
+            case PLAYSTATE_PLAYING:
+            case PLAYSTATE_FAST_FORWARDING:
+            case PLAYSTATE_REWINDING:
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Period for playback position drift checks, 15s when playing at 1x or slower.
+     */
+    private final static long POSITION_REFRESH_PERIOD_PLAYING_MS = 15000;
+    /**
+     * Minimum period for playback position drift checks, never more often when every 2s, when
+     * fast forwarding or rewinding.
+     */
+    private final static long POSITION_REFRESH_PERIOD_MIN_MS = 2000;
+    /**
+     * The value above which the difference between client-reported playback position and
+     * estimated position is considered a drift.
+     */
+    private final static long POSITION_DRIFT_MAX_MS = 500;
+    /**
+     * Compute the period at which the estimated playback position should be compared against the
+     * actual playback position. Is a funciton of playback speed.
+     * @param speed 1.0f is normal playback speed
+     * @return the period in ms
+     */
+    private static long getCheckPeriodFromSpeed(float speed) {
+        if (Math.abs(speed) <= 1.0f) {
+            return POSITION_REFRESH_PERIOD_PLAYING_MS;
+        } else {
+            return Math.max((long)(POSITION_REFRESH_PERIOD_PLAYING_MS / Math.abs(speed)),
+                    POSITION_REFRESH_PERIOD_MIN_MS);
         }
     }
 }
