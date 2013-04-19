@@ -1232,8 +1232,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         try {
             mKeyStore.setEntry(TEST_ALIAS_1, entry,
-                    new AndroidKeyStoreParameter.Builder(getContext())
-                    .setEncryptionRequired()
+                    new KeyStoreParameter.Builder(getContext())
+                    .setEncryptionRequired(true)
                     .build());
             fail("Shouldn't be able to insert encrypted entry when KeyStore uninitialized");
         } catch (KeyStoreException expected) {
@@ -1752,8 +1752,10 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
             Entry entry = mKeyStore.getEntry(TEST_ALIAS_1, null);
 
             try {
-                mKeyStore.setEntry(TEST_ALIAS_1, entry, new AndroidKeyStoreParameter.Builder(
-                        getContext()).setEncryptionRequired().build());
+                mKeyStore.setEntry(TEST_ALIAS_1, entry,
+                        new KeyStoreParameter.Builder(getContext())
+                                .setEncryptionRequired(true)
+                                .build());
                 fail("Should not allow setting of Entry without unlocked keystore");
             } catch (KeyStoreException success) {
             }
@@ -1762,8 +1764,8 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
             assertTrue(mAndroidKeyStore.isUnlocked());
 
             mKeyStore.setEntry(TEST_ALIAS_1, entry,
-                    new AndroidKeyStoreParameter.Builder(getContext())
-                            .setEncryptionRequired()
+                    new KeyStoreParameter.Builder(getContext())
+                            .setEncryptionRequired(true)
                             .build());
         }
     }
