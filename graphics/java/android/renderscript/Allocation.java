@@ -1711,6 +1711,8 @@ public class Allocation extends BaseObj {
     }
 
     /**
+     * @hide
+     *
      * Interface to handle notification when new buffers are
      * available via USAGE_IO_INPUT.  An application will receive
      * one notification when a buffer is available.  Additional
@@ -1722,6 +1724,8 @@ public class Allocation extends BaseObj {
     }
 
     /**
+     * @hide
+     *
      * Set a notification handler for USAGE_IO_INPUT
      *
      * @param callback instance of the IoInputNotifier class to be called
