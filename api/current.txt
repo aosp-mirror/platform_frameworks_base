@@ -13938,8 +13938,11 @@ package android.net.wifi {
     ctor public WifiEnterpriseConfig(android.net.wifi.WifiEnterpriseConfig);
     method public int describeContents();
     method public java.lang.String getAnonymousIdentity();
+    method public java.security.cert.X509Certificate getCaCertificate();
+    method public java.security.cert.X509Certificate getClientCertificate();
     method public int getEapMethod();
     method public java.lang.String getIdentity();
+    method public java.lang.String getPassword();
     method public int getPhase2Method();
     method public java.lang.String getSubjectMatch();
     method public void setAnonymousIdentity(java.lang.String);
@@ -13955,7 +13958,6 @@ package android.net.wifi {
   }
 
   public static final class WifiEnterpriseConfig.Eap {
-    ctor public WifiEnterpriseConfig.Eap();
     field public static final int NONE = -1; // 0xffffffff
     field public static final int PEAP = 0; // 0x0
     field public static final int PWD = 3; // 0x3
@@ -13964,7 +13966,6 @@ package android.net.wifi {
   }
 
   public static final class WifiEnterpriseConfig.Phase2 {
-    ctor public WifiEnterpriseConfig.Phase2();
     field public static final int GTC = 4; // 0x4
     field public static final int MSCHAP = 2; // 0x2
     field public static final int MSCHAPV2 = 3; // 0x3
