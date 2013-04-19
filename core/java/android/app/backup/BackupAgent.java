@@ -17,12 +17,15 @@
 package android.app.backup;
 
 import android.app.IBackupAgent;
+import android.app.QueuedWork;
 import android.app.backup.IBackupManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -33,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.concurrent.CountDownLatch;
 
 import libcore.io.ErrnoException;
 import libcore.io.Libcore;
@@ -121,6 +125,32 @@ public abstract class BackupAgent extends ContextWrapper {
 
     /** @hide */
     public static final int TYPE_SYMLINK = 3;
+
+    Handler mHandler = null;
+
+    class SharedPrefsSynchronizer implements Runnable {
+        public final CountDownLatch mLatch = new CountDownLatch(1);
+
+        @Override
+        public void run() {
+            QueuedWork.waitToFinish();
+            mLatch.countDown();
+        }
+    };
+
+    // Syncing shared preferences deferred writes needs to happen on the main looper thread
+    private void waitForSharedPrefs() {
+        if (mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+
+        final SharedPrefsSynchronizer s = new SharedPrefsSynchronizer();
+        mHandler.postAtFrontOfQueue(s);
+        try {
+            s.mLatch.await();
+        } catch (InterruptedException e) { /* ignored */ }
+    }
+
 
     public BackupAgent() {
         super(null);
@@ -542,6 +572,11 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
+                // Ensure that any SharedPreferences writes have landed after the backup,
+                // in case the app code has side effects (since apps cannot provide this
+                // guarantee themselves).
+                waitForSharedPrefs();
+
                 Binder.restoreCallingIdentity(ident);
                 try {
                     callbackBinder.opComplete(token);
@@ -569,6 +604,9 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
+                // Ensure that any side-effect SharedPreferences writes have landed
+                waitForSharedPrefs();
+
                 Binder.restoreCallingIdentity(ident);
                 try {
                     callbackBinder.opComplete(token);
@@ -586,6 +624,10 @@ public abstract class BackupAgent extends ContextWrapper {
 
             if (DEBUG) Log.v(TAG, "doFullBackup() invoked");
 
+            // Ensure that any SharedPreferences writes have landed *before*
+            // we potentially try to back up the underlying files directly.
+            waitForSharedPrefs();
+
             try {
                 BackupAgent.this.onFullBackup(new FullBackupDataOutput(data));
             } catch (IOException ex) {
@@ -595,6 +637,9 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
+                // ... and then again after, as in the doBackup() case
+                waitForSharedPrefs();
+
                 // Send the EOD marker indicating that there is no more data
                 // forthcoming from this agent.
                 try {
@@ -624,6 +669,9 @@ public abstract class BackupAgent extends ContextWrapper {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {
+                // Ensure that any side-effect SharedPreferences writes have landed
+                waitForSharedPrefs();
+
                 Binder.restoreCallingIdentity(ident);
                 try {
                     callbackBinder.opComplete(token);
