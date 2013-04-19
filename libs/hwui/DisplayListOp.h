@@ -78,9 +78,11 @@ public:
         kOpLogFlag_JSON = 0x2 // TODO: add?
     };
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) = 0;
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) = 0;
 
-    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level) = 0;
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
+            bool useQuickReject) = 0;
 
     virtual void output(int level, uint32_t logFlags = 0) = 0;
 
@@ -104,7 +106,8 @@ public:
 
     virtual ~StateOp() {}
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) {
         // default behavior only affects immediate, deferrable state, issue directly to renderer
         applyState(deferStruct.mRenderer, saveCount);
     }
@@ -113,7 +116,8 @@ public:
      * State operations are applied directly to the renderer, but can cause the deferred drawing op
      * list to flush
      */
-    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level) {
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
+            bool useQuickReject) {
         applyState(replayStruct.mRenderer, saveCount);
     }
 
@@ -126,9 +130,9 @@ public:
     DrawOp(SkPaint* paint)
             : mPaint(paint), mQuickRejected(false) {}
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
-        if (mQuickRejected &&
-                CC_LIKELY(deferStruct.mReplayFlags & DisplayList::kReplayFlag_ClipChildren)) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) {
+        if (mQuickRejected && CC_LIKELY(useQuickReject)) {
             return;
         }
 
@@ -140,9 +144,9 @@ public:
         deferStruct.mDeferredList.addDrawOp(deferStruct.mRenderer, this);
     }
 
-    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level) {
-        if (mQuickRejected &&
-                CC_LIKELY(replayStruct.mReplayFlags & DisplayList::kReplayFlag_ClipChildren)) {
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
+            bool useQuickReject) {
+        if (mQuickRejected && CC_LIKELY(useQuickReject)) {
             return;
         }
 
@@ -261,7 +265,8 @@ public:
     SaveOp(int flags)
             : mFlags(flags) {}
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) {
         int newSaveCount = deferStruct.mRenderer.save(mFlags);
         deferStruct.mDeferredList.addSave(deferStruct.mRenderer, this, newSaveCount);
     }
@@ -293,7 +298,8 @@ public:
     RestoreToCountOp(int count)
             : mCount(count) {}
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) {
         deferStruct.mDeferredList.addRestoreToCount(deferStruct.mRenderer,
                 this, saveCount + mCount);
         deferStruct.mRenderer.restoreToCount(saveCount + mCount);
@@ -326,7 +332,8 @@ public:
             int alpha, SkXfermode::Mode mode, int flags)
             : mArea(left, top, right, bottom), mAlpha(alpha), mMode(mode), mFlags(flags) {}
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) {
         // NOTE: don't bother with actual saveLayer, instead issuing it at flush time
         int newSaveCount = deferStruct.mRenderer.getSaveCount();
         deferStruct.mDeferredList.addSaveLayer(deferStruct.mRenderer, this, newSaveCount);
@@ -490,7 +497,8 @@ class ClipOp : public StateOp {
 public:
     ClipOp(SkRegion::Op op) : mOp(op) {}
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) {
         // NOTE: must defer op BEFORE applying state, since it may read clip
         deferStruct.mDeferredList.addClip(deferStruct.mRenderer, this);
 
@@ -1371,12 +1379,14 @@ public:
             : DrawBoundedOp(0, 0, displayList->getWidth(), displayList->getHeight(), 0),
             mDisplayList(displayList), mFlags(flags) {}
 
-    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level) {
+    virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
+            bool useQuickReject) {
         if (mDisplayList && mDisplayList->isRenderable()) {
             mDisplayList->defer(deferStruct, level + 1);
         }
     }
-    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level) {
+    virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
+            bool useQuickReject) {
         if (mDisplayList && mDisplayList->isRenderable()) {
             mDisplayList->replay(replayStruct, level + 1);
         }

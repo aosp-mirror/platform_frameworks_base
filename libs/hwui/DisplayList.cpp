@@ -231,7 +231,7 @@ void DisplayList::init() {
     mTop = 0;
     mRight = 0;
     mBottom = 0;
-    mClipChildren = true;
+    mClipToBounds = true;
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
@@ -358,7 +358,7 @@ void DisplayList::outputViewProperties(const int level) {
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mAlpha);
         } else {
             int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipChildren) {
+            if (mClipToBounds) {
                 flags |= SkCanvas::kClipToLayer_SaveFlag;
             }
             ALOGD("%*sSaveLayerAlpha %.2f, %.2f, %.2f, %.2f, %d, 0x%x", level * 2, "",
@@ -366,7 +366,7 @@ void DisplayList::outputViewProperties(const int level) {
                     (int)(mAlpha * 255), flags);
         }
     }
-    if (mClipChildren && !mCaching) {
+    if (mClipToBounds && !mCaching) {
         ALOGD("%*sClipRect %.2f, %.2f, %.2f, %.2f", level * 2, "", 0.0f, 0.0f,
                 (float) mRight - mLeft, (float) mBottom - mTop);
     }
@@ -411,16 +411,17 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             // have to pass it into this call. In fact, this information might be in the
             // location/size info that we store with the new native transform data.
             int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipChildren) {
+            if (mClipToBounds) {
                 saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
             }
             handler(mSaveLayerOp->reinit(0, 0, mRight - mLeft, mBottom - mTop,
-                    mAlpha * 255, SkXfermode::kSrcOver_Mode, saveFlags), PROPERTY_SAVECOUNT);
+                    mAlpha * 255, SkXfermode::kSrcOver_Mode, saveFlags), PROPERTY_SAVECOUNT,
+                    mClipToBounds);
         }
     }
-    if (mClipChildren && !mCaching) {
+    if (mClipToBounds && !mCaching) {
         handler(mClipRectOp->reinit(0, 0, mRight - mLeft, mBottom - mTop, SkRegion::kIntersect_Op),
-                PROPERTY_SAVECOUNT);
+                PROPERTY_SAVECOUNT, mClipToBounds);
     }
 }
 
@@ -428,8 +429,8 @@ class DeferOperationHandler {
 public:
     DeferOperationHandler(DeferStateStruct& deferStruct, int level)
         : mDeferStruct(deferStruct), mLevel(level) {}
-    inline void operator()(DisplayListOp* operation, int saveCount) {
-        operation->defer(mDeferStruct, saveCount, mLevel);
+    inline void operator()(DisplayListOp* operation, int saveCount, bool clipToBounds) {
+        operation->defer(mDeferStruct, saveCount, mLevel, clipToBounds);
     }
 private:
     DeferStateStruct& mDeferStruct;
@@ -445,11 +446,11 @@ class ReplayOperationHandler {
 public:
     ReplayOperationHandler(ReplayStateStruct& replayStruct, int level)
         : mReplayStruct(replayStruct), mLevel(level) {}
-    inline void operator()(DisplayListOp* operation, int saveCount) {
+    inline void operator()(DisplayListOp* operation, int saveCount, bool clipToBounds) {
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
         mReplayStruct.mRenderer.eventMark(operation->name());
 #endif
-        operation->replay(mReplayStruct, saveCount, mLevel);
+        operation->replay(mReplayStruct, saveCount, mLevel, clipToBounds);
     }
 private:
     ReplayStateStruct& mReplayStruct;
@@ -492,16 +493,16 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
 
     int restoreTo = renderer.getSaveCount();
     handler(mSaveOp->reinit(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
-            PROPERTY_SAVECOUNT);
+            PROPERTY_SAVECOUNT, mClipToBounds);
 
     DISPLAY_LIST_LOGD("%*sSave %d %d", (level + 1) * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
 
     setViewProperties<T>(renderer, handler, level + 1);
 
-    if (renderer.quickRejectNoScissor(0, 0, mWidth, mHeight)) {
+    if (mClipToBounds && renderer.quickRejectNoScissor(0, 0, mWidth, mHeight)) {
         DISPLAY_LIST_LOGD("%*sRestoreToCount %d", level * 2, "", restoreTo);
-        handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT);
+        handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
         return;
     }
 
@@ -510,12 +511,12 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
     for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
         DisplayListOp *op = mDisplayListData->displayListOps[i];
 
-        handler(op, saveCount);
+        handler(op, saveCount, mClipToBounds);
         logBuffer.writeCommand(level, op->name());
     }
 
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
-    handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT);
+    handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
     renderer.restoreToCount(restoreTo);
     renderer.setOverrideLayerAlpha(1.0f);
 }

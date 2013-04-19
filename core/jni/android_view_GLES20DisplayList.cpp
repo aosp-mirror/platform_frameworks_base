@@ -84,9 +84,9 @@ static void android_view_GLES20DisplayList_setAnimationMatrix(JNIEnv* env,
     displayList->setAnimationMatrix(matrix);
 }
 
-static void android_view_GLES20DisplayList_setClipChildren(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, jboolean clipChildren) {
-    displayList->setClipChildren(clipChildren);
+static void android_view_GLES20DisplayList_setClipToBounds(JNIEnv* env,
+        jobject clazz, DisplayList* displayList, jboolean clipToBounds) {
+    displayList->setClipToBounds(clipToBounds);
 }
 
 static void android_view_GLES20DisplayList_setAlpha(JNIEnv* env,
@@ -308,7 +308,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetCaching",           "(IZ)V",  (void*) android_view_GLES20DisplayList_setCaching },
     { "nSetStaticMatrix",      "(II)V",  (void*) android_view_GLES20DisplayList_setStaticMatrix },
     { "nSetAnimationMatrix",   "(II)V",  (void*) android_view_GLES20DisplayList_setAnimationMatrix },
-    { "nSetClipChildren",      "(IZ)V",  (void*) android_view_GLES20DisplayList_setClipChildren },
+    { "nSetClipToBounds",      "(IZ)V",  (void*) android_view_GLES20DisplayList_setClipToBounds },
     { "nSetAlpha",             "(IF)V",  (void*) android_view_GLES20DisplayList_setAlpha },
     { "nSetHasOverlappingRendering", "(IZ)V",
             (void*) android_view_GLES20DisplayList_setHasOverlappingRendering },

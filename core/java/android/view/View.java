@@ -13489,8 +13489,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             displayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
             displayList.setHasOverlappingRendering(hasOverlappingRendering());
             if (mParent instanceof ViewGroup) {
-                displayList.setClipChildren(
-                        (((ViewGroup)mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
+                displayList.setClipToBounds(
+                        (((ViewGroup) mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
             }
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
