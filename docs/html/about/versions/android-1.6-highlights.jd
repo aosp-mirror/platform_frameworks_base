@@ -1,4 +1,5 @@
 page.title=Android 1.6 Platform Highlights
+excludeFromSuggestions=true
 sdk.date=September 2009
 
 @jd:body

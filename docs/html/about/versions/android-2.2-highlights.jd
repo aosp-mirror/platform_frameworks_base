@@ -1,4 +1,5 @@
 page.title=Android 2.2 Platform Highlights
+excludeFromSuggestions=true
 
 @jd:body
 
