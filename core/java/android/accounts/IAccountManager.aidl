@@ -32,6 +32,7 @@ interface IAccountManager {
     AuthenticatorDescription[] getAuthenticatorTypes();
     Account[] getAccounts(String accountType);
     Account[] getAccountsForPackage(String packageName, int uid);
+    Account[] getAccountsByTypeForPackage(String type, String packageName);
     Account[] getAccountsAsUser(String accountType, int userId);
     void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType, in String[] features);

@@ -2203,6 +2203,7 @@ package android.accounts {
     method public android.accounts.Account[] getAccounts();
     method public android.accounts.Account[] getAccountsByType(java.lang.String);
     method public android.accounts.AccountManagerFuture<android.accounts.Account[]> getAccountsByTypeAndFeatures(java.lang.String, java.lang.String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler);
+    method public android.accounts.Account[] getAccountsByTypeForPackage(java.lang.String, java.lang.String);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> getAuthToken(android.accounts.Account, java.lang.String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public deprecated android.accounts.AccountManagerFuture<android.os.Bundle> getAuthToken(android.accounts.Account, java.lang.String, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> getAuthToken(android.accounts.Account, java.lang.String, android.os.Bundle, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
@@ -4363,7 +4364,7 @@ package android.app.admin {
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
-    method public boolean isDeviceOwner(java.lang.String);
+    method public boolean isDeviceOwnerApp(java.lang.String);
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
