@@ -545,6 +545,7 @@
     <!-- =============================================== -->
     <!-- Permissions for enabling accessibility features -->
     <!-- =============================================== -->
+    <eat-comment />
 
     <!-- Used for permissions that allow requesting certain accessibility features. -->
     <permission-group android:name="android.permission-group.ACCESSIBILITY_FEATURES"
@@ -837,6 +838,7 @@
     <!-- ==================================================== -->
     <!-- Permissions related to changing audio settings   -->
     <!-- ==================================================== -->
+    <eat-comment />
 
     <!-- Used for permissions that provide direct access to speaker settings
          the device. -->
@@ -1276,6 +1278,7 @@
     <!-- ==================================================== -->
     <!-- Permissions related to changing status bar   -->
     <!-- ==================================================== -->
+    <eat-comment />
 
     <!-- Used for permissions that change the status bar -->
     <permission-group android:name="android.permission-group.STATUS_BAR"
@@ -1294,6 +1297,7 @@
     <!-- ==================================================== -->
     <!-- Permissions related to accessing sync settings   -->
     <!-- ==================================================== -->
+    <eat-comment />
 
     <!-- Used for permissions that access the sync settings or sync
          related information. -->
