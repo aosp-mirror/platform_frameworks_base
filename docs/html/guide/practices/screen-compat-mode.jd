@@ -1,4 +1,5 @@
 page.title=Screen Compatibility Mode
+excludeFromSuggestions=true
 parent.title=Supporting Multiple Screens
 parent.link=screens_support.html
 
