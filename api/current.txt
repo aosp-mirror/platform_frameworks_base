@@ -37,8 +37,6 @@ package android {
     field public static final java.lang.String CALL_PHONE = "android.permission.CALL_PHONE";
     field public static final java.lang.String CALL_PRIVILEGED = "android.permission.CALL_PRIVILEGED";
     field public static final java.lang.String CAMERA = "android.permission.CAMERA";
-    field public static final java.lang.String CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = "android.permission.CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
-    field public static final java.lang.String CAN_REQUEST_TOUCH_EXPLORATION_MODE = "android.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE";
     field public static final java.lang.String CHANGE_COMPONENT_ENABLED_STATE = "android.permission.CHANGE_COMPONENT_ENABLED_STATE";
     field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CHANGE_NETWORK_STATE = "android.permission.CHANGE_NETWORK_STATE";
@@ -322,6 +320,9 @@ package android {
     field public static final int cacheColorHint = 16843009; // 0x1010101
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
+    field public static final int canRequestEnhancedWebAccessibility = 16843735; // 0x10103d7
+    field public static final int canRequestFilterKeyEvents = 16843736; // 0x10103d8
+    field public static final int canRequestTouchExplorationMode = 16843734; // 0x10103d6
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
@@ -2112,16 +2113,22 @@ package android.accessibilityservice {
 
   public class AccessibilityServiceInfo implements android.os.Parcelable {
     ctor public AccessibilityServiceInfo();
+    method public static java.lang.String capabilityToString(int);
     method public int describeContents();
     method public static java.lang.String feedbackTypeToString(int);
     method public static java.lang.String flagToString(int);
-    method public boolean getCanRetrieveWindowContent();
+    method public deprecated boolean getCanRetrieveWindowContent();
+    method public int getCapabilities();
     method public deprecated java.lang.String getDescription();
     method public java.lang.String getId();
     method public android.content.pm.ResolveInfo getResolveInfo();
     method public java.lang.String getSettingsActivityName();
     method public java.lang.String loadDescription(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 4; // 0x4
+    field public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 8; // 0x8
+    field public static final int CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 2; // 0x2
+    field public static final int CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT = 1; // 0x1
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DEFAULT = 1; // 0x1
     field public static final int FEEDBACK_ALL_MASK = -1; // 0xffffffff
@@ -2134,6 +2141,7 @@ package android.accessibilityservice {
     field public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
     field public static final int FLAG_REPORT_VIEW_IDS = 16; // 0x10
     field public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 8; // 0x8
+    field public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 32; // 0x20
     field public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 4; // 0x4
     field public int eventTypes;
     field public int feedbackType;

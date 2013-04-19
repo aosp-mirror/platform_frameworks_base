@@ -2043,6 +2043,9 @@
   <public type="attr" name="childIndicatorEnd" />
   <public type="attr" name="restrictedAccountType" />
   <public type="attr" name="requiredAccountType" />
+  <public type="attr" name="canRequestTouchExplorationMode" />
+  <public type="attr" name="canRequestEnhancedWebAccessibility" />
+  <public type="attr" name="canRequestFilterKeyEvents" />
 
   <public type="style" name="Theme.NoTitleBar.Overscan" />
   <public type="style" name="Theme.Light.NoTitleBar.Overscan" />

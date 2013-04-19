@@ -825,17 +825,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private boolean notifyKeyEventLocked(KeyEvent event, int policyFlags, boolean isDefault) {
         // TODO: Now we are giving the key events to the last enabled
-        //       service that can handle them which is the last one
-        //       in our list since we write the last enabled as the
-        //       last record in the enabled services setting. Ideally,
-        //       the user should make the call which service handles
-        //       key events. However, only one service should handle
-        //       key events to avoid user frustration when different
-        //       behavior is observed from different combinations of
-        //       enabled accessibility services.
+        //       service that can handle them Ideally, the user should
+        //       make the call which service handles key events. However,
+        //       only one service should handle key events to avoid user
+        //       frustration when different behavior is observed from
+        //       different combinations of enabled accessibility services.
         UserState state = getCurrentUserStateLocked();
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             Service service = state.mBoundServices.get(i);
+            // Key events are handled only by services that declared
+            // this capability and requested to filter key events.
+            if (!service.mRequestFilterKeyEvents ||
+                    (service.mAccessibilityServiceInfo.getCapabilities() & AccessibilityServiceInfo
+                            .CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS) == 0) {
+                continue;
+            }
             if (service.mIsDefault == isDefault) {
                 service.notifyKeyEvent(event, policyFlags);
                 return true;
@@ -1374,11 +1378,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return true;
             }
         } else {
-            // Starting in JB-MR2 we request a permission to allow a service to enable
-            // touch exploration and do not care if the service is in the white list.
-            if (mContext.getPackageManager().checkPermission(
-                    android.Manifest.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE,
-                    service.mComponentName.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
+            // Starting in JB-MR2 we request an accessibility service to declare
+            // certain capabilities in its meta-data to allow it to enable the
+            // corresponding features.
+            if (service.mIsAutomation || (service.mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION) != 0) {
                 userState.mIsTouchExplorationEnabled = true;
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, service.mUserId);
@@ -1407,9 +1411,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         if (userState.mIsEnhancedWebAccessibilityEnabled) {
             return false;
         }
-        if (service.mIsAutomation || mContext.getPackageManager().checkPermission(
-                android.Manifest.permission.CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
-                service.mComponentName.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
+        if (service.mIsAutomation || (service.mAccessibilityServiceInfo.getCapabilities()
+               & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0) {
             userState.mIsEnhancedWebAccessibilityEnabled = true;
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 1, userState.mUserId);
@@ -1644,6 +1647,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mRequestEnhancedWebAccessibility;
 
+        boolean mRequestFilterKeyEvents;
+
         int mFetchFlags;
 
         long mNotificationTimeout;
@@ -1689,7 +1694,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mAccessibilityServiceInfo = accessibilityServiceInfo;
             mIsAutomation = (sFakeAccessibilityServiceComponentName.equals(componentName));
             if (!mIsAutomation) {
-                mCanRetrieveScreenContent = accessibilityServiceInfo.getCanRetrieveWindowContent();
+                mCanRetrieveScreenContent = (accessibilityServiceInfo.getCapabilities()
+                        & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION) != 0;
                 mIntent = new Intent().setComponent(mComponentName);
                 mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                         com.android.internal.R.string.accessibility_binding_label);
@@ -1728,9 +1734,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             if (mResolveInfo != null) {
                 mRequestTouchExplorationMode = (info.flags
-                            & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
+                        & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
                 mRequestEnhancedWebAccessibility = (info.flags
-                           & AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0;
+                        & AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0;
+                mRequestFilterKeyEvents = (info.flags
+                        & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS)  != 0;
             }
         }
 

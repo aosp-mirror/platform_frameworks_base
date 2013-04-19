@@ -308,6 +308,8 @@ public abstract class AccessibilityService extends Service {
      *     android:accessibilityFlags="flagDefault"
      *     android:settingsActivity="foo.bar.TestBackActivity"
      *     android:canRetrieveWindowContent="true"
+     *     android:canRequestTouchExplorationMode="true"
+     *     android:canRequestEnhancedWebAccessibility="true"
      *     . . .
      * /&gt;</pre>
      */
