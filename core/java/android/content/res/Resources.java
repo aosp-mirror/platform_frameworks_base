@@ -1985,13 +1985,14 @@ public class Resources {
         }
     }
 
-    static private final int VARYING_CONFIGS = ActivityInfo.activityInfoConfigToNative(
-            ActivityInfo.CONFIG_LAYOUT_DIRECTION);
-
-    private boolean verifyPreloadConfig(int changingConfigurations, int resourceId, String name) {
-        // We dont want to preloadd a Drawable when there is both a LTR and RTL version of it
+    private boolean verifyPreloadConfig(int changingConfigurations, int allowVarying,
+            int resourceId, String name) {
+        // We allow preloading of resources even if they vary by font scale (which
+        // doesn't impact resource selection) or density (which we handle specially by
+        // simply turning off all preloading), as well as any other configs specified
+        // by the caller.
         if (((changingConfigurations&~(ActivityInfo.CONFIG_FONT_SCALE |
-                ActivityInfo.CONFIG_DENSITY)) & VARYING_CONFIGS) != 0) {
+                ActivityInfo.CONFIG_DENSITY)) & ~allowVarying) != 0) {
             String resName;
             try {
                 resName = getResourceName(resourceId);
@@ -2017,6 +2018,9 @@ public class Resources {
         return true;
     }
 
+    static private final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigToNative(
+            ActivityInfo.CONFIG_LAYOUT_DIRECTION);
+
     /*package*/ Drawable loadDrawable(TypedValue value, int id)
             throws NotFoundException {
 
@@ -2041,11 +2045,12 @@ public class Resources {
         if (dr != null) {
             return dr;
         }
-        final int layoutDirection = mConfiguration.getLayoutDirection();
-        Drawable.ConstantState cs = isColorDrawable
-                ? sPreloadedColorDrawables.get(key)
-                : (sPreloadedDensity == mConfiguration.densityDpi
-                        ? sPreloadedDrawables[layoutDirection].get(key) : null);
+        Drawable.ConstantState cs;
+        if (isColorDrawable) {
+            cs = sPreloadedColorDrawables.get(key);
+        } else {
+            cs = sPreloadedDrawables[mConfiguration.getLayoutDirection()].get(key);
+        }
         if (cs != null) {
             dr = cs.newDrawable(this);
         } else {
@@ -2119,12 +2124,26 @@ public class Resources {
             cs = dr.getConstantState();
             if (cs != null) {
                 if (mPreloading) {
-                    if (verifyPreloadConfig(cs.getChangingConfigurations(), value.resourceId,
-                            "drawable")) {
-                        if (isColorDrawable) {
+                    final int changingConfigs = cs.getChangingConfigurations();
+                    if (isColorDrawable) {
+                        if (verifyPreloadConfig(changingConfigs, 0, value.resourceId,
+                                "drawable")) {
                             sPreloadedColorDrawables.put(key, cs);
-                        } else {
-                            sPreloadedDrawables[layoutDirection].put(key, cs);
+                        }
+                    } else {
+                        if (verifyPreloadConfig(changingConfigs,
+                                LAYOUT_DIR_CONFIG, value.resourceId, "drawable")) {
+                            if ((changingConfigs&LAYOUT_DIR_CONFIG) == 0) {
+                                // If this resource does not vary based on layout direction,
+                                // we can put it in all of the preload maps.
+                                sPreloadedDrawables[0].put(key, cs);
+                                sPreloadedDrawables[1].put(key, cs);
+                            } else {
+                                // Otherwise, only in the layout dir we loaded it for.
+                                final LongSparseArray<Drawable.ConstantState> preloads
+                                        = sPreloadedDrawables[mConfiguration.getLayoutDirection()];
+                                preloads.put(key, cs);
+                            }
                         }
                     }
                 } else {
@@ -2190,7 +2209,8 @@ public class Resources {
 
             csl = ColorStateList.valueOf(value.data);
             if (mPreloading) {
-                if (verifyPreloadConfig(value.changingConfigurations, value.resourceId, "color")) {
+                if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
+                        "color")) {
                     sPreloadedColorStateLists.put(key, csl);
                 }
             }
@@ -2239,7 +2259,8 @@ public class Resources {
 
         if (csl != null) {
             if (mPreloading) {
-                if (verifyPreloadConfig(value.changingConfigurations, value.resourceId, "color")) {
+                if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
+                        "color")) {
                     sPreloadedColorStateLists.put(key, csl);
                 }
             } else {
