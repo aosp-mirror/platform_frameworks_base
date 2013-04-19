@@ -26,6 +26,7 @@ import android.content.pm.IPackageManager;
 import android.content.res.Configuration;
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -1054,6 +1055,8 @@ public class SystemServer {
         // The system server has to run all of the time, so it needs to be
         // as efficient as possible with its memory usage.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
+
+        Environment.setUserRequired(true);
 
         System.loadLibrary("android_servers");
         init1(args);
