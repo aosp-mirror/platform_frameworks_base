@@ -17,17 +17,14 @@
 package android.app;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.RestrictionEntry;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.UserManager;
 
 /**
  * Base class for those who need to maintain global application state. You can
@@ -49,7 +46,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
             new ArrayList<ComponentCallbacks>();
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
             new ArrayList<ActivityLifecycleCallbacks>();
-    private ArrayList<OnProvideAssistData> mAssistCallbacks = null;
+    private ArrayList<OnProvideAssistDataListener> mAssistCallbacks = null;
 
     /** @hide */
     public LoadedApk mLoadedApk;
@@ -65,10 +62,10 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     /**
-     * Callback interface for use with {@link Application#registerOnProvideAssistData}
-     * and {@link Application#unregisterOnProvideAssistData}.
+     * Callback interface for use with {@link Application#registerOnProvideAssistDataListener}
+     * and {@link Application#unregisterOnProvideAssistDataListener}.
      */
-    public interface OnProvideAssistData {
+    public interface OnProvideAssistDataListener {
         /**
          * This is called when the user is requesting an assist, to build a full
          * {@link Intent#ACTION_ASSIST} Intent with all of the context of the current
@@ -158,16 +155,16 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    public void registerOnProvideAssistData(OnProvideAssistData callback) {
+    public void registerOnProvideAssistDataListener(OnProvideAssistDataListener callback) {
         synchronized (this) {
             if (mAssistCallbacks == null) {
-                mAssistCallbacks = new ArrayList<OnProvideAssistData>();
+                mAssistCallbacks = new ArrayList<OnProvideAssistDataListener>();
             }
             mAssistCallbacks.add(callback);
         }
     }
 
-    public void unregisterOnProvideAssistData(OnProvideAssistData callback) {
+    public void unregisterOnProvideAssistDataListener(OnProvideAssistDataListener callback) {
         synchronized (this) {
             if (mAssistCallbacks != null) {
                 mAssistCallbacks.remove(callback);
@@ -280,7 +277,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
-                ((OnProvideAssistData)callbacks[i]).onProvideAssistData(activity, data);
+                ((OnProvideAssistDataListener)callbacks[i]).onProvideAssistData(activity, data);
             }
         }
     }
