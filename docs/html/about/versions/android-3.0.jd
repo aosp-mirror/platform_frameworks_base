@@ -1,4 +1,5 @@
 page.title=Android 3.0 APIs
+excludeFromSuggestions=true
 sdk.platform.version=3.0
 sdk.platform.apiLevel=11
 @jd:body

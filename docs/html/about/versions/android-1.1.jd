@@ -1,4 +1,5 @@
 page.title=Android 1.1 Version Notes
+excludeFromSuggestions=true
 sdk.version=1.1_r1
 sys.date=February 2009
 @jd:body
