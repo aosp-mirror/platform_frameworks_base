@@ -17524,16 +17524,17 @@ package android.os {
 
   public class StatFs {
     ctor public StatFs(java.lang.String);
-    method public int getAvailableBlocks();
+    method public deprecated int getAvailableBlocks();
     method public long getAvailableBlocksLong();
     method public long getAvailableBytes();
-    method public int getBlockCount();
+    method public deprecated int getBlockCount();
     method public long getBlockCountLong();
-    method public int getBlockSize();
+    method public deprecated int getBlockSize();
     method public long getBlockSizeLong();
-    method public int getFreeBlocks();
+    method public deprecated int getFreeBlocks();
     method public long getFreeBlocksLong();
     method public long getFreeBytes();
+    method public long getTotalBytes();
     method public void restat(java.lang.String);
   }
 
