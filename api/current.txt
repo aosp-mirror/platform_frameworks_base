@@ -20299,7 +20299,6 @@ package android.renderscript {
     method public deprecated synchronized void resize(int);
     method public void setFromFieldPacker(int, android.renderscript.FieldPacker);
     method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
-    method public void setIoInputNotificationHandler(android.renderscript.Allocation.IoInputNotifier);
     method public void setSurface(android.view.Surface);
     method public void syncAll(int);
     field public static final int USAGE_GRAPHICS_CONSTANTS = 8; // 0x8
@@ -20310,10 +20309,6 @@ package android.renderscript {
     field public static final int USAGE_IO_OUTPUT = 64; // 0x40
     field public static final int USAGE_SCRIPT = 1; // 0x1
     field public static final int USAGE_SHARED = 128; // 0x80
-  }
-
-  public static abstract interface Allocation.IoInputNotifier {
-    method public abstract void onBufferAvailable(android.renderscript.Allocation);
   }
 
   public static final class Allocation.MipmapControl extends java.lang.Enum {
@@ -20898,13 +20893,6 @@ package android.renderscript {
     method public android.renderscript.Script.LaunchOptions setX(int, int);
     method public android.renderscript.Script.LaunchOptions setY(int, int);
     method public android.renderscript.Script.LaunchOptions setZ(int, int);
-    field protected int strategy;
-    field protected int xend;
-    field protected int xstart;
-    field protected int yend;
-    field protected int ystart;
-    field protected int zend;
-    field protected int zstart;
   }
 
   public class ScriptC extends android.renderscript.Script {
