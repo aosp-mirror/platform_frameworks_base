@@ -107,6 +107,11 @@ public class UsbDeviceConnection {
      * {@link UsbConstants#USB_DIR_OUT}, then the transfer is a write,
      * and if it is {@link UsbConstants#USB_DIR_IN}, then the transfer
      * is a read.
+     * <p>
+     * This method transfers data starting from index 0 in the buffer.
+     * To specify a different offset, use
+     * {@link #controlTransfer(int, int, int, int, byte[], int, int, int)}.
+     * </p>
      *
      * @param requestType request type for this transaction
      * @param request request ID for this transaction
@@ -118,11 +123,7 @@ public class UsbDeviceConnection {
      * @param timeout in milliseconds
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
-     *
-     * @deprecated Use {@link #controlTransfer(int, int, int, int, byte[], int, int, int)}
-     * which accepts a buffer start index.
      */
-    @Deprecated
     public int controlTransfer(int requestType, int request, int value,
             int index, byte[] buffer, int length, int timeout) {
         return controlTransfer(requestType, request, value, index, buffer, 0, length, timeout);
@@ -142,22 +143,27 @@ public class UsbDeviceConnection {
      * @param index index field for this transaction
      * @param buffer buffer for data portion of transaction,
      * or null if no data needs to be sent or received
-     * @param start the index of the first byte in the buffer to send or receive
+     * @param offset the index of the first byte in the buffer to send or receive
      * @param length the length of the data to send or receive
      * @param timeout in milliseconds
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
      */
     public int controlTransfer(int requestType, int request, int value, int index,
-            byte[] buffer, int start, int length, int timeout) {
-        checkBounds(buffer, start, length);
+            byte[] buffer, int offset, int length, int timeout) {
+        checkBounds(buffer, offset, length);
         return native_control_request(requestType, request, value, index,
-                buffer, start, length, timeout);
+                buffer, offset, length, timeout);
     }
 
     /**
      * Performs a bulk transaction on the given endpoint.
-     * The direction of the transfer is determined by the direction of the endpoint
+     * The direction of the transfer is determined by the direction of the endpoint.
+     * <p>
+     * This method transfers data starting from index 0 in the buffer.
+     * To specify a different offset, use
+     * {@link #bulkTransfer(UsbEndpoint, byte[], int, int, int)}.
+     * </p>
      *
      * @param endpoint the endpoint for this transaction
      * @param buffer buffer for data to send or receive
@@ -165,11 +171,7 @@ public class UsbDeviceConnection {
      * @param timeout in milliseconds
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
-     *
-     * @deprecated Use {@link #bulkTransfer(UsbEndpoint, byte[], int, int, int)}
-     * which accepts a buffer start index.
      */
-    @Deprecated
     public int bulkTransfer(UsbEndpoint endpoint,
             byte[] buffer, int length, int timeout) {
         return bulkTransfer(endpoint, buffer, 0, length, timeout);
@@ -177,20 +179,20 @@ public class UsbDeviceConnection {
 
     /**
      * Performs a bulk transaction on the given endpoint.
-     * The direction of the transfer is determined by the direction of the endpoint
+     * The direction of the transfer is determined by the direction of the endpoint.
      *
      * @param endpoint the endpoint for this transaction
      * @param buffer buffer for data to send or receive
-     * @param start the index of the first byte in the buffer to send or receive
+     * @param offset the index of the first byte in the buffer to send or receive
      * @param length the length of the data to send or receive
      * @param timeout in milliseconds
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
      */
     public int bulkTransfer(UsbEndpoint endpoint,
-            byte[] buffer, int start, int length, int timeout) {
-        checkBounds(buffer, start, length);
-        return native_bulk_request(endpoint.getAddress(), buffer, start, length, timeout);
+            byte[] buffer, int offset, int length, int timeout) {
+        checkBounds(buffer, offset, length);
+        return native_bulk_request(endpoint.getAddress(), buffer, offset, length, timeout);
     }
 
     /**
@@ -235,9 +237,9 @@ public class UsbDeviceConnection {
     private native boolean native_claim_interface(int interfaceID, boolean force);
     private native boolean native_release_interface(int interfaceID);
     private native int native_control_request(int requestType, int request, int value,
-            int index, byte[] buffer, int start, int length, int timeout);
+            int index, byte[] buffer, int offset, int length, int timeout);
     private native int native_bulk_request(int endpoint, byte[] buffer,
-            int start, int length, int timeout);
+            int offset, int length, int timeout);
     private native UsbRequest native_request_wait();
     private native String native_get_serial();
 }
