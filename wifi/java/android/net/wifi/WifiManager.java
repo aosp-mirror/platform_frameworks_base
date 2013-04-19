@@ -794,9 +794,9 @@ public class WifiManager {
      *
      * To change this setting, see {@link #ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE}.
      */
-    public boolean isScanningAlwaysAvailable() {
+    public boolean isScanAlwaysAvailable() {
         try {
-            return mService.isScanningAlwaysAvailable();
+            return mService.isScanAlwaysAvailable();
         } catch (RemoteException e) {
             return false;
         }
