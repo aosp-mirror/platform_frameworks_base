@@ -13996,7 +13996,7 @@ package android.net.wifi {
     method public deprecated android.net.DhcpInfo getDhcpInfo();
     method public java.util.List<android.net.wifi.ScanResult> getScanResults();
     method public int getWifiState();
-    method public boolean isScanningAlwaysAvailable();
+    method public boolean isScanAlwaysAvailable();
     method public boolean isWifiEnabled();
     method public boolean pingSupplicant();
     method public boolean reassociate();
