@@ -1,4 +1,5 @@
 page.title=Best Practices
+excludeFromSuggestions=true
 page.landing=true
 page.landing.intro=Design and build apps the right way. Learn how to create apps that look great and perform well on as many devices as possible, from phones to tablets and more.  
 page.landing.image=

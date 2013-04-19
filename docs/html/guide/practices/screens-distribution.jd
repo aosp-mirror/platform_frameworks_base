@@ -1,4 +1,5 @@
 page.title=Distributing to Specific Screens
+excludeFromSuggestions=true
 parent.title=Supporting Multiple Screens
 parent.link=screens_support.html
 
