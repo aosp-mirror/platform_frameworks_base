@@ -24457,17 +24457,6 @@ package android.util {
     method public void set(T, V);
   }
 
-  public class PropertyValueModel extends android.util.ValueModel {
-    method public T get();
-    method public H getHost();
-    method public android.util.Property<H, T> getProperty();
-    method public java.lang.Class<T> getType();
-    method public static android.util.PropertyValueModel<H, T> of(H, android.util.Property<H, T>);
-    method public static android.util.PropertyValueModel<H, T> of(H, java.lang.Class<T>, java.lang.String);
-    method public static android.util.PropertyValueModel of(java.lang.Object, java.lang.String);
-    method public void set(T);
-  }
-
   public class SparseArray implements java.lang.Cloneable {
     ctor public SparseArray();
     ctor public SparseArray(int);
@@ -24632,14 +24621,6 @@ package android.util {
     field public int resourceId;
     field public java.lang.CharSequence string;
     field public int type;
-  }
-
-  public abstract class ValueModel {
-    ctor protected ValueModel();
-    method public abstract T get();
-    method public abstract java.lang.Class<T> getType();
-    method public abstract void set(T);
-    field public static final android.util.ValueModel EMPTY;
   }
 
   public class Xml {
@@ -29248,12 +29229,10 @@ package android.widget {
     method public abstract void onSelectedDayChange(android.widget.CalendarView, int, int, int);
   }
 
-  public class CheckBox extends android.widget.CompoundButton implements android.widget.ValueEditor {
+  public class CheckBox extends android.widget.CompoundButton {
     ctor public CheckBox(android.content.Context);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet, int);
-    method public android.util.ValueModel<java.lang.Boolean> getValueModel();
-    method public void setValueModel(android.util.ValueModel<java.lang.Boolean>);
   }
 
   public abstract interface Checkable {
@@ -29426,16 +29405,14 @@ package android.widget {
     method public void setSize(int, int);
   }
 
-  public class EditText extends android.widget.TextView implements android.widget.ValueEditor {
+  public class EditText extends android.widget.TextView {
     ctor public EditText(android.content.Context);
     ctor public EditText(android.content.Context, android.util.AttributeSet);
     ctor public EditText(android.content.Context, android.util.AttributeSet, int);
     method public void extendSelection(int);
-    method public android.util.ValueModel<java.lang.CharSequence> getValueModel();
     method public void selectAll();
     method public void setSelection(int, int);
     method public void setSelection(int);
-    method public void setValueModel(android.util.ValueModel<java.lang.CharSequence>);
   }
 
   public abstract interface ExpandableListAdapter {
@@ -30466,13 +30443,11 @@ package android.widget {
     method public abstract java.lang.Object[] getSections();
   }
 
-  public class SeekBar extends android.widget.AbsSeekBar implements android.widget.ValueEditor {
+  public class SeekBar extends android.widget.AbsSeekBar {
     ctor public SeekBar(android.content.Context);
     ctor public SeekBar(android.content.Context, android.util.AttributeSet);
     ctor public SeekBar(android.content.Context, android.util.AttributeSet, int);
-    method public android.util.ValueModel<java.lang.Integer> getValueModel();
     method public void setOnSeekBarChangeListener(android.widget.SeekBar.OnSeekBarChangeListener);
-    method public void setValueModel(android.util.ValueModel<java.lang.Integer>);
   }
 
   public static abstract interface SeekBar.OnSeekBarChangeListener {
@@ -31058,11 +31033,6 @@ package android.widget {
     ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet, int);
     method public android.widget.TextView getText1();
     method public android.widget.TextView getText2();
-  }
-
-  public abstract interface ValueEditor {
-    method public abstract android.util.ValueModel<T> getValueModel();
-    method public abstract void setValueModel(android.util.ValueModel<T>);
   }
 
   public class VideoView extends android.view.SurfaceView implements android.widget.MediaController.MediaPlayerControl {
