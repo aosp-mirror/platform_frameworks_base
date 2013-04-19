@@ -417,10 +417,14 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @throws IllegalArgumentException if not a CA certificate
      */
     public void setCaCertificate(X509Certificate cert) {
-        if (cert.getBasicConstraints() >= 0) {
-            mCaCert = cert;
+        if (cert != null) {
+            if (cert.getBasicConstraints() >= 0) {
+                mCaCert = cert;
+            } else {
+                throw new IllegalArgumentException("Not a CA certificate");
+            }
         } else {
-            throw new IllegalArgumentException("Not a CA certificate");
+            mCaCert = null;
         }
     }
 
@@ -683,6 +687,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     private String removeDoubleQuotes(String string) {
+        if (TextUtils.isEmpty(string)) return "";
         int length = string.length();
         if ((length > 1) && (string.charAt(0) == '"')
                 && (string.charAt(length - 1) == '"')) {
