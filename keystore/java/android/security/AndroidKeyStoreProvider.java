@@ -24,7 +24,7 @@ import java.security.Provider;
  * @hide
  */
 public class AndroidKeyStoreProvider extends Provider {
-    public static final String PROVIDER_NAME = "AndroidKeyStoreProvider";
+    public static final String PROVIDER_NAME = "AndroidKeyStore";
 
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
@@ -33,6 +33,6 @@ public class AndroidKeyStoreProvider extends Provider {
         put("KeyStore." + AndroidKeyStore.NAME, AndroidKeyStore.class.getName());
 
         // java.security.KeyPairGenerator
-        put("KeyPairGenerator." + AndroidKeyStore.NAME, AndroidKeyPairGenerator.class.getName());
+        put("KeyPairGenerator.RSA", AndroidKeyPairGenerator.class.getName());
     }
 }

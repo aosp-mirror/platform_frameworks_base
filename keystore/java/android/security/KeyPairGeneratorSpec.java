@@ -29,9 +29,9 @@ import javax.security.auth.x500.X500Principal;
 
 /**
  * This provides the required parameters needed for initializing the
- * {@code KeyPairGenerator} that works with <a href="{@docRoot}
- * guide/topics/security/keystore.html">Android KeyStore facility</a>. The
- * Android KeyStore facility is accessed through a
+ * {@code KeyPairGenerator} that works with
+ * <a href="{@docRoot}guide/topics/security/keystore.html">Android KeyStore
+ * facility</a>. The Android KeyStore facility is accessed through a
  * {@link java.security.KeyPairGenerator} API using the {@code AndroidKeyStore}
  * provider. The {@code context} passed in may be used to pop up some UI to ask
  * the user to unlock or initialize the Android KeyStore facility.
@@ -49,7 +49,7 @@ import javax.security.auth.x500.X500Principal;
  * The self-signed X.509 certificate may be replaced at a later time by a
  * certificate signed by a real Certificate Authority.
  */
-public final class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
+public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     private final String mKeystoreAlias;
 
     private final Context mContext;
@@ -91,9 +91,9 @@ public final class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec
      *            period
      * @throws IllegalArgumentException when any argument is {@code null} or
      *             {@code endDate} is before {@code startDate}.
-     * @hide should be built with AndroidKeyPairGeneratorSpecBuilder
+     * @hide should be built with KeyPairGeneratorSpecBuilder
      */
-    public AndroidKeyPairGeneratorSpec(Context context, String keyStoreAlias,
+    public KeyPairGeneratorSpec(Context context, String keyStoreAlias,
             X500Principal subjectDN, BigInteger serialNumber, Date startDate, Date endDate,
             int flags) {
         if (context == null) {
@@ -184,7 +184,7 @@ public final class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec
     }
 
     /**
-     * Builder class for {@link AndroidKeyPairGeneratorSpec} objects.
+     * Builder class for {@link KeyPairGeneratorSpec} objects.
      * <p>
      * This will build a parameter spec for use with the <a href="{@docRoot}
      * guide/topics/security/keystore.html">Android KeyStore facility</a>.
@@ -198,14 +198,10 @@ public final class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec
      * Calendar end = new Calendar();
      * end.add(1, Calendar.YEAR);
      *
-     * AndroidKeyPairGeneratorSpec spec =
-     *         new AndroidKeyPairGeneratorSpec.Builder(mContext)
-     *                 .setAlias(&quot;myKey&quot;)
-     *                 .setSubject(new X500Principal(&quot;CN=myKey&quot;))
-     *                 .setSerial(BigInteger.valueOf(1337))
-     *                 .setStartDate(start.getTime())
-     *                 .setEndDate(end.getTime())
-     *                 .build();
+     * KeyPairGeneratorSpec spec =
+     *         new KeyPairGeneratorSpec.Builder(mContext).setAlias(&quot;myKey&quot;)
+     *                 .setSubject(new X500Principal(&quot;CN=myKey&quot;)).setSerial(BigInteger.valueOf(1337))
+     *                 .setStartDate(start.getTime()).setEndDate(end.getTime()).build();
      * </pre>
      */
     public final static class Builder {
@@ -309,13 +305,13 @@ public final class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec
         }
 
         /**
-         * Builds the instance of the {@code AndroidKeyPairGeneratorSpec}.
+         * Builds the instance of the {@code KeyPairGeneratorSpec}.
          *
          * @throws IllegalArgumentException if a required field is missing
-         * @return built instance of {@code AndroidKeyPairGeneratorSpec}
+         * @return built instance of {@code KeyPairGeneratorSpec}
          */
-        public AndroidKeyPairGeneratorSpec build() {
-            return new AndroidKeyPairGeneratorSpec(mContext, mKeystoreAlias, mSubjectDN,
+        public KeyPairGeneratorSpec build() {
+            return new KeyPairGeneratorSpec(mContext, mKeystoreAlias, mSubjectDN,
                     mSerialNumber, mStartDate, mEndDate, mFlags);
         }
     }
