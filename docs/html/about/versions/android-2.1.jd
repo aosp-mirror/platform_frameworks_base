@@ -1,4 +1,5 @@
 page.title=Android 2.1 Platform
+excludeFromSuggestions=true
 sdk.platform.version=2.1
 sdk.platform.apiLevel=7
 sdk.platform.majorMinor=minor
