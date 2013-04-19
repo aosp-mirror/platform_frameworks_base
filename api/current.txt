@@ -21136,37 +21136,6 @@ package android.sax {
 
 package android.security {
 
-  public final class AndroidKeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
-    method public android.content.Context getContext();
-    method public java.util.Date getEndDate();
-    method public java.lang.String getKeystoreAlias();
-    method public java.math.BigInteger getSerialNumber();
-    method public java.util.Date getStartDate();
-    method public javax.security.auth.x500.X500Principal getSubjectDN();
-    method public boolean isEncryptionRequired();
-  }
-
-  public static final class AndroidKeyPairGeneratorSpec.Builder {
-    ctor public AndroidKeyPairGeneratorSpec.Builder(android.content.Context);
-    method public android.security.AndroidKeyPairGeneratorSpec build();
-    method public android.security.AndroidKeyPairGeneratorSpec.Builder setAlias(java.lang.String);
-    method public android.security.AndroidKeyPairGeneratorSpec.Builder setEncryptionRequired();
-    method public android.security.AndroidKeyPairGeneratorSpec.Builder setEndDate(java.util.Date);
-    method public android.security.AndroidKeyPairGeneratorSpec.Builder setSerialNumber(java.math.BigInteger);
-    method public android.security.AndroidKeyPairGeneratorSpec.Builder setStartDate(java.util.Date);
-    method public android.security.AndroidKeyPairGeneratorSpec.Builder setSubject(javax.security.auth.x500.X500Principal);
-  }
-
-  public final class AndroidKeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
-    method public boolean isEncryptionRequired();
-  }
-
-  public static final class AndroidKeyStoreParameter.Builder {
-    ctor public AndroidKeyStoreParameter.Builder(android.content.Context);
-    method public android.security.AndroidKeyStoreParameter build();
-    method public android.security.AndroidKeyStoreParameter.Builder setEncryptionRequired();
-  }
-
   public final class KeyChain {
     ctor public KeyChain();
     method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], java.lang.String, int, java.lang.String);
@@ -21190,6 +21159,37 @@ package android.security {
     ctor public KeyChainException(java.lang.String);
     ctor public KeyChainException(java.lang.String, java.lang.Throwable);
     ctor public KeyChainException(java.lang.Throwable);
+  }
+
+  public final class KeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
+    method public android.content.Context getContext();
+    method public java.util.Date getEndDate();
+    method public java.lang.String getKeystoreAlias();
+    method public java.math.BigInteger getSerialNumber();
+    method public java.util.Date getStartDate();
+    method public javax.security.auth.x500.X500Principal getSubjectDN();
+    method public boolean isEncryptionRequired();
+  }
+
+  public static final class KeyPairGeneratorSpec.Builder {
+    ctor public KeyPairGeneratorSpec.Builder(android.content.Context);
+    method public android.security.KeyPairGeneratorSpec build();
+    method public android.security.KeyPairGeneratorSpec.Builder setAlias(java.lang.String);
+    method public android.security.KeyPairGeneratorSpec.Builder setEncryptionRequired();
+    method public android.security.KeyPairGeneratorSpec.Builder setEndDate(java.util.Date);
+    method public android.security.KeyPairGeneratorSpec.Builder setSerialNumber(java.math.BigInteger);
+    method public android.security.KeyPairGeneratorSpec.Builder setStartDate(java.util.Date);
+    method public android.security.KeyPairGeneratorSpec.Builder setSubject(javax.security.auth.x500.X500Principal);
+  }
+
+  public final class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
+    method public boolean isEncryptionRequired();
+  }
+
+  public static final class KeyStoreParameter.Builder {
+    ctor public KeyStoreParameter.Builder(android.content.Context);
+    method public android.security.KeyStoreParameter build();
+    method public android.security.KeyStoreParameter.Builder setEncryptionRequired(boolean);
   }
 
 }

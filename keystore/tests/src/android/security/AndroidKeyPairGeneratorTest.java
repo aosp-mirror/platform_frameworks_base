@@ -65,7 +65,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
 
         assertFalse(mAndroidKeyStore.isUnlocked());
 
-        mGenerator = java.security.KeyPairGenerator.getInstance("AndroidKeyStore");
+        mGenerator = java.security.KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
     }
 
     private void setupPassword() {
@@ -80,7 +80,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
     public void testKeyPairGenerator_Initialize_Params_Encrypted_Success() throws Exception {
         setupPassword();
 
-        mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+        mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                 .setAlias(TEST_ALIAS_1)
                 .setSubject(TEST_DN_1)
                 .setSerialNumber(TEST_SERIAL_1)
@@ -116,7 +116,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
         setupPassword();
 
         mGenerator.initialize(
-                new AndroidKeyPairGeneratorSpec.Builder(getContext())
+                new KeyPairGeneratorSpec.Builder(getContext())
                         .setAlias(TEST_ALIAS_1)
                         .setSubject(TEST_DN_1)
                         .setSerialNumber(TEST_SERIAL_1)
@@ -130,7 +130,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
     public void testKeyPairGenerator_GenerateKeyPair_Encrypted_Success() throws Exception {
         setupPassword();
 
-        mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+        mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                 .setAlias(TEST_ALIAS_1)
                 .setSubject(TEST_DN_1)
                 .setSerialNumber(TEST_SERIAL_1)
@@ -146,7 +146,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
     }
 
     public void testKeyPairGenerator_GenerateKeyPair_Unencrypted_Success() throws Exception {
-        mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+        mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                 .setAlias(TEST_ALIAS_1)
                 .setSubject(TEST_DN_1)
                 .setSerialNumber(TEST_SERIAL_1)
@@ -163,7 +163,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
     public void testKeyPairGenerator_GenerateKeyPair_Replaced_Success() throws Exception {
         // Generate the first key
         {
-            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+            mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                     .setAlias(TEST_ALIAS_1)
                     .setSubject(TEST_DN_1)
                     .setSerialNumber(TEST_SERIAL_1)
@@ -178,7 +178,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
 
         // Replace the original key
         {
-            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+            mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                     .setAlias(TEST_ALIAS_2)
                     .setSubject(TEST_DN_2)
                     .setSerialNumber(TEST_SERIAL_2)
@@ -196,7 +196,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
             throws Exception {
         // Generate the first key
         {
-            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+            mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                     .setAlias(TEST_ALIAS_1)
                     .setSubject(TEST_DN_1)
                     .setSerialNumber(TEST_SERIAL_1)
@@ -211,7 +211,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
 
         // Attempt to replace previous key
         {
-            mGenerator.initialize(new AndroidKeyPairGeneratorSpec.Builder(getContext())
+            mGenerator.initialize(new KeyPairGeneratorSpec.Builder(getContext())
                     .setAlias(TEST_ALIAS_1)
                     .setSubject(TEST_DN_2)
                     .setSerialNumber(TEST_SERIAL_2)
