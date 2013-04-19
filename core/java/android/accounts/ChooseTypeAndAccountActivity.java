@@ -34,13 +34,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.internal.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -110,6 +108,7 @@ public class ChooseTypeAndAccountActivity extends Activity
     private static final String KEY_INSTANCE_STATE_EXISTING_ACCOUNTS = "existingAccounts";
     private static final String KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME = "selectedAccountName";
     private static final String KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT = "selectedAddAccount";
+    private static final String KEY_INSTANCE_STATE_ACCOUNT_LIST = "accountList";
 
     private static final int SELECTED_ITEM_NONE = -1;
 
@@ -169,6 +168,7 @@ public class ChooseTypeAndAccountActivity extends Activity
 
             mSelectedAddNewAccount = savedInstanceState.getBoolean(
                     KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, false);
+            mAccounts = savedInstanceState.getParcelableArrayList(KEY_INSTANCE_STATE_ACCOUNT_LIST);
         } else {
             mPendingRequest = REQUEST_NULL;
             mExistingAccounts = null;
@@ -266,6 +266,7 @@ public class ChooseTypeAndAccountActivity extends Activity
                         mAccounts.get(mSelectedItemIndex).name);
             }
         }
+        outState.putParcelableArrayList(KEY_INSTANCE_STATE_ACCOUNT_LIST, mAccounts);
     }
 
     public void onCancelButtonClicked(View view) {
