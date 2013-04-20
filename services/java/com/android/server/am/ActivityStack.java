@@ -2412,7 +2412,7 @@ final class ActivityStack {
             if (r.finishing) {
                 finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
             } else {
-                stopActivityLocked(r);
+                r.task.stack.stopActivityLocked(r);
             }
         }
 
@@ -2420,7 +2420,7 @@ final class ActivityStack {
         // waiting for the next one to start.
         for (int i = 0; i < NF; i++) {
             r = finishes.get(i);
-            activityRemoved |= destroyActivityLocked(r, true, false, "finish-idle");
+            activityRemoved |= r.task.stack.destroyActivityLocked(r, true, false, "finish-idle");
         }
 
         if (booting) {

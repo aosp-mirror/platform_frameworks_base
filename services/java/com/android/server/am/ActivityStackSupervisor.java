@@ -1212,8 +1212,9 @@ public class ActivityStackSupervisor {
                     // to have the same behavior as if a new instance was
                     // being started, which means not bringing it to the front
                     // if the caller is not itself in the front.
-                    ActivityRecord curTop =
-                            targetStack.topRunningNonDelayedActivityLocked(notTop);
+                    final ActivityStack lastStack = getLastStack();
+                    ActivityRecord curTop = lastStack == null?
+                            null : lastStack.topRunningNonDelayedActivityLocked(notTop);
                     if (curTop != null && curTop.task != intentActivity.task) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                         if (sourceRecord == null || sourceStack.topActivity() == sourceRecord) {
