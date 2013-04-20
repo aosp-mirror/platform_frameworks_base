@@ -371,6 +371,9 @@ int register_android_server_BatteryService(JNIEnv* env)
                 if (access(path, R_OK) == 0)
                     gPaths.batteryTechnologyPath = path;
                 break;
+
+            case ANDROID_POWER_SUPPLY_TYPE_UNKNOWN:
+                break;
             }
         }
         closedir(dir);
