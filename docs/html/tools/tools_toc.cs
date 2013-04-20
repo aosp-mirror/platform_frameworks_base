@@ -12,6 +12,7 @@
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/installing/bundle.html">
           <span class="en">Setting Up the ADT Bundle</span></a></li>
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>sdk/installing/index.html"><span class="en">Setting Up
@@ -21,6 +22,18 @@
               <span class="en">Installing the Eclipse Plugin</span></a></li>
         <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
             <span class="en">Adding Platforms and Packages</span></a></li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>sdk/installing/studio.html">Android Studio</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
+              Migrating from Eclipse</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
+              Tips and Tricks</a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>sdk/exploring.html">
