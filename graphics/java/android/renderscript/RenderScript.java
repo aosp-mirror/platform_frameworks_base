@@ -136,6 +136,8 @@ public class RenderScript {
         }
     }
 
+    ContextType mContextType;
+
     // Methods below are wrapped to protect the non-threadsafe
     // lockless fifo.
     native int  rsnContextCreateGL(int dev, int ver, int sdkVer,
@@ -1023,6 +1025,7 @@ public class RenderScript {
         static final int RS_MESSAGE_TO_CLIENT_USER = 4;
         static final int RS_MESSAGE_TO_CLIENT_NEW_BUFFER = 5;
 
+        static final int RS_ERROR_FATAL_DEBUG = 0x0800;
         static final int RS_ERROR_FATAL_UNKNOWN = 0x1000;
 
         MessageThread(RenderScript rs) {
@@ -1065,7 +1068,17 @@ public class RenderScript {
                 if (msg == RS_MESSAGE_TO_CLIENT_ERROR) {
                     String e = mRS.nContextGetErrorMessage(mRS.mContext);
 
-                    if (subID >= RS_ERROR_FATAL_UNKNOWN) {
+                    // Throw RSRuntimeException under the following conditions:
+                    //
+                    // 1) It is an unknown fatal error.
+                    // 2) It is a debug fatal error, and we are not in a
+                    //    debug context.
+                    // 3) It is a debug fatal error, and we do not have an
+                    //    error callback.
+                    if (subID >= RS_ERROR_FATAL_UNKNOWN ||
+                        (subID >= RS_ERROR_FATAL_DEBUG &&
+                         (mRS.mContextType != ContextType.DEBUG ||
+                          mRS.mErrorCallback == null))) {
                         throw new RSRuntimeException("Fatal error " + subID + ", details: " + e);
                     }
 
@@ -1100,6 +1113,7 @@ public class RenderScript {
     }
 
     RenderScript(Context ctx) {
+        mContextType = ContextType.NORMAL;
         if (ctx != null) {
             mApplicationContext = ctx.getApplicationContext();
         }
@@ -1138,6 +1152,7 @@ public class RenderScript {
 
         rs.mDev = rs.nDeviceCreate();
         rs.mContext = rs.nContextCreate(rs.mDev, 0, sdkVersion, ct.mID);
+        rs.mContextType = ct;
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
         }
