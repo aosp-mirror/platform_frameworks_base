@@ -1351,7 +1351,7 @@ public class Editor {
                         } finally {
                             blockDisplayList.end();
                             // Same as drawDisplayList below, handled by our TextView's parent
-                            blockDisplayList.setClipChildren(false);
+                            blockDisplayList.setClipToBounds(false);
                         }
                     }
 

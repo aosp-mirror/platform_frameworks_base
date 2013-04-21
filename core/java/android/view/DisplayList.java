@@ -285,9 +285,9 @@ public abstract class DisplayList {
      * Set whether the display list should clip itself to its bounds. This property is controlled by
      * the view's parent.
      *
-     * @param clipChildren true if the display list should clip to its bounds
+     * @param clipToBounds true if the display list should clip to its bounds
      */
-    public abstract void setClipChildren(boolean clipChildren);
+    public abstract void setClipToBounds(boolean clipToBounds);
 
     /**
      * Set the static matrix on the display list. The specified matrix is combined with other

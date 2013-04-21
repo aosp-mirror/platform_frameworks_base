@@ -137,9 +137,9 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
-    public void setClipChildren(boolean clipChildren) {
+    public void setClipToBounds(boolean clipToBounds) {
         if (hasNativeDisplayList()) {
-            nSetClipChildren(mFinalizer.mNativeDisplayList, clipChildren);
+            nSetClipToBounds(mFinalizer.mNativeDisplayList, clipToBounds);
         }
     }
 
@@ -450,7 +450,7 @@ class GLES20DisplayList extends DisplayList {
     private static native void nSetPivotY(int displayList, float pivotY);
     private static native void nSetPivotX(int displayList, float pivotX);
     private static native void nSetCaching(int displayList, boolean caching);
-    private static native void nSetClipChildren(int displayList, boolean clipChildren);
+    private static native void nSetClipToBounds(int displayList, boolean clipToBounds);
     private static native void nSetAlpha(int displayList, float alpha);
     private static native void nSetHasOverlappingRendering(int displayList,
             boolean hasOverlappingRendering);
