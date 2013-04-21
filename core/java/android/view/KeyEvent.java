@@ -628,8 +628,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
-    //  native/include/android/keycodes.h
-    //  frameworks/base/include/ui/KeycodeLabels.h
+    //  frameworks/native/include/android/keycodes.h
+    //  frameworks/base/include/androidfw/KeycodeLabels.h
     //  external/webkit/WebKit/android/plugins/ANPKeyCodes.h
     //  frameworks/base/core/res/res/values/attrs.xml
     //  emulator?
