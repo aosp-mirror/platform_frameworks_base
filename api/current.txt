@@ -22731,6 +22731,28 @@ package android.text {
     method public static int getSize(android.view.View);
   }
 
+  public final class BidiFormatter {
+    method public static android.text.BidiFormatter getInstance();
+    method public static android.text.BidiFormatter getInstance(boolean);
+    method public static android.text.BidiFormatter getInstance(java.util.Locale);
+    method public boolean getStereoReset();
+    method public boolean isRtl(java.lang.String);
+    method public boolean isRtlContext();
+    method public java.lang.String unicodeWrap(java.lang.String, android.text.TextDirectionHeuristic, boolean);
+    method public java.lang.String unicodeWrap(java.lang.String, android.text.TextDirectionHeuristic);
+    method public java.lang.String unicodeWrap(java.lang.String, boolean);
+    method public java.lang.String unicodeWrap(java.lang.String);
+  }
+
+  public static final class BidiFormatter.Builder {
+    ctor public BidiFormatter.Builder();
+    ctor public BidiFormatter.Builder(boolean);
+    ctor public BidiFormatter.Builder(java.util.Locale);
+    method public android.text.BidiFormatter build();
+    method public android.text.BidiFormatter.Builder setTextDirectionHeuristic(android.text.TextDirectionHeuristic);
+    method public android.text.BidiFormatter.Builder stereoReset(boolean);
+  }
+
   public class BoringLayout extends android.text.Layout implements android.text.TextUtils.EllipsizeCallback {
     ctor public BoringLayout(java.lang.CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean);
     ctor public BoringLayout(java.lang.CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float, android.text.BoringLayout.Metrics, boolean, android.text.TextUtils.TruncateAt, int);
@@ -23221,49 +23243,6 @@ package android.text {
     method public abstract void afterTextChanged(android.text.Editable);
     method public abstract void beforeTextChanged(java.lang.CharSequence, int, int, int);
     method public abstract void onTextChanged(java.lang.CharSequence, int, int, int);
-  }
-
-}
-
-package android.text.bidi {
-
-  public final class BidiFormatter {
-    method public java.lang.String dirAttr(java.lang.String);
-    method public java.lang.String dirAttr(java.lang.String, android.text.TextDirectionHeuristic);
-    method public java.lang.String dirAttr(boolean);
-    method public java.lang.String dirAttrValue(java.lang.String);
-    method public java.lang.String dirAttrValue(java.lang.String, android.text.TextDirectionHeuristic);
-    method public java.lang.String dirAttrValue(boolean);
-    method public java.lang.String endEdge();
-    method public static android.text.bidi.BidiFormatter getInstance();
-    method public static android.text.bidi.BidiFormatter getInstance(boolean);
-    method public static android.text.bidi.BidiFormatter getInstance(java.util.Locale);
-    method public boolean getStereoReset();
-    method public boolean isRtl(java.lang.String);
-    method public boolean isRtlContext();
-    method public java.lang.String mark();
-    method public java.lang.String markAfter(java.lang.String);
-    method public java.lang.String markAfter(java.lang.String, android.text.TextDirectionHeuristic);
-    method public java.lang.String markBefore(java.lang.String);
-    method public java.lang.String markBefore(java.lang.String, android.text.TextDirectionHeuristic);
-    method public java.lang.String spanWrap(java.lang.String, android.text.TextDirectionHeuristic, boolean);
-    method public java.lang.String spanWrap(java.lang.String, android.text.TextDirectionHeuristic);
-    method public java.lang.String spanWrap(java.lang.String, boolean);
-    method public java.lang.String spanWrap(java.lang.String);
-    method public java.lang.String startEdge();
-    method public java.lang.String unicodeWrap(java.lang.String, android.text.TextDirectionHeuristic, boolean);
-    method public java.lang.String unicodeWrap(java.lang.String, android.text.TextDirectionHeuristic);
-    method public java.lang.String unicodeWrap(java.lang.String, boolean);
-    method public java.lang.String unicodeWrap(java.lang.String);
-  }
-
-  public static final class BidiFormatter.Builder {
-    ctor public BidiFormatter.Builder();
-    ctor public BidiFormatter.Builder(boolean);
-    ctor public BidiFormatter.Builder(java.util.Locale);
-    method public android.text.bidi.BidiFormatter build();
-    method public android.text.bidi.BidiFormatter.Builder setTextDirectionHeuristic(android.text.TextDirectionHeuristic);
-    method public android.text.bidi.BidiFormatter.Builder stereoReset(boolean);
   }
 
 }
