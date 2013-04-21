@@ -1219,12 +1219,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Return the layout direction. Will be either {@link View#LAYOUT_DIRECTION_LTR} or
      * {@link View#LAYOUT_DIRECTION_RTL}.
      *
-     * @return the layout direction
+     * @return Returns {@link View#LAYOUT_DIRECTION_RTL} if the configuration
+     * is {@link #SCREENLAYOUT_LAYOUTDIR_RTL}, otherwise {@link View#LAYOUT_DIRECTION_LTR}.
      */
     public int getLayoutDirection() {
-        // We need to substract one here as the configuration values are using "0" as undefined thus
-        // having LRT set to "1" and RTL set to "2"
-        return ((screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK) >> SCREENLAYOUT_LAYOUTDIR_SHIFT) - 1;
+        return (screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK) == SCREENLAYOUT_LAYOUTDIR_RTL
+                ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR;
     }
 
     /**
