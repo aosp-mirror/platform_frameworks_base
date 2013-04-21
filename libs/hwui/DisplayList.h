@@ -137,8 +137,8 @@ public:
         return mName.string();
     }
 
-    void setClipChildren(bool clipChildren) {
-        mClipChildren = clipChildren;
+    void setClipToBounds(bool clipToBounds) {
+        mClipToBounds = clipToBounds;
     }
 
     void setStaticMatrix(SkMatrix* matrix) {
@@ -498,7 +498,7 @@ private:
     String8 mName;
 
     // View properties
-    bool mClipChildren;
+    bool mClipToBounds;
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY;

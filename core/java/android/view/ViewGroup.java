@@ -3119,7 +3119,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = 0; i < mChildrenCount; ++i) {
                 View child = getChildAt(i);
                 if (child.mDisplayList != null) {
-                    child.mDisplayList.setClipChildren(clipChildren);
+                    child.mDisplayList.setClipToBounds(clipChildren);
                 }
             }
         }
