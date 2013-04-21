@@ -581,8 +581,7 @@ public class WebView extends AbsoluteLayout
      * forms. Note that this is unrelated to the credentials used for HTTP
      * authentication.
      *
-     * @param host the host that required the credentials. It is recommended that
-     *             the host is given using scheme://hostname format.
+     * @param host the host that required the credentials
      * @param username the username for the given host
      * @param password the password for the given host
      * @see WebViewDatabase#clearUsernamePassword
