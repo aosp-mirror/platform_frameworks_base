@@ -12,15 +12,15 @@ page.title=Tablet App Quality Checklist
 <li><a href="#adjust-font-sizes">5. Adjust fonts and touch targets</a></li>
 <li><a href="#adjust-widgets">6. Adjust homescreen widgets</a></li>
 <li><a href="#offer-full-feature-set">7. Offer the app's full feature set</a></li>
-<li><a href="#hardware-requirements">8. Don’t require hardware features</a></li>
-<li><a href="#support-screens">9. Declare tablet screen support</a></li>
-<li><a href="#google-play">10. Showcase your tablet UI</a></li>
-<li><a href="#google-play-bp">11. Follow publishing best practices</a></li>
+<li><a href="#android-versions">8. Target Android versions properly</a></li>
+<li><a href="#hardware-requirements">9. Declare dependencies properly</a></li>
+<li><a href="#support-screens">10. Declare tablet screens support</a></li>
+<li><a href="#google-play">11. Showcase your tablet UI</a></li>
+<li><a href="#google-play-bp">12. Follow publishing best practices</a></li>
 
 </ol>
 <h2>Testing</h2>
 <ol>
-<li><a href="#basic-technical-checks">Basic Technical Checks for Tablets</a></li>
 <li><a href="#test-environment">Setting Up a Test Environment</a></li>
 </ol>
 </div></div>
@@ -47,12 +47,7 @@ to the greatest extent possible. </p>
 that can help you address the topics raised in each task.</p>
 
 
-<h2 id="core-app-quality">1. Test for Core Tablet App Quality</h2>
-
-<p>Before publishing, make sure that your app and it's store listing meet the
-  core quality guidlines below. </p>
-
-<h5>Core app quality</h5>
+<h2 id="core-app-quality" style="margin-top:1.5em;">1. Test for basic tablet app quality</h2>
 
 <p>The first step in delivering a great tablet app experience is making sure
 that it meets the <em>core app quality criteria</em> for all of the devices
@@ -60,68 +55,22 @@ and form factors that the app is targeting. For complete information, see the <a
 href="{@docRoot}distribute/googleplay/quality/core.html">Core App Quality Guidelines</a>. 
 </p>
 
-<h5>Basic technical checks for tablets</h5>
 <p>
-  Before publishing, you should also ensure that your app passes several basic
-  technical checks, such as:
+  Before publishing, also ensure that your app passes several basic
+  technical checks and launch criteria, such as:
 </p>
 
 <ul>
-  <li>Targeting appropriate Android versions</li>
-  <li>Specifying any feature dependencies properly</li>
-  <li>Declaring support for appropriate screens</li>
+  <li><a href="#android-versions">Targets appropriate Android versions</a></li>
+  <li><a href="#hardware-requirements">Specifies any hardware dependencies properly</a></li>
+  <li><a href="#support-screens">Declares support for appropriate screens</a></li>
+  <li><a href="#use-extra-space">Uses all of the available screen space</a></li>
+  <li><a href="#google-play">Screenshots are uploaded to Google Play</a></li>
 </ul>
 
-<p>
-  For details, see <a href="#basic-technical-checks">Basic Technical
-  Checks</a>.
-</p>
+<p>The sections that follow provide more information about these and other
+quality guidelines for tablet apps.</p>
 
-<h5>Tablet screenshots and other promotional tools</h5>
-
-<p>Make sure that you upload screenshots of your tablet UI to the
-  Developer Console and highlight your tablet experience in your app description,
-  video, and promotional campaigns. For details, see <a href="#google-play">Showcase your
-  tablet UI in Google Play.</a></p>
-
-<h5>Test environment</h5>
-
-<p>
-  To assess the quality of your app on tablets, you need to set up a suitable
-  hardware or emulator environment for testing. For more information, see
-  <a href="#test-environment">Setting Up a Test Environment</a>.
-</p>
-<p>
-  Note that a successful tablet app will go <em>well beyond the core and tablet
-  app quality criteria</em> to offer a custom tablet experience to users. Read
-  the sections below for ideas on how to plan and develop a great tablet UI for
-  your app.
-</p>
-
-
-<div class="rel-resources">
-  <h3>
-    Related resources
-  </h3>
-
-  <ul>
-    <li>
-      <a href="{@docRoot}distribute/googleplay/quality/core.html">Core App
-      Quality</a>&mdash;A set of core quality criteria that all Android apps
-      should meet on all targeted devices.
-    </li>
-
-    <li>
-      <a href="#basic-technical-checks">Basic Technical Checks for
-      Tablets</a>&mdash;Additional quality criteria for any app that is
-      targeting, designed for, or distributable to Android tablets.
-    </li>
-    <li>
-      <a href="#google-play">Showcase your tablet UI on Google Play</a>&mdash;Information
-      on how to upload tablet screenshots and promote your tablet app.
-    </li>
-  </ul>
-</div>
 
 <h2 id="optimize-layouts">2. Optimize your layouts for larger screens</h2>
 
@@ -288,7 +237,7 @@ different layouts in the appropriate screen size buckets (such as
 
     <li>
       <a href=
-      "/training/design-navigation/multiple-sizes.html">Planning for Multiple
+      "{@docRoot}training/design-navigation/multiple-sizes.html">Planning for Multiple
       Touchscreen Sizes</a>&mdash;Android Training class that walks you through
       the essentials of planning an intuitive, effective navigation for tablets
       and other devices.
@@ -304,7 +253,8 @@ different layouts in the appropriate screen size buckets (such as
 </div>
 
 
-<h2 id="use-tablet-icons">4. Use Icons and other assets that are designed for tablet screens</h2>
+<h2 id="use-tablet-icons">4. Use Icons and other assets that are designed
+for tablet screens</h2>
 
 <p>So that your app looks its best, make sure to use icons and other bitmap
 assets that are created specifically for the densities used by tablet screens.
@@ -362,6 +312,8 @@ resource qualifiers</a> to ensure that the proper set of alternative resources
 gets loaded.</li>
 </ul>
 
+<p>At a minimum, your app should supply custom drawables and assets for common tablet screen densities, tagged with the qualifiers <code>hdpi</code>, <code>xhdpi</code>, or <code>xxhdpi</code>.</p>
+
 <div class="rel-resources">
   <h3>
     Related resources
@@ -375,7 +327,7 @@ gets loaded.</li>
 
     <li>
       <a href=
-      "/guide/topics/resources/providing-resources.html">Providing
+      "{@docRoot}guide/topics/resources/providing-resources.html">Providing
       Resources</a>&mdash;Developer documentation on how to provide
       sets of layouts and drawable resources for specific ranges of device
       screens.
@@ -390,7 +342,7 @@ gets loaded.</li>
 
     <li>
       <a href=
-      "/training/basics/supporting-devices/screens.html">Supporting Different
+      "{@docRoot}training/basics/supporting-devices/screens.html">Supporting Different
       Screens</a>&mdash;Android Training class that takes you
       through the process of optimizing the user experience for different
       screen sizes and densities.
@@ -527,9 +479,25 @@ that it is not accessible to users or that it offers “graceful degradation”
 to a replacement feature (also see the section below on hardware features).</li>
 </ul>
 
+<h2 id="android-versions">8. Target Android versions properly</h2>
 
-<h2 id="hardware-requirements">8. Don’t require hardware features that might not be
-  available on tablets</h2>
+<p>To ensure the broadest possible distribution to tablets, make sure that your
+app is targeting the Android versions that support tablets. You can declare
+the targeted range of Android versions in the
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+element in the app manifest.</p>
+
+<p>At a minimum, your app's
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+should declare support for Android versions as follows:</p>
+
+  <ul>
+  <li>If a <code>targetSdkVersion</code> attribute is declared, it should have a value of 11 or higher, OR</li>
+  <li>If a <code>minSdkVersion</code> attribute is declared, it should have a value of 11 or higher.</li>
+  <li>Also, if a <code>maxSdkVersion</code> attribute is declared, it must have a value of 12 or higher. Note that, in most cases, the use of <code>maxSdkVersion</code> is <em>not recommended</em>.</li>
+</ul>
+
+<h2 id="hardware-requirements">9. Declare hardware feature dependencies properly</h2>
 
 <p>Handsets and tablets typically offer slightly different hardware support for
 sensors, camera, telephony, and other features. For example, many tablets are
@@ -579,13 +547,13 @@ run-time checking for the hardware capability that it needs and handle as needed
 <ul>
   <li>
     <a href=
-    "/guide/topics/manifest/uses-feature-element.html#permissions">Permissions
+    "{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">Permissions
     that Imply Feature Requirements</a>&mdash;A list of permissions that may
     cause unwanted filtering if declared in your app's manifest.
   </li>
   <li>
     <a href=
-    "/guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>&mdash;Description
+    "{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>&mdash;Description
     and reference documentation for the <code>&lt;uses-feature&gt;</code>
     manifest element.
   </li>
@@ -599,22 +567,31 @@ run-time checking for the hardware capability that it needs and handle as needed
 </ul>
 </div>
 
-<h2 id="support-screens">9. Declare support for tablet screen configurations</h2>
+<h2 id="support-screens">10. Declare support for tablet screens</h2>
 
-<p>To ensure that you can distribute your app to a broad range of tablets,
-declare all the screen sizes that your app supports in its manifest:</p>
+<p>To ensure that you can distribute your app to a broad range of tablets, your app should
+declare support for tablet screen sizes in the
+<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
+element in the app manifest, as follows:</p>
 
 <ul>
-<li>Declare a <a
-href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> element
-with appropriate attributes, as needed. For details, see <a 
-href="#basic-technical-checks">Basic Technical Checks</a>
-later in this document.</li>
-<li>If the app declares a <code>&lt;compatible-screens&gt;</code> element in the
-manifest, the element must include attributes that specify <em>all of the size and
-density combinations for tablet screens</em> that the app supports. Note that, if possible,
-you should avoid using this element in your app.</li>
+  <li>A
+  <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
+  element, if declared, must not specify <code>android:largeScreens="false"</code>
+  or <code>android:xlargeScreens="false"</code>.</li>
+  <li>For apps targeting <code>minSdkVersion</code> value less than 13, a
+  <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
+  element must be declared with both <code>android:largeScreens="true"</code> and
+  <code>android:xlargeScreens="true"</code>.</li>
 </ul>
+
+<p>If the app declares a
+<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a>
+element in the manifest, the element should include attributes that specify
+<em>all of the size and density combinations for tablet screens</em> that the
+app supports. Note that, if possible, you should avoid using the
+<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
+element in your app.</p>
 
 <div class="rel-resources">
   <h3>
@@ -623,21 +600,8 @@ you should avoid using this element in your app.</li>
 
   <ul>
     <li>
-      <a href="#basic-technical-checks">Basic Technical
-      Checks</a>&mdash;Includes details (see <a href="#TB-R4">TB-R4</a>) on how
-      to properly declare screens support for tablet screen sizes.
-    </li>
-
-    <li>
       <a href=
-      "/guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>&mdash;Description
-      and reference documentation for the <code>&lt;supports-screens&gt;</code>
-      manifest element.
-    </li>
-
-    <li>
-      <a href=
-      "/guide/practices/screens_support.html#DeclaringScreenSizeSupport">Declaring
+      "{@docRoot}guide/practices/screens_support.html#DeclaringScreenSizeSupport">Declaring
       Screen Size Support</a>&mdash;Developer documentation that explains the
       details of managing UI for best display on multiple screen sizes.
     </li>
@@ -645,7 +609,7 @@ you should avoid using this element in your app.</li>
 </div>
 
 
-<h2 id="google-play">10. Showcase your tablet UI in Google Play</h2>
+<h2 id="google-play">11. Showcase your tablet UI in Google Play</h2>
 
 <p>
   After you've done the work to create an rich, optimized UI for your tablet
@@ -659,10 +623,9 @@ you should avoid using this element in your app.</li>
 
 <p>
   Tablet users want to know what your app is like on a tablet device, not on a
-  phone. Capitalize on their interest by showing them screenshots of your
-  tablet UI on your app's store listing page. You can upload tablet screenshots
-  from the Developer Console. Here are some tips and guidelines:
-</p>
+  phone. If you developed a tablet app, make sure to upload screenshots
+  of your tablet UI to the Developer Console. Here are some guidelines:
+  </p>
 
 <ul style="margin-top:0;">
   <li>Your screenshots should show the core functionality of your app, not a
@@ -670,7 +633,7 @@ you should avoid using this element in your app.</li>
   what you should show in your screenshots.
   </li>
 
-  <li>Add screenshots taken on both 7-inch and 10-inch tablets, if possible.
+  <li>Add screenshots taken on both 7-inch and 10-inch tablets.
   </li>
 
   <li>It's recommended that you add screenshots taken in both landscape and
@@ -796,26 +759,15 @@ you should avoid using this element in your app.</li>
   </ul>
 </div>
 
-<h2 id="google-play-bp">11. Follow best practices for publishing in Google Play</h2>
+<h2 id="google-play-bp">12. Follow best practices for publishing in Google Play</h2>
 
-<p>Make sure that your app follows key best practices that ensure broad
-  distribution to tablet devices. </p>
+Here are some best practices to consider when publishing a tablet app on Google Play.</p>
 
-<h5>Verify basic technical checks</h5>
+<h5>Check the app's filtering</h5>
 
-  <ul>
-    <li>Verify that the app is targeting the proper Android versions and screen sizes 
-    for Android tablets. Follow the <a href="#basic-technical-checks">Basic Technical
-    Checks for Tablets</a> listed in the next section. </li>
-    <li>After you've uploaded the app to the 
-    <a href="https://play.google.com/apps/publish/">Developer Console</a>,
-    check the APK's Supported Devices list to make sure that the app is not filtered
-    from tablet devices that you want to target.</p></li>
-  </ul>
+<p>After you've uploaded the app to the <a href="https://play.google.com/apps/publish/">Developer Console</a>, check the APK's Supported Devices list to make sure that the app is not filtered from tablet devices that you want to target.</p>
 
-<h5>
-  Distribute as a single APK
-</h5>
+<h5>Distribute as a single APK</h5>
 
 <p>
   It's recommended that you publish your app as a single APK for all screen
@@ -841,7 +793,7 @@ you should avoid using this element in your app.</li>
 
 <p>
   If necessary, you can alternatively choose to deliver your app using <a href=
-  "/google/play/publishing/multiple-apks.html">Multiple APK Support</a>,
+  "{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a>,
   although in most cases using a single APK to reach all devices is strongly
   recommended.
 </p>
@@ -858,189 +810,6 @@ you should avoid using this element in your app.</li>
 </ul>
 </div>
 
-<h2 id="basic-technical-checks">Basic Technical Checks for Tablets</h2>
-
-<p>
-  This section lists specific details on basic technical checks that you should
-  perform before publishing. The checks ensure that your app is properly targeted to a
-  broad range of tablet devices. Make sure that the app meets all of the checks
-  listed below.
-</p>
-
-<p>
-  To verify the basic technical checks, follow the <a href="#tests">Test
-  Procedures</a> listed below. Before you start, you need to obtain need the
-  application source code.
-</p>
-
-<h5 id="criteria">
-Technical checks
-</h5>
-
-<table>
-  <tr>
-    <th style="width:2px;">
-      Area
-    </th>
-    <th style="width:54px;">
-      ID
-    </th>
-    <th>
-      Description
-    </th>
-    <th style="width:54px;">
-      Tests
-    </th>
-  </tr>
-  <tr id="TB-R1">
-    <td rowspan="2">Android Versions</td>
-    <td>
-      TB-R1
-    </td>
-    <td>
-      <p style="margin-bottom:.5em;">App <em>does</em> target minimum Android versions
-        that support tablets:</p>
-      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
-        <li><code>targetSdkVersion</code> is declared with value 11 or higher, OR</li>
-        <li><code>minSdkVersion</code> is declared with value 11 or higher.</li>
-      </ol>
-    </td>
-      <td><a href="#tests">TA-1</a></td>
-  </tr>
-  <tr id="TB-R2">
-    <td>
-      TB-R2
-    </td>
-    <td>
-      <p style="margin-bottom:.5em;">App <em>does not</em> limit targeting to
-        exclude Android versions that support tablets:</p>
-      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
-        <li><code>maxSdkVersion</code>, if declared, must have a value of 12
-          or higher. </li>
-      </ol>
-      <p class="caution" style="margin-bottom:.25em;">Note that, in most cases, the use of <code>
-        maxSdkVersion</code> is not recommended.</p>
-    </td>
-    <td><a href="#tests">TA-1</a></td>
-  </tr>
-  <tr id="TB-R3">
-    <td rowspan="1">Feature Dependencies</td>
-    <td>
-      TB-R3
-    </td>
-    <td>
-      <p style="margin-bottom:.5em;">App <em>does not</em> limit distribution to
-        tablets by requiring hardware features not normally available on tablets,
-        whether <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#declared"
-        declared explicitly</a> or <a href=
-        "/guide/topics/manifest/uses-feature-element.html#permissions">implied by
-        permissions</a>.
-      </p> 
-      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
-        <li>the app must not declare a <code>&lt;uses-feature&gt;</code> element for
-          <code>android.hardware.telephony</code> unless the element is specifically
-          marked with the <code>android:required="false"</code> attribute. 
-        </li>
-      </ol>
-      <p>For details, see <a href="#hardware-requirements">Hardware Requirements</a>
-        earlier in this document.</p>
-    </td>
-    <td><a href="#tests">TA-1</a></td>
-  </tr>
-  <tr id="TB-R4">
-  <td rowspan="2">Screens Support</td>
-    <td>
-      TB-R4
-    </td>
-    <td>
-      <p style="margin-bottom:.5em;">App <em>does not</em> limit distribution to common
-        tablet screen sizes:</p>
-      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
-        <li>If declared, <code>&lt;supports-screens&gt;</code> element must not specify
-          <code>android:largeScreens="false"</code> or <code>android:xlargeScreens="false"</code>.</li>
-        <li>For a <code>minSdkVersion</code> value less than 13, a <code>&lt;supports-screens&gt;</code>
-          element must be declared with both <code>android:largeScreens="true"</code>
-          and <code>android:xlargeScreens="true"</code>.</li>
-      </ol>
-    </td>
-    <td><a href="#tests">TA-1</a></td>
-  </tr>
-  <tr id="TB-R5">
-    <td>
-          TB-R5
-    </td>
-    <td>
-      <p style="margin-bottom:.5em;">App <em>does</em> supply custom drawables and
-        assets for common tablet screen densities. Specifically, the APK must include
-        corresponding resource directories tagged with these qualifiers:</p>
-        <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
-            <li>An <code>hdpi</code> qualifier, OR</li>
-            <li>An <code>xhdpi</code> qualifier, OR</li>
-            <li>An <code>xxhdpi</code> qualifier</li>
-          </ol>
-
-          <p>For details, see <a href="#use-tablet-icons">Icons and Other Assets</a>
-            earlier in this document.</p>
-      </td>
-    <td><a href="#tests">TA-2</a></td>
-  </tr>
-</table>
-
-<p>If you use <a href="{@docRoot}google/play/publishing/multiple-apks.html">multiple APK
-  support</a> to deliver size- or version-specific APKs, the APKs and their
-  characteristics must meet all of the criteria listed above, either individually
-  or as a cumulative set.</p>
-
-<h5 id="tests">
-  Test procedures
-</h5>
-
-<table>
-  <tr>
-    <th style="width:54px;">
-      Procedure
-    <th>
-      Description
-    </th>
-  </tr>
-    <td>
-         TA-1
-   </td>
-    <td>
-      <p style="margin-bottom:.5em;">Obtain the APK and inspect the manifest.xml file. Check for the required attribute values.</p>
-    </td>
-  </tr>
-  <tr id="ta2">
-    <td>
-      TA-2
-    </td>
-    <td>
-      <p style="margin-bottom:.5em;">Obtain the APK and inspect the resources
-        directories. Make sure that the app includes custom drawables and assets
-        directories tagged with the required qualifiers.</p>
-      </td>
-  </tr>
-</table>
-
-<div class="rel-resources">
-  <h3>
-    Related resources
-  </h3>
-
-  <ul>
-    <li>
-      <a href="{@docRoot}distribute/googleplay/quality/core.html">Core App
-      Quality</a>&mdash;A set of core quality criteria that all Android apps
-      should meet on all targeted devices.
-    </li>
-
-    <li>
-      <a href="#test-environment">Setting up a Test
-      Environment</a>&mdash;Information on how to set up an environment to test
-      your app on tablets.
-    </li>
-  </ul>
-</div>
 
 <h2 id="test-environment">Setting Up a Test Environment for Tablets</h2>
 
