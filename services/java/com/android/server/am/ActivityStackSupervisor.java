@@ -85,6 +85,12 @@ public class ActivityStackSupervisor {
 
     public static final int HOME_STACK_ID = 0;
 
+    /** How long we wait until giving up on the last activity telling us it is idle. */
+    static final int IDLE_TIMEOUT = 10*1000;
+
+    static final int IDLE_TIMEOUT_MSG = ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG; 
+    static final int IDLE_NOW_MSG = ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG + 1;
+
     final ActivityManagerService mService;
     final Context mContext;
     final Looper mLooper;
@@ -138,6 +144,17 @@ public class ActivityStackSupervisor {
     /** List of activities that are ready to be stopped, but waiting for the next activity to
      * settle down before doing so. */
     final ArrayList<ActivityRecord> mStoppingActivities = new ArrayList<ActivityRecord>();
+
+    /** List of activities that are ready to be finished, but waiting for the previous activity to
+     * settle down before doing so.  It contains ActivityRecord objects. */
+    final ArrayList<ActivityRecord> mFinishingActivities = new ArrayList<ActivityRecord>();
+
+    /** List of ActivityRecord objects that have been finished and must still report back to a
+     * pending thumbnail receiver. */
+    final ArrayList<ActivityRecord> mCancelledThumbnails = new ArrayList<ActivityRecord>();
+
+    /** Used on user changes */
+    final ArrayList<UserStartedState> mStartingUsers = new ArrayList<UserStartedState>();
 
     /** Set to indicate whether to issue an onUserLeaving callback when a newly launched activity
      * is being brought in front of us. */
@@ -1572,6 +1589,154 @@ public class ActivityStackSupervisor {
         return ActivityManager.START_SUCCESS;
     }
 
+    // Checked.
+    final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
+            Configuration config) {
+        if (localLOGV) Slog.v(TAG, "Activity idle: " + token);
+
+        ActivityRecord res = null;
+
+        ArrayList<ActivityRecord> stops = null;
+        ArrayList<ActivityRecord> finishes = null;
+        ArrayList<UserStartedState> startingUsers = null;
+        int NS = 0;
+        int NF = 0;
+        IApplicationThread sendThumbnail = null;
+        boolean booting = false;
+        boolean enableScreen = false;
+        boolean activityRemoved = false;
+
+        ActivityRecord r = ActivityRecord.forToken(token);
+        if (r != null) {
+            mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
+            r.finishLaunchTickingLocked();
+            res = r.task.stack.activityIdleInternalLocked(token, fromTimeout, config);
+            if (res != null) {
+                if (fromTimeout) {
+                    reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
+                }
+
+                // This is a hack to semi-deal with a race condition
+                // in the client where it can be constructed with a
+                // newer configuration from when we asked it to launch.
+                // We'll update with whatever configuration it now says
+                // it used to launch.
+                if (config != null) {
+                    r.configuration = config;
+                }
+
+                // We are now idle.  If someone is waiting for a thumbnail from
+                // us, we can now deliver.
+                r.idle = true;
+                if (allResumedActivitiesIdle()) {
+                    mService.scheduleAppGcsLocked();
+                }
+                if (r.thumbnailNeeded && r.app != null && r.app.thread != null) {
+                    sendThumbnail = r.app.thread;
+                    r.thumbnailNeeded = false;
+                }
+    
+                //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
+                if (!mService.mBooted && isFrontStack(r.task.stack)) {
+                    mService.mBooted = true;
+                    enableScreen = true;
+                }
+            } else if (fromTimeout) {
+                reportActivityLaunchedLocked(fromTimeout, null, -1, -1);
+            }
+        }
+
+        // Atomically retrieve all of the other things to do.
+        stops = processStoppingActivitiesLocked(true);
+        NS = stops != null ? stops.size() : 0;
+        if ((NF=mFinishingActivities.size()) > 0) {
+            finishes = new ArrayList<ActivityRecord>(mFinishingActivities);
+            mFinishingActivities.clear();
+        }
+
+        final ArrayList<ActivityRecord> thumbnails;
+        final int NT = mCancelledThumbnails.size();
+        if (NT > 0) {
+            thumbnails = new ArrayList<ActivityRecord>(mCancelledThumbnails);
+            mCancelledThumbnails.clear();
+        } else {
+            thumbnails = null;
+        }
+
+        if (isFrontStack(mHomeStack)) {
+            booting = mService.mBooting;
+            mService.mBooting = false;
+        }
+
+        if (mStartingUsers.size() > 0) {
+            startingUsers = new ArrayList<UserStartedState>(mStartingUsers);
+            mStartingUsers.clear();
+        }
+
+        // Perform the following actions from unsynchronized state.
+        final IApplicationThread thumbnailThread = sendThumbnail;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (thumbnailThread != null) {
+                    try {
+                        thumbnailThread.requestThumbnail(token);
+                    } catch (Exception e) {
+                        Slog.w(TAG, "Exception thrown when requesting thumbnail", e);
+                        mService.sendPendingThumbnail(null, token, null, null, true);
+                    }
+                }
+
+                // Report back to any thumbnail receivers.
+                for (int i = 0; i < NT; i++) {
+                    ActivityRecord r = thumbnails.get(i);
+                    mService.sendPendingThumbnail(r, null, null, null, true);
+                }
+            }
+        });
+
+        // Stop any activities that are scheduled to do so but have been
+        // waiting for the next one to start.
+        for (int i = 0; i < NS; i++) {
+            r = stops.get(i);
+            final ActivityStack stack = r.task.stack;
+            if (r.finishing) {
+                stack.finishCurrentActivityLocked(r, ActivityStack.FINISH_IMMEDIATELY, false);
+            } else {
+                stack.stopActivityLocked(r);
+            }
+        }
+
+        // Finish any activities that are scheduled to do so but have been
+        // waiting for the next one to start.
+        for (int i = 0; i < NF; i++) {
+            r = finishes.get(i);
+            activityRemoved |= r.task.stack.destroyActivityLocked(r, true, false, "finish-idle");
+        }
+
+        if (booting) {
+            mService.finishBooting();
+        } else if (startingUsers != null) {
+            for (int i = 0; i < startingUsers.size(); i++) {
+                mService.finishUserSwitch(startingUsers.get(i));
+            }
+        }
+
+        mService.trimApplications();
+        //dump();
+        //mWindowManager.dump();
+
+        if (enableScreen) {
+            mService.enableScreenAfterBoot();
+        }
+
+        if (activityRemoved) {
+            getFocusedStack().resumeTopActivityLocked(null);
+        }
+
+        return res;
+    }
+
     void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
         // Just in case.
         final int numStacks = mStacks.size();
@@ -1617,12 +1782,6 @@ public class ActivityStackSupervisor {
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             stack.finishTopRunningActivityLocked(app);
-        }
-    }
-
-    void scheduleIdleLocked() {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).scheduleIdleLocked();
         }
     }
 
@@ -1772,12 +1931,12 @@ public class ActivityStackSupervisor {
 
     boolean switchUserLocked(int userId, UserStartedState uss) {
         mCurrentUser = userId;
-        boolean homeInBack = !homeIsInFront();
+        mStartingUsers.add(uss);
         boolean haveActivities = false;
         final int numStacks = mStacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.isHomeStack() ^ homeInBack) {
+            if (isFrontStack(stack)) {
                 haveActivities |= stack.switchUserLocked(userId, uss);
             }
         }
@@ -1850,12 +2009,6 @@ public class ActivityStackSupervisor {
                 dumpHistoryList(fd, pw, stack.mGoingToSleepActivities, "  ", "Sleep", false,
                         !dumpAll, false, dumpPackage);
             }
-            if (stack.mFinishingActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting to finish:");
-                dumpHistoryList(fd, pw, stack.mFinishingActivities, "  ", "Fin", false,
-                        !dumpAll, false, dumpPackage);
-            }
 
             pw.print("  Stack #"); pw.println(mStacks.indexOf(stack));
             if (stack.mPausingActivity != null) {
@@ -1866,6 +2019,13 @@ public class ActivityStackSupervisor {
                 pw.println("  mLastPausedActivity: " + stack.mLastPausedActivity);
                 pw.println("  mSleepTimeout: " + stack.mSleepTimeout);
             }
+        }
+
+        if (mFinishingActivities.size() > 0) {
+            pw.println(" ");
+            pw.println("  Activities waiting to finish:");
+            dumpHistoryList(fd, pw, mFinishingActivities, "  ", "Fin", false, !dumpAll, false,
+                    dumpPackage);
         }
 
         if (mStoppingActivities.size() > 0) {
@@ -1958,15 +2118,48 @@ public class ActivityStackSupervisor {
         }
     }
 
+    void scheduleIdleTimeoutLocked(ActivityRecord next) {
+        mHandler.obtainMessage(IDLE_TIMEOUT_MSG, next).sendToTarget();
+    }
+
+    final void scheduleIdleLocked() {
+        mHandler.obtainMessage(IDLE_NOW_MSG).sendToTarget();
+    }
+
+    void removeTimeoutsForActivityLocked(ActivityRecord r) {
+        mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
+    }
+
     private final class ActivityStackSupervisorHandler extends Handler {
+
         public ActivityStackSupervisorHandler(Looper looper) {
             super(looper);
         }
 
+        void activityIdleInternal(ActivityRecord r) {
+            synchronized (mService) {
+                activityIdleInternalLocked(r != null ? r.appToken : null, true, null);
+            }
+        }    
+            
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                
+                case IDLE_TIMEOUT_MSG: {
+                    if (mService.mDidDexOpt) {
+                        mService.mDidDexOpt = false;
+                        Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
+                        nmsg.obj = msg.obj;
+                        mHandler.sendMessageDelayed(nmsg, IDLE_TIMEOUT);
+                        return;
+                    }
+                    // We don't at this point know if the activity is fullscreen,
+                    // so we need to be conservative and assume it isn't.
+                    activityIdleInternal((ActivityRecord)msg.obj);
+                } break;
+                case IDLE_NOW_MSG: {
+                    activityIdleInternal((ActivityRecord)msg.obj);
+                } break;
             }
         }
     }

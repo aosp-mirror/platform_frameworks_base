@@ -845,9 +845,7 @@ final class ActivityRecord {
                                     "Was waiting for visible: " + r);
                         }
                         mStackSupervisor.mWaitingVisibleActivities.clear();
-                        Message msg = Message.obtain();
-                        msg.what = ActivityStack.IDLE_NOW_MSG;
-                        stack.mHandler.sendMessage(msg);
+                        mStackSupervisor.scheduleIdleLocked();
                     }
                 }
                 service.scheduleAppGcsLocked();
@@ -960,7 +958,8 @@ final class ActivityRecord {
     @Override
     public String toString() {
         if (stringName != null) {
-            return stringName + " t" + task.taskId + (finishing ? " f}" : "}");
+            return stringName + " t" + (task == null ? -1 : task.taskId) +
+                    (finishing ? " f}" : "}");
         }
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");
