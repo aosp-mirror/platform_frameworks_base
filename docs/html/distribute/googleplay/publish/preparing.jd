@@ -278,7 +278,7 @@ priced). You can also sell in-app products and subscriptions. </li>
 </ul>
 
 <p> If your app is be priced, or if you'll be selling in-app products,
-you need set up a Checkout Merchant Account before you can publish.</p>
+you need set up a Google Wallet merchant account before you can publish.</p>
 
 <table>
 <tr>
@@ -560,7 +560,7 @@ final checks.</p>
 <p>Make sure that: </p>
 
 <ul>
-<li>Your developer profile has the correct information and is linked to the proper Google Checkout Merchant account (if you are selling products).</li>
+<li>Your developer profile has the correct information and is linked to the proper Google Wallet merchant account (if you are selling products).</li>
 <li>You have the right version of the app uploaded.</li>
 <li>All parts of your Product Details are ready, including all graphic assets, screenshots, video, localized descriptions, and so on. </li>
 <li>You have set your app's pricing to free or priced.</li>

@@ -31,7 +31,7 @@ familiar purchase flow.</p>
 
 <p>Any application that you publish through Google Play can implement In-app Billing. No special
 account or registration is required other than a Google Play Developer Console account and a Google
-Checkout merchant account.</p>
+Wallet merchant account.</p>
 
 <p>To help you integrate in-app billing into your application, the Android SDK
 provides a sample application that demonstrates how to sell standard in-app
