@@ -202,7 +202,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Нет сети"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi выкл."</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Проектор Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Беспроводной проектор"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Wi-Fi-монитор"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркость"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОНАСТРОЙКА"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Это панель уведомлений"</string>
