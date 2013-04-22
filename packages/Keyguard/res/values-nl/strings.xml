@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Typ pincode om te ontgrendelen"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Onjuiste pincode."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Druk op \'Menu\' en vervolgens op 0 om te ontgrendelen."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximaal aantal pogingen voor Face Unlock overschreden"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximaal aantal pogingen voor Ontgrendelen via gezichtsherkenning overschreden"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Opgeladen"</string>
     <string name="keyguard_plugged_in" msgid="8117572000639998388">"Opladen, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Sluit de oplader aan."</string>
@@ -61,7 +61,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Ontgrendelingsgebied uitvouwen."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Ontgrendeling via schuiven."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Ontgrendeling via patroon."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ontgrendeling via gezichtsherkenning."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ontgrendelen via gezichtsherkenning"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Ontgrendeling via pincode."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ontgrendeling via wachtwoord."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Tekengebied voor patroon."</string>

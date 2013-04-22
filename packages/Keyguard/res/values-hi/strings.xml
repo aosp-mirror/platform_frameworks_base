@@ -101,7 +101,7 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम PIN डालें"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN डालें"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"पासवर्ड डालें"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए कैरियर से संपर्क करें."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड डालें"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM कार्ड अनलॉक कर रहा है…"</string>
