@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Доступ да SD-карты."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Спецыяльныя магчымасці"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Функцыі, якія могуць запытаць дадатковыя тэхналогii."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымайце змесцiва акна"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Вывучыце змесцiва акна, з якiм вы працуеце."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключыце Explore by Touch"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Элемент, да якiх дакраналiся, могуць быць агучаны, а экран будзе працаваць з жэстамi."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Уключыце паляпшэнне вэб-даступнасці"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Сцэнарыi могуць быць усталяваны, каб зрабіць змесцiва прыкладання больш даступным."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Глядзiце, што набiраеце"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Уключае ў сябе асабістыя дадзеныя, такія як нумары крэдытных карт і паролі."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"адключаць ці змяняць радок стану"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дазваляе прыкладанням адключаць радок стану або дадаваць і выдаляць сістэмныя значкі."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"радок стану"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню метада ўводу. Не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"прывязацца да службы доступу"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню службы доступу. Не патрабуецца для звычайных прыкладанняў."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"запытаць даследаванне навобмацак"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Дазваляе ўладальнiку запытваць працу ў рэжыме ўзаемадзеяння, у якiм элементы, да якiх дакранулiся, прагаворваюцца ўслых, а карыстальнiцкi iнтэрфейс можна даследаваць рукамi."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"прасіць пашырэння даступнасці вэб-даступнасцi"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Дазваляе ўладальнiку запытваць уключэнне iнтэрнэт-даступнасцi паляпшэнняў. Напрыклад, усталёўка скрыптаў з Google зробiць кантэнт больш прыдатным для доступу."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"звязаць з тэкставай службай"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню тэкставай паслугі (напрыклад, SpellCheckerService). Ніколі не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"звязвацца з VPN сэрвісам"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Перазагрузіць"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"На старонцы з адрасам <xliff:g id="TITLE">%s</xliff:g> вызначана:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Пацвердзіце пераход"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Пакінуць гэту старонку"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Заставацца на гэтай старонцы"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Вы ўпэўнены, што хочаце пакiнуць гэту старонку?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Пацвердзіць"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Падказка: двойчы націсніце, каб павялічыць або паменшыць."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Аўтазапаўненне"</string>

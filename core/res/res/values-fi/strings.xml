@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Käytä SD-korttia."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Esteettömyysominaisuudet"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Ominaisuudet, joiden käyttöönottoa avustava tekniikka voi pyytää."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Nouda ikkunan sisältöä"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tarkista käyttämäsi ikkunan sisältö."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ota kosketuksella tutkiminen käyttöön"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Kosketetut kohteet sanotaan ääneen ja ruudulla voi liikkua eleiden avulla."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ota parannettu verkon esteettömyys käyttöön"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Sovellus voi asentaa ohjelmia tehdäkseen sisällöstään esteettömämmän."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tarkkaile kirjoittamaasi tekstiä"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sisältää henkilökohtaisia tietoja, kuten luottokortin numeroita ja salasanoja."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"poista tilapalkki käytöstä tai muokkaa tilapalkkia"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Antaa sovelluksen poistaa tilapalkin käytöstä ja lisätä tai poistaa järjestelmäkuvakkeita."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"tilapalkki"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Antaa sovelluksen sitoutua syötetavan ylätason käyttöliittymään. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"sitoudu esteettömyyspalveluun"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Antaa sovelluksen sitoutua esteettömyyspalvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"pyydä kosketuksella tutkimisen käyttöönottoa"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Antaa luvan haltijan pyytää käyttöön vuorovaikutustilaa, jossa kosketettujen kohteiden nimet sanotaan ääneen ja käyttöliittymää voi tutkia eleiden avulla."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"pyydä parannettua verkon esteettömyyttä"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Antaa luvan haltijan pyytää verkon esteettömyysparannuksien käyttöönottoa. Sovellus voi esimerkiksi pyytää Googlen koodikatkelmien asentamista sovelluksen sisällön esteettömyyden parantamiseksi."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tekstipalveluun sitoutuminen"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Antaa sovelluksen sitoutua tekstipalvelun (kuten SpellCheckerServicen) ylätason liittymään. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"sitoudu VPN-palveluun"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Käynnistä uudelleen"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Sivu <xliff:g id="TITLE">%s</xliff:g> sanoo:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Vahvista siirtyminen"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Poistu tältä sivulta"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Pysy tällä sivulla"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Haluatko varmasti siirtyä pois tältä sivulta?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Vahvista"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Vinkki: lähennä ja loitonna kaksoisnapauttamalla."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut. täyttö"</string>

@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Tilgængelighedsfunktioner"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funktioner, som hjælpeteknologier kan anmode om."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente indholdet i vinduet"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"undersøge indholdet i et vindue, du interagerer med."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"aktivere Udforsk ved berøring"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"De emner, der trykkes på, læses højt, og skærmen kan udforskes ved hjælp af bevægelser."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"aktivere forbedret webtilgængelighed"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Der installeres muligvis scripts for at gøre appindhold mere tilgængeligt."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere tekst, du skriver"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data såsom kreditkortnumre og adgangskoder."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Tillader, at appen kan deaktivere statusbjælken eller tilføje og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbjælke"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Tillader, at brugeren kan forpligter sig til en inputmetodes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"bind dig til en tilgængelighedstjeneste"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Tillader, at brugeren binder sig til en grænseflade for en tilgængelighedstjeneste på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"anmod om udforsk ved berøring"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Tillader brugeren at anmode om en interaktionstilstand, hvor elementer, der berøres, læses op, og brugergrænsefladen kan udforskes via berøringer."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"anmod om bedre webtilgængelighed"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Tillader, at brugeren kan anmode om aktivering af webtilgængelighedsforbedringer. Disse omfatter bl.a. at installering af scripts, der gør appindhold mere tilgængeligt."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"forpligte sig til en sms-tjeneste"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Tillader, at ejeren kan binde en teksttjenestes grænseflade (f. eks. SpellCheckerService) på øverste niveau. Dette bør aldrig være nødvendigt til normale apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind til en VPN-tjeneste"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Genstart"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"På siden på \"<xliff:g id="TITLE">%s</xliff:g>\" står der:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"Javascript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Bekræft navigation"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Forlad denne side"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Forbliv på denne side"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Er du sikker på, at du vil navigere væk fra denne side?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekræft"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip! Dobbeltklik for at zoome ind eller ud."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofyld"</string>

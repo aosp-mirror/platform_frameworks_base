@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"الدخول إلى بطاقة SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"ميزات إمكانية الوصول"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"الميزات التي يمكن للتقنية المساعدة طلبها"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"سيتم نطق العناصر التي تم لمسها بصوت عال ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"تشغيل إمكانية الدخول المحسّن عبر الويب"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"قد يتم تثبيت النصوص البرمجية لتسهيل الدخول إلى المحتوى."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ملاحظة النص الذي تكتبه"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"يتضمن بيانات شخصية مثل أرقام بطاقات الائتمان وكلمات المرور."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"تعطيل شريط الحالة أو تعديله"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"للسماح للتطبيق بتعطيل شريط الحالة أو إضافة رموز نظام وإزالتها."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"شريط الحالة"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لأسلوب الإدخال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"الالتزام بخدمة إمكانية الدخول"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إمكانية الدخول. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"طلب الاستكشاف باللمس"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"للسماح للمالك بطلب وضع التفاعل الذي يتم فيه النطق بالعناصر الملموسة بصوت عالٍ واستكشاف واجهة المستخدم بالإيماءات."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"طلب إمكانية وصول محسنة"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"للسماح للمالك بطلب تمكين تحسينات إمكانية الوصول إلى الويب، مثل تثبيت البرامج النصية لمزيد من تسهيل الدخول إلى محتوى التطبيق."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"الالتزام بخدمة إدخال النصوص"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إدخال النصوص (على سبيل المثال، SpellCheckerService). لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"الالتزام بخدمة VPN"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"إعادة تشغيل"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"تعرض الصفحة في \"<xliff:g id="TITLE">%s</xliff:g>\":"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"جافا سكريبت"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"تأكيد الانتقال"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"مغادرة هذه الصفحة"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"البقاء في هذه الصفحة"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"هل تريد بالتأكيد الانتقال بعيدًا عن هذه الصفحة؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأكيد"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"نصيحة: اضغط مرتين للتكبير والتصغير."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ملء تلقائي"</string>
