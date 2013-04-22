@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accéder à la carte SD"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Fonctionnalités d\'accessibilité"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Fonctionnalités pouvant être requises dans le cadre des technologies d\'assistance"</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barre d\'état"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un mode de saisie. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"associer à un service d\'accessibilité"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service d\'accessibilité. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"demander l\'activation de la fonctionnalité \"Explorer au toucher\""</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permet à l\'application de demander l\'activation d\'un mode d\'interaction dans lequel les éléments sur lesquels l\'utilisateur appuie sont énoncés à voix haute et dans lequel l\'utilisateur peut explorer l\'interface à l\'aide de gestes."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"demander des améliorations de la fonctionnalité d\'accessibilité Web"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Permet à l\'application de demander l\'activation d\'améliorations de la fonctionnalité d\'accessibilité Web, telles que l\'installation de scripts pour rendre le contenu des applications plus accessible."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"associer à un service de texte"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet à l\'application de s\'associer à l\'interface de haut niveau d\'un service de texte (par exemple, SpellCheckerService). Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"associer à un service VPN"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Redémarrer"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"La page \"<xliff:g id="TITLE">%s</xliff:g>\" indique :"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Quitter la page"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Quitter cette page"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Rester sur cette page"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Voulez-vous vraiment quitter cette page ?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmer"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Conseil : Appuyez deux fois pour faire un zoom avant ou arrière."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Saisie auto"</string>

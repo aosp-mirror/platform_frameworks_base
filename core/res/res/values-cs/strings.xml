@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Přístup ke kartě SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkce usnadnění"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkce, o které může asistenční technologie požádat."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načíst obsah okna"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Můžete prozkoumat obsah okna, se kterým pracujete."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnout funkci Prozkoumání dotykem"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Položky, na které klepnete, budou přečteny nahlas a obrazovku bude možné procházet pomocí gest."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnout vylepšené usnadnění přístupu k webu"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za účelem usnadnění přístupu k obsahu aplikací mohou být nainstalovány skripty."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovat zadávaný text"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Zahrnuje osobní údaje, jako jsou například čísla kreditních karet a hesla."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový řádek"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Umožňuje držiteli vázat se na nejvyšší úroveň rozhraní pro zadávání dat. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"navázat se na službu usnadnění přístupu"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby usnadnění přístupu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"požádat o prozkoumání dotykem"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Umožňuje držiteli požádat o interaktivní režim, ve kterém jsou po dotyku vysloveny názvy položek a uživatelské rozhraní lze poznávat pomocí gest."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"požádat o usnadnění přístupu k webu"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Umožňuje držiteli požádat o aktivaci usnadnění přístupu k webu, například o instalaci skriptů, které usnadňují přístup k obsahu aplikace."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"navázat se na textovou službu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Umožňuje držiteli připojit se k nejvyšší úrovni rozhraní textové služby (např. SpellCheckerService). Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"navázat se na službu VPN"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Restartovat"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Stránka <xliff:g id="TITLE">%s</xliff:g> uvádí:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Potvrďte přechod"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Opustit stránku"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Zůstat na této stránce"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Opravdu tuto stránku chcete opustit?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut.vyp."</string>
@@ -1082,7 +1082,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> nereaguje. Chcete ji ukončit?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> nereaguje."\n\n"Chcete jej ukončit?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Nahlásit"</string>
+    <string name="report" msgid="4060218260984795706">"Hlášení"</string>
     <string name="wait" msgid="7147118217226317732">"Počkat"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Stránka nereaguje."\n\n"Chcete ji zavřít?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Přesměrování aplikace"</string>

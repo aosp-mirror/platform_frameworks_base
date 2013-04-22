@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"存取 SD 卡。"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"協助工具功能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"輔助技術可要求的功能。"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"擷取視窗內容"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查您存取的視窗內容。"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"啟用輕觸探索功能"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"朗讀您輕觸的項目，並可讓您使用手勢探索螢幕。"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"啟用強化網頁協助工具"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"可能會安裝程式碼，使應用程式內容更易於存取。"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"記錄您輸入的文字"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包括個人資料，如信用卡號碼和密碼。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"狀態列"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允許應用程式繫結至輸入法的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"繫結至協助工具服務"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允許應用程式繫結至協助工具服務的頂層介面 (一般應用程式不需使用)。"</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"要求輕觸探索"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"允許應用程式要求啟用互動模式，讓裝置讀出使用者輕觸的項目，並且讓使用者透過手勢探索使用者介面。"</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"要求增強式網頁協助工具"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"允許應用程式要求啟用網頁協助工具增強功能。例如安裝指令碼，讓使用者更容易存取應用程式的內容。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"繫結至文字服務"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"允許應用程式繫結至文字服務 (例如 SpellCheckerService) 的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"繫結至 VPN 服務"</string>
@@ -462,7 +466,7 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音訊設定，例如音量和用來輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"允許應用程式使用麥克風錄音。這項權限可讓應用程式隨時錄音，不需經過您的確認。"</string>
-    <string name="permlab_camera" msgid="3616391919559751192">"拍照和拍攝影片"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"拍攝相片和影片"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"允許應用程式使用相機拍照和錄影。這項權限可讓應用程式隨時使用相機，而不需請求您進行確認。"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"永久停用平板電腦"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"永久停用電話"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"重新開機"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"「<xliff:g id="TITLE">%s</xliff:g>」網頁指出："</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"確認瀏覽"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"離開這一頁"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"停留在這一頁"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"您確定要前往其他網頁瀏覽嗎？"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕按兩下即可縮放。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動填入功能"</string>

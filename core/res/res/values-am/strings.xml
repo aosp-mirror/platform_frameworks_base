@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD ካርድ ድረስ"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"የተደራሽነት ባህሪያት"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"አጋዥ ቴክኖሎጂ ሊጠይቃቸው የሚችላቸው ባህሪያት።"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"የመስኮት ይዘት ሰርስረው ያውጡ"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"መስተጋበር የሚፈጥሩት የመስኮት ይዘት ይመርምሩ።"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"በመንካት ያስሱን ያብሩ"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"የተነኩ ንጥሎች ጮክ ተብለው ይነገሩና የጣት ምልክቶችን በመጠቀም ማያ ገጹ ሊታሰስ ይችላል።"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"የተሻሻለ የድር ተደራሽነት ያብሩ"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"የመተግበሪያ ይዘት ይበልጥ የሚገኙ ለማድረግ ስክሪፕቶች ሊጫኑ ይችላሉ።"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"የሚተይቡት ጽሑፍ ይመልከቱ"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"እንደ የክሬዲት ካርድ ቁጥሮች እና የይለፍ ቃላት ያሉ የግል ውሂብ ያካትታል።"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"የሁኔቴ አሞሌ አቦዝን ወይም ቀይር"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"የስርዓት አዶዎችን ወደ ሁኔታ አሞሌ ላለማስቻል ወይም ለማከል እና ለማስወገድ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"ኹናቴ አሞሌ"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ያዡ ግቤት ስልቱን ወደ ከፍተኛ-ደረጃ በይነገጽ ለመጠረዝ ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ከአንድ የተደራሽነት አገልግሎት ጋር እሰር"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ያዢው ወደ የአንድ ተደራሽነት አገልግሎት ከፍተኛ-ደረጃ በይነገጽ እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች መቼም ቢሆን ሊያስፈልግ አይገባም።"</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"በንክኪ ማሰስን ይጠይቁ"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"ያዢው የተነኩ ንጥሎች ጮክ ተብለው የሚነገሩበት እና በይነገጹ በምልክቶች በኩል ሊታሰስ በሚችሉበት የበይነግንኙነት ሁኒታ እንዲጠይቅ ያስችለዋል።"</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"የተሻሻለ የድር ተደራሽነት ይጠይቁ"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"ያዢው የድር ተደራሽነት ማሻሻያዎች እንዲነቁለት እንዲጠይቅ ያስችለዋል። ለምሳሌ፣ የመተግበሪያ ይዘት ይበልጥ ተደራሽ እንዲሆን የGoogle ስክሪፕቶችን እንዲጫኑ መጠየቅ።"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"ለፅሁፍ አገልግሎት አሰረ"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"ያዡ ግቤት ለከፍተኛ-ደረጃ የፅሁፍ አገልግሎት ገፅታ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"ለVPN አገልግሎት ተገዛ"</string>
@@ -804,8 +808,8 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g>ጊዜ በስህተት ስለውታል።"\n\n"እባክህ እንደገና ከ<xliff:g id="NUMBER_1">%d</xliff:g>ሰከንዶች በኋላ ሞክር።"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"<xliff:g id="NUMBER_0">%d</xliff:g>ጊዚያቶች የይለፍ ቃልህን በስህተት ተይበኻል፡፡በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰኮንዶች ውስጥ "\n\n"እንደገና ሞክር፡፡"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"<xliff:g id="NUMBER_0">%d</xliff:g>ጊዚያቶች ፒንህን በስህተት ተይበኻል፡፡በ"\n"ሰኮንዶች ውስጥ "\n"<xliff:g id="NUMBER_1">%d</xliff:g>እንደገና ሞክር፡፡"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g>ጊዜ በስህተት ስለኽውዋል።ከ<xliff:g id="NUMBER_1">%d</xliff:g>የበለጠ ያልተሳካ ሙከራ በኋላ፣ የGoogle መግቢያህን ተጠቅመህ ስልኩን እንድትከፍት ትጠየቃለህ።"\n\n"እባክህ እንደገና <xliff:g id="NUMBER_2">%d</xliff:g>ከሰከንዶች በኋላ ሞክር።"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"የመክፈቻ ስርዓተ ጥለቱን<xliff:g id="NUMBER_0">%d</xliff:g>ጊዜ በስህተት ስለኽውዋል።ከ<xliff:g id="NUMBER_1">%d</xliff:g> የበለጠ ያልተሳካ ሙከራ በኋላ፣ የGoogle መግቢያህን ተጠቅመህ ስልኩን እንድትከፍት ትጠየቃለህ።"\n\n"እባክህ እንደገና ከ<xliff:g id="NUMBER_2">%d</xliff:g> ሰከንዶች በኋላ ሞክር።"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g>ጊዜ በስህተት ስለውታል።ከ<xliff:g id="NUMBER_1">%d</xliff:g>የበለጠ ያልተሳካ ሙከራ በኋላ፣ የGoogle መግቢያዎን ተጠቅመው ስልኩን እንዲከከፍቱ ይጠየቃሉ።"\n\n"እባክዎ እንደገና <xliff:g id="NUMBER_2">%d</xliff:g>ከሰከንዶች በኋላ ይሞክሩ።"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"የመክፈቻ ስርዓተ ጥለቱን<xliff:g id="NUMBER_0">%d</xliff:g>ጊዜ በስህተት ስለውታል።ከ<xliff:g id="NUMBER_1">%d</xliff:g> የበለጠ ያልተሳካ ሙከራ በኋላ፣ የGoogle መግቢያዎን ተጠቅመው ስልኩን እንዲከፍቱ ይጠየቃሉ።"\n\n"እባክዎ እንደገና ከ<xliff:g id="NUMBER_2">%d</xliff:g> ሰከንዶች በኋላ ይሞክሩ።"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"ይህን tablet <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ ያህል በስህተት ለማስከፈት ሞክረሃል፡፡ ከ <xliff:g id="NUMBER_1">%d</xliff:g> በላይ ያልተሳኩ ሙከራዎች በኋላ፣ ይህ tablet አሁን በፋብሪካ ነባሪ ቅንጅት ዳግም ይቀናበርና ሁሉም የተጠቃሚው ውሂብ ይጠፋል፡፡"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"ይህን ስልክ <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ ያህል በስህተት ለማስከፈት ሞክረሃል፡፡ ከ <xliff:g id="NUMBER_1">%d</xliff:g> በላይ ያልተሳኩ ሙከራዎች በኋላ፣ ይህ ስልክ በፋብሪካ ነባሪ ቅንጅት ዳግም ይቀናበርና ሁሉም የተጠቃሚው ውሂብ ይጠፋል፡፡"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"ይህን tablet <xliff:g id="NUMBER">%d</xliff:g> ጊዜ ያህል በስህተት ለማስከፈት ሞክረሃል፡፡ ይህ tablet አሁን በፋብሪካ ነባሪ ቅንጅት ዳግም ይቀናበራል፡፡"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"ድጋሚ አስነሳ"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"በ«<xliff:g id="TITLE">%s</xliff:g>» ያለው ገጽ ይህን ይላል፦"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"ጃቫስክሪፕት"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"አሰሳን አረጋግጥ"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"ከዚህ ገጽ ውጣ"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"እዚህ ገፅ ላይ ቆይ"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"እርግጠኛ ነዎት ከዚህ ገጽ ወደ ሌላ ቦታ መሄድ ይፈልጋሉ?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"አረጋግጥ"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"ጠቃሚ ምክር፦ ለማጉላት እና ለማሳነስ ሁለቴ-መታ አድርግ።"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ራስ ሙላ"</string>

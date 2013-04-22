@@ -36,9 +36,9 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de ligação ou código MMI inválido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"A operação está restringida a números fixos autorizados."</string>
-    <string name="serviceEnabled" msgid="8147278346414714315">"O serviço foi activado."</string>
-    <string name="serviceEnabledFor" msgid="6856228140453471041">"O serviço foi activado para:"</string>
-    <string name="serviceDisabled" msgid="1937553226592516411">"O serviço foi desactivado."</string>
+    <string name="serviceEnabled" msgid="8147278346414714315">"O serviço foi ativado."</string>
+    <string name="serviceEnabledFor" msgid="6856228140453471041">"O serviço foi ativado para:"</string>
+    <string name="serviceDisabled" msgid="1937553226592516411">"O serviço foi desativado."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"O registo foi bem sucedido."</string>
     <string name="serviceErased" msgid="1288584695297200972">"A eliminação foi bem sucedida."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Palavra-passe incorrecta."</string>
@@ -88,8 +88,8 @@
     <string name="serviceClassDataSync" msgid="7530000519646054776">"Sincronização"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"Pacote"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
-    <string name="roamingText0" msgid="7170335472198694945">"Indicador de Roaming activado"</string>
-    <string name="roamingText1" msgid="5314861519752538922">"Indicador de Roaming desactivado"</string>
+    <string name="roamingText0" msgid="7170335472198694945">"Indicador de Roaming ativado"</string>
+    <string name="roamingText1" msgid="5314861519752538922">"Indicador de Roaming desativado"</string>
     <string name="roamingText2" msgid="8969929049081268115">"Indicador de Roaming intermitente"</string>
     <string name="roamingText3" msgid="5148255027043943317">"Fora da Vizinhança"</string>
     <string name="roamingText4" msgid="8808456682550796530">"No Exterior"</string>
@@ -158,11 +158,11 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Criar Rel. Erro"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Será recolhida informação sobre o estado atual do seu dispositivo a enviar através de uma mensagem de email. Demorará algum tempo até que o relatório de erro esteja pronto para ser enviado. Aguarde um pouco."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
-    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Som desactivado"</string>
-    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"O som está activado"</string>
+    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Som desativado"</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"O som está ativado"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo de avião"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"O modo de voo está activado"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"O modo de voo está desactivado"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"O modo de voo está ativado"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"O modo de voo está desativado"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Aceder ao cartão SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funcionalidades de acessibilidade"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funcionalidades que a tecnologia de apoio pode solicitar."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Obter conteúdo da janela"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo de uma janela com a qual está a interagir."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar Através do Toque"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Os itens em que tocar serão pronunciados em voz alta e o ecrã poderá ser explorado através de toques."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ativar a acessibilidade Web melhorada"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Poderão ser instalados scripts para tornar o conteúdo da aplicação mais acessível."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar o texto que escreve"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclui dados pessoais, como números de cartões de crédito e palavras-passe."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite à aplicação desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barra de estado"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permite ao titular vincular-se à interface de nível superior de um método de entrada. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"vincular a um serviço de acessibilidade"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite que o titular vincule a interface de nível superior de um serviço de acessibilidade. Nunca deverá ser necessário para aplicações normais."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"solicitar exploração por toque"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permite ao Hoder solicitar um modo de interação em que os itens tocados são falados em voz alta e a IU pode ser explorada através de gestos."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"solicitar acessibilidade Web melhorada"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Permite ao Hoder solicitar a ativação de melhoramentos de acessibilidade Web. Por exemplo, a instalação de scripts do Google para tornar o conteúdo das aplicações mais acessível."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincular a um serviço de texto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite ao titular ligar-se à interface de nível superior de um serviço de texto (por exemplo SpellCheckerService). Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincular a um serviço VPN"</string>
@@ -822,8 +826,8 @@
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Esqueceu-se do nome de utilizador ou da palavra-passe?"\n"Visite "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"A verificar…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Desbloquear"</string>
-    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Som activado"</string>
-    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Som desactivado"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Som ativado"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Som desativado"</string>
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Sequência iniciada"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Sequência apagada"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Célula adicionada"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"A página em \"<xliff:g id="TITLE">%s</xliff:g>\" indica:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Confirmar Navegação"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Sair desta Página"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Permanecer nesta Página"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tem a certeza de que pretende navegar para outra página?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Sugestão: toque duas vezes para aumentar ou diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Preenchimento Automático"</string>
@@ -1065,7 +1065,7 @@
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atenção"</string>
     <string name="loading" msgid="7933681260296021180">"A carregar…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"Activado"</string>
+    <string name="capital_on" msgid="1544682755514494298">"Ativado"</string>
     <string name="capital_off" msgid="6815870386972805832">"Desactivar"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Concluir ação utilizando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta acção."</string>
@@ -1289,7 +1289,7 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"Não foi selecionado nenhum ficheiro"</string>
     <string name="reset" msgid="2448168080964209908">"Repor"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo automóvel activado"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo automóvel ativado"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toque para sair do modo automóvel."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Ligação ponto a ponto ou hotspot activos"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Toque para configurar."</string>

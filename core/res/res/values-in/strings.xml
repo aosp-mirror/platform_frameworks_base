@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Akses kartu SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Fitur aksesibilitas"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Fitur yang dapat diminta oleh teknologi bantu."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Mengambil konten jendela"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Memeriksa konten jendela tempat Anda berinteraksi."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Item yang disentuh akan diucapkan dengan jelas dan layar dapat dijelajahi menggunakan isyarat."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Mengaktifkan aksesibilitas web yang disempurnakan"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skrip mungkin dipasang agar konten aplikasi lebih dapat diakses."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Mengamati teks yang Anda ketik"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Meliputi data pribadi seperti nomor kartu kredit dan sandi."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"nonaktifkan atau ubah bilah status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Mengizinkan apl menonaktifkan bilah status atau menambah dan menghapus ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"bilah status"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu metode masukan. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"mengikat ke layanan aksesibilitas"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Mengizinkan pemegang untuk mengikat antarmuka tingkat tinggi dari suatu layanan. Tidak pernah diperlukan oleh aplikasi normal."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"meminta penjelajahan dengan sentuhan"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Memungkinkan pemegang meminta mode interaksi yang mana item yang disentuh diucapkan dengan keras dan UI dapat dijelajahi dengan isyarat."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"meminta aksesibilitas web yang disempurnakan"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Memungkinkan pemegang meminta pengaktifan penyempurnaan aksesibilitas web. Contohnya, memasang skrip agar konten aplikasi lebih mudah diakses."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"mengikat ke layanan SMS"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan teks (misal: SpellCheckerService). Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"mengikat ke layanan VPN"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Mulai ulang"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Laman pada \"<xliff:g id="TITLE">%s</xliff:g>\" menyatakan:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Konfirmasi Navigasi"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Keluar dari Laman ini"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Tetap di Laman ini"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Yakin ingin beranjak dari laman ini?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Isiotomatis"</string>

@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Fikia kadi ya SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Vipengele vya ufikiaji"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Vipengee ambavyo teknolojia saidizi inaweza kuomba."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Rejesha maudhui ya dirisha"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Chunguza maudhui ya dirisha unaloingiliana nalo."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Washa Chunguza kwa Mguso"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Vipengee vilivyoguswa vitatamkwa kwa sauti na skrini inaweza kuchunguzwa kwa kutumia ishara."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Washa ufikiaji wa wavuti ulioboreshwa"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Hati zinaweza kusakinishwa ili kuyafanya maudhui ya programu kufikiwa zaidi."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Angalia maandishi unayoyacharaza"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inajumuisha data binafsi kama vile nambari za kadi ya mkopo na manenosiri."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa ikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"mwamba hali"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Inaruhusu mmiliki kushurutisha kwenye kusano ya kiwango cha juu ya mbinu ya ingizo. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"funga kwa huduma ya ufikiaji"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Inamuruhusu mmiliki kufunga kipengee kinachojitokeza katika nyanja mbalimbali za kiwango cha juu cha huduma ya afikiaji. Hapaswi kuhitajika kwa programu za kawaida."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"omba uchunguzi kwa kugusa"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Huruhusu programu kuomba hali ya mwingiliano ambapo vipengee vilivyoguswa hutamkwa kwa sauti na Kiolesura kinaweza kuchunguzwa kupitia ishara."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"omba ufikiaji wa wavuti ulioimarishwa"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Huruhusu programu kuomba uwezeshaji wa uimarishaji wa ufikiaji wa wavuti. Kwa mfano, kusakinisha hati ili kufanya maudhui ya programu kufikiwa zaidi."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Imefungwa kwa huduma ya maandishi"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Inaruhusu kishikiliaji kushurutisha kusano ya kiwango cha juu ya huduma ya matini(k.m.SpellCheckerService). Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"funga kwa huduma ya VPN"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Washa tena"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Ukurasa ulio \"<xliff:g id="TITLE">%s</xliff:g>\" unasema:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"HatiJava"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Thibitisha jinsi ya kuelekea"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Toka kwenye Ukurasa huu"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bakia kwenye Ukurasa huu"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Je, una uhakika unataka kutoka kwenye ukurasa huu?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Thibitisha"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kidokezo: Gonga mara mbili ili kukuza ndani na nje."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Kujaza kiotomatiki"</string>
@@ -1057,7 +1057,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Vitendo vya maandishi"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nafasi ya kuhafadhi inakwisha"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>
-    <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> inaendesha"</string>
+    <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumiwa"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Gusa ili upate maelezo zaidi au usitishe programu."</string>
     <string name="ok" msgid="5970060430562524910">"Sawa"</string>
     <string name="cancel" msgid="6442560571259935130">"Ghairi"</string>
@@ -1120,8 +1120,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Sauti ya simu"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya midia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Sauti ya arifa"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Toni mlio chaguo-msingi"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Toni mlio chaguo-msingi  (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Mlio chaguo-msingi"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Mlio chaguo-msingi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Hamna"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Toni za mlio"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Mlio amabo haujulikani"</string>
