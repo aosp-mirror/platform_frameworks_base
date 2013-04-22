@@ -544,7 +544,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&
                                  mTethering.getUpstreamIfaceTypes().length != 0);
 
-        mVpn = new Vpn(mContext, mVpnCallback, mNetd);
+        mVpn = new Vpn(mContext, mVpnCallback, mNetd, this);
         mVpn.startMonitoring(mContext, mTrackerHandler);
 
         mClat = new Nat464Xlat(mContext, mNetd, this, mTrackerHandler);
@@ -3447,5 +3447,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (isNetworkTypeValid(networkType) && mNetTrackers[networkType] != null) {
             mNetTrackers[networkType].supplyMessenger(messenger);
         }
+    }
+
+    public int findConnectionTypeForIface(String iface) {
+        enforceConnectivityInternalPermission();
+
+        if (TextUtils.isEmpty(iface)) return ConnectivityManager.TYPE_NONE;
+        for (NetworkStateTracker tracker : mNetTrackers) {
+            if (tracker != null) {
+                LinkProperties lp = tracker.getLinkProperties();
+                if (lp != null && iface.equals(lp.getInterfaceName())) {
+                    return tracker.getNetworkInfo().getType();
+                }
+            }
+        }
+        return ConnectivityManager.TYPE_NONE;
     }
 }
