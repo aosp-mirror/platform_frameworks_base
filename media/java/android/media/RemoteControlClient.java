@@ -645,35 +645,42 @@ public class RemoteControlClient
                 sendAudioServiceNewPlaybackState_syncCacheLock();
 
                 // handle automatic playback position refreshes
-                if (mEventHandler == null) {
-                    return;
-                }
-                mEventHandler.removeMessages(MSG_POSITION_DRIFT_CHECK);
-                if (timeInMs == PLAYBACK_POSITION_INVALID) {
-                    // this playback state refresh has no known playback position, it's no use
-                    // trying to see if there is any drift at this point
-                    // (this also bypasses this mechanism for older apps that use the old
-                    //  setPlaybackState(int) API)
-                    return;
-                }
-                if (playbackPositionShouldMove(mPlaybackState)) {
-                    // playback position moving, schedule next position drift check
-                    mEventHandler.sendMessageDelayed(
-                            mEventHandler.obtainMessage(MSG_POSITION_DRIFT_CHECK),
-                            getCheckPeriodFromSpeed(playbackSpeed));
-                }
+                initiateCheckForDrift_syncCacheLock();
             }
+        }
+    }
+
+    private void initiateCheckForDrift_syncCacheLock() {
+        if (mEventHandler == null) {
+            return;
+        }
+        mEventHandler.removeMessages(MSG_POSITION_DRIFT_CHECK);
+        if (!mNeedsPositionSync) {
+            return;
+        }
+        if (mPlaybackPositionMs < 0) {
+            // the current playback state has no known playback position, it's no use
+            // trying to see if there is any drift at this point
+            // (this also bypasses this mechanism for older apps that use the old
+            //  setPlaybackState(int) API)
+            return;
+        }
+        if (playbackPositionShouldMove(mPlaybackState)) {
+            // playback position moving, schedule next position drift check
+            mEventHandler.sendMessageDelayed(
+                    mEventHandler.obtainMessage(MSG_POSITION_DRIFT_CHECK),
+                    getCheckPeriodFromSpeed(mPlaybackSpeed));
         }
     }
 
     private void onPositionDriftCheck() {
         if (DEBUG) { Log.d(TAG, "onPositionDriftCheck()"); }
         synchronized(mCacheLock) {
-            if ((mEventHandler == null) || (mPositionProvider == null)) {
+            if ((mEventHandler == null) || (mPositionProvider == null) || !mNeedsPositionSync) {
                 return;
             }
-            if ((mPlaybackPositionMs == PLAYBACK_POSITION_INVALID) || (mPlaybackSpeed == 0.0f)) {
-                if (DEBUG) { Log.d(TAG, " no position or 0 speed, no check needed"); }
+            if ((mPlaybackPositionMs < 0) || (mPlaybackSpeed == 0.0f)) {
+                if (DEBUG) { Log.d(TAG, " no valid position or 0 speed, no check needed"); }
                 return;
             }
             long estPos = mPlaybackPositionMs + (long)
@@ -1012,6 +1019,12 @@ public class RemoteControlClient
     private final PendingIntent mRcMediaIntent;
 
     /**
+     * Reflects whether any "plugged in" IRemoteControlDisplay has mWantsPositonSync set to true.
+     */
+    // TODO consider using a ref count for IRemoteControlDisplay requiring sync instead
+    private boolean mNeedsPositionSync = false;
+
+    /**
      * A class to encapsulate all the information about a remote control display.
      * A RemoteControlClient's metadata and state may be displayed on multiple IRemoteControlDisplay
      */
@@ -1020,6 +1033,7 @@ public class RemoteControlClient
         private IRemoteControlDisplay mRcDisplay;
         private int mArtworkExpectedWidth;
         private int mArtworkExpectedHeight;
+        private boolean mWantsPositionSync = false;
 
         DisplayInfoForClient(IRemoteControlDisplay rcd, int w, int h) {
             mRcDisplay = rcd;
@@ -1109,6 +1123,14 @@ public class RemoteControlClient
             }
         }
 
+        public void setWantsSyncForDisplay(IRemoteControlDisplay rcd, boolean wantsSync) {
+            // only post messages, we can't block here
+            if ((mEventHandler != null) && (rcd != null)) {
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
+                        MSG_DISPLAY_WANTS_POS_SYNC, wantsSync ? 1 : 0, 0/*arg2 ignored*/, rcd));
+            }
+        }
+
         public void seekTo(int generationId, long timeMs) {
             // only post messages, we can't block here
             if (mEventHandler != null) {
@@ -1160,6 +1182,7 @@ public class RemoteControlClient
     private final static int MSG_UPDATE_DISPLAY_ARTWORK_SIZE = 9;
     private final static int MSG_SEEK_TO = 10;
     private final static int MSG_POSITION_DRIFT_CHECK = 11;
+    private final static int MSG_DISPLAY_WANTS_POS_SYNC = 12;
 
     private class EventHandler extends Handler {
         public EventHandler(RemoteControlClient rcc, Looper looper) {
@@ -1209,6 +1232,9 @@ public class RemoteControlClient
                     break;
                 case MSG_POSITION_DRIFT_CHECK:
                     onPositionDriftCheck();
+                    break;
+                case MSG_DISPLAY_WANTS_POS_SYNC:
+                    onDisplayWantsSync((IRemoteControlDisplay)msg.obj, msg.arg1 == 1);
                     break;
                 default:
                     Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
@@ -1410,13 +1436,29 @@ public class RemoteControlClient
     /** pre-condition rcd != null */
     private void onUnplugDisplay(IRemoteControlDisplay rcd) {
         synchronized(mCacheLock) {
-            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
                 if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                     displayIterator.remove();
-                    return;
+                    break;
                 }
+            }
+            // list of RCDs has changed, reevaluate whether position check is still needed
+            boolean oldNeedsPositionSync = mNeedsPositionSync;
+            boolean newNeedsPositionSync = false;
+            displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                if (di.mWantsPositionSync) {
+                    newNeedsPositionSync = true;
+                    break;
+                }
+            }
+            mNeedsPositionSync = newNeedsPositionSync;
+            if (oldNeedsPositionSync != mNeedsPositionSync) {
+                // update needed?
+                initiateCheckForDrift_syncCacheLock();
             }
         }
     }
@@ -1436,6 +1478,31 @@ public class RemoteControlClient
                     }
                     break;
                 }
+            }
+        }
+    }
+
+    /** pre-condition rcd != null */
+    private void onDisplayWantsSync(IRemoteControlDisplay rcd, boolean wantsSync) {
+        synchronized(mCacheLock) {
+            boolean oldNeedsPositionSync = mNeedsPositionSync;
+            boolean newNeedsPositionSync = false;
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            // go through the list of RCDs and for each entry, check both whether this is the RCD
+            //  that gets upated, and whether the list has one entry that wants position sync
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                    di.mWantsPositionSync = wantsSync;
+                }
+                if (di.mWantsPositionSync) {
+                    newNeedsPositionSync = true;
+                }
+            }
+            mNeedsPositionSync = newNeedsPositionSync;
+            if (oldNeedsPositionSync != mNeedsPositionSync) {
+                // update needed?
+                initiateCheckForDrift_syncCacheLock();
             }
         }
     }
