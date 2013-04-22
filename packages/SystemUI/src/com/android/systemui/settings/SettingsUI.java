@@ -25,6 +25,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.systemui.SystemUI;
@@ -66,7 +67,7 @@ public class SettingsUI extends SystemUI {
     public void start() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
-        mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+        mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, mHandler);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
