@@ -226,7 +226,12 @@ public class RelativeLayout extends ViewGroup {
     private boolean mMeasureVerticalWithPaddingMargin = false;
 
     // A default width used for RTL measure pass
-    private static final int DEFAULT_WIDTH = Integer.MAX_VALUE / 2;
+    /**
+     * Value reduced so as not to interfere with View's measurement spec. flags. See:
+     * {@link View#MEASURED_SIZE_MASK}.
+     * {@link View#MEASURED_STATE_TOO_SMALL}.
+     **/
+    private static final int DEFAULT_WIDTH = 0x008000000;
 
     public RelativeLayout(Context context) {
         super(context);
