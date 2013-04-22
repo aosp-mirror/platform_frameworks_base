@@ -90,10 +90,6 @@ final class ActivityStack {
 
     static final boolean VALIDATE_TOKENS = ActivityManagerService.VALIDATE_TOKENS;
 
-    // How long we wait until giving up on the last activity telling us it
-    // is idle.
-    static final int IDLE_TIMEOUT = 10*1000;
-
     // Ticks during which we check progress while waiting for an app to launch.
     static final int LAUNCH_TICK = 500;
 
@@ -176,15 +172,6 @@ final class ActivityStack {
     final ArrayList<ActivityRecord> mNoAnimActivities = new ArrayList<ActivityRecord>();
 
     /**
-     * List of activities that are ready to be finished, but waiting
-     * for the previous activity to settle down before doing so.  It contains
-     * HistoryRecord objects.
-     */
-    final ArrayList<ActivityRecord> mFinishingActivities = new ArrayList<ActivityRecord>();
-
-    final ArrayList<UserStartedState> mStartingUsers = new ArrayList<UserStartedState>();
-
-    /**
      * Set when the system is going to sleep, until we have
      * successfully paused the current activity and released our wake lock.
      * At that point the system is allowed to actually sleep.
@@ -244,12 +231,6 @@ final class ActivityStack {
     private ActivityRecord mLastScreenshotActivity = null;
     private Bitmap mLastScreenshotBitmap = null;
 
-    /**
-     * List of ActivityRecord objects that have been finished and must
-     * still report back to a pending thumbnail receiver.
-     */
-    private final ArrayList<ActivityRecord> mCancelledThumbnails = new ArrayList<ActivityRecord>();
-
     int mThumbnailWidth = -1;
     int mThumbnailHeight = -1;
 
@@ -262,14 +243,12 @@ final class ActivityStack {
 
     static final int SLEEP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG;
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
-    static final int IDLE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
-    static final int IDLE_NOW_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
-    static final int LAUNCH_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
-    static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
-    static final int RESUME_TOP_ACTIVITY_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
-    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
-    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 8;
-    static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 9;
+    static final int LAUNCH_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
+    static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
+    static final int RESUME_TOP_ACTIVITY_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
+    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
+    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
+    static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
 
     static class ScheduleDestroyArgs {
         final ProcessRecord mOwner;
@@ -318,22 +297,6 @@ final class ActivityStack {
                         activityPausedLocked(r != null ? r.appToken : null, true);
                     }
                 } break;
-                case IDLE_TIMEOUT_MSG: {
-                    if (mService.mDidDexOpt) {
-                        mService.mDidDexOpt = false;
-                        Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
-                        nmsg.obj = msg.obj;
-                        mHandler.sendMessageDelayed(nmsg, IDLE_TIMEOUT);
-                        return;
-                    }
-                    // We don't at this point know if the activity is fullscreen,
-                    // so we need to be conservative and assume it isn't.
-                    ActivityRecord r = (ActivityRecord)msg.obj;
-                    Slog.w(TAG, "Activity idle timeout for " + r);
-                    synchronized (mService) {
-                        activityIdleInternalLocked(r != null ? r.appToken : null, true, null);
-                    }
-                } break;
                 case LAUNCH_TICK_MSG: {
                     ActivityRecord r = (ActivityRecord)msg.obj;
                     synchronized (mService) {
@@ -350,12 +313,6 @@ final class ActivityStack {
                     Slog.w(TAG, "Activity destroy timeout for " + r);
                     synchronized (mService) {
                         activityDestroyedLocked(r != null ? r.appToken : null);
-                    }
-                } break;
-                case IDLE_NOW_MSG: {
-                    ActivityRecord r = (ActivityRecord)msg.obj;
-                    synchronized (mService) {
-                        activityIdleInternalLocked(r != null ? r.appToken : null, false, null);
                     }
                 } break;
                 case LAUNCH_TIMEOUT_MSG: {
@@ -626,7 +583,6 @@ final class ActivityStack {
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
-        mStartingUsers.add(uss);
         if (mCurrentUser == userId) {
             return true;
         }
@@ -739,7 +695,7 @@ final class ActivityStack {
                 // Still need to tell some activities to stop; can't sleep yet.
                 if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to stop "
                         + mStackSupervisor.mStoppingActivities.size() + " activities");
-                scheduleIdleLocked();
+                mStackSupervisor.scheduleIdleLocked();
                 return;
             }
 
@@ -995,7 +951,7 @@ final class ActivityStack {
                         // them out. Or if r is the last of activity of the last task the stack
                         // will be empty and must be cleared immediately.
                         if (DEBUG_PAUSE) Slog.v(TAG, "To many pending stops, forcing idle");
-                        scheduleIdleLocked();
+                        mStackSupervisor.scheduleIdleLocked();
                     } else {
                         checkReadyForSleepLocked();
                     }
@@ -1061,19 +1017,7 @@ final class ActivityStack {
         next.newIntents = null;
 
         // schedule an idle timeout in case the app doesn't do it for us.
-        Message msg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
-        msg.obj = next;
-        mHandler.sendMessageDelayed(msg, IDLE_TIMEOUT);
-
-        if (false) {
-            // The activity was never told to pause, so just keep
-            // things going as-is.  To maintain our own state,
-            // we need to emulate it coming back and saying it is
-            // idle.
-            msg = mHandler.obtainMessage(IDLE_NOW_MSG);
-            msg.obj = next;
-            mHandler.sendMessage(msg);
-        }
+        mStackSupervisor.scheduleIdleTimeoutLocked(next);
 
         mStackSupervisor.reportResumedActivityLocked(next);
 
@@ -2159,7 +2103,7 @@ final class ActivityStack {
         r.addResultLocked(null, resultWho, requestCode, resultCode, data);
     }
 
-    private final void stopActivityLocked(ActivityRecord r) {
+    final void stopActivityLocked(ActivityRecord r) {
         if (DEBUG_SWITCH) Slog.d(TAG, "Stopping: " + r);
         if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
                 || (r.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
@@ -2217,12 +2161,6 @@ final class ActivityStack {
         }
     }
 
-    final void scheduleIdleLocked() {
-        Message msg = Message.obtain();
-        msg.what = IDLE_NOW_MSG;
-        mHandler.sendMessage(msg);
-    }
-
     // Checked.
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
             Configuration config) {
@@ -2240,145 +2178,18 @@ final class ActivityStack {
         boolean enableScreen = false;
         boolean activityRemoved = false;
 
-        ActivityRecord r = ActivityRecord.forToken(token);
-        if (r != null) {
-            mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
-            r.finishLaunchTickingLocked();
-        }
-
         // Get the activity record.
-        if (isInStackLocked(token) != null) {
-            res = r;
-
-            if (fromTimeout) {
-                mStackSupervisor.reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
-            }
-
-            // This is a hack to semi-deal with a race condition
-            // in the client where it can be constructed with a
-            // newer configuration from when we asked it to launch.
-            // We'll update with whatever configuration it now says
-            // it used to launch.
-            if (config != null) {
-                r.configuration = config;
-            }
-
+        res = isInStackLocked(token);
+        if (res != null) {
             // No longer need to keep the device awake.
-            if (mResumedActivity == r && mLaunchingActivity.isHeld()) {
+            if (mResumedActivity == res && mLaunchingActivity.isHeld()) {
                 mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
                 mLaunchingActivity.release();
             }
 
-            // We are now idle.  If someone is waiting for a thumbnail from
-            // us, we can now deliver.
-            r.idle = true;
-            if (mStackSupervisor.allResumedActivitiesIdle()) {
-                mService.scheduleAppGcsLocked();
-            }
-            if (r.thumbnailNeeded && r.app != null && r.app.thread != null) {
-                sendThumbnail = r.app.thread;
-                r.thumbnailNeeded = false;
-            }
-
             // If this activity is fullscreen, set up to hide those under it.
-
-            if (DEBUG_VISBILITY) Slog.v(TAG, "Idle activity for " + r);
+            if (DEBUG_VISBILITY) Slog.v(TAG, "Idle activity for " + res);
             ensureActivitiesVisibleLocked(null, 0);
-
-            //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
-            if (!mService.mBooted && mStackSupervisor.isFrontStack(this)) {
-                mService.mBooted = true;
-                enableScreen = true;
-            }
-        } else if (fromTimeout) {
-            mStackSupervisor.reportActivityLaunchedLocked(fromTimeout, null, -1, -1);
-        }
-
-        // Atomically retrieve all of the other things to do.
-        stops = mStackSupervisor.processStoppingActivitiesLocked(true);
-        NS = stops != null ? stops.size() : 0;
-        if ((NF=mFinishingActivities.size()) > 0) {
-            finishes = new ArrayList<ActivityRecord>(mFinishingActivities);
-            mFinishingActivities.clear();
-        }
-
-        final ArrayList<ActivityRecord> thumbnails;
-        final int NT = mCancelledThumbnails.size();
-        if (NT > 0) {
-            thumbnails = new ArrayList<ActivityRecord>(mCancelledThumbnails);
-            mCancelledThumbnails.clear();
-        } else {
-            thumbnails = null;
-        }
-
-        if (mStackSupervisor.isFrontStack(this)) {
-            booting = mService.mBooting;
-            mService.mBooting = false;
-        }
-
-        if (mStartingUsers.size() > 0) {
-            startingUsers = new ArrayList<UserStartedState>(mStartingUsers);
-            mStartingUsers.clear();
-        }
-
-        // Perform the following actions from unsynchronized state.
-        final IApplicationThread thumbnailThread = sendThumbnail;
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (thumbnailThread != null) {
-                    try {
-                        thumbnailThread.requestThumbnail(token);
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Exception thrown when requesting thumbnail", e);
-                        mService.sendPendingThumbnail(null, token, null, null, true);
-                    }
-                }
-
-                // Report back to any thumbnail receivers.
-                for (int i = 0; i < NT; i++) {
-                    ActivityRecord r = thumbnails.get(i);
-                    mService.sendPendingThumbnail(r, null, null, null, true);
-                }
-            }
-        });
-
-        // Stop any activities that are scheduled to do so but have been
-        // waiting for the next one to start.
-        for (int i = 0; i < NS; i++) {
-            r = stops.get(i);
-            if (r.finishing) {
-                finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
-            } else {
-                r.task.stack.stopActivityLocked(r);
-            }
-        }
-
-        // Finish any activities that are scheduled to do so but have been
-        // waiting for the next one to start.
-        for (int i = 0; i < NF; i++) {
-            r = finishes.get(i);
-            activityRemoved |= r.task.stack.destroyActivityLocked(r, true, false, "finish-idle");
-        }
-
-        if (booting) {
-            mService.finishBooting();
-        } else if (startingUsers != null) {
-            for (int i = 0; i < startingUsers.size(); i++) {
-                mService.finishUserSwitch(startingUsers.get(i));
-            }
-        }
-
-        mService.trimApplications();
-        //dump();
-        //mWindowManager.dump();
-
-        if (enableScreen) {
-            mService.enableScreenAfterBoot();
-        }
-
-        if (activityRemoved) {
-            mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
         }
 
         return res;
@@ -2501,8 +2312,8 @@ final class ActivityStack {
      * @return Returns true if this activity has been removed from the history
      * list, or false if it is still in the list and will be removed later.
      */
-    final boolean finishActivityLocked(ActivityRecord r, int resultCode,
-            Intent resultData, String reason, boolean oomAdj) {
+    final boolean finishActivityLocked(ActivityRecord r, int resultCode, Intent resultData,
+            String reason, boolean oomAdj) {
         if (r.finishing) {
             Slog.w(TAG, "Duplicate finish request for " + r);
             return false;
@@ -2541,7 +2352,7 @@ final class ActivityStack {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
-            mCancelledThumbnails.add(r);
+            mStackSupervisor.mCancelledThumbnails.add(r);
         }
 
         if (mResumedActivity == r) {
@@ -2573,12 +2384,11 @@ final class ActivityStack {
         return false;
     }
 
-    private static final int FINISH_IMMEDIATELY = 0;
-    private static final int FINISH_AFTER_PAUSE = 1;
-    private static final int FINISH_AFTER_VISIBLE = 2;
+    static final int FINISH_IMMEDIATELY = 0;
+    static final int FINISH_AFTER_PAUSE = 1;
+    static final int FINISH_AFTER_VISIBLE = 2;
 
-    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
-            int mode, boolean oomAdj) {
+    final ActivityRecord finishCurrentActivityLocked(ActivityRecord r, int mode, boolean oomAdj) {
         // First things first: if this activity is currently visible,
         // and the resumed activity is not yet visible, then hold off on
         // finishing until the resumed one becomes visible.
@@ -2591,7 +2401,7 @@ final class ActivityStack {
                     // then give up on things going idle and start clearing
                     // them out. Or if r is the last of activity of the last task the stack
                     // will be empty and must be cleared immediately.
-                    scheduleIdleLocked();
+                    mStackSupervisor.scheduleIdleLocked();
                 } else {
                     checkReadyForSleepLocked();
                 }
@@ -2632,7 +2442,7 @@ final class ActivityStack {
         // Need to go through the full pause cycle to get this
         // activity into the stopped state and then finish it.
         if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
-        mFinishingActivities.add(r);
+        mStackSupervisor.mFinishingActivities.add(r);
         mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
         return r;
     }
@@ -2745,7 +2555,7 @@ final class ActivityStack {
         // Make sure this record is no longer in the pending finishes list.
         // This could happen, for example, if we are trimming activities
         // down to the max limit while they are still waiting to finish.
-        mFinishingActivities.remove(r);
+        mStackSupervisor.mFinishingActivities.remove(r);
         mStackSupervisor.mWaitingVisibleActivities.remove(r);
 
         // Remove any pending results.
@@ -2767,7 +2577,7 @@ final class ActivityStack {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
-            mCancelledThumbnails.add(r);
+            mStackSupervisor.mCancelledThumbnails.add(r);
         }
 
         // Get rid of any pending idle timeouts.
@@ -2775,9 +2585,9 @@ final class ActivityStack {
     }
 
     private void removeTimeoutsForActivityLocked(ActivityRecord r) {
+        mStackSupervisor.removeTimeoutsForActivityLocked(r);
         mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
         mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
-        mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
         mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
         r.finishLaunchTickingLocked();
     }
@@ -3014,7 +2824,8 @@ final class ActivityStack {
         removeHistoryRecordsForAppLocked(mGoingToSleepActivities, app, "mGoingToSleepActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mWaitingVisibleActivities, app,
                 "mWaitingVisibleActivities");
-        removeHistoryRecordsForAppLocked(mFinishingActivities, app, "mFinishingActivities");
+        removeHistoryRecordsForAppLocked(mStackSupervisor.mFinishingActivities, app,
+                "mFinishingActivities");
 
         boolean hasVisibleActivities = false;
 

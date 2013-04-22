@@ -962,6 +962,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
     static final int FIRST_COMPAT_MODE_MSG = 300;
+    static final int FIRST_SUPERVISOR_STACK_MSG = 100;
 
     AlertDialog mUidAlert;
     CompatModeDialog mCompatModeDialog;
