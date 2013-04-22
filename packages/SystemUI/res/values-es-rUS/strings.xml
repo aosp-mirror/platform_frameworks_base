@@ -58,7 +58,7 @@
     <string name="label_view" msgid="6304565553218192990">"Ver"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Se usa de forma predeterminada para este dispositivo USB."</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Se usa de forma predeterminada para este accesorio USB."</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"¿Permitir depuración de USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"¿Permitir depuración por USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"La huella digital de tu clave RSA es:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir siempre desde esta computadora"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para ocupar la pantalla"</string>
@@ -178,7 +178,7 @@
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Activar protector"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo de avión"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo avión"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Cargada"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
