@@ -155,8 +155,8 @@
     <string name="global_action_lock" msgid="2844945191792119712">"화면 잠금"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"종료"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"버그 신고"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"버그 신고 받기"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"이렇게 하면 현재 기기 상태에 대한 정보를 수집하여 이메일 메시지로 전송합니다. 버그 신고를 시작하여 전송할 준비가 되려면 약간 시간이 걸립니다."</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"버그 신고"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"현재 기기 상태에 대한 정보를 수집하여 이메일 메시지로 전송합니다. 버그 신고를 시작하여 전송할 준비가 되려면 약간 시간이 걸립니다."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"무음 모드"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"소리 꺼짐"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"소리 켜짐"</string>
@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"접근성 기능"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"장애인 보조 기술이 요청할 수 있는 기능입니다."</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"상태 표시줄"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"접근성 서비스와 연결"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"권한을 가진 프로그램이 접근성 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"\'터치하여 탐색\' 요청"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"권한을 가진 프로그램이 터치한 항목을 소리내어 말하고 제스처로 UI를 탐색할 수 있는 상호작용 모드를 요청할 수 있도록 허용합니다."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"웹 접근성 개선 요청"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"권한을 가진 프로그램이 웹 접근성 개선을 요청할 수 있도록 허용합니다. 예를 들어 스크립트를 설치하여 앱 콘텐츠에 더 간편하게 액세스할 수 있습니다."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"권한을 가진 프로그램이 텍스트 서비스(예: SpellCheckerService)에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN 서비스와 연결"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"다시 부팅"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\'<xliff:g id="TITLE">%s</xliff:g>\' 페이지 내용:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"자바스크립트"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"탐색 확인"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"이 페이지 닫기"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"이 페이지에 머무르기"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"다른 페이지로 이동하시겠습니까?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"확인"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"도움말: 확대/축소하려면 두 번 탭합니다."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"자동완성"</string>

@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Az SD-kártya elérése."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Kisegítő lehetőségek funkciói"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"A kisegítő technológia által kérhető funkciók."</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"állapotsor kikapcsolása vagy módosítása"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lehetővé teszi az alkalmazás számára az állapotsor kikapcsolását, illetve rendszerikonok hozzáadását és eltávolítását."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"állapotsor"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lehetővé teszi, hogy a tulajdonos kötelezővé tegye egy beviteli mód legfelső szintű felületét. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"csatlakozás egy kisegítő szolgáltatáshoz"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lehetővé teszi a használó számára, hogy csatlakozzon egy kisegítő szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"felfedezés érintéssel kérése"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Lehetővé teszi a felhasználó számára egy olyan használati mód engedélyezését, amelyben az eszköz kimondja, hogy milyen elemek lettek megérintve, a felhasználói felület pedig felfedezhető kézmozdulatok révén."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"bővített internetes kisegítő lehetőségek kérése"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Lehetővé teszi a felhasználó számára az internetes kisegítő lehetőségek bővítését. Telepíthet például szkripteket, hogy még inkább elérhetővé tegye az alkalmazás tartalmát."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"csatlakozás szövegszolgáltatáshoz"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Lehetővé teszi, hogy a tulajdonos egy szöveges szolgáltatás felső szintjéhez kapcsolódjon (pl. SpellCheckerService). A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"csatlakozás egy VPN-szolgáltatáshoz"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Újraindítás"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"A \"<xliff:g id="TITLE">%s</xliff:g>\" címen található oldal szerint:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Navigáció megerősítése"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Oldal elhagyása"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Ezen az oldalon maradok"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Biztosan szeretné elhagyni az oldalt?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Megerősítés"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tipp: érintse meg kétszer a nagyításhoz és kicsinyítéshez."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Kitöltés"</string>

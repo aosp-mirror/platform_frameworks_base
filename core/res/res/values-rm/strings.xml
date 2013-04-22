@@ -318,6 +318,22 @@
     <skip />
     <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
     <skip />
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"deactivar u modifitgar la trav da status"</string>
     <!-- no translation found for permdesc_statusBar (8434669549504290975) -->
     <skip />
@@ -536,14 +552,6 @@
     <!-- no translation found for permlab_bindAccessibilityService (5357733942556031593) -->
     <skip />
     <!-- no translation found for permdesc_bindAccessibilityService (7034615928609331368) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
     <skip />

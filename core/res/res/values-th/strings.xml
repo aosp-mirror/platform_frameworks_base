@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"เข้าถึงการ์ด SD"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"คุณลักษณะการเข้าถึง"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"คุณลักษณะที่เทคโนโลยีความช่วยเหลือสามารถร้องขอได้"</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"ปิดการใช้งานหรือแก้ไขแถบสถานะ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"อนุญาตให้แอปพลิเคชันปิดใช้งานแถบสถานะหรือเพิ่มและนำไอคอนระบบออก"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"แถบสถานะ"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของวิธีการป้อนข้อมูล ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"เชื่อมโยงกับบริการการเข้าถึง"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"อนุญาตให้เจ้าของเชื่อมโยงกับส่วนติดต่อระดับบนสุดของบริการการเข้าถึง ซึ่งแอปพลิเคชันทั่วไปไม่จำเป็นต้องใช้"</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"ขอการแตะเพื่อสำรวจ"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"อนุญาตให้ผู้ถือสิทธิ์ขอโหมดโต้ตอบซึ่งจะมีเสียงพูดออกมาเมื่อรายการถูกแตะ และสามารถสำรวจ UI ได้โดยการใช้ท่าทางสัมผัส"</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"ขอการเข้าถึงเว็บที่มีประสิทธิภาพมากขึ้น"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"อนุญาตให้ผู้ถือสิทธิ์ขอเปิดใช้การเพิ่มประสิทธิภาพการเข้าถึงเว็บ ตัวอย่างเช่น การติดตั้งสคริปต์เพื่อให้เข้าถึงเนื้อหาแอปพลิเคชันได้ดีขึ้น"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"เชื่อมโยงกับบริการข้อความ"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของบริการข้อความ (เช่น บริการเครื่องตรวจตัวสะกด) ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"เชื่อมโยงกับบริการ VPN"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"รีบูต"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"หน้าเว็บที่ \"<xliff:g id="TITLE">%s</xliff:g>\" ระบุว่า:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"ยืนยันการนำทาง"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"ออกจากหน้านี้"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"อยู่ในหน้านี้"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"คุณแน่ใจหรือไม่ว่าต้องการออกจากหน้านี้"</string>
     <string name="save_password_label" msgid="6860261758665825069">"ยืนยัน"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"เคล็ดลับ: แตะสองครั้งเพื่อขยายและย่อ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ป้อนอัตโนมัติ"</string>

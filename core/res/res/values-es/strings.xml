@@ -156,7 +156,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de error"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Crear informe de errores"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo, que se enviará por correo electrónico. Pasarán unos minutos desde que se inicie el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"El sonido está desactivado. Activar"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El sonido está activado. Desactivar"</string>
@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Acceder a la tarjeta SD"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funciones de accesibilidad"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funciones que pueden solicitar tecnología adaptada"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contenido de la ventana"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contenido de una ventana con la que estés interactuando."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar exploración táctil"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Los elementos seleccionados se dirán en voz alta y podrás explorar la pantalla mediante gestos."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar accesibilidad web mejorada"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Es posible que se instalen secuencias de comandos para que el contenido de las aplicaciones sea más accesible."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el texto que escribes"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Incluye datos personales como números de tarjetas de crédito y contraseñas."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"inhabilitar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite que la aplicación inhabilite la barra de estado o añada y elimine iconos del sistema."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barra de estado"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permite que se enlace con la interfaz de nivel superior de un método de entrada de texto. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"enlazar con un servicio de accesibilidad"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite enlazar con la interfaz de nivel superior de un servicio de accesibilidad. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"Solicitar exploración por tacto"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permite al titular solicitar un modo de interacción en el que los elementos que se toquen se reproduzcan en voz alta y la interfaz de usuario se pueda explorar mediante gestos."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"Solicitar accesibilidad web mejorada"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Permite que el titular solicite que se habiliten mejoras de accesibilidad web. Por ejemplo, instalar secuencias de comandos de Google para que el contenido de la aplicación sea más accesible."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"enlazar con un servicio de texto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite enlazar con la interfaz de nivel superior de un servicio de texto (por ejemplo, SpellCheckerService). Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"enlazar con un servicio VPN"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"La página \"<xliff:g id="TITLE">%s</xliff:g>\" dice:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Confirmar navegación"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Salir de esta página"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Permanecer en esta página"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"¿Seguro que quieres salir de esta página?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Sugerencia: toca dos veces para ampliar o reducir el contenido."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autocompletar"</string>
@@ -1206,7 +1206,7 @@
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectado como una cámara"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Toca para acceder a otras opciones de USB."</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"Toca para acceder a otras opciones de USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"¿Formatear USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"¿Formatear la tarjeta SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Se borrarán todos los archivos almacenados en el almacenamiento USB. Esta acción no se puede deshacer."</string>
@@ -1484,7 +1484,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminar"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"¿Quieres subir el volumen por encima del nivel recomendado?"\n"Escuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"¿Quieres subir el volumen por encima del nivel recomendado?"\n"Escuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar los oídos."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén la pantalla pulsada con dos dedos para habilitar las funciones de accesibilidad."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accesibilidad habilitada"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilidad cancelada"</string>

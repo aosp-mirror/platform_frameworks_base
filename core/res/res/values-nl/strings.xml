@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Toegang tot de SD-kaart."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Toegankelijkheidsfuncties"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Functies die kunnen worden aangevraagd door ondersteunende technologie."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Inhoud van vensters ophalen"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De inhoud inspecteren van een venster waarmee u interactie heeft."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Verkennen via aanraking inschakelen"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Aangeraakte items worden hardop benoemd en het scherm kan worden verkend door middel van aanraking."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbeterde internettoegankelijkheid inschakelen"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Er kunnen scripts worden geïnstalleerd om app-content toegankelijker te maken."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tekst observeren die u typt"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"statusbalk uitschakelen of wijzigen"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Hiermee kan de app de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbalk"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Hiermee kan de houder zich verbinden met de hoofdinterface van een invoermethode. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"koppelen aan een toegankelijkheidsservice"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Hiermee wordt de houder toegestaan verbinding te maken met de hoofdinterface van een toegankelijkheidsservice. Nooit vereist voor normale apps."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"verkennen via aanraking aanvragen"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Hiermee kan de houder een interactiemodus aanvragen waarin aangeraakte items worden uitgesproken en de gebruikersinterface kan worden bediend met gebaren."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"verbeterde internettoegankelijkheid aanvragen"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Hiermee kan de houder het inschakelen van verbeteringen voor internettoegankelijkheid aanvragen. Bijvoorbeeld scripts installeren om app-inhoud toegankelijker te maken."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"koppelen aan een sms-service"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Hiermee kan de gebruiker koppelen met de hoofdinterface van een tekstservice (zoals SpellCheckerService). Dit is niet nodig voor normale apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"koppelen aan een VPN-service"</string>
@@ -778,7 +782,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Juist!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Opnieuw proberen"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Nogmaals proberen"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximaal aantal pogingen voor Face Unlock overschreden"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximaal aantal pogingen voor Ontgrendelen via gezichtsherkenning overschreden"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Opladen, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"Opgeladen"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -844,7 +848,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Ontgrendelingsgebied uitvouwen."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Ontgrendeling via schuiven."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Ontgrendeling via patroon."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ontgrendeling via gezichtsherkenning."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ontgrendelen via gezichtsherkenning"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Ontgrendeling via pincode."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ontgrendeling via wachtwoord."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Tekengebied voor patroon."</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Opnieuw opstarten"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"De pagina op \'<xliff:g id="TITLE">%s</xliff:g>\' meldt het volgende:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Navigatie bevestigen"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Deze pagina verlaten"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Op deze pagina blijven"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Weet u zeker dat u deze pagina wilt verlaten?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bevestigen"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: dubbeltik om in en uit te zoomen."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autom. aanvullen"</string>

@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Πρόσβαση στην κάρτα SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Λειτουργίες προσβασιμότητας"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Λειτουργίες που μπορεί να ζητήσει η τεχνολογία υποβοήθησης."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ανάκτηση του περιεχομένου του παραθύρου"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Έλεγχος του περιεχομένου ενός παραθύρου με το οποίο αλληλεπιδράτε."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ενεργοποίηση της λειτουργίας \"Εξερεύνηση με άγγιγμα\""</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Τα στοιχεία που αγγίζετε θα εκφωνούνται και η εξερεύνηση της οθόνης μπορεί να γίνει με κινήσεις."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ενεργοποίηση της βελτιωμένης προσβασιμότητας ιστού"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Ενδέχεται να εγκατασταθούν σενάρια για τη βελτίωση της πρόσβασης στο περιεχόμενο της εφαρμογής."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Παρακολούθηση του κειμένου που πληκτρολογείτε"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Περιλαμβάνει προσωπικά δεδομένα, όπως είναι οι αριθμοί πιστωτικών καρτών και οι κωδικοί πρόσβασης."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"απενεργοποίηση ή τροποποίηση γραμμής κατάστασης"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Επιτρέπει στην εφαρμογή να απενεργοποιεί τη γραμμή κατάστασης ή να προσθέτει και να αφαιρεί εικονίδια συστήματος."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"γραμμή κατάστασης"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας μεθόδου εισόδου. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"δέσμευση σε υπηρεσία προσβασιμότητας"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανώτατου επιπέδου μιας υπηρεσίας προσβασιμότητας. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"αίτημα εξερεύνησης με αφή"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Επιτρέπει στον κάτοχο να ζητήσει μια λειτουργία αλληλεπίδρασης κατά την οποία τα στοιχεία που αγγίζει ο χρήστης εκφωνούνται και είναι δυνατή η εξερεύνηση της διεπαφής χρήστη μέσω αφής."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"αίτημα βελτιωμένης προσβασιμότητας στον ιστό"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Επιτρέπει στον κάτοχο να ζητήσει την ενεργοποίηση βελτιώσεων προσβασιμότητας ιστού. Για παράδειγμα, εγκατάσταση σεναρίων από την Google προκειμένου το περιεχόμενο των εφαρμογών να είναι πιο προσβάσιμο."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"δέσμευση σε υπηρεσία ανταλλαγής μηνυμάτων"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Επιτρέπει στον κάτοχο τη σύνδεση με τη διεπαφή ανωτέρου επιπέδου μιας υπηρεσίας ανταλλαγής μηνυμάτων (π.χ. SpellCheckerService). Δεν είναι απαραίτητο για κανονικές εφαρμογές."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"δέσμευση σε υπηρεσία VPN"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Επανεκκίνηση"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Η σελίδα στον τίτλο \"<xliff:g id="TITLE">%s</xliff:g>\" λέει:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Επιβεβαίωση πλοήγησης"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Αποχώρηση από αυτήν τη σελίδα"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Παραμονή σε αυτήν τη σελίδα"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Είστε βέβαιοι ότι θέλετε να απομακρυνθείτε από αυτήν τη σελίδα;"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Επιβεβαίωση"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Συμβουλή: Πατήστε δύο φορές για μεγέθυνση και σμίκρυνση."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Αυτόματη συμπλήρωση"</string>

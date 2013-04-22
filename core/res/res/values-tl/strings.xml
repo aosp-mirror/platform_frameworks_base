@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"I-access ang SD card."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Mga tampok ng accessibility"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Mga tampok na maaaring hilingin ng tumutulong na teknolohiya."</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"huwag paganahin o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pinapayagan ang app na huwag paganahin ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"status bar"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng pamamaraan ng pag-input. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"sumailalim sa isang serbisyo sa accessibility"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Binibigyang-daan ang may-ari na sumailalim sa nasa nangungunang antas na interface ng isang serbisyo sa accessibility. Hindi dapat kailanman kailanganin para sa normal na apps."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"humiling ng explore by touch"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Binibigyang-daan ang may-ari na humiling ng mode ng pakikipag-ugnayan kung saan sinasabi nang malakas ang mga napindot na item at nagagalugad ang UI sa pamamagitan ng mga galaw."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"humiling ng pinahusay na accessibility sa web"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Binibigyang-daan ang may-ari na hilingin ang pagpapagana ng mga pagpapahusay sa accessibility sa web. Halimbawa, ang pag-install ng mga script mula sa Google upang gawing mas naa-access ang nilalaman ng app."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sumailalim sa serbisyo ng teksto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Pinapayagan ang may-hawak na sumailalim sa nangungunang antas na interface (hal. SpellCheckerService). Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"sumailalim sa isang serbisyo ng VPN"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"I-reboot"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Isinasaad ng pahina sa \"<xliff:g id="TITLE">%s</xliff:g>\" na:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Kumpirmahin ang Pag-navigate"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Umalis sa Pahinang ito"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Manatili sa Pahinang ito"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Sigurado ka bang gusto mong mag-navigate paalis sa pahinang ito?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Kumpirmahin"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Mag-double tap upang mag-zoom in at out."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofill"</string>

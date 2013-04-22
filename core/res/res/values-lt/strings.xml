@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Pasiekite SD kortelę."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Pritaikymo neįgaliesiems funkcijos"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcijos, kurių užklausas gali teikti pagalbinė technologija."</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"išjungti ar keisti būsenos juostą"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Leidžiama programai neleisti būsenos juostos arba pridėti ir pašalinti sistemos piktogramas."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"būsenos juosta"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Leidžiama savininką susaistyti su įvesties metodo aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"susisaistyti su pasiekiamumo paslauga"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Savininkui leidžiama susisaistyti su aukščiausio lygio pasiekiamumo paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"pateikti užklausą dėl naršymo palietus"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Leidžiama pateikti užklausą dėl sąveikos režimo, kuriam veikiant garsiai pasakomi paliesti elementai ir palietimu galima tyrinėti naudotojo sąsają."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"pateikti užklausą dėl patobulintos prieigos prie žiniatinklio"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Leidžiama pateikti užklausą dėl žiniatinklio pritaikymo neįgaliesiems patobulinimų įgalinimo. Pavyzdžiui, pateikti užklausą dėl scenarijų diegimo, kad programos turinys būtų geriau pritaikytas neįgaliesiems."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"priskirti teksto paslaugą"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Leidžiama savininkui priskirti aukščiausio lygio teksto paslaugos (pvz., „SpellCheckerService“) sąsają. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"susaistyti su VPN paslauga"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Pakartotinai įkelti"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Puslapyje šiuo adresu: <xliff:g id="TITLE">%s</xliff:g>, teigiama:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Patvirtinti išėjimą"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Išeiti iš šio puslapio"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Likti šiame puslapyje"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tikrai norite išeiti iš šio puslapio?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Patvirtinti"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Patarimas: palieskite dukart, kad padidintumėte ar sumažintumėte mastelį."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Automatinis pildymas"</string>
