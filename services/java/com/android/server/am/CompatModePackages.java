@@ -165,7 +165,7 @@ public class CompatModePackages {
     }
 
     public boolean getFrontActivityAskCompatModeLocked() {
-        ActivityRecord r = mService.getTopStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r == null) {
             return false;
         }
@@ -177,7 +177,7 @@ public class CompatModePackages {
     }
 
     public void setFrontActivityAskCompatModeLocked(boolean ask) {
-        ActivityRecord r = mService.getTopStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r != null) {
             setPackageAskCompatModeLocked(r.packageName, ask);
         }
@@ -199,7 +199,7 @@ public class CompatModePackages {
     }
 
     public int getFrontActivityScreenCompatModeLocked() {
-        ActivityRecord r = mService.getTopStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r == null) {
             return ActivityManager.COMPAT_MODE_UNKNOWN;
         }
@@ -207,7 +207,7 @@ public class CompatModePackages {
     }
 
     public void setFrontActivityScreenCompatModeLocked(int mode) {
-        ActivityRecord r = mService.getTopStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r == null) {
             Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
             return;
@@ -294,7 +294,7 @@ public class CompatModePackages {
             Message msg = mHandler.obtainMessage(MSG_WRITE);
             mHandler.sendMessageDelayed(msg, 10000);
 
-            final ActivityStack stack = mService.getTopStack();
+            final ActivityStack stack = mService.getFocusedStack();
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.

@@ -900,7 +900,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static ActivityManagerService mSelf;
     static ActivityThread mSystemThread;
 
-    private int mCurrentUserId = 0;
+    int mCurrentUserId = 0;
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -1488,6 +1488,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
+        mStackSupervisor.setWindowManager(wm);
         wm.createStack(HOME_STACK_ID, -1, StackBox.TASK_STACK_GOES_OVER, 1.0f);
     }
 
@@ -1520,7 +1521,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         m.mIntentFirewall = new IntentFirewall(m.new IntentFirewallInterface());
 
         m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
-        m.mStackSupervisor.init(m.mCurrentUserId);
 
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
@@ -2659,7 +2659,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
-            final ActivityStack stack = getTopStack();
+            final ActivityStack stack = getFocusedStack();
             if (stack.mResumedActivity != null &&
                     stack.mResumedActivity.info.applicationInfo.uid == Binder.getCallingUid()) {
                 mAppSwitchesAllowedTime = 0;
@@ -7243,7 +7243,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                getTopStack().unhandledBackLocked();
+                getFocusedStack().unhandledBackLocked();
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -7649,7 +7649,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         PendingActivityExtras pae;
         Bundle extras = new Bundle();
         synchronized (this) {
-            ActivityRecord activity = getTopStack().mResumedActivity;
+            ActivityRecord activity = getFocusedStack().mResumedActivity;
             if (activity == null) {
                 Slog.w(TAG, "getTopActivityExtras failed: no resumed activity");
                 return null;
@@ -7745,7 +7745,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("startActivity");
         synchronized (this) {
-            ActivityRecord r = getTopStack().topRunningActivityLocked(null);
+            ActivityRecord r = getFocusedStack().topRunningActivityLocked(null);
             return (r != null) ? r.immersive : false;
         }
     }
@@ -9651,7 +9651,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         pw.println("  mConfiguration: " + mConfiguration);
         if (dumpAll) {
-            pw.println("  mConfigWillChange: " + getTopStack().mConfigWillChange);
+            pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
             if (mCompatModePackages.getPackages().size() > 0) {
                 boolean printed = false;
                 for (Map.Entry<String, Integer> entry
@@ -9711,8 +9711,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.print("  mLastPowerCheckUptime=");
                     TimeUtils.formatDuration(mLastPowerCheckUptime, pw);
                     pw.println("");
-            pw.println("  mGoingToSleep=" + getTopStack().mGoingToSleep);
-            pw.println("  mLaunchingActivity=" + getTopStack().mLaunchingActivity);
+            pw.println("  mGoingToSleep=" + getFocusedStack().mGoingToSleep);
+            pw.println("  mLaunchingActivity=" + getFocusedStack().mLaunchingActivity);
             pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
             pw.println("  mNumNonHiddenProcs=" + mNumNonHiddenProcs
                     + " mNumHiddenProcs=" + mNumHiddenProcs
@@ -12451,8 +12451,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return config;
     }
 
-    ActivityStack getTopStack() {
-        return mStackSupervisor.getTopStack();
+    ActivityStack getFocusedStack() {
+        return mStackSupervisor.getFocusedStack();
     }
 
     public Configuration getConfiguration() {
@@ -12596,7 +12596,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         boolean kept = true;
-        final ActivityStack mainStack = mStackSupervisor.getTopStack();
+        final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
         if (changes != 0 && starting == null) {
             // If the configuration changed, and the caller is not already
             // in the process of starting an activity, then find the top
