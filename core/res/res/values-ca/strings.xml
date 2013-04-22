@@ -156,7 +156,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Apaga"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe d\'error"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Crea informe d\'errors"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Es recopilarà informació sobre l\'estat actual del dispositiu, que s\'enviarà per correu electrònic. Passaran uns quants minuts des de l\'inici de l\'informe d\'errors fins al seu enviament, per la qual cosa et recomanem que tinguis paciència."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Es recopilarà informació sobre l\'estat actual del dispositiu i se t\'enviarà per correu electrònic. Passaran uns quants minuts des de l\'inici de l\'informe d\'errors fins al seu enviament, per la qual cosa et recomanem que tinguis paciència."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mode silenciós"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"So desactivat"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El so està activat"</string>
@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accedeix a la targeta SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funcions d\'accessibilitat"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funcions que pot sol·licitar la tecnologia d\'assistència."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contingut de les finestres"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contingut d\'una finestra amb la qual estàs interaccionant."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar Exploració tàctil"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Els elements que es toquen es diran en veu alta i la pantalla es podrà explorar mitjançant gestos."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar l\'accessibilitat web millorada"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"És possible que s\'instal·lin scripts per fer que el contingut de l\'aplicació sigui més accessible."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el text que escrius"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclou dades personals com ara números de targetes de crèdit i contrasenyes."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barra d\'estat"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permet que el titular vinculi a la interfície de nivell superior d\'un mètode d\'entrada. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"vincular amb un servei d\'accessibilitat"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permet vincular amb la interfície de nivell superior d\'un servei d\'accessibilitat. Les aplicacions normals no haurien de necessitar-ho."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"sol·licitud d\'exploració tàctil"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Permet que el titular sol·liciti un mode d\'interacció en què els elements que es toquin es llegeixin en veu alta i la interfície d\'usuari es pugui explorar mitjançant gestos."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"sol·licitud d\'accessibilitat web millorada"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Permet que el titular sol·liciti l\'activació de les millores per a l\'accessibilitat web. Per exemple, la instal·lació de scripts de Google per fer més accessible el contingut de l\'aplicació."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincula a un servei de text"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet al titular vincular amb la interfície de nivell superior d\'un servei de text (per exemple, SpellCheckerService). Les aplicacions normals mai no ho haurien de necessitar."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincula a un servei de VPN"</string>
@@ -535,7 +539,7 @@
     <string name="permlab_setTime" msgid="2021614829591775646">"definir l\'hora"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Permet que l\'aplicació canviï la zona horària de la tauleta."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Permet que l\'aplicació canviï l\'hora del rellotge del telèfon."</string>
-    <string name="permlab_setTimeZone" msgid="2945079801013077340">"definir el fus horari"</string>
+    <string name="permlab_setTimeZone" msgid="2945079801013077340">"selecció de zona horària"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Permet que l\'aplicació canviï la zona horària de la tauleta."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Permet que l\'aplicació canviï la zona horària del telèfon."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"actuar com a AccountManagerService"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reinicia"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"La pàgina de \"<xliff:g id="TITLE">%s</xliff:g>\" diu:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Confirmació de la navegació"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Surt d\'aquesta pàgina"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Queda\'t en aquesta pàgina"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Estàs segur que vols sortir d\'aquesta pàgina?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirma"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Consell: Pica dos cops per ampliar i per reduir."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Em. aut."</string>
@@ -1174,7 +1174,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Addició de la targeta SIM"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Reinicia el dispositiu per accedir a la xarxa de telefonia mòbil."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reinicia"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Estableix l\'hora"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Defineix l\'hora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establiment de data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Defineix"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Fet"</string>
@@ -1213,7 +1213,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Es perdran totes les dades d\'aquesta targeta."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formata"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
     <string name="select_input_method" msgid="4653387336791222978">"Selecciona un mètodes d\'entrada"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Configura els mètodes d\'entrada"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Teclat físic"</string>
@@ -1482,7 +1482,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Elimina"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Vols augmentar el volum per sobre del nivell de seguretat?"\n"Escoltar música a un volum alt durant períodes llargs pot danyar l\'oïda."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Vols augmentar el volum per sobre del nivell recomanat?"\n"Escoltar sons a un volum alt durant períodes de temps llargs pot danyar l\'oïda."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén premuts els dos dits per activar l\'accessibilitat."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"S\'ha activat l\'accessibilitat."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilitat cancel·lada."</string>

@@ -229,6 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Lees die SD-kaart."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Toeganklikheidseienskappe"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Kenmerke wat bystandtegnologie kan versoek."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Haal venster-inhoud op"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ondersoek die inhoud van \'n venster waarmee jy interaksie het."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Skakel Verken deur raak aan"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Aangeraakte items sal hardop gesê word en die skerm kan verken word met behulp van gebare."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Skakel verbeterde webtoeganklikheid aan"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skripte kan geïnstalleer word om program-inhoud meer toeganklik te maak."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Neem teks wat jy tik waar"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiveer of verander statusbalk"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbalk"</string>
@@ -348,10 +356,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n invoermetode te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"verbind aan \'n toeganklikheidsdiens"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Dit laat die houer toe om aan die top-koppelvlak van \'n toeganklikheidsdiens te verbind. Behoort nooit vir gewone programme nodig te wees nie."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"versoek verken-met-aanraking"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Laat die houer toe om \'n interaksiemodus te versoek waarin geraakte items hardop uitgespreek word en die UI via handgebare verken kan word."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"versoek verbeterde webtoeganklikheid"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Laat die houer toe om te versoek dat webtoeganklikheidsverbeterings geaktiveer word. Byvoorbeeld, om skripte te installeer om programinhoud meer toeganklik te maak."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bind aan \'n teksdiens"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n teksdiens (bv SpellCheckerService) te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind aan \'n VPN-diens"</string>
@@ -864,14 +868,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Herlaai"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Die bladsy by \"<xliff:g id="TITLE">%s</xliff:g>\" sê:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Bevestig navigasie"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Verlaat hierdie bladsy"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bly op hierdie bladsy"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Is jy seker dat jy weg van hierdie bladsy af wil navigeer?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bevestig"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Wenk: Dubbeltik om in en uit te zoem."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Outovul"</string>
