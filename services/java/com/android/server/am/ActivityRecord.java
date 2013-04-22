@@ -803,7 +803,7 @@ final class ActivityRecord {
                     }
                     Log.i(ActivityManagerService.TAG, sb.toString());
                 }
-                stack.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
+                mStackSupervisor.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
                 if (totalTime > 0) {
                     service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
                 }
@@ -818,7 +818,7 @@ final class ActivityRecord {
     public void windowsVisible() {
         synchronized(service) {
             final ActivityStack stack = task.stack;
-            stack.reportActivityVisibleLocked(this);
+            mStackSupervisor.reportActivityVisibleLocked(this);
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
             if (!nowVisible) {

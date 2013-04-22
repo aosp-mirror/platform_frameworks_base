@@ -32,6 +32,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IThumbnailReceiver;
 import android.app.PendingIntent;
@@ -50,6 +51,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -64,6 +66,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.StackBox;
+import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -85,6 +88,11 @@ public class ActivityStackSupervisor {
     final ActivityManagerService mService;
     final Context mContext;
     final Looper mLooper;
+
+    final ActivityStackSupervisorHandler mHandler;
+
+    /** Short cut */
+    WindowManagerService mWindowManager;
 
     /** Dismiss the keyguard after the next activity is displayed? */
     private boolean mDismissKeyguardOnNextActivity = false;
@@ -119,6 +127,14 @@ public class ActivityStackSupervisor {
      * whatever operation they are supposed to do. */
     final ArrayList<ActivityRecord> mWaitingVisibleActivities = new ArrayList<ActivityRecord>();
 
+    /** List of processes waiting to find out about the next visible activity. */
+    final ArrayList<IActivityManager.WaitResult> mWaitingActivityVisible =
+            new ArrayList<IActivityManager.WaitResult>();
+
+    /** List of processes waiting to find out about the next launched activity. */
+    final ArrayList<IActivityManager.WaitResult> mWaitingActivityLaunched =
+            new ArrayList<IActivityManager.WaitResult>();
+
     /** List of activities that are ready to be stopped, but waiting for the next activity to
      * settle down before doing so. */
     final ArrayList<ActivityRecord> mStoppingActivities = new ArrayList<ActivityRecord>();
@@ -132,21 +148,23 @@ public class ActivityStackSupervisor {
         mService = service;
         mContext = context;
         mLooper = looper;
+        mHandler = new ActivityStackSupervisorHandler(looper);
     }
 
-    void init(int userId) {
-        mHomeStack = new ActivityStack(mService, mContext, mLooper, HOME_STACK_ID, this, userId);
+    void setWindowManager(WindowManagerService wm) {
+        mWindowManager = wm;
+        mHomeStack = new ActivityStack(mService, mContext, mLooper, HOME_STACK_ID);
         mStacks.add(mHomeStack);
     }
 
     void dismissKeyguard() {
         if (mDismissKeyguardOnNextActivity) {
             mDismissKeyguardOnNextActivity = false;
-            mService.mWindowManager.dismissKeyguard();
+            mWindowManager.dismissKeyguard();
         }
     }
 
-    ActivityStack getTopStack() {
+    ActivityStack getFocusedStack() {
         if (mFocusedStack == null) {
             return mHomeStack;
         }
@@ -173,8 +191,12 @@ public class ActivityStackSupervisor {
         }
     }
 
+    boolean isFocusedStack(ActivityStack stack) {
+        return getFocusedStack() == stack;
+    }
+
     boolean isFrontStack(ActivityStack stack) {
-        return !(stack.isHomeStack() ^ getTopStack().isHomeStack());
+        return !(stack.isHomeStack() ^ getFocusedStack().isHomeStack());
     }
 
     boolean homeIsInFront() {
@@ -256,7 +278,7 @@ public class ActivityStackSupervisor {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing stack " + stack);
             mStacks.remove(stack);
             final int stackId = stack.mStackId;
-            final int nextStackId = mService.mWindowManager.removeStack(stackId);
+            final int nextStackId = mWindowManager.removeStack(stackId);
             // TODO: Perhaps we need to let the ActivityManager determine the next focus...
             if (mFocusedStack.mStackId == stackId) {
                 mFocusedStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
@@ -265,7 +287,10 @@ public class ActivityStackSupervisor {
     }
 
     ActivityRecord resumedAppLocked() {
-        ActivityStack stack = getTopStack();
+        ActivityStack stack = getFocusedStack();
+        if (stack == null) {
+            return null;
+        }
         ActivityRecord resumedActivity = stack.mResumedActivity;
         if (resumedActivity == null || resumedActivity.app == null) {
             resumedActivity = stack.mPausingActivity;
@@ -359,6 +384,34 @@ public class ActivityStackSupervisor {
             }
         }
         return true;
+    }
+
+    void reportActivityVisibleLocked(ActivityRecord r) {
+        for (int i=mWaitingActivityVisible.size()-1; i>=0; i--) {
+            WaitResult w = mWaitingActivityVisible.get(i);
+            w.timeout = false;
+            if (r != null) {
+                w.who = new ComponentName(r.info.packageName, r.info.name);
+            }
+            w.totalTime = SystemClock.uptimeMillis() - w.thisTime;
+            w.thisTime = w.totalTime;
+        }
+        mService.notifyAll();
+        dismissKeyguard();
+    }
+
+    void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
+            long thisTime, long totalTime) {
+        for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
+            WaitResult w = mWaitingActivityLaunched.get(i);
+            w.timeout = timeout;
+            if (r != null) {
+                w.who = new ComponentName(r.info.packageName, r.info.name);
+            }
+            w.thisTime = thisTime;
+            w.totalTime = totalTime;
+        }
+        mService.notifyAll();
     }
 
     ActivityRecord topRunningActivityLocked() {
@@ -478,7 +531,7 @@ public class ActivityStackSupervisor {
                 callingPid = callingUid = -1;
             }
 
-            final ActivityStack stack = getTopStack();
+            final ActivityStack stack = getFocusedStack();
             stack.mConfigWillChange = config != null
                     && mService.mConfiguration.diff(config) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG,
@@ -578,7 +631,7 @@ public class ActivityStackSupervisor {
             if (outResult != null) {
                 outResult.result = res;
                 if (res == ActivityManager.START_SUCCESS) {
-                    stack.mWaitingActivityLaunched.add(outResult);
+                    mWaitingActivityLaunched.add(outResult);
                     do {
                         try {
                             mService.wait();
@@ -594,7 +647,7 @@ public class ActivityStackSupervisor {
                         outResult.thisTime = 0;
                     } else {
                         outResult.thisTime = SystemClock.uptimeMillis();
-                        stack.mWaitingActivityVisible.add(outResult);
+                        mWaitingActivityVisible.add(outResult);
                         do {
                             try {
                                 mService.wait();
@@ -694,7 +747,7 @@ public class ActivityStackSupervisor {
             throws RemoteException {
 
         r.startFreezingScreenLocked(app, 0);
-        mService.mWindowManager.setAppVisibility(r.appToken, true);
+        mWindowManager.setAppVisibility(r.appToken, true);
 
         // schedule launch ticks to collect information about slow apps.
         r.startLaunchTickingLocked();
@@ -706,7 +759,7 @@ public class ActivityStackSupervisor {
         // because the activity is not currently running so we are
         // just restarting it anyway.
         if (checkConfig) {
-            Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
+            Configuration config = mWindowManager.updateOrientationFromAppTokens(
                     mService.mConfiguration,
                     r.mayFreezeScreenLocked(app) ? r.appToken : null);
             mService.updateConfigurationLocked(config, r, false, false);
@@ -1028,7 +1081,7 @@ public class ActivityStackSupervisor {
             outActivity[0] = r;
         }
 
-        final ActivityStack stack = getTopStack();
+        final ActivityStack stack = getFocusedStack();
         if (stack.mResumedActivity == null
                 || stack.mResumedActivity.info.applicationInfo.uid != callingUid) {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
@@ -1123,7 +1176,7 @@ public class ActivityStackSupervisor {
         if ((startFlags&ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
             ActivityRecord checkedCaller = sourceRecord;
             if (checkedCaller == null) {
-                checkedCaller = getTopStack().topRunningNonDelayedActivityLocked(notTop);
+                checkedCaller = getFocusedStack().topRunningNonDelayedActivityLocked(notTop);
             }
             if (!checkedCaller.realActivity.equals(r.realActivity)) {
                 // Caller is not the same as launcher, so always needed.
@@ -1363,7 +1416,7 @@ public class ActivityStackSupervisor {
             // If the activity being launched is the same as the one currently
             // at the top, then we need to check if it should only be launched
             // once.
-            ActivityStack topStack = getTopStack();
+            ActivityStack topStack = getFocusedStack();
             ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(notTop);
             if (top != null && r.resultTo == null) {
                 if (top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
@@ -1605,8 +1658,7 @@ public class ActivityStackSupervisor {
                     break;
                 }
             }
-            mStacks.add(new ActivityStack(mService, mContext, mLooper, mLastStackId, this,
-                    mCurrentUser));
+            mStacks.add(new ActivityStack(mService, mContext, mLooper, mLastStackId));
             return mLastStackId;
         }
     }
@@ -1673,15 +1725,27 @@ public class ActivityStackSupervisor {
     }
 
     void comeOutOfSleepIfNeededLocked() {
-        final boolean homeIsBack = !homeIsInFront();
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.isHomeStack() ^ homeIsBack) {
-                stack.awakeFromSleepingLocked();
+            stack.awakeFromSleepingLocked();
+            if (isFrontStack(stack)) {
                 stack.resumeTopActivityLocked(null);
             }
         }
+    }
+
+    boolean reportResumedActivityLocked(ActivityRecord r) {
+        final ActivityStack stack = r.task.stack;
+        if (isFrontStack(stack)) {
+            mService.reportResumedActivityLocked(r);
+            mService.setFocusedActivityLocked(r);
+        }
+        if (allResumedActivitiesComplete()) {
+            ensureActivitiesVisibleLocked(null, 0);
+            mWindowManager.executeAppTransition();
+            return true;
+        }
+        return false;
     }
 
     void handleAppCrashLocked(ProcessRecord app) {
@@ -1742,7 +1806,7 @@ public class ActivityStackSupervisor {
                     // normal flow and hide it once we determine that it is
                     // hidden by the activities in front of it.
                     if (localLOGV) Slog.v(TAG, "Before stopping, can hide: " + s);
-                    mService.mWindowManager.setAppVisibility(s.appToken, false);
+                    mWindowManager.setAppVisibility(s.appToken, false);
                 }
             }
             if ((!s.waitingVisible || mService.isSleepingOrShuttingDown()) && remove) {
@@ -1766,7 +1830,7 @@ public class ActivityStackSupervisor {
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
-        return getTopStack().getDumpActivitiesLocked(name);
+        return getFocusedStack().getDumpActivitiesLocked(name);
     }
 
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
@@ -1890,6 +1954,19 @@ public class ActivityStackSupervisor {
                     pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
                 }
                 needNL = true;
+            }
+        }
+    }
+
+    private final class ActivityStackSupervisorHandler extends Handler {
+        public ActivityStackSupervisorHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                
             }
         }
     }
