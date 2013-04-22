@@ -64,8 +64,8 @@ create the store listing page for a specific app.</p>
 <h3 id="merchant">Linking your Merchant Account</h3>
 
 <p>If you want to sell apps or in-app products, you can link your Google
-Checkout Merchant account to your developer profile. Google Play uses the linked
-Checkout account for financial and tax identification and monthly payouts of
+Wallet merchant account to your developer profile. Google Play uses the linked
+merchant account for financial and tax identification and monthly payouts of
 sales. </p>
 
 <h3 id="details">Your store listing details</h3>
