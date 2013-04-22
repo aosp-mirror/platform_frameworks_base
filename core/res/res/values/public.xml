@@ -2029,27 +2029,27 @@
   <public type="style" name="Widget.DeviceDefault.Light.CheckedTextView" id="0x010301dc" />
 
 <!-- ===============================================================
-     Resources added in version 18 of the platform
+     Resources added in version 18 of the platform (Jelly Bean MR2)
      =============================================================== -->
   <eat-comment />
 
-  <public type="attr" name="mipMap" />
-  <public type="attr" name="mirrorForRtl" />
-  <public type="attr" name="windowOverscan" />
-  <public type="attr" name="requiredForAllUsers" />
-  <public type="attr" name="indicatorStart"  />
-  <public type="attr" name="indicatorEnd" />
-  <public type="attr" name="childIndicatorStart" />
-  <public type="attr" name="childIndicatorEnd" />
-  <public type="attr" name="restrictedAccountType" />
-  <public type="attr" name="requiredAccountType" />
-  <public type="attr" name="canRequestTouchExplorationMode" />
-  <public type="attr" name="canRequestEnhancedWebAccessibility" />
-  <public type="attr" name="canRequestFilterKeyEvents" />
+  <public type="attr" name="mipMap" id="0x010103cd" />
+  <public type="attr" name="mirrorForRtl" id="0x010103ce" />
+  <public type="attr" name="windowOverscan" id="0x010103cf" />
+  <public type="attr" name="requiredForAllUsers" id="0x010103d0" />
+  <public type="attr" name="indicatorStart" id="0x010103d1" />
+  <public type="attr" name="indicatorEnd" id="0x010103d2" />
+  <public type="attr" name="childIndicatorStart" id="0x010103d3" />
+  <public type="attr" name="childIndicatorEnd" id="0x010103d4" />
+  <public type="attr" name="restrictedAccountType" id="0x010103d5" />
+  <public type="attr" name="requiredAccountType" id="0x010103d6" />
+  <public type="attr" name="canRequestTouchExplorationMode" id="0x010103d7" />
+  <public type="attr" name="canRequestEnhancedWebAccessibility" id="0x010103d8" />
+  <public type="attr" name="canRequestFilterKeyEvents" id="0x010103d9" />
 
-  <public type="style" name="Theme.Holo.NoActionBar.Overscan" />
-  <public type="style" name="Theme.Holo.Light.NoActionBar.Overscan" />
-  <public type="style" name="Theme.DeviceDefault.NoActionBar.Overscan" />
-  <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.Overscan" />
+  <public type="style" name="Theme.Holo.NoActionBar.Overscan" id="0x010301dd" />
+  <public type="style" name="Theme.Holo.Light.NoActionBar.Overscan" id="0x010301de" />
+  <public type="style" name="Theme.DeviceDefault.NoActionBar.Overscan" id="0x010301df" />
+  <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.Overscan" id="0x010301e0" />
 
 </resources>
