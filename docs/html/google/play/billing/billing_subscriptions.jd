@@ -72,7 +72,7 @@ publish. For more information about using the Developer Console, see
 <p>When users purchase subscriptions in your apps, Google Play handles all 
 checkout details so your apps never have to directly process any financial 
 transactions. Google Play processes all payments for subscriptions through 
-Google Checkout, just as it does for standard in-app products and app purchases. 
+Google Wallet, just as it does for standard in-app products and app purchases. 
 This ensures a consistent and familiar purchase flow for your users.</p>
 
 <img src="{@docRoot}images/in-app-billing/v3/billing_subscription_v3.png" style="float:right; border:4px solid ddd;">
@@ -156,10 +156,10 @@ original price, but new users will be charged at the new price.</p>
 automated recurring billing at either of two intervals:</p>
 
 <ul>
-  <li>Monthly &mdash; Google Play bills the customer’s Google Checkout account at
+  <li>Monthly &mdash; Google Play bills the customer’s Google Wallet account at
   the time of purchase and monthly subsequent to the purchase date (exact billing
   intervals can vary slightly over time)</li>
-  <li>Annually &mdash; Google Play bills the customer's Google Checkout account at
+  <li>Annually &mdash; Google Play bills the customer's Google Wallet account at
   the time of purchase and again on the same date in subsequent years.</li>
 </ul>
 
@@ -173,7 +173,7 @@ cycles will always match subscription cycles, based on the purchase date.</p>
 or by Direct Carrier Billing) that was originally used to purchase the
 subscription.</p>
 
-<p>When the subscription payment is approved by Google Checkout, Google Play
+<p>When the subscription payment is approved by Google Wallet, Google Play
 provides a purchase token back to the purchasing app through the In-app Billing
 API. Your apps can store the token locally or pass it to your backend servers, 
 which can then use it to validate or cancel the subscription remotely using the <a
@@ -310,7 +310,7 @@ subscriptions are not available at this time.</p>
 <h2 id="payment">Payment Processing and Policies</h2>
 
 <p>In general, the terms of Google Play allow you to sell in-app subscriptions
-only through the standard payment processor, Google Checkout. For purchases of 
+only through the standard payment processor, Google Wallet. For purchases of 
 any subscription products, the transaction fee is the same as the transaction 
 fee for application purchases (30%).</p>
 
@@ -325,7 +325,7 @@ document</a>.</p>
 <h3 id="orderId">Subscription order numbers</h3>
 
 <p>To help you track transactions relating to a given subscription, Google
-Checkout provides a base Merchant Order Number for all recurrences of the 
+Wallet provides a base Merchant Order Number for all recurrences of the 
 subscription and denotes
 each recurring transaction by appending an integer as follows: </p>
 

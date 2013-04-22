@@ -83,7 +83,7 @@ to the <a href="http://www.android.com/us/developer-distribution-agreement.html"
 Developer Distribution Agreement</a>. After you register you can access the Developer
 Console, where you can upload applications, configure publishing options, and monitor publishing
 data. If you want to sell your applications or use the in-app billing feature, you will also need
-to set up a Google Checkout merchant account. For more information about the registration process,
+to set up a Google Wallet merchant account. For more information about the registration process,
 see <a href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113468">
 Developer Registration</a>.</p>
 
@@ -271,7 +271,7 @@ in-app purchases is the same as the transaction fee for application purchases (3
 
 <p>Any application that you publish through Google Play can implement in-app billing. No special
 account or registration is required other than a Google Play publisher account and a Google
-Checkout Merchant account. Also, because the service uses no dedicated framework APIs, you can add
+Wallet merchant account. Also, because the service uses no dedicated framework APIs, you can add
 in-app billing to any application that uses a minimum API level of 4 or higher.</p>
 
 <p>To help you integrate in-app billing into your application, the Android SDK provides a <a
