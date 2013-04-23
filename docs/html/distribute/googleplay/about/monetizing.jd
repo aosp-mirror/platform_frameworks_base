@@ -138,7 +138,7 @@ Google Play Developer Console.</p>
 <h2 id="payouts">Monthly payouts in your local currency</h2>
 
 <p>To sell products in Google Play, all you have to do is register for a Google
-Checkout merchant account and link it to your Google Play Android Developer
+Wallet merchant account and link it to your Google Play Android Developer
 Console account (see <a
 href="{@docRoot}distribute/googleplay/publish/register.html">Get Started with
 Publishing</a> for details). Once you’ve set up your account and published your
@@ -159,4 +159,4 @@ transaction.</p>
 <p>At the close of the month, you can download a complete sales report that
 gives you the final details of all transactions that closed in the month,
 including the payout amounts and other data. Additional financial reports are
-available in your Google Checkout merchant account.</p>
+available in your Google Wallet merchant account.</p>
