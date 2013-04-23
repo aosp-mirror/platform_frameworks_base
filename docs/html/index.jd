@@ -14,7 +14,9 @@ page.metaDescription=The official site for Android developers. Provides the Andr
             <ul>
                 <li class="item carousel-home">
                     <div class="content-left col-10">
-                    <img src="{@docRoot}images/home/io-extended-2013.png" style="margin:90px 0 0">
+                    <a href="https://developers.google.com/events/io/io-extended/?utm_source=site&utm_medium=emb&utm_campaign=extended-android-site">
+                      <img src="{@docRoot}images/home/io-extended-2013.png" style="margin:90px 0 0">
+                    </a>
                     </div>
                     <div class="content-right col-5">
                     <h1>Google I/O Extended</h1>
