@@ -121,8 +121,6 @@ public final class WifiService extends IWifiManager.Stub {
      * on this */
     private WorkSource mScanWorkSource;
 
-    private boolean mIsReceiverRegistered = false;
-
     /**
      * Asynchronous channel to WifiStateMachine
      */
@@ -272,6 +270,11 @@ public final class WifiService extends IWifiManager.Stub {
                         }
                     }
                 }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
+        // Adding optimizations of only receiving broadcasts when wifi is enabled
+        // can result in race conditions when apps toggle wifi in the background
+        // without active user involvement. Always receive broadcasts.
+        registerForBroadcasts();
     }
 
     private WifiController mWifiController;
@@ -421,17 +424,6 @@ public final class WifiService extends IWifiManager.Stub {
         }
 
         mWifiController.sendMessage(CMD_WIFI_TOGGLED);
-
-        if (enable) {
-            if (!mIsReceiverRegistered) {
-                registerForBroadcasts();
-                mIsReceiverRegistered = true;
-            }
-        } else if (mIsReceiverRegistered) {
-            mContext.unregisterReceiver(mReceiver);
-            mIsReceiverRegistered = false;
-        }
-
         return true;
     }
 
