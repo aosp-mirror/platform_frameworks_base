@@ -55,10 +55,17 @@ public abstract class NotificationListenerService extends Service {
      * <P>
      * This might occur because the user has dismissed the notification using system UI (or another
      * notification listener) or because the app has withdrawn the notification.
+     * <P>
+     * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
+     * {@link StatusBarNotification#notification} member may be missing some heavyweight
+     * fields such as {@link android.app.Notification#contentView} and
+     * {@link android.app.Notification#largeIcon}. However, all other fields on
+     * {@link StatusBarNotification}, sufficient to match this call with a prior call to
+     * {@link #onNotificationPosted(StatusBarNotification)}, will be intact.
      *
-     * @param sbn A data structure encapsulating the original {@link android.app.Notification}
-     *            object as well as its identifying information (tag and id) and source
-     *            (package name).
+     * @param sbn A data structure encapsulating at least the original information (tag and id)
+     *            and source (package name) used to post the {@link android.app.Notification} that
+     *            was just removed.
      */
     public abstract void onNotificationRemoved(StatusBarNotification sbn);
 

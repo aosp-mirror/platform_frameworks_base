@@ -635,11 +635,16 @@ public class Notification implements Parcelable
     @Override
     public Notification clone() {
         Notification that = new Notification();
-        cloneInto(that);
+        cloneInto(that, true);
         return that;
     }
 
-    private void cloneInto(Notification that) {
+    /**
+     * Copy all (or if heavy is false, all except Bitmaps and RemoteViews) members
+     * of this into that.
+     * @hide
+     */
+    public void cloneInto(Notification that, boolean heavy) {
         that.when = this.when;
         that.icon = this.icon;
         that.number = this.number;
@@ -652,13 +657,13 @@ public class Notification implements Parcelable
         if (this.tickerText != null) {
             that.tickerText = this.tickerText.toString();
         }
-        if (this.tickerView != null) {
+        if (heavy && this.tickerView != null) {
             that.tickerView = this.tickerView.clone();
         }
-        if (this.contentView != null) {
+        if (heavy && this.contentView != null) {
             that.contentView = this.contentView.clone();
         }
-        if (this.largeIcon != null) {
+        if (heavy && this.largeIcon != null) {
             that.largeIcon = Bitmap.createBitmap(this.largeIcon);
         }
         that.iconLevel = this.iconLevel;
@@ -690,7 +695,6 @@ public class Notification implements Parcelable
 
         if (this.extras != null) {
             that.extras = new Bundle(this.extras);
-
         }
 
         if (this.actions != null) {
@@ -700,8 +704,29 @@ public class Notification implements Parcelable
             }
         }
 
-        if (this.bigContentView != null) {
+        if (heavy && this.bigContentView != null) {
             that.bigContentView = this.bigContentView.clone();
+        }
+
+        if (!heavy) {
+            that.lightenPayload(); // will clean out extras
+        }
+    }
+
+    /**
+     * Removes heavyweight parts of the Notification object for archival or for sending to
+     * listeners when the full contents are not necessary.
+     * @hide
+     */
+    public final void lightenPayload() {
+        tickerView = null;
+        contentView = null;
+        bigContentView = null;
+        largeIcon = null;
+        if (extras != null) {
+            extras.remove(Notification.EXTRA_LARGE_ICON);
+            extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
+            extras.remove(Notification.EXTRA_PICTURE);
         }
     }
 
@@ -1706,7 +1731,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public Notification buildInto(Notification n) {
-            build().cloneInto(n);
+            build().cloneInto(n, true);
             return n;
         }
     }
