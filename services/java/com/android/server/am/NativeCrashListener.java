@@ -219,6 +219,14 @@ class NativeCrashListener extends Thread {
                     pr = mAm.mPidsSelfLocked.get(pid);
                 }
                 if (pr != null) {
+                    // Don't attempt crash reporting for persistent apps
+                    if (pr.persistent) {
+                        if (DEBUG) {
+                            Slog.v(TAG, "Skipping report for persistent app " + pr);
+                        }
+                        return;
+                    }
+
                     int bytes;
                     do {
                         // get some data
