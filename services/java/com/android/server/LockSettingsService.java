@@ -106,24 +106,31 @@ public class LockSettingsService extends ILockSettings.Stub {
                 final ContentResolver cr = mContext.getContentResolver();
                 List<UserInfo> users = um.getUsers();
                 for (int user = 0; user < users.size(); user++) {
-                    int userId = users.get(user).getUserHandle().getIdentifier();
-                    for (String perUserSetting : MIGRATE_SETTINGS_PER_USER) {
-                        // Handle Strings
-                        String value = Settings.Secure.getStringForUser(cr, perUserSetting, userId);
-                        if (value != null) {
-                            setString(perUserSetting, value, userId);
-                            Settings.Secure.putStringForUser(cr, perUserSetting, "", userId);
-                            continue;
-                        }
+                    // Migrate owner info
+                    final int userId = users.get(user).id;
+                    final String OWNER_INFO = Secure.LOCK_SCREEN_OWNER_INFO;
+                    String ownerInfo = Settings.Secure.getStringForUser(cr, OWNER_INFO, userId);
+                    if (ownerInfo != null) {
+                        setString(OWNER_INFO, ownerInfo, userId);
+                        Settings.Secure.putStringForUser(cr, ownerInfo, "", userId);
+                    }
 
-                        // Handle integers
-                        try {
-                            int ivalue = Settings.Secure.getIntForUser(cr, perUserSetting, userId);
-                            setLong(perUserSetting, ivalue, userId);
-                            Settings.Secure.putIntForUser(cr, perUserSetting, 0, userId);
-                        } catch (SettingNotFoundException e) {
+                    // Migrate owner info enabled.  Note there was a bug where older platforms only
+                    // stored this value if the checkbox was toggled at least once. The code detects
+                    // this case by handling the exception.
+                    final String OWNER_INFO_ENABLED = Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
+                    boolean enabled;
+                    try {
+                        int ivalue = Settings.Secure.getIntForUser(cr, OWNER_INFO_ENABLED, userId);
+                        enabled = ivalue != 0;
+                        setLong(OWNER_INFO_ENABLED, enabled ? 1 : 0, userId);
+                    } catch (SettingNotFoundException e) {
+                        // Setting was never stored. Store it if the string is not empty.
+                        if (!TextUtils.isEmpty(ownerInfo)) {
+                            setLong(OWNER_INFO_ENABLED, 1, userId);
                         }
                     }
+                    Settings.Secure.putIntForUser(cr, OWNER_INFO_ENABLED, 0, userId);
                 }
                 // No need to move the password / pattern files. They're already in the right place.
                 setString("migrated_user_specific", "true", 0);
@@ -441,7 +448,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
     };
 
-    private static final String[] MIGRATE_SETTINGS_PER_USER = new String[] {
+    // These are protected with a read permission
+    private static final String[] READ_PROFILE_PROTECTED_SETTINGS = new String[] {
         Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
         Secure.LOCK_SCREEN_OWNER_INFO
     };
