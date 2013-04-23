@@ -184,6 +184,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ProgressBar_maxWidth
  * @attr ref android.R.styleable#ProgressBar_minHeight
  * @attr ref android.R.styleable#ProgressBar_minWidth
+ * @attr ref android.R.styleable#ProgressBar_mirrorForRtl
  * @attr ref android.R.styleable#ProgressBar_progress
  * @attr ref android.R.styleable#ProgressBar_progressDrawable
  * @attr ref android.R.styleable#ProgressBar_secondaryProgress
