@@ -761,7 +761,7 @@ final class ActivityStack {
         return null;
     }
 
-    private final void startPausingLocked(boolean userLeaving, boolean uiSleeping) {
+    final void startPausingLocked(boolean userLeaving, boolean uiSleeping) {
         if (mPausingActivity != null) {
             Slog.e(TAG, "Trying to pause when pause is already pending for "
                   + mPausingActivity, new RuntimeException("here").fillInStackTrace());
@@ -1206,6 +1206,7 @@ final class ActivityStack {
             // There are no more activities!  Let's just start up the
             // Launcher...
             ActivityOptions.abort(options);
+            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return mStackSupervisor.resumeHomeActivity(prev);
         }
 
@@ -1219,11 +1220,13 @@ final class ActivityStack {
             mWindowManager.executeAppTransition();
             mNoAnimActivities.clear();
             ActivityOptions.abort(options);
+            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return false;
         }
 
         if (prev != null && prev.mLaunchHomeTaskNext && prev.finishing &&
                 prev.task.getTopActivity() == null) {
+            if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
             return mStackSupervisor.resumeHomeActivity(prev);
         }
 
@@ -1237,6 +1240,7 @@ final class ActivityStack {
             mWindowManager.executeAppTransition();
             mNoAnimActivities.clear();
             ActivityOptions.abort(options);
+            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return false;
         }
 
@@ -1246,6 +1250,7 @@ final class ActivityStack {
         if (mService.mStartedUsers.get(next.userId) == null) {
             Slog.w(TAG, "Skipping resume of top activity " + next
                     + ": user " + next.userId + " is stopped");
+            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return false;
         }
 
@@ -1264,6 +1269,7 @@ final class ActivityStack {
         // until that is done.
         if (!mStackSupervisor.allPausedActivitiesComplete()) {
             if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG, "Skip resume: some activity pausing");
+            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return false;
         }
 
@@ -1298,10 +1304,7 @@ final class ActivityStack {
 
         // We need to start pausing the current activity so the top one
         // can be resumed...
-        final ActivityStack lastStack = mStackSupervisor.getLastStack();
-        if (lastStack != null && (isHomeStack() ^ lastStack.isHomeStack()) &&
-                lastStack.mResumedActivity != null) {
-            // TODO: Don't pause when launching to the sibling task.
+        if (mStackSupervisor.pauseBackStacks(userLeaving)) {
             if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
             // at the top of the LRU list, since we know we will be needing it
@@ -1312,7 +1315,7 @@ final class ActivityStack {
                 // happen whenever it needs to later.
                 mService.updateLruProcessLocked(next.app, false);
             }
-            lastStack.startPausingLocked(userLeaving, false);
+            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return true;
         }
 
@@ -1420,6 +1423,7 @@ final class ActivityStack {
             next.clearOptionsLocked();
         }
 
+        ActivityStack lastStack = mStackSupervisor.getLastStack();
         if (next.app != null && next.app.thread != null) {
             if (DEBUG_SWITCH) Slog.v(TAG, "Resume running: " + next);
 
@@ -1472,8 +1476,10 @@ final class ActivityStack {
                 }
                 if (mStackSupervisor.reportResumedActivityLocked(next)) {
                     mNoAnimActivities.clear();
+                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                     return true;
                 }
+                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                 return false;
             }
 
@@ -1526,6 +1532,7 @@ final class ActivityStack {
                             null, true);
                 }
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
+                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                 return true;
             }
 
@@ -1540,6 +1547,7 @@ final class ActivityStack {
                 Slog.w(TAG, "Exception thrown during resume of " + next, e);
                 requestFinishActivityLocked(next.appToken, Activity.RESULT_CANCELED, null,
                         "resume-exception", true);
+                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                 return true;
             }
             next.stopped = false;
@@ -1563,6 +1571,7 @@ final class ActivityStack {
             mStackSupervisor.startSpecificActivityLocked(next, true, true);
         }
 
+        if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
         return true;
     }
 

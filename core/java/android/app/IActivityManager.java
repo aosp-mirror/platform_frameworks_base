@@ -120,6 +120,7 @@ public interface IActivityManager extends IInterface {
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
     public void resizeStack(int stackId, float weight) throws RemoteException;
     public List<StackInfo> getStacks() throws RemoteException;
+    public void setFocusedStack(int stackId) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     /* oneway */
     public void reportThumbnail(IBinder token,
@@ -157,14 +158,14 @@ public interface IActivityManager extends IInterface {
     public void serviceDoneExecuting(IBinder token, int type, int startId,
             int res) throws RemoteException;
     public IBinder peekService(Intent service, String resolvedType) throws RemoteException;
-    
+
     public boolean bindBackupAgent(ApplicationInfo appInfo, int backupRestoreMode)
             throws RemoteException;
     public void clearPendingBackup() throws RemoteException;
     public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException;
     public void unbindBackupAgent(ApplicationInfo appInfo) throws RemoteException;
     public void killApplicationProcess(String processName, int uid) throws RemoteException;
-    
+
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher,
             IUiAutomationConnection connection, int userId) throws RemoteException;
@@ -176,7 +177,7 @@ public interface IActivityManager extends IInterface {
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) throws RemoteException;
     public int getRequestedOrientation(IBinder token) throws RemoteException;
-    
+
     public ComponentName getActivityClassForToken(IBinder token) throws RemoteException;
     public String getPackageForToken(IBinder token) throws RemoteException;
 
@@ -189,16 +190,16 @@ public interface IActivityManager extends IInterface {
             final IPackageDataObserver observer, int userId) throws RemoteException;
     public String getPackageForIntentSender(IIntentSender sender) throws RemoteException;
     public int getUidForIntentSender(IIntentSender sender) throws RemoteException;
-    
+
     public int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, String name, String callerPackage) throws RemoteException;
 
     public void setProcessLimit(int max) throws RemoteException;
     public int getProcessLimit() throws RemoteException;
-    
+
     public void setProcessForeground(IBinder token, int pid,
             boolean isForeground) throws RemoteException;
-    
+
     public int checkPermission(String permission, int pid, int uid)
             throws RemoteException;
 
@@ -401,10 +402,12 @@ public interface IActivityManager extends IInterface {
             info = _info;
         }
 
+        @Override
         public int describeContents() {
             return 0;
         }
 
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             info.writeToParcel(dest, 0);
             if (provider != null) {
@@ -418,10 +421,12 @@ public interface IActivityManager extends IInterface {
 
         public static final Parcelable.Creator<ContentProviderHolder> CREATOR
                 = new Parcelable.Creator<ContentProviderHolder>() {
+            @Override
             public ContentProviderHolder createFromParcel(Parcel source) {
                 return new ContentProviderHolder(source);
             }
 
+            @Override
             public ContentProviderHolder[] newArray(int size) {
                 return new ContentProviderHolder[size];
             }
@@ -447,10 +452,12 @@ public interface IActivityManager extends IInterface {
         public WaitResult() {
         }
 
+        @Override
         public int describeContents() {
             return 0;
         }
 
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(result);
             dest.writeInt(timeout ? 1 : 0);
@@ -461,10 +468,12 @@ public interface IActivityManager extends IInterface {
 
         public static final Parcelable.Creator<WaitResult> CREATOR
                 = new Parcelable.Creator<WaitResult>() {
+            @Override
             public WaitResult createFromParcel(Parcel source) {
                 return new WaitResult(source);
             }
 
+            @Override
             public WaitResult[] newArray(int size) {
                 return new WaitResult[size];
             }
@@ -650,4 +659,5 @@ public interface IActivityManager extends IInterface {
     int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
     int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+168;
     int GET_STACKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+169;
+    int SET_FOCUSED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
 }

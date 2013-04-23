@@ -275,6 +275,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
+    private static final String TAP_INPUT_CHANNEL_NAME = "StackTapDetector";
+
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
@@ -731,6 +733,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mOnlyCore = onlyCore;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
+        mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerService = displayManager;
         mHeadless = displayManager.isHeadless();
         mDisplaySettings = new DisplaySettings(context);
@@ -782,7 +785,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 | PowerManager.ON_AFTER_RELEASE, TAG);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mInputManager = inputManager;
         mFxSession = new SurfaceSession();
         mAnimator = new WindowAnimator(this);
 
@@ -3703,6 +3705,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void tapOutsideStackBounds(DisplayContent displayContent, int x, int y) {
+        synchronized (mWindowMap) {
+            int stackId = displayContent.stackIdFromPoint(x, y);
+            if (stackId >= 0) {
+                try {
+                    mActivityManager.setFocusedStack(stackId);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+    }
+
     @Override
     public void setFocusedApp(IBinder token, boolean moveFocusNow) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
@@ -3725,10 +3739,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Attempted to set focus to non-existing app token: " + token);
                     return;
                 }
-                Task task = mTaskIdToTask.get(newFocus.groupId);
-                task.getDisplayContent().moveStack(task.mStack, true);
                 changed = mFocusedApp != newFocus;
                 mFocusedApp = newFocus;
+                moveTaskToTop(newFocus.groupId);
                 if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp
                         + " moveFocusNow=" + moveFocusNow);
                 if (changed) {
@@ -4663,7 +4676,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-            false /*updateInputWindows*/)) {
+                false /*updateInputWindows*/)) {
             assignLayersLocked(displayContent.getWindowList());
         }
 
@@ -9260,8 +9273,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        final TaskStack stack = mFocusedApp != null ?
-                mTaskIdToTask.get(mFocusedApp.groupId).mStack : null;
+        final TaskStack stack;
+        if (mFocusedApp != null) {
+            Task task = mTaskIdToTask.get(mFocusedApp.groupId);
+            stack = task.mStack;
+            task.getDisplayContent().mTapDetector.setStackBounds(stack.mStackBox.mBounds);
+        } else {
+            stack = null;
+        }
         setFocusedStackFrame(stack);
 
         // Check to see if we are now in a state where the screen should
@@ -10541,7 +10560,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private DisplayContent newDisplayContentLocked(final Display display) {
         DisplayContent displayContent = new DisplayContent(display);
-        mDisplayContents.put(display.getDisplayId(), displayContent);
+        final int displayId = display.getDisplayId();
+        mDisplayContents.put(displayId, displayContent);
         final Rect rect = new Rect();
         DisplayInfo info = displayContent.getDisplayInfo();
         mDisplaySettings.getOverscanLocked(info.name, rect);
@@ -10553,6 +10573,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 rect.right, rect.bottom);
         mPolicy.setDisplayOverscan(displayContent.getDisplay(), rect.left, rect.top,
                 rect.right, rect.bottom);
+
+        // TODO: Create an input channel for each display with touch capability.
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            InputChannel inputChannel = monitorInput(TAP_INPUT_CHANNEL_NAME);
+            displayContent.mTapInputChannel = inputChannel;
+            displayContent.mTapDetector =
+                    new StackTapDetector(this, displayContent, inputChannel, Looper.myLooper());
+        }
+
         return displayContent;
     }
 
@@ -10732,6 +10761,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         if (displayContent != null) {
             mDisplayContents.delete(displayId);
+            displayContent.mTapInputChannel.dispose();
             WindowList windows = displayContent.getWindowList();
             while (!windows.isEmpty()) {
                 final WindowState win = windows.get(windows.size() - 1);
