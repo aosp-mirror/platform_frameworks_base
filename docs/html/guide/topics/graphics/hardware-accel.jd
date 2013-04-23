@@ -47,35 +47,24 @@ parent.link=index.html
     </div>
   </div>
 
-  <p>Beginning in Android 3.0 (API level 11), the Android 2D rendering pipeline is designed to
-  better support hardware acceleration. Hardware acceleration carries out all drawing operations
-  that are performed on a {@link android.view.View}'s canvas using the GPU. Because of the
-  increased resources required to enable hardware acceleration, your app will consume more RAM.</p>
+  <p>Beginning in Android 3.0 (API level 11), the Android 2D rendering pipeline supports hardware
+  acceleration, meaning that all drawing operations that are performed on a {@link
+  android.view.View}'s canvas use the GPU. Because of the increased resources required to enable
+  hardware acceleration, your app will consume more RAM.</p>
 
-  <p>The easiest way to enable hardware acceleration is to turn it on
-  globally for your entire application. If your application uses only standard views and {@link
-  android.graphics.drawable.Drawable}s, turning it on globally should not cause any adverse
-  drawing effects. However, because hardware acceleration is not supported for all of the 2D drawing
-  operations, turning it on might affect some of your applications that use custom views or drawing
-  calls. Problems usually manifest themselves as invisible elements, exceptions, or wrongly
-  rendered pixels. To remedy this, Android gives you the option to enable or disable hardware
-  acceleration at the following levels:</p>
+  <p>Hardware acceleration is enabled by default if your Target API level is &gt;=14, but can also
+  be explicitly enabled. If your application uses only standard views and {@link
+  android.graphics.drawable.Drawable}s, turning it on globally should not cause any adverse drawing
+  effects. However, because hardware acceleration is not supported for all of the 2D drawing
+  operations, turning it on might affect some of your custom views or drawing calls. Problems
+  usually manifest themselves as invisible elements, exceptions, or wrongly rendered pixels. To
+  remedy this, Android gives you the option to enable or disable hardware acceleration at multiple
+  levels. See <a href="#controlling">Controlling Hardware Acceleration</a>.</p>
 
-  <ul>
-    <li>Application</li>
-
-    <li>Activity</li>
-
-    <li>Window</li>
-
-    <li>View</li>
-  </ul>
-
-  <p>If your application performs custom drawing, test your application on actual hardware
-devices with hardware acceleration turned on to find any problems. The <a
-href="#drawing-support">Unsupported drawing operations</a> section describes known issues with
-drawing operations that cannot be hardware accelerated and how to work around them.</p>
-
+  <p>If your application performs custom drawing, test your application on actual hardware devices
+  with hardware acceleration turned on to find any problems. The <a
+  href="#drawing-support">Unsupported drawing operations</a> section describes known issues with
+  hardware acceleration and how to work around them.</p>
 
  <h2 id="controlling">Controlling Hardware Acceleration</h2>
   <p>You can control hardware acceleration at the following levels:</p>
@@ -100,12 +89,12 @@ drawing operations that cannot be hardware accelerated and how to work around th
 </pre>
 
   <h4>Activity level</h4>
-  <p>If your application does not behave properly with hardware acceleration turned on globally,
-  you can control it for individual activities as well. To enable or disable hardware acceleration
-  at the  activity level, you can use the <code>android:hardwareAccelerated</code>
-  attribute for the <a href="{@docRoot}guide/topics/manifest/activity-element.html">
-    <code>&lt;activity&gt;</code></a> element. The following example enables hardware acceleration
-for the  entire application but disables it for one activity:</p>
+  <p>If your application does not behave properly with hardware acceleration turned on globally, you
+  can control it for individual activities as well. To enable or disable hardware acceleration at
+  the activity level, you can use the <code>android:hardwareAccelerated</code> attribute for
+  the <a href="{@docRoot}guide/topics/manifest/activity-element.html">
+  <code>&lt;activity&gt;</code></a> element. The following example enables hardware acceleration for
+  the entire application but disables it for one activity:</p>
 
 <pre>
 &lt;application android:hardwareAccelerated="true"&gt;
@@ -228,8 +217,7 @@ changed.</li>
   <p>With this model, you cannot rely on a view intersecting the dirty region to have its {@link
   android.view.View#draw draw()} method executed. To ensure that the Android system records a
   view’s display list, you must call {@link android.view.View#invalidate invalidate()}. Forgetting
-  to do so causes a view to look the same even after changing it, which is an easier bug to find if
-  it happens.</p>
+  to do so causes a view to look the same even after it has been changed.</p>
 
   <p>Using display lists also benefits animation performance because setting specific properties,
   such as alpha or rotation, does not require invalidating the targeted view (it is done
@@ -275,7 +263,7 @@ changed.</li>
   <p>The following table describes the support level of various operations across API levels:</p>
 
   <style type="text/css">
-  .tblGenFixed,.tblGeneric{font-size:15px}.tblGenFixed td {padding:0 3px;letter-spacing:0;word-spacing:0;background-color:#fff;z-index:1;border-top:0px none;border-left:0px none;border-bottom:1px solid #CCC;border-right:1px solid #CCC;} .dn {display:none} .tblGenFixed td.s0 {background-color:white;border-top:1px solid #CCC;border-left:1px solid #CCC;} .tblGenFixed td.s2 {background-color:#d9d9d9;color:#000000;text-align:center;} .tblGenFixed td.s1 {background-color:#434343;color:#ffffff;text-align:center;border-top:1px solid #CCC;} .tblGenFixed td.s9 {background-color:;color:#6aa84f;text-align:center;} .tblGenFixed td.s12 {background-color:white;color:#6aa84f;text-align:center;} .tblGenFixed td.s13 {background-color:#d9d9d9;color:#6aa84f;text-align:center;} .tblGenFixed td.s7 {background-color:#d9d9d9;color:#980000;text-align:center;} .tblGenFixed td.s8 {background-color:;color:#980000;text-align:center;} .tblGenFixed td.s5 {background-color:#434343;color:#ffffff;text-align:left;border-left:1px solid #CCC;} .tblGenFixed td.s6 {background-color:;font-family:courier new,monospace;color:;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.s10 {background-color:white;font-family:courier new,monospace;color:#000000;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.s3 {background-color:white;color:#000000;text-align:center;} .tblGenFixed td.s11 {background-color:white;color:#980000;text-align:center;} .tblGenFixed td.s4 {background-color:#d9d9d9;color:#000000;text-align:center;}
+    .tblGenFixed, .tblGeneric{font-size:15px}.tblGenFixed td {padding:0 3px;letter-spacing:0;word-spacing:0;background-color:#fff;z-index:1;border-top:0px none;border-left:0px none;border-bottom:1px solid #CCC;border-right:1px solid #CCC;} .dn {display:none} .tblGenFixed td.s0 {background-color:white;border-top:1px solid #CCC;border-left:1px solid #CCC;} .tblGenFixed td.s1 {background-color:#434343;color:#ffffff;text-align:center;border-top:1px solid #CCC;} .tblGenFixed td.s2 {background-color:#d9d9d9;color:#000000;text-align:center;} .tblGenFixed td.s3 {background-color:white;color:#000000;text-align:center;} .tblGenFixed td.s5 {background-color:#434343;color:#ffffff;text-align:left;border-left:1px solid #CCC;} .tblGenFixed td.s10 {background-color:white;font-family:courier new,monospace;color:#000000;text-align:right;border-left:1px solid #CCC;} .tblGenFixed td.g_pos {background-color:#d9d9d9;color:#6aa84f;text-align:center;} .tblGenFixed td.g_neg {background-color:#d9d9d9;color:#980000;text-align:center;} .tblGenFixed td.w_pos {background-color:white;color:#6aa84f;text-align:center;} .tblGenFixed td.w_neg {background-color:white;color:#980000;text-align:center;}
   </style>
   <table border="0" cellpadding="0" cellspacing="0" class="tblGenFixed" id="tblMain">
     <tbody>
@@ -294,242 +282,329 @@ changed.</li>
         <td style="display:none;"></td>
         <td class="s2">&lt; 16</td>
         <td class="s3">16</td>
-        <td class="s4">17</td>
+        <td class="s2">17</td>
         <td class="s3">18</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Canvas</td>
     </tr>
     <tr>
-        <td class="s6">clipPath()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s8">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s9">&#10003;</td>
-    </tr>
-    <tr>
-        <td class="s10">clipRegion()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-    </tr>
-    <tr>
-        <td class="s10">clipRect(Region.Op.XOR)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-    </tr>
-    <tr>
-        <td class="s10">clipRect(Region.Op.Difference)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-    </tr>
-    <tr>
-        <td class="s10">clipRect(Region.Op.ReverseDifference)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-    </tr>
-    <tr>
         <td class="s10">drawBitmapMesh() (colors array)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
         <td class="s10">drawPicture()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">drawPosText()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-        <td class="s13">&#10003;</td>
-        <td class="s12">&#10003;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+        <td class="g_pos">&#10003;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
         <td class="s10">drawTextOnPath()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-        <td class="s13">&#10003;</td>
-        <td class="s12">&#10003;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+        <td class="g_pos">&#10003;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
         <td class="s10">drawVertices()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">setDrawFilter()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-        <td class="s13">&#10003;</td>
-        <td class="s12">&#10003;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+        <td class="g_pos">&#10003;</td>
+        <td class="w_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipPath()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRegion()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRect(Region.Op.XOR)</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRect(Region.Op.Difference)</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRect(Region.Op.ReverseDifference)</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">clipRect() with rotation/perspective</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Paint</td>
     </tr>
     <tr>
-        <td class="s6">setAntiAlias() (for text)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
+        <td class="s10">setAntiAlias() (for text)</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
-        <td class="s6">setAntiAlias() (for lines)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
-        <td class="s13">&#10003;</td>
-        <td class="s12">&#10003;</td>
+        <td class="s10">setAntiAlias() (for lines)</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+        <td class="g_pos">&#10003;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
-        <td class="s6">setFilterBitmap()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s13">&#10003;</td>
-        <td class="s12">&#10003;</td>
+        <td class="s10">setFilterBitmap()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_pos">&#10003;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
-        <td class="s6">setLinearText()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s8">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s8">&#10007;</td>
+        <td class="s10">setLinearText()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">setMaskFilter()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">setPathEffect() (for lines)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">setRasterizer()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">setShadowLayer() (other than text)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">setStrokeCap() (for lines)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s12">&#10003;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     <tr>
         <td class="s10">setStrokeCap() (for points)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">setSubpixelText()</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Xfermode</td>
     </tr>
     <tr>
-        <td class="s6">AvoidXfermode</td>
-        <td class="s7">&#10007;</td>
-        <td class="s8">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s8">&#10007;</td>
+        <td class="s10">AvoidXfermode</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">PixelXorXfermode</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">PorterDuff.Mode.DARKEN (framebuffer)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s8">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s8">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">PorterDuff.Mode.LIGHTEN (framebuffer)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">PorterDuff.Mode.OVERLAY (framebuffer)</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Shader</td>
     </tr>
     <tr>
         <td class="s10">ComposeShader inside ComposeShader</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">Same type shaders inside ComposeShader</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
     </tr>
     <tr>
         <td class="s10">Local matrix on ComposeShader</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10007;</td>
-        <td class="s7">&#10007;</td>
-        <td class="s11">&#10003;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
     </tr>
     </tbody>
   </table>
 
+  <h3 id="scaling">Canvas Scaling</h3>
+
+  <p>The hardware accelerated 2D rendering pipeline was built first to support unscaled drawing,
+  with some drawing operations degrading quality significantly at higher scale values. These
+  operations are implemented as textures drawn at scale 1.0, transformed by the GPU.  In API level
+  &lt;17, using these operations will result in scaling artifacts increasing with scale.</p>
+
+  The following table shows when implementation was changed to correctly handle large scales:
+
+  <table border="0" cellpadding="0" cellspacing="0" class="tblGenFixed" id="tblMain">
+    <tbody>
+    <tr class="rShim">
+        <td class="rShim" style="width:380px;"></td>
+        <td class="rShim" style="width:120px;"></td>
+        <td class="rShim" style="width:120px;"></td>
+        <td class="rShim" style="width:120px;"></td>
+    </tr>
+    <tr>
+        <td rowspan="2" class="s0"></td>
+        <td colspan="4" class="s1">API level</td>
+    </tr>
+    <tr>
+        <td style="display:none;"></td>
+        <td class="s2">&lt; 17</td>
+        <td class="s3">17</td>
+        <td class="s2">18</td>
+    </tr>
+    <tr>
+        <td colspan="5" class="s5">Support for large scale factors</td>
+    </tr>
+    <tr>
+        <td class="s10">drawText()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawPosText()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawTextOnPath()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">Simple Shapes*</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_pos">&#10003;</td>
+        <td class="g_pos">&#10003;</td>
+    </tr>
+    <tr>
+        <td class="s10">Complex Shapes*</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">drawPath()</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+    </tr>
+    <tr>
+        <td class="s10">Shadow layer</td>
+        <td class="g_neg">&#10007;</td>
+        <td class="w_neg">&#10007;</td>
+        <td class="g_neg">&#10007;</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <p class="note"><strong>Note</strong>: 'Simple' shapes are <code>drawRect()</code>,
+  <code>drawCircle()</code>, <code>drawOval()</code>, <code>drawRoundRect()</code>, and
+  <code>drawArc()</code> (with useCenter=false) commands issued with a Paint that doesn't have a
+  PathEffect, and doesn't contain non-default joins (via <code>setStrokeJoin()</code> /
+  <code>setStrokeMiter()</code>). Other instances of those draw commands fall under 'Complex,' in
+  the above chart.</p>
+
   <p>If your application is affected by any of these missing features or limitations, you can turn
-  off hardware acceleration for just the affected portion of your application by calling
-  {@link android.view.View#setLayerType setLayerType(View.LAYER_TYPE_SOFTWARE, null)}. This way,
-you can still take advantage of hardware acceleratin everywhere else. See <a
-href="#controlling">Controlling Hardware Acceleration</a> for more information on how to enable and
-disable hardware acceleration at different levels in your application.
-
-
+  off hardware acceleration for just the affected portion of your application by calling {@link
+  android.view.View#setLayerType setLayerType(View.LAYER_TYPE_SOFTWARE, null)}. This way, you can
+  still take advantage of hardware acceleration everywhere else. See <a
+  href="#controlling">Controlling Hardware Acceleration</a> for more information on how to enable
+  and disable hardware acceleration at different levels in your application.
 
   <h2 id="layers">View Layers</h2>
 
