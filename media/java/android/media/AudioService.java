@@ -5085,7 +5085,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
                 pw.println("  IRCD: " + di.mRcDisplay +
                         "  -- w:" + di.mArtworkExpectedWidth +
-                        "  -- h:" + di.mArtworkExpectedHeight);
+                        "  -- h:" + di.mArtworkExpectedHeight+
+                        "  -- wantsPosSync:" + di.mWantsPositionSync);
             }
         }
     }
@@ -5689,6 +5690,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         private IBinder mRcDisplayBinder;
         private int mArtworkExpectedWidth = -1;
         private int mArtworkExpectedHeight = -1;
+        private boolean mWantsPositionSync = false;
 
         public DisplayInfoForServer(IRemoteControlDisplay rcd, int w, int h) {
             if (DEBUG_RC) Log.i(TAG, "new DisplayInfoForServer for " + rcd + " w=" + w + " h=" + h);
@@ -5752,6 +5754,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             try {
                 rcc.plugRemoteControlDisplay(di.mRcDisplay, di.mArtworkExpectedWidth,
                         di.mArtworkExpectedHeight);
+                if (di.mWantsPositionSync) {
+                    rcc.setWantsSyncForDisplay(di.mRcDisplay, true);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error connecting RCD to RCC in RCC registration",e);
             }
@@ -5899,6 +5904,52 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         } catch (RemoteException e) {
                             Log.e(TAG, "Error setting bitmap size for RCD on RCC: ", e);
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Controls whether a remote control display needs periodic checks of the RemoteControlClient
+     * playback position to verify that the estimated position has not drifted from the actual
+     * position. By default the check is not performed.
+     * The IRemoteControlDisplay must have been previously registered for this to have any effect.
+     * @param rcd the IRemoteControlDisplay for which the anti-drift mechanism will be enabled
+     *     or disabled. Not null.
+     * @param wantsSync if true, RemoteControlClient instances which expose their playback position
+     *     to the framework will regularly compare the estimated playback position with the actual
+     *     position, and will update the IRemoteControlDisplay implementation whenever a drift is
+     *     detected.
+     */
+    public void remoteControlDisplayWantsPlaybackPositionSync(IRemoteControlDisplay rcd,
+            boolean wantsSync) {
+        synchronized(mRCStack) {
+            boolean rcdRegistered = false;
+            // store the information about this display
+            // (display stack traversal order doesn't matter).
+            final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                    di.mWantsPositionSync = wantsSync;
+                    rcdRegistered = true;
+                    break;
+                }
+            }
+            if (!rcdRegistered) {
+                return;
+            }
+            // notify all current RemoteControlClients
+            // (stack traversal order doesn't matter as we notify all RCCs)
+            final Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while (stackIterator.hasNext()) {
+                final RemoteControlStackEntry rcse = stackIterator.next();
+                if (rcse.mRcClient != null) {
+                    try {
+                        rcse.mRcClient.setWantsSyncForDisplay(rcd, wantsSync);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error setting position sync flag for RCD on RCC: ", e);
                     }
                 }
             }
