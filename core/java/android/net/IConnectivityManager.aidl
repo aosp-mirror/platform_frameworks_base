@@ -129,4 +129,6 @@ interface IConnectivityManager
     void captivePortalCheckComplete(in NetworkInfo info);
 
     void supplyMessenger(int networkType, in Messenger messenger);
+
+    int findConnectionTypeForIface(in String iface);
 }

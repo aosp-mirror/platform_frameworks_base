@@ -21,9 +21,11 @@ import static android.Manifest.permission.BIND_VPN_SERVICE;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -33,6 +35,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.BaseNetworkStateTracker;
 import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.LinkProperties;
 import android.net.LocalSocket;
@@ -71,6 +74,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.charset.Charsets;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import libcore.io.IoUtils;
 
@@ -92,12 +96,15 @@ public class Vpn extends BaseNetworkStateTracker {
     private LegacyVpnRunner mLegacyVpnRunner;
     private PendingIntent mStatusIntent;
     private boolean mEnableNotif = true;
+    private final IConnectivityManager mConnService;
 
-    public Vpn(Context context, VpnCallback callback, INetworkManagementService netService) {
+    public Vpn(Context context, VpnCallback callback, INetworkManagementService netService,
+            IConnectivityManager connService) {
         // TODO: create dedicated TYPE_VPN network type
         super(ConnectivityManager.TYPE_DUMMY);
         mContext = context;
         mCallback = callback;
+        mConnService = connService;
 
         try {
             netService.registerObserver(mObserver);
@@ -562,7 +569,6 @@ public class Vpn extends BaseNetworkStateTracker {
         if (!profile.searchDomains.isEmpty()) {
             config.searchDomains = Arrays.asList(profile.searchDomains.split(" +"));
         }
-
         startLegacyVpn(config, racoon, mtpd);
     }
 
@@ -630,8 +636,31 @@ public class Vpn extends BaseNetworkStateTracker {
         private final String[][] mArguments;
         private final LocalSocket[] mSockets;
         private final String mOuterInterface;
+        private final AtomicInteger mOuterConnection =
+                new AtomicInteger(ConnectivityManager.TYPE_NONE);
 
         private long mTimer = -1;
+
+        /**
+         * Watch for the outer connection (passing in the constructor) going away.
+         */
+        private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    if (intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE,
+                            ConnectivityManager.TYPE_NONE) == mOuterConnection.get()) {
+                        NetworkInfo info = (NetworkInfo)intent.getExtra(
+                                ConnectivityManager.EXTRA_NETWORK_INFO);
+                        if (info != null && !info.isConnectedOrConnecting()) {
+                            try {
+                                mObserver.interfaceStatusChanged(mOuterInterface, false);
+                            } catch (RemoteException e) {}
+                        }
+                    }
+                }
+            }
+        };
 
         public LegacyVpnRunner(VpnConfig config, String[] racoon, String[] mtpd) {
             super(TAG);
@@ -644,7 +673,22 @@ public class Vpn extends BaseNetworkStateTracker {
             // This is the interface which VPN is running on,
             // mConfig.interfaze will change to point to OUR
             // internal interface soon. TODO - add inner/outer to mconfig
+            // TODO - we have a race - if the outer iface goes away/disconnects before we hit this
+            // we will leave the VPN up.  We should check that it's still there/connected after 
+            // registering
             mOuterInterface = mConfig.interfaze;
+
+            try {
+                mOuterConnection.set(
+                        mConnService.findConnectionTypeForIface(mOuterInterface));
+            } catch (Exception e) {
+                mOuterConnection.set(ConnectivityManager.TYPE_NONE);
+            }
+
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            mContext.registerReceiver(mBroadcastReceiver, filter);
+
         }
 
         public void check(String interfaze) {
@@ -661,6 +705,9 @@ public class Vpn extends BaseNetworkStateTracker {
                 IoUtils.closeQuietly(socket);
             }
             updateState(DetailedState.DISCONNECTED, "exit");
+            try {
+                mContext.unregisterReceiver(mBroadcastReceiver);
+            } catch (IllegalArgumentException e) {}
         }
 
         @Override
