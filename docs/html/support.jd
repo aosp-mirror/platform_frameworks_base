@@ -21,7 +21,6 @@ fullpage=1
 <a href="http://groups.google.com/group/android-security-discuss">android-security-discuss</a> support forum<br />
 
   <a href="http://webchat.freenode.net/?channels=android">#android</a>, <a href="http://webchat.freenode.net/?channels=android-dev">#android-dev</a> <span style="color:#888">(IRC via irc.freenode.net)</span><br />
-  <a href="https://plus.google.com/108967384991768947849/posts">+Android Developers Office Hours</a> <span style="color:#888">(Wednesdays 2 PM PST (UTC-7))</span><br />
 </p>
 
 
@@ -47,8 +46,9 @@ uppercase;border-bottom: 1px solid #CCC;margin: 0 0 20px;">Google Play Support</
 <h5 id="contact">Direct support contacts for developers</h5>
 <p style="color:#888">
   <a href=" https://support.google.com/googleplay/android-developer/troubleshooter/3049653">Registration, account issues</a><br />
-  <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=publishing">Publishing, app distribution issues</a><br />
-  <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=bugs">Developer Console issues</a><br />
+  <a href="https://support.google.com/googleplay/android-developer/troubleshooter/3055196">Publishing, app distribution issues</a><br />
+  <a href="https://support.google.com/googleplay/android-developer/troubleshooter/3055329">App visibility and discoverability</a><br />
+  <a href="https://support.google.com/googleplay/android-developer/troubleshooter/3076003">Billing and reporting</a><br />
   <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=takedown">Inappropriate apps</a><br />
   <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1085703&topic=15868&ctx=topic">Report a Google Play policy violation</a>
 </p>
