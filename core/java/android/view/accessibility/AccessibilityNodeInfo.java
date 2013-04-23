@@ -473,7 +473,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mClassName;
     private CharSequence mText;
     private CharSequence mContentDescription;
-    private CharSequence mViewIdResourceName;
+    private String mViewIdResourceName;
 
     private final SparseLongArray mChildNodeIds = new SparseLongArray();
     private int mActions;
@@ -1541,7 +1541,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param viewIdResName The id resource name.
      */
-    public void setViewIdResourceName(CharSequence viewIdResName) {
+    public void setViewIdResourceName(String viewIdResName) {
         enforceNotSealed();
         mViewIdResourceName = viewIdResName;
     }
@@ -1558,7 +1558,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
      * @return The id resource name.
      */
-    public CharSequence getViewIdResourceName() {
+    public String getViewIdResourceName() {
         return mViewIdResourceName;
     }
 
@@ -1841,7 +1841,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeCharSequence(mClassName);
         parcel.writeCharSequence(mText);
         parcel.writeCharSequence(mContentDescription);
-        parcel.writeCharSequence(mViewIdResourceName);
+        parcel.writeString(mViewIdResourceName);
 
         parcel.writeInt(mTextSelectionStart);
         parcel.writeInt(mTextSelectionEnd);
@@ -1923,7 +1923,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mClassName = parcel.readCharSequence();
         mText = parcel.readCharSequence();
         mContentDescription = parcel.readCharSequence();
-        mViewIdResourceName = parcel.readCharSequence();
+        mViewIdResourceName = parcel.readString();
 
         mTextSelectionStart = parcel.readInt();
         mTextSelectionEnd = parcel.readInt();
