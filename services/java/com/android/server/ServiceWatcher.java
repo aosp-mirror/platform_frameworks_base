@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -36,6 +37,7 @@ import com.android.internal.content.PackageMonitor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -53,6 +55,13 @@ public class ServiceWatcher implements ServiceConnection {
     private final PackageManager mPm;
     private final List<HashSet<Signature>> mSignatureSets;
     private final String mAction;
+
+    /**
+     * If mServicePackageName is not null, only this package will be searched for the service that
+     * implements mAction. When null, all packages in the system that matches one of the signature
+     * in mSignatureSets are searched.
+     */
+    private final String mServicePackageName;
     private final Runnable mNewServiceWork;
     private final Handler mHandler;
 
@@ -87,19 +96,40 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     public ServiceWatcher(Context context, String logTag, String action,
-            List<String> initialPackageNames, Runnable newServiceWork, Handler handler) {
+            int overlaySwitchResId, int defaultServicePackageNameResId,
+            int initialPackageNamesResId, Runnable newServiceWork,
+            Handler handler) {
         mContext = context;
         mTag = logTag;
         mAction = action;
         mPm = mContext.getPackageManager();
         mNewServiceWork = newServiceWork;
         mHandler = handler;
+        Resources resources = context.getResources();
+
+        // Whether to enable service overlay.
+        boolean enableOverlay = resources.getBoolean(overlaySwitchResId);
+        ArrayList<String>  initialPackageNames = new ArrayList<String>();
+        if (enableOverlay) {
+            // A list of package names used to create the signatures.
+            String[] pkgs = resources.getStringArray(initialPackageNamesResId);
+            if (pkgs != null) initialPackageNames.addAll(Arrays.asList(pkgs));
+            mServicePackageName = null;
+            if (D) Log.d(mTag, "Overlay enabled, packages=" + Arrays.toString(pkgs));
+        } else {
+            // The default package name that is searched for service implementation when overlay is
+            // disabled.
+            String servicePackageName = resources.getString(defaultServicePackageNameResId);
+            if (servicePackageName != null) initialPackageNames.add(servicePackageName);
+            mServicePackageName = servicePackageName;
+            if (D) Log.d(mTag, "Overlay disabled, default package=" + servicePackageName);
+        }
         mSignatureSets = getSignatureSets(context, initialPackageNames);
     }
 
     public boolean start() {
         synchronized (mLock) {
-            if (!bindBestPackageLocked(null)) return false;
+            if (!bindBestPackageLocked(mServicePackageName)) return false;
         }
 
         // listen for user change
@@ -115,8 +145,10 @@ public class ServiceWatcher implements ServiceConnection {
             }
         }, UserHandle.ALL, intentFilter, null, mHandler);
 
-        // listen for relevant package changes
-        mPackageMonitor.register(mContext, null, UserHandle.ALL, true);
+        // listen for relevant package changes if service overlay is enabled.
+        if (mServicePackageName == null) {
+            mPackageMonitor.register(mContext, null, UserHandle.ALL, true);
+        }
 
         return true;
     }
@@ -133,50 +165,55 @@ public class ServiceWatcher implements ServiceConnection {
         if (justCheckThisPackage != null) {
             intent.setPackage(justCheckThisPackage);
         }
-        List<ResolveInfo> rInfos = mPm.queryIntentServicesAsUser(new Intent(mAction),
+        List<ResolveInfo> rInfos = mPm.queryIntentServicesAsUser(intent,
                 PackageManager.GET_META_DATA, UserHandle.USER_OWNER);
         int bestVersion = Integer.MIN_VALUE;
         String bestPackage = null;
         boolean bestIsMultiuser = false;
-        for (ResolveInfo rInfo : rInfos) {
-            String packageName = rInfo.serviceInfo.packageName;
+        if (rInfos != null) {
+            for (ResolveInfo rInfo : rInfos) {
+                String packageName = rInfo.serviceInfo.packageName;
 
-            // check signature
-            try {
-                PackageInfo pInfo;
-                pInfo = mPm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
-                if (!isSignatureMatch(pInfo.signatures)) {
-                    Log.w(mTag, packageName + " resolves service " + mAction +
-                            ", but has wrong signature, ignoring");
+                // check signature
+                try {
+                    PackageInfo pInfo;
+                    pInfo = mPm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+                    if (!isSignatureMatch(pInfo.signatures)) {
+                        Log.w(mTag, packageName + " resolves service " + mAction
+                                + ", but has wrong signature, ignoring");
+                        continue;
+                    }
+                } catch (NameNotFoundException e) {
+                    Log.wtf(mTag, e);
                     continue;
                 }
-            } catch (NameNotFoundException e) {
-                Log.wtf(mTag, e);
-                continue;
+
+                // check metadata
+                int version = Integer.MIN_VALUE;
+                boolean isMultiuser = false;
+                if (rInfo.serviceInfo.metaData != null) {
+                    version = rInfo.serviceInfo.metaData.getInt(
+                            EXTRA_SERVICE_VERSION, Integer.MIN_VALUE);
+                    isMultiuser = rInfo.serviceInfo.metaData.getBoolean(EXTRA_SERVICE_IS_MULTIUSER);
+                }
+
+                if (version > mVersion) {
+                    bestVersion = version;
+                    bestPackage = packageName;
+                    bestIsMultiuser = isMultiuser;
+                }
             }
 
-            // check metadata
-            int version = Integer.MIN_VALUE;
-            boolean isMultiuser = false;
-            if (rInfo.serviceInfo.metaData != null) {
-                version = rInfo.serviceInfo.metaData.getInt(EXTRA_SERVICE_VERSION,
-                        Integer.MIN_VALUE);
-                isMultiuser = rInfo.serviceInfo.metaData.getBoolean(EXTRA_SERVICE_IS_MULTIUSER);
+            if (D) {
+                Log.d(mTag, String.format("bindBestPackage for %s : %s found %d, %s", mAction,
+                        (justCheckThisPackage == null ? ""
+                                : "(" + justCheckThisPackage + ") "), rInfos.size(),
+                        (bestPackage == null ? "no new best package"
+                                : "new best package: " + bestPackage)));
             }
-
-            if (version > mVersion) {
-                bestVersion = version;
-                bestPackage = packageName;
-                bestIsMultiuser = isMultiuser;
-            }
+        } else {
+            if (D) Log.d(mTag, "Unable to query intent services for action: " + mAction);
         }
-
-        if (D) Log.d(mTag, String.format("bindBestPackage for %s : %s found %d, %s", mAction,
-                (justCheckThisPackage == null ? "" : "(" + justCheckThisPackage + ") "),
-                rInfos.size(),
-                (bestPackage == null ? "no new best package" : "new best package: "
-                + bestPackage)));
-
         if (bestPackage != null) {
             bindToPackageLocked(bestPackage, bestVersion, bestIsMultiuser);
             return true;
@@ -243,8 +280,9 @@ public class ServiceWatcher implements ServiceConnection {
                     // package updated, make sure to rebind
                     unbindLocked();
                 }
-                // check the updated package in case it is better
-                bindBestPackageLocked(packageName);
+                // Need to check all packages because this method is also called when a
+                // system app is uninstalled and the stock version in reinstalled.
+                bindBestPackageLocked(null);
             }
         }
 
@@ -256,7 +294,7 @@ public class ServiceWatcher implements ServiceConnection {
                     unbindLocked();
                 }
                 // check the new package is case it is better
-                bindBestPackageLocked(packageName);
+                bindBestPackageLocked(null);
             }
         }
 
@@ -270,6 +308,20 @@ public class ServiceWatcher implements ServiceConnection {
                     bindBestPackageLocked(null);
                 }
             }
+        }
+
+        @Override
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            synchronized (mLock) {
+                if (packageName.equals(mPackageName)) {
+                    // service enabled or disabled, make sure to rebind
+                    unbindLocked();
+                }
+                // the service might be disabled, need to search for a new
+                // package
+                bindBestPackageLocked(null);
+            }
+            return super.onPackageChanged(packageName, uid, components);
         }
     };
 
@@ -323,7 +375,7 @@ public class ServiceWatcher implements ServiceConnection {
         synchronized (mLock) {
             if (!mIsMultiuser) {
                 unbindLocked();
-                bindBestPackageLocked(null);
+                bindBestPackageLocked(mServicePackageName);
             }
         }
     }

@@ -59,8 +59,10 @@ public final class GeofenceProxy {
     };
 
     public static GeofenceProxy createAndBind(Context context,
-            List<String> initialPackageNames, Handler handler, IGpsGeofenceHardware gpsGeofence) {
-        GeofenceProxy proxy = new GeofenceProxy(context, initialPackageNames, handler, gpsGeofence);
+            int overlaySwitchResId, int defaultServicePackageNameResId,
+            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence) {
+        GeofenceProxy proxy = new GeofenceProxy(context, overlaySwitchResId,
+            defaultServicePackageNameResId, initialPackageNamesResId, handler, gpsGeofence);
         if (proxy.bindGeofenceProvider()) {
             return proxy;
         } else {
@@ -68,11 +70,12 @@ public final class GeofenceProxy {
         }
     }
 
-    private GeofenceProxy(Context context, List<String> initialPackageName, Handler handler,
-            IGpsGeofenceHardware gpsGeofence) {
+    private GeofenceProxy(Context context,
+            int overlaySwitchResId, int defaultServicePackageNameResId,
+            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence) {
         mContext = context;
-        mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, initialPackageName,
-                mRunnable, handler);
+        mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, overlaySwitchResId,
+            defaultServicePackageNameResId, initialPackageNamesResId, mRunnable, handler);
         mGpsGeofenceHardware = gpsGeofence;
         bindHardwareGeofence();
     }

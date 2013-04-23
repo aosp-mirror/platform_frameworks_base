@@ -380,7 +380,10 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mContext,
                 LocationManager.NETWORK_PROVIDER,
                 NETWORK_LOCATION_SERVICE_ACTION,
-                providerPackageNames, mLocationHandler);
+                com.android.internal.R.bool.config_enableNetworkLocationOverlay,
+                com.android.internal.R.string.config_networkLocationProviderPackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames,
+                mLocationHandler);
         if (networkProvider != null) {
             mRealProviders.put(LocationManager.NETWORK_PROVIDER, networkProvider);
             mProxyProviders.add(networkProvider);
@@ -394,7 +397,10 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mContext,
                 LocationManager.FUSED_PROVIDER,
                 FUSED_LOCATION_SERVICE_ACTION,
-                providerPackageNames, mLocationHandler);
+                com.android.internal.R.bool.config_enableFusedLocationOverlay,
+                com.android.internal.R.string.config_fusedLocationProviderPackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames,
+                mLocationHandler);
         if (fusedLocationProvider != null) {
             addProviderLocked(fusedLocationProvider);
             mProxyProviders.add(fusedLocationProvider);
@@ -406,15 +412,22 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // bind to geocoder provider
-        mGeocodeProvider = GeocoderProxy.createAndBind(mContext, providerPackageNames,
+        mGeocodeProvider = GeocoderProxy.createAndBind(mContext,
+                com.android.internal.R.bool.config_enableGeocoderOverlay,
+                com.android.internal.R.string.config_geocoderProviderPackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames,
                 mLocationHandler);
         if (mGeocodeProvider == null) {
             Slog.e(TAG,  "no geocoder provider found");
         }
 
         // bind to geofence provider
-        GeofenceProxy provider = GeofenceProxy.createAndBind(mContext, providerPackageNames,
-                mLocationHandler, gpsProvider.getGpsGeofenceProxy());
+        GeofenceProxy provider = GeofenceProxy.createAndBind(mContext,
+                com.android.internal.R.bool.config_enableGeofenceOverlay,
+                com.android.internal.R.string.config_geofenceProviderPackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames,
+                mLocationHandler,
+                gpsProvider.getGpsGeofenceProxy());
         if (provider == null) {
             Slog.e(TAG,  "no geofence provider found");
         }
@@ -1290,13 +1303,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (name == null) {
             throw new IllegalArgumentException("provider name must not be null");
         }
+
+        if (D) Log.d(TAG, "request " + Integer.toHexString(System.identityHashCode(receiver))
+                + " " + name + " " + request + " from " + packageName + "(" + uid + ")");
         LocationProviderInterface provider = mProvidersByName.get(name);
         if (provider == null) {
             throw new IllegalArgumentException("provider doesn't exisit: " + provider);
         }
-
-        if (D) Log.d(TAG, "request " + Integer.toHexString(System.identityHashCode(receiver))
-                + " " + name + " " + request + " from " + packageName + "(" + uid + ")");
 
         UpdateRecord record = new UpdateRecord(name, request, receiver);
         UpdateRecord oldRecord = receiver.mUpdateRecords.put(name, record);
