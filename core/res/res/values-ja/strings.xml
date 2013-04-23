@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SDカードにアクセスします。"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"ユーザー補助機能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"補助テクノロジーがリクエストできる機能です。"</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ステータスバーの無効化、システムアイコンの追加や削除をアプリに許可します。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"ステータスバーへの表示"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"入力方法のトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ユーザー補助サービスにバインド"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ユーザー補助サービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"タッチガイドのリクエスト"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"触れたアイテムが読み上げられ、ジェスチャーでユーザーインターフェースのガイドを利用できる操作モードをリクエストすることを所有者に許可します。"</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"ウェブアクセシビリティ拡張のリクエスト"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"ウェブアクセシビリティの拡張の有効化をリクエストすることを所有者に許可します。たとえば、アプリコンテンツのアクセシビリティをもっと向上させるためにスクリプトをインストールできます。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"テキストサービスにバインド"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"テキストサービス（SpellCheckerServiceなど）のトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPNサービスにバインド"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"再起動"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"<xliff:g id="TITLE">%s</xliff:g> のページ:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"ナビゲーションの確認"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"このページから移動"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"このページのまま"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"このページから移動してもよろしいですか？"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"ヒント: ダブルタップで拡大/縮小できます。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動入力"</string>

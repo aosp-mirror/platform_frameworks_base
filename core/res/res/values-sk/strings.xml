@@ -229,6 +229,22 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Prístup na kartu SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcie zjednodušenia ovládania"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcie, ktoré môže vyžadovať nápomocná technológia."</string>
+    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
+    <skip />
+    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
+    <skip />
+    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový riadok"</string>
@@ -348,10 +364,6 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania metódy vstupu. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"viazať na službu zjednodušeného ovládania"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby zjednodušeného ovládania. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
-    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"vyžiadať preskúmanie dotykom"</string>
-    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Držiteľovi umožňuje požiadať o interaktívny režim, v ktorom aplikácia reaguje na dotyky položiek vyslovením ich názvu a v ktorom môže používateľ preskúmať používateľské rozhranie pomocou gest."</string>
-    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"vyžiadať zlepšenie dostupnosti webu"</string>
-    <string name="permdesc_canRequestEnahncedWebAccessibility" msgid="4500520989321729676">"Držiteľovi umožňuje, aby vyžiadal povolenie vylepšení prístupu k webu, napríklad inštaláciu skriptov, ktoré uľahčujú prístup k obsahu aplikácie."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"väzba na textovú službu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania textovej služby (napr. SpellCheckerService). Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"Zaviazať k službe VPN"</string>
@@ -864,14 +876,10 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reštartovať"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Stránka „<xliff:g id="TITLE">%s</xliff:g>“ uvádza:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <!-- no translation found for js_dialog_before_unload_title (2619376555525116593) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_positive_button (3112752010600484130) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload_negative_button (5614861293026099715) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (3468816357095378590) -->
-    <skip />
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Potvrďte prechod"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Opustiť stránku"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Zostať na tejto strane"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Naozaj chcete túto stránku opustiť?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdiť"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Dvojitým klepnutím môžete zobrazenie priblížiť alebo oddialiť."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut.dop."</string>
