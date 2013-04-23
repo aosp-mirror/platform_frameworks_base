@@ -7,6 +7,7 @@
 
 #define LOG_TAG "appproc"
 
+#include <cutils/properties.h>
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <utils/Log.h>
@@ -148,7 +149,10 @@ int main(int argc, char* const argv[])
      * This breaks some programs which improperly embed
      * an out of date copy of Android's linker.
      */
-    if (getenv("NO_ADDR_COMPAT_LAYOUT_FIXUP") == NULL) {
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.kernel.qemu", value, "");
+    bool is_qemu = (strcmp(value, "1") == 0);
+    if ((getenv("NO_ADDR_COMPAT_LAYOUT_FIXUP") == NULL) && !is_qemu) {
         int current = personality(0xFFFFFFFF);
         if ((current & ADDR_COMPAT_LAYOUT) == 0) {
             personality(current | ADDR_COMPAT_LAYOUT);
