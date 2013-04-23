@@ -597,12 +597,11 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 if (mInputChannel != null) {
                     if (mInputQueueCallback != null) {
-                        mInputQueue = new InputQueue(mInputChannel);
+                        mInputQueue = new InputQueue();
                         mInputQueueCallback.onInputQueueCreated(mInputQueue);
-                    } else {
-                        mInputEventReceiver = new WindowInputEventReceiver(mInputChannel,
-                                Looper.myLooper());
                     }
+                    mInputEventReceiver = new WindowInputEventReceiver(mInputChannel,
+                            Looper.myLooper());
                 }
 
                 view.assignParent(this);
@@ -2822,9 +2821,11 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mInputQueueCallback != null && mInputQueue != null) {
             mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
+            mInputQueue.dispose();
             mInputQueueCallback = null;
             mInputQueue = null;
-        } else if (mInputEventReceiver != null) {
+        }
+        if (mInputEventReceiver != null) {
             mInputEventReceiver.dispose();
             mInputEventReceiver = null;
         }
@@ -3347,6 +3348,15 @@ public final class ViewRootImpl implements ViewParent,
             if ((q.mFlags & QueuedInputEvent.FLAG_FINISHED) != 0) {
                 forward(q);
             } else if (mView == null || !mAdded) {
+                Slog.w(TAG, "Dropping event due to root view being removed: " + q.mEvent);
+                finish(q, false);
+            } else if (!mAttachInfo.mHasWindowFocus &&
+                  !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER) &&
+                  !isTerminalInputEvent(q.mEvent)) {
+                // If this is a focused event and the window doesn't currently have input focus,
+                // then drop this event.  This could be an event that came back from the previous
+                // stage but the window has lost focus in the meantime.
+                Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
                 finish(q, false);
             } else {
                 apply(q, onProcess(q));
@@ -3547,14 +3557,29 @@ public final class ViewRootImpl implements ViewParent,
      * Delivers pre-ime input events to a native activity.
      * Does not support pointer events.
      */
-    final class NativePreImeInputStage extends AsyncInputStage {
+    final class NativePreImeInputStage extends AsyncInputStage
+            implements InputQueue.FinishedInputEventCallback {
         public NativePreImeInputStage(InputStage next, String traceCounter) {
             super(next, traceCounter);
         }
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
+            if (mInputQueue != null && q.mEvent instanceof KeyEvent) {
+                mInputQueue.sendInputEvent(q.mEvent, q, true, this);
+                return DEFER;
+            }
             return FORWARD;
+        }
+
+        @Override
+        public void onFinishedInputEvent(Object token, boolean handled) {
+            QueuedInputEvent q = (QueuedInputEvent)token;
+            if (handled) {
+                finish(q, true);
+                return;
+            }
+            forward(q);
         }
     }
 
@@ -3621,16 +3646,6 @@ public final class ViewRootImpl implements ViewParent,
                 finish(q, true);
                 return;
             }
-
-            // If the window doesn't currently have input focus, then drop
-            // this event.  This could be an event that came back from the
-            // IME dispatch but the window has lost focus in the meantime.
-            if (!mAttachInfo.mHasWindowFocus && !isTerminalInputEvent(q.mEvent)) {
-                Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
-                finish(q, false);
-                return;
-            }
-
             forward(q);
         }
     }
@@ -3702,14 +3717,29 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Delivers post-ime input events to a native activity.
      */
-    final class NativePostImeInputStage extends AsyncInputStage {
+    final class NativePostImeInputStage extends AsyncInputStage
+            implements InputQueue.FinishedInputEventCallback {
         public NativePostImeInputStage(InputStage next, String traceCounter) {
             super(next, traceCounter);
         }
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
+            if (mInputQueue != null) {
+                mInputQueue.sendInputEvent(q.mEvent, q, false, this);
+                return DEFER;
+            }
             return FORWARD;
+        }
+
+        @Override
+        public void onFinishedInputEvent(Object token, boolean handled) {
+            QueuedInputEvent q = (QueuedInputEvent)token;
+            if (handled) {
+                finish(q, true);
+                return;
+            }
+            forward(q);
         }
     }
 

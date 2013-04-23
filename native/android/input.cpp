@@ -25,12 +25,15 @@
 #include <utils/Vector.h>
 
 #include <android_runtime/android_app_NativeActivity.h>
+#include <android_runtime/android_view_InputQueue.h>
 
 #include <poll.h>
 #include <errno.h>
 
 using android::InputEvent;
+using android::InputQueue;
 using android::KeyEvent;
+using android::Looper;
 using android::MotionEvent;
 using android::sp;
 using android::Vector;
@@ -269,25 +272,37 @@ float AMotionEvent_getHistoricalAxisValue(const AInputEvent* motion_event,
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
         int ident, ALooper_callbackFunc callback, void* data) {
-    queue->attachLooper(looper, ident, callback, data);
+    InputQueue* iq = static_cast<InputQueue*>(queue);
+    Looper* l = static_cast<Looper*>(looper);
+    iq->attachLooper(l, ident, callback, data);
 }
 
 void AInputQueue_detachLooper(AInputQueue* queue) {
-    queue->detachLooper();
+    InputQueue* iq = static_cast<InputQueue*>(queue);
+    iq->detachLooper();
 }
 
 int32_t AInputQueue_hasEvents(AInputQueue* queue) {
-    return queue->hasEvents();
+    InputQueue* iq = static_cast<InputQueue*>(queue);
+    return iq->hasEvents();
 }
 
 int32_t AInputQueue_getEvent(AInputQueue* queue, AInputEvent** outEvent) {
-    return queue->getEvent(outEvent);
+    InputQueue* iq = static_cast<InputQueue*>(queue);
+    InputEvent* event;
+    int32_t res = iq->getEvent(&event);
+    *outEvent = event;
+    return res;
 }
 
 int32_t AInputQueue_preDispatchEvent(AInputQueue* queue, AInputEvent* event) {
-    return queue->preDispatchEvent(event) ? 1 : 0;
+    InputQueue* iq = static_cast<InputQueue*>(queue);
+    InputEvent* e = static_cast<InputEvent*>(event);
+    return iq->preDispatchEvent(e) ? 1 : 0;
 }
 
 void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled) {
-    queue->finishEvent(event, handled != 0, false);
+    InputQueue* iq = static_cast<InputQueue*>(queue);
+    InputEvent* e = static_cast<InputEvent*>(event);
+    iq->finishEvent(e, handled != 0);
 }

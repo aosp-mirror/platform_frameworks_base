@@ -46,6 +46,7 @@ LOCAL_SRC_FILES:= \
 	android_view_InputDevice.cpp \
 	android_view_InputEventReceiver.cpp \
 	android_view_InputEventSender.cpp \
+	android_view_InputQueue.cpp \
 	android_view_KeyEvent.cpp \
 	android_view_KeyCharacterMap.cpp \
 	android_view_HardwareRenderer.cpp \

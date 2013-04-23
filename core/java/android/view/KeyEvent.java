@@ -1233,6 +1233,12 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int FLAG_FALLBACK = 0x400;
 
     /**
+     * Signifies that the key is being predispatched.
+     * @hide
+     */
+    public static final int FLAG_PREDISPATCH = 0x20000000;
+
+    /**
      * Private control to determine when an app is tracking a key sequence.
      * @hide
      */
