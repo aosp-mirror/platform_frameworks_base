@@ -16760,7 +16760,7 @@ package android.os {
     field public static final int ICE_CREAM_SANDWICH_MR1 = 15; // 0xf
     field public static final int JELLY_BEAN = 16; // 0x10
     field public static final int JELLY_BEAN_MR1 = 17; // 0x11
-    field public static final int JELLY_BEAN_MR2 = 10000; // 0x2710
+    field public static final int JELLY_BEAN_MR2 = 18; // 0x12
   }
 
   public final class Bundle implements java.lang.Cloneable android.os.Parcelable {
