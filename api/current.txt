@@ -16949,7 +16949,7 @@ package android.os {
     method public static void startMethodTracing(java.lang.String, int);
     method public static void startMethodTracing(java.lang.String, int, int);
     method public static void startNativeTracing();
-    method public static void stopAllocCounting();
+    method public static deprecated void stopAllocCounting();
     method public static void stopMethodTracing();
     method public static void stopNativeTracing();
     method public static long threadCpuTimeNanos();
