@@ -26,7 +26,23 @@ keylayouts := \
     Vendor_046d_Product_c532.kl \
     Vendor_054c_Product_0268.kl \
     Vendor_05ac_Product_0239.kl \
-    Vendor_22b8_Product_093d.kl
+    Vendor_22b8_Product_093d.kl \
+    Vendor_0079_Product_0011.kl \
+    Vendor_046d_Product_c219.kl \
+    Vendor_046d_Product_c21f.kl \
+    Vendor_0583_Product_2060.kl \
+    Vendor_0a5c_Product_8502.kl \
+    Vendor_1038_Product_1412.kl \
+    Vendor_12bd_Product_d015.kl \
+    Vendor_1689_Product_fd00.kl \
+    Vendor_1689_Product_fd01.kl \
+    Vendor_1689_Product_fe00.kl \
+    Vendor_1bad_Product_f016.kl \
+    Vendor_1bad_Product_f023.kl \
+    Vendor_1bad_Product_f027.kl \
+    Vendor_1bad_Product_f036.kl \
+    Vendor_1d79_Product_0009.kl \
+    Vendor_2378_Product_100a.kl
 
 keycharmaps := \
     Generic.kcm \
