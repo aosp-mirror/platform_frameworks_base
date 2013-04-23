@@ -231,7 +231,7 @@ public class RelativeLayout extends ViewGroup {
      * {@link View#MEASURED_SIZE_MASK}.
      * {@link View#MEASURED_STATE_TOO_SMALL}.
      **/
-    private static final int DEFAULT_WIDTH = 0x008000000;
+    private static final int DEFAULT_WIDTH = 0x00010000;
 
     public RelativeLayout(Context context) {
         super(context);
