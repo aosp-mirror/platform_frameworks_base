@@ -433,9 +433,9 @@ public class Build {
         public static final int JELLY_BEAN_MR1 = 17;
 
         /**
-         * Android 4.X: Jelly Bean MR2, the revenge of the beans.
+         * Android 4.3: Jelly Bean MR2, the revenge of the beans.
          */
-        public static final int JELLY_BEAN_MR2 = CUR_DEVELOPMENT;
+        public static final int JELLY_BEAN_MR2 = 18;
 
         /**
          * Android X.X: Key Lime Pie, another tasty treat.
