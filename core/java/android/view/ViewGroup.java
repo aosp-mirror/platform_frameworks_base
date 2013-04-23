@@ -4279,6 +4279,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         FLAG_OPTIMIZE_INVALIDATE) {
                 dirty.offset(location[CHILD_LEFT_INDEX] - mScrollX,
                         location[CHILD_TOP_INDEX] - mScrollY);
+                if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0) {
+                    dirty.union(0, 0, mRight - mLeft, mBottom - mTop);
+                }
 
                 final int left = mLeft;
                 final int top = mTop;
@@ -4378,6 +4381,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if ((mPrivateFlags & PFLAG_DRAWN) == PFLAG_DRAWN ||
                 (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) {
             dirty.offset(left - mScrollX, top - mScrollY);
+            if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0) {
+                dirty.union(0, 0, mRight - mLeft, mBottom - mTop);
+            }
 
             if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0 ||
                     dirty.intersect(0, 0, mRight - mLeft, mBottom - mTop)) {
