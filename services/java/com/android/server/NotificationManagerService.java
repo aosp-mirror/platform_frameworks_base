@@ -237,7 +237,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             try {
                 listener.onNotificationPosted(sbn);
             } catch (RemoteException ex) {
-                // not there?
+                Log.e(TAG, "unable to notify listener (posted): " + listener, ex);
             }
         }
 
@@ -246,7 +246,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             try {
                 listener.onNotificationRemoved(sbn);
             } catch (RemoteException ex) {
-                // not there?
+                Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
             }
         }
 
@@ -285,14 +285,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         public void record(StatusBarNotification nr) {
             // Nuke heavy parts of notification before storing in archive
-            nr.notification.tickerView = null;
-            nr.notification.contentView = null;
-            nr.notification.bigContentView = null;
-            nr.notification.largeIcon = null;
-            final Bundle extras = nr.notification.extras;
-            extras.remove(Notification.EXTRA_LARGE_ICON);
-            extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
-            extras.remove(Notification.EXTRA_PICTURE);
+            nr.notification.lightenPayload();
 
             if (mBuffer.size() == BUFFER_SIZE) {
                 mBuffer.removeFirst();
@@ -746,7 +739,8 @@ public class NotificationManagerService extends INotificationManager.Stub
      * asynchronously notify all listeners about a new notification
      */
     private void notifyPostedLocked(NotificationRecord n) {
-        final StatusBarNotification sbn = n.sbn;
+        // make a copy in case changes are made to the underlying Notification object
+        final StatusBarNotification sbn = n.sbn.clone();
         for (final NotificationListenerInfo info : mListeners) {
             mHandler.post(new Runnable() {
                 @Override
@@ -760,12 +754,15 @@ public class NotificationManagerService extends INotificationManager.Stub
      * asynchronously notify all listeners about a removed notification
      */
     private void notifyRemovedLocked(NotificationRecord n) {
-        final StatusBarNotification sbn = n.sbn;
+        // make a copy in case changes are made to the underlying Notification object
+        // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the notification
+        final StatusBarNotification sbn_light = n.sbn.cloneLight();
+
         for (final NotificationListenerInfo info : mListeners) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    info.notifyRemovedIfUserMatch(sbn);
+                    info.notifyRemovedIfUserMatch(sbn_light);
                 }});
         }
     }
