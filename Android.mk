@@ -282,15 +282,17 @@ aidl_files := \
 	frameworks/base/core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
+	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
 	frameworks/base/core/java/android/bluetooth/BluetoothDevice.aidl \
 	frameworks/base/core/java/android/bluetooth/BluetoothHealthAppConfiguration.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
+	frameworks/base/core/java/android/content/ContentValues.aidl \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/IntentSender.aidl \
 	frameworks/base/core/java/android/content/PeriodicSync.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/res/Configuration.aidl \
-	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
+	frameworks/base/core/java/android/database/CursorWindow.aidl \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/nfc/NdefMessage.aidl \
 	frameworks/base/core/java/android/nfc/NdefRecord.aidl \
