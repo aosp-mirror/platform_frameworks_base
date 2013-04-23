@@ -622,11 +622,11 @@ hb_utf16_script_run_prev(ScriptRun* run, const uint16_t *chars, size_t len, ssiz
   const hb_script_t init_script = code_point_to_script(init_cp);
   hb_script_t current_script = init_script;
   run->script = init_script;
+  size_t break_iter = *iter;
 
   for (;;) {
     if (*iter < 0)
       break;
-    const ssize_t prev_iter = *iter;
     const uint32_t cp = utf16_to_code_point_prev(chars, len, iter);
     const hb_script_t script = code_point_to_script(cp);
 
@@ -635,21 +635,18 @@ hb_utf16_script_run_prev(ScriptRun* run, const uint16_t *chars, size_t len, ssiz
         // If we started off as inherited, we take whatever we can find.
         run->script = script;
         current_script = script;
+        // In cases of script1 + inherited + script2, always group the inherited
+        // with script1.
+        break_iter = *iter;
         continue;
       } else if (script == HB_SCRIPT_INHERITED) {
-        /* BEGIN android-changed
-           We apply the same fix for Chrome to Android.
-           Chrome team will talk with upsteam about it.
-           Just assume that whatever follows this combining character is within
-           the same script.  This is incorrect if you had language1 + combining
-           char + language 2, but that is rare and this code is suspicious
-           anyway.
-           END android-changed */
         continue;
       } else {
-        *iter = prev_iter;
+        *iter = break_iter;
         break;
       }
+    } else {
+        break_iter = *iter;
     }
   }
 
