@@ -542,7 +542,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return -1;
     }
 
-    public void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient serviceClient,
+    public void registerUiTestAutomationService(IBinder owner,
+            IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
@@ -1732,14 +1733,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mFetchFlags &= ~AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
             }
 
-            if (mResolveInfo != null) {
-                mRequestTouchExplorationMode = (info.flags
-                        & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
-                mRequestEnhancedWebAccessibility = (info.flags
-                        & AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0;
-                mRequestFilterKeyEvents = (info.flags
-                        & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS)  != 0;
-            }
+            mRequestTouchExplorationMode = (info.flags
+                    & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
+            mRequestEnhancedWebAccessibility = (info.flags
+                    & AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0;
+            mRequestFilterKeyEvents = (info.flags
+                    & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS)  != 0;
         }
 
         /**
