@@ -4699,10 +4699,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         boolean isLocked = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
         if (!isLocked && pm.isScreenOn()) {
             voiceIntent = new Intent(android.speech.RecognizerIntent.ACTION_WEB_SEARCH);
+            Log.i(TAG, "voice-based interactions: about to use ACTION_WEB_SEARCH");
         } else {
             voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
             voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE,
                     isLocked && mKeyguardManager.isKeyguardSecure());
+            Log.i(TAG, "voice-based interactions: about to use ACTION_VOICE_SEARCH_HANDS_FREE");
         }
         // start the search activity
         if (needWakeLock) {
