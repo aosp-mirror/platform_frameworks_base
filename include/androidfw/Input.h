@@ -36,6 +36,9 @@ class SkMatrix;
  * Additional private constants not defined in ndk/ui/input.h.
  */
 enum {
+    /* Signifies that the key is being predispatched */
+    AKEY_EVENT_FLAG_PREDISPATCH = 0x20000000,
+
     /* Private control to determine when an app is tracking a key sequence. */
     AKEY_EVENT_FLAG_START_TRACKING = 0x40000000,
 
