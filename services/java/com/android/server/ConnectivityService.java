@@ -432,6 +432,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mRadioAttributes[r.mType] = r;
         }
 
+        // TODO: What is the "correct" way to do determine if this is a wifi only device?
+        boolean wifiOnly = SystemProperties.getBoolean("ro.radio.noril", false);
+        log("wifiOnly=" + wifiOnly);
         String[] naStrings = context.getResources().getStringArray(
                 com.android.internal.R.array.networkAttributes);
         for (String naString : naStrings) {
@@ -439,6 +442,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 NetworkConfig n = new NetworkConfig(naString);
                 if (n.type > ConnectivityManager.MAX_NETWORK_TYPE) {
                     loge("Error in networkAttributes - ignoring attempt to define type " +
+                            n.type);
+                    continue;
+                }
+                if (wifiOnly && ConnectivityManager.isNetworkTypeMobile(n.type)) {
+                    log("networkAttributes - ignoring mobile as this dev is wifiOnly " +
                             n.type);
                     continue;
                 }
