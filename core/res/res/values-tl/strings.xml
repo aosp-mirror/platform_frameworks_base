@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"I-access ang SD card."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Mga tampok ng accessibility"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Mga tampok na maaaring hilingin ng tumutulong na teknolohiya."</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kunin ang nilalaman ng window"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Siyasatin ang nilalaman ng isang window kung saan ka nakikipag-ugnayan."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"I-on ang Explore by Touch"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Bibigkasin ang mga pinindot na item at maaaring galugarin ang screen gamit ang mga galaw."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"I-on ang pinahusay na accessibility sa web"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Maaaring mag-install ng mga script upang gawing mas naa-access ang nilalaman ng app."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obserbahan ang tekstong tina-type mo"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"May kasamang personal na data tulad ng mga numero ng credit card at password."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"huwag paganahin o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pinapayagan ang app na huwag paganahin ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"status bar"</string>

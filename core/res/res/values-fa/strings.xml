@@ -230,11 +230,11 @@
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"ویژگی‌های قابلیت دسترسی"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"ویژگی‌هایی که فناوری مفید می‌تواند درخواست کند."</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"بازیابی محتوای پنجره"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"محتوای پنجره‌ای را که درحال تعامل با آن هستید بررسی کنید."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"فعال‌سازی کاوش با لمس"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"محتوای پنجره‌ای را که در حال تعامل با آن هستید بررسی کنید."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"فعال‌سازی کاوش لمسی"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"موارد لمس شده با صدای بلند خوانده می‌شوند و با استفاده از حرکات لمسی می‌توانید صفحه را کاوش کنید."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"فعال‌سازی افزایش دسترسی به وب پیشرفته"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ممکن است جهت افزایش قابلیت دسترسی به محتوای برنامه، اسکریپت‌هایی نصب شود."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"فعال‌سازی دسترس‌پذیری پیشرفته برای وب"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ممکن است جهت افزایش دسترس‌پذیری به محتوای برنامه، اسکریپت‌هایی نصب شود."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"نوشتاری را که تایپ می‌کنید مشاهده نمایید"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را شامل می‌شود."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"غیرفعال کردن یا تغییر نوار وضعیت"</string>
@@ -871,7 +871,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"تأیید پیمایش"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"ترک این صفحه"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"ماندن در این صفحه"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"مطمئنید که می‌خواهید از این صفحه پیمایش کنیدد؟"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"مطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگنمایی و کوچکنمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>

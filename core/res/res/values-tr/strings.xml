@@ -267,7 +267,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Uygulamaya WAP mesajlarını alma ve işleme izni verir. Buna, size gönderilen mesajları takip edip size göstermeden silebilme izni de dahildir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"çalışan uygulamaları al"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Uygulamaya o anda ve son çalışan görevler hakkında bilgi alma izni verir. Bu izin, uygulamanın cihaz tarafından kullanılan uygulamalar hakkında bilgi elde etmesine olanak sağlayabilir."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kullanıcılar arasında etkileşim kur"</string>
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kullanıcılar arasında etkileşim kurma"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Uygulamaya cihazdaki farklı kullanıcılar arasında işlem gerçekleştirme izni verir. Kötü amaçlı uygulamalar bu izinle kullanıcılar arasındaki korumayı ihlal edebilir."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"kullanıcılar arasında etkileşim kurmak için tam izin"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Kullanıcılar arasında tüm etkileşime izin verir."</string>
@@ -285,7 +285,7 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Uygulamaya diğer uygulamaların ekran uyumluluk modunu denetleme izni verir. Kötü amaçlı uygulamalar diğer uygulamaların çalışma şeklini bozabilir."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"uygulama hata ayıklamayı etkinleştir"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Uygulamaya, başka bir uygulama için hata ayıklamayı açma izni verir. Kötü amaçlı uygulamalar diğer uygulamaları kaldırmak için bunu kullanabilir."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"sistem görüntüleme ayarlarını değiştir"</string>
+    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"sistem görüntüleme ayarlarını değiştirme"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Uygulamaya, yerel ayar veya genel yazı tipi boyutu gibi mevcut yapılandırmayı değiştirme izni verir."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"araç modunu etkinleştir"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Uygulamaya, araç modunu etkinleştirme izni verir."</string>
@@ -295,7 +295,7 @@
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Uygulamaya, diğer uygulamaları zorla durdurma izni verir."</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"uygulamayı kapanmaya zorla"</string>
     <string name="permdesc_forceBack" msgid="3892295830419513623">"Uygulamaya, ön plandaki herhangi bir etkinliği kapatma ve geri gitme izni verir. Normal uygulamalar için gerekli olmaz."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"sistemin dahili durumunu al"</string>
+    <string name="permlab_dump" msgid="1681799862438954752">"sistemin dahili durumunu alma"</string>
     <string name="permdesc_dump" msgid="1778299088692290329">"Uygulamaya, sistemin iç durumunu alma izni verir. Kötü amaçlı uygulamalar normalde gerek duymadıkları çok çeşitli özel ve güvenli bilgilerini alabilir."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ekran içeriğini al"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Uygulamaya, etkin pencerenin içeriğini alma izni verir. Kötü amaçlı uygulamalar tüm pencere içeriğini alabilir ve şifreleri hariç tüm metni inceleyebilir."</string>
@@ -339,7 +339,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Uygulamaya, tam yedekleme onay arabirimini başlatma izni verir. Herhangi bir uygulamanın kullanımına yönelik değildir."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"yetkisiz pencereleri görüntüle"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Uygulamaya, dahili sistem kullanıcı arayüzü tarafından kullanılacak pencereler oluşturma izni verir. Normal uygulamaların kullanımına yönelik değildir."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"diğer uygulamaları sürükle"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"diğer uygulamaların üzerinde görüntüleme"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Uygulamaya, diğer uygulamaların veya kullanıcı arayüzüne ait bölümlerin üstüne çizim yapma izni verir. Bu izne sahip uygulamalar herhangi bir uygulamada kullanıcı arayüzünü kullanımınızı etkileyebilir veya diğer uygulamalarda gördüğünüzü düşündüğünüz arayüz öğelerini değiştirmiş olabilir."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"genel animasyon hızını değiştir"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Uygulamaya, istediği zaman genel animasyon hızını değiştirme (animasyonları hızlandırma veya yavaşlatma) izni verir."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Uygulamaya klavye düzenini değiştirme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"uygulamalara Linux sinyalleri gönder"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Uygulamaya, sağlanan sinyalin tüm kalıcı işlemlere gönderilmesini isteme izni verir."</string>
-    <string name="permlab_persistentActivity" msgid="8841113627955563938">"uygulamayı her zaman çalıştır"</string>
+    <string name="permlab_persistentActivity" msgid="8841113627955563938">"uygulamayı her zaman çalıştırma"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Uygulamaya kendisinin bir bölümünü bellekte kalıcı yapma izni verir. Bu izin, diğer uygulamaların kullanabileceği belleği sınırlandırarak tabletin yavaş çalışmasına neden olabilir."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Uygulamaya kendisinin bir bölümünü bellekte kalıcı yapma izni verir. Bu izin, diğer uygulamaların kullanabileceği belleği sınırlandırarak telefonun yavaş çalışmasına neden olabilir."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"uygulamaları sil"</string>
@@ -406,22 +406,22 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Uygulamaya, kendisi veya başka uygulamalar için belirli izinleri verme ya da kaldırma izni verir. Zararlı uygulamalar bunu, kendilerine izin vermediğiniz özelliklere erişmek için kullanabilir."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"tercih edilen uygulamaları ayarla"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Uygulamaya, tercih edilen uygulamalarınızı değiştirme izni verir. Kötü amaçlı uygulamalar çalışmakta olan uygulamaları sessizce değiştirip gizli verilerinizi toplamak için mevcut uygulamalarınızı yanlış yönlendirebilir."</string>
-    <string name="permlab_writeSettings" msgid="2226195290955224730">"sistem ayarlarını değiştir"</string>
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"sistem ayarlarını değiştirme"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Uygulamaya, sistem ayarı verilerini değiştirme izni verir. Kötü amaçlı uygulamalar sistem yapılandırmanızı bozabilir."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"güvenli sistem ayarlarını değiştir"</string>
+    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"güvenli sistem ayarlarını değiştirme"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Uygulamaya, sisteme ait güvenlik ayarı verilerini değiştirme izni verir. Normal uygulamaların kullanımına yönelik değildir."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Google hizmetler haritasını değiştir"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Uygulamaya, Google hizmetleri haritasını değiştirme izni verir. Normal uygulamaların kullanımına yönelik değildir."</string>
-    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"başlangıçta çalıştır"</string>
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"başlangıçta çalıştırma"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Uygulamaya, kendisini sistem açılışı bittikten hemen sonra başlatma izni verir. Bu izin, tabletin başlaması için daha uzun süre geçmesine ve uygulamanın her zaman çalışarak tableti yavaşlatmasına neden olabilir."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Uygulamaya, kendisini sistem açılışı bittikten hemen sonra başlatma izni verir. Bu izin, telefonun başlatılması için daha uzun bir süre geçmesine ve uygulamanın her zaman çalışarak telefonu yavaşlatmasına neden olur."</string>
-    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sabit yayın gönder"</string>
+    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sabit yayın gönderme"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Aşırı kullanılması çok fazla bellek harcanmasına neden olarak tableti yavaşlatabilir veya dengesiz hale getirebilir."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Aşırı kullanılması çok fazla bellek harcanmasına neden olarak telefonunu yavaşlatabilir veya dengesiz hale getirebilir."</string>
-    <string name="permlab_readContacts" msgid="8348481131899886131">"kişilerimi oku"</string>
+    <string name="permlab_readContacts" msgid="8348481131899886131">"kişilerinizi okuma"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Uygulamaya tabletinizde depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini haberiniz olmadan paylaşabilir."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
-    <string name="permlab_writeContacts" msgid="5107492086416793544">"kişilerimi değiştir"</string>
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"kişilerinizi değiştirme"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Uygulamaya tabletinizde depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"çağrı günlüğünü oku"</string>
@@ -432,11 +432,11 @@
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Uygulamaya telefonunuzun çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"kendi kişi kartımı oku"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Uygulamaya adınız ve iletişim bilgileriniz gibi cihazınızda saklanan kişisel profil bilgilerini okuma izni verir. Bu izin, uygulamanın sizi tanımlayabileceği ve profil bilgilerinizi başkalarına gönderebileceği anlamına gelir."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"kendi kişi kartımı değiştir"</string>
+    <string name="permlab_writeProfile" msgid="907793628777397643">"kendi kişi kartınızı değiştirme"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Uygulamaya adınız ve iletişim bilgileriniz gibi cihazınızda saklanan kişisel profil bilgilerini değiştirme veya bunlara ekleme yapma izni verir. Bu izin, uygulamanın sizi tanımlayabileceği ve profil bilgilerinizi başkalarına gönderebileceği anlamına gelir."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"sosyal akışımı oku"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"sosyal akışınızı okuma"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Uygulamaya size veya arkadaşlarınıza ait sosyal güncellemelere erişme ve bunları senkronize etme izni verir. Bilgi paylaşırken dikkatli olun. Bu izin, uygulamanın sosyal ağlarda sizinle arkadaşlarınız arasındaki iletişimi, gizliliğine bakılmaksızın okumasına olanak sağlar. Not: Bu izin tüm sosyal ağlar için geçerli olmayabilir."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"sosyal akışıma yaz"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"sosyal akışınıza yazma"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Uygulamaya arkadaşlarınızın sosyal güncellemelerini gösterme izni verir. Bilgi paylaşırken dikkatli olun -- Bu uygulama bir arkadaşınızdan geliyormuş gibi görünen mesajlar oluşturabilir. Not: Bu izin, tüm sosyal ağlarda geçerli olmayabilir."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"takvim etkinliklerini ve gizli bilgileri oku"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Uygulamaya, arkadaşlarınızın ve iş arkadaşlarınızın etkinlikleri de olmak üzere tabletinizde depolanan tüm takvim etkinliklerini okuma izni verir. Bu izin, uygulamanın takvim verilerinizi gizliliğine ve hassaslığına bakmaksızın paylaşmasına ve kaydetmesine olanak sağlayabilir."</string>
@@ -492,7 +492,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Uygulamaya, dahili depolama birimini ekleme/bağlantısını kesme izni verir."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"dahili dep br adını dğş"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Uygulamaya, dahili depolama biriminin adını değiştirme izni verir."</string>
-    <string name="permlab_vibrate" msgid="7696427026057705834">"titreşimi denetle"</string>
+    <string name="permlab_vibrate" msgid="7696427026057705834">"titreşimi denetleme"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Uygulamaya, titreşimi denetleme izni verir."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"flaşı denetle"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Uygulamaya, flaş ışığını denetleme izni verir."</string>
@@ -517,10 +517,10 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Uygulamaya, hangi uygulamaların hangi widget\'ları kullanacağını sisteme bildirme izni verir. Bu izne sahip bir uygulama, başka uygulamalara kişisel veriler için erişim hakkı verebilir. Normal uygulamaların kullanımına yönelik değildir."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"telefon durumunu değiştir"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Uygulamaya, cihazın telefon özelliklerini kontrol etme izni verir. Bu izne sahip bir uygulama sizi hiç uyarmadan ağlar arasında geçiş, telefonun radyosunu açıp kapatma ve benzeri işlemler yapabilir."</string>
-    <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonun durumunu ve kimliğini oku"</string>
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonun durumunu ve kimliğini okuma"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Uygulamaya cihazdaki telefon özelliklerine erişme izni verir. Bu izin, uygulamanın telefon numarasını ve cihaz kimliğini, etkin bir çağrı olup olmadığını ve çağrıda bağlanılan karşı tarafın numarasını öğrenmesine olanak sağlar."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tabletin uykuya geçmesini önle"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonunun uykuya geçmesini önle"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonun uykuya geçmesini önleme"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Uygulamaya, tabletin uykuya geçmesini önleme izni verir."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Uygulamaya, telefonun uykuya geçmesini önleme izni verir."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"tableti aç veya kapat"</string>
@@ -544,30 +544,30 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Uygulamaya, telefonun saat dilimini değiştirme izni verir."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"Hesap Yönetici Hizmeti gibi davran"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Uygulamaya, Hesap Kimlik Doğrulayıcılarına çağrı yapma izni verir."</string>
-    <string name="permlab_getAccounts" msgid="1086795467760122114">"cihazdaki hesapları bul"</string>
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"cihazdaki hesapları bulma"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Uygulamaya tablet tarafından bilinen hesapların listesini alma izni verir. Bu liste, yüklediğiniz uygulamalar tarafından oluşturulan tüm hesapları içerebilir."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Uygulamaya telefon tarafından bilinen hesapların listesini alma izni verir. Bu liste, yüklediğiniz uygulamalar tarafından oluşturulan tüm hesapları içerebilir."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"hesap oluştur ve şifre ayarla"</string>
+    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"hesap oluşturma ve şifre ayarlama"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Uygulamaya, hesaplar oluşturma ve bunların şifrelerini alma ve ayarlama da dahil olmak üzere Hesap Yöneticisi\'nin hesap doğrulama yetkilerini kullanma izni verir."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"hesap ekle veya kaldır"</string>
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"hesap ekleme veya kaldırma"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Uygulamaya, hesap ekleme, kaldırma ve hesapların şifrelerini silme gibi işlemleri yapma izni verir."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"bu cihazdaki hesapları kullan"</string>
+    <string name="permlab_useCredentials" msgid="235481396163877642">"bu cihazdaki hesapları kullanma"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Uygulamaya kimlik doğrulama jetonları isteme izni verir."</string>
-    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ağ bağlantılarını görüntüle"</string>
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ağ bağlantılarını görüntüleme"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Uygulamaya, hangi ağların bulunduğu ve hangilerinin bağlı olduğu gibi ağ bağlantılarıyla ilgili bilgileri görüntüleme izni verir."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"tam ağ erişimi"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Uygulamaya ağ yuvaları oluşturma ve özel ağ protokolleri kullanma izni verir. Tarayıcı ve diğer uygulamalar İnternet\'e veri gönderilmesi için araç sağlarlar, bu nedenle bu izin, İnternet\'e veri göndermek için gerekli değildir."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"ağ ayarlarını ve trafiği değiştir/müdahale et"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Uygulamaya, ağ ayarlarını değiştirme, tüm ağ trafiğine engel olma ve izleme (örneğin, proxy\'yi ve APN bağlantı noktalarını değiştirmek için) izni verir. Kötü amaçlı uygulamalar sizin bilginiz olmadan ağ paketlerini izleyebilir, yönlendirebilir ya da değiştirebilir."</string>
-    <string name="permlab_changeNetworkState" msgid="958884291454327309">"ağ bağlantısını değiştir"</string>
+    <string name="permlab_changeNetworkState" msgid="958884291454327309">"ağ bağlantısını değiştirme"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Uygulamaya, ağ bağlantısının durumunu değiştirme izni verir."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"kullanılan bağlantıyı değiştir"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Uygulamaya, tethering kullanan ağ bağlantısının durumunu değiştirme izni verir."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"arka plan veri kullanımı ayarını değiştir"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Uygulamaya, arka plan veri kullanımı ayarını değiştirme izni verir."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Kablosuz bağlantıları görüntüle"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Kablosuz bağlantıları görüntüleme"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Uygulamaya, Kablosuz bağlantının etkin olup olmadığı ve bağlanan Kablosuz cihazların adları gibi Kablosuz ağ kullanımıyla ilgili bilgileri görüntüleme izni verir."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Kablosuza bağlan veya Kablosuz bağlantısını kes"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Kablosuza bağlanma veya Kablosuz bağlantısını kesme"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Uygulamaya, kablosuz erişim noktalarına bağlanıp bunlarla bağlantısını kesme ve Kablosuz ağlar için cihaz yapılandırmasında değişiklikler yapma izni verir."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Kablosuz Çoklu Yayın alımına izin ver"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Uygulamaya, çoklu yayın adreslerini kullanarak yalnızca tablete değil Kablosuz ağ üzerindeki tüm cihazlara gönderilen paketleri alma izni verir. Çoklu olmayan yayın moduna göre daha fazla güç tüketir."</string>
@@ -587,25 +587,25 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Uygulamaya, Near Field Communication (NFC) etiketleri, kartlar ve okuyucular ile iletişim kurma izni verir."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran kilidimi devre dışı bırak"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Uygulamaya, tuş kilidini ve ilişkili tüm şifreli güvenlik önlemlerini devre dışı bırakma izni verir. Örneğin, telefon, çağrı alındığında tuş kilidinin devre dışı bırakır ve sonra, görüşme bittiğinde kilidi yeniden etkinleştirir."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını oku"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını okuma"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Uygulamaya bir hesaba ait senkronizasyon ayarlarını okuma izni verir. Örneğin, bu izne sahip bir uygulama Kişiler uygulamasının bir hesapla senkronize olup olmadığını belirleyebilir."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"senkronizasyonu aç/kapat"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"senkronizasyonu açma/kapatma"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Uygulamaya bir hesaba ait senkronizasyon ayarlarını değiştirme izni verir. Örneğin, bu izne sahip bir uygulama Kişiler uygulamasının bir hesapla senkronize edilmesini etkinleştirebilir."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"senk. istatistiklerini oku"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"senk. istatistiklerini okuma"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Uygulamaya bir hesaba ait senkronizasyon istatistiklerini okuma izni verir. Buna senkronizasyon etkinlikleri geçmişi ve senkronize edilen veri miktarı bilgileri de dahildir."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abone olunan yayınları oku"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abone olunan yayınları okuma"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Uygulamaya, o anda senkronize olan özet akışları ile ilgili bilgi alma izni verir."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"abone olunan yayınları yaz"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"abone olunan yayınları yazma"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Uygulamaya, o anda senkronize edilmiş özet akışlarını değiştirme izni verir. Kötü amaçlı uygulamalar senkronize edilmiş özet akışlarını değiştirebilir."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"sözlüğe eklediğim terimleri oku"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Uygulamaya, kullanıcının kullanıcı sözlüğünde depolamış olabileceği kelimeleri, adları ve kelime öbeklerini okuma izni verir."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"kullanıcı tanımlı sözlüğe kelime ekle"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Uygulamaya, kullanıcı sözlüğüne yeni kelimeler yazma izni verir."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"korumalı depolama birimine erişimi test etme"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"korumalı depolama birimine erişimi test etme"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Uygulamaya, gelecekteki cihazlarda kullanılabilecek USB depolama birimi için bir izni test etme olanağı verir."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Uygulamaya gelecekteki cihazlarda kullanılabilecek SD karta ilişkin bir izni test etme olanağı verir."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB belleğimin içeriğini değiştir veya sil"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB belleğinizin içeriğini değiştirme veya silme"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD kartın içeriğini değiştir veya sil"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Uygulamaya USB belleğe yazma izni verir."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Uygulamaya, SD karta yazma izni verir."</string>

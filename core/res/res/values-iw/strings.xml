@@ -231,8 +231,8 @@
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"תכונות שטכנולוגיה מסייעת יכולה לבקש."</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזר תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעל את גילוי באמצעות מגע"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"פריטים שנגעת בהם יאמרו בקול וניתן לחקור את המסך באמצעות תנועות."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעל את \'גילוי באמצעות מגע\'"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"פריטים שנגעת בהם ייאמרו בקול וניתן לנווט במסך באמצעות תנועות."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"הפעל גישה משופרת לאינטרנט"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ייתכן שסקריפטים יותקנו על מנת להקל את הגישה אל תוכן של יישומים."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצג טקסט שאתה מקליד"</string>

@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问 SD 卡。"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"辅助功能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"辅助技术可请求启用的功能。"</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检查您正与其进行互动的窗口的内容。"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"启用触摸浏览"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"设备可大声读出用户触摸的内容，而用户可以通过手势浏览屏幕。"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"启用网页辅助增强功能"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"安装脚本以方便访问应用的内容。"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"监测您输入的文字"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包含个人数据，例如信用卡号和密码。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"状态栏"</string>
@@ -876,7 +868,7 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"重新启动"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"网址为“<xliff:g id="TITLE">%s</xliff:g>”的网页显示："</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"确认导航"</string>
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"确认离开"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"离开此页"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"留在此页"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"您确定要离开此页面吗？"</string>

@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Dostęp do karty SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcje ułatwień dostępu"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcje, których może zażądać technologia ułatwień dostępu."</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pobierz zawartość okna"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włącz czytanie dotykiem"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Klikane elementy będą wymawiane na głos, a ekran można przeglądać, używając gestów."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Włącz ułatwienia dostępu w internecie"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Można zainstalować skrypty, by zawartość aplikacji była łatwiej dostępna."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obserwuj wpisywany tekst"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obejmuje informacje osobiste, takie jak numery kart kredytowych i hasła."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"pasek stanu"</string>

@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Az SD-kártya elérése."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Kisegítő lehetőségek funkciói"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"A kisegítő technológia által kérhető funkciók."</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ablaktartalom lekérdezése"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"A használt ablak tartalmának vizsgálata."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Felfedezés érintéssel bekapcsolása"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"A megérintett elemeket a rendszer hangosan kimondja, a képernyő pedig felfedezhető kézmozdulatok használatával."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Webelérhetőség fokozásának bekapcsolása"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Lehet telepíteni szkripteket, hogy az alkalmazástartalmak jobban elérhetők legyenek."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"A gépelt szöveg figyelése"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Tartalmazza a személyes adatokat, például a hitelkártyaszámokat és jelszavakat."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"állapotsor kikapcsolása vagy módosítása"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lehetővé teszi az alkalmazás számára az állapotsor kikapcsolását, illetve rendszerikonok hozzáadását és eltávolítását."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"állapotsor"</string>
