@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.InputChannel;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -84,10 +85,11 @@ class DisplayContent {
      */
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
-    /** Array containing the home StackBox and possibly one more which would contain apps */
+    /** Array containing the home StackBox and possibly one more which would contain apps. Array
+     * is stored in display order with the current bottom stack at 0. */
     private ArrayList<StackBox> mStackBoxes = new ArrayList<StackBox>();
 
-    /** True when the home StackBox is at the top of mStackBoxes, false otherwise */
+    /** True when the home StackBox is at the top of mStackBoxes, false otherwise. */
     private TaskStack mHomeStack = null;
 
     /** Save allocating when retrieving tasks */
@@ -95,6 +97,12 @@ class DisplayContent {
 
     /** Sorted most recent at top, oldest at [0]. */
     ArrayList<TaskStack> mStackHistory = new ArrayList<TaskStack>();
+
+    /** Forward motion events to mTapDetector. */
+    InputChannel mTapInputChannel;
+
+    /** Detect user tapping outside of current focused stack bounds .*/
+    StackTapDetector mTapDetector;
 
     /**
      * @param display May not be null.
@@ -285,6 +293,11 @@ class DisplayContent {
             }
         }
         return null;
+    }
+
+    int stackIdFromPoint(int x, int y) {
+        StackBox topBox = mStackBoxes.get(mStackBoxes.size() - 1);
+        return topBox.stackIdFromPoint(x, y);
     }
 
     public void dump(String prefix, PrintWriter pw) {

@@ -108,6 +108,26 @@ public class StackBox {
         return mFirst.contains(stackId) || mSecond.contains(stackId);
     }
 
+    /**
+     * Return the stackId of the stack that intersects the passed point.
+     * @param x coordinate of point.
+     * @param y coordinate of point.
+     * @return -1 if point is outside of mBounds, otherwise the stackId of the containing stack.
+     */
+    int stackIdFromPoint(int x, int y) {
+        if (!mBounds.contains(x, y)) {
+            return -1;
+        }
+        if (mStack != null) {
+            return mStack.mStackId;
+        }
+        int stackId = mFirst.stackIdFromPoint(x, y);
+        if (stackId >= 0) {
+            return stackId;
+        }
+        return mSecond.stackIdFromPoint(x, y);
+    }
+
     /** Determine if this StackBox is the first child or second child.
      * @return true if this is the first child.
      */

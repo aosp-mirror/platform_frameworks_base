@@ -958,6 +958,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int USER_SWITCH_TIMEOUT_MSG = 36;
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS = 38;
+    static final int SET_FOCUSED_STACK = 39;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1444,6 +1445,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case PERSIST_URI_GRANTS: {
                 writeGrantedUriPermissions();
+                break;
+            }
+            case SET_FOCUSED_STACK: {
+                synchronized (ActivityManagerService.this) {
+                    ActivityStack stack = mStackSupervisor.getStack(msg.arg1);
+                    if (stack != null) {
+                        ActivityRecord r = stack.topRunningActivityLocked(null);
+                        if (r != null) {
+                            setFocusedActivityLocked(r);
+                        }
+                    }
+                }
                 break;
             }
             }
@@ -1933,6 +1946,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             applyUpdateLockStateLocked(r);
         }
+    }
+
+    @Override
+    public void setFocusedStack(int stackId) {
+        mHandler.obtainMessage(SET_FOCUSED_STACK, stackId, 0).sendToTarget();
     }
 
     final void applyUpdateLockStateLocked(ActivityRecord r) {
@@ -3119,7 +3137,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             IApplicationThread thread) {
 
         mProcDeaths[0]++;
-        
+
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         synchronized (stats) {
             stats.noteProcessDiedLocked(app.info.uid, pid);
@@ -3151,7 +3169,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         break;
                     }
                 }
-                
+
                 if (!haveBg) {
                     EventLog.writeEvent(EventLogTags.AM_LOW_MEMORY, mLruProcesses.size());
                     long now = SystemClock.uptimeMillis();
@@ -3500,7 +3518,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Unless configured otherwise, swallow ANRs in background processes & kill the process.
         boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-        
+
         synchronized (this) {
             if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
                 Slog.w(TAG, "Killing " + app + ": background ANR");
@@ -4915,6 +4933,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
+    @Override
     public Intent getIntentForIntentSender(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return null;
@@ -4927,6 +4946,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return null;
     }
 
+    @Override
     public void setProcessLimit(int max) {
         enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
                 "setProcessLimit()");
@@ -4937,6 +4957,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         trimApplications();
     }
 
+    @Override
     public int getProcessLimit() {
         synchronized (this) {
             return mProcessLimitOverride;

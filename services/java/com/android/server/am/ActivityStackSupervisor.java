@@ -216,10 +216,6 @@ public class ActivityStackSupervisor {
         return !(stack.isHomeStack() ^ getFocusedStack().isHomeStack());
     }
 
-    boolean homeIsInFront() {
-        return isFrontStack(mHomeStack);
-    }
-
     void moveHomeStack(boolean toFront) {
         final boolean homeInFront = isFrontStack(mHomeStack);
         if (homeInFront ^ toFront) {
@@ -388,6 +384,18 @@ public class ActivityStackSupervisor {
             }
         }
         return true;
+    }
+
+    boolean pauseBackStacks(boolean userLeaving) {
+        boolean someActivityPaused = false;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (!isFrontStack(stack) && stack.mResumedActivity != null) {
+                stack.startPausingLocked(userLeaving, false);
+                someActivityPaused = true;
+            }
+        }
+        return someActivityPaused;
     }
 
     boolean allPausedActivitiesComplete() {
@@ -1981,6 +1989,38 @@ public class ActivityStackSupervisor {
         }
 
         return stops;
+    }
+
+    void validateTopActivitiesLocked() {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            final ActivityRecord r = stack.topRunningActivityLocked(null);
+            if (isFrontStack(stack)) {
+                if (r == null) {
+                    Slog.e(TAG, "validateTop...: null top activity, stack=" + stack);
+                } else {
+                    if (stack.mPausingActivity != null) {
+                        Slog.e(TAG, "validateTop...: top stack has pausing activity r=" + r +
+                            " state=" + r.state);
+                    }
+                    if (r.state != ActivityState.INITIALIZING &&
+                            r.state != ActivityState.RESUMED) {
+                        Slog.e(TAG, "validateTop...: activity in front not resumed r=" + r +
+                                " state=" + r.state);
+                    }
+                }
+            } else {
+                if (stack.mResumedActivity != null) {
+                    Slog.e(TAG, "validateTop...: back stack has resumed activity r=" + r +
+                        " state=" + r.state);
+                }
+                if (r != null && (r.state == ActivityState.INITIALIZING
+                        || r.state == ActivityState.RESUMED)) {
+                    Slog.e(TAG, "validateTop...: activity in back resumed r=" + r +
+                            " state=" + r.state);
+                }
+            }
+        }
     }
 
     public void dump(PrintWriter pw, String prefix) {
