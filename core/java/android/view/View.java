@@ -8711,7 +8711,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Change the view's z order in the tree, so it's on top of other sibling
-     * views
+     * views. This ordering change may affect layout, if the parent container
+     * uses an order-dependent layout scheme (e.g., LinearLayout). This
+     * method should be followed by calls to {@link #requestLayout()} and
+     * {@link View#invalidate()} on the parent.
+     *
+     * @see ViewGroup#bringChildToFront(View)
      */
     public void bringToFront() {
         if (mParent != null) {
