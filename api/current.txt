@@ -21231,6 +21231,7 @@ package android.service.notification {
     ctor public NotificationListenerService();
     method public final void clearAllNotifications();
     method public final void clearNotification(java.lang.String, java.lang.String, int);
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract void onNotificationPosted(android.service.notification.StatusBarNotification);
     method public abstract void onNotificationRemoved(android.service.notification.StatusBarNotification);
