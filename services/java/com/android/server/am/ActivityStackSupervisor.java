@@ -438,7 +438,7 @@ public class ActivityStackSupervisor {
     void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
             long thisTime, long totalTime) {
         for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
-            WaitResult w = mWaitingActivityLaunched.get(i);
+            WaitResult w = mWaitingActivityLaunched.remove(i);
             w.timeout = timeout;
             if (r != null) {
                 w.who = new ComponentName(r.info.packageName, r.info.name);
@@ -2182,7 +2182,8 @@ public class ActivityStackSupervisor {
     }
 
     void scheduleIdleTimeoutLocked(ActivityRecord next) {
-        mHandler.obtainMessage(IDLE_TIMEOUT_MSG, next).sendToTarget();
+        Message msg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG, next);
+        mHandler.sendMessageDelayed(msg, IDLE_TIMEOUT);
     }
 
     final void scheduleIdleLocked() {
