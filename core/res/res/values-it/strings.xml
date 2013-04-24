@@ -229,13 +229,13 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accesso alla scheda SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funzioni di accessibilità"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funzioni che possono essere richieste dalla tecnologia di ausilio."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recupera contenuti finestra"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Vengono esaminati i contenuti di una finestra con cui interagisci."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attiva Esplora al tocco"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti finestra"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Gli elementi toccati verranno pronunciati ad alta voce e sarà possibile esplorare lo schermo utilizzando i gesti."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Attiva accessibilità web migliorata"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Attivare accessibilità web migliorata"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Potrebbero essere installati script per rendere più accessibili i contenuti delle app."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Osserva il testo digitato"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Osservare il testo digitato"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sono inclusi dati personali come numeri di carte di credito e password."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"disattivare o modificare la barra di stato"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Consente all\'applicazione di disattivare la barra di stato o di aggiungere e rimuovere icone di sistema."</string>

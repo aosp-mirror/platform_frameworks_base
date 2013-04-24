@@ -231,7 +231,7 @@
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Λειτουργίες που μπορεί να ζητήσει η τεχνολογία υποβοήθησης."</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ανάκτηση του περιεχομένου του παραθύρου"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Έλεγχος του περιεχομένου ενός παραθύρου με το οποίο αλληλεπιδράτε."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ενεργοποίηση της λειτουργίας \"Εξερεύνηση με άγγιγμα\""</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ενεργοποίηση της \"Εξερεύνησης με άγγιγμα\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Τα στοιχεία που αγγίζετε θα εκφωνούνται και η εξερεύνηση της οθόνης μπορεί να γίνει με κινήσεις."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ενεργοποίηση της βελτιωμένης προσβασιμότητας ιστού"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Ενδέχεται να εγκατασταθούν σενάρια για τη βελτίωση της πρόσβασης στο περιεχόμενο της εφαρμογής."</string>

@@ -232,9 +232,9 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobivanje vsebine okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverite vsebino okna, ki ga uporabljate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklop raziskovanja z dotikom"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Elementi, ki se jih dotaknete, bodo izrečeni naglas, zaslonu pa lahko raziskujete s potezami."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Elementi, ki se jih dotaknete, bodo izrečeni naglas, zaslon pa lahko raziskujete s potezami."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Vklop izboljšanja dostopnosti spleta za ljudi s posebnimi potrebami"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za boljšo dostopnost vsebine aplikacije se lahko namestijo skripti."</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za boljšo dostopnost vsebine aplikacije je mogoče namestiti skripte."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Opazovanje besedila, ki ga natipkate"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Vključuje osebne podatke, kot so številke kreditnih kartic in gesla."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogočanje ali spreminjanje vrstice stanja"</string>

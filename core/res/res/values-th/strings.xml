@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"เข้าถึงการ์ด SD"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"คุณลักษณะการเข้าถึง"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"คุณลักษณะที่เทคโนโลยีความช่วยเหลือสามารถร้องขอได้"</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"เรียกเนื้อหาหน้าต่าง"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"เปิด \"แตะเพื่อสำรวจ\""</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"รายการที่แตะจะถูกพูดออกเสียง และการสำรวจหน้าจอสามารถทำได้ด้วยท่าทางสัมผัส"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"เปิดการเข้าถึงเว็บที่มีประสิทธิภาพมากขึ้น"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"อาจติดตั้งสคริปต์เพื่อทำให้สามารถเข้าถึงเนื้อหาแอปได้ง่ายขึ้น"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"สังเกตข้อความที่คุณพิมพ์"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"รวมถึงข้อมูลส่วนบุคคล เช่น หมายเลขบัตรเครดิตและรหัสผ่าน"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ปิดการใช้งานหรือแก้ไขแถบสถานะ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"อนุญาตให้แอปพลิเคชันปิดใช้งานแถบสถานะหรือเพิ่มและนำไอคอนระบบออก"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"แถบสถานะ"</string>
@@ -879,7 +871,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"ยืนยันการนำทาง"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"ออกจากหน้านี้"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"อยู่ในหน้านี้"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"คุณแน่ใจหรือไม่ว่าต้องการออกจากหน้านี้"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"คุณแน่ใจไหมว่าต้องการออกจากหน้านี้"</string>
     <string name="save_password_label" msgid="6860261758665825069">"ยืนยัน"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"เคล็ดลับ: แตะสองครั้งเพื่อขยายและย่อ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ป้อนอัตโนมัติ"</string>

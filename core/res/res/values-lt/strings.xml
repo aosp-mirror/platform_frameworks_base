@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Pasiekite SD kortelę."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Pritaikymo neįgaliesiems funkcijos"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcijos, kurių užklausas gali teikti pagalbinė technologija."</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Gauti lango turinį"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tikrinti lango, su kuriuo sąveikaujate, turinį."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Įjungti „Naršyti paliečiant“"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Paliesti elementai bus ištariami garsiai. Be to, ekrane gali būti naršoma naudojant gestus."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Įjungti patobulintą žiniatinklio pasiekiamumą"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Gali būti įdiegti scenarijai, kad būtų lengviau pasiekti programų turinį."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Stebėti jūsų įvedamą tekstą"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Įtraukiami asmeniniai duomenys, pavyzdžiui, kredito kortelių numeriai ir slaptažodžiai."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"išjungti ar keisti būsenos juostą"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Leidžiama programai neleisti būsenos juostos arba pridėti ir pašalinti sistemos piktogramas."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"būsenos juosta"</string>
