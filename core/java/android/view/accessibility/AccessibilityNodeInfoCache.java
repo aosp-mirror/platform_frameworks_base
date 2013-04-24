@@ -83,6 +83,7 @@ public class AccessibilityNodeInfoCache {
                 } break;
                 case AccessibilityEvent.TYPE_VIEW_FOCUSED:
                 case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
                 case AccessibilityEvent.TYPE_VIEW_SELECTED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {

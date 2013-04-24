@@ -443,18 +443,25 @@ public final class UiAutomation {
      */
     public AccessibilityEvent executeAndWaitForEvent(Runnable command,
             AccessibilityEventFilter filter, long timeoutMillis) throws TimeoutException {
+        // Acquire the lock and prepare for receiving events.
         synchronized (mLock) {
             throwIfNotConnectedLocked();
-
             mEventQueue.clear();
             // Prepare to wait for an event.
             mWaitingForEventDelivery = true;
+        }
 
-            // We will ignore events from previous interactions.
-            final long executionStartTimeMillis = SystemClock.uptimeMillis();
+        // Note: We have to release the lock since calling out with this lock held
+        // can bite. We will correctly filter out events from other interactions,
+        // so starting to collect events before running the action is just fine.
 
-            // Execute the command.
-            command.run();
+        // We will ignore events from previous interactions.
+        final long executionStartTimeMillis = SystemClock.uptimeMillis();
+        // Execute the command *without* the lock being held.
+        command.run();
+
+        // Acquire the lock and wait for the event.
+        synchronized (mLock) {
             try {
                 // Wait for the event.
                 final long startTimeMillis = SystemClock.uptimeMillis();
@@ -463,7 +470,7 @@ public final class UiAutomation {
                     while (!mEventQueue.isEmpty()) {
                         AccessibilityEvent event = mEventQueue.remove(0);
                         // Ignore events from previous interactions.
-                        if (event.getEventTime() <= executionStartTimeMillis) {
+                        if (event.getEventTime() < executionStartTimeMillis) {
                             continue;
                         }
                         if (filter.accept(event)) {
