@@ -152,8 +152,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
 
-    static public final String ACTION_HIDEYBARS = "android.intent.action.HIDEYBARS";
-
     /**
      * These are the system UI flags that, when changing, can cause the layout
      * of the screen to change.
@@ -559,12 +557,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int HIDEYBARS_HIDING = 2;
     private int mHideybars;
 
-    BroadcastReceiver mHideybarsReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-           receivedHideybars(intent.getAction());
-        }
-    };
+    private InputChannel mSystemGestureInputChannel;
+    private InputEventReceiver mSystemGestures;
 
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
@@ -918,10 +912,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         context.registerReceiver(mMultiuserReceiver, filter);
 
-        // register for hideybars
-        filter = new IntentFilter();
-        filter.addAction(ACTION_HIDEYBARS);
-        context.registerReceiver(mHideybarsReceiver, filter);
+        // monitor for system gestures
+        mSystemGestureInputChannel = mWindowManagerFuncs.monitorInput("SystemGestures");
+        mSystemGestures = new SystemGestures(mSystemGestureInputChannel,
+                mHandler.getLooper(), context,
+                new SystemGestures.Callbacks() {
+                    @Override
+                    public void onSwipeFromTop() {
+                        showHideybars();
+                    }});
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
@@ -4118,20 +4117,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    private void receivedHideybars(String action) {
+    private void showHideybars() {
         synchronized(mLock) {
-            if (action.equals(ACTION_HIDEYBARS)) {
-                if (mHideybars == HIDEYBARS_SHOWING) {
-                    if (DEBUG) Slog.d(TAG, "Not showing hideybars, already shown");
-                    return;
-                }
-                if (mStatusBar.isDisplayedLw()) {
-                    if (DEBUG) Slog.d(TAG, "Not showing hideybars, status bar already visible");
-                    return;
-                }
-                mHideybars = HIDEYBARS_SHOWING;
-                updateSystemUiVisibilityLw();
+            if (mHideybars == HIDEYBARS_SHOWING) {
+                if (DEBUG) Slog.d(TAG, "Not showing hideybars, already shown");
+                return;
             }
+            if (mStatusBar.isDisplayedLw()) {
+                if (DEBUG) Slog.d(TAG, "Not showing hideybars, status bar already visible");
+                return;
+            }
+            mHideybars = HIDEYBARS_SHOWING;
+            updateSystemUiVisibilityLw();
         }
     }
 
