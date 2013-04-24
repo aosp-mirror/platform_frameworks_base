@@ -5094,22 +5094,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setCurrentUser(final int newUserId) {
         synchronized (mWindowMap) {
+            int oldUserId = mCurrentUserId;
             mCurrentUserId = newUserId;
             mPolicy.setCurrentUserLw(newUserId);
 
             // Hide windows that should not be seen by the new user.
             DisplayContentsIterator iterator = new DisplayContentsIterator();
             while (iterator.hasNext()) {
-                final WindowList windows = iterator.next().getWindowList();
-                for (int i = 0; i < windows.size(); i++) {
-                    final WindowState win = windows.get(i);
-                    if (win.isHiddenFromUserLocked()) {
-                        Slog.w(TAG, "current user violation " + newUserId + " hiding "
-                                + win + ", attrs=" + win.mAttrs.type + ", belonging to "
-                                + win.mOwnerUid);
-                        win.hideLw(false);
-                    }
-                }
+                DisplayContent displayContent = iterator.next();
+                displayContent.switchUserStacks(oldUserId, newUserId);
+                rebuildAppWindowListLocked(displayContent);
             }
             performLayoutAndPlaceSurfacesLocked();
         }

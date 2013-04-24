@@ -18,10 +18,12 @@ package com.android.server.wm;
 
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.graphics.Rect;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputChannel;
@@ -104,6 +106,8 @@ class DisplayContent {
     /** Detect user tapping outside of current focused stack bounds .*/
     StackTapDetector mTapDetector;
 
+    SparseArray<UserStacks> mUserStacks = new SparseArray<UserStacks>();
+
     /**
      * @param display May not be null.
      */
@@ -145,6 +149,22 @@ class DisplayContent {
      */
     ArrayList<Task> getTasks() {
         mTmpTasks.clear();
+        // First do the tasks belonging to other users.
+        final int numUserStacks = mUserStacks.size();
+        for (int i = 0; i < numUserStacks; ++i) {
+            UserStacks userStacks = mUserStacks.valueAt(i);
+            ArrayList<TaskStack> stacks = userStacks.mSavedStackHistory;
+            final int numStacks = stacks.size();
+            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+                TaskStack stack = stacks.get(stackNdx);
+                if (stack != mHomeStack) {
+                    if (WindowManagerService.DEBUG_LAYERS) Slog.i(TAG, "getTasks: mStackHistory=" +
+                            mStackHistory);
+                    mTmpTasks.addAll(stack.getTasks());
+                }
+            }
+        }
+        // Now do the current user's tasks.
         final int numStacks = mStackHistory.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             mTmpTasks.addAll(mStackHistory.get(stackNdx).getTasks());
@@ -292,12 +312,40 @@ class DisplayContent {
                 return bounds;
             }
         }
+        // Not in the visible stacks, try the saved ones.
+        for (int userNdx = mUserStacks.size() - 1; userNdx >= 0; --userNdx) {
+            UserStacks userStacks = mUserStacks.valueAt(userNdx);
+            Rect bounds = userStacks.mSavedStackBox.getStackBounds(stackId);
+            if (bounds != null) {
+                return bounds;
+            }
+        }
         return null;
     }
 
     int stackIdFromPoint(int x, int y) {
         StackBox topBox = mStackBoxes.get(mStackBoxes.size() - 1);
         return topBox.stackIdFromPoint(x, y);
+    }
+
+    void switchUserStacks(int oldUserId, int newUserId) {
+        final WindowList windows = getWindowList();
+        for (int i = 0; i < windows.size(); i++) {
+            final WindowState win = windows.get(i);
+            if (win.isHiddenFromUserLocked()) {
+                if (DEBUG_VISIBILITY) Slog.w(TAG, "user changing " + newUserId + " hiding "
+                        + win + ", attrs=" + win.mAttrs.type + ", belonging to "
+                        + win.mOwnerUid);
+                win.hideLw(false);
+            }
+        }
+        // Clear the old user's non-home StackBox
+        mUserStacks.put(oldUserId, new UserStacks());
+        UserStacks userStacks = mUserStacks.get(newUserId);
+        if (userStacks != null) {
+            userStacks.restore();
+            mUserStacks.delete(newUserId);
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -365,6 +413,49 @@ class DisplayContent {
                   token.dump(pw, "    ");
             }
         }
+        if (mUserStacks.size() > 0) {
+            pw.println();
+            pw.println("  Saved user stacks:");
+            for (int i = 0; i < mUserStacks.size(); ++i) {
+                UserStacks userStacks = mUserStacks.valueAt(i);
+                pw.print("  UserId="); pw.println(Integer.toHexString(mUserStacks.keyAt(i)));
+                pw.print("  StackHistory="); pw.println(userStacks.mSavedStackHistory);
+                pw.print("  StackBox="); userStacks.mSavedStackBox.dump("    ", pw);
+            }
+        }
         pw.println();
+    }
+
+    private final class UserStacks {
+        final ArrayList<TaskStack> mSavedStackHistory;
+        StackBox mSavedStackBox;
+        int mBoxNdx;
+
+        public UserStacks() {
+            mSavedStackHistory = new ArrayList<TaskStack>(mStackHistory);
+            for (int stackNdx = mStackHistory.size() - 1; stackNdx >=0; --stackNdx) {
+                if (mStackHistory.get(stackNdx) != mHomeStack) {
+                    mStackHistory.remove(stackNdx);
+                }
+            }
+            mSavedStackBox = null;
+            mBoxNdx = -1;
+            for (int boxNdx = mStackBoxes.size() - 1; boxNdx >= 0; --boxNdx) {
+                StackBox box = mStackBoxes.get(boxNdx);
+                if (box.mStack != mHomeStack) {
+                    mSavedStackBox = box;
+                    mBoxNdx = boxNdx;
+                    mStackBoxes.remove(boxNdx);
+                    break;
+                }
+            }
+        }
+
+        void restore() {
+            mStackHistory = mSavedStackHistory;
+            if (mBoxNdx >= 0) {
+                mStackBoxes.add(mBoxNdx, mSavedStackBox);
+            }
+        }
     }
 }
