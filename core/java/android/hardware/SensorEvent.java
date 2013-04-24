@@ -334,8 +334,8 @@ public class SensorEvent {
      * </p>
      * 
      * <p>
-     * values[2]: Roll, rotation around y-axis (-90 to 90), with positive values
-     * when the x-axis moves <b>toward</b> the z-axis.
+     * values[2]: Roll, rotation around the x-axis (-90 to 90)
+     * increasing as the device moves clockwise.
      * </p>
      * </ul>
      * 
