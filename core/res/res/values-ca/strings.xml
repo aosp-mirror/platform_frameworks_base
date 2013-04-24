@@ -232,7 +232,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contingut de les finestres"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contingut d\'una finestra amb la qual estàs interaccionant."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar Exploració tàctil"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Els elements que es toquen es diran en veu alta i la pantalla es podrà explorar mitjançant gestos."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Els elements que toquis es diran en veu alta i la pantalla es podrà explorar mitjançant gestos."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar l\'accessibilitat web millorada"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"És possible que s\'instal·lin scripts per fer que el contingut de l\'aplicació sigui més accessible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el text que escrius"</string>

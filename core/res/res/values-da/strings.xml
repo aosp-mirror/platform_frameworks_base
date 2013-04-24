@@ -870,7 +870,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"Javascript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Bekræft navigation"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Forlad denne side"</string>
-    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Forbliv på denne side"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bliv på denne side"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Er du sikker på, at du vil navigere væk fra denne side?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekræft"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip! Dobbeltklik for at zoome ind eller ud."</string>
