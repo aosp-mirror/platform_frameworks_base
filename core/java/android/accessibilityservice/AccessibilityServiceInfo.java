@@ -378,6 +378,23 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * Creates a new instance.
      *
+     * @param isAutomation Whether this is a test automation service.
+     *
+     * @hide
+     */
+    public AccessibilityServiceInfo(boolean isAutomation) {
+        // Automation service can do anything.
+        if (isAutomation) {
+            mCapabilities |= CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
+                    | CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
+                    | CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
+                    | CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS;
+        }
+    }
+
+    /**
+     * Creates a new instance.
+     *
      * @param resolveInfo The service resolve info.
      * @param context Context for accessing resources.
      * @throws XmlPullParserException If a XML parsing error occurs.

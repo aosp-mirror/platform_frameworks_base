@@ -158,7 +158,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     private void registerUiTestAutomationServiceLocked(IAccessibilityServiceClient client) {
         IAccessibilityManager manager = IAccessibilityManager.Stub.asInterface(
                 ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
-        AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+        AccessibilityServiceInfo info = new AccessibilityServiceInfo(true);
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
