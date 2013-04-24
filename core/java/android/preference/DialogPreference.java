@@ -285,6 +285,22 @@ public abstract class DialogPreference extends Preference implements
      * @param state Optional instance state to restore on the dialog
      */
     protected void showDialog(Bundle state) {
+        // Create the dialog
+        final Dialog dialog = mDialog = createDialog();
+        if (state != null) {
+            dialog.onRestoreInstanceState(state);
+        }
+        if (needInputMethod()) {
+            requestInputMethod(dialog);
+        }
+        dialog.setOnDismissListener(this);
+        dialog.show();
+    }
+
+    /**
+     * @hide
+     */
+    protected Dialog createDialog() {
         Context context = getContext();
 
         mWhichButtonClicked = DialogInterface.BUTTON_NEGATIVE;
@@ -307,16 +323,7 @@ public abstract class DialogPreference extends Preference implements
         
         getPreferenceManager().registerOnActivityDestroyListener(this);
         
-        // Create the dialog
-        final Dialog dialog = mDialog = mBuilder.create();
-        if (state != null) {
-            dialog.onRestoreInstanceState(state);
-        }
-        if (needInputMethod()) {
-            requestInputMethod(dialog);
-        }
-        dialog.setOnDismissListener(this);
-        dialog.show();
+        return mBuilder.create();
     }
 
     /**
