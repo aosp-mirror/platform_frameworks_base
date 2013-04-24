@@ -1261,11 +1261,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void onUserStateChangedLocked(UserState userState) {
+        updateLegacyCapabilities(userState);
         updateServicesLocked(userState);
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
+    }
+
+    private void updateLegacyCapabilities(UserState userState) {
+        // Up to JB-MR1 we had a white list with services that can enable touch
+        // exploration. When a service is first started we show a dialog to the
+        // use to get a permission to white list the service.
+        final int installedServiceCount = userState.mInstalledServices.size();
+        for (int i = 0; i < installedServiceCount; i++) {
+            AccessibilityServiceInfo serviceInfo = userState.mInstalledServices.get(i);
+            ResolveInfo resolveInfo = serviceInfo.getResolveInfo();
+            if ((serviceInfo.getCapabilities()
+                        & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION) == 0
+                    && resolveInfo.serviceInfo.applicationInfo.targetSdkVersion
+                        <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                ComponentName componentName = new ComponentName(
+                        resolveInfo.serviceInfo.packageName, resolveInfo.serviceInfo.name);
+                if (userState.mTouchExplorationGrantedServices.contains(componentName)) {
+                    serviceInfo.setCapabilities(serviceInfo.getCapabilities()
+                            | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION);
+                }
+            }
+        }
     }
 
     private void updateServicesLocked(UserState userState) {
@@ -1658,8 +1681,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         Intent mIntent;
 
-        boolean mCanRetrieveScreenContent;
-
         boolean mIsAutomation;
 
         final Rect mTempBounds = new Rect();
@@ -1695,15 +1716,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mAccessibilityServiceInfo = accessibilityServiceInfo;
             mIsAutomation = (sFakeAccessibilityServiceComponentName.equals(componentName));
             if (!mIsAutomation) {
-                mCanRetrieveScreenContent = (accessibilityServiceInfo.getCapabilities()
-                        & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION) != 0;
                 mIntent = new Intent().setComponent(mComponentName);
                 mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                         com.android.internal.R.string.accessibility_binding_label);
                 mIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                         mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
-            } else {
-                mCanRetrieveScreenContent = true;
             }
             setDynamicallyConfigurableProperties(accessibilityServiceInfo);
         }
@@ -2152,7 +2169,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         .loadLabel(mContext.getPackageManager()));
                 pw.append(", feedbackType"
                         + AccessibilityServiceInfo.feedbackTypeToString(mFeedbackType));
-                pw.append(", canRetrieveScreenContent=" + mCanRetrieveScreenContent);
+                pw.append(", capabilities=" + mAccessibilityServiceInfo.getCapabilities());
                 pw.append(", eventTypes="
                         + AccessibilityEvent.eventTypeToString(mEventTypes));
                 pw.append(", notificationTimeout=" + mNotificationTimeout);
@@ -2742,7 +2759,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public boolean canRetrieveWindowContent(Service service) {
-            return service.mCanRetrieveScreenContent;
+            return (service.mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
         }
 
         public void enforceCanRetrieveWindowContent(Service service) throws RemoteException {

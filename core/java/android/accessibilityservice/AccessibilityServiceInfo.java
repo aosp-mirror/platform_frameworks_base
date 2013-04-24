@@ -378,23 +378,6 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * Creates a new instance.
      *
-     * @param isAutomation Whether this is a test automation service.
-     *
-     * @hide
-     */
-    public AccessibilityServiceInfo(boolean isAutomation) {
-        // Automation service can do anything.
-        if (isAutomation) {
-            mCapabilities |= CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
-                    | CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
-                    | CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
-                    | CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS;
-        }
-    }
-
-    /**
-     * Creates a new instance.
-     *
      * @param resolveInfo The service resolve info.
      * @param context Context for accessing resources.
      * @throws XmlPullParserException If a XML parsing error occurs.
@@ -461,8 +444,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 mCapabilities |= CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION;
             }
             if (asAttributes.getBoolean(com.android.internal.R.styleable
-                    .AccessibilityService_canRequestEnhancedWebAccessibility, false)) {
-                mCapabilities |= CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY;
+                        .AccessibilityService_canRequestEnhancedWebAccessibility, false)) {
+                    mCapabilities |= CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY;
             }
             if (asAttributes.getBoolean(com.android.internal.R.styleable
                     .AccessibilityService_canRequestFilterKeyEvents, false)) {
@@ -571,6 +554,23 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public int getCapabilities() {
         return mCapabilities;
+    }
+
+    /**
+     * Sets the bit mask of capabilities this accessibility service has such as
+     * being able to retrieve the active window content, etc.
+     *
+     * @param capabilities The capability bit mask.
+     *
+     * @see #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
+     * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
+     * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
+     * @see #CAPABILITY_FILTER_KEY_EVENTS
+     *
+     * @hide
+     */
+    public void setCapabilities(int capabilities) {
+        mCapabilities = capabilities;
     }
 
     /**
