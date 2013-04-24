@@ -3705,18 +3705,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void tapOutsideStackBounds(DisplayContent displayContent, int x, int y) {
-        synchronized (mWindowMap) {
-            int stackId = displayContent.stackIdFromPoint(x, y);
-            if (stackId >= 0) {
-                try {
-                    mActivityManager.setFocusedStack(stackId);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-    }
-
     @Override
     public void setFocusedApp(IBinder token, boolean moveFocusNow) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
@@ -6932,6 +6920,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int DO_DISPLAY_CHANGED = 29;
 
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
+        public static final int TAP_OUTSIDE_STACK = 31;
 
         @Override
         public void handleMessage(Message msg) {
@@ -7351,6 +7340,18 @@ public class WindowManagerService extends IWindowManager.Stub
                         handleDisplayChangedLocked(msg.arg1);
                     }
                     break;
+
+                case TAP_OUTSIDE_STACK:
+                    synchronized (mWindowMap) {
+                        int stackId =
+                                ((DisplayContent)msg.obj).stackIdFromPoint(msg.arg1, msg.arg2);
+                        if (stackId >= 0) {
+                            try {
+                                mActivityManager.setFocusedStack(stackId);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG, "handleMessage: exit");

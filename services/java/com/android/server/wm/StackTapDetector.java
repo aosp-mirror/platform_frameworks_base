@@ -25,6 +25,8 @@ import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 
+import com.android.server.wm.WindowManagerService.H;
+
 public class StackTapDetector extends InputEventReceiver {
     private static final int TAP_TIMEOUT_MSEC = 300;
     private static final float TAP_MOTION_SLOP_INCHES = 0.125f;
@@ -83,7 +85,8 @@ public class StackTapDetector extends InputEventReceiver {
                                 < TAP_TIMEOUT_MSEC
                                 && (x - mDownX) < mMotionSlop && (y - mDownY) < mMotionSlop
                                 && !mStackBounds.contains(x, y)) {
-                            mService.tapOutsideStackBounds(mDisplayContent, x, y);
+                            mService.mH.obtainMessage(H.TAP_OUTSIDE_STACK, x, y, mDisplayContent)
+                                    .sendToTarget();
                         }
                     }
                     mPointerId = -1;
