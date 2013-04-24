@@ -61,6 +61,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
@@ -160,6 +161,9 @@ public class ActivityStackSupervisor {
      * is being brought in front of us. */
     boolean mUserLeaving = false;
 
+    /** Stacks belonging to users other than mCurrentUser. Indexed by userId. */
+    final SparseArray<UserState> mUserStates = new SparseArray<UserState>();
+
     public ActivityStackSupervisor(ActivityManagerService service, Context context,
             Looper looper) {
         mService = service;
@@ -213,6 +217,9 @@ public class ActivityStackSupervisor {
     }
 
     boolean isFrontStack(ActivityStack stack) {
+        if (stack.mCurrentUser != mCurrentUser) {
+            return false;
+        }
         return !(stack.isHomeStack() ^ getFocusedStack().isHomeStack());
     }
 
@@ -319,6 +326,9 @@ public class ActivityStackSupervisor {
         final String processName = app.processName;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
+            if (!isFrontStack(stack)) {
+                continue;
+            }
             ActivityRecord hr = stack.topRunningActivityLocked(null);
             if (hr != null) {
                 if (hr.app == null && app.uid == hr.info.applicationInfo.uid
@@ -412,7 +422,7 @@ public class ActivityStackSupervisor {
     }
 
     void reportActivityVisibleLocked(ActivityRecord r) {
-        for (int i=mWaitingActivityVisible.size()-1; i>=0; i--) {
+        for (int i = mWaitingActivityVisible.size()-1; i >= 0; i--) {
             WaitResult w = mWaitingActivityVisible.get(i);
             w.timeout = false;
             if (r != null) {
@@ -449,6 +459,9 @@ public class ActivityStackSupervisor {
         }
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
+            if (stack.mCurrentUser != mCurrentUser) {
+                continue;
+            }
             if (stack != mFocusedStack && isFrontStack(stack)) {
                 r = stack.topRunningActivityLocked(null);
                 if (r != null) {
@@ -1145,8 +1158,14 @@ public class ActivityStackSupervisor {
 
     ActivityStack getCorrectStack(ActivityRecord r) {
         if (!r.isHomeActivity) {
-            if (mStacks.size() == 1) {
-                // Time to create the first app stack.
+            int stackNdx;
+            for (stackNdx = mStacks.size() - 1; stackNdx > 0; --stackNdx) {
+                if (mStacks.get(stackNdx).mCurrentUser == mCurrentUser) {
+                    break;
+                }
+            }
+            if (stackNdx == 0) {
+                // Time to create the first app stack for this user.
                 int stackId = mService.createStack(-1, HOME_STACK_ID,
                         StackBox.TASK_STACK_GOES_OVER, 1.0f);
                 mFocusedStack = getStack(stackId);
@@ -1776,7 +1795,7 @@ public class ActivityStackSupervisor {
         return didSomething;
     }
 
-    void resumeTopActivityLocked() {
+    void resumeTopActivitiesLocked() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             if (isFrontStack(stack)) {
@@ -1816,18 +1835,16 @@ public class ActivityStackSupervisor {
     }
 
     int createStack() {
-        synchronized (this) {
-            while (true) {
-                if (++mLastStackId <= HOME_STACK_ID) {
-                    mLastStackId = HOME_STACK_ID + 1;
-                }
-                if (getStack(mLastStackId) == null) {
-                    break;
-                }
+        while (true) {
+            if (++mLastStackId <= HOME_STACK_ID) {
+                mLastStackId = HOME_STACK_ID + 1;
             }
-            mStacks.add(new ActivityStack(mService, mContext, mLooper, mLastStackId));
-            return mLastStackId;
+            if (getStack(mLastStackId) == null) {
+                break;
+            }
         }
+        mStacks.add(new ActivityStack(mService, mContext, mLooper, mLastStackId));
+        return mLastStackId;
     }
 
     void moveTaskToStack(int taskId, int stackId, boolean toTop) {
@@ -1938,16 +1955,22 @@ public class ActivityStackSupervisor {
     }
 
     boolean switchUserLocked(int userId, UserStartedState uss) {
+        mUserStates.put(mCurrentUser, new UserState());
         mCurrentUser = userId;
-        mStartingUsers.add(uss);
-        boolean haveActivities = false;
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (isFrontStack(stack)) {
-                haveActivities |= stack.switchUserLocked(userId, uss);
-            }
+        UserState userState = mUserStates.get(userId);
+        if (userState != null) {
+            userState.restore();
+            mUserStates.delete(userId);
+        } else {
+            mFocusedStack = null;
+            mStackState = STACK_STATE_HOME_IN_FRONT;
         }
+
+        mStartingUsers.add(uss);
+        boolean haveActivities = mHomeStack.switchUserLocked(userId, uss);
+
+        resumeTopActivitiesLocked();
+
         return haveActivities;
     }
 
@@ -2201,6 +2224,23 @@ public class ActivityStackSupervisor {
                     activityIdleInternal((ActivityRecord)msg.obj);
                 } break;
             }
+        }
+    }
+
+    private final class UserState {
+        final ActivityStack mSavedFocusedStack;
+        final int mSavedStackState;
+
+        public UserState() {
+            ActivityStackSupervisor supervisor = ActivityStackSupervisor.this;
+            mSavedFocusedStack = supervisor.mFocusedStack;
+            mSavedStackState = supervisor.mStackState;
+        }
+
+        void restore() {
+            ActivityStackSupervisor supervisor = ActivityStackSupervisor.this;
+            supervisor.mFocusedStack = mSavedFocusedStack;
+            supervisor.mStackState = mSavedStackState;
         }
     }
 }

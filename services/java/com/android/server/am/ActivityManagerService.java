@@ -3612,7 +3612,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     "for process:"+packageName);
                 }
             }
-            
+
             try {
                 // Clear application user data
                 pm.clearApplicationUserData(packageName, observer, userId);
@@ -3681,7 +3681,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        
+
         long callingId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
@@ -3702,7 +3702,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 }
-                
+
                 int N = procs.size();
                 for (int i=0; i<N; i++) {
                     removeProcessLocked(procs.get(i), false, true, "kill all background");
@@ -3971,7 +3971,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 procs.add(app);
             }
         }
-        
+
         int N = procs.size();
         for (int i=0; i<N; i++) {
             removeProcessLocked(procs.get(i), callerWillRestart, allowRestart, reason);
@@ -4133,7 +4133,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             if (mBooted) {
-                mStackSupervisor.resumeTopActivityLocked();
+                mStackSupervisor.resumeTopActivitiesLocked();
                 mStackSupervisor.scheduleIdleLocked();
             }
         }
@@ -4983,7 +4983,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             updateOomAdjLocked();
         }
     }
-    
+
+    @Override
     public void setProcessForeground(IBinder token, int pid, boolean isForeground) {
         enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
                 "setProcessForeground()");
@@ -5007,6 +5008,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (isForeground && token != null) {
                     ForegroundToken newToken = new ForegroundToken() {
+                        @Override
                         public void binderDied() {
                             foregroundTokenDied(this);
                         }
@@ -5041,6 +5043,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mActivityManagerService = activityManagerService;
         }
 
+        @Override
         public boolean checkPermission(String permission, int pid, int uid) {
             return mActivityManagerService.checkPermission(permission, pid,
                     uid) == PackageManager.PERMISSION_GRANTED;
@@ -5048,12 +5051,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     class IntentFirewallInterface implements IntentFirewall.AMSInterface {
+        @Override
         public int checkComponentPermission(String permission, int pid, int uid,
                 int owningUid, boolean exported) {
             return ActivityManagerService.this.checkComponentPermission(permission, pid, uid,
                     owningUid, exported);
         }
 
+        @Override
         public Object getAMSLock() {
             return ActivityManagerService.this;
         }
@@ -8281,7 +8286,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            mStackSupervisor.resumeTopActivityLocked();
+            mStackSupervisor.resumeTopActivitiesLocked();
             sendUserSwitchBroadcastsLocked(-1, mCurrentUserId);
         }
     }
@@ -8396,10 +8401,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
                 removeProcessLocked(app, false, false, "crash");
-                mStackSupervisor.resumeTopActivityLocked();
+                mStackSupervisor.resumeTopActivitiesLocked();
                 return false;
             }
-            mStackSupervisor.resumeTopActivityLocked();
+            mStackSupervisor.resumeTopActivitiesLocked();
         } else {
             mStackSupervisor.finishTopRunningActivityLocked(app);
         }

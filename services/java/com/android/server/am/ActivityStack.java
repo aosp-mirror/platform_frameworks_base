@@ -234,7 +234,7 @@ final class ActivityStack {
     int mThumbnailWidth = -1;
     int mThumbnailHeight = -1;
 
-    private int mCurrentUser;
+    int mCurrentUser;
 
     final int mStackId;
 
@@ -576,7 +576,8 @@ final class ActivityStack {
     }
 
     /*
-     * Move the activities around in the stack to bring a user to the foreground.
+     * Move the activities around in the stack to bring a user to the foreground. This only
+     * matters on the home stack. All other stacks are single user.
      * @return whether there are any activities for the specified user.
      */
     final boolean switchUserLocked(int userId, UserStartedState uss) {
@@ -602,9 +603,6 @@ final class ActivityStack {
             }
         }
 
-        // task is now the original topmost TaskRecord. Transition from the old top to the new top.
-        ActivityRecord top = task != null ? task.getTopActivity() : null;
-        resumeTopActivityLocked(top);
         return haveActivities;
     }
 
@@ -1718,7 +1716,7 @@ final class ActivityStack {
         }
 
         if (doResume) {
-            mStackSupervisor.resumeTopActivityLocked();
+            mStackSupervisor.resumeTopActivitiesLocked();
         }
     }
 
