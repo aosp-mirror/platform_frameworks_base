@@ -1302,7 +1302,12 @@ final class ActivityStack {
 
         // We need to start pausing the current activity so the top one
         // can be resumed...
-        if (mStackSupervisor.pauseBackStacks(userLeaving)) {
+        boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving);
+        if (mResumedActivity != null) {
+            pausing = true;
+            startPausingLocked(userLeaving, false);
+        }
+        if (pausing) {
             if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
             // at the top of the LRU list, since we know we will be needing it
