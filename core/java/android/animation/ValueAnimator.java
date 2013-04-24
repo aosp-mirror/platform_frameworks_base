@@ -869,7 +869,7 @@ public class ValueAnimator extends Animator {
      *
      * <p>If this ValueAnimator has only one set of values being animated between, this evaluator
      * will be used for that set. If there are several sets of values being animated, which is
-     * the case if PropertyValuesHOlder objects were set on the ValueAnimator, then the evaluator
+     * the case if PropertyValuesHolder objects were set on the ValueAnimator, then the evaluator
      * is assigned just to the first PropertyValuesHolder object.</p>
      *
      * @param value the evaluator to be used this animation
@@ -1024,7 +1024,7 @@ public class ValueAnimator extends Animator {
         mStarted = false;
         mStartListenersCalled = false;
         mPlayingBackwards = false;
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, "animator",
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                 System.identityHashCode(this));
     }
 
@@ -1033,7 +1033,7 @@ public class ValueAnimator extends Animator {
      * called on the UI thread.
      */
     private void startAnimation(AnimationHandler handler) {
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, "animator",
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                 System.identityHashCode(this));
         initAnimation();
         handler.mAnimations.add(this);
@@ -1043,6 +1043,14 @@ public class ValueAnimator extends Animator {
             notifyStartListeners();
         }
     }
+
+    /**
+     * Returns the name of this animator for debugging purposes.
+     */
+    String getNameForTrace() {
+        return "animator";
+    }
+
 
     /**
      * Internal function called to process an animation frame on an animation that is currently
