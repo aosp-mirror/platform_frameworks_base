@@ -16,7 +16,7 @@ page.title=Tablet App Quality Checklist
 <li><a href="#hardware-requirements">9. Declare dependencies properly</a></li>
 <li><a href="#support-screens">10. Declare tablet screens support</a></li>
 <li><a href="#google-play">11. Showcase your tablet UI</a></li>
-<li><a href="#google-play-bp">12. Follow publishing best practices</a></li>
+<li><a href="#google-play-best-practices">12. Follow publishing best practices</a></li>
 
 </ol>
 <h2>Testing</h2>
@@ -68,8 +68,10 @@ href="{@docRoot}distribute/googleplay/quality/core.html">Core App Quality Guidel
   <li><a href="#google-play">Screenshots are uploaded to Google Play</a></li>
 </ul>
 
-<p>The sections that follow provide more information about these and other
-quality guidelines for tablet apps.</p>
+<p>If your app is already uploaded to the Google Play Developer Console, you
+  can see how it is doing against these checks  
+  by visiting the <a href="#google-play-optimization-tips">Optimization
+  Tips page</a>.</p>
 
 
 <h2 id="optimize-layouts">2. Optimize your layouts for larger screens</h2>
@@ -312,7 +314,15 @@ resource qualifiers</a> to ensure that the proper set of alternative resources
 gets loaded.</li>
 </ul>
 
-<p>At a minimum, your app should supply custom drawables and assets for common tablet screen densities, tagged with the qualifiers <code>hdpi</code>, <code>xhdpi</code>, or <code>xxhdpi</code>.</p>
+<p style="margin-bottom:.5em;">At a minimum, your app should supply sets of
+  custom drawables and assets for common tablet screen densities,
+  tagged with these qualifiers as appropriate:</p>
+
+<ul>
+  <li><code>hdpi</code>, OR</li>
+  <li><code>xhdpi</code>, OR</li>
+  <li><code>xxhdpi</code></li>
+</ul>
 
 <div class="rel-resources">
   <h3>
@@ -482,62 +492,103 @@ to a replacement feature (also see the section below on hardware features).</li>
 <h2 id="android-versions">8. Target Android versions properly</h2>
 
 <p>To ensure the broadest possible distribution to tablets, make sure that your
-app is targeting the Android versions that support tablets. You can declare
-the targeted range of Android versions in the
-<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
-element in the app manifest.</p>
+app properly targets the Android versions that support tablets. Initial support for
+tablets was added in <a href="{@docRoot}about/versions/android-3.0">Android 3.0</a> (API level 11). Unified UI
+framework support for tablets, phones, and other devices was introduced in <a href="{@docRoot}about/versions/android-4.0">Android 4.0</a> (API level 14) and is supported in later versions.
 
-<p>At a minimum, your app's
-<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
-should declare support for Android versions as follows:</p>
+<p>You can set the app's
+range of targeted Android versions in the manifest file, in the
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> element. In most cases, you can target Android versions properly by setting the element's <code>targetSdkVersion</code> attribute to the highest API level available.</p>
 
-  <ul>
-  <li>If a <code>targetSdkVersion</code> attribute is declared, it should have a value of 11 or higher, OR</li>
-  <li>If a <code>minSdkVersion</code> attribute is declared, it should have a value of 11 or higher.</li>
-  <li>Also, if a <code>maxSdkVersion</code> attribute is declared, it must have a value of 12 or higher. Note that, in most cases, the use of <code>maxSdkVersion</code> is <em>not recommended</em>.</li>
+<p style="margin-bottom:.5em;">At a minimum, check the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+  element to make sure that:</p>
+
+      <ol style="list-style-type:lower-alpha;margin-top:0em;">
+        <li><code>targetSdkVersion</code> is declared with value 11 or higher (14 or higher is recommended), OR</li>
+        <li><code>minSdkVersion</code> is declared with value 11 or higher.</li>
+        <li>If a <code>maxSdkVersion</code> attribute is declared, it must have a value of 11 or higher. Note that, in general, the use of <code>maxSdkVersion</code> is <em>not recommended</em>.</li>
+</ol>
+
+<div class="rel-resources">
+<h3>
+  Related resources
+</h3>
+
+<ul>
+  <li>
+    <a href=
+    "{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API
+    Levels</a>&mdash;Introduces API levels and how they relate to compatibility.
+    A reference of available API levels is included.
+  </li>
+  <li>
+    <a href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different Platform Versions</a>&mdash;Training class showing how to declare support for
+    minimum and target API levels in your app. 
+  </li>
 </ul>
+</div>
 
 <h2 id="hardware-requirements">9. Declare hardware feature dependencies properly</h2>
 
-<p>Handsets and tablets typically offer slightly different hardware support for
-sensors, camera, telephony, and other features. For example, many tablets are
-available in a "Wi-Fi" configuration that does not include telephony support.</p>
+<p>
+  Handsets and tablets typically offer slightly different hardware support for
+  sensors, camera, telephony, and other features. For example, many tablets are
+  available in a "Wi-Fi" configuration that does not include telephony support.
+</p>
 
-<p>To ensure that you can deliver a single APK broadly across the
-your full customer base, make sure that your app does not have built-in
-requirements for hardware features that aren't commonly available on tablets.
+<p>
+  So that you can distribute a single APK broadly across your full customer
+  base of phones and tablets, make sure that your app doesn't declare
+  requirements for hardware features that aren't commonly available on tablets.
+  Instead, properly declare the hardware features as <em>not required</em> in the app
+  manifest, as described below.
 </p>
 
 <ul>
-<li>Your app's manifest should not include <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
-elements for hardware features or capabilities that might not be
-available on tablets, except when they are declared with the
-<code>android:required=”false”</code> attribute. For example, your app should
-not <em>require</em> features such as:
+<li>In your app manifest, locate any <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+elements. In particular, look for hardware features that might not be
+available on some tablets, such as:
+
 <ul>
 <li><code>android.hardware.telephony</code></li>
 <li><code>android.hardware.camera</code> (refers to back camera), or</li>
 <li><code>android.hardware.camera.front</code></li>
-</ul>
-</li>
-<li>Similarly, your app manifest should not include any <a
-href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> elements that <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">imply
-feature requirements</a> that might not be appropriate for tablets, except when
-accompanied by a corresponding <code>&lt;uses-feature&gt;</code> element
-declared with the <code>android:required=”false”</code> attribute.
-<p>Here's an example of a dependency that's properly declared as "not required", so that 
-it does not limit distribution to devices that do not support the dependency:</p>
-<p><code>&lt;uses-feature android:name="android.hardware.telephony"
-android:required="false" /&gt;</code></p></li>
+</ul></li>
+
+<li>Declare the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+elements as <em>not required</em> by including the <code>android:required=”false”</code>
+attribute.
+
+<p>
+  For example, here's the proper way to declare a dependency on
+  <code>android.hardware.telephony</code>, such that you can still
+  distribute the app broadly, even to devices that don't offer telephony:
+</p>
+
+<pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;</pre></li>
+
+<li>Similarly, check the manifest for <a href="/guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> elements that 
+<a href="/guide/topics/manifest/uses-feature-element.html#permissions">imply hardware
+feature requirements</a> that not be appropriate for tablets. If you find such
+permissions, make sure to explicitly declare a corresponding
+<code>&lt;uses-feature&gt;</code> element for the features and includes the
+<code>android:required=”false”</code> attribute.</li>
 </ul>
 
-<p>In all cases, the app must function normally when the hardware features it
-uses are not available and should offer "graceful degradation" and alternative
-functionality where appropriate. For example, if GPS is not supported on the device,
-your app could let the user set their location manually. The app should do
-run-time checking for the hardware capability that it needs and handle as needed.</p>
+
+<p>
+  After declaring hardware features as <em>not required</em>, make sure to test
+  your app on a variety of devices. The app should function normally when the
+  hardware features it uses are not available, and it should offer "graceful
+  degradation" and alternative functionality where appropriate.
+</p>
+
+<p>
+  For example, if an app normally uses GPS to set the location but GPS is not
+  supported on the device, the app could let the user set the location manually
+  instead. The app can check for device hardware capabilities at runtime and handle
+  as needed.
+</p>
 
 <div class="rel-resources">
 <h3>
@@ -570,9 +621,7 @@ run-time checking for the hardware capability that it needs and handle as needed
 <h2 id="support-screens">10. Declare support for tablet screens</h2>
 
 <p>To ensure that you can distribute your app to a broad range of tablets, your app should
-declare support for tablet screen sizes in the
-<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
-element in the app manifest, as follows:</p>
+declare support for tablet screen sizes in its manifest file, as follows:</p>
 
 <ul>
   <li>A
@@ -617,14 +666,14 @@ element in your app.</p>
   ways to promote your tablet app to users on Google Play.
 </p>
 
-<h5>
+<h4>
   Upload screenshots of your tablet UI
-</h5>
+</h4>
 
 <p>
   Tablet users want to know what your app is like on a tablet device, not on a
   phone. If you developed a tablet app, make sure to upload screenshots
-  of your tablet UI to the Developer Console. Here are some guidelines:
+  of your tablet UI to the Google Play Developer Console. Here are some guidelines:
   </p>
 
 <ul style="margin-top:0;">
@@ -652,9 +701,9 @@ element in your app.</p>
   </li>
 </ul>
 
-<h5>
+<h4>
   Update your app description and release notes
-</h5>
+</h4>
 
 <ul>
   <li>In your app description, make sure to highlight that your app offers
@@ -667,9 +716,9 @@ element in your app.</p>
   </li>
 </ul>
 
-<h5>
+<h4>
   Update your promotional video
-</h5>
+</h4>
 
 <p>
   Many users view an app's promotional video to get an idea of what the app is
@@ -698,9 +747,9 @@ element in your app.</p>
   </li>
 </ul>
 
-<h5>
+<h4>
   Feature your tablet UI in your promotional campaigns
-</h5>
+</h4>
 
 <p>
   Make sure to let tablet users know about your tablet UI in your promotional
@@ -759,15 +808,59 @@ element in your app.</p>
   </ul>
 </div>
 
-<h2 id="google-play-bp">12. Follow best practices for publishing in Google Play</h2>
+<h2 id="google-play-best-practices">12. Follow best practices for publishing in Google Play</h2>
 
-Here are some best practices to consider when publishing a tablet app on Google Play.</p>
+<p>Here are some best practices for delivering a successful tablet app on Google Play.</p>
 
-<h5>Check the app's filtering</h5>
+<h4 id="google-play-optimization-tips">Check out your app's Optimization Tips</h4>
+
+<p>The Google Play Developer Console now offers an Optimization Tips page that
+lets you quickly check how your app is doing against basic guidelines for tablet app
+distribution and quality. To visit the page, sign into the Developer Console,
+load the app from All Applications, and click Optimization Tips in
+the left navigation.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2 style="line-height:1em;">How to Send Feedback</h2>
+
+<p>Please use the link below to send
+feedback or request a manual review of your Optimization Tips.</p>
+
+<p>Make sure to read the relevant sections of the Tablet App Quality
+Guidelines prior to sending feedback.</p>
+
+<p><strong><a href="https://support.google.com/googleplay/android-developer/contact/tabletf"
+target="_googleplay" style="white-space:nowrap">Tablet Optimization
+Tips Feedback Form &raquo;</a></strong></p>
+</div>
+</div>
+
+<p>The Developer Console creates your app's Optimization Tips page
+by running a series of checks to verify basic quality
+criteria. If it finds any issues, it alerts you to them as "To Do"
+items in the Optimization Tips page.</p>
+
+<p>If you've developed a tablet experience for your app, make sure
+to visit the Optimization Tips page to see how your app is doing
+against the basic checks.  If there are any issues listed, we
+recommend addressing them in your app and uploading a new binary for
+distribution, if needed.</p>
+
+<p>If the Optimization Tips page lists "To Do" issues that you feel don't
+apply to your app or affect its quality on tablets, please notify us
+using the <a href="https://support.google.com/googleplay/android-developer/contact/tabletf"
+target="_googleplay" style="white-space:nowrap">Tablet Optimization
+Tips Feedback Form</a>. We
+will review your app and update your Optimization Tips page as
+appropriate.</p>
+
+
+<h4>Confirm the app's filtering</h4>
 
 <p>After you've uploaded the app to the <a href="https://play.google.com/apps/publish/">Developer Console</a>, check the APK's Supported Devices list to make sure that the app is not filtered from tablet devices that you want to target.</p>
 
-<h5>Distribute as a single APK</h5>
+<h4>Distribute as a single APK</h4>
 
 <p>
   It's recommended that you publish your app as a single APK for all screen
