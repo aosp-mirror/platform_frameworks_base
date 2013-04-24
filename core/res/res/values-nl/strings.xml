@@ -234,7 +234,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Verkennen via aanraking inschakelen"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Aangeraakte items worden hardop benoemd en het scherm kan worden verkend door middel van aanraking."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbeterde internettoegankelijkheid inschakelen"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Er kunnen scripts worden geïnstalleerd om app-content toegankelijker te maken."</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Er kunnen scripts worden geïnstalleerd om app-inhoud toegankelijker te maken."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tekst observeren die u typt"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"statusbalk uitschakelen of wijzigen"</string>
