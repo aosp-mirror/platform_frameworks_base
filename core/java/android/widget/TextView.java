@@ -8065,7 +8065,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             info.setEditable(true);
         }
 
-        if (TextUtils.isEmpty(getContentDescription()) && !TextUtils.isEmpty(mText)) {
+        if (!TextUtils.isEmpty(mText)) {
             info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
             info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
             info.setMovementGranularities(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
@@ -8074,6 +8074,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
         }
+
         if (isFocused()) {
             if (canSelectText()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
@@ -8678,13 +8679,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public CharSequence getIterableTextForAccessibility() {
-        if (!TextUtils.isEmpty(mText)) {
-            if (!(mText instanceof Spannable)) {
-                setText(mText, BufferType.SPANNABLE);
-            }
-            return mText;
+        if (!(mText instanceof Spannable)) {
+            setText(mText, BufferType.SPANNABLE);
         }
-        return super.getIterableTextForAccessibility();
+        return mText;
     }
 
     /**
@@ -8720,13 +8718,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public int getAccessibilitySelectionStart() {
-        if (TextUtils.isEmpty(getContentDescription())) {
-            final int selectionStart = getSelectionStart();
-            if (selectionStart >= 0) {
-                return selectionStart;
-            }
-        }
-        return ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
+        return getSelectionStart();
     }
 
     /**
@@ -8741,13 +8733,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public int getAccessibilitySelectionEnd() {
-        if (TextUtils.isEmpty(getContentDescription())) {
-            final int selectionEnd = getSelectionEnd();
-            if (selectionEnd >= 0) {
-                return selectionEnd;
-            }
-        }
-        return ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
+        return getSelectionEnd();
     }
 
     /**
