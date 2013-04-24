@@ -146,9 +146,13 @@ public interface ViewParent {
     public View focusSearch(View v, int direction);
 
     /**
-     * Change the z order of the child so it's on top of all other children
+     * Change the z order of the child so it's on top of all other children.
+     * This ordering change may affect layout, if this container
+     * uses an order-dependent layout scheme (e.g., LinearLayout). This
+     * method should be followed by calls to {@link #requestLayout()} and
+     * {@link View#invalidate()} on this parent.
      * 
-     * @param child
+     * @param child The child to bring to the top of the z order
      */
     public void bringChildToFront(View child);
 
