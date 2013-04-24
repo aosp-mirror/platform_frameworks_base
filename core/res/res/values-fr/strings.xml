@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accéder à la carte SD"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Fonctionnalités d\'accessibilité"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Fonctionnalités pouvant être requises dans le cadre des technologies d\'assistance"</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Récupérer le contenu d\'une fenêtre"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecter le contenu d\'une fenêtre avec laquelle vous interagissez."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activer la fonctionnalité Explorer au toucher"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Les éléments sélectionnés sont énoncés à voix haute. Vous pouvez explorer l\'écran à l\'aide de gestes."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activer l\'accessibilité Web améliorée"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Vous pouvez installer des scripts pour rendre le contenu des applications plus accessible."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observer le texte que vous saisissez"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclut des données personnelles telles que les numéros de cartes de paiement et les mots de passe."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barre d\'état"</string>

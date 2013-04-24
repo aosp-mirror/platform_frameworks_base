@@ -229,22 +229,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"접근성 기능"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"장애인 보조 기술이 요청할 수 있는 기능입니다."</string>
-    <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestTouchExploration (3108723364676667320) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestTouchExploration (5800552516779249356) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestEnhancedWebAccessibility (1739881766522594073) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestEnhancedWebAccessibility (7881063961507511765) -->
-    <skip />
-    <!-- no translation found for capability_title_canRequestFilterKeyEvents (2103440391902412174) -->
-    <skip />
-    <!-- no translation found for capability_desc_canRequestFilterKeyEvents (7463135292204152818) -->
-    <skip />
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 검색"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"터치하여 탐색 사용"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"항목을 터치하면 소리 내어 알려주며 제스처를 사용하여 화면을 탐색할 수 있습니다."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"향상된 웹 접근성 기능 사용"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"스크립트를 설치하여 앱 콘텐츠에 더 간편하게 액세스할 수 있습니다."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"입력하는 텍스트 살펴보기"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"신용카드 번호와 비밀번호 등의 개인 데이터를 포함합니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"상태 표시줄"</string>
