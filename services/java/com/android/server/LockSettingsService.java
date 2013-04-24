@@ -452,7 +452,4 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
         Secure.LOCK_SCREEN_OWNER_INFO
     };
-
-    // These are protected with a read permission
-    private static final String[] READ_PROFILE_PROTECTED_SETTINGS = MIGRATE_SETTINGS_PER_USER;
 }
