@@ -4106,7 +4106,7 @@
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
     <!-- Message informing user that app is not permitted to access accounts. [CHAR LIMIT=none] -->
-    <string name="app_no_restricted_accounts">This application does not support accounts for limited users</string>
+    <string name="app_no_restricted_accounts">This application does not support accounts for restricted profiles</string>
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
