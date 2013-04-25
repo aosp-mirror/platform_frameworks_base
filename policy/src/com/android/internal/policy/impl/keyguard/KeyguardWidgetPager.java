@@ -169,6 +169,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             KeyguardWidgetFrame newWidgetPage = getWidgetPageAt(newPageIndex);
             if (newWidgetPage != null) {
                 newWidgetPage.onActive(true);
+                newWidgetPage.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                 newWidgetPage.requestAccessibilityFocus();
             }
             if (mParent != null && AccessibilityManager.getInstance(mContext).isEnabled()) {
