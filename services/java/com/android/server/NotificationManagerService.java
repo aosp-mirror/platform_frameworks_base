@@ -49,7 +49,6 @@ import android.media.IAudioService;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -285,7 +284,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         public void record(StatusBarNotification nr) {
             // Nuke heavy parts of notification before storing in archive
-            nr.notification.lightenPayload();
+            nr.getNotification().lightenPayload();
 
             if (mBuffer.size() == BUFFER_SIZE) {
                 mBuffer.removeFirst();
@@ -312,7 +311,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 private StatusBarNotification findNext() {
                     while (iter.hasNext()) {
                         StatusBarNotification nr = iter.next();
-                        if ((pkg == null || nr.pkg == pkg)
+                        if ((pkg == null || nr.getPkg() == pkg)
                                 && (userId == UserHandle.USER_ALL || nr.getUserId() == userId)) {
                             return nr;
                         }
@@ -786,7 +785,7 @@ public class NotificationManagerService extends INotificationManager.Stub
      *
      * @param token The binder for the listener, to check that the caller is allowed
      */
-    public void clearAllNotificationsFromListener(INotificationListener token) {
+    public void cancelAllNotificationsFromListener(INotificationListener token) {
         NotificationListenerInfo info = checkListenerToken(token);
         long identity = Binder.clearCallingIdentity();
         try {
@@ -803,7 +802,7 @@ public class NotificationManagerService extends INotificationManager.Stub
      *
      * @param token The binder for the listener, to check that the caller is allowed
      */
-    public void clearNotificationFromListener(INotificationListener token, String pkg, String tag, int id) {
+    public void cancelNotificationFromListener(INotificationListener token, String pkg, String tag, int id) {
         NotificationListenerInfo info = checkListenerToken(token);
         long identity = Binder.clearCallingIdentity();
         try {
@@ -852,17 +851,17 @@ public class NotificationManagerService extends INotificationManager.Stub
             this.sbn = sbn;
         }
 
-        public Notification getNotification() { return sbn.notification; }
-        public int getFlags() { return sbn.notification.flags; }
+        public Notification getNotification() { return sbn.getNotification(); }
+        public int getFlags() { return sbn.getNotification().flags; }
         public int getUserId() { return sbn.getUserId(); }
 
         void dump(PrintWriter pw, String prefix, Context baseContext) {
-            final Notification notification = sbn.notification;
+            final Notification notification = sbn.getNotification();
             pw.println(prefix + this);
-            pw.println(prefix + "  uid=" + sbn.uid + " userId=" + sbn.getUserId());
+            pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
             pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
-                    + " / " + idDebugString(baseContext, sbn.pkg, notification.icon));
-            pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.score);
+                    + " / " + idDebugString(baseContext, sbn.getPkg(), notification.icon));
+            pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
             pw.println(prefix + "  contentIntent=" + notification.contentIntent);
             pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
             pw.println(prefix + "  tickerText=" + notification.tickerText);
@@ -921,8 +920,8 @@ public class NotificationManagerService extends INotificationManager.Stub
             return String.format(
                     "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s score=%d: %s)",
                     System.identityHashCode(this),
-                    this.sbn.pkg, this.sbn.user, this.sbn.id, this.sbn.tag,
-                    this.sbn.score, this.sbn.notification);
+                    this.sbn.getPkg(), this.sbn.getUser(), this.sbn.getId(), this.sbn.getTag(),
+                    this.sbn.getScore(), this.sbn.getNotification());
         }
     }
 
@@ -1541,7 +1540,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 final int N = mNotificationList.size();
                 for (int i=0; i<N; i++) {
                     final NotificationRecord r = mNotificationList.get(i);
-                    if (r.sbn.pkg.equals(pkg) && r.sbn.getUserId() == userId) {
+                    if (r.sbn.getPkg().equals(pkg) && r.sbn.getUserId() == userId) {
                         count++;
                         if (count >= MAX_PACKAGE_NOTIFICATIONS) {
                             Slog.e(TAG, "Package has already posted " + count
@@ -1658,7 +1657,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                     long identity = Binder.clearCallingIdentity();
                     try {
                         r.statusBarKey = mStatusBar.addNotification(n);
-                        if ((n.notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0
+                        if ((n.getNotification().flags & Notification.FLAG_SHOW_LIGHTS) != 0
                                 && canInterrupt) {
                             mAttentionLight.pulse();
                         }
@@ -1774,7 +1773,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                         // does not have the VIBRATE permission.
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            mVibrator.vibrate(r.sbn.uid, r.sbn.basePkg,
+                            mVibrator.vibrate(r.sbn.getUid(), r.sbn.getBasePkg(),
                                 useDefaultVibrate ? mDefaultVibrationPattern
                                     : mFallbackVibrationPattern,
                                 ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
@@ -1783,7 +1782,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                         }
                     } else if (notification.vibrate.length > 1) {
                         // If you want your own vibration pattern, you need the VIBRATE permission
-                        mVibrator.vibrate(r.sbn.uid, r.sbn.basePkg, notification.vibrate,
+                        mVibrator.vibrate(r.sbn.getUid(), r.sbn.getBasePkg(), notification.vibrate,
                             ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
                     }
                 }
@@ -1840,7 +1839,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 } catch (PendingIntent.CanceledException ex) {
                     // do nothing - there's no relevant way to recover, and
                     //     no reason to let this propagate
-                    Slog.w(TAG, "canceled PendingIntent for " + r.sbn.pkg, ex);
+                    Slog.w(TAG, "canceled PendingIntent for " + r.sbn.getPkg(), ex);
                 }
             }
         }
@@ -1965,7 +1964,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 if ((r.getFlags() & mustNotHaveFlags) != 0) {
                     continue;
                 }
-                if (pkg != null && !r.sbn.pkg.equals(pkg)) {
+                if (pkg != null && !r.sbn.getPkg().equals(pkg)) {
                     continue;
                 }
                 canceledSomething = true;
@@ -2065,7 +2064,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         if (mLedNotification == null || mInCall || mScreenOn) {
             mNotificationLight.turnOff();
         } else {
-            final Notification ledno = mLedNotification.sbn.notification;
+            final Notification ledno = mLedNotification.sbn.getNotification();
             int ledARGB = ledno.ledARGB;
             int ledOnMS = ledno.ledOnMS;
             int ledOffMS = ledno.ledOffMS;
@@ -2089,19 +2088,19 @@ public class NotificationManagerService extends INotificationManager.Stub
         final int len = list.size();
         for (int i=0; i<len; i++) {
             NotificationRecord r = list.get(i);
-            if (!notificationMatchesUserId(r, userId) || r.sbn.id != id) {
+            if (!notificationMatchesUserId(r, userId) || r.sbn.getId() != id) {
                 continue;
             }
             if (tag == null) {
-                if (r.sbn.tag != null) {
+                if (r.sbn.getTag() != null) {
                     continue;
                 }
             } else {
-                if (!tag.equals(r.sbn.tag)) {
+                if (!tag.equals(r.sbn.getTag())) {
                     continue;
                 }
             }
-            if (r.sbn.pkg.equals(pkg)) {
+            if (r.sbn.getPkg().equals(pkg)) {
                 return i;
             }
         }
