@@ -202,6 +202,7 @@ public class UserManager {
      * Used to check if the user making this call is linked to another user. Linked users may have
      * a reduced number of available apps, app restrictions and account restrictions.
      * @return whether the user making this call is a linked user
+     * @hide
      */
     public boolean isLinkedUser() {
         try {
