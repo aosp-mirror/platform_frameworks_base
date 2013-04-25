@@ -146,6 +146,8 @@ public class DefaultContainerService extends IntentService {
                 Slog.e(TAG, "Could not copy URI " + packageURI.toString() + " Security: "
                                 + e.getMessage());
                 return PackageManager.INSTALL_FAILED_INVALID_APK;
+            } finally {
+                IoUtils.closeQuietly(autoOut);
             }
         }
 
