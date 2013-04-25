@@ -124,6 +124,21 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
+    /**
+     * Request the list of outstanding notifications (that is, those that are visible to the
+     * current user). Useful when starting up and you don't know what's already been posted.
+     *
+     * @return An array of active notifications.
+     */
+    public StatusBarNotification[] getActiveNotifications() {
+        try {
+            return getNotificationInterface().getActiveNotificationsFromListener(mWrapper);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+        return null;
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         if (mWrapper == null) {
