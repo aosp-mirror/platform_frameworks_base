@@ -60,6 +60,7 @@ public class RestrictionEntry implements Parcelable {
      * and the corresponding values, respectively.
      * The presentation could imply that values in lower array indices are included when a
      * particular value is chosen.
+     * @hide
      */
     public static final int TYPE_CHOICE_LEVEL = 3;
 
@@ -102,7 +103,7 @@ public class RestrictionEntry implements Parcelable {
     private String[] currentValues;
 
     /**
-     * Constructor for {@link #TYPE_CHOICE} and {@link #TYPE_CHOICE_LEVEL} types.
+     * Constructor for {@link #TYPE_CHOICE} type.
      * @param key the unique key for this restriction
      * @param selectedString the current value
      */
@@ -206,7 +207,7 @@ public class RestrictionEntry implements Parcelable {
      * shown to the user. Values will be chosen from this list as the user's selection and the
      * selected values can be retrieved by a call to {@link #getAllSelectedStrings()}, or
      * {@link #getSelectedString()}, depending on whether it is a multi-select type or choice type.
-     * This method is not relevant for types other than {@link #TYPE_CHOICE_LEVEL},
+     * This method is not relevant for types other than
      * {@link #TYPE_CHOICE}, and {@link #TYPE_MULTI_SELECT}.
      * @param choiceValues an array of Strings which will be the selected values for the user's
      * selections.
@@ -241,7 +242,7 @@ public class RestrictionEntry implements Parcelable {
      * user selects one or more of these choices, the corresponding value from the possible values
      * are stored as the selected strings. The size of this array must match the size of the array
      * set in {@link #setChoiceValues(String[])}. This method is not relevant for types other
-     * than {@link #TYPE_CHOICE_LEVEL}, {@link #TYPE_CHOICE}, and {@link #TYPE_MULTI_SELECT}.
+     * than {@link #TYPE_CHOICE}, and {@link #TYPE_MULTI_SELECT}.
      * @param choiceEntries the list of user-visible choices.
      * @see #setChoiceValues(String[])
      */
