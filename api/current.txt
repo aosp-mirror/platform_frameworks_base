@@ -6480,7 +6480,6 @@ package android.content {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int TYPE_BOOLEAN = 1; // 0x1
     field public static final int TYPE_CHOICE = 2; // 0x2
-    field public static final int TYPE_CHOICE_LEVEL = 3; // 0x3
     field public static final int TYPE_MULTI_SELECT = 4; // 0x4
     field public static final int TYPE_NULL = 0; // 0x0
   }
