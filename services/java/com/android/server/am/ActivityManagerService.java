@@ -2529,7 +2529,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void reportResumedActivityLocked(ActivityRecord r) {
-        //Slog.i(TAG, "**** REPORT RESUME: " + r);
         updateUsageStats(r, true);
     }
 

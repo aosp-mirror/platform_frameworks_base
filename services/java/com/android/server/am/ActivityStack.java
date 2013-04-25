@@ -3349,9 +3349,6 @@ final class ActivityStack {
         if (andResume) {
             r.results = null;
             r.newIntents = null;
-            if (mStackSupervisor.isFrontStack(this)) {
-                mService.reportResumedActivityLocked(r);
-            }
             r.state = ActivityState.RESUMED;
         } else {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
