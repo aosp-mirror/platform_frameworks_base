@@ -315,7 +315,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
         if (n.isClearable()) {
-            final String _pkg = n.getPkg();
+            final String _pkg = n.getPackageName();
             final String _tag = n.getTag();
             final int _id = n.getId();
             vetoButton.setOnClickListener(new View.OnClickListener() {
@@ -345,10 +345,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 com.android.internal.R.layout.notification_template_base) {
             int version = 0;
             try {
-                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPkg(), 0);
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
                 version = info.targetSdkVersion;
             } catch (NameNotFoundException ex) {
-                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPkg(), ex);
+                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
             }
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
                 content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
@@ -741,7 +741,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
 
         // for blaming (see SwipeHelper.setLongPressListener)
-        row.setTag(sbn.getPkg());
+        row.setTag(sbn.getPackageName());
 
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = updateNotificationVetoButton(row, sbn);
@@ -759,7 +759,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
             final View.OnClickListener listener = new NotificationClicker(contentIntent,
-                    sbn.getPkg(), sbn.getTag(), sbn.getId());
+                    sbn.getPackageName(), sbn.getTag(), sbn.getId());
             content.setOnClickListener(listener);
         } else {
             content.setOnClickListener(null);
@@ -775,7 +775,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         catch (RuntimeException e) {
-            final String ident = sbn.getPkg() + "/0x" + Integer.toHexString(sbn.getId());
+            final String ident = sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId());
             Slog.e(TAG, "couldn't inflate view for notification " + ident, e);
             return false;
         }
@@ -904,7 +904,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
         removeNotification(key);
         try {
-            mBarService.onNotificationError(n.getPkg(), n.getTag(), n.getId(), n.getUid(), n.getInitialPid(), message);
+            mBarService.onNotificationError(n.getPackageName(), n.getTag(), n.getId(), n.getUid(), n.getInitialPid(), message);
         } catch (RemoteException ex) {
             // The end is nigh.
         }
@@ -932,11 +932,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
-                notification.getPkg() + "/0x" + Integer.toHexString(notification.getId()),
+                notification.getPackageName() + "/0x" + Integer.toHexString(notification.getId()),
                 notification.getNotification());
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-        final StatusBarIcon ic = new StatusBarIcon(notification.getPkg(),
+        final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
                 notification.getUser(),
                     notification.getNotification().icon,
                     notification.getNotification().iconLevel,
@@ -1083,13 +1083,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 final PendingIntent contentIntent = notification.getNotification().contentIntent;
                 if (contentIntent != null) {
                     final View.OnClickListener listener = makeClicker(contentIntent,
-                            notification.getPkg(), notification.getTag(), notification.getId());
+                            notification.getPackageName(), notification.getTag(), notification.getId());
                     oldEntry.content.setOnClickListener(listener);
                 } else {
                     oldEntry.content.setOnClickListener(null);
                 }
                 // Update the icon.
-                final StatusBarIcon ic = new StatusBarIcon(notification.getPkg(),
+                final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
                         notification.getUser(),
                         notification.getNotification().icon, notification.getNotification().iconLevel,
                         notification.getNotification().number,
@@ -1155,7 +1155,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // A: Almost none! Only things coming from the system (package is "android") that also
     // have special "kind" tags marking them as relevant for setup (see below).
     protected boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
-        if ("android".equals(sbn.getPkg())) {
+        if ("android".equals(sbn.getPackageName())) {
             if (sbn.getNotification().kind != null) {
                 for (String aKind : sbn.getNotification().kind) {
                     // IME switcher, created by InputMethodManagerService
