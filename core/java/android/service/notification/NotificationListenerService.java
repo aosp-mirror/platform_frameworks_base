@@ -97,9 +97,9 @@ public abstract class NotificationListenerService extends Service {
      * @param id  ID of the notification as specified by the notifying app in
      *     {@link android.app.NotificationManager#notify(String, int, android.app.Notification)}.
      */
-    public final void clearNotification(String pkg, String tag, int id) {
+    public final void cancelNotification(String pkg, String tag, int id) {
         try {
-            getNotificationInterface().clearNotificationFromListener(mWrapper, pkg, tag, id);
+            getNotificationInterface().cancelNotificationFromListener(mWrapper, pkg, tag, id);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -114,11 +114,11 @@ public abstract class NotificationListenerService extends Service {
      * upon being informed, the notification manager will actually remove all active notifications
      * and you will get multiple {@link #onNotificationRemoved(StatusBarNotification)} callbacks.
      *
-     * {@see #clearNotification(String, String, int)}
+     * {@see #cancelNotification(String, String, int)}
      */
-    public final void clearAllNotifications() {
+    public final void cancelAllNotifications() {
         try {
-            getNotificationInterface().clearAllNotificationsFromListener(mWrapper);
+            getNotificationInterface().cancelAllNotificationsFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }

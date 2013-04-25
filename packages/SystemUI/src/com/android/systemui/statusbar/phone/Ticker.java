@@ -189,25 +189,25 @@ public abstract class Ticker {
         // a notification storm).
         if (initialCount > 0) {
             final Segment seg = mSegments.get(0);
-            if (n.pkg.equals(seg.notification.pkg)
-                    && n.notification.icon == seg.notification.notification.icon
-                    && n.notification.iconLevel == seg.notification.notification.iconLevel
-                    && CharSequences.equals(seg.notification.notification.tickerText,
-                        n.notification.tickerText)) {
+            if (n.getPkg().equals(seg.notification.getPkg())
+                    && n.getNotification().icon == seg.notification.getNotification().icon
+                    && n.getNotification().iconLevel == seg.notification.getNotification().iconLevel
+                    && CharSequences.equals(seg.notification.getNotification().tickerText,
+                        n.getNotification().tickerText)) {
                 return;
             }
         }
 
         final Drawable icon = StatusBarIconView.getIcon(mContext,
-                new StatusBarIcon(n.pkg, n.user, n.notification.icon, n.notification.iconLevel, 0,
-                        n.notification.tickerText));
-        final CharSequence text = n.notification.tickerText;
+                new StatusBarIcon(n.getPkg(), n.getUser(), n.getNotification().icon, n.getNotification().iconLevel, 0,
+                        n.getNotification().tickerText));
+        final CharSequence text = n.getNotification().tickerText;
         final Segment newSegment = new Segment(n, icon, text);
 
         // If there's already a notification schedule for this package and id, remove it.
         for (int i=0; i<mSegments.size(); i++) {
             Segment seg = mSegments.get(i);
-            if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
+            if (n.getId() == seg.notification.getId() && n.getPkg().equals(seg.notification.getPkg())) {
                 // just update that one to use this new data instead
                 mSegments.remove(i--); // restart iteration here
             }
@@ -235,7 +235,7 @@ public abstract class Ticker {
     public void removeEntry(StatusBarNotification n) {
         for (int i=mSegments.size()-1; i>=0; i--) {
             Segment seg = mSegments.get(i);
-            if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
+            if (n.getId() == seg.notification.getId() && n.getPkg().equals(seg.notification.getPkg())) {
                 mSegments.remove(i);
             }
         }
