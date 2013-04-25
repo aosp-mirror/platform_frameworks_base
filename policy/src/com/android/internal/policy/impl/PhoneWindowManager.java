@@ -4960,7 +4960,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mHideybars == HIDEYBARS_SHOWING) {
             if (!hideybarsAllowed) {
                 mHideybars = HIDEYBARS_NONE;
+                if ((tmpVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0) {
+                    // hideybars for View.SYSTEM_UI_FLAG_FULLSCREEN: clear the clearable flags
+                    int newVal = mResettingSystemUiFlags | View.SYSTEM_UI_CLEARABLE_FLAGS;
+                    if (newVal != mResettingSystemUiFlags) {
+                        mResettingSystemUiFlags = newVal;
+                        mWindowManagerFuncs.reevaluateStatusBarVisibility();
+                    }
+                }
             } else {
+                // hideybars for WM.LP.FLAG_FULLSCREEN: show transparent status bar
                 tmpVisibility |= View.STATUS_BAR_OVERLAY;
                 if ((mLastSystemUiFlags & View.STATUS_BAR_OVERLAY) == 0) {
                     mStatusBar.showLw(true);
