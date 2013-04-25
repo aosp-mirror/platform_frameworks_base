@@ -668,7 +668,6 @@ final class ActivityStack {
         checkReadyForSleepLocked();
     }
 
-    // Checked.
     void checkReadyForSleepLocked() {
         if (!mService.isSleepingOrShuttingDown()) {
             // Do not care.
@@ -1003,7 +1002,6 @@ final class ActivityStack {
         prev.cpuTimeAtResume = 0; // reset it
     }
 
-    // Checked.
     /**
      * Once we know that we have asked an application to put an activity in
      * the resumed state (either by launching it or explicitly telling it),
@@ -1034,13 +1032,28 @@ final class ActivityStack {
         }
     }
 
-    // Checked.
+    /**
+     * Version of ensureActivitiesVisible that can easily be called anywhere.
+     */
+    final boolean ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
+        return ensureActivitiesVisibleLocked(starting, configChanges, false);
+    }
+
+    final boolean ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+            boolean forceHomeShown) {
+        ActivityRecord r = topRunningActivityLocked(null);
+        if (r != null) {
+            return ensureActivitiesVisibleLocked(r, starting, null, configChanges, forceHomeShown);
+        }
+        return false;
+    }
+
     /**
      * Make sure that all activities that need to be visible (that is, they
      * currently can be seen by the user) actually are.
      */
-    final void ensureActivitiesVisibleLocked(ActivityRecord top,
-            ActivityRecord starting, String onlyThisProcess, int configChanges) {
+    final boolean ensureActivitiesVisibleLocked(ActivityRecord top, ActivityRecord starting,
+            String onlyThisProcess, int configChanges, boolean forceHomeShown) {
         if (DEBUG_VISBILITY) Slog.v(
                 TAG, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
@@ -1048,7 +1061,9 @@ final class ActivityStack {
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
         boolean aboveTop = true;
-        boolean behindFullscreen = !mStackSupervisor.isFrontStack(this);
+        boolean showHomeBehindStack = false;
+        boolean behindFullscreen = !mStackSupervisor.isFrontStack(this) &&
+                !(forceHomeShown && isHomeStack());
         int taskNdx;
         for (taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
@@ -1129,8 +1144,11 @@ final class ActivityStack {
 
                     if (r.fullscreen) {
                         // At this point, nothing else needs to be shown
-                        if (DEBUG_VISBILITY) Slog.v(
-                                TAG, "Stopping: fullscreen at " + r);
+                        if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
+                        behindFullscreen = true;
+                    } else if (r.mLaunchHomeTaskNext) {
+                        if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
+                        showHomeBehindStack = true;
                         behindFullscreen = true;
                     }
                 } else {
@@ -1163,18 +1181,7 @@ final class ActivityStack {
                 }
             }
         }
-    }
-
-    // Checked.
-    /**
-     * Version of ensureActivitiesVisible that can easily be called anywhere.
-     */
-    final void ensureActivitiesVisibleLocked(ActivityRecord starting,
-            int configChanges) {
-        ActivityRecord r = topRunningActivityLocked(null);
-        if (r != null) {
-            ensureActivitiesVisibleLocked(r, starting, null, configChanges);
-        }
+        return showHomeBehindStack;
     }
 
     /**
@@ -1190,7 +1197,6 @@ final class ActivityStack {
         return resumeTopActivityLocked(prev, null);
     }
 
-    // Checked.
     final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
         // Find the first activity that is not finishing.
         ActivityRecord next = topRunningActivityLocked(null);
@@ -2173,7 +2179,6 @@ final class ActivityStack {
         }
     }
 
-    // Checked.
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
             Configuration config) {
         if (localLOGV) Slog.v(TAG, "Activity idle: " + token);

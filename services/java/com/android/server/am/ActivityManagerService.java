@@ -2341,6 +2341,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void updateUsageStats(ActivityRecord resumedComponent, boolean resumed) {
+        if (DEBUG_SWITCH) Slog.d(TAG, "updateUsageStats: comp=" + resumedComponent + "res="
+                + resumed);
         if (resumed) {
             mUsageStatsService.noteResumeComponent(resumedComponent.realActivity);
         } else {
@@ -6782,7 +6784,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (DEBUG_PROVIDER) {
                     RuntimeException e = new RuntimeException("here");
-                    Slog.w(TAG, "LAUNCHING REMOTE PROVIDER (myuid " + r.uid
+                    Slog.w(TAG, "LAUNCHING REMOTE PROVIDER (myuid " + (r != null ? r.uid : null)
                           + " pruid " + cpr.appInfo.uid + "): " + cpr.info.name, e);
                 }
 

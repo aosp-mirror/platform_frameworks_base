@@ -346,7 +346,7 @@ public class ActivityStackSupervisor {
                         throw e;
                     }
                 } else {
-                    stack.ensureActivitiesVisibleLocked(hr, null, processName, 0);
+                    stack.ensureActivitiesVisibleLocked(hr, null, processName, 0, false);
                 }
             }
         }
@@ -1941,8 +1941,21 @@ public class ActivityStackSupervisor {
     }
 
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
+        // First the front stacks. In case any are not fullscreen and are in front of home.
+        boolean showHomeBehindStack = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).ensureActivitiesVisibleLocked(starting, configChanges);
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (isFrontStack(stack)) {
+                showHomeBehindStack =
+                        stack.ensureActivitiesVisibleLocked(starting, configChanges);
+            }
+        }
+        // Now do back stacks.
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (!isFrontStack(stack)) {
+                stack.ensureActivitiesVisibleLocked(starting, configChanges, showHomeBehindStack);
+            }
         }
     }
 
