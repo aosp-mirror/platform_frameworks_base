@@ -21245,7 +21245,7 @@ package android.service.notification {
     method public int describeContents();
     method public int getId();
     method public android.app.Notification getNotification();
-    method public java.lang.String getPkg();
+    method public java.lang.String getPackageName();
     method public long getPostTime();
     method public java.lang.String getTag();
     method public int getUserId();
