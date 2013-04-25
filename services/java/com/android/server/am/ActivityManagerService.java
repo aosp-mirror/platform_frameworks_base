@@ -2340,13 +2340,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void updateUsageStats(ActivityRecord resumedComponent, boolean resumed) {
-        if (DEBUG_SWITCH) Slog.d(TAG, "updateUsageStats: comp=" + resumedComponent + "res="
-                + resumed);
+    void updateUsageStats(ActivityRecord component, boolean resumed) {
+        if (DEBUG_SWITCH) Slog.d(TAG, "updateUsageStats: comp=" + component + "res=" + resumed);
+        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         if (resumed) {
-            mUsageStatsService.noteResumeComponent(resumedComponent.realActivity);
+            mUsageStatsService.noteResumeComponent(component.realActivity);
+            synchronized (stats) {
+                stats.noteActivityResumedLocked(component.app.uid);
+            }
         } else {
-            mUsageStatsService.notePauseComponent(resumedComponent.realActivity);
+            mUsageStatsService.notePauseComponent(component.realActivity);
+            synchronized (stats) {
+                stats.noteActivityPausedLocked(component.app.uid);
+            }
         }
     }
 
@@ -2542,6 +2548,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mPendingProcessChanges.clear();
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "*** Delivering " + N + " process changes");
         }
+
         int i = mProcessObservers.beginBroadcast();
         while (i > 0) {
             i--;

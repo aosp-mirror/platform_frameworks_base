@@ -518,6 +518,10 @@ public class ProcessStats {
         return pids;
     }
 
+    /**
+     * Returns the total time (in clock ticks, or 1/100 sec) spent executing in
+     * both user and system code.
+     */
     public long getCpuTimeForPid(int pid) {
         final String statFile = "/proc/" + pid + "/stat";
         final long[] statsData = mSinglePidStatsData;
@@ -531,9 +535,9 @@ public class ProcessStats {
     }
 
     /**
-     * Returns the times spent at each CPU speed, since the last call to this method. If this
-     * is the first time, it will return 1 for each value.
-     * @return relative times spent at different speed steps.
+     * Returns the delta time (in clock ticks, or 1/100 sec) spent at each CPU
+     * speed, since the last call to this method. If this is the first call, it
+     * will return 1 for each value.
      */
     public long[] getLastCpuSpeedTimes() {
         if (mCpuSpeedTimes == null) {

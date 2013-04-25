@@ -83,7 +83,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 64 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 65 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -663,7 +663,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void logState(Printer pw, String prefix) {
-            pw.println(prefix + " mCount=" + mCount
+            pw.println(prefix + "mCount=" + mCount
                     + " mLoadedCount=" + mLoadedCount + " mLastCount=" + mLastCount
                     + " mUnpluggedCount=" + mUnpluggedCount);
             pw.println(prefix + "mTotalTime=" + mTotalTime
@@ -1048,7 +1048,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         public void logState(Printer pw, String prefix) {
             super.logState(pw, prefix);
-            pw.println(prefix + "mNesting=" + mNesting + "mUpdateTime=" + mUpdateTime
+            pw.println(prefix + "mNesting=" + mNesting + " mUpdateTime=" + mUpdateTime
                     + " mAcquireTime=" + mAcquireTime);
         }
 
@@ -2240,6 +2240,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteVideoTurnedOffLocked();
     }
 
+    public void noteActivityResumedLocked(int uid) {
+        getUidStatsLocked(uid).noteActivityResumedLocked();
+    }
+
+    public void noteActivityPausedLocked(int uid) {
+        getUidStatsLocked(uid).noteActivityPausedLocked();
+    }
+
     public void noteVibratorOnLocked(int uid, long durationMillis) {
         getUidStatsLocked(uid).noteVibratorOnLocked(durationMillis);
     }
@@ -2541,6 +2549,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         boolean mVideoTurnedOn;
         StopwatchTimer mVideoTurnedOnTimer;
 
+        StopwatchTimer mForegroundActivityTimer;
+
         BatchTimer mVibratorOnTimer;
 
         Counter[] mUserActivityCounters;
@@ -2776,6 +2786,27 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        public StopwatchTimer createForegroundActivityTimerLocked() {
+            if (mForegroundActivityTimer == null) {
+                mForegroundActivityTimer = new StopwatchTimer(
+                        Uid.this, FOREGROUND_ACTIVITY, null, mUnpluggables);
+            }
+            return mForegroundActivityTimer;
+        }
+
+        @Override
+        public void noteActivityResumedLocked() {
+            // We always start, since we want multiple foreground PIDs to nest
+            createForegroundActivityTimerLocked().startRunningLocked(BatteryStatsImpl.this);
+        }
+
+        @Override
+        public void noteActivityPausedLocked() {
+            if (mForegroundActivityTimer != null) {
+                mForegroundActivityTimer.stopRunningLocked(BatteryStatsImpl.this);
+            }
+        }
+
         public BatchTimer createVibratorOnTimerLocked() {
             if (mVibratorOnTimer == null) {
                 mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON,
@@ -2841,6 +2872,11 @@ public final class BatteryStatsImpl extends BatteryStats {
                 return 0;
             }
             return mVideoTurnedOnTimer.getTotalTimeLocked(batteryRealtime, which);
+        }
+
+        @Override
+        public Timer getForegroundActivityTimer() {
+            return mForegroundActivityTimer;
         }
 
         @Override
@@ -2918,6 +2954,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mVideoTurnedOnTimer != null) {
                 active |= !mVideoTurnedOnTimer.reset(BatteryStatsImpl.this, false);
                 active |= mVideoTurnedOn;
+            }
+            if (mForegroundActivityTimer != null) {
+                active |= !mForegroundActivityTimer.reset(BatteryStatsImpl.this, false);
             }
             if (mVibratorOnTimer != null) {
                 if (mVibratorOnTimer.reset(BatteryStatsImpl.this, false)) {
@@ -3018,6 +3057,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mVideoTurnedOnTimer.detach();
                     mVideoTurnedOnTimer = null;
                 }
+                if (mForegroundActivityTimer != null) {
+                    mForegroundActivityTimer.detach();
+                    mForegroundActivityTimer = null;
+                }
                 if (mUserActivityCounters != null) {
                     for (int i=0; i<NUM_USER_ACTIVITY_TYPES; i++) {
                         mUserActivityCounters[i].detach();
@@ -3096,6 +3139,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mVideoTurnedOnTimer != null) {
                 out.writeInt(1);
                 mVideoTurnedOnTimer.writeToParcel(out, batteryRealtime);
+            } else {
+                out.writeInt(0);
+            }
+            if (mForegroundActivityTimer != null) {
+                out.writeInt(1);
+                mForegroundActivityTimer.writeToParcel(out, batteryRealtime);
             } else {
                 out.writeInt(0);
             }
@@ -3202,6 +3251,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                         null, mUnpluggables, in);
             } else {
                 mVideoTurnedOnTimer = null;
+            }
+            if (in.readInt() != 0) {
+                mForegroundActivityTimer = new StopwatchTimer(
+                        Uid.this, FOREGROUND_ACTIVITY, null, mUnpluggables, in);
+            } else {
+                mForegroundActivityTimer = null;
             }
             if (in.readInt() != 0) {
                 mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON,
@@ -3372,14 +3427,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             long mSystemTime;
 
             /**
-             * Number of times the process has been started.
-             */
-            int mStarts;
-
-            /**
              * Amount of time the process was running in the foreground.
              */
             long mForegroundTime;
+
+            /**
+             * Number of times the process has been started.
+             */
+            int mStarts;
 
             /**
              * The amount of user time loaded from a previous save.
@@ -3392,14 +3447,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             long mLoadedSystemTime;
 
             /**
-             * The number of times the process has started from a previous save.
-             */
-            int mLoadedStarts;
-
-            /**
              * The amount of foreground time loaded from a previous save.
              */
             long mLoadedForegroundTime;
+
+            /**
+             * The number of times the process has started from a previous save.
+             */
+            int mLoadedStarts;
 
             /**
              * The amount of user time loaded from the previous run.
@@ -3412,14 +3467,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             long mLastSystemTime;
 
             /**
-             * The number of times the process has started from the previous run.
-             */
-            int mLastStarts;
-
-            /**
              * The amount of foreground time loaded from the previous run
              */
             long mLastForegroundTime;
+
+            /**
+             * The number of times the process has started from the previous run.
+             */
+            int mLastStarts;
 
             /**
              * The amount of user time when last unplugged.
@@ -3432,14 +3487,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             long mUnpluggedSystemTime;
 
             /**
-             * The number of times the process has started before unplugged.
-             */
-            int mUnpluggedStarts;
-
-            /**
              * The amount of foreground time since unplugged.
              */
             long mUnpluggedForegroundTime;
+
+            /**
+             * The number of times the process has started before unplugged.
+             */
+            int mUnpluggedStarts;
 
             SamplingCounter[] mSpeedBins;
 
@@ -3453,8 +3508,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             public void unplug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
                 mUnpluggedUserTime = mUserTime;
                 mUnpluggedSystemTime = mSystemTime;
-                mUnpluggedStarts = mStarts;
                 mUnpluggedForegroundTime = mForegroundTime;
+                mUnpluggedStarts = mStarts;
             }
 
             public void plug(long elapsedRealtime, long batteryUptime, long batteryRealtime) {
@@ -5362,6 +5417,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 u.createVideoTurnedOnTimerLocked().readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
+                u.createForegroundActivityTimerLocked().readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
                 u.createVibratorOnTimerLocked().readSummaryFromParcelLocked(in);
             }
 
@@ -5415,6 +5473,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 Uid.Proc p = u.getProcessStatsLocked(procName);
                 p.mUserTime = p.mLoadedUserTime = in.readLong();
                 p.mSystemTime = p.mLoadedSystemTime = in.readLong();
+                p.mForegroundTime = p.mLoadedForegroundTime = in.readLong();
                 p.mStarts = p.mLoadedStarts = in.readInt();
                 int NSB = in.readInt();
                 if (NSB > 100) {
@@ -5564,6 +5623,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else {
                 out.writeInt(0);
             }
+            if (u.mForegroundActivityTimer != null) {
+                out.writeInt(1);
+                u.mForegroundActivityTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+            } else {
+                out.writeInt(0);
+            }
             if (u.mVibratorOnTimer != null) {
                 out.writeInt(1);
                 u.mVibratorOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
@@ -5633,6 +5698,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     Uid.Proc ps = ent.getValue();
                     out.writeLong(ps.mUserTime);
                     out.writeLong(ps.mSystemTime);
+                    out.writeLong(ps.mForegroundTime);
                     out.writeInt(ps.mStarts);
                     final int N = ps.mSpeedBins.length;
                     out.writeInt(N);
