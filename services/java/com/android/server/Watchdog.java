@@ -424,7 +424,7 @@ public class Watchdog extends Thread {
                 }
 
                 name = (mCurrentMonitor != null) ?
-                    mCurrentMonitor.getClass().getName() : "null";
+                    mCurrentMonitor.getClass().getName() : "main thread blocked";
             }
 
             // If we got here, that means that the system is most likely hung.
