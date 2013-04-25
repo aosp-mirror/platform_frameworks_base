@@ -1434,7 +1434,7 @@ public final class BluetoothAdapter {
      * <p>Results of the scan are reported using the
      * {@link LeScanCallback#onLeScan} callback.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param callback the callback LE scan results are delivered
      * @return true, if the scan was started successfully
@@ -1450,7 +1450,7 @@ public final class BluetoothAdapter {
      * <p>Devices which advertise all specified services are reported using the
      * {@link LeScanCallback#onLeScan} callback.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param serviceUuids Array of services to look for
      * @param callback the callback LE scan results are delivered
@@ -1490,7 +1490,7 @@ public final class BluetoothAdapter {
     /**
      * Stops an ongoing Bluetooth LE device scan.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param callback used to identify which scan to stop
      *        must be the same handle used to start the scan
