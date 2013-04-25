@@ -107,6 +107,7 @@ public class IntentFirewall {
     public IntentFirewall(AMSInterface ams) {
         mAms = ams;
         File rulesFile = getRulesFile();
+        rulesFile.getParentFile().mkdirs();
 
         readRules(rulesFile);
 
