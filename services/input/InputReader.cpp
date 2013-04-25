@@ -6110,13 +6110,40 @@ void JoystickInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
 
     for (size_t i = 0; i < mAxes.size(); i++) {
         const Axis& axis = mAxes.valueAt(i);
-        info->addMotionRange(axis.axisInfo.axis, AINPUT_SOURCE_JOYSTICK,
-                axis.min, axis.max, axis.flat, axis.fuzz, axis.resolution);
+        addMotionRange(axis.axisInfo.axis, axis, info);
+
         if (axis.axisInfo.mode == AxisInfo::MODE_SPLIT) {
-            info->addMotionRange(axis.axisInfo.highAxis, AINPUT_SOURCE_JOYSTICK,
-                    axis.min, axis.max, axis.flat, axis.fuzz, axis.resolution);
+            addMotionRange(axis.axisInfo.highAxis, axis, info);
+
         }
     }
+}
+
+void JoystickInputMapper::addMotionRange(int32_t axisId, const Axis& axis,
+        InputDeviceInfo* info) {
+    info->addMotionRange(axisId, AINPUT_SOURCE_JOYSTICK,
+            axis.min, axis.max, axis.flat, axis.fuzz, axis.resolution);
+    /* In order to ease the transition for developers from using the old axes
+     * to the newer, more semantically correct axes, we'll continue to register
+     * the old axes as duplicates of their corresponding new ones.  */
+    int32_t compatAxis = getCompatAxis(axisId);
+    if (compatAxis >= 0) {
+        info->addMotionRange(compatAxis, AINPUT_SOURCE_JOYSTICK,
+                axis.min, axis.max, axis.flat, axis.fuzz, axis.resolution);
+    }
+}
+
+/* A mapping from axes the joystick actually has to the axes that should be
+ * artificially created for compatibility purposes.
+ * Returns -1 if no compatibility axis is needed. */
+int32_t JoystickInputMapper::getCompatAxis(int32_t axis) {
+    switch(axis) {
+    case AMOTION_EVENT_AXIS_LTRIGGER:
+        return AMOTION_EVENT_AXIS_BRAKE;
+    case AMOTION_EVENT_AXIS_RTRIGGER:
+        return AMOTION_EVENT_AXIS_GAS;
+    }
+    return -1;
 }
 
 void JoystickInputMapper::dump(String8& dump) {
@@ -6373,9 +6400,10 @@ void JoystickInputMapper::sync(nsecs_t when, bool force) {
     size_t numAxes = mAxes.size();
     for (size_t i = 0; i < numAxes; i++) {
         const Axis& axis = mAxes.valueAt(i);
-        pointerCoords.setAxisValue(axis.axisInfo.axis, axis.currentValue);
+        setPointerCoordsAxisValue(&pointerCoords, axis.axisInfo.axis, axis.currentValue);
         if (axis.axisInfo.mode == AxisInfo::MODE_SPLIT) {
-            pointerCoords.setAxisValue(axis.axisInfo.highAxis, axis.highCurrentValue);
+            setPointerCoordsAxisValue(&pointerCoords, axis.axisInfo.highAxis,
+                    axis.highCurrentValue);
         }
     }
 
@@ -6389,6 +6417,19 @@ void JoystickInputMapper::sync(nsecs_t when, bool force) {
             AMOTION_EVENT_ACTION_MOVE, 0, metaState, buttonState, AMOTION_EVENT_EDGE_FLAG_NONE,
             ADISPLAY_ID_NONE, 1, &pointerProperties, &pointerCoords, 0, 0, 0);
     getListener()->notifyMotion(&args);
+}
+
+void JoystickInputMapper::setPointerCoordsAxisValue(PointerCoords* pointerCoords,
+        int32_t axis, float value) {
+    pointerCoords->setAxisValue(axis, value);
+    /* In order to ease the transition for developers from using the old axes
+     * to the newer, more semantically correct axes, we'll continue to produce
+     * values for the old axes as mirrors of the value of their corresponding
+     * new axes. */
+    int32_t compatAxis = getCompatAxis(axis);
+    if (compatAxis >= 0) {
+        pointerCoords->setAxisValue(compatAxis, value);
+    }
 }
 
 bool JoystickInputMapper::filterAxes(bool force) {
