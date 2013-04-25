@@ -189,7 +189,7 @@ public abstract class Ticker {
         // a notification storm).
         if (initialCount > 0) {
             final Segment seg = mSegments.get(0);
-            if (n.getPkg().equals(seg.notification.getPkg())
+            if (n.getPackageName().equals(seg.notification.getPackageName())
                     && n.getNotification().icon == seg.notification.getNotification().icon
                     && n.getNotification().iconLevel == seg.notification.getNotification().iconLevel
                     && CharSequences.equals(seg.notification.getNotification().tickerText,
@@ -199,7 +199,7 @@ public abstract class Ticker {
         }
 
         final Drawable icon = StatusBarIconView.getIcon(mContext,
-                new StatusBarIcon(n.getPkg(), n.getUser(), n.getNotification().icon, n.getNotification().iconLevel, 0,
+                new StatusBarIcon(n.getPackageName(), n.getUser(), n.getNotification().icon, n.getNotification().iconLevel, 0,
                         n.getNotification().tickerText));
         final CharSequence text = n.getNotification().tickerText;
         final Segment newSegment = new Segment(n, icon, text);
@@ -207,7 +207,7 @@ public abstract class Ticker {
         // If there's already a notification schedule for this package and id, remove it.
         for (int i=0; i<mSegments.size(); i++) {
             Segment seg = mSegments.get(i);
-            if (n.getId() == seg.notification.getId() && n.getPkg().equals(seg.notification.getPkg())) {
+            if (n.getId() == seg.notification.getId() && n.getPackageName().equals(seg.notification.getPackageName())) {
                 // just update that one to use this new data instead
                 mSegments.remove(i--); // restart iteration here
             }
@@ -235,7 +235,7 @@ public abstract class Ticker {
     public void removeEntry(StatusBarNotification n) {
         for (int i=mSegments.size()-1; i>=0; i--) {
             Segment seg = mSegments.get(i);
-            if (n.getId() == seg.notification.getId() && n.getPkg().equals(seg.notification.getPkg())) {
+            if (n.getId() == seg.notification.getId() && n.getPackageName().equals(seg.notification.getPackageName())) {
                 mSegments.remove(i);
             }
         }

@@ -186,7 +186,7 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /** The package of the app that posted the notification. */
-    public String getPkg() {
+    public String getPackageName() {
         return pkg;
     }
 

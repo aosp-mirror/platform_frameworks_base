@@ -274,7 +274,7 @@ public class TabletTicker
                 exception = e;
             }
             if (expanded == null) {
-                final String ident = notification.getPkg()
+                final String ident = notification.getPackageName()
                         + "/0x" + Integer.toHexString(notification.getId());
                 Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
                 return null;
@@ -286,7 +286,7 @@ public class TabletTicker
         } else if (n.tickerText != null) {
             group = (ViewGroup)inflater.inflate(R.layout.system_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
-                    new StatusBarIcon(notification.getPkg(), notification.getUser(), n.icon, n.iconLevel, 0,
+                    new StatusBarIcon(notification.getPackageName(), notification.getUser(), n.icon, n.iconLevel, 0,
                             n.tickerText));
             ImageView iv = (ImageView)group.findViewById(iconId);
             iv.setImageDrawable(icon);
@@ -318,7 +318,7 @@ public class TabletTicker
                 // create the usual notification clicker, but chain it together with a halt() call
                 // to abort the ticker too
                 final View.OnClickListener clicker = mBar.makeClicker(contentIntent,
-                        notification.getPkg(), notification.getTag(), notification.getId());
+                        notification.getPackageName(), notification.getTag(), notification.getId());
                 group.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         halt();
