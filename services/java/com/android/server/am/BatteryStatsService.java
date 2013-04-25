@@ -346,6 +346,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         synchronized (mStats) {
             mBluetoothPendingStats = false;
             mStats.noteBluetoothOffLocked();
+            mStats.setBtHeadset(null);
+        }
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null && mBluetoothHeadset != null) {
+            adapter.closeProfileProxy(BluetoothProfile.HEADSET, mBluetoothHeadset);
+            mBluetoothHeadset = null;
         }
     }
     
