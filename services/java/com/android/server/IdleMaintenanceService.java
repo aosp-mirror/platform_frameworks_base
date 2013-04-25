@@ -30,9 +30,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-
 /**
  * This service observes the device state and when applicable sends
  * broadcasts at the beginning and at the end of a period during which
@@ -57,9 +54,15 @@ public class IdleMaintenanceService extends BroadcastReceiver {
 
     private static final int LAST_USER_ACTIVITY_TIME_INVALID = -1;
 
-    private static final int MIN_IDLE_MAINTENANCE_START_BATTERY_LEVEL = 20; // percent
+    private static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
 
-    private static final long MIN_IDLE_MAINTENANCE_START_USER_INACTIVITY = 60 * 60 * 1000; // 1 hour
+    private static final int MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_CHARGING = 30; // percent
+
+    private static final int MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_NOT_CHARGING = 80; // percent
+
+    private static final int MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_RUNNING = 10; // percent
+
+    private static final long MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START = 60 * 60 * 1000; // 1 hour
 
     private final Intent mIdleMaintenanceStartIntent =
             new Intent(Intent.ACTION_IDLE_MAINTENANCE_START);
@@ -73,13 +76,13 @@ public class IdleMaintenanceService extends BroadcastReceiver {
 
     private final Handler mHandler;
 
-    private final Calendar mTempCalendar = Calendar.getInstance();
-
-    private final Calendar mLastIdleMaintenanceStartTime = Calendar.getInstance();
+    private long mLastIdleMaintenanceStartTimeMillis = SystemClock.elapsedRealtime();
 
     private long mLastUserActivityElapsedTimeMillis = LAST_USER_ACTIVITY_TIME_INVALID;
 
     private int mBatteryLevel;
+
+    private boolean mBatteryCharging;
 
     private boolean mIdleMaintenanceStarted;
 
@@ -90,10 +93,6 @@ public class IdleMaintenanceService extends BroadcastReceiver {
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
 
         mHandler = new Handler(mContext.getMainLooper());
-
-        // Move one day back so we can run maintenance the first day after starting.
-        final int prevDayOfYear = mLastIdleMaintenanceStartTime.get(Calendar.DAY_OF_YEAR) - 1;
-        mLastIdleMaintenanceStartTime.set(Calendar.DAY_OF_YEAR, prevDayOfYear);
 
         register(mContext.getMainLooper());
     }
@@ -120,15 +119,21 @@ public class IdleMaintenanceService extends BroadcastReceiver {
         if (mIdleMaintenanceStarted) {
             // Idle maintenance can be interrupted only by
             // a change of the device state.
-            if (!deviceStatePermitsIdleMaintenance()) {
+            if (!deviceStatePermitsIdleMaintenanceRunning()) {
                 mIdleMaintenanceStarted = false;
+                EventLogTags.writeIdleMaintenanceWindowFinish(SystemClock.elapsedRealtime(),
+                        mLastUserActivityElapsedTimeMillis, mBatteryLevel,
+                        mBatteryCharging ? 1 : 0);
                 sendIdleMaintenanceEndIntent();
             }
-        } else if (deviceStatePermitsIdleMaintenance()
+        } else if (deviceStatePermitsIdleMaintenanceStart()
                 && lastUserActivityPermitsIdleMaintenanceStart()
                 && lastRunPermitsIdleMaintenanceStart()) {
             mIdleMaintenanceStarted = true;
-            mLastIdleMaintenanceStartTime.setTimeInMillis(System.currentTimeMillis());
+            EventLogTags.writeIdleMaintenanceWindowStart(SystemClock.elapsedRealtime(),
+                    mLastUserActivityElapsedTimeMillis, mBatteryLevel,
+                    mBatteryCharging ? 1 : 0);
+            mLastIdleMaintenanceStartTimeMillis = SystemClock.elapsedRealtime();
             sendIdleMaintenanceStartIntent();
         }
     }
@@ -151,29 +156,26 @@ public class IdleMaintenanceService extends BroadcastReceiver {
                 null, this, mHandler, Activity.RESULT_OK, null, null);
     }
 
-    private boolean deviceStatePermitsIdleMaintenance() {
+    private boolean deviceStatePermitsIdleMaintenanceStart() {
+        final int minBatteryLevel = mBatteryCharging
+                ? MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_CHARGING
+                : MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_NOT_CHARGING;
         return (mLastUserActivityElapsedTimeMillis != LAST_USER_ACTIVITY_TIME_INVALID
-                && mBatteryLevel > MIN_IDLE_MAINTENANCE_START_BATTERY_LEVEL);
+                && mBatteryLevel > minBatteryLevel);
+    }
+
+    private boolean deviceStatePermitsIdleMaintenanceRunning() {
+        return (mLastUserActivityElapsedTimeMillis != LAST_USER_ACTIVITY_TIME_INVALID
+                && mBatteryLevel > MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_RUNNING);
     }
 
     private boolean lastUserActivityPermitsIdleMaintenanceStart() {
         return (SystemClock.elapsedRealtime() - mLastUserActivityElapsedTimeMillis
-                > MIN_IDLE_MAINTENANCE_START_USER_INACTIVITY);
+                > MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START);
     }
 
     private boolean lastRunPermitsIdleMaintenanceStart() {
-        Calendar now = mTempCalendar;
-        // Not setting the Locale since we do not care of locale
-        // specific properties such as the first day of the week.
-        now.setTimeZone(TimeZone.getDefault());
-        now.setTimeInMillis(System.currentTimeMillis());
-
-        Calendar lastRun = mLastIdleMaintenanceStartTime;
-        // Not setting the Locale since we do not care of locale
-        // specific properties such as the first day of the week.
-        lastRun.setTimeZone(TimeZone.getDefault());
-
-        return now.get(Calendar.DAY_OF_YEAR) != lastRun.get(Calendar.DAY_OF_YEAR);
+        return SystemClock.elapsedRealtime() - mLastIdleMaintenanceStartTimeMillis > MILLIS_IN_DAY;
     }
 
     @Override
@@ -186,6 +188,10 @@ public class IdleMaintenanceService extends BroadcastReceiver {
             final int maxBatteryLevel = intent.getExtras().getInt(BatteryManager.EXTRA_SCALE);
             final int currBatteryLevel = intent.getExtras().getInt(BatteryManager.EXTRA_LEVEL);
             mBatteryLevel = (int) (((float) maxBatteryLevel / 100) * currBatteryLevel);
+            final int pluggedState = intent.getExtras().getInt(BatteryManager.EXTRA_PLUGGED);
+            final int chargerState = intent.getExtras().getInt(
+                    BatteryManager.EXTRA_INVALID_CHARGER, 0);
+            mBatteryCharging = (pluggedState > 0 && chargerState == 0);
         } else if (Intent.ACTION_SCREEN_ON.equals(action)
                 || Intent.ACTION_DREAMING_STOPPED.equals(action)) {
             mLastUserActivityElapsedTimeMillis = LAST_USER_ACTIVITY_TIME_INVALID;

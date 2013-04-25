@@ -36,6 +36,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -43,6 +44,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
@@ -173,6 +175,11 @@ class MountService extends IMountService.Stub
         public static final int VolumeDiskInserted             = 630;
         public static final int VolumeDiskRemoved              = 631;
         public static final int VolumeBadRemoval               = 632;
+
+        /*
+         * 700 series - fstrim
+         */
+        public static final int FstrimCompleted                = 700;
     }
 
     private Context mContext;
@@ -609,6 +616,7 @@ class MountService extends IMountService.Stub
                     // This method runs on the handler thread,
                     // so it is safe to directly call into vold.
                     mConnector.execute("fstrim", "dotrim");
+                    EventLogTags.writeFstrimStart(SystemClock.elapsedRealtime());
                 } catch (NativeDaemonConnectorException ndce) {
                     Slog.e(TAG, "Failed to run fstrim!");
                 }
@@ -857,6 +865,10 @@ class MountService extends IMountService.Stub
                 if (DEBUG_EVENTS) Slog.i(TAG, "Sending media bad removal");
                 updatePublicVolumeState(volume, Environment.MEDIA_BAD_REMOVAL);
                 action = Intent.ACTION_MEDIA_BAD_REMOVAL;
+            } else if (code == VoldResponseCode.FstrimCompleted) {
+                if (Build.IS_DEBUGGABLE) {
+                    EventLogTags.writeFstrimFinish(SystemClock.elapsedRealtime());
+                }
             } else {
                 Slog.e(TAG, String.format("Unknown code {%d}", code));
             }
