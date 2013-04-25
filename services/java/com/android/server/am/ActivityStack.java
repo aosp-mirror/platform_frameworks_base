@@ -788,9 +788,9 @@ final class ActivityStack {
                 EventLog.writeEvent(EventLogTags.AM_PAUSE_ACTIVITY,
                         prev.userId, System.identityHashCode(prev),
                         prev.shortComponentName);
+                mService.updateUsageStats(prev, false);
                 prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
                         userLeaving, prev.configChangeFlags);
-                mService.updateUsageStats(prev, false);
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
                 Slog.w(TAG, "Exception thrown during pause", e);
@@ -2883,6 +2883,9 @@ final class ActivityStack {
                                     r.userId, System.identityHashCode(r),
                                     r.task.taskId, r.shortComponentName,
                                     "proc died without state saved");
+                            if (r.state == ActivityState.RESUMED) {
+                                mService.updateUsageStats(r, false);
+                            }
                         }
                         removeActivityFromHistoryLocked(r);
 

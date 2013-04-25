@@ -1921,7 +1921,7 @@ public class ActivityStackSupervisor {
     boolean reportResumedActivityLocked(ActivityRecord r) {
         final ActivityStack stack = r.task.stack;
         if (isFrontStack(stack)) {
-            mService.reportResumedActivityLocked(r);
+            mService.updateUsageStats(r, true);
             mService.setFocusedActivityLocked(r);
         }
         if (allResumedActivitiesComplete()) {
