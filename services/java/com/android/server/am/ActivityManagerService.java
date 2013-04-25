@@ -2530,10 +2530,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void reportResumedActivityLocked(ActivityRecord r) {
-        updateUsageStats(r, true);
-    }
-
     private void dispatchProcessesChanged() {
         int N;
         synchronized (this) {
