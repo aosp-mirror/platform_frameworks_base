@@ -389,10 +389,14 @@ final class ElectronBeam {
                 mTexNamesGenerated = true;
             }
 
-            SurfaceTexture st = new SurfaceTexture(mTexNames[0]);
-            SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
-                    SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN),
-                    new Surface(st));
+            final SurfaceTexture st = new SurfaceTexture(mTexNames[0]);
+            final Surface s = new Surface(st);
+            try {
+                SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
+                        SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), s);
+            } finally {
+                s.release();
+            }
 
             st.updateTexImage();
             st.getTransformMatrix(mTexMatrix);
