@@ -70,7 +70,6 @@ public abstract class InputEvent implements Parcelable {
      * Gets the source of the event.
      * 
      * @return The event source or {@link InputDevice#SOURCE_UNKNOWN} if unknown.
-     * @see InputDevice#getSourceInfo
      */
     public abstract int getSource();
 
