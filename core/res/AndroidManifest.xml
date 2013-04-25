@@ -938,6 +938,15 @@
         android:label="@string/permlab_camera"
         android:description="@string/permdesc_camera" />
 
+    <!-- Allows disabling the transmit-indicator LED that is normally on when
+         a camera is in use by an application.
+         @hide -->
+    <permission android:name="android.permission.CAMERA_DISABLE_TRANSMIT_LED"
+        android:permissionGroup="android.permission-group.CAMERA"
+        android:protectionLevel="signature|system"
+        android:label="@string/permlab_cameraDisableTransmitLed"
+        android:description="@string/permdesc_cameraDisableTransmitLed" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with telephony state -->
     <!-- =========================================== -->
