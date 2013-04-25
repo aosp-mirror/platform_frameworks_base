@@ -639,7 +639,7 @@ declare support for tablet screen sizes in its manifest file, as follows:</p>
 element in the manifest, the element should include attributes that specify
 <em>all of the size and density combinations for tablet screens</em> that the
 app supports. Note that, if possible, you should avoid using the
-<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
+<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a>
 element in your app.</p>
 
 <div class="rel-resources">
