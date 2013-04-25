@@ -2822,7 +2822,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @param symbolicName The symbolic name of the keycode.
      * @return The keycode or {@link #KEYCODE_UNKNOWN} if not found.
-     * @see #keycodeToString
+     * @see #keycodeToString(int)
      */
     public static int keyCodeFromString(String symbolicName) {
         if (symbolicName == null) {
