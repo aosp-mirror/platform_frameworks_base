@@ -859,12 +859,12 @@ public class TabletStatusBar extends BaseStatusBar implements
         final boolean immersive = isImmersive();
         if (false && immersive) {
             // TODO: immersive mode popups for tablet
-        } else if (notification.notification.fullScreenIntent != null) {
+        } else if (notification.getNotification().fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
             Slog.w(TAG, "Notification has fullScreenIntent and activity is not immersive;"
                     + " sending fullScreenIntent");
             try {
-                notification.notification.fullScreenIntent.send();
+                notification.getNotification().fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
             }
         } else {
@@ -971,14 +971,14 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
         // If they asked for FLAG_ONLY_ALERT_ONCE, then only show this notification
         // if it's a new notification.
-        if (!firstTime && (n.notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0) {
+        if (!firstTime && (n.getNotification().flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0) {
             return;
         }
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
         // run a ticker without being attached will crash!
-        if (hasTicker(n.notification) && mStatusBarView.getWindowToken() != null) {
+        if (hasTicker(n.getNotification()) && mStatusBarView.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.add(key, n);
@@ -1410,7 +1410,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         for (int i=0; toShow.size()< maxNotificationIconsCount; i++) {
             if (i >= N) break;
             Entry ent = mNotificationData.get(N-i-1);
-            if ((provisioned && ent.notification.score >= HIDE_ICONS_BELOW_SCORE)
+            if ((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification)) {
                 toShow.add(ent.icon);
             }

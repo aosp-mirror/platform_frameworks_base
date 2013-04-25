@@ -26,35 +26,21 @@ import android.os.UserHandle;
  * the status bar and any {@link android.service.notification.NotificationListenerService}s.
  */
 public class StatusBarNotification implements Parcelable {
-    /** The package of the app that posted the notification. */
-    public final String pkg;
-    /** The id supplied to {@link android.app.NotificationManager#notify}. */
-    public final int id;
-    /** The tag supplied to {@link android.app.NotificationManager#notify}, or null if no tag
-     * was specified. */
-    public final String tag;
+    private final String pkg;
+    private final int id;
+    private final String tag;
 
-    /** The notifying app's calling uid. @hide */
-    public final int uid;
-    /** The notifying app's base package. @hide */
-    public final String basePkg;
-    /** @hide */
-    public final int initialPid;
+    private final int uid;
+    private final String basePkg;
+    private final int initialPid;
     // TODO: make this field private and move callers to an accessor that
     // ensures sourceUser is applied.
 
-    /** The {@link android.app.Notification} supplied to
-     * {@link android.app.NotificationManager#notify}. */
-    public final Notification notification;
-    /** The {@link android.os.UserHandle} for whom this notification is intended. */
-    public final UserHandle user;
-    /** The time (in {@link System#currentTimeMillis} time) the notification was posted,
-     * which may be different than {@link android.app.Notification#when}.
-     */
-    public final long postTime;
+    private final Notification notification;
+    private final UserHandle user;
+    private final long postTime;
 
-    /** @hide */
-    public final int score;
+    private final int score;
 
     /** This is temporarily needed for the JB MR1 PDK.
      * @hide */
@@ -197,5 +183,62 @@ public class StatusBarNotification implements Parcelable {
     /** Returns a userHandle for the instance of the app that posted this notification. */
     public int getUserId() {
         return this.user.getIdentifier();
+    }
+
+    /** The package of the app that posted the notification. */
+    public String getPkg() {
+        return pkg;
+    }
+
+    /** The id supplied to {@link android.app.NotificationManager#notify}. */
+    public int getId() {
+        return id;
+    }
+
+    /** The tag supplied to {@link android.app.NotificationManager#notify}, or null if no tag
+     * was specified. */
+    public String getTag() {
+        return tag;
+    }
+
+    /** The notifying app's calling uid. @hide */
+    public int getUid() {
+        return uid;
+    }
+
+    /** The notifying app's base package. @hide */
+    public String getBasePkg() {
+        return basePkg;
+    }
+
+    /** @hide */
+    public int getInitialPid() {
+        return initialPid;
+    }
+
+    /** The {@link android.app.Notification} supplied to
+     * {@link android.app.NotificationManager#notify}. */
+    public Notification getNotification() {
+        return notification;
+    }
+
+    /**
+     * The {@link android.os.UserHandle} for whom this notification is intended.
+     * @hide
+     */
+    public UserHandle getUser() {
+        return user;
+    }
+
+    /** The time (in {@link System#currentTimeMillis} time) the notification was posted,
+     * which may be different than {@link android.app.Notification#when}.
+     */
+    public long getPostTime() {
+        return postTime;
+    }
+
+    /** @hide */
+    public int getScore() {
+        return score;
     }
 }

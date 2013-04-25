@@ -249,7 +249,7 @@ public class TabletTicker
     }
 
     private View makeTickerView(StatusBarNotification notification) {
-        final Notification n = notification.notification;
+        final Notification n = notification.getNotification();
 
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
@@ -274,8 +274,8 @@ public class TabletTicker
                 exception = e;
             }
             if (expanded == null) {
-                final String ident = notification.pkg
-                        + "/0x" + Integer.toHexString(notification.id);
+                final String ident = notification.getPkg()
+                        + "/0x" + Integer.toHexString(notification.getId());
                 Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
                 return null;
             }
@@ -286,7 +286,7 @@ public class TabletTicker
         } else if (n.tickerText != null) {
             group = (ViewGroup)inflater.inflate(R.layout.system_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
-                    new StatusBarIcon(notification.pkg, notification.user, n.icon, n.iconLevel, 0,
+                    new StatusBarIcon(notification.getPkg(), notification.getUser(), n.icon, n.iconLevel, 0,
                             n.tickerText));
             ImageView iv = (ImageView)group.findViewById(iconId);
             iv.setImageDrawable(icon);
@@ -313,12 +313,12 @@ public class TabletTicker
         }
 
         if (CLICKABLE_TICKER) {
-            PendingIntent contentIntent = notification.notification.contentIntent;
+            PendingIntent contentIntent = notification.getNotification().contentIntent;
             if (contentIntent != null) {
                 // create the usual notification clicker, but chain it together with a halt() call
                 // to abort the ticker too
                 final View.OnClickListener clicker = mBar.makeClicker(contentIntent,
-                                            notification.pkg, notification.tag, notification.id);
+                        notification.getPkg(), notification.getTag(), notification.getId());
                 group.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         halt();

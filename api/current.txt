@@ -21229,8 +21229,8 @@ package android.service.notification {
 
   public abstract class NotificationListenerService extends android.app.Service {
     ctor public NotificationListenerService();
-    method public final void clearAllNotifications();
-    method public final void clearNotification(java.lang.String, java.lang.String, int);
+    method public final void cancelAllNotifications();
+    method public final void cancelNotification(java.lang.String, java.lang.String, int);
     method public android.service.notification.StatusBarNotification[] getActiveNotifications();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract void onNotificationPosted(android.service.notification.StatusBarNotification);
@@ -21243,17 +21243,16 @@ package android.service.notification {
     ctor public StatusBarNotification(android.os.Parcel);
     method public android.service.notification.StatusBarNotification clone();
     method public int describeContents();
+    method public int getId();
+    method public android.app.Notification getNotification();
+    method public java.lang.String getPkg();
+    method public long getPostTime();
+    method public java.lang.String getTag();
     method public int getUserId();
     method public boolean isClearable();
     method public boolean isOngoing();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public final int id;
-    field public final android.app.Notification notification;
-    field public final java.lang.String pkg;
-    field public final long postTime;
-    field public final java.lang.String tag;
-    field public final android.os.UserHandle user;
   }
 
 }
