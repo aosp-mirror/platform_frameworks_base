@@ -2066,7 +2066,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     NotificationData.Entry e = mNotificationData.get(i);
                     pw.println("    [" + i + "] key=" + e.key + " icon=" + e.icon);
                     StatusBarNotification n = e.notification;
-                    pw.println("         pkg=" + n.getPkg() + " id=" + n.getId() + " score=" + n.getScore());
+                    pw.println("         pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" + n.getScore());
                     pw.println("         notification=" + n.getNotification());
                     pw.println("         tickerText=\"" + n.getNotification().tickerText + "\"");
                 }
@@ -2369,7 +2369,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         try {
             mBarService.onNotificationClear(
-                    mCurrentlyIntrudingNotification.getPkg(),
+                    mCurrentlyIntrudingNotification.getPackageName(),
                     mCurrentlyIntrudingNotification.getTag(),
                     mCurrentlyIntrudingNotification.getId());
         } catch (android.os.RemoteException ex) {

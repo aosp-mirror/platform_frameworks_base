@@ -311,7 +311,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 private StatusBarNotification findNext() {
                     while (iter.hasNext()) {
                         StatusBarNotification nr = iter.next();
-                        if ((pkg == null || nr.getPkg() == pkg)
+                        if ((pkg == null || nr.getPackageName() == pkg)
                                 && (userId == UserHandle.USER_ALL || nr.getUserId() == userId)) {
                             return nr;
                         }
@@ -860,7 +860,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             pw.println(prefix + this);
             pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
             pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
-                    + " / " + idDebugString(baseContext, sbn.getPkg(), notification.icon));
+                    + " / " + idDebugString(baseContext, sbn.getPackageName(), notification.icon));
             pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
             pw.println(prefix + "  contentIntent=" + notification.contentIntent);
             pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
@@ -920,7 +920,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             return String.format(
                     "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s score=%d: %s)",
                     System.identityHashCode(this),
-                    this.sbn.getPkg(), this.sbn.getUser(), this.sbn.getId(), this.sbn.getTag(),
+                    this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(), this.sbn.getTag(),
                     this.sbn.getScore(), this.sbn.getNotification());
         }
     }
@@ -1540,7 +1540,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 final int N = mNotificationList.size();
                 for (int i=0; i<N; i++) {
                     final NotificationRecord r = mNotificationList.get(i);
-                    if (r.sbn.getPkg().equals(pkg) && r.sbn.getUserId() == userId) {
+                    if (r.sbn.getPackageName().equals(pkg) && r.sbn.getUserId() == userId) {
                         count++;
                         if (count >= MAX_PACKAGE_NOTIFICATIONS) {
                             Slog.e(TAG, "Package has already posted " + count
@@ -1839,7 +1839,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 } catch (PendingIntent.CanceledException ex) {
                     // do nothing - there's no relevant way to recover, and
                     //     no reason to let this propagate
-                    Slog.w(TAG, "canceled PendingIntent for " + r.sbn.getPkg(), ex);
+                    Slog.w(TAG, "canceled PendingIntent for " + r.sbn.getPackageName(), ex);
                 }
             }
         }
@@ -1964,7 +1964,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 if ((r.getFlags() & mustNotHaveFlags) != 0) {
                     continue;
                 }
-                if (pkg != null && !r.sbn.getPkg().equals(pkg)) {
+                if (pkg != null && !r.sbn.getPackageName().equals(pkg)) {
                     continue;
                 }
                 canceledSomething = true;
@@ -2100,7 +2100,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                     continue;
                 }
             }
-            if (r.sbn.getPkg().equals(pkg)) {
+            if (r.sbn.getPackageName().equals(pkg)) {
                 return i;
             }
         }
