@@ -394,8 +394,6 @@ public class RelativeLayout extends ViewGroup {
         }        
     }
 
-    // TODO: we need to find another way to implement RelativeLayout
-    // This implementation cannot handle every case
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mDirtyHierarchy) {
@@ -685,16 +683,28 @@ public class RelativeLayout extends ViewGroup {
      * @param myHeight Height of the RelativeLayout
      */
     private void measureChild(View child, LayoutParams params, int myWidth, int myHeight) {
-        int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft,
-                params.mRight, params.width,
-                params.leftMargin, params.rightMargin,
-                mPaddingLeft, mPaddingRight,
-                myWidth);
         int childHeightMeasureSpec = getChildMeasureSpec(params.mTop,
                 params.mBottom, params.height,
                 params.topMargin, params.bottomMargin,
                 mPaddingTop, mPaddingBottom,
                 myHeight);
+        switch (MeasureSpec.getMode(childHeightMeasureSpec)) {
+            case MeasureSpec.AT_MOST:
+                if (child.getMeasuredHeight() <= MeasureSpec.getSize(childHeightMeasureSpec)) {
+                    return;
+                }
+                break;
+            case MeasureSpec.EXACTLY:
+                if (child.getMeasuredHeight() == MeasureSpec.getSize(childHeightMeasureSpec)) {
+                    return;
+                }
+                break;
+        }
+        int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft,
+                params.mRight, params.width,
+                params.leftMargin, params.rightMargin,
+                mPaddingLeft, mPaddingRight,
+                myWidth);
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
@@ -900,8 +910,6 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[LEFT_OF] != 0) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
@@ -926,20 +934,16 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ALIGN_RIGHT] != 0) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
-        if (0 != rules[ALIGN_PARENT_LEFT]) {
+        if (rules[ALIGN_PARENT_LEFT] != 0) {
             childParams.mLeft = mPaddingLeft + childParams.leftMargin;
         }
 
-        if (0 != rules[ALIGN_PARENT_RIGHT]) {
+        if (rules[ALIGN_PARENT_RIGHT] != 0) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
     }
@@ -958,8 +962,6 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ABOVE] != 0) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
@@ -984,20 +986,16 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ALIGN_BOTTOM] != 0) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
-        if (0 != rules[ALIGN_PARENT_TOP]) {
+        if (rules[ALIGN_PARENT_TOP] != 0) {
             childParams.mTop = mPaddingTop + childParams.topMargin;
         }
 
-        if (0 != rules[ALIGN_PARENT_BOTTOM]) {
+        if (rules[ALIGN_PARENT_BOTTOM] != 0) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
