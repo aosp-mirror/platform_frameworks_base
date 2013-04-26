@@ -371,7 +371,31 @@ static void socket_setOption(
         return;
     }
 }
+static jint socket_pending (JNIEnv *env, jobject object,
+        jobject fileDescriptor)
+{
+    int fd;
 
+    fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+
+    if (env->ExceptionOccurred() != NULL) {
+        return (jint)-1;
+    }
+
+    int pending;
+    int ret = ioctl(fd, TIOCOUTQ, &pending);
+
+    // If this were a non-socket fd, there would be other cases to worry
+    // about...
+
+    //ALOGD("socket_pending, ioctl ret:%d, pending:%d", ret, pending);
+    if (ret < 0) {
+        jniThrowIOException(env, errno);
+        return (jint) 0;
+    }
+
+    return (jint)pending;
+}
 static jint socket_available (JNIEnv *env, jobject object,
         jobject fileDescriptor)
 {
@@ -893,6 +917,7 @@ static JNINativeMethod gMethods[] = {
     {"accept", "(Ljava/io/FileDescriptor;Landroid/net/LocalSocketImpl;)Ljava/io/FileDescriptor;", (void*)socket_accept},
     {"shutdown", "(Ljava/io/FileDescriptor;Z)V", (void*)socket_shutdown},
     {"available_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_available},
+    {"pending_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_pending},
     {"close_native", "(Ljava/io/FileDescriptor;)V", (void*) socket_close},
     {"read_native", "(Ljava/io/FileDescriptor;)I", (void*) socket_read},
     {"readba_native", "([BIILjava/io/FileDescriptor;)I", (void*) socket_readba},

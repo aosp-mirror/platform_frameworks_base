@@ -136,8 +136,28 @@ class LocalSocketImpl
                 write_native(b, myFd);
             }
         }
+
+        /**
+         * Wait until the data in sending queue is emptied. A polling version
+         * for flush implementation.
+         * @throws IOException
+         *             if an i/o error occurs.
+         */
+        @Override
+        public void flush() throws IOException {
+            FileDescriptor myFd = fd;
+            if (myFd == null) throw new IOException("socket closed");
+            while(pending_native(fd) > 0) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ie) {
+                    return;
+                }
+            }
+        }
     }
 
+    private native int pending_native(FileDescriptor fd) throws IOException;
     private native int available_native(FileDescriptor fd) throws IOException;
     private native void close_native(FileDescriptor fd) throws IOException;
     private native int read_native(FileDescriptor fd) throws IOException;
