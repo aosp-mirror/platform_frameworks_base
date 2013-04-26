@@ -220,6 +220,7 @@ public abstract class ContentResolver {
 
     // Always log queries which take 500ms+; shorter queries are
     // sampled accordingly.
+    private static final boolean ENABLE_CONTENT_SAMPLE = false;
     private static final int SLOW_THRESHOLD_MILLIS = 500;
     private final Random mRandom = new Random();  // guarded by itself
 
@@ -1832,6 +1833,7 @@ public abstract class ContentResolver {
     private void maybeLogQueryToEventLog(long durationMillis,
                                          Uri uri, String[] projection,
                                          String selection, String sortOrder) {
+        if (!ENABLE_CONTENT_SAMPLE) return;
         int samplePercent = samplePercentForDuration(durationMillis);
         if (samplePercent < 100) {
             synchronized (mRandom) {
@@ -1871,6 +1873,7 @@ public abstract class ContentResolver {
 
     private void maybeLogUpdateToEventLog(
         long durationMillis, Uri uri, String operation, String selection) {
+        if (!ENABLE_CONTENT_SAMPLE) return;
         int samplePercent = samplePercentForDuration(durationMillis);
         if (samplePercent < 100) {
             synchronized (mRandom) {
