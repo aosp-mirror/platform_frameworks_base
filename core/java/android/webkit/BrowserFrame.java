@@ -757,12 +757,15 @@ class BrowserFrame extends Handler {
                 return null;
             }
         } else if (url.startsWith(ANDROID_ASSET)) {
-            url = url.replaceFirst(ANDROID_ASSET, "");
+            String assetUrl = url.replaceFirst(ANDROID_ASSET, "");
             try {
                 AssetManager assets = mContext.getAssets();
-                Uri uri = Uri.parse(url);
+                Uri uri = Uri.parse(assetUrl);
                 return assets.open(uri.getPath(), AssetManager.ACCESS_STREAMING);
             } catch (IOException e) {
+                return null;
+            } catch (Exception e) {
+                Log.w(LOGTAG, "Problem loading url: " + url, e);
                 return null;
             }
         } else if (mSettings.getAllowContentAccess() &&
