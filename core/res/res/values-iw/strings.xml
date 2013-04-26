@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"מאפשר ליישום להקליט אודיו באמצעות המיקרופון. אישור זה מתיר ליישום להקליט אודיו בכל עת ללא אישורך."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"צלם תמונות וסרטונים"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"מאפשר ליישום לצלם תמונות וסרטונים באמצעות המצלמה. אישור זה מאפשר ליישום להשתמש במצלמה בכל עת ללא אישורך."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"השבת טאבלט לצמיתות"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"השבת טלפון לצמיתות"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"מאפשר ליישום להשבית את הטבלט כולו לצמיתות. זו הרשאה מסוכנת מאוד."</string>
@@ -931,8 +935,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"שלח שאילתה"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"חיפוש קולי"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"האם להפעיל את התכונה \'חקור על ידי מגע\'?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> רוצה להפעיל את התכונה \'חקור על ידי מגע\'. כאשר התכונה \'חקור על ידי מגע\' מופעלת, אתה יכול לשמוע או לראות תיאורים של הפריטים שעליהם אצבעך מונחת או לקיים אינטראקציה עם הטאבלט באמצעות מחוות."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> רוצה להפעיל את התכונה \'חקור על ידי מגע\'. כאשר התכונה \'חקור על ידי מגע\' מופעלת, אתה יכול לשמוע או לראות תיאורים של הפריטים שעליהם אצבעך מונחת או לקיים אינטראקציה עם הטלפון באמצעות מחוות."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> רוצה להפעיל את התכונה \'חקור על ידי מגע\'. כאשר התכונה \'חקור על ידי מגע\' מופעלת, אתה יכול לשמוע או לראות תיאורים של הפריטים שעליהם אצבעך  מונחת או לקיים אינטראקציה עם הטאבלט באמצעות תנועות אצבע."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> רוצה להפעיל את התכונה \'חקור על ידי מגע\'. כאשר התכונה \'חקור על ידי מגע\' מופעלת, אתה יכול לשמוע או לראות תיאורים של הפריטים שעליהם אצבעך מונחת או לקיים אינטראקציה עם הטלפון באמצעות תנועות אצבע."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"לפני חודש אחד"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"לפני חודש אחד"</string>
   <plurals name="num_seconds_ago">
@@ -1491,7 +1495,8 @@
     <string name="user_switched" msgid="3768006783166984410">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"בעלים"</string>
     <string name="error_message_title" msgid="4510373083082500195">"שגיאה"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"היישום הזה לא תומך בחשבונות עבור משתמשים מוגבלים"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"לא נמצא יישום שתומך בפעולה זו"</string>
     <string name="revoke" msgid="5404479185228271586">"בטל"</string>
 </resources>

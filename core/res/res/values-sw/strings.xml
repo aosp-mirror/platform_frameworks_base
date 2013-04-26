@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Inaruhusu programu kurekodi sauti kwa kinasa sauti. Idhini hii inaruhusu programu kurekodi sauti wakati wowote bila ya uthibitisho wako."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"chukua picha na video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Inaruhusu programu kupiga picha na video kwa kamera. Kibali hiki kinaruhusu programu kutumia kamera kwa wakati wowote bila uthibitisho wako."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"zima kompyuta ndogo kabisa"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"simu iliyolemazwa kabisa"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Inaruhusu programu kulemaza kompyuta yote kibao kabisa. Hii ni hatari sana."</string>
@@ -1491,7 +1495,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Mmiliki"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hitilafu"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Programu hii haiwezi kutumiwa na akaunti za watumiaji waliowekewa vizuizi"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Hakuna programu iliyopatikana ili kushughulikia kitendo hiki"</string>
     <string name="revoke" msgid="5404479185228271586">"Batilisha"</string>
 </resources>

@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikaci zaznamenat zvuk pomocí mikrofonu. Toto oprávnění umožňuje aplikaci kdykoliv zaznamenat zvuk bez vašeho svolení."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"pořizování fotografií a videí"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikaci pořizovat fotografie a videa pomocí fotoaparátu. Toto oprávnění umožňuje aplikaci používat fotoaparát kdykoliv i bez vašeho svolení."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trvalé vypnutí tabletu"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trvalé vypnutí telefonu"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Umožňuje aplikaci trvale vypnout celý tablet. To je velmi nebezpečné oprávnění."</string>
@@ -1491,7 +1495,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Aktuální uživatel je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Vlastník"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Chyba"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Tato aplikace u omezeného počtu uživatelů nepodporuje účty"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Aplikace potřebná k provedení této akce nebyla nalezena"</string>
     <string name="revoke" msgid="5404479185228271586">"Zrušit"</string>
 </resources>

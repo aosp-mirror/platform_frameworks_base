@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"एप्लिकेशन को माइक्रोफ़ोन द्वारा ऑडियो रिकार्ड करने देता है. यह अनुमति एप्लिकेशन को आपकी पुष्टि के बिना किसी भी समय ऑडियो रिकार्ड करने देती है."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"चित्र और वीडियो लें"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"एप्लिकेशन को कैमरे से चित्र और वीडियो लेने देता है. यह अनुमति एप्लिकेशन को किसी भी समय आपकी पुष्टि के बिना कैमरे का उपयोग करने देती है."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"स्‍थायी रूप से टेबलेट अक्षम करें"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"फ़ोन को स्‍थायी रूप से अक्षम करें"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"एप्‍लिकेशन को संपूर्ण टेबलेट को स्‍थायी रूप से अक्षम करने देता है. यह बहुत खतरनाक है."</string>
@@ -1491,7 +1495,8 @@
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"यह एप्लिकेशन सीमित उपयोगकर्ताओं के खातों का समर्थन नहीं करता है"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"इस कार्यवाही को प्रबंधित करने के लिए कोई एप्लिकेशन नहीं मिला"</string>
     <string name="revoke" msgid="5404479185228271586">"निरस्‍त करें"</string>
 </resources>
