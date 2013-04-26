@@ -533,7 +533,6 @@ public final class InputDevice implements Parcelable {
      *
      * @see MotionEvent#AXIS_X
      * @see MotionEvent#AXIS_Y
-     * @see #getSupportedAxes()
      */
     public MotionRange getMotionRange(int axis) {
         final int numRanges = mMotionRanges.size();
@@ -559,7 +558,6 @@ public final class InputDevice implements Parcelable {
      *
      * @see MotionEvent#AXIS_X
      * @see MotionEvent#AXIS_Y
-     * @see #getSupportedAxes()
      */
     public MotionRange getMotionRange(int axis, int source) {
         final int numRanges = mMotionRanges.size();

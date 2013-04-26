@@ -1947,8 +1947,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #TOOL_TYPE_FINGER
      * @see #TOOL_TYPE_STYLUS
      * @see #TOOL_TYPE_MOUSE
-     * @see #TOOL_TYPE_INDIRECT_FINGER
-     * @see #TOOL_TYPE_INDIRECT_STYLUS
      */
     public final int getToolType(int pointerIndex) {
         return nativeGetToolType(mNativePtr, pointerIndex);
@@ -2190,7 +2188,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * on the screen, before it had been adjusted for the containing window
      * and views.
      *
-     * @see getX()
+     * @see #getX(int)
      * @see #AXIS_X
      */
     public final float getRawX() {
@@ -2203,7 +2201,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * on the screen, before it had been adjusted for the containing window
      * and views.
      *
-     * @see getY()
+     * @see #getY(int)
      * @see #AXIS_Y
      */
     public final float getRawY() {
@@ -3063,7 +3061,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param symbolicName The symbolic name of the axis.
      * @return The axis or -1 if not found.
-     * @see #keycodeToString
+     * @see KeyEvent#keycodeToString(int)
      */
     public static int axisFromString(String symbolicName) {
         if (symbolicName == null) {
