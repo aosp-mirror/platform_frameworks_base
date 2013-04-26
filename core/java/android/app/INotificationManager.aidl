@@ -44,8 +44,8 @@ interface INotificationManager
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);
     void unregisterListener(in INotificationListener listener, int userid);
 
-    void clearNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
-    void clearAllNotificationsFromListener(in INotificationListener token);
+    void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
+    void cancelAllNotificationsFromListener(in INotificationListener token);
 
     StatusBarNotification[] getActiveNotificationsFromListener(in INotificationListener token);
 }
