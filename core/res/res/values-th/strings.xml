@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"อนุญาตให้แอปพลิเคชันบันทึกเสียงด้วยไมโครโฟน การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกเสียงได้ทุกเมื่อโดยไม่ต้องรอการยืนยันจากคุณ"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"อนุญาตให้แอปพลิเคชันถ่ายภาพและวิดีโอด้วยกล้องถ่ายรูปนี้ การอนุญาตนี้จะทำให้แอปพลิเคชันสามารถใช้กล้องถ่ายรูปได้ทุกเมื่อโดยไม่ต้องรอการยืนยันจากคุณ"</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ปิดการใช้งานแท็บเล็ตอย่างถาวร"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ปิดการใช้งานโทรศัพท์ถาวร"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"อนุญาตให้แอปพลิเคชันปิดใช้งานแท็บเล็ตทั้งเครื่องอย่างถาวร การดำเนินการนี้เป็นอันตรายอย่างยิ่ง"</string>
@@ -1491,7 +1495,8 @@
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"เจ้าของ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ข้อผิดพลาด"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"แอปพลิเคชันนี้ไม่สนับสนุนบัญชีผู้ใช้ที่ถูกจำกัด"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"ไม่พบแอปพลิเคชันสำหรับการทำงานนี้"</string>
     <string name="revoke" msgid="5404479185228271586">"เพิกถอน"</string>
 </resources>

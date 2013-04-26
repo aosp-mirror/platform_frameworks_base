@@ -434,9 +434,9 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Aplikaciji omogoča branje osebnih podatkov v profilu, ki so shranjeni v napravi, na primer ime in podatki za stik. To pomeni, da vas lahko aplikacija prepozna in vaše podatke v profilu pošlje drugim."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"spreminj. vaše osebne vizitke"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Aplikaciji omogoča spreminjanje ali dodajanje osebnih podatkov v profilu, ki so shranjeni v napravi, na primer ime in podatki za stik. To pomeni, da vas lahko aplikacija prepozna in vaše podatke v profilu pošlje drugim."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"preberite svoj družabni tok"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"branje vašega družabnega toka"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Aplikaciji omogoča dostop do vaših objav in objav vaših prijateljev v družabnih omrežjih ter njihovo sinhronizacijo. Previdno pri objavljanju informacij – aplikacija lahko s tem bere komunikacijo med vami in prijatelji v družabnih omrežjih, ne glede na zasebnost. Opomba: Tega dovoljenja ni mogoče uveljaviti v vseh družabnih omrežjih."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pišite v svoj družabni tok"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje v vaš družabni tok"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Aplikaciji omogoča prikaz objav vaših prijateljev v družabnih omrežjih. Previdno pri objavljanju informacij – aplikacija lahko s tem ustvari sporočila, za katera je videti, da jih pošiljajo prijatelji. Opomba: Tega dovoljenja ni mogoče uveljaviti v vseh družabnih omrežjih."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"branje dogodkov v koledarju in zaupnih podatkov"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Aplikaciji omogoča branje vseh dogodkov v koledarju, ki so shranjeni v tabličnem računalniku, vključno z dogodki prijateljev in sodelavcev. S tem lahko aplikacija objavi ali shrani podatke v koledarju, ne glede na njihovo zaupnost ali občutljivost."</string>
@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Aplikaciji omogoča snemanje zvoka z mikrofonom. S tem dovoljenjem lahko aplikacija kadar koli snema zvok brez vaše potrditve."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogoča fotografiranje in snemanje videoposnetkov s kamero. S tem dovoljenjem lahko aplikacija kadar koli uporablja kamero brez vaše potrditve."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trajno onemogočenje tabličnega računalnika"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trajno onemogočenje telefona"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Programu omogoča trajno onemogočenje celotnega tabličnega računalnika. To je zelo nevarno dejanje."</string>
@@ -1491,7 +1495,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Trenutni uporabnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Lastnik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Napaka"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Ta aplikacija ne podpira računov za uporabnike z omejitvami"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Najdena ni bila nobena aplikacija za izvedbo tega dejanja"</string>
     <string name="revoke" msgid="5404479185228271586">"Prekliči"</string>
 </resources>

@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Consente all\'applicazione di registrare audio con il microfono. Questa autorizzazione consente all\'applicazione di registrare audio in qualsiasi momento senza la tua conferma."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"acquisizione di foto e video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Consente all\'applicazione di scattare foto e riprendere video con la fotocamera. Questa autorizzazione consente all\'applicazione di utilizzare la fotocamera in qualsiasi momento senza la tua conferma."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"disattivazione definitiva tablet"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"disattivazione telefono"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Consente all\'applicazione di disattivare l\'intero tablet in modo definitivo. Questa autorizzazione è molto pericolosa."</string>
@@ -605,7 +609,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"test dell\'accesso all\'archivio protetto"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Consente all\'applicazione di testare un\'autorizzazione relativa all\'archivio USB che sarà disponibile su dispositivi futuri."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Consente all\'applicazione di testare un\'autorizzazione relativa alla scheda SD che sarà disponibile su dispositivi futuri."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"mod./elimin. cont. archivio USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"mod./elimin. contenuti USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifica o eliminazione dei contenuti della scheda SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Consente all\'applicazione di scrivere nell\'archivio USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Consente all\'applicazione di scrivere sulla scheda SD."</string>
@@ -1491,7 +1495,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Utente corrente <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Errore"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Questa applicazione non supporta account di utenti con limitazioni"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Nessuna applicazione trovata in grado di gestire questa azione"</string>
     <string name="revoke" msgid="5404479185228271586">"Revoca"</string>
 </resources>
