@@ -1170,9 +1170,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         boolean setInputFilter = false;
         AccessibilityInputFilter inputFilter = null;
         synchronized (mLock) {
-            // Accessibility enabled means at least one service is enabled.
-            if (userState.mIsAccessibilityEnabled
-                    || userState.mIsDisplayMagnificationEnabled) {
+            int flags = 0;
+            if (userState.mIsDisplayMagnificationEnabled) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
+            }
+            // Touch exploration without accessibility makes no sense.
+            if (userState.mIsAccessibilityEnabled && userState.mIsTouchExplorationEnabled) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
+            }
+            if (userState.mIsFilterKeyEventsEnabled) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_FILTER_KEY_EVENTS;
+            }
+            if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
                     if (mInputFilter == null) {
@@ -1182,19 +1191,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     inputFilter = mInputFilter;
                     setInputFilter = true;
                 }
-                int flags = 0;
-                if (userState.mIsDisplayMagnificationEnabled) {
-                    flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
-                }
-                // Touch exploration without accessibility makes no sense.
-                if (userState.mIsAccessibilityEnabled && userState.mIsTouchExplorationEnabled) {
-                    flags |= AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
-                }
                 mInputFilter.setEnabledFeatures(flags);
             } else {
                 if (mHasInputFilter) {
                     mHasInputFilter = false;
-                    mInputFilter.reset();
+                    mInputFilter.disableFeatures();
                     inputFilter = null;
                     setInputFilter = true;
                 }
@@ -1263,6 +1264,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void onUserStateChangedLocked(UserState userState) {
         updateLegacyCapabilities(userState);
         updateServicesLocked(userState);
+        updateFilterKeyEventsLocked(userState);
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
         scheduleUpdateInputFilter(userState);
@@ -1289,6 +1291,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
         }
+    }
+
+    private void updateFilterKeyEventsLocked(UserState userState) {
+        final int serviceCount = userState.mBoundServices.size();
+        for (int i = 0; i < serviceCount; i++) {
+            Service service = userState.mBoundServices.get(i);
+            if (service.mRequestFilterKeyEvents
+                    && (service.mAccessibilityServiceInfo.getCapabilities()
+                            & AccessibilityServiceInfo
+                            .CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS) != 0) {
+                userState.mIsFilterKeyEventsEnabled = true;
+                return;
+            }
+        }
+        userState.mIsFilterKeyEventsEnabled = false;
     }
 
     private void updateServicesLocked(UserState userState) {
@@ -2899,6 +2916,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean mIsTouchExplorationEnabled;
         public boolean mIsEnhancedWebAccessibilityEnabled;
         public boolean mIsDisplayMagnificationEnabled;
+        public boolean mIsFilterKeyEventsEnabled;
 
         private Service mUiAutomationService;
         private IAccessibilityServiceClient mUiAutomationServiceClient;
