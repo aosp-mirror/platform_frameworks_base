@@ -156,7 +156,7 @@ class WifiConfigStore {
      * Fetch the list of configured networks
      * and enable all stored networks in supplicant.
      */
-    void initialize() {
+    void loadAndEnableAllNetworks() {
         if (DBG) log("Loading config and enabling all networks");
         loadConfiguredNetworks();
         enableAllNetworks();
