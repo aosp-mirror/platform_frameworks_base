@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"允許應用程式使用麥克風錄音。這項權限可讓應用程式隨時錄音，不需經過您的確認。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍攝相片和影片"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"允許應用程式使用相機拍照和錄影。這項權限可讓應用程式隨時使用相機，而不需請求您進行確認。"</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"永久停用平板電腦"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"永久停用電話"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"允許應用程式永久停用平板電腦所有功能 (這類權限具有高度風險)。"</string>
@@ -542,7 +546,7 @@
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"設定時區"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"允許應用程式變更平板電腦的時區。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"允許應用程式變更手機的時區。"</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"作為 AccountManagerService"</string>
+    <string name="permlab_accountManagerService" msgid="4829262349691386986">"做為 AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"允許應用程式呼叫 AccountAuthenticators。"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"尋找裝置上的帳戶"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"允許應用程式取得平板電腦上所記憶的帳戶清單，其中可能包括您安裝的應用程式所建立的任何帳戶。"</string>
@@ -1489,7 +1493,8 @@
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是 <xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="owner_name" msgid="2716755460376028154">"擁有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"錯誤"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"這個應用程式不支援受限的使用者帳戶。"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"找不到支援此操作的應用程式"</string>
     <string name="revoke" msgid="5404479185228271586">"撤銷"</string>
 </resources>
