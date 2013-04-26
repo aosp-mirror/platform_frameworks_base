@@ -98,6 +98,11 @@ public abstract class BatteryStats implements Parcelable {
     public static final int VIBRATOR_ON = 9;
 
     /**
+     * A constant indicating a foreground activity timer
+     */
+    public static final int FOREGROUND_ACTIVITY = 10;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_SINCE_CHARGED = 0;
@@ -125,7 +130,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Bump the version on this if the checkin format changes.
      */
-    private static final int BATTERY_STATS_CHECKIN_VERSION = 5;
+    private static final int BATTERY_STATS_CHECKIN_VERSION = 6;
     
     private static final long BYTES_PER_KB = 1024;
     private static final long BYTES_PER_MB = 1048576; // 1024^2
@@ -137,6 +142,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String PROCESS_DATA = "pr";
     private static final String SENSOR_DATA = "sr";
     private static final String VIBRATOR_DATA = "vib";
+    private static final String FOREGROUND_DATA = "fg";
     private static final String WAKELOCK_DATA = "wl";
     private static final String KERNEL_WAKELOCK_DATA = "kwl";
     private static final String NETWORK_DATA = "nt";
@@ -276,6 +282,8 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void noteAudioTurnedOffLocked();
         public abstract void noteVideoTurnedOnLocked();
         public abstract void noteVideoTurnedOffLocked();
+        public abstract void noteActivityResumedLocked();
+        public abstract void noteActivityPausedLocked();
         public abstract long getWifiRunningTime(long batteryRealtime, int which);
         public abstract long getFullWifiLockTime(long batteryRealtime, int which);
         public abstract long getWifiScanTime(long batteryRealtime, int which);
@@ -283,6 +291,7 @@ public abstract class BatteryStats implements Parcelable {
                                                   int which);
         public abstract long getAudioTurnedOnTime(long batteryRealtime, int which);
         public abstract long getVideoTurnedOnTime(long batteryRealtime, int which);
+        public abstract Timer getForegroundActivityTimer();
         public abstract Timer getVibratorOnTimer();
 
         /**
@@ -1229,7 +1238,7 @@ public abstract class BatteryStats implements Parcelable {
         final int NU = uidStats.size();
         
         String category = STAT_NAMES[which];
-        
+
         // Dump "battery" stat
         dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, 
                 which == STATS_SINCE_CHARGED ? getStartCount() : "N/A",
@@ -1417,22 +1426,31 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
 
+            Timer fgTimer = u.getForegroundActivityTimer();
+            if (fgTimer != null) {
+                // Convert from microseconds to milliseconds with rounding
+                long totalTime = (fgTimer.getTotalTimeLocked(batteryRealtime, which) + 500) / 1000;
+                int count = fgTimer.getCountLocked(which);
+                if (totalTime != 0) {
+                    dumpLine(pw, uid, category, FOREGROUND_DATA, totalTime, count);
+                }
+            }
+
             Map<String, ? extends BatteryStats.Uid.Proc> processStats = u.getProcessStats();
             if (processStats.size() > 0) {
                 for (Map.Entry<String, ? extends BatteryStats.Uid.Proc> ent
                         : processStats.entrySet()) {
                     Uid.Proc ps = ent.getValue();
-    
-                    long userTime = ps.getUserTime(which);
-                    long systemTime = ps.getSystemTime(which);
-                    int starts = ps.getStarts(which);
-    
-                    if (userTime != 0 || systemTime != 0 || starts != 0) {
-                        dumpLine(pw, uid, category, PROCESS_DATA, 
-                                ent.getKey(), // proc
-                                userTime * 10, // cpu time in ms
-                                systemTime * 10, // user time in ms
-                                starts); // process starts
+
+                    final long userMillis = ps.getUserTime(which) * 10;
+                    final long systemMillis = ps.getSystemTime(which) * 10;
+                    final long foregroundMillis = ps.getForegroundTime(which) * 10;
+                    final long starts = ps.getStarts(which);
+
+                    if (userMillis != 0 || systemMillis != 0 || foregroundMillis != 0
+                            || starts != 0) {
+                        dumpLine(pw, uid, category, PROCESS_DATA, ent.getKey(), userMillis,
+                                systemMillis, foregroundMillis, starts);
                     }
                 }
             }
@@ -1961,6 +1979,24 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
 
+            Timer fgTimer = u.getForegroundActivityTimer();
+            if (fgTimer != null) {
+                // Convert from microseconds to milliseconds with rounding
+                long totalTime = (fgTimer.getTotalTimeLocked(batteryRealtime, which) + 500) / 1000;
+                int count = fgTimer.getCountLocked(which);
+                if (totalTime != 0) {
+                    sb.setLength(0);
+                    sb.append(prefix);
+                    sb.append("    Foreground activities: ");
+                    formatTimeMs(sb, totalTime);
+                    sb.append("realtime (");
+                    sb.append(count);
+                    sb.append(" times)");
+                    pw.println(sb.toString());
+                    uidActivity = true;
+                }
+            }
+
             Map<String, ? extends BatteryStats.Uid.Proc> processStats = u.getProcessStats();
             if (processStats.size() > 0) {
                 for (Map.Entry<String, ? extends BatteryStats.Uid.Proc> ent
@@ -1968,23 +2004,26 @@ public abstract class BatteryStats implements Parcelable {
                     Uid.Proc ps = ent.getValue();
                     long userTime;
                     long systemTime;
+                    long foregroundTime;
                     int starts;
                     int numExcessive;
 
                     userTime = ps.getUserTime(which);
                     systemTime = ps.getSystemTime(which);
+                    foregroundTime = ps.getForegroundTime(which);
                     starts = ps.getStarts(which);
                     numExcessive = which == STATS_SINCE_CHARGED
                             ? ps.countExcessivePowers() : 0;
 
-                    if (userTime != 0 || systemTime != 0 || starts != 0
+                    if (userTime != 0 || systemTime != 0 || foregroundTime != 0 || starts != 0
                             || numExcessive != 0) {
                         sb.setLength(0);
                         sb.append(prefix); sb.append("    Proc ");
                                 sb.append(ent.getKey()); sb.append(":\n");
                         sb.append(prefix); sb.append("      CPU: ");
                                 formatTime(sb, userTime); sb.append("usr + ");
-                                formatTime(sb, systemTime); sb.append("krn");
+                                formatTime(sb, systemTime); sb.append("krn ; ");
+                                formatTime(sb, foregroundTime); sb.append("fg");
                         if (starts != 0) {
                             sb.append("\n"); sb.append(prefix); sb.append("      ");
                                     sb.append(starts); sb.append(" proc starts");
@@ -2042,7 +2081,7 @@ public abstract class BatteryStats implements Parcelable {
                                         sb.append(sent.getKey()); sb.append(":\n");
                                 sb.append(prefix); sb.append("        Created for: ");
                                         formatTimeMs(sb, startTime / 1000);
-                                        sb.append(" uptime\n");
+                                        sb.append("uptime\n");
                                 sb.append(prefix); sb.append("        Starts: ");
                                         sb.append(starts);
                                         sb.append(", launches: "); sb.append(launches);
