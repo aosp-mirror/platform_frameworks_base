@@ -6632,12 +6632,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void clearAccessibilityFocus() {
-        if ((mPrivateFlags2 & PFLAG2_ACCESSIBILITY_FOCUSED) != 0) {
-            mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_FOCUSED;
-            invalidate();
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
-            notifyAccessibilityStateChanged();
-        }
+        clearAccessibilityFocusNoCallbacks();
         // Clear the global reference of accessibility focus if this
         // view or any of its descendants had accessibility focus.
         ViewRootImpl viewRootImpl = getViewRootImpl();
@@ -6684,6 +6679,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags2 & PFLAG2_ACCESSIBILITY_FOCUSED) != 0) {
             mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_FOCUSED;
             invalidate();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+            notifyAccessibilityStateChanged();
         }
     }
 
