@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Aplikaciji omogućuje snimanje zvuka mikrofonom. Ta dozvola aplikaciji omogućuje snimanje zvuka u bilo kojem trenutku bez vašeg odobrenja."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimi fotografije i videozapise"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogućuje snimanje slika i videozapisa fotoaparatom. Ta dozvola aplikaciji omogućuje upotrebu fotoaparata u bilo kojem trenutku bez vašeg odobrenja."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trajno onemogući tabletni uređaj"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trajno onemogućavanje telefona"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Aplikaciji omogućuje trajno isključivanje cijelog tabletnog računala. To je vrlo opasno."</string>
@@ -1489,7 +1493,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Trenutačni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Vlasnik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Pogreška"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Aplikacija ne podržava račune za ograničene korisnike"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Nije pronađena aplikacija za upravljanje ovom radnjom"</string>
     <string name="revoke" msgid="5404479185228271586">"Opozovi"</string>
 </resources>

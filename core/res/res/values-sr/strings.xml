@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Дозвољава апликацији да снима звук помоћу микрофона. Ова дозвола омогућава апликацији да снима звук у било ком тренутку без ваше потврде."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимање фотографија и видео снимака"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Дозвољава апликацији да снима слике и видео снимке камером. Ова дозвола омогућава апликацији да у било ком тренутку користи камеру без ваше потврде."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"трајно онемогућавање таблета"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"трајно онемогућавање телефона"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Дозвољава апликацији да трајно онемогући цео таблет. Ово је веома опасно."</string>
@@ -1489,7 +1493,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Власник"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Ова апликација не подржава налоге за кориснике са ограничењем"</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Није пронађена ниједна апликација која би могла да обави ову радњу"</string>
     <string name="revoke" msgid="5404479185228271586">"Опозови"</string>
 </resources>

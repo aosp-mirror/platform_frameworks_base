@@ -762,6 +762,10 @@
     <string name="permlab_camera" msgid="3616391919559751192">"fotografar e registrar videos"</string>
     <!-- no translation found for permdesc_camera (8497216524735535009) -->
     <skip />
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <!-- no translation found for permlab_brick (2961292205764488304) -->
     <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"deactivar permanentamain il telefonin"</string>
@@ -2417,7 +2421,7 @@
     <skip />
     <!-- no translation found for error_message_title (4510373083082500195) -->
     <skip />
-    <!-- no translation found for app_no_restricted_accounts (5322164210667258876) -->
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
     <skip />
     <!-- no translation found for app_not_found (3429141853498927379) -->
     <skip />

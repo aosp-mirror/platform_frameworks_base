@@ -468,6 +468,10 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Ermöglicht der App, Ton mithilfe des Mikrofons aufzunehmen. Die Berechtigung erlaubt der App, Tonaufnahmen jederzeit und ohne Ihre Bestätigung durchzuführen."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Bilder und Videos aufnehmen"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Ermöglicht der App, Bilder und Videos mit der Kamera aufzunehmen. Die Berechtigung erlaubt der App, die Kamera jederzeit und ohne Ihre Bestätigung zu nutzen."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"Tablet dauerhaft deaktivieren"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"Telefon dauerhaft deaktivieren"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Ermöglicht der App, das gesamte Tablet dauerhaft zu deaktivieren. Dies birgt hohe Risiken."</string>
@@ -553,7 +557,7 @@
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Ermöglicht der App, Konten hinzuzufügen und zu entfernen oder deren Passwörter zu löschen"</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"Konten auf dem Gerät verwenden"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Ermöglicht der App, Authentifizierungs-Token anzufordern"</string>
-    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"Netzwerkverbindungen anzeigen"</string>
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"Netzwerkverbindungen abrufen"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Ermöglicht der App, Informationen zu Netzwerkverbindungen abzurufen, etwa welche Netzwerke existieren und verbunden sind."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"Voller Netzwerkzugriff"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Ermöglicht der App die Erstellung von Netzwerk-Sockets und die Verwendung benutzerdefinierter Netzwerkprotokolle. Der Browser und andere Apps bieten die Möglichkeit, Daten über das Internet zu versenden. Daher ist diese Berechtigung nicht erforderlich, um Daten über das Internet versenden zu können."</string>
@@ -565,7 +569,7 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Ermöglicht der App, den Status der Tethering-Konnektivität zu ändern"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"Einstellung zur Verwendung von Hintergrunddaten ändern"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Ermöglicht der App, die Einstellung zur Verwendung von Hintergrunddaten zu ändern"</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"WLAN-Verbindungen anzeigen"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"WLAN-Verbindungen abrufen"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ermöglicht der App, Informationen zu WLANs abzurufen, etwa ob ein WLAN aktiviert ist, und den Namen verbundener WLAN-Geräte."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"WLAN-Verbindungen herstellen und trennen"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ermöglicht der App, eine Verbindung zu WLAN-Zugriffspunkten herzustellen und solche zu trennen und Änderungen an der Gerätekonfiguration für WLAN-Netzwerke vorzunehmen."</string>
@@ -613,7 +617,7 @@
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Ermöglicht der App, den Inhalt des internen Medienspeichers zu ändern"</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"Auf externen Speicher aller Nutzer zugreifen"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Ermöglicht der App, auf externen Speicher aller Nutzer zuzugreifen."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Zugriff auf das Cache-Dateisystem"</string>
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Auf das Cache-Dateisystem zugreifen"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Ermöglicht der App Lese- und Schreibzugriff auf das Cache-Dateisystem"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"Internetanrufe tätigen/annehmen"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"Ermöglicht der App die Verwendung des SIP-Dienstes zum Tätigen und Annehmen von Internetanrufen"</string>
@@ -1489,7 +1493,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigentümer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fehler"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Diese App unterstützt keine Konten für eingeschränkte Nutzer."</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Für diese Aktion wurde keine App gefunden."</string>
     <string name="revoke" msgid="5404479185228271586">"Aufheben"</string>
 </resources>
