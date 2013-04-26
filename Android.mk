@@ -412,19 +412,23 @@ framework_docs_LOCAL_DROIDDOC_SOURCE_PATH := \
 	$(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
 
 framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
-			$(framework_res_source_path)/android/R.java \
-			$(framework_res_source_path)/android/Manifest.java \
-			$(framework_res_source_path)/com/android/internal/R.java
+	$(framework_res_source_path)/android/R.java \
+	$(framework_res_source_path)/android/Manifest.java \
+	$(framework_res_source_path)/com/android/internal/R.java
+
+framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
+	bouncycastle \
+	core \
+	okhttp \
+	ext \
+	framework \
+	mms-common \
+	telephony-common \
+	voip-common
 
 framework_docs_LOCAL_JAVA_LIBRARIES := \
-			bouncycastle \
-			core \
-			okhttp \
-			ext \
-			framework \
-			mms-common \
-			telephony-common \
-			voip-common \
+	$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES) \
+	$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES)
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
@@ -453,7 +457,12 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
 		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
-framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= $(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
+framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
+	$(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
+
+framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
+	$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR) \
+	$(foreach lib,$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES),$(call intermediates-dir-for,JAVA_LIBRARIES,$(lib),,COMMON))
 
 framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
     frameworks/base/docs/knowntags.txt
@@ -575,11 +584,11 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
 LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
-LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
 LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 
 LOCAL_MODULE := api-stubs
