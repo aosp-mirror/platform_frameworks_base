@@ -797,6 +797,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private Service getQueryBridge() {
         if (mQueryBridge == null) {
             AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+            info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT);
             mQueryBridge = new Service(UserHandle.USER_NULL,
                     sFakeAccessibilityServiceComponentName, info);
         }
