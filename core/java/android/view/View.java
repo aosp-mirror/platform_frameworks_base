@@ -13807,7 +13807,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) == ViewGroup.FLAG_CLIP_CHILDREN &&
-                !useDisplayListProperties && layerType == LAYER_TYPE_NONE) {
+                !useDisplayListProperties && cache == null) {
             if (offsetForScroll) {
                 canvas.clipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop));
             } else {
