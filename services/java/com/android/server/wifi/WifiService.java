@@ -102,9 +102,6 @@ public final class WifiService extends IWifiManager.Stub {
     private int mMulticastEnabled;
     private int mMulticastDisabled;
 
-    private AtomicBoolean mDeviceProvisioned = new AtomicBoolean();
-    private AtomicBoolean mNotifyScanMode = new AtomicBoolean();
-
     private final IBatteryStats mBatteryStats;
     private final AppOpsManager mAppOps;
 
@@ -249,8 +246,6 @@ public final class WifiService extends IWifiManager.Stub {
         mWifiController.start();
 
         registerForScanModeChange();
-        registerForDeviceProvisionedChange();
-        registerForNotifyUserOnScanModeChange();
         mContext.registerReceiver(
                 new BroadcastReceiver() {
                     @Override
@@ -402,16 +397,6 @@ public final class WifiService extends IWifiManager.Stub {
 
         long ident = Binder.clearCallingIdentity();
         try {
-
-            /* Turning off Wi-Fi when scans are still available */
-            if (!enable && isScanAlwaysAvailable()) {
-                /* Notify if device is provisioned and user has not opted out of the notification */
-                if (mNotifyScanMode.get() && mDeviceProvisioned.get()) {
-                    Intent intent = new Intent(WifiManager.ACTION_NOTIFY_SCAN_ALWAYS_AVAILABLE);
-                    mContext.startActivityAsUser(intent, null, UserHandle.CURRENT);
-                }
-            }
-
             if (! mSettingsStore.handleWifiToggled(enable)) {
                 // Nothing to do if wifi cannot be toggled
                 return true;
@@ -879,51 +864,6 @@ public final class WifiService extends IWifiManager.Stub {
                 false, contentObserver);
     }
 
-    private void getPersistedDeviceProvisioned() {
-        mDeviceProvisioned.set(Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.DEVICE_PROVISIONED, 0) != 0);
-    }
-
-    private void getPersistedNotifyScanMode() {
-        mNotifyScanMode.set(Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_NOTIFY_SCAN_ALWAYS_AVAILABLE, 1) == 1);
-    }
-
-    /**
-     * Observes settings changes to notify the user when scan mode is active and
-     * Wi-Fi is turned off
-     */
-    private void registerForNotifyUserOnScanModeChange() {
-            ContentObserver contentObserver = new ContentObserver(null) {
-            @Override
-            public void onChange(boolean selfChange) {
-                getPersistedNotifyScanMode();
-            }
-        };
-
-        getPersistedNotifyScanMode();
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.WIFI_NOTIFY_SCAN_ALWAYS_AVAILABLE),
-                false, contentObserver);
-    }
-
-    /*
-     * Observes settings changes device provisioned status
-     */
-    private void registerForDeviceProvisionedChange() {
-       ContentObserver contentObserver = new ContentObserver(null) {
-            @Override
-            public void onChange(boolean selfChange) {
-                getPersistedDeviceProvisioned();
-            }
-        };
-
-        getPersistedDeviceProvisioned();
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
-                false, contentObserver);
-    }
-
     private void registerForBroadcasts() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
@@ -948,8 +888,6 @@ public final class WifiService extends IWifiManager.Stub {
         pw.println("Stay-awake conditions: " +
                 Settings.Global.getInt(mContext.getContentResolver(),
                                        Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0));
-        pw.println("mDeviceProvisioned " + mDeviceProvisioned.get());
-        pw.println("mNotifyScanMode " + mNotifyScanMode.get());
         pw.println("mMulticastEnabled " + mMulticastEnabled);
         pw.println("mMulticastDisabled " + mMulticastDisabled);
         mWifiController.dump(fd, pw, args);
