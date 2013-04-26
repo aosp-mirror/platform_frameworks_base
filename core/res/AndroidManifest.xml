@@ -2209,6 +2209,13 @@
         android:label="@string/permlab_access_keyguard_secure_storage"
         android:description="@string/permdesc_access_keyguard_secure_storage" />
 
+    <!-- Allows an application to control keyguard.  Only allowed for system processes.
+        @hide -->
+    <permission android:name="android.permission.CONTROL_KEYGUARD"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_control_keyguard"
+        android:description="@string/permdesc_control_keyguard" />
+
     <!-- Must be required by an {@link
          android.service.notification.NotificationListenerService},
          to ensure that only the system can bind to it. -->
