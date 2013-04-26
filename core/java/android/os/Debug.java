@@ -114,6 +114,8 @@ public final class Debug
         public int dalvikPrivateDirty;
         /** The shared dirty pages used by dalvik. */
         public int dalvikSharedDirty;
+        /** The shared clean pages used by dalvik. */
+        public int dalvikSharedClean;
 
         /** The proportional set size for the native heap. */
         public int nativePss;
@@ -121,6 +123,8 @@ public final class Debug
         public int nativePrivateDirty;
         /** The shared dirty pages used by the native heap. */
         public int nativeSharedDirty;
+        /** The shared clean pages used by the native heap. */
+        public int nativeSharedClean;
 
         /** The proportional set size for everything else. */
         public int otherPss;
@@ -128,11 +132,16 @@ public final class Debug
         public int otherPrivateDirty;
         /** The shared dirty pages used by everything else. */
         public int otherSharedDirty;
+        /** The shared clean pages used by everything else. */
+        public int otherSharedClean;
 
         /** @hide */
         public static final int NUM_OTHER_STATS = 12;
 
-        private int[] otherStats = new int[NUM_OTHER_STATS*3];
+        /** @hide */
+        public static final int NUM_CATEGORIES = 4;
+
+        private int[] otherStats = new int[NUM_OTHER_STATS*NUM_CATEGORIES];
 
         public MemoryInfo() {
         }
@@ -158,22 +167,33 @@ public final class Debug
             return dalvikSharedDirty + nativeSharedDirty + otherSharedDirty;
         }
 
+        /**
+         * Return total shared clean memory usage in kB.
+         */
+        public int getTotalSharedClean() {
+            return dalvikSharedClean + nativeSharedClean + otherSharedClean;
+        }
+
         /* @hide */
         public int getOtherPss(int which) {
-            return otherStats[which*3];
+            return otherStats[which*NUM_CATEGORIES];
         }
 
         /* @hide */
         public int getOtherPrivateDirty(int which) {
-            return otherStats[which*3 + 1];
+            return otherStats[which*NUM_CATEGORIES + 1];
         }
 
         /* @hide */
         public int getOtherSharedDirty(int which) {
-            return otherStats[which*3 + 2];
+            return otherStats[which*NUM_CATEGORIES + 2];
         }
 
-
+        /* @hide */
+        public int getOtherSharedClean(int which) {
+            return otherStats[which*NUM_CATEGORIES + 3];
+        }
+        
         /* @hide */
         public static String getOtherLabel(int which) {
             switch (which) {
@@ -186,8 +206,8 @@ public final class Debug
                 case 6: return ".apk mmap";
                 case 7: return ".ttf mmap";
                 case 8: return ".dex mmap";
-                case 9: return ".oat mmap";
-                case 10: return ".art mmap";
+                case 9: return "code mmap";
+                case 10: return "image mmap";
                 case 11: return "Other mmap";
                 default: return "????";
             }
@@ -201,12 +221,15 @@ public final class Debug
             dest.writeInt(dalvikPss);
             dest.writeInt(dalvikPrivateDirty);
             dest.writeInt(dalvikSharedDirty);
+            dest.writeInt(dalvikSharedClean);
             dest.writeInt(nativePss);
             dest.writeInt(nativePrivateDirty);
             dest.writeInt(nativeSharedDirty);
+            dest.writeInt(nativeSharedClean);
             dest.writeInt(otherPss);
             dest.writeInt(otherPrivateDirty);
             dest.writeInt(otherSharedDirty);
+            dest.writeInt(otherSharedClean);
             dest.writeIntArray(otherStats);
         }
 
@@ -214,12 +237,15 @@ public final class Debug
             dalvikPss = source.readInt();
             dalvikPrivateDirty = source.readInt();
             dalvikSharedDirty = source.readInt();
+            dalvikSharedClean = source.readInt();
             nativePss = source.readInt();
             nativePrivateDirty = source.readInt();
             nativeSharedDirty = source.readInt();
+            nativeSharedClean = source.readInt();
             otherPss = source.readInt();
             otherPrivateDirty = source.readInt();
             otherSharedDirty = source.readInt();
+            otherSharedClean = source.readInt();
             otherStats = source.createIntArray();
         }
 
@@ -1399,7 +1425,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Return a String describing the calling method and location at a particular stack depth.
-     * @param callStack the Thread stack 
+     * @param callStack the Thread stack
      * @param depth the depth of stack to return information for.
      * @return the String describing the caller at that depth.
      */
