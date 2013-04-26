@@ -1,11 +1,11 @@
 page.title=&lt;application&gt;
-parent.title=The AndroidManifest.xml File
-parent.link=manifest-intro.html
+
 @jd:body
 
 <dl class="xml">
 <dt>syntax:</dt>
 <dd><pre class="stx">&lt;application android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
+             android:<a href="#allowbackup">allowBackup</a>=["true" | "false"]
              android:<a href="#agent">backupAgent</a>="<i>string</i>"
              android:<a href="#debug">debuggable</a>=["true" | "false"]
              android:<a href="#desc">description</a>="<i>string resource</i>"
@@ -23,10 +23,14 @@ parent.link=manifest-intro.html
              android:<a href="#persistent">persistent</a>=["true" | "false"]
              android:<a href="#proc">process</a>="<i>string</i>"
              android:<a href="#restoreany">restoreAnyVersion</a>=["true" | "false"]
+             android:<a href="#requiredAccountType">requiredAccountType</a>="<i>string</i>"
+             android:<a href="#restrictedAccountType">restrictedAccountType</a>="<i>string</i>"
              android:<a href="#supportsrtl">supportsRtl</a>=["true" | "false"]
              android:<a href="#aff">taskAffinity</a>="<i>string</i>"
+             android:<a href="#testOnly">testOnly</a>=["true" | "false"]
              android:<a href="#theme">theme</a>="<i>resource or theme</i>"
-             android:<a href="#uioptions">uiOptions</a>=["none" | "splitActionBarWhenNarrow"] &gt;
+             android:<a href="#uioptions">uiOptions</a>=["none" | "splitActionBarWhenNarrow"]
+             android:<a href="#vmSafeMode">vmSafeMode</a>=["true" | "false"] &gt;
     . . .
 &lt;/application&gt;</pre></dd>
 
@@ -52,6 +56,10 @@ for corresponding attributes of the component elements.  Others (such as
 {@code allowClearUserData})  set values for the application as a whole and 
 cannot be overridden by the components.</dd>
 
+
+
+
+
 <dt>attributes</dt>
 <dd><dl class="attr">
 
@@ -70,6 +78,15 @@ element has its own
 attribute that can override the value set here.  See that attribute for more 
 information.
 </p></dd>
+
+
+<dt><a name="allowbackup"></a>{@code android:allowbackup}</dt>
+<dd>Whether to allow the application to participate in the backup
+and restore infrastructure. If this attribute is set to false, no backup
+or restore of the application will ever be performed, even by a full-system
+backup that would otherwise cause all application data to be saved via adb.
+The default value of this attribute is true.</dd>
+
 
 <dt><a name="agent"></a>{@code android:backupAgent}</dt>
 <dd>The name of the class that implement's the application's backup agent,
@@ -282,6 +299,57 @@ incompatible.  <em>Use with caution!</em>
 <p>The default value of this attribute is {@code false}.
 </p></dd>
 
+
+
+<dt><a name="requiredAccountType"></a>{@code android:requiredAccountType}</dt>
+<dd>Specifies the account type required by the application in order to function.
+If your app requires an {@link android.accounts.Account}, the value for this attribute must
+correspond to the account authenticator
+type used by your app (as defined by {@link android.accounts.AuthenticatorDescription}),
+such as "com.google".  
+
+<p>The default value is null and indicates that the application
+can work <em>without</em> any accounts.
+
+<p>Because restricted profiles currently
+cannot add accounts, specifying this attribute <strong>makes your app
+unavailable from a restricted profile</strong> unless you also declare
+<a href="#restrictedAccountType">{@code android:restrictedAccountType}</a> with
+the same value.</p>
+
+<p class="caution"><strong>Caution:</strong>
+If the account data may reveal personally identifiable information, it's important
+that you declare this attribute and leave <a href="#restrictedAccountType">{@code android:restrictedAccountType}</a> null, so that restricted profiles cannot use
+your app to access personal information that belongs to the owner user.</p>
+
+<p>This attribute was added in API level 18.</p>
+</dd>
+
+
+<dt><a name="restrictedAccountType"></a>{@code android:restrictedAccountType}</dt>
+<dd>Specifies the account type required by this application and indicates that restricted profiles
+are allowed to access such accounts that belong to the owner user. If your app requires an
+{@link android.accounts.Account} and restricted profiles <strong>are allowed to
+access</strong> the primary user's accounts, the value for this attribute must
+correspond to the account authenticator type used by your app (as
+defined by {@link android.accounts.AuthenticatorDescription}), such as "com.google".
+
+<p>The default value is null and indicates that the application can work <em>without</em> any
+accounts.
+
+<p class="caution"><strong>Caution:</strong>
+Specifying this attribute allows restricted profiles to use your
+app with accounts that belong to the owner user, which may reveal personally identifiable
+information. If the account may reveal personal details, you <strong>should not</strong>
+use this attribute and you should instead declare the <a
+href="#requiredAccountType">{@code android:requiredAccountType}</a> attribute
+to make your app unavailable to restricted profiles.</p>
+
+<p>This attribute was added in API level 18.</p>
+</dd>
+
+
+
 <dt><a name="supportsrtl"></a>{@code android:supportsRtl}</dt>
 <dd>Declares whether your application is willing to support right-to-left (RTL) layouts.
 <p>If set to {@code true} and <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
@@ -309,6 +377,13 @@ affinity.  The name of that affinity is the same as the package name
 set by the 
 <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
 </p></dd>
+
+<dt><a name="testOnly"></a>{@code android:testOnly}</dt>
+<dd>Indicates whether this application is only for testing purposes. For example,
+it may expose functionality or data outside of itself that would cause a security
+hole, but is useful for testing. This kind of application can be installed
+only through adb.</dd>
+
 
 <dt><a name="theme"></a>{@code android:theme}</dt>
 <dd>A reference to a style resource defining a default theme for all
@@ -339,6 +414,14 @@ together.</td></tr>
 href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.</p>
   <p>This attribute was added in API level 14.</p>
 </dd>
+
+<dt><a name="vmSafeMode"></a>{@code android:vmSafeMode}</dt>
+<dd>Indicates whether the app would like the virtual machine (VM) to operate
+in safe mode. The default value is {@code "false"}.
+</dd>
+
+
+
 
 </dl></dd>
 

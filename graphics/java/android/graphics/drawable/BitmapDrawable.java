@@ -53,6 +53,7 @@ import java.io.IOException;
  * @attr ref android.R.styleable#BitmapDrawable_filter
  * @attr ref android.R.styleable#BitmapDrawable_dither
  * @attr ref android.R.styleable#BitmapDrawable_gravity
+ * @attr ref android.R.styleable#BitmapDrawable_mipMap
  * @attr ref android.R.styleable#BitmapDrawable_tileMode
  */
 public class BitmapDrawable extends Drawable {
@@ -283,6 +284,7 @@ public class BitmapDrawable extends Drawable {
      *         is null, this method always returns false.
      *
      * @see #setMipMap(boolean) 
+     * @attr ref android.R.styleable#BitmapDrawable_mipMap
      */
     public boolean hasMipMap() {
         return mBitmapState.mBitmap != null && mBitmapState.mBitmap.hasMipMap();
