@@ -1111,6 +1111,7 @@ public class WifiStateMachine extends StateMachine {
         pw.println("mUserWantsSuspendOpt " + mUserWantsSuspendOpt);
         pw.println("mSuspendOptNeedsDisabled " + mSuspendOptNeedsDisabled);
         pw.println("Supplicant status " + mWifiNative.status());
+        pw.println("mEnableBackgroundScan " + mEnableBackgroundScan);
         pw.println();
         mWifiConfigStore.dump(fd, pw, args);
     }
@@ -2121,7 +2122,7 @@ public class WifiStateMachine extends StateMachine {
                     mLastSignalLevel = -1;
 
                     mWifiInfo.setMacAddress(mWifiNative.getMacAddress());
-                    mWifiConfigStore.initialize();
+                    mWifiConfigStore.loadAndEnableAllNetworks();
                     initializeWpsDetails();
 
                     sendSupplicantConnectionChangedBroadcast(true);
@@ -2657,9 +2658,13 @@ public class WifiStateMachine extends StateMachine {
         public void exit() {
             if (mLastOperationMode == SCAN_ONLY_WITH_WIFI_OFF_MODE) {
                 setWifiState(WIFI_STATE_ENABLED);
+                // Load and re-enable networks when going back to enabled state
+                // This is essential for networks to show up after restore
+                mWifiConfigStore.loadAndEnableAllNetworks();
                 mWifiP2pChannel.sendMessage(CMD_ENABLE_P2P);
+            } else {
+                mWifiConfigStore.enableAllNetworks();
             }
-            mWifiConfigStore.enableAllNetworks();
             mWifiNative.reconnect();
         }
         @Override
