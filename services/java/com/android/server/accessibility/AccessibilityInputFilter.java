@@ -56,6 +56,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_FEATURE_TOUCH_EXPLORATION = 0x00000002;
 
+    /**
+     * Flag for enabling the filtering key events feature.
+     *
+     * @see #setEnabledFeatures(int)
+     */
+    static final int FLAG_FEATURE_FILTER_KEY_EVENTS = 0x00000004;
+
     private final Runnable mProcessBatchedEventsRunnable = new Runnable() {
         @Override
         public void run() {
@@ -100,6 +107,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private boolean mHoverEventSequenceStarted;
 
     private boolean mKeyEventSequenceStarted;
+
+    private boolean mFilterKeyEvents;
 
     AccessibilityInputFilter(Context context, AccessibilityManagerService service) {
         super(context.getMainLooper());
@@ -198,6 +207,10 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void onKeyEvent(KeyEvent event, int policyFlags) {
+        if (!mFilterKeyEvents) {
+            super.onInputEvent(event, policyFlags);
+            return;
+        }
         if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
             mKeyEventSequenceStarted = false;
             super.onInputEvent(event, policyFlags);
@@ -314,13 +327,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
-    void reset() {
-        setEnabledFeatures(0);
-        mKeyEventSequenceStarted = false;
-        mMotionEventSequenceStarted = false;
-        mHoverEventSequenceStarted = false;
-    }
-
     private void enableFeatures() {
         mMotionEventSequenceStarted = false;
         mHoverEventSequenceStarted = false;
@@ -338,6 +344,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 mEventHandler = mTouchExplorer;
             }
         }
+        if ((mEnabledFeatures & FLAG_FEATURE_FILTER_KEY_EVENTS) != 0) {
+            mFilterKeyEvents = true;
+        }
     }
 
     private void disableFeatures() {
@@ -352,6 +361,10 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mScreenMagnifier = null;
         }
         mEventHandler = null;
+        mKeyEventSequenceStarted = false;
+        mMotionEventSequenceStarted = false;
+        mHoverEventSequenceStarted = false;
+        mFilterKeyEvents = false;
     }
 
     @Override
