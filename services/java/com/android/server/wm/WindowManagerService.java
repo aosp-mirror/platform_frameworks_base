@@ -10757,7 +10757,11 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         if (displayContent != null) {
             mDisplayContents.delete(displayId);
-            displayContent.mTapInputChannel.dispose();
+
+            if (displayContent.mTapInputChannel != null) {
+                displayContent.mTapInputChannel.dispose();
+            }
+
             WindowList windows = displayContent.getWindowList();
             while (!windows.isEmpty()) {
                 final WindowState win = windows.get(windows.size() - 1);
