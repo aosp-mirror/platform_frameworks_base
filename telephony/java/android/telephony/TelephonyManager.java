@@ -234,7 +234,14 @@ public class TelephonyManager {
 
     /**
      * Returns the current location of the device.
-     * Return null if current location is not available.
+     *<p>
+     * If there is only one radio in the device and that radio has an LTE connection,
+     * this method will return null. The implementation must not to try add LTE
+     * identifiers into the existing cdma/gsm classes.
+     *<p>
+     * In the future this call will be deprecated.
+     *<p>
+     * @return Current location of the device or null if not available.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
@@ -290,8 +297,11 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the neighboring cell information of the device.
-     *
+     * Returns the neighboring cell information of the device. The getAllCellInfo is preferred
+     * and use this only if getAllCellInfo return nulls or an empty list.
+     *<p>
+     * In the future this call will be deprecated.
+     *<p>
      * @return List of NeighboringCellInfo or null if info unavailable.
      *
      * <p>Requires Permission:
@@ -582,7 +592,7 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_HSPAP = 15;
 
     /**
-     * Returns the NETWORK_TYPE_xxxx for data transmission
+     * @return the NETWORK_TYPE_xxxx for current data connection.
      */
     public int getNetworkType() {
         return getDataNetworkType();
@@ -865,8 +875,8 @@ public class TelephonyManager {
      * is a tri-state return value as for a period of time
      * the mode may be unknown.
      *
-     * @return {@link Phone#LTE_ON_CDMA_UNKNOWN}, {@link Phone#LTE_ON_CDMA_FALSE}
-     * or {@link Phone#LTE_ON_CDMA_TRUE}
+     * @return {@link PhoneConstants#LTE_ON_CDMA_UNKNOWN}, {@link PhoneConstants#LTE_ON_CDMA_FALSE}
+     * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
      *
      * @hide
      */
@@ -1341,13 +1351,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns all observed cell information of the device. This does
+     * Returns all observed cell information from all radios on the
+     * device including the primary and neighboring cells. This does
      * not cause or change the rate of PhoneStateListner#onCellInfoChanged.
-     *
+     *<p>
+     * The list can include one or more of {@link android.telephony.CellInfoGsm CellInfoGsm},
+     * {@link android.telephony.CellInfoCdma CellInfoCdma},
+     * {@link android.telephony.CellInfoLte CellInfoLte} and
+     * {@link android.telephony.CellInfoWcdma CellInfoCdma} in any combination.
+     * Specifically on devices with multiple radios it is typical to see instances of
+     * one or more of any these in the list. In addition 0, 1 or more CellInfo
+     * objects may return isRegistered() true.
+     *<p>
+     * This is preferred over using getCellLocation although for older
+     * devices this may return null in which case getCellLocation should
+     * be called.
+     *<p>
      * @return List of CellInfo or null if info unavailable.
      *
-     * <p>Requires Permission:
-     * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
+     * <p>Requires Permission: {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
      */
     public List<CellInfo> getAllCellInfo() {
         try {
@@ -1362,11 +1384,11 @@ public class TelephonyManager {
     /**
      * Sets the minimum time in milli-seconds between {@link PhoneStateListener#onCellInfoChanged
      * PhoneStateListener.onCellInfoChanged} will be invoked.
-     *
+     *<p>
      * The default, 0, means invoke onCellInfoChanged when any of the reported
      * information changes. Setting the value to INT_MAX(0x7fffffff) means never issue
      * A onCellInfoChanged.
-     *
+     *<p>
      * @param rateInMillis the rate
      *
      * @hide
