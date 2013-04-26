@@ -349,7 +349,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
-    private void disableFeatures() {
+    void disableFeatures() {
         if (mTouchExplorer != null) {
             mTouchExplorer.clear();
             mTouchExplorer.onDestroy();
