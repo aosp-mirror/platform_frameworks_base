@@ -6610,6 +6610,59 @@ package android.content {
     method public abstract void onStatusChanged(int);
   }
 
+  public class UndoManager {
+    ctor public UndoManager();
+    method public void addOperation(android.content.UndoOperation<?>, int);
+    method public void beginUpdate(java.lang.CharSequence);
+    method public int commitState(android.content.UndoOwner);
+    method public int countRedos(android.content.UndoOwner[]);
+    method public int countUndos(android.content.UndoOwner[]);
+    method public void endUpdate();
+    method public int forgetRedos(android.content.UndoOwner[], int);
+    method public int forgetUndos(android.content.UndoOwner[], int);
+    method public int getHistorySize();
+    method public android.content.UndoOperation<?> getLastOperation(int);
+    method public android.content.UndoOperation<?> getLastOperation(android.content.UndoOwner, int);
+    method public T getLastOperation(java.lang.Class<T>, android.content.UndoOwner, int);
+    method public android.content.UndoOwner getOwner(java.lang.String, java.lang.Object);
+    method public java.lang.CharSequence getRedoLabel(android.content.UndoOwner[]);
+    method public java.lang.CharSequence getUndoLabel(android.content.UndoOwner[]);
+    method public int getUpdateNestingLevel();
+    method public boolean hasOperation(android.content.UndoOwner);
+    method public boolean isInUndo();
+    method public boolean isInUpdate();
+    method public int redo(android.content.UndoOwner[], int);
+    method public void restoreInstanceState(android.os.Parcelable);
+    method public android.os.Parcelable saveInstanceState();
+    method public void setHistorySize(int);
+    method public void setUndoLabel(java.lang.CharSequence);
+    method public void suggestUndoLabel(java.lang.CharSequence);
+    method public boolean uncommitState(int, android.content.UndoOwner);
+    method public int undo(android.content.UndoOwner[], int);
+    field public static final int MERGE_MODE_ANY = 2; // 0x2
+    field public static final int MERGE_MODE_NONE = 0; // 0x0
+    field public static final int MERGE_MODE_UNIQUE = 1; // 0x1
+  }
+
+  public abstract class UndoOperation implements android.os.Parcelable {
+    ctor public UndoOperation(android.content.UndoOwner);
+    ctor protected UndoOperation(android.os.Parcel, java.lang.ClassLoader);
+    method public boolean allowMerge();
+    method public abstract void commit();
+    method public int describeContents();
+    method public android.content.UndoOwner getOwner();
+    method public DATA getOwnerData();
+    method public boolean hasData();
+    method public boolean matchOwner(android.content.UndoOwner);
+    method public abstract void redo();
+    method public abstract void undo();
+  }
+
+  public class UndoOwner {
+    method public java.lang.Object getData();
+    method public java.lang.String getTag();
+  }
+
   public class UriMatcher {
     ctor public UriMatcher(int);
     method public void addURI(java.lang.String, java.lang.String, int);
@@ -30873,6 +30926,7 @@ package android.widget {
     method public int getTotalPaddingTop();
     method public final android.text.method.TransformationMethod getTransformationMethod();
     method public android.graphics.Typeface getTypeface();
+    method public final android.content.UndoManager getUndoManager();
     method public android.text.style.URLSpan[] getUrls();
     method public boolean hasSelection();
     method public boolean isCursorVisible();
@@ -30971,6 +31025,7 @@ package android.widget {
     method public final void setTransformationMethod(android.text.method.TransformationMethod);
     method public void setTypeface(android.graphics.Typeface, int);
     method public void setTypeface(android.graphics.Typeface);
+    method public final void setUndoManager(android.content.UndoManager, java.lang.String);
     method public void setWidth(int);
   }
 

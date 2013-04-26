@@ -16,6 +16,13 @@
 
 package android.widget;
 
+import android.content.UndoManager;
+import android.content.UndoOperation;
+import android.content.UndoOwner;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.InputFilter;
+import android.text.SpannableString;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -107,10 +114,15 @@ import java.util.HashMap;
  */
 public class Editor {
     private static final String TAG = "Editor";
+    static final boolean DEBUG_UNDO = false;
 
     static final int BLINK = 500;
     private static final float[] TEMP_POSITION = new float[2];
     private static int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
+
+    UndoManager mUndoManager;
+    UndoOwner mUndoOwner;
+    InputFilter mUndoInputFilter;
 
     // Cursor Controllers.
     InsertionPointCursorController mInsertionPointCursorController;
@@ -1884,7 +1896,7 @@ public class Editor {
     /**
      * Controls the {@link EasyEditSpan} monitoring when it is added, and when the related
      * pop-up should be displayed.
-     * Also monitors {@link SelectionSpan} to call back to the attached input method.
+     * Also monitors {@link Selection} to call back to the attached input method.
      */
     class SpanController implements SpanWatcher {
 
@@ -2014,7 +2026,7 @@ public class Editor {
 
     /**
      * Displays the actions associated to an {@link EasyEditSpan}. The pop-up is controlled
-     * by {@link EasyEditSpanController}.
+     * by {@link SpanController}.
      */
     private class EasyEditPopupWindow extends PinnedPopupWindow
             implements OnClickListener {
@@ -3958,5 +3970,167 @@ public class Editor {
             final int newCursorPosition = mWordStart + addedWord.length();
             mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
         }
+    }
+
+    public static class UndoInputFilter implements InputFilter {
+        final Editor mEditor;
+
+        public UndoInputFilter(Editor editor) {
+            mEditor = editor;
+        }
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend) {
+            if (DEBUG_UNDO) {
+                Log.d(TAG, "filter: source=" + source + " (" + start + "-" + end + ")");
+                Log.d(TAG, "filter: dest=" + dest + " (" + dstart + "-" + dend + ")");
+            }
+            final UndoManager um = mEditor.mUndoManager;
+            if (um.isInUndo()) {
+                if (DEBUG_UNDO) Log.d(TAG, "*** skipping, currently performing undo/redo");
+                return null;
+            }
+
+            um.beginUpdate("Edit text");
+            TextModifyOperation op = um.getLastOperation(
+                    TextModifyOperation.class, mEditor.mUndoOwner, UndoManager.MERGE_MODE_UNIQUE);
+            if (op != null) {
+                if (DEBUG_UNDO) Log.d(TAG, "Last op: range=(" + op.mRangeStart + "-" + op.mRangeEnd
+                        + "), oldText=" + op.mOldText);
+                // See if we can continue modifying this operation.
+                if (op.mOldText == null) {
+                    // The current operation is an add...  are we adding more?  We are adding
+                    // more if we are either appending new text to the end of the last edit or
+                    // completely replacing some or all of the last edit.
+                    if (start < end && ((dstart >= op.mRangeStart && dend <= op.mRangeEnd)
+                            || (dstart == op.mRangeEnd && dend == op.mRangeEnd))) {
+                        op.mRangeEnd = dstart + (end-start);
+                        um.endUpdate();
+                        if (DEBUG_UNDO) Log.d(TAG, "*** merging with last op, mRangeEnd="
+                                + op.mRangeEnd);
+                        return null;
+                    }
+                } else {
+                    // The current operation is a delete...  can we delete more?
+                    if (start == end && dend == op.mRangeStart-1) {
+                        SpannableStringBuilder str;
+                        if (op.mOldText instanceof SpannableString) {
+                            str = (SpannableStringBuilder)op.mOldText;
+                        } else {
+                            str = new SpannableStringBuilder(op.mOldText);
+                        }
+                        str.insert(0, dest, dstart, dend);
+                        op.mRangeStart = dstart;
+                        op.mOldText = str;
+                        um.endUpdate();
+                        if (DEBUG_UNDO) Log.d(TAG, "*** merging with last op, range=("
+                                + op.mRangeStart + "-" + op.mRangeEnd
+                                + "), oldText=" + op.mOldText);
+                        return null;
+                    }
+                }
+
+                // Couldn't add to the current undo operation, need to start a new
+                // undo state for a new undo operation.
+                um.commitState(null);
+                um.setUndoLabel("Edit text");
+            }
+
+            // Create a new undo state reflecting the operation being performed.
+            op = new TextModifyOperation(mEditor.mUndoOwner);
+            op.mRangeStart = dstart;
+            if (start < end) {
+                op.mRangeEnd = dstart + (end-start);
+            } else {
+                op.mRangeEnd = dstart;
+            }
+            if (dstart < dend) {
+                op.mOldText = dest.subSequence(dstart, dend);
+            }
+            if (DEBUG_UNDO) Log.d(TAG, "*** adding new op, range=(" + op.mRangeStart
+                    + "-" + op.mRangeEnd + "), oldText=" + op.mOldText);
+            um.addOperation(op, UndoManager.MERGE_MODE_NONE);
+            um.endUpdate();
+            return null;
+        }
+    }
+
+    public static class TextModifyOperation extends UndoOperation<TextView> {
+        int mRangeStart, mRangeEnd;
+        CharSequence mOldText;
+
+        public TextModifyOperation(UndoOwner owner) {
+            super(owner);
+        }
+
+        public TextModifyOperation(Parcel src, ClassLoader loader) {
+            super(src, loader);
+            mRangeStart = src.readInt();
+            mRangeEnd = src.readInt();
+            mOldText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(src);
+        }
+
+        @Override
+        public void commit() {
+        }
+
+        @Override
+        public void undo() {
+            swapText();
+        }
+
+        @Override
+        public void redo() {
+            swapText();
+        }
+
+        private void swapText() {
+            // Both undo and redo involves swapping the contents of the range
+            // in the text view with our local text.
+            TextView tv = getOwnerData();
+            Editable editable = (Editable)tv.getText();
+            CharSequence curText;
+            if (mRangeStart >= mRangeEnd) {
+                curText = null;
+            } else {
+                curText = editable.subSequence(mRangeStart, mRangeEnd);
+            }
+            if (DEBUG_UNDO) {
+                Log.d(TAG, "Swap: range=(" + mRangeStart + "-" + mRangeEnd
+                        + "), oldText=" + mOldText);
+                Log.d(TAG, "Swap: curText=" + curText);
+            }
+            if (mOldText == null) {
+                editable.delete(mRangeStart, mRangeEnd);
+                mRangeEnd = mRangeStart;
+            } else {
+                editable.replace(mRangeStart, mRangeEnd, mOldText);
+                mRangeEnd = mRangeStart + mOldText.length();
+            }
+            mOldText = curText;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mRangeStart);
+            dest.writeInt(mRangeEnd);
+            TextUtils.writeToParcel(mOldText, dest, flags);
+        }
+
+        public static final Parcelable.ClassLoaderCreator<TextModifyOperation> CREATOR
+                = new Parcelable.ClassLoaderCreator<TextModifyOperation>() {
+            public TextModifyOperation createFromParcel(Parcel in) {
+                return new TextModifyOperation(in, null);
+            }
+
+            public TextModifyOperation createFromParcel(Parcel in, ClassLoader loader) {
+                return new TextModifyOperation(in, loader);
+            }
+
+            public TextModifyOperation[] newArray(int size) {
+                return new TextModifyOperation[size];
+            }
+        };
     }
 }

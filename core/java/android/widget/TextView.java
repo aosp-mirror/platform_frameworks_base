@@ -20,6 +20,7 @@ import android.R;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.UndoManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
@@ -1507,6 +1508,47 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     final Layout getHintLayout() {
         return mHintLayout;
+    }
+
+    /**
+     * Retrieve the {@link android.content.UndoManager} that is currently associated
+     * with this TextView.  By default there is no associated UndoManager, so null
+     * is returned.  One can be associated with the TextView through
+     * {@link #setUndoManager(android.content.UndoManager, String)}
+     */
+    public final UndoManager getUndoManager() {
+        return mEditor == null ? null : mEditor.mUndoManager;
+    }
+
+    /**
+     * Associate an {@link android.content.UndoManager} with this TextView.  Once
+     * done, all edit operations on the TextView will result in appropriate
+     * {@link android.content.UndoOperation} objects pushed on the given UndoManager's
+     * stack.
+     *
+     * @param undoManager The {@link android.content.UndoManager} to associate with
+     * this TextView, or null to clear any existing association.
+     * @param tag String tag identifying this particular TextView owner in the
+     * UndoManager.  This is used to keep the correct association with the
+     * {@link android.content.UndoOwner} of any operations inside of the UndoManager.
+     */
+    public final void setUndoManager(UndoManager undoManager, String tag) {
+        if (undoManager != null) {
+            createEditorIfNeeded();
+            mEditor.mUndoManager = undoManager;
+            mEditor.mUndoOwner = undoManager.getOwner(tag, this);
+            mEditor.mUndoInputFilter = new Editor.UndoInputFilter(mEditor);
+            if (!(mText instanceof Editable)) {
+                setText(mText, BufferType.EDITABLE);
+            }
+
+            setFilters((Editable) mText, mFilters);
+        } else if (mEditor != null) {
+            // XXX need to destroy all associated state.
+            mEditor.mUndoManager = null;
+            mEditor.mUndoOwner = null;
+            mEditor.mUndoInputFilter = null;
+        }
     }
 
     /**
@@ -4401,16 +4443,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * and includes mInput in the list if it is an InputFilter.
      */
     private void setFilters(Editable e, InputFilter[] filters) {
-        if (mEditor != null && mEditor.mKeyListener instanceof InputFilter) {
-            InputFilter[] nf = new InputFilter[filters.length + 1];
+        if (mEditor != null) {
+            final boolean undoFilter = mEditor.mUndoInputFilter != null;
+            final boolean keyFilter = mEditor.mKeyListener instanceof InputFilter;
+            int num = 0;
+            if (undoFilter) num++;
+            if (keyFilter) num++;
+            if (num > 0) {
+                InputFilter[] nf = new InputFilter[filters.length + num];
 
-            System.arraycopy(filters, 0, nf, 0, filters.length);
-            nf[filters.length] = (InputFilter) mEditor.mKeyListener;
+                System.arraycopy(filters, 0, nf, 0, filters.length);
+                num = 0;
+                if (undoFilter) {
+                    nf[filters.length] = mEditor.mUndoInputFilter;
+                    num++;
+                }
+                if (keyFilter) {
+                    nf[filters.length + num] = (InputFilter) mEditor.mKeyListener;
+                }
 
-            e.setFilters(nf);
-        } else {
-            e.setFilters(filters);
+                e.setFilters(nf);
+                return;
+            }
         }
+        e.setFilters(filters);
     }
 
     /**
