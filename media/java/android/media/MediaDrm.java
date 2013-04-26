@@ -127,11 +127,14 @@ public final class MediaDrm {
     private static final native boolean isCryptoSchemeSupportedNative(byte[] uuid);
 
     /**
-     * Instantiate a MediaDrm object using opaque, crypto scheme specific
-     * data.
+     * Instantiate a MediaDrm object
+     *
      * @param uuid The UUID of the crypto scheme.
+     *
+     * @throws UnsupportedSchemeException if the device does not support the
+     * specified scheme UUID
      */
-    public MediaDrm(UUID uuid) throws MediaDrmException {
+    public MediaDrm(UUID uuid) throws UnsupportedSchemeException {
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -268,8 +271,10 @@ public final class MediaDrm {
 
     /**
      * Open a new session with the MediaDrm object.  A session ID is returned.
+     *
+     * @throws NotProvisionedException if provisioning is needed
      */
-    public native byte[] openSession();
+    public native byte[] openSession() throws NotProvisionedException;
 
     /**
      * Close a session on the MediaDrm object that was previously opened
@@ -346,10 +351,14 @@ public final class MediaDrm {
      * keys, which are identified by a keySetId.
      * @param optionalParameters are included in the key request message to
      * allow a client application to provide additional message parameters to the server.
+     *
+     * @throws NotProvisionedException if reprovisioning is needed, due to a
+     * problem with the certifcate
      */
     public native KeyRequest getKeyRequest(byte[] scope, byte[] init,
                                            String mimeType, int keyType,
-                                           HashMap<String, String> optionalParameters);
+                                           HashMap<String, String> optionalParameters)
+        throws NotProvisionedException;
 
 
     /**
@@ -360,8 +369,15 @@ public final class MediaDrm {
      *
      * @param sessionId the session ID for the DRM session
      * @param response the byte array response from the server
+     *
+     * @throws NotProvisionedException if the response indicates that
+     * reprovisioning is required
+     * @throws DeniedByServerException if the response indicates that the
+     * server rejected the request
      */
-    public native byte[] provideKeyResponse(byte[] sessionId, byte[] response);
+    public native byte[] provideKeyResponse(byte[] sessionId, byte[] response)
+        throws NotProvisionedException, DeniedByServerException;
+
 
     /**
      * Restore persisted offline keys into a new session.  keySetId identifies the
@@ -430,8 +446,12 @@ public final class MediaDrm {
      *
      * @param response the opaque provisioning response byte array to provide to the
      * DRM engine plugin.
+     *
+     * @throws DeniedByServerException if the response indicates that the
+     * server rejected the request
      */
-    public native void provideProvisionResponse(byte[] response);
+    public native void provideProvisionResponse(byte[] response)
+        throws DeniedByServerException;
 
     /**
      * A means of enforcing limits on the number of concurrent streams per subscriber

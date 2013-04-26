@@ -17,10 +17,13 @@
 package android.media;
 
 /**
- * Base class for MediaDrm exceptions
+ * Exception thrown when an operation on a MediaDrm object is attempted
+ * and the device does not have a certificate.  The app should obtain and
+ * install a certificate using the MediaDrm provisioning methods then retry
+ * the operation.
  */
-public class MediaDrmException extends Exception {
-    public MediaDrmException(String detailMessage) {
+public final class NotProvisionedException extends MediaDrmException {
+    public NotProvisionedException(String detailMessage) {
         super(detailMessage);
     }
 }

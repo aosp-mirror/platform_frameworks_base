@@ -11497,6 +11497,10 @@ package android.media {
     field public static final int QUALITY_MEDIUM = 1; // 0x1
   }
 
+  public final class DeniedByServerException extends android.media.MediaDrmException {
+    ctor public DeniedByServerException(java.lang.String);
+  }
+
   public class ExifInterface {
     ctor public ExifInterface(java.lang.String) throws java.io.IOException;
     method public double getAltitude(double);
@@ -11818,18 +11822,18 @@ package android.media {
   }
 
   public final class MediaDrm {
-    ctor public MediaDrm(java.util.UUID) throws android.media.MediaDrmException;
+    ctor public MediaDrm(java.util.UUID) throws android.media.UnsupportedSchemeException;
     method public void closeSession(byte[]);
     method public android.media.MediaDrm.CryptoSession getCryptoSession(byte[], java.lang.String, java.lang.String);
-    method public android.media.MediaDrm.KeyRequest getKeyRequest(byte[], byte[], java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
+    method public android.media.MediaDrm.KeyRequest getKeyRequest(byte[], byte[], java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>) throws android.media.NotProvisionedException;
     method public byte[] getPropertyByteArray(java.lang.String);
     method public java.lang.String getPropertyString(java.lang.String);
     method public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
     method public java.util.List<byte[]> getSecureStops();
     method public static final boolean isCryptoSchemeSupported(java.util.UUID);
-    method public byte[] openSession();
-    method public byte[] provideKeyResponse(byte[], byte[]);
-    method public void provideProvisionResponse(byte[]);
+    method public byte[] openSession() throws android.media.NotProvisionedException;
+    method public byte[] provideKeyResponse(byte[], byte[]) throws android.media.DeniedByServerException, android.media.NotProvisionedException;
+    method public void provideProvisionResponse(byte[]) throws android.media.DeniedByServerException;
     method public java.util.HashMap<java.lang.String, java.lang.String> queryKeyStatus(byte[]);
     method public final void release();
     method public void releaseSecureStops(byte[]);
@@ -11873,7 +11877,7 @@ package android.media {
     method public java.lang.String getDefaultUrl();
   }
 
-  public final class MediaDrmException extends java.lang.Exception {
+  public class MediaDrmException extends java.lang.Exception {
     ctor public MediaDrmException(java.lang.String);
   }
 
@@ -12339,6 +12343,10 @@ package android.media {
     field public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1; // 0x1
   }
 
+  public final class NotProvisionedException extends android.media.MediaDrmException {
+    ctor public NotProvisionedException(java.lang.String);
+  }
+
   public class RemoteControlClient {
     ctor public RemoteControlClient(android.app.PendingIntent);
     ctor public RemoteControlClient(android.app.PendingIntent, android.os.Looper);
@@ -12579,6 +12587,10 @@ package android.media {
     field public static final int TONE_SUP_RADIO_ACK = 19; // 0x13
     field public static final int TONE_SUP_RADIO_NOTAVAIL = 20; // 0x14
     field public static final int TONE_SUP_RINGTONE = 23; // 0x17
+  }
+
+  public final class UnsupportedSchemeException extends android.media.MediaDrmException {
+    ctor public UnsupportedSchemeException(java.lang.String);
   }
 
 }
