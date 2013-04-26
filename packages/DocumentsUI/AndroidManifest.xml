@@ -1,0 +1,21 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.documentsui">
+
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
+
+    <application android:label="@string/app_label">
+        <activity
+            android:name=".DocumentsActivity"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.OPEN_DOCUMENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.CREATE_DOCUMENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
