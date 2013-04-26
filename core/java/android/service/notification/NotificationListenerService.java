@@ -25,6 +25,20 @@ import android.os.IBinder;
 import android.os.ServiceManager;
 import android.util.Log;
 
+/**
+ * A service that receives calls from the system when new notifications are posted or removed.
+ * <p>To extend this class, you must declare the service in your manifest file with
+ * the {@link android.Manifest.permission#BIND_NOTIFICATION_LISTENER_SERVICE} permission
+ * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
+ * <pre>
+ * &lt;service android:name=".NotificationListener"
+ *          android:label="&#64;string/service_name"
+ *          android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+ *     &lt;intent-filter>
+ *         &lt;action android:name="android.service.notification.NotificationListenerService" />
+ *     &lt;/intent-filter>
+ * &lt;/service></pre>
+ */
 public abstract class NotificationListenerService extends Service {
     // TAG = "NotificationListenerService[MySubclass]"
     private final String TAG = NotificationListenerService.class.getSimpleName()
@@ -57,7 +71,7 @@ public abstract class NotificationListenerService extends Service {
      * notification listener) or because the app has withdrawn the notification.
      * <P>
      * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
-     * {@link StatusBarNotification#notification} member may be missing some heavyweight
+     * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
      * fields such as {@link android.app.Notification#contentView} and
      * {@link android.app.Notification#largeIcon}. However, all other fields on
      * {@link StatusBarNotification}, sufficient to match this call with a prior call to
