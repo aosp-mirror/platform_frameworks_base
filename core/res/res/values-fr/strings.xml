@@ -464,10 +464,14 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet à l\'application de contrôler les fonctionnalités de base des écrans Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrement de fichier audio"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrer des fichiers audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet à l\'application d\'enregistrer des contenus audio à l\'aide du microphone. Cette autorisation lui donne la possibilité d\'enregistrer du contenu audio à tout moment sans votre consentement."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
+    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"désactiver définitivement la tablette"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"désactiver définitivement le téléphone"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permet à l\'application de désactiver définitivement la tablette. Cette fonctionnalité peut avoir des répercussions très sérieuses."</string>
@@ -502,7 +506,7 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permet l\'accès au pilote MTP du noyau à des fins de mise en œuvre du protocole USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Tests du matériel"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"Appel direct des numéros de téléphone"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"Appeler directement les numéros de téléphone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus et ne permet pas à l\'application d\'appeler des numéros d\'urgence. Les applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Appel direct de tout numéro de téléphone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permet à l\'application d\'appeler n\'importe quel numéro de téléphone, y compris les numéros d\'urgence, sans votre intervention. Des applications malveillantes peuvent passer des appels inutiles et interdits aux services d\'urgence."</string>
@@ -1489,7 +1493,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propriétaire"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erreur"</string>
-    <string name="app_no_restricted_accounts" msgid="5322164210667258876">"Les comptes des utilisateurs en accès limité ne sont pas acceptés pour cette application."</string>
+    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Aucune application trouvée pour gérer cette action."</string>
     <string name="revoke" msgid="5404479185228271586">"Révoquer"</string>
 </resources>
