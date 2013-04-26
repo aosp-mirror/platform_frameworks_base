@@ -122,9 +122,16 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     }
 
     private void setEnforcingMode(Context context) {
-        boolean mode = Settings.Global.getInt(context.getContentResolver(),
-            Settings.Global.SELINUX_STATUS, 0) == 1;
-        SELinux.setSELinuxEnforce(mode);
+        String mode = Settings.Global.getString(context.getContentResolver(),
+            Settings.Global.SELINUX_STATUS);
+        if (mode.equals("1")) {
+            Slog.i(TAG, "Setting enforcing mode");
+            SystemProperties.set("persist.selinux.enforcing", mode);
+        } else if (mode.equals("0")) {
+            Slog.i(TAG, "Tried to set permissive mode, ignoring");
+        } else {
+            Slog.e(TAG, "Got invalid enforcing mode: " + mode);
+        }
     }
 
     @Override
