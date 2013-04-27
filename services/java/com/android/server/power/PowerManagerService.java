@@ -963,10 +963,13 @@ public final class PowerManagerService extends IPowerManager.Stub
             if (mKeyboardVisible != visible) {
                 mKeyboardVisible = visible;
                 if (!visible) {
-                    mKeyboardLight.turnOff();
                     // If hiding keyboard, turn off leds
                     setKeyboardLight(false, 1);
                     setKeyboardLight(false, 2);
+                }
+                synchronized (mLock) {
+                    mDirty |= DIRTY_USER_ACTIVITY;
+                    updatePowerStateLocked();
                 }
             }
         }
@@ -1411,15 +1414,14 @@ public final class PowerManagerService extends IPowerManager.Stub
                     nextTimeout = mLastUserActivityTime
                             + screenOffTimeout - screenDimDuration;
                     if (now < nextTimeout) {
+                        int brightness = mButtonBrightnessOverrideFromWindowManager >= 0
+                                ? mButtonBrightnessOverrideFromWindowManager
+                                : mDisplayPowerRequest.screenBrightness;
+                        mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
                         if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
                             mButtonsLight.setBrightness(0);
-                            mKeyboardLight.setBrightness(0);
                         } else {
-                            int brightness = mButtonBrightnessOverrideFromWindowManager >= 0
-                                    ? mButtonBrightnessOverrideFromWindowManager
-                                    : mDisplayPowerRequest.screenBrightness;
                             mButtonsLight.setBrightness(brightness);
-                            mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
                             if (brightness != 0) {
                                 nextTimeout = now + BUTTON_ON_DURATION;
                             }
@@ -1428,6 +1430,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                     } else {
                         nextTimeout = mLastUserActivityTime + screenOffTimeout;
                         if (now < nextTimeout) {
+                            mKeyboardLight.setBrightness(0);
                             mUserActivitySummary |= USER_ACTIVITY_SCREEN_DIM;
                         }
                     }
