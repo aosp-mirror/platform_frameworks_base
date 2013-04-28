@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -28,6 +29,8 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+
+import com.android.server.wm.WindowStateAnimator.SurfaceTrace;
 
 class FocusedStackFrame {
     private static final String TAG = "FocusedStackFrame";
@@ -43,10 +46,14 @@ class FocusedStackFrame {
     public FocusedStackFrame(Display display, SurfaceSession session) {
         SurfaceControl ctrl = null;
         try {
-            ctrl = new SurfaceControl(session, "FocusedStackFrame",
-                1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            if (DEBUG_SURFACE_TRACE) {
+                ctrl = new SurfaceTrace(session, "FocusedStackFrame",
+                    1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            } else {
+                ctrl = new SurfaceControl(session, "FocusedStackFrame",
+                    1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            }
             ctrl.setLayerStack(display.getLayerStack());
-            ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 102);
             ctrl.setAlpha(ALPHA);
             mSurface.copyFrom(ctrl);
         } catch (SurfaceControl.OutOfResourcesException e) {
@@ -126,5 +133,9 @@ class FocusedStackFrame {
     public void setBounds(Rect bounds) {
         if (DEBUG_STACK) Slog.i(TAG, "setBounds: bounds=" + bounds);
         mBounds.set(bounds);
+    }
+
+    public void setLayer(int layer) {
+        mSurfaceControl.setLayer(layer);
     }
 }

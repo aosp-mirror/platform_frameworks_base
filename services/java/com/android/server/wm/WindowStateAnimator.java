@@ -19,7 +19,6 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
