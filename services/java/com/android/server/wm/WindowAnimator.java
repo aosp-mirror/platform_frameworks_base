@@ -625,6 +625,8 @@ public class WindowAnimator {
                 }
             }
 
+            mService.setFocusedStackLayer();
+
             if (mService.mWatermark != null) {
                 mService.mWatermark.drawIfNeeded();
             }

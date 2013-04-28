@@ -219,6 +219,11 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYER_OFFSET_BLUR = 2;
 
     /**
+     * FocusedStackFrame layer is immediately above focused window.
+     */
+    static final int LAYER_OFFSET_FOCUSED_STACK = 1;
+
+    /**
      * Animation thumbnail is as far as possible below the window above
      * the thumbnail (or in other words as far as possible above the window
      * below it).
@@ -404,6 +409,8 @@ public class WindowManagerService extends IWindowManager.Stub
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
     FocusedStackFrame mFocusedStackFrame;
+
+    int mFocusedStackLayer;
 
     final float[] mTmpFloats = new float[9];
 
@@ -3686,7 +3693,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setFocusedStackFrame(TaskStack stack) {
+    /** Call while in a Surface transaction. */
+    void setFocusedStackLayer() {
+        mFocusedStackLayer = 0;
+        final WindowList windows = mFocusedApp.allAppWindows;
+        for (int i = windows.size() - 1; i >= 0; --i) {
+            final WindowState win = windows.get(i);
+            final int animLayer = win.mWinAnimator.mAnimLayer;
+            if (win.mAttachedWindow == null && win.isVisibleLw() &&
+                    animLayer > mFocusedStackLayer) {
+                mFocusedStackLayer = animLayer + LAYER_OFFSET_FOCUSED_STACK;
+            }
+        }
+        if (DEBUG_LAYERS) Slog.v(TAG, "Setting FocusedStackFrame to layer=" +
+                mFocusedStackLayer);
+        mFocusedStackFrame.setLayer(mFocusedStackLayer);
+    }
+
+    void setFocusedStackFrame() {
+        final TaskStack stack;
+        if (mFocusedApp != null) {
+            Task task = mTaskIdToTask.get(mFocusedApp.groupId);
+            stack = task.mStack;
+            task.getDisplayContent().mTapDetector.setStackBounds(stack.mStackBox.mBounds);
+        } else {
+            stack = null;
+        }
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setFocusedStackFrame");
         SurfaceControl.openTransaction();
         try {
@@ -7858,13 +7890,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 layerChanged = true;
                 anyLayerChanged = true;
             }
+            final AppWindowToken wtoken = w.mAppToken;
             oldLayer = winAnimator.mAnimLayer;
             if (w.mTargetAppToken != null) {
                 winAnimator.mAnimLayer =
                         w.mLayer + w.mTargetAppToken.mAppAnimator.animLayerAdjustment;
-            } else if (w.mAppToken != null) {
+            } else if (wtoken != null) {
                 winAnimator.mAnimLayer =
-                        w.mLayer + w.mAppToken.mAppAnimator.animLayerAdjustment;
+                        w.mLayer + wtoken.mAppAnimator.animLayerAdjustment;
             } else {
                 winAnimator.mAnimLayer = w.mLayer;
             }
@@ -7884,8 +7917,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_LAYERS) Slog.v(TAG, "Assign layer " + w + ": "
                     + "mBase=" + w.mBaseLayer
                     + " mLayer=" + w.mLayer
-                    + (w.mAppToken == null ?
-                            "" : " mAppLayer=" + w.mAppToken.mAppAnimator.animLayerAdjustment)
+                    + (wtoken == null ?
+                            "" : " mAppLayer=" + wtoken.mAppAnimator.animLayerAdjustment)
                     + " =mAnimLayer=" + winAnimator.mAnimLayer);
             //System.out.println(
             //    "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
@@ -9269,16 +9302,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        final TaskStack stack;
-        if (mFocusedApp != null) {
-            Task task = mTaskIdToTask.get(mFocusedApp.groupId);
-            stack = task.mStack;
-            task.getDisplayContent().mTapDetector.setStackBounds(stack.mStackBox.mBounds);
-        } else {
-            stack = null;
-        }
-        setFocusedStackFrame(stack);
-
+        setFocusedStackFrame();
+        
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
         enableScreenIfNeededLocked();
