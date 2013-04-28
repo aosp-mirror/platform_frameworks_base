@@ -447,8 +447,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContainingFrame.set(pf);
         }
 
-        final Rect display = mDisplayFrame;
-        display.set(df);
+        mDisplayFrame.set(df);
 
         final int pw = mContainingFrame.width();
         final int ph = mContainingFrame.height();
@@ -498,18 +497,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContentChanged = true;
         }
 
-        final Rect overscan = mOverscanFrame;
-        overscan.set(of);
+        mOverscanFrame.set(of);
+        mContentFrame.set(cf);
+        mVisibleFrame.set(vf);
 
-        final Rect content = mContentFrame;
-        content.set(cf);
-
-        final Rect visible = mVisibleFrame;
-        visible.set(vf);
-
-        final Rect frame = mFrame;
-        final int fw = frame.width();
-        final int fh = frame.height();
+        final int fw = mFrame.width();
+        final int fh = mFrame.height();
 
         //System.out.println("In: w=" + w + " h=" + h + " container=" +
         //                   container + " x=" + mAttrs.x + " y=" + mAttrs.y);
@@ -525,61 +518,60 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
                 (int) (x + mAttrs.horizontalMargin * pw),
-                (int) (y + mAttrs.verticalMargin * ph), frame);
+                (int) (y + mAttrs.verticalMargin * ph), mFrame);
 
         //System.out.println("Out: " + mFrame);
 
         // Now make sure the window fits in the overall display.
-        Gravity.applyDisplay(mAttrs.gravity, df, frame);
+        Gravity.applyDisplay(mAttrs.gravity, df, mFrame);
 
         // Make sure the overscan, content and visible frames are inside of the
         // final window frame.
-        if (overscan.left < frame.left) overscan.left = frame.left;
-        if (overscan.top < frame.top) overscan.top = frame.top;
-        if (overscan.right > frame.right) overscan.right = frame.right;
-        if (overscan.bottom > frame.bottom) overscan.bottom = frame.bottom;
-        if (content.left < frame.left) content.left = frame.left;
-        if (content.top < frame.top) content.top = frame.top;
-        if (content.right > frame.right) content.right = frame.right;
-        if (content.bottom > frame.bottom) content.bottom = frame.bottom;
-        if (visible.left < frame.left) visible.left = frame.left;
-        if (visible.top < frame.top) visible.top = frame.top;
-        if (visible.right > frame.right) visible.right = frame.right;
-        if (visible.bottom > frame.bottom) visible.bottom = frame.bottom;
+        mOverscanFrame.set(Math.max(mOverscanFrame.left, mFrame.left),
+                Math.max(mOverscanFrame.top, mFrame.top),
+                Math.min(mOverscanFrame.right, mFrame.right),
+                Math.min(mOverscanFrame.bottom, mFrame.bottom));
 
-        final Rect overscanInsets = mOverscanInsets;
-        overscanInsets.left = overscan.left-frame.left;
-        overscanInsets.top = overscan.top-frame.top;
-        overscanInsets.right = frame.right-overscan.right;
-        overscanInsets.bottom = frame.bottom-overscan.bottom;
+        mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
+                Math.max(mContentFrame.top, mFrame.top),
+                Math.min(mContentFrame.right, mFrame.right),
+                Math.min(mContentFrame.bottom, mFrame.bottom));
 
-        final Rect contentInsets = mContentInsets;
-        contentInsets.left = content.left-frame.left;
-        contentInsets.top = content.top-frame.top;
-        contentInsets.right = frame.right-content.right;
-        contentInsets.bottom = frame.bottom-content.bottom;
+        mVisibleFrame.set(Math.max(mVisibleFrame.left, mFrame.left),
+                Math.max(mVisibleFrame.top, mFrame.top),
+                Math.min(mVisibleFrame.right, mFrame.right),
+                Math.min(mVisibleFrame.bottom, mFrame.bottom));
 
-        final Rect visibleInsets = mVisibleInsets;
-        visibleInsets.left = visible.left-frame.left;
-        visibleInsets.top = visible.top-frame.top;
-        visibleInsets.right = frame.right-visible.right;
-        visibleInsets.bottom = frame.bottom-visible.bottom;
+        mOverscanInsets.set(mOverscanFrame.left - mFrame.left,
+                mOverscanFrame.top - mFrame.top,
+                mFrame.right - mOverscanFrame.right,
+                mFrame.bottom - mOverscanFrame.bottom);
 
-        mCompatFrame.set(frame);
+        mContentInsets.set(mContentFrame.left - mFrame.left,
+                mContentFrame.top - mFrame.top,
+                mFrame.right - mContentFrame.right,
+                mFrame.bottom - mContentFrame.bottom);
+
+        mVisibleInsets.set(mVisibleFrame.left - mFrame.left,
+                mVisibleFrame.top - mFrame.top,
+                mFrame.right - mVisibleFrame.right,
+                mFrame.bottom - mVisibleFrame.bottom);
+
+        mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
             // If there is a size compatibility scale being applied to the
             // window, we need to apply this to its insets so that they are
             // reported to the app in its coordinate space.
-            overscanInsets.scale(mInvGlobalScale);
-            contentInsets.scale(mInvGlobalScale);
-            visibleInsets.scale(mInvGlobalScale);
+            mOverscanInsets.scale(mInvGlobalScale);
+            mContentInsets.scale(mInvGlobalScale);
+            mVisibleInsets.scale(mInvGlobalScale);
 
             // Also the scaled frame that we report to the app needs to be
             // adjusted to be in its coordinate space.
             mCompatFrame.scale(mInvGlobalScale);
         }
 
-        if (mIsWallpaper && (fw != frame.width() || fh != frame.height())) {
+        if (mIsWallpaper && (fw != mFrame.width() || fh != mFrame.height())) {
             final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
             mService.updateWallpaperOffsetLocked(this, displayInfo.appWidth, displayInfo.appHeight,
                     false);
@@ -592,8 +584,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         + mRequestedWidth + ", mRequestedheight="
                         + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
                         + "): frame=" + mFrame.toShortString()
-                        + " ci=" + contentInsets.toShortString()
-                        + " vi=" + visibleInsets.toShortString());
+                        + " ci=" + mContentInsets.toShortString()
+                        + " vi=" + mVisibleInsets.toShortString());
             //}
         }
     }
