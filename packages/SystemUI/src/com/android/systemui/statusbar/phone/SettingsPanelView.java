@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -62,10 +63,8 @@ public class SettingsPanelView extends PanelView {
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
-
-        setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
     }
-    
+
     public void setQuickSettings(QuickSettings qs) {
         mQS = qs;
     }
@@ -118,6 +117,17 @@ public class SettingsPanelView extends PanelView {
         if (mQS != null) {
             mQS.setService(phoneStatusBar);
         }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            event.getText()
+                    .add(getContext().getString(R.string.accessibility_desc_quick_settings));
+            return true;
+        }
+
+        return super.dispatchPopulateAccessibilityEvent(event);
     }
 
     // We draw the handle ourselves so that it's always glued to the bottom of the window.
