@@ -22,6 +22,7 @@ import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -70,6 +71,8 @@ class DisplayContent {
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
 
+    Rect mBaseDisplayRect = new Rect();
+
     // Accessed directly by all users.
     boolean layoutNeeded;
     int pendingLayoutChanges;
@@ -94,9 +97,6 @@ class DisplayContent {
     /** True when the home StackBox is at the top of mStackBoxes, false otherwise. */
     private TaskStack mHomeStack = null;
 
-    /** Save allocating when retrieving tasks */
-    ArrayList<Task> mTmpTasks = new ArrayList<Task>();
-
     /** Sorted most recent at top, oldest at [0]. */
     ArrayList<TaskStack> mStackHistory = new ArrayList<TaskStack>();
 
@@ -106,7 +106,16 @@ class DisplayContent {
     /** Detect user tapping outside of current focused stack bounds .*/
     StackTapDetector mTapDetector;
 
+    /** Detect user tapping outside of current focused stack bounds .*/
+    Region mTouchExcludeRegion = new Region();
+
     SparseArray<UserStacks> mUserStacks = new SparseArray<UserStacks>();
+
+    /** Save allocating when retrieving tasks */
+    ArrayList<Task> mTmpTasks = new ArrayList<Task>();
+
+    /** Save allocating when calculating rects */
+    Rect mTmpRect = new Rect();
 
     /**
      * @param display May not be null.
@@ -326,6 +335,20 @@ class DisplayContent {
     int stackIdFromPoint(int x, int y) {
         StackBox topBox = mStackBoxes.get(mStackBoxes.size() - 1);
         return topBox.stackIdFromPoint(x, y);
+    }
+
+    void setTouchExcludeRegion(TaskStack focusedStack) {
+        mTouchExcludeRegion.set(mBaseDisplayRect);
+        WindowList windows = getWindowList();
+        for (int i = windows.size() - 1; i >= 0; --i) {
+            final WindowState win = windows.get(i);
+            final TaskStack stack = win.getStack();
+            if (win.isVisibleLw() && stack != null && stack != focusedStack) {
+                mTmpRect.set(win.mVisibleFrame);
+                mTmpRect.intersect(win.mVisibleInsets);
+                mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+            }
+        }
     }
 
     void switchUserStacks(int oldUserId, int newUserId) {
