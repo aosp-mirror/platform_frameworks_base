@@ -48,11 +48,11 @@ public final class GeofenceHardwareImpl {
     private final Context mContext;
     private static GeofenceHardwareImpl sInstance;
     private PowerManager.WakeLock mWakeLock;
-    private SparseArray<IGeofenceHardwareCallback> mGeofences =
+    private final SparseArray<IGeofenceHardwareCallback> mGeofences =
             new SparseArray<IGeofenceHardwareCallback>();
-    private ArrayList<IGeofenceHardwareMonitorCallback>[] mCallbacks =
+    private final ArrayList<IGeofenceHardwareMonitorCallback>[] mCallbacks =
             new ArrayList[GeofenceHardware.NUM_MONITORS];
-    private ArrayList<Reaper> mReapers = new ArrayList<Reaper>();
+    private final ArrayList<Reaper> mReapers = new ArrayList<Reaper>();
 
     private IGpsGeofenceHardware mGpsService;
 
@@ -64,9 +64,7 @@ public final class GeofenceHardwareImpl {
     private static final int REMOVE_GEOFENCE_CALLBACK = 3;
     private static final int PAUSE_GEOFENCE_CALLBACK = 4;
     private static final int RESUME_GEOFENCE_CALLBACK = 5;
-    private static final int ADD_GEOFENCE = 6;
-    private static final int REMOVE_GEOFENCE = 7;
-    private static final int GEOFENCE_CALLBACK_BINDER_DIED = 8;
+    private static final int GEOFENCE_CALLBACK_BINDER_DIED = 6;
 
     // mCallbacksHandler message types
     private static final int GPS_GEOFENCE_STATUS = 1;
@@ -186,17 +184,22 @@ public final class GeofenceHardwareImpl {
         // This API is not thread safe. Operations on the same geofence need to be serialized
         // by upper layers
         if (DEBUG) {
-            Log.d(TAG, "addCircularFence: GeofenceId: " + geofenceId + "Latitude: " + latitude +
-                    "Longitude: " + longitude + "Radius: " + radius + "LastTransition: "
-                    + lastTransition + "MonitorTransition: " + monitorTransitions +
-                    "NotificationResponsiveness: " + notificationResponsivenes +
-                    "UnKnown Timer: " + unknownTimer + "MonitoringType: " + monitoringType);
+            Log.d(TAG, "addCircularFence: GeofenceId: " + geofenceId + " Latitude: " + latitude +
+                    " Longitude: " + longitude + " Radius: " + radius + " LastTransition: "
+                    + lastTransition + " MonitorTransition: " + monitorTransitions +
+                    " NotificationResponsiveness: " + notificationResponsivenes +
+                    " UnKnown Timer: " + unknownTimer + " MonitoringType: " + monitoringType);
 
         }
         boolean result;
-        Message m = mGeofenceHandler.obtainMessage(ADD_GEOFENCE, callback);
-        m.arg1 = geofenceId;
-        mGeofenceHandler.sendMessage(m);
+
+        // The callback must be added before addCircularHardwareGeofence is called otherwise the
+        // callback might not be called after the geofence is added in the geofence hardware.
+        // This also means that the callback must be removed if the addCircularHardwareGeofence
+        // operations is not called or fails.
+        synchronized (mGeofences) {
+            mGeofences.put(geofenceId, callback);
+        }
 
         switch (monitoringType) {
             case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
@@ -214,13 +217,13 @@ public final class GeofenceHardwareImpl {
                 result = false;
         }
         if (result) {
-            m = mReaperHandler.obtainMessage(REAPER_GEOFENCE_ADDED, callback);
+            Message m = mReaperHandler.obtainMessage(REAPER_GEOFENCE_ADDED, callback);
             m.arg1 = monitoringType;
             mReaperHandler.sendMessage(m);
         } else {
-            m = mGeofenceHandler.obtainMessage(REMOVE_GEOFENCE);
-            m.arg1 = geofenceId;
-            mGeofenceHandler.sendMessage(m);
+            synchronized (mGeofences) {
+                mGeofences.remove(geofenceId);
+            }
         }
 
         if (DEBUG) Log.d(TAG, "addCircularFence: Result is: " + result);
@@ -232,6 +235,12 @@ public final class GeofenceHardwareImpl {
         // by upper layers
         if (DEBUG) Log.d(TAG, "Remove Geofence: GeofenceId: " + geofenceId);
         boolean result = false;
+
+        synchronized (mGeofences) {
+            if (mGeofences.get(geofenceId) == null) {
+                throw new IllegalArgumentException("Geofence " + geofenceId + " not registered.");
+            }
+        }
         switch (monitoringType) {
             case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
                 if (mGpsService == null) return false;
@@ -254,6 +263,11 @@ public final class GeofenceHardwareImpl {
         // by upper layers
         if (DEBUG) Log.d(TAG, "Pause Geofence: GeofenceId: " + geofenceId);
         boolean result;
+        synchronized (mGeofences) {
+            if (mGeofences.get(geofenceId) == null) {
+                throw new IllegalArgumentException("Geofence " + geofenceId + " not registered.");
+            }
+        }
         switch (monitoringType) {
             case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
                 if (mGpsService == null) return false;
@@ -277,6 +291,11 @@ public final class GeofenceHardwareImpl {
         // by upper layers
         if (DEBUG) Log.d(TAG, "Resume Geofence: GeofenceId: " + geofenceId);
         boolean result;
+        synchronized (mGeofences) {
+            if (mGeofences.get(geofenceId) == null) {
+                throw new IllegalArgumentException("Geofence " + geofenceId + " not registered.");
+            }
+        }
         switch (monitoringType) {
             case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
                 if (mGpsService == null) return false;
@@ -446,18 +465,11 @@ public final class GeofenceHardwareImpl {
             int status;
             IGeofenceHardwareCallback callback;
             switch (msg.what) {
-                case ADD_GEOFENCE:
-                    geofenceId = msg.arg1;
-                    callback = (IGeofenceHardwareCallback) msg.obj;
-                    mGeofences.put(geofenceId, callback);
-                    break;
-                case REMOVE_GEOFENCE:
-                    geofenceId = msg.arg1;
-                    mGeofences.remove(geofenceId);
-                    break;
                 case ADD_GEOFENCE_CALLBACK:
                     geofenceId = msg.arg1;
-                    callback = mGeofences.get(geofenceId);
+                    synchronized (mGeofences) {
+                        callback = mGeofences.get(geofenceId);
+                    }
                     if (callback == null) return;
 
                     try {
@@ -467,19 +479,25 @@ public final class GeofenceHardwareImpl {
                     break;
                 case REMOVE_GEOFENCE_CALLBACK:
                     geofenceId = msg.arg1;
-                    callback = mGeofences.get(geofenceId);
+                    synchronized (mGeofences) {
+                        callback = mGeofences.get(geofenceId);
+                    }
                     if (callback == null) return;
 
                     try {
                         callback.onGeofenceRemove(geofenceId, msg.arg2);
                     } catch (RemoteException e) {}
-                    mGeofences.remove(geofenceId);
+                    synchronized (mGeofences) {
+                        mGeofences.remove(geofenceId);
+                    }
                     releaseWakeLock();
                     break;
 
                 case PAUSE_GEOFENCE_CALLBACK:
                     geofenceId = msg.arg1;
-                    callback = mGeofences.get(geofenceId);
+                    synchronized (mGeofences) {
+                        callback = mGeofences.get(geofenceId);
+                    }
                     if (callback == null) return;
 
                     try {
@@ -490,7 +508,9 @@ public final class GeofenceHardwareImpl {
 
                 case RESUME_GEOFENCE_CALLBACK:
                     geofenceId = msg.arg1;
-                    callback = mGeofences.get(geofenceId);
+                    synchronized (mGeofences) {
+                        callback = mGeofences.get(geofenceId);
+                    }
                     if (callback == null) return;
 
                     try {
@@ -501,12 +521,14 @@ public final class GeofenceHardwareImpl {
 
                 case GEOFENCE_TRANSITION_CALLBACK:
                     GeofenceTransition geofenceTransition = (GeofenceTransition)(msg.obj);
-                    callback = mGeofences.get(geofenceTransition.mGeofenceId);
+                    synchronized (mGeofences) {
+                        callback = mGeofences.get(geofenceTransition.mGeofenceId);
+                    }
 
                     if (DEBUG) Log.d(TAG, "GeofenceTransistionCallback: GPS : GeofenceId: " +
                             geofenceTransition.mGeofenceId +
-                            "Transition: " + geofenceTransition.mTransition +
-                            "Location: " + geofenceTransition.mLocation + ":" + mGeofences);
+                            " Transition: " + geofenceTransition.mTransition +
+                            " Location: " + geofenceTransition.mLocation + ":" + mGeofences);
 
                     try {
                         callback.onGeofenceTransition(
@@ -521,12 +543,14 @@ public final class GeofenceHardwareImpl {
                    callback = (IGeofenceHardwareCallback) (msg.obj);
                    if (DEBUG) Log.d(TAG, "Geofence callback reaped:" + callback);
                    int monitoringType = msg.arg1;
-                   for (int i = 0; i < mGeofences.size(); i++) {
-                        if (mGeofences.valueAt(i).equals(callback)) {
-                            geofenceId = mGeofences.keyAt(i);
-                            removeGeofence(mGeofences.keyAt(i), monitoringType);
-                            mGeofences.remove(geofenceId);
-                        }
+                   synchronized (mGeofences) {
+                       for (int i = 0; i < mGeofences.size(); i++) {
+                            if (mGeofences.valueAt(i).equals(callback)) {
+                                geofenceId = mGeofences.keyAt(i);
+                                removeGeofence(mGeofences.keyAt(i), monitoringType);
+                                mGeofences.remove(geofenceId);
+                            }
+                       }
                    }
             }
         }
