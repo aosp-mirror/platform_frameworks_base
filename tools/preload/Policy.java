@@ -69,7 +69,8 @@ public class Policy {
         // Threads
         "android.os.AsyncTask",
         "android.pim.ContactsAsyncHelper",
-        "java.lang.ProcessManager"
+        "android.webkit.WebViewClassic$1",
+        "java.lang.ProcessManager",
     ));
 
     /**
