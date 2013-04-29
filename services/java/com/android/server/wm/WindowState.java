@@ -900,7 +900,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 || (atoken == null && mRootToken.hidden)
                 || (atoken != null && (atoken.hiddenRequested || atoken.hidden))
                 || mAttachedHidden
-                || mExiting || mDestroying;
+                || (mExiting && !isAnimatingLw())
+                || mDestroying;
     }
 
     /**
