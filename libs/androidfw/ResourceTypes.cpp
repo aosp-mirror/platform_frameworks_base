@@ -5324,7 +5324,7 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
 }
 
 
-#ifndef HAVE_ANDROID_OS
+#ifdef STATIC_ANDROIDFW_FOR_TOOLS
 #define CHAR16_TO_CSTR(c16, len) (String8(String16(c16,len)).string())
 
 #define CHAR16_ARRAY_EQ(constant, var, len) \
@@ -5621,6 +5621,6 @@ void ResTable::print(bool inclValues) const
     }
 }
 
-#endif // HAVE_ANDROID_OS
+#endif // STATIC_ANDROIDFW_FOR_TOOLS
 
 }   // namespace android
