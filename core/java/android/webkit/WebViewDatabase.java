@@ -342,14 +342,14 @@ public class WebViewDatabase {
     }
 
     private static void upgradeDatabaseFromV11ToV12() {
-        int oldVersion = sDatabase.getVersion();
+        int oldVersion = mDatabase.getVersion();
 
         if (oldVersion >= 12) {
             // Nothing to do.
             return;
         }
         // delete the rows in the database.
-        sDatabase.delete(mTableNames[TABLE_PASSWORD_ID], null, null);
+        mDatabase.delete(mTableNames[TABLE_PASSWORD_ID], null, null);
     }
 
     private static void upgradeDatabaseFromV10ToV11() {
