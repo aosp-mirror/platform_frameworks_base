@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
+import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,7 +31,7 @@ import java.io.IOException;
  * opened FileDescriptor that can be used to read the data, as well as the
  * offset and length of that entry's data in the file.
  */
-public class AssetFileDescriptor implements Parcelable {
+public class AssetFileDescriptor implements Parcelable, Closeable {
     /**
      * Length used with {@link #AssetFileDescriptor(ParcelFileDescriptor, long, long)}
      * and {@link #getDeclaredLength} when a length has not been declared.  This means
@@ -122,6 +123,7 @@ public class AssetFileDescriptor implements Parcelable {
     /**
      * Convenience for calling <code>getParcelFileDescriptor().close()</code>.
      */
+    @Override
     public void close() throws IOException {
         mFd.close();
     }
