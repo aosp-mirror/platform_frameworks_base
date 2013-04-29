@@ -63,6 +63,12 @@ static void glVertexAttribPointerBounds(GLuint indx, GLint size, GLenum type,
     glVertexAttribPointer(indx, size, type, normalized, stride, pointer);
 }
 #endif
+#ifdef GL_ES_VERSION_3_0
+static void glVertexAttribIPointerBounds(GLuint indx, GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count) {
+    glVertexAttribIPointer(indx, size, type, stride, pointer);
+}
+#endif
 }
 
 /* Cache method IDs each time the class is loaded. */
@@ -288,6 +294,7 @@ getarray
     int _needed = 0;
 
     params = (CTYPE *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    _remaining /= sizeof(CTYPE);    // convert from bytes to item count
     _needed = getNeededCount(pname);
     // if we didn't find this pname, we just assume the user passed
     // an array of the right size -- this might happen with extensions
@@ -2129,7 +2136,7 @@ android_glIsRenderbufferOES__I
     _returnValue = glIsRenderbufferOES(
         (GLuint)renderbuffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* void glBindRenderbufferOES ( GLenum target, GLuint renderbuffer ) */
@@ -2422,7 +2429,7 @@ android_glIsFramebufferOES__I
     _returnValue = glIsFramebufferOES(
         (GLuint)framebuffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* void glBindFramebufferOES ( GLenum target, GLuint framebuffer ) */
@@ -2615,7 +2622,7 @@ android_glCheckFramebufferStatusOES__I
     _returnValue = glCheckFramebufferStatusOES(
         (GLenum)target
     );
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glFramebufferRenderbufferOES ( GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer ) */

@@ -63,6 +63,12 @@ static void glVertexAttribPointerBounds(GLuint indx, GLint size, GLenum type,
     glVertexAttribPointer(indx, size, type, normalized, stride, pointer);
 }
 #endif
+#ifdef GL_ES_VERSION_3_0
+static void glVertexAttribIPointerBounds(GLuint indx, GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count) {
+    glVertexAttribIPointer(indx, size, type, stride, pointer);
+}
+#endif
 }
 
 /* Cache method IDs each time the class is loaded. */
@@ -288,6 +294,7 @@ getarray
     int _needed = 0;
 
     params = (CTYPE *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    _remaining /= sizeof(CTYPE);    // convert from bytes to item count
     _needed = getNeededCount(pname);
     // if we didn't find this pname, we just assume the user passed
     // an array of the right size -- this might happen with extensions
@@ -549,7 +556,7 @@ android_glCheckFramebufferStatus__I
     _returnValue = glCheckFramebufferStatus(
         (GLenum)target
     );
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glClear ( GLbitfield mask ) */
@@ -709,7 +716,7 @@ android_glCreateProgram__
   (JNIEnv *_env, jobject _this) {
     GLuint _returnValue;
     _returnValue = glCreateProgram();
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* GLuint glCreateShader ( GLenum type ) */
@@ -720,7 +727,7 @@ android_glCreateShader__I
     _returnValue = glCreateShader(
         (GLenum)type
     );
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glCullFace ( GLenum mode ) */
@@ -1172,7 +1179,7 @@ android_glDrawElements__IIII
         (GLenum)mode,
         (GLsizei)count,
         (GLenum)type,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -2466,7 +2473,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glGetBooleanv ( GLenum pname, GLboolean *params ) */
@@ -2576,7 +2583,7 @@ android_glGetError__
   (JNIEnv *_env, jobject _this) {
     GLenum _returnValue;
     _returnValue = glGetError();
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glGetFloatv ( GLenum pname, GLfloat *params ) */
@@ -3614,7 +3621,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glGetVertexAttribfv ( GLuint index, GLenum pname, GLfloat *params ) */
@@ -3855,7 +3862,7 @@ android_glIsBuffer__I
     _returnValue = glIsBuffer(
         (GLuint)buffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsEnabled ( GLenum cap ) */
@@ -3866,7 +3873,7 @@ android_glIsEnabled__I
     _returnValue = glIsEnabled(
         (GLenum)cap
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsFramebuffer ( GLuint framebuffer ) */
@@ -3877,7 +3884,7 @@ android_glIsFramebuffer__I
     _returnValue = glIsFramebuffer(
         (GLuint)framebuffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsProgram ( GLuint program ) */
@@ -3888,7 +3895,7 @@ android_glIsProgram__I
     _returnValue = glIsProgram(
         (GLuint)program
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsRenderbuffer ( GLuint renderbuffer ) */
@@ -3899,7 +3906,7 @@ android_glIsRenderbuffer__I
     _returnValue = glIsRenderbuffer(
         (GLuint)renderbuffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsShader ( GLuint shader ) */
@@ -3910,7 +3917,7 @@ android_glIsShader__I
     _returnValue = glIsShader(
         (GLuint)shader
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsTexture ( GLuint texture ) */
@@ -3921,7 +3928,7 @@ android_glIsTexture__I
     _returnValue = glIsTexture(
         (GLuint)texture
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* void glLineWidth ( GLfloat width ) */
@@ -5975,7 +5982,7 @@ android_glVertexAttribPointer__IIIZII
         (GLenum)type,
         (GLboolean)normalized,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
 }
 
