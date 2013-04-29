@@ -58,11 +58,20 @@ int32_t drm_dcfParser(uint8_t *buffer, int32_t bufferLen, T_DRM_DCF_Info *pDcfIn
     pDcfInfo->Version = *(tmpBuf++);
     if (0x01 != pDcfInfo->Version) /* Because it is OMA DRM v1.0, the vension must be 1 */
         return FALSE;
+
     pDcfInfo->ContentTypeLen = *(tmpBuf++);
+    if (pDcfInfo->ContentTypeLen >= MAX_CONTENT_TYPE_LEN)
+        return FALSE;
+
     pDcfInfo->ContentURILen = *(tmpBuf++);
+    if (pDcfInfo->ContentURILen >= MAX_CONTENT_URI_LEN)
+        return FALSE;
+
     strncpy((char *)pDcfInfo->ContentType, (char *)tmpBuf, pDcfInfo->ContentTypeLen);
+    pDcfInfo->ContentType[MAX_CONTENT_TYPE_LEN - 1] = 0;
     tmpBuf += pDcfInfo->ContentTypeLen;
     strncpy((char *)pDcfInfo->ContentURI, (char *)tmpBuf, pDcfInfo->ContentURILen);
+    pDcfInfo->ContentURI[MAX_CONTENT_URI_LEN - 1] = 0;
     tmpBuf += pDcfInfo->ContentURILen;
 
     /* 2. Get the headers length and data length */
@@ -86,30 +95,49 @@ int32_t drm_dcfParser(uint8_t *buffer, int32_t bufferLen, T_DRM_DCF_Info *pDcfIn
         while ('\r' != *pEnd && pEnd < pData)
             pEnd++;
 
-        if (0 == strncmp((char *)pStart, HEADER_ENCRYPTION_METHOD, HEADER_ENCRYPTION_METHOD_LEN))
+        if (0 == strncmp((char *)pStart, HEADER_ENCRYPTION_METHOD, HEADER_ENCRYPTION_METHOD_LEN)) {
+            if ((pEnd - pStart - HEADER_ENCRYPTION_METHOD_LEN) >= MAX_ENCRYPTION_METHOD_LEN)
+                return FALSE;
             strncpy((char *)pDcfInfo->Encryption_Method,
                          (char *)(pStart + HEADER_ENCRYPTION_METHOD_LEN),
                          pEnd - pStart - HEADER_ENCRYPTION_METHOD_LEN);
-        else if (0 == strncmp((char *)pStart, HEADER_RIGHTS_ISSUER, HEADER_RIGHTS_ISSUER_LEN))
+            pDcfInfo->Encryption_Method[MAX_ENCRYPTION_METHOD_LEN - 1] = 0;
+        } else if (0 == strncmp((char *)pStart, HEADER_RIGHTS_ISSUER, HEADER_RIGHTS_ISSUER_LEN)) {
+            if ((pEnd - pStart - HEADER_RIGHTS_ISSUER_LEN) >= MAX_RIGHTS_ISSUER_LEN)
+                return FALSE;
             strncpy((char *)pDcfInfo->Rights_Issuer,
                          (char *)(pStart + HEADER_RIGHTS_ISSUER_LEN),
                          pEnd - pStart - HEADER_RIGHTS_ISSUER_LEN);
-        else if (0 == strncmp((char *)pStart, HEADER_CONTENT_NAME, HEADER_CONTENT_NAME_LEN))
+            pDcfInfo->Rights_Issuer[MAX_RIGHTS_ISSUER_LEN - 1] = 0;
+        } else if (0 == strncmp((char *)pStart, HEADER_CONTENT_NAME, HEADER_CONTENT_NAME_LEN)) {
+            if ((pEnd - pStart - HEADER_CONTENT_NAME_LEN) >= MAX_CONTENT_NAME_LEN)
+                return FALSE;
             strncpy((char *)pDcfInfo->Content_Name,
                          (char *)(pStart + HEADER_CONTENT_NAME_LEN),
                          pEnd - pStart - HEADER_CONTENT_NAME_LEN);
-        else if (0 == strncmp((char *)pStart, HEADER_CONTENT_DESCRIPTION, HEADER_CONTENT_DESCRIPTION_LEN))
+            pDcfInfo->Content_Name[MAX_CONTENT_NAME_LEN - 1] = 0;
+        } else if (0 == strncmp((char *)pStart, HEADER_CONTENT_DESCRIPTION, HEADER_CONTENT_DESCRIPTION_LEN)) {
+            if ((pEnd - pStart - HEADER_CONTENT_DESCRIPTION_LEN) >= MAX_CONTENT_DESCRIPTION_LEN)
+                return FALSE;
             strncpy((char *)pDcfInfo->ContentDescription,
                          (char *)(pStart + HEADER_CONTENT_DESCRIPTION_LEN),
                          pEnd - pStart - HEADER_CONTENT_DESCRIPTION_LEN);
-        else if (0 == strncmp((char *)pStart, HEADER_CONTENT_VENDOR, HEADER_CONTENT_VENDOR_LEN))
+            pDcfInfo->ContentDescription[MAX_CONTENT_DESCRIPTION_LEN - 1] = 0;
+        } else if (0 == strncmp((char *)pStart, HEADER_CONTENT_VENDOR, HEADER_CONTENT_VENDOR_LEN)) {
+            if ((pEnd - pStart - HEADER_CONTENT_VENDOR_LEN) >= MAX_CONTENT_VENDOR_LEN)
+                return FALSE;
             strncpy((char *)pDcfInfo->ContentVendor,
                          (char *)(pStart + HEADER_CONTENT_VENDOR_LEN),
                          pEnd - pStart - HEADER_CONTENT_VENDOR_LEN);
-        else if (0 == strncmp((char *)pStart, HEADER_ICON_URI, HEADER_ICON_URI_LEN))
+            pDcfInfo->ContentVendor[MAX_CONTENT_VENDOR_LEN - 1] = 0;
+        } else if (0 == strncmp((char *)pStart, HEADER_ICON_URI, HEADER_ICON_URI_LEN)) {
+            if ((pEnd - pStart - HEADER_ICON_URI_LEN) >= MAX_ICON_URI_LEN)
+                return FALSE;
             strncpy((char *)pDcfInfo->Icon_URI,
                          (char *)(pStart + HEADER_ICON_URI_LEN),
                          pEnd - pStart - HEADER_ICON_URI_LEN);
+            pDcfInfo->Icon_URI[MAX_ICON_URI_LEN - 1] = 0;
+        }
 
         if ('\n' == *(pEnd + 1))
             pStart = pEnd + 2;  /* Two bytes: a '\r' and a '\n' */
