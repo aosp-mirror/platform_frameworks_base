@@ -90,7 +90,10 @@ int32_t drm_parseDM(const uint8_t *buffer, int32_t bufferLen, T_DRM_DM_Info *pDm
     /* if can not find the CRLF, return FALSE */
     if (NULL == pEnd)
         return FALSE;
+    if ((pEnd - pStart) >= MAX_CONTENT_BOUNDARY_LEN)
+        return FALSE;
     strncpy((char *)pDmInfo->boundary, (char *)pStart, pEnd - pStart);
+    pDmInfo->boundary[MAX_CONTENT_BOUNDARY_LEN - 1] = 0;
     boundaryLen = strlen((char *)pDmInfo->boundary) + 2; /* 2 means: '\r' and '\n' */
 
     pEnd += 2; /* skip the '\r' and '\n' */
@@ -126,6 +129,8 @@ int32_t drm_parseDM(const uint8_t *buffer, int32_t bufferLen, T_DRM_DM_Info *pDm
                     DRM_SKIP_SPACE_TAB(pStart);
 
                     if (pEnd - pStart > 0) {
+                        if ((pEnd - pStart) >= MAX_CONTENT_TYPE_LEN)
+                            return FALSE;
                         strncpy((char *)pDmInfo->contentType, (char *)pStart, pEnd - pStart);
                         pDmInfo->contentType[pEnd - pStart] = '\0';
                     }
@@ -146,13 +151,16 @@ int32_t drm_parseDM(const uint8_t *buffer, int32_t bufferLen, T_DRM_DM_Info *pDm
 
                     /* Change the format from <...> to cid:... */
                     if (NULL != (pTmp = (uint8_t *)memchr((char *)pStart, '<', pEnd - pStart))) {
+                        if ((pEnd - pTmp - 1) >= (int) sizeof(tmpBuf))
+                            return FALSE;
                         strncpy((char *)tmpBuf, (char *)(pTmp + 1), pEnd - pTmp - 1);
+                        tmpBuf[MAX_CONTENT_ID - 1] = 0;
 
                         if (NULL != (pTmp = (uint8_t *)memchr((char *)tmpBuf, '>', pEnd - pTmp - 1))) {
                             *pTmp = '\0';
 
                             memset(pDmInfo->contentID, 0, MAX_CONTENT_ID);
-                            sprintf((char *)pDmInfo->contentID, "%s%s", "cid:", (int8_t *)tmpBuf);
+                            snprintf((char *)pDmInfo->contentID, MAX_CONTENT_ID, "%s%s", "cid:", (int8_t *)tmpBuf);
                         }
                     }
                 }
