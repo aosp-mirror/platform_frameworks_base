@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Looper;
 import android.view.DisplayInfo;
 import android.view.InputChannel;
@@ -35,7 +36,7 @@ public class StackTapDetector extends InputEventReceiver {
     private float mDownX;
     private float mDownY;
     private int mPointerId;
-    private Rect mStackBounds = new Rect();
+    final private Region mTouchExcludeRegion;
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
 
@@ -44,6 +45,7 @@ public class StackTapDetector extends InputEventReceiver {
         super(inputChannel, looper);
         mService = service;
         mDisplayContent = displayContent;
+        mTouchExcludeRegion = displayContent.mTouchExcludeRegion;
         DisplayInfo info = displayContent.getDisplayInfo();
         mMotionSlop = (int)(info.logicalDensityDpi * TAP_MOTION_SLOP_INCHES);
     }
@@ -84,7 +86,7 @@ public class StackTapDetector extends InputEventReceiver {
                         if ((motionEvent.getEventTime() - motionEvent.getDownTime())
                                 < TAP_TIMEOUT_MSEC
                                 && (x - mDownX) < mMotionSlop && (y - mDownY) < mMotionSlop
-                                && !mStackBounds.contains(x, y)) {
+                                && !mTouchExcludeRegion.contains(x, y)) {
                             mService.mH.obtainMessage(H.TAP_OUTSIDE_STACK, x, y, mDisplayContent)
                                     .sendToTarget();
                         }
@@ -93,12 +95,6 @@ public class StackTapDetector extends InputEventReceiver {
                 }
                 break;
             }
-        }
-    }
-
-    void setStackBounds(Rect bounds) {
-        synchronized (this) {
-            mStackBounds.set(bounds);
         }
     }
 }

@@ -3715,7 +3715,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mFocusedApp != null) {
             Task task = mTaskIdToTask.get(mFocusedApp.groupId);
             stack = task.mStack;
-            task.getDisplayContent().mTapDetector.setStackBounds(stack.mStackBox.mBounds);
+            task.getDisplayContent().setTouchExcludeRegion(stack);
         } else {
             stack = null;
         }
@@ -6895,6 +6895,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.mBaseDisplayWidth = displayContent.mInitialDisplayWidth;
                     displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
                     displayContent.mBaseDisplayDensity = displayContent.mInitialDisplayDensity;
+                    displayContent.mBaseDisplayRect.set(0, 0,
+                            displayContent.mBaseDisplayWidth, displayContent.mBaseDisplayHeight);
                 }
             }
         }
