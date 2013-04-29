@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RotationLockController;
 
 public class SettingsPanelView extends PanelView {
     public static final boolean DEBUG_GESTURES = true;
@@ -86,10 +87,11 @@ public class SettingsPanelView extends PanelView {
     }
 
     public void setup(NetworkController networkController, BluetoothController bluetoothController,
-            BatteryController batteryController, LocationController locationController) {
+            BatteryController batteryController, LocationController locationController,
+            RotationLockController rotationLockController) {
         if (mQS != null) {
             mQS.setup(networkController, bluetoothController, batteryController,
-                    locationController);
+                    locationController, rotationLockController);
         }
     }
 
