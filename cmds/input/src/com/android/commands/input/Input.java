@@ -57,14 +57,18 @@ public class Input {
                 }
             } else if (command.equals("keyevent")) {
                 if (args.length >= 2) {
-                    for (int i=1; i < args.length; i++) {
-                        int keyCode = KeyEvent.keyCodeFromString(args[i]);
-                        if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
-                            keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[i]);
+                    final boolean longpress = "--longpress".equals(args[1]);
+                    final int start = longpress ? 2 : 1;
+                    if (args.length > start) {
+                        for (int i = start; i < args.length; i++) {
+                            int keyCode = KeyEvent.keyCodeFromString(args[i]);
+                            if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+                                keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[i]);
+                            }
+                            sendKeyEvent(keyCode, longpress);
                         }
-                        sendKeyEvent(keyCode);
+                        return;
                     }
-                    return;
                 }
             } else if (command.equals("tap")) {
                 if (args.length == 3) {
@@ -168,10 +172,15 @@ public class Input {
         }
     }
 
-    private void sendKeyEvent(int keyCode) {
+    private void sendKeyEvent(int keyCode, boolean longpress) {
         long now = SystemClock.uptimeMillis();
         injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0, 0,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
+        if (longpress) {
+            injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 1, 0,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_LONG_PRESS,
+                    InputDevice.SOURCE_KEYBOARD));
+        }
         injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0, 0,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
     }
@@ -251,7 +260,7 @@ public class Input {
     private void showUsage() {
         System.err.println("usage: input ...");
         System.err.println("       input text <string>");
-        System.err.println("       input keyevent <key code number or name> ...");
+        System.err.println("       input keyevent [--longpress] <key code number or name> ...");
         System.err.println("       input [touchscreen|touchpad|touchnavigation] tap <x> <y>");
         System.err.println("       input [touchscreen|touchpad|touchnavigation] swipe "
                 + "<x1> <y1> <x2> <y2> [duration(ms)]");
