@@ -624,7 +624,10 @@ public interface WindowManager extends ViewManager {
          * Window flag: hide all screen decorations (such as the status bar) while
          * this window is displayed.  This allows the window to use the entire
          * display space for itself -- the status bar will be hidden when
-         * an app window with this flag set is on the top layer.
+         * an app window with this flag set is on the top layer. A fullscreen window
+         * will ignore a value of {@link #SOFT_INPUT_ADJUST_RESIZE} for the window's
+         * {@link #softInputMode} field; the window will stay fullscreen
+         * and will not resize.
          *
          * <p>This flag can be controlled in your theme through the
          * {@link android.R.attr#windowFullscreen} attribute; this attribute
@@ -1114,7 +1117,10 @@ public interface WindowManager extends ViewManager {
          * method.  This can <em>not</em> be combined with
          * {@link #SOFT_INPUT_ADJUST_PAN}; if
          * neither of these are set, then the system will try to pick one or
-         * the other depending on the contents of the window.
+         * the other depending on the contents of the window. If the window's
+         * layout parameter flags include {@link #FLAG_FULLSCREEN}, this
+         * value for {@link #softInputMode} will be ignored; the window will
+         * not resize, but will stay fullscreen.
          */
         public static final int SOFT_INPUT_ADJUST_RESIZE = 0x10;
         
