@@ -45,6 +45,8 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import libcore.icu.ICU;
+
 /**
  * This class is a widget for selecting a date. The date can be selected by a
  * year, month, and day spinners or a {@link CalendarView}. The set of spinners
@@ -508,24 +510,27 @@ public class DatePicker extends FrameLayout {
      */
     private void reorderSpinners() {
         mSpinners.removeAllViews();
-        char[] order = DateFormat.getDateFormatOrder(getContext());
+        // We use numeric spinners for year and day, but textual months. Ask icu4c what
+        // order the user's locale uses for that combination. http://b/7207103.
+        String pattern = ICU.getBestDateTimePattern("yyyyMMMdd", Locale.getDefault().toString());
+        char[] order = ICU.getDateFormatOrder(pattern);
         final int spinnerCount = order.length;
         for (int i = 0; i < spinnerCount; i++) {
             switch (order[i]) {
-                case DateFormat.DATE:
+                case 'd':
                     mSpinners.addView(mDaySpinner);
                     setImeOptions(mDaySpinner, spinnerCount, i);
                     break;
-                case DateFormat.MONTH:
+                case 'M':
                     mSpinners.addView(mMonthSpinner);
                     setImeOptions(mMonthSpinner, spinnerCount, i);
                     break;
-                case DateFormat.YEAR:
+                case 'y':
                     mSpinners.addView(mYearSpinner);
                     setImeOptions(mYearSpinner, spinnerCount, i);
                     break;
                 default:
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException(Arrays.toString(order));
             }
         }
     }
