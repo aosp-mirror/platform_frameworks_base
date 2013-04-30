@@ -65,7 +65,7 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Stiepiet, lai aizp. ekr."</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Saderības tālummaiņa"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Ja lietotne ir paredzēta mazākam ekrānam, blakus pulkstenim tiks parādīta tālummaiņas vadīkla."</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Notiek ekrānuzņ. saglabāšana"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Notiek ekrānuzņēmuma saglabāšana"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Notiek ekrānuzņēmuma saglabāšana..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Notiek ekrānuzņēmuma saglabāšana."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekrānuzņēmums ir uzņemts."</string>
