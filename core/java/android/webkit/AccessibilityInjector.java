@@ -647,6 +647,9 @@ class AccessibilityInjector {
     private static class TextToSpeechWrapper {
         private static final String WRAP_TAG = TextToSpeechWrapper.class.getSimpleName();
 
+        /** Lock used to control access to the TextToSpeech object. */
+        private final Object mTtsLock = new Object();
+
         private final HashMap<String, String> mTtsParams;
         private final TextToSpeech mTextToSpeech;
 
@@ -684,7 +687,7 @@ class AccessibilityInjector {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public boolean isSpeaking() {
-            synchronized (mTextToSpeech) {
+            synchronized (mTtsLock) {
                 if (!mReady) {
                     return false;
                 }
@@ -696,7 +699,7 @@ class AccessibilityInjector {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public int speak(String text, int queueMode, HashMap<String, String> params) {
-            synchronized (mTextToSpeech) {
+            synchronized (mTtsLock) {
                 if (!mReady) {
                     if (DEBUG) {
                         Log.w(WRAP_TAG, "[" + hashCode() + "] Attempted to speak before TTS init");
@@ -715,7 +718,7 @@ class AccessibilityInjector {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public int stop() {
-            synchronized (mTextToSpeech) {
+            synchronized (mTtsLock) {
                 if (!mReady) {
                     if (DEBUG) {
                         Log.w(WRAP_TAG, "[" + hashCode() + "] Attempted to stop before initialize");
@@ -733,7 +736,7 @@ class AccessibilityInjector {
 
         @SuppressWarnings("unused")
         protected void shutdown() {
-            synchronized (mTextToSpeech) {
+            synchronized (mTtsLock) {
                 if (!mReady) {
                     if (DEBUG) {
                         Log.w(WRAP_TAG, "[" + hashCode() + "] Called shutdown before initialize");
@@ -753,7 +756,7 @@ class AccessibilityInjector {
         private final OnInitListener mInitListener = new OnInitListener() {
             @Override
             public void onInit(int status) {
-                synchronized (mTextToSpeech) {
+                synchronized (mTtsLock) {
                     if (!mShutdown && (status == TextToSpeech.SUCCESS)) {
                         if (DEBUG) {
                             Log.d(WRAP_TAG, "[" + TextToSpeechWrapper.this.hashCode()
