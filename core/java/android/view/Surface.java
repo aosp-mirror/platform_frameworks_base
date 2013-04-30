@@ -34,19 +34,21 @@ public class Surface implements Parcelable {
 
     private static native int nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
             throws OutOfResourcesException;
+    private static native int nativeCreateFromSurfaceControl(int surfaceControlNativeObject);
 
-    private native Canvas nativeLockCanvas(int nativeObject, Rect dirty);
-    private native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
+    private static native void nativeLockCanvas(int nativeObject, Canvas canvas, Rect dirty)
+            throws OutOfResourcesException;
+    private static native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
 
     private static native void nativeRelease(int nativeObject);
     private static native boolean nativeIsValid(int nativeObject);
     private static native boolean nativeIsConsumerRunningBehind(int nativeObject);
-    private static native int nativeCopyFrom(int nativeObject, int surfaceControlNativeObject);
     private static native int nativeReadFromParcel(int nativeObject, Parcel source);
     private static native void nativeWriteToParcel(int nativeObject, Parcel dest);
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
+        @Override
         public Surface createFromParcel(Parcel source) {
             try {
                 Surface s = new Surface();
@@ -57,26 +59,20 @@ public class Surface implements Parcelable {
                 return null;
             }
         }
+
+        @Override
         public Surface[] newArray(int size) {
             return new Surface[size];
         }
     };
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    // Guarded state.
+    final Object mLock = new Object(); // protects the native state
     private String mName;
-
-    // Note: These fields are accessed by native code.
-    // The mSurfaceControl will only be present for Surfaces used by the window
-    // server or system processes. When this class is parceled we defer to the
-    // mSurfaceControl to do the parceling. Otherwise we parcel the
-    // mNativeSurface.
     int mNativeObject; // package scope only for SurfaceControl access
-
-    // protects the native state
-    private final Object mNativeObjectLock = new Object();
-
-    private int mGenerationId; // incremented each time mNativeSurface changes
-    @SuppressWarnings("UnusedDeclaration")
+    private int mGenerationId; // incremented each time mNativeObject changes
     private final Canvas mCanvas = new CompatibleCanvas();
 
     // A matrix to scale the matrix set by application. This is set to null for
@@ -125,21 +121,22 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("surfaceTexture must not be null");
         }
 
-        mName = surfaceTexture.toString();
-        try {
-            mNativeObject = nativeCreateFromSurfaceTexture(surfaceTexture);
-        } catch (OutOfResourcesException ex) {
-            // We can't throw OutOfResourcesException because it would be an API change.
-            throw new RuntimeException(ex);
+        synchronized (mLock) {
+            mName = surfaceTexture.toString();
+            try {
+                setNativeObjectLocked(nativeCreateFromSurfaceTexture(surfaceTexture));
+            } catch (OutOfResourcesException ex) {
+                // We can't throw OutOfResourcesException because it would be an API change.
+                throw new RuntimeException(ex);
+            }
         }
-
-        mCloseGuard.open("release");
     }
 
     /* called from android_view_Surface_createFromIGraphicBufferProducer() */
     private Surface(int nativeObject) {
-        mNativeObject = nativeObject;
-        mCloseGuard.open("release");
+        synchronized (mLock) {
+            setNativeObjectLocked(nativeObject);
+        }
     }
 
     @Override
@@ -160,13 +157,11 @@ public class Surface implements Parcelable {
      * This will make the surface invalid.
      */
     public void release() {
-        synchronized (mNativeObjectLock) {
+        synchronized (mLock) {
             if (mNativeObject != 0) {
                 nativeRelease(mNativeObject);
-                mNativeObject = 0;
-                mGenerationId++;
+                setNativeObjectLocked(0);
             }
-            mCloseGuard.close();
         }
     }
 
@@ -187,7 +182,7 @@ public class Surface implements Parcelable {
      * Otherwise returns false.
      */
     public boolean isValid() {
-        synchronized (mNativeObjectLock) {
+        synchronized (mLock) {
             if (mNativeObject == 0) return false;
             return nativeIsValid(mNativeObject);
         }
@@ -201,7 +196,9 @@ public class Surface implements Parcelable {
      * @hide
      */
     public int getGenerationId() {
-        return mGenerationId;
+        synchronized (mLock) {
+            return mGenerationId;
+        }
     }
 
     /**
@@ -211,7 +208,7 @@ public class Surface implements Parcelable {
      * @hide
      */
     public boolean isConsumerRunningBehind() {
-        synchronized (mNativeObjectLock) {
+        synchronized (mLock) {
             checkNotReleasedLocked();
             return nativeIsConsumerRunningBehind(mNativeObject);
         }
@@ -234,9 +231,10 @@ public class Surface implements Parcelable {
      */
     public Canvas lockCanvas(Rect inOutDirty)
             throws OutOfResourcesException, IllegalArgumentException {
-        synchronized (mNativeObjectLock) {
+        synchronized (mLock) {
             checkNotReleasedLocked();
-            return nativeLockCanvas(mNativeObject, inOutDirty);
+            nativeLockCanvas(mNativeObject, mCanvas, inOutDirty);
+            return mCanvas;
         }
     }
 
@@ -247,7 +245,12 @@ public class Surface implements Parcelable {
      * @param canvas The canvas previously obtained from {@link #lockCanvas}.
      */
     public void unlockCanvasAndPost(Canvas canvas) {
-        synchronized (mNativeObjectLock) {
+        if (canvas != mCanvas) {
+            throw new IllegalArgumentException("canvas object must be the same instance that "
+                    + "was previously returned by lockCanvas");
+        }
+
+        synchronized (mLock) {
             checkNotReleasedLocked();
             nativeUnlockCanvasAndPost(mNativeObject, canvas);
         }
@@ -273,7 +276,6 @@ public class Surface implements Parcelable {
         }
     }
 
-
     /**
      * Copy another surface to this one.  This surface now holds a reference
      * to the same data as the original surface, and is -not- the owner.
@@ -287,22 +289,24 @@ public class Surface implements Parcelable {
         if (other == null) {
             throw new IllegalArgumentException("other must not be null");
         }
-        if (other.mNativeObject == 0) {
+
+        int surfaceControlPtr = other.mNativeObject;
+        if (surfaceControlPtr == 0) {
             throw new NullPointerException(
                     "SurfaceControl native object is null. Are you using a released SurfaceControl?");
         }
-        synchronized (mNativeObjectLock) {
-            mNativeObject = nativeCopyFrom(mNativeObject, other.mNativeObject);
-            if (mNativeObject == 0) {
-                // nativeCopyFrom released our reference
-                mCloseGuard.close();
+        int newNativeObject = nativeCreateFromSurfaceControl(surfaceControlPtr);
+
+        synchronized (mLock) {
+            if (mNativeObject != 0) {
+                nativeRelease(mNativeObject);
             }
-            mGenerationId++;
+            setNativeObjectLocked(newNativeObject);
         }
     }
 
     /**
-     * This is intended to be used by {@link SurfaceView.updateWindow} only.
+     * This is intended to be used by {@link SurfaceView#updateWindow} only.
      * @param other access is not thread safe
      * @hide
      * @deprecated
@@ -313,21 +317,18 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("other must not be null");
         }
         if (other != this) {
-            synchronized (mNativeObjectLock) {
+            final int newPtr;
+            synchronized (other.mLock) {
+                newPtr = other.mNativeObject;
+                other.setNativeObjectLocked(0);
+            }
+
+            synchronized (mLock) {
                 if (mNativeObject != 0) {
-                    // release our reference to our native object
                     nativeRelease(mNativeObject);
                 }
-                // transfer the reference from other to us
-                if (other.mNativeObject != 0 && mNativeObject == 0) {
-                    mCloseGuard.open("release");
-                }
-                mNativeObject = other.mNativeObject;
-                mGenerationId++;
+                setNativeObjectLocked(newPtr);
             }
-            other.mNativeObject = 0;
-            other.mGenerationId++;
-            other.mCloseGuard.close();
         }
     }
 
@@ -340,14 +341,10 @@ public class Surface implements Parcelable {
         if (source == null) {
             throw new IllegalArgumentException("source must not be null");
         }
-        synchronized (mNativeObjectLock) {
+
+        synchronized (mLock) {
             mName = source.readString();
-            int nativeObject = nativeReadFromParcel(mNativeObject, source);
-            if (nativeObject !=0 && mNativeObject == 0) {
-                mCloseGuard.open("release");
-            }
-            mNativeObject = nativeObject;
-            mGenerationId++;
+            setNativeObjectLocked(nativeReadFromParcel(mNativeObject, source));
         }
     }
 
@@ -356,7 +353,7 @@ public class Surface implements Parcelable {
         if (dest == null) {
             throw new IllegalArgumentException("dest must not be null");
         }
-        synchronized (mNativeObjectLock) {
+        synchronized (mLock) {
             dest.writeString(mName);
             nativeWriteToParcel(mNativeObject, dest);
         }
@@ -367,7 +364,27 @@ public class Surface implements Parcelable {
 
     @Override
     public String toString() {
-        return "Surface(name=" + mName + ")";
+        synchronized (mLock) {
+            return "Surface(name=" + mName + ")";
+        }
+    }
+
+    private void setNativeObjectLocked(int ptr) {
+        if (mNativeObject != ptr) {
+            if (mNativeObject == 0 && ptr != 0) {
+                mCloseGuard.open("release");
+            } else if (mNativeObject != 0 && ptr == 0) {
+                mCloseGuard.close();
+            }
+            mNativeObject = ptr;
+            mGenerationId += 1;
+        }
+    }
+
+    private void checkNotReleasedLocked() {
+        if (mNativeObject == 0) {
+            throw new IllegalStateException("Surface has already been released.");
+        }
     }
 
     /**
@@ -450,10 +467,5 @@ public class Surface implements Parcelable {
             }
             mOrigMatrix.set(m);
         }
-    }
-
-    private void checkNotReleasedLocked() {
-        if (mNativeObject == 0) throw new NullPointerException(
-                "mNativeObject is null. Have you called release() already?");
     }
 }
