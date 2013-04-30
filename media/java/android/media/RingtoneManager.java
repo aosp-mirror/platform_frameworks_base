@@ -111,8 +111,7 @@ public class RingtoneManager {
 
     /**
      * Given to the ringtone picker as a boolean. Whether to include DRM ringtones.
-     * Obsolete - does nothing now
-     * @deprecated
+     * @deprecated DRM ringtones are no longer supported
      */
     @Deprecated
     public static final String EXTRA_RINGTONE_INCLUDE_DRM =
@@ -322,7 +321,7 @@ public class RingtoneManager {
      * @return Whether DRM ringtones will be included.
      * @see #setIncludeDrm(boolean)
      * Obsolete - always returns false
-     * @deprecated
+     * @deprecated DRM ringtones are no longer supported
      */
     @Deprecated
     public boolean getIncludeDrm() {
@@ -333,8 +332,8 @@ public class RingtoneManager {
      * Sets whether to include DRM ringtones.
      * 
      * @param includeDrm Whether to include DRM ringtones.
-     * Obsolete - no longer does anything
-     * @deprecated
+     * Obsolete - no longer has any effect
+     * @deprecated DRM ringtones are no longer supported
      */
     @Deprecated
     public void setIncludeDrm(boolean includeDrm) {
