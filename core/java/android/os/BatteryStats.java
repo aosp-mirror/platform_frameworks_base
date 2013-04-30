@@ -2254,7 +2254,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param pw a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dumpLocked(PrintWriter pw) {
+    public void dumpLocked(PrintWriter pw, boolean isUnpluggedOnly) {
         prepareForDumpLocked();
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
@@ -2306,28 +2306,22 @@ public abstract class BatteryStats implements Parcelable {
         if (didPid) {
             pw.println("");
         }
-        
-        pw.println("Statistics since last charge:");
-        pw.println("  System starts: " + getStartCount()
-                + ", currently on battery: " + getIsOnBattery());
-        dumpLocked(pw, "", STATS_SINCE_CHARGED, -1);
-        pw.println("");
+
+        if (!isUnpluggedOnly) {
+            pw.println("Statistics since last charge:");
+            pw.println("  System starts: " + getStartCount()
+                    + ", currently on battery: " + getIsOnBattery());
+            dumpLocked(pw, "", STATS_SINCE_CHARGED, -1);
+            pw.println("");
+        }
         pw.println("Statistics since last unplugged:");
         dumpLocked(pw, "", STATS_SINCE_UNPLUGGED, -1);
     }
     
     @SuppressWarnings("unused")
-    public void dumpCheckinLocked(PrintWriter pw, String[] args, List<ApplicationInfo> apps) {
+    public void dumpCheckinLocked(
+            PrintWriter pw, List<ApplicationInfo> apps, boolean isUnpluggedOnly) {
         prepareForDumpLocked();
-
-        boolean isUnpluggedOnly = false;
-        
-        for (String arg : args) {
-            if ("-u".equals(arg)) {
-                if (LOCAL_LOGV) Log.v("BatteryStats", "Dumping unplugged data");
-                isUnpluggedOnly = true;
-            }
-        }
         
         if (apps != null) {
             SparseArray<ArrayList<String>> uids = new SparseArray<ArrayList<String>>();

@@ -5974,7 +5974,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         updateKernelWakelocksLocked();
     }
 
-    public void dumpLocked(PrintWriter pw) {
+    public void dumpLocked(PrintWriter pw, boolean isUnpluggedOnly) {
         if (DEBUG) {
             Printer pr = new PrintWriterPrinter(pw);
             pr.println("*** Screen timer:");
@@ -6006,7 +6006,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             pr.println("*** Mobile ifaces:");
             pr.println(mMobileIfaces.toString());
         }
-        super.dumpLocked(pw);
+        super.dumpLocked(pw, isUnpluggedOnly);
     }
 
     private NetworkStats mNetworkSummaryCache;
