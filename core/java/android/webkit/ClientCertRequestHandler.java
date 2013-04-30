@@ -20,9 +20,9 @@ import android.os.Handler;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import org.apache.harmony.xnet.provider.jsse.NativeCrypto;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLKey;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLKeyHolder;
+import com.android.org.conscrypt.NativeCrypto;
+import com.android.org.conscrypt.OpenSSLKey;
+import com.android.org.conscrypt.OpenSSLKeyHolder;
 
 /**
  * ClientCertRequestHandler: class responsible for handling client

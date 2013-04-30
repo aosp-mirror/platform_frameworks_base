@@ -16,7 +16,7 @@
 
 package android.net.http;
 
-import org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
+import com.android.org.conscrypt.TrustManagerImpl;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
