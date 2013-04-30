@@ -648,13 +648,19 @@ public class TextureView extends View {
      * rectangle. Every pixel within that rectangle must be written; however
      * pixels outside the dirty rectangle will be preserved by the next call
      * to lockCanvas().
+     *
+     * This method can return null if the underlying surface texture is not
+     * available (see {@link #isAvailable()} or if the surface texture is
+     * already connected to an image producer (for instance: the camera,
+     * OpenGL, a media player, etc.)
      * 
      * @param dirty Area of the surface that will be modified.
 
      * @return A Canvas used to draw into the surface.
      * 
      * @see #lockCanvas() 
-     * @see #unlockCanvasAndPost(android.graphics.Canvas) 
+     * @see #unlockCanvasAndPost(android.graphics.Canvas)
+     * @see #isAvailable()
      */
     public Canvas lockCanvas(Rect dirty) {
         if (!isAvailable()) return null;
@@ -664,7 +670,9 @@ public class TextureView extends View {
         }
 
         synchronized (mNativeWindowLock) {
-            nLockCanvas(mNativeWindow, mCanvas, dirty);
+            if (!nLockCanvas(mNativeWindow, mCanvas, dirty)) {
+                return null;
+            }
         }
         mSaveCount = mCanvas.save();
 
@@ -803,6 +811,6 @@ public class TextureView extends View {
     private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture,
             int width, int height);
 
-    private static native void nLockCanvas(int nativeWindow, Canvas canvas, Rect dirty);
+    private static native boolean nLockCanvas(int nativeWindow, Canvas canvas, Rect dirty);
     private static native void nUnlockCanvasAndPost(int nativeWindow, Canvas canvas);
 }

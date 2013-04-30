@@ -134,11 +134,11 @@ static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCa
   SkSafeUnref(previousCanvas);
 }
 
-static void android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
+static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
         jint nativeWindow, jobject canvas, jobject dirtyRect) {
 
     if (!nativeWindow) {
-        return;
+        return false;
     }
 
     ANativeWindow_Buffer buffer;
@@ -154,7 +154,8 @@ static void android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
     }
 
     sp<ANativeWindow> window((ANativeWindow*) nativeWindow);
-    native_window_lock(window.get(), &buffer, &rect);
+    int32_t status = native_window_lock(window.get(), &buffer, &rect);
+    if (status) return false;
 
     ssize_t bytesCount = buffer.stride * bytesPerPixel(buffer.format);
 
@@ -184,6 +185,8 @@ static void android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
         INVOKEV(dirtyRect, gRectClassInfo.set,
                 int(rect.left), int(rect.top), int(rect.right), int(rect.bottom));
     }
+
+    return true;
 }
 
 static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
@@ -213,7 +216,7 @@ static JNINativeMethod gMethods[] = {
     {   "nDestroyNativeWindow", "()V",
             (void*) android_view_TextureView_destroyNativeWindow },
 
-    {   "nLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)V",
+    {   "nLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)Z",
             (void*) android_view_TextureView_lockCanvas },
     {   "nUnlockCanvasAndPost", "(ILandroid/graphics/Canvas;)V",
             (void*) android_view_TextureView_unlockCanvasAndPost },
@@ -241,7 +244,8 @@ int register_android_view_TextureView(JNIEnv* env) {
     GET_FIELD_ID(gRectClassInfo.bottom, clazz, "bottom", "I");
 
     FIND_CLASS(clazz, "android/graphics/Canvas");
-    GET_FIELD_ID(gCanvasClassInfo.mFinalizer, clazz, "mFinalizer", "Landroid/graphics/Canvas$CanvasFinalizer;");
+    GET_FIELD_ID(gCanvasClassInfo.mFinalizer, clazz, "mFinalizer",
+            "Landroid/graphics/Canvas$CanvasFinalizer;");
     GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "I");
     GET_FIELD_ID(gCanvasClassInfo.mSurfaceFormat, clazz, "mSurfaceFormat", "I");
 
