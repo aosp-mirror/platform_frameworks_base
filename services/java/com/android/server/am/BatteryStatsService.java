@@ -470,8 +470,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batteryinfo) dump options:");
-        pw.println("  [--checkin] [--reset] [--write] [-h]");
+        pw.println("  [--checkin] [--unplugged] [--reset] [--write] [-h]");
         pw.println("  --checkin: format output for a checkin report.");
+        pw.println("  --unplugged: only output data since last unplugged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
         pw.println("  -h: print this help text.");
@@ -488,11 +489,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
 
         boolean isCheckin = false;
+        boolean isUnpluggedOnly = false;
         boolean noOutput = false;
         if (args != null) {
             for (String arg : args) {
                 if ("--checkin".equals(arg)) {
                     isCheckin = true;
+                } else if ("--unplugged".equals(arg)) {
+                    isUnpluggedOnly = true;
                 } else if ("--reset".equals(arg)) {
                     synchronized (mStats) {
                         mStats.resetAllStatsLocked();
@@ -522,11 +526,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (isCheckin) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
             synchronized (mStats) {
-                mStats.dumpCheckinLocked(pw, args, apps);
+                mStats.dumpCheckinLocked(pw, apps, isUnpluggedOnly);
             }
         } else {
             synchronized (mStats) {
-                mStats.dumpLocked(pw);
+                mStats.dumpLocked(pw, isUnpluggedOnly);
             }
         }
     }
