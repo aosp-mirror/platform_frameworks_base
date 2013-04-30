@@ -31,7 +31,6 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.IThumbnailReceiver;
-import android.app.IThumbnailRetriever;
 import android.app.IApplicationThread;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -3067,127 +3066,6 @@ final class ActivityStack {
         return true;
     }
 
-    public ActivityManager.TaskThumbnails getTaskThumbnailsLocked(TaskRecord tr) {
-        TaskAccessInfo info = getTaskAccessInfoLocked(tr, true);
-        if (mResumedActivity != null && mResumedActivity.thumbHolder == tr) {
-            info.mainThumbnail = screenshotActivities(mResumedActivity);
-        }
-        if (info.mainThumbnail == null) {
-            info.mainThumbnail = tr.lastThumbnail;
-        }
-        return info;
-    }
-
-    public Bitmap getTaskTopThumbnailLocked(TaskRecord tr) {
-        if (mResumedActivity != null && mResumedActivity.task == tr) {
-            // This task is the current resumed task, we just need to take
-            // a screenshot of it and return that.
-            return screenshotActivities(mResumedActivity);
-        }
-        // Return the information about the task, to figure out the top
-        // thumbnail to return.
-        TaskAccessInfo info = getTaskAccessInfoLocked(tr, true);
-        if (info.numSubThumbbails <= 0) {
-            return info.mainThumbnail != null ? info.mainThumbnail : tr.lastThumbnail;
-        }
-        return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
-    }
-
-    public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex,
-            boolean taskRequired) {
-        final TaskRecord task = taskForIdLocked(taskId);
-        if (task == null) {
-            return null;
-        }
-        TaskAccessInfo info = getTaskAccessInfoLocked(task, false);
-        if (info.root == null) {
-            if (taskRequired) {
-                Slog.w(TAG, "removeTaskLocked: unknown taskId " + taskId);
-            }
-            return null;
-        }
-
-        if (subTaskIndex < 0) {
-            // Just remove the entire task.
-            task.performClearTaskAtIndexLocked(info.rootIndex);
-            return info.root;
-        }
-
-        if (subTaskIndex >= info.subtasks.size()) {
-            if (taskRequired) {
-                Slog.w(TAG, "removeTaskLocked: unknown subTaskIndex " + subTaskIndex);
-            }
-            return null;
-        }
-
-        // Remove all of this task's activities starting at the sub task.
-        TaskAccessInfo.SubTask subtask = info.subtasks.get(subTaskIndex);
-        task.performClearTaskAtIndexLocked(subtask.index);
-        return subtask.activity;
-    }
-
-    public TaskAccessInfo getTaskAccessInfoLocked(TaskRecord task, boolean inclThumbs) {
-        final TaskAccessInfo thumbs = new TaskAccessInfo();
-        // How many different sub-thumbnails?
-        final ArrayList<ActivityRecord> activities = task.mActivities;
-        final int NA = activities.size();
-        int j = 0;
-        ThumbnailHolder holder = null;
-        while (j < NA) {
-            ActivityRecord ar = activities.get(j);
-            if (!ar.finishing) {
-                thumbs.root = ar;
-                thumbs.rootIndex = j;
-                holder = ar.thumbHolder;
-                if (holder != null) {
-                    thumbs.mainThumbnail = holder.lastThumbnail;
-                }
-                j++;
-                break;
-            }
-            j++;
-        }
-
-        if (j >= NA) {
-            return thumbs;
-        }
-
-        ArrayList<TaskAccessInfo.SubTask> subtasks = new ArrayList<TaskAccessInfo.SubTask>();
-        thumbs.subtasks = subtasks;
-        while (j < NA) {
-            ActivityRecord ar = activities.get(j);
-            j++;
-            if (ar.finishing) {
-                continue;
-            }
-            if (ar.thumbHolder != holder && holder != null) {
-                thumbs.numSubThumbbails++;
-                holder = ar.thumbHolder;
-                TaskAccessInfo.SubTask sub = new TaskAccessInfo.SubTask();
-                sub.holder = holder;
-                sub.activity = ar;
-                sub.index = j-1;
-                subtasks.add(sub);
-            }
-        }
-        if (thumbs.numSubThumbbails > 0) {
-            thumbs.retriever = new IThumbnailRetriever.Stub() {
-                @Override
-                public Bitmap getThumbnail(int index) {
-                    if (index < 0 || index >= thumbs.subtasks.size()) {
-                        return null;
-                    }
-                    TaskAccessInfo.SubTask sub = thumbs.subtasks.get(index);
-                    if (mResumedActivity != null && mResumedActivity.thumbHolder == sub.holder) {
-                        return screenshotActivities(mResumedActivity);
-                    }
-                    return sub.holder.lastThumbnail;
-                }
-            };
-        }
-        return thumbs;
-    }
-
     static final void logStartActivity(int tag, ActivityRecord r,
             TaskRecord task) {
         final Uri data = r.intent.getData();
@@ -3216,7 +3094,7 @@ final class ActivityStack {
 
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                 "Ensuring correct configuration: " + r);
-        
+
         // Short circuit: if the two configurations are the exact same
         // object (the common case), then there is nothing to do.
         Configuration newConfig = mService.mConfiguration;
@@ -3337,9 +3215,9 @@ final class ActivityStack {
         EventLog.writeEvent(andResume ? EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY
                 : EventLogTags.AM_RELAUNCH_ACTIVITY, r.userId, System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName);
-        
+
         r.startFreezingScreenLocked(r.app, 0);
-        
+
         try {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG,
                     (andResume ? "Relaunching to RESUMED " : "Relaunching to PAUSED ")
