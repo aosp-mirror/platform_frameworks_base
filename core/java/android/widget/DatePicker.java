@@ -39,6 +39,7 @@ import android.widget.NumberPicker.OnValueChangeListener;
 
 import com.android.internal.R;
 
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -480,11 +481,24 @@ public class DatePicker extends FrameLayout {
         mCurrentDate = getCalendarForLocale(mCurrentDate, locale);
 
         mNumberOfMonths = mTempDate.getActualMaximum(Calendar.MONTH) + 1;
-        mShortMonths = new String[mNumberOfMonths];
-        for (int i = 0; i < mNumberOfMonths; i++) {
-            mShortMonths[i] = DateUtils.getMonthString(Calendar.JANUARY + i,
-                    DateUtils.LENGTH_MEDIUM);
+        mShortMonths = new DateFormatSymbols().getShortMonths();
+
+        if (usingNumericMonths()) {
+            // We're in a locale where a date should either be all-numeric, or all-text.
+            // All-text would require custom NumberPicker formatters for day and year.
+            mShortMonths = new String[mNumberOfMonths];
+            for (int i = 0; i < mNumberOfMonths; ++i) {
+                mShortMonths[i] = String.format("%d", i + 1);
+            }
         }
+    }
+
+    /**
+     * Tests whether the current locale is one where there are no real month names,
+     * such as Chinese, Japanese, or Korean locales.
+     */
+    private boolean usingNumericMonths() {
+        return Character.isDigit(mShortMonths[Calendar.JANUARY].charAt(0));
     }
 
     /**
@@ -667,7 +681,7 @@ public class DatePicker extends FrameLayout {
         mMonthSpinner.setValue(mCurrentDate.get(Calendar.MONTH));
         mDaySpinner.setValue(mCurrentDate.get(Calendar.DAY_OF_MONTH));
 
-        if (Character.isDigit(displayedValues[0].charAt(0))) {
+        if (usingNumericMonths()) {
             mMonthSpinnerInput.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         }
     }
