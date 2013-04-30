@@ -23,6 +23,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
+import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -115,9 +116,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
-    private Context mContext;
-    private ContentResolver mContentResolver;
-    private boolean mVoiceCapable;
+    private final Context mContext;
+    private final ContentResolver mContentResolver;
+    private final AppOpsManager mAppOps;
+    private final boolean mVoiceCapable;
 
     /** The UI */
     private VolumePanel mVolumePanel;
@@ -254,6 +256,23 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         AudioSystem.STREAM_MUSIC            // STREAM_TTS
     };
     private int[] mStreamVolumeAlias;
+
+    /**
+     * Map AudioSystem.STREAM_* constants to app ops.  This should be used
+     * after mapping through mStreamVolumeAlias.
+     */
+    private static final int[] STEAM_VOLUME_OPS = new int[] {
+        AppOpsManager.OP_AUDIO_VOICE_VOLUME,            // STREAM_VOICE_CALL
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_SYSTEM
+        AppOpsManager.OP_AUDIO_RING_VOLUME,             // STREAM_RING
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_MUSIC
+        AppOpsManager.OP_AUDIO_ALARM_VOLUME,            // STREAM_ALARM
+        AppOpsManager.OP_AUDIO_NOTIFICATION_VOLUME,     // STREAM_NOTIFICATION
+        AppOpsManager.OP_AUDIO_BLUETOOTH_VOLUME,        // STREAM_BLUETOOTH_SCO
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_SYSTEM_ENFORCED
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_DTMF
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_TTS
+    };
 
     private final boolean mUseFixedVolume;
 
@@ -452,6 +471,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public AudioService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         mVoiceCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
 
@@ -775,23 +795,26 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     ///////////////////////////////////////////////////////////////////////////
 
     /** @see AudioManager#adjustVolume(int, int) */
-    public void adjustVolume(int direction, int flags) {
-        adjustSuggestedStreamVolume(direction, AudioManager.USE_DEFAULT_STREAM_TYPE, flags);
+    public void adjustVolume(int direction, int flags, String callingPackage) {
+        adjustSuggestedStreamVolume(direction, AudioManager.USE_DEFAULT_STREAM_TYPE, flags,
+                callingPackage);
     }
 
     /** @see AudioManager#adjustLocalOrRemoteStreamVolume(int, int) with current assumption
      *  on streamType: fixed to STREAM_MUSIC */
-    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction) {
+    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
+            String callingPackage) {
         if (DEBUG_VOL) Log.d(TAG, "adjustLocalOrRemoteStreamVolume(dir="+direction+")");
         if (checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
             adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, 0);
         } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
-            adjustStreamVolume(AudioSystem.STREAM_MUSIC, direction, 0);
+            adjustStreamVolume(AudioSystem.STREAM_MUSIC, direction, 0, callingPackage);
         }
     }
 
     /** @see AudioManager#adjustVolume(int, int) */
-    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
+    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
+            String callingPackage) {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType);
         int streamType;
         if (mVolumeControlStream != -1) {
@@ -814,12 +837,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             //if (DEBUG_VOL) Log.i(TAG, "Need to adjust remote volume: calling adjustRemoteVolume()");
             adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, flags);
         } else {
-            adjustStreamVolume(streamType, direction, flags);
+            adjustStreamVolume(streamType, direction, flags, callingPackage);
         }
     }
 
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
-    public void adjustStreamVolume(int streamType, int direction, int flags) {
+    public void adjustStreamVolume(int streamType, int direction, int flags,
+            String callingPackage) {
         if (mUseFixedVolume) {
             return;
         }
@@ -839,6 +863,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         int aliasIndex = streamState.getIndex(device);
         boolean adjustVolume = true;
         int step;
+
+        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
 
         // reset any pending volume command
         synchronized (mSafeMediaVolumeState) {
@@ -905,7 +934,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     /** @see AudioManager#adjustMasterVolume(int, int) */
-    public void adjustMasterVolume(int steps, int flags) {
+    public void adjustMasterVolume(int steps, int flags, String callingPackage) {
         if (mUseFixedVolume) {
             return;
         }
@@ -920,7 +949,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         //Log.d(TAG, "adjustMasterVolume volume: " + volume + " steps: " + steps);
-        setMasterVolume(volume, flags);
+        setMasterVolume(volume, flags, callingPackage);
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of
@@ -956,16 +985,22 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
-    public void setStreamVolume(int streamType, int index, int flags) {
+    public void setStreamVolume(int streamType, int index, int flags, String callingPackage) {
         if (mUseFixedVolume) {
             return;
         }
 
         ensureValidStreamType(streamType);
-        VolumeStreamState streamState = mStreamStates[mStreamVolumeAlias[streamType]];
+        int streamTypeAlias = mStreamVolumeAlias[streamType];
+        VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
         final int device = getDeviceForStream(streamType);
         int oldIndex;
+
+        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
 
         synchronized (mSafeMediaVolumeState) {
             // reset any pending volume command
@@ -973,10 +1008,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
             oldIndex = streamState.getIndex(device);
 
-            index = rescaleIndex(index * 10, streamType, mStreamVolumeAlias[streamType]);
+            index = rescaleIndex(index * 10, streamType, streamTypeAlias);
 
             flags &= ~AudioManager.FLAG_FIXED_VOLUME;
-            if ((mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
+            if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
                     ((device & mFixedVolumeDevices) != 0)) {
                 flags |= AudioManager.FLAG_FIXED_VOLUME;
 
@@ -991,7 +1026,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 }
             }
 
-            if (!checkSafeMediaVolume(mStreamVolumeAlias[streamType], index, device)) {
+            if (!checkSafeMediaVolume(streamTypeAlias, index, device)) {
                 mVolumePanel.postDisplaySafeVolumeWarning(flags);
                 mPendingVolumeCommand = new StreamVolumeCommand(
                                                     streamType, index, flags, device);
@@ -1249,8 +1284,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return getLastAudibleMasterVolume();
     }
 
-    public void setMasterVolume(int volume, int flags) {
+    public void setMasterVolume(int volume, int flags, String callingPackage) {
         if (mUseFixedVolume) {
+            return;
+        }
+
+        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return;
         }
 
@@ -4382,6 +4422,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
+        if (mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
+                callingPackageName) != AppOpsManager.MODE_ALLOWED) {
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+
         synchronized(mAudioFocusLock) {
             if (!canReassignAudioFocus()) {
                 return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
@@ -5180,6 +5225,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             IBinder token) {
         // already at top of stack?
         if (!mRCStack.empty() && mRCStack.peek().mMediaIntent.equals(mediaIntent)) {
+            return;
+        }
+        if (mAppOps.noteOp(AppOpsManager.OP_TAKE_MEDIA_BUTTONS, Binder.getCallingUid(),
+                mediaIntent.getCreatorPackage()) != AppOpsManager.MODE_ALLOWED) {
             return;
         }
         RemoteControlStackEntry rcse = null;
