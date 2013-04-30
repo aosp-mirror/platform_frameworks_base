@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
+import libcore.icu.ICU;
 import libcore.icu.LocaleData;
 
 /**
@@ -278,39 +279,13 @@ public class DateFormat {
      * Gets the current date format stored as a char array. The array will contain
      * 3 elements ({@link #DATE}, {@link #MONTH}, and {@link #YEAR}) in the order
      * specified by the user's format preference.  Note that this order is
-     * only appropriate for all-numeric dates; spelled-out (MEDIUM and LONG)
+     * <i>only</i> appropriate for all-numeric dates; spelled-out (MEDIUM and LONG)
      * dates will generally contain other punctuation, spaces, or words,
      * not just the day, month, and year, and not necessarily in the same
      * order returned here.
      */
     public static char[] getDateFormatOrder(Context context) {
-        char[] order = new char[] {DATE, MONTH, YEAR};
-        String value = getDateFormatString(context);
-        int index = 0;
-        boolean foundDate = false;
-        boolean foundMonth = false;
-        boolean foundYear = false;
-
-        for (char c : value.toCharArray()) {
-            if (!foundDate && (c == DATE)) {
-                foundDate = true;
-                order[index] = DATE;
-                index++;
-            }
-
-            if (!foundMonth && (c == MONTH || c == STANDALONE_MONTH)) {
-                foundMonth = true;
-                order[index] = MONTH;
-                index++;
-            }
-
-            if (!foundYear && (c == YEAR)) {
-                foundYear = true;
-                order[index] = YEAR;
-                index++;
-            }
-        }
-        return order;
+        return ICU.getDateFormatOrder(getDateFormatString(context));
     }
 
     private static String getDateFormatString(Context context) {
