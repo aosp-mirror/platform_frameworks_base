@@ -1259,6 +1259,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite unei aplicaţii să direcţioneze rezultate media către alte dispozitive externe."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Accesează stocarea securizată când tastatura este blocată"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permite unei aplicații să acceseze stocarea securizată când tastatura este blocată."</string>
+    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
+    <skip />
+    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Atingeţi de două ori pentru a mări/micşora"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nu s-a putut adăuga widgetul."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Accesaţi"</string>

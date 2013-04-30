@@ -1259,6 +1259,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Επιτρέπει σε μια εφαρμογή τη διαγραφή διαδρομής δεδομένων εξόδου μέσων σε άλλες εξωτερικές συσκευές."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Πρόσβαση στον ασφαλή αποθηκευτικό χώρο με κλείδωμα"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση στον ασφαλή αποθηκευτικό χώρο με κλείδωμα."</string>
+    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
+    <skip />
+    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Αγγίξτε δύο φορές για έλεγχο εστίασης"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Δεν ήταν δυνατή η προσθήκη του γραφικού στοιχείου."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Μετάβαση"</string>

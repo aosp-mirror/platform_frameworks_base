@@ -466,7 +466,7 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Inaruhusu programu kurekebisha mipangilio ya sauti kila mahali kama vile sauti na ni kipaza sauti kipi ambacho kinatumika kwa kutoa."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekodi sauti"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Inaruhusu programu kurekodi sauti kwa kinasa sauti. Idhini hii inaruhusu programu kurekodi sauti wakati wowote bila ya uthibitisho wako."</string>
-    <string name="permlab_camera" msgid="3616391919559751192">"chukua picha na video"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"Kupiga picha na kurekodi video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Inaruhusu programu kupiga picha na video kwa kamera. Kibali hiki kinaruhusu programu kutumia kamera kwa wakati wowote bila uthibitisho wako."</string>
     <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
     <skip />
@@ -587,7 +587,7 @@
     <string name="permlab_bluetooth" msgid="6127769336339276828">"oanisha na vifaa vya Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"dhibiti Mawasiliano Karibu na Uga"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"dhibiti Mawasiliano ya vifaa vilivyo Karibu"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zima kufuli la skrini yako"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Inaruhusu programu kulemaza ufunguo wa vitufe na usalama mwingine ambata wa nenosiri. Kwa mfano, simu inalemaza ufunguo wa viitufe inapopokea simu inayoingia, kisha inawezesha upya ufunguo wa vitufe wakati simu inapokamilika."</string>
@@ -1259,6 +1259,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Inaruhusu programu kufuatilia utoaji wa habari kwa vifaa vingine vya nje."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Kufikia hifadhi salama ya ufunguo wa ulinzi"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Inaruhusu programu kufikia hifadhi salama ya ufunguo wa ulinzi."</string>
+    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
+    <skip />
+    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Gusa mara mbili kwa udhibiti cha kuza"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Haikuweza kuongeza wijeti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Nenda"</string>

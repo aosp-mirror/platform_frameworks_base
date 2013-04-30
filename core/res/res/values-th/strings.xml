@@ -1259,6 +1259,10 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"อนุญาตให้แอปพลิเคชันกำหนดเส้นทางเอาต์พุตของสื่อไปยังอุปกรณ์ภายนอกอื่นๆ"</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"เข้าถึงพื้นที่จัดเก็บที่รักษาความปลอดภัยด้วยคีย์การ์ด"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"อนุญาตให้แอปพลิเคชันเข้าถึงพื้นที่จัดเก็บที่รักษาความปลอดภัยด้วยคีย์การ์ด"</string>
+    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
+    <skip />
+    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ไป"</string>
