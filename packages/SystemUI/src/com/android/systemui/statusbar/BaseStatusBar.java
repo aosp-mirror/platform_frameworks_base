@@ -1172,4 +1172,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         return km.inKeyguardRestrictedInputMode();
     }
+
+    public void suspendAutohide() {
+        // hook for subclasses
+    }
+
+    public void resumeAutohide() {
+        // hook for subclasses
+    }
 }

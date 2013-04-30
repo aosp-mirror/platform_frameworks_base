@@ -57,8 +57,8 @@ public class DelegateViewHelper {
         final float sourceX = mTempPoint[0];
         final float sourceY = mTempPoint[1];
 
-
-        switch (event.getAction()) {
+        final int action = event.getAction();
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mPanelShowing = mDelegateView.getVisibility() == View.VISIBLE;
                 mDownPoint[0] = event.getX();
@@ -71,7 +71,7 @@ public class DelegateViewHelper {
             return false;
         }
 
-        if (!mPanelShowing && event.getAction() == MotionEvent.ACTION_MOVE) {
+        if (!mPanelShowing && action == MotionEvent.ACTION_MOVE) {
             final int historySize = event.getHistorySize();
             for (int k = 0; k < historySize + 1; k++) {
                 float x = k < historySize ? event.getHistoricalX(k) : event.getX();
@@ -83,6 +83,12 @@ public class DelegateViewHelper {
                     break;
                 }
             }
+        }
+
+        if (action == MotionEvent.ACTION_DOWN) {
+            mBar.suspendAutohide();
+        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            mBar.resumeAutohide();
         }
 
         mDelegateView.getLocationOnScreen(mTempPoint);

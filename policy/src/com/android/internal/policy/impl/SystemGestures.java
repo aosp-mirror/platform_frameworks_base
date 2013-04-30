@@ -36,15 +36,24 @@ public class SystemGestures extends InputEventReceiver {
     private static final int MAX_TRACKED_POINTERS = 32;  // max per input system
     private static final int UNTRACKED_POINTER = -1;
 
+    private static final int SWIPE_NONE = 0;
+    private static final int SWIPE_FROM_TOP = 1;
+    private static final int SWIPE_FROM_BOTTOM = 2;
+    private static final int SWIPE_FROM_RIGHT = 3;
+
     private final int mSwipeStartThreshold;
     private final int mSwipeEndThreshold;
     private final Callbacks mCallbacks;
     private final int[] mDownPointerId = new int[MAX_TRACKED_POINTERS];
+    private final float[] mDownX = new float[MAX_TRACKED_POINTERS];
     private final float[] mDownY = new float[MAX_TRACKED_POINTERS];
     private final long[] mDownTime = new long[MAX_TRACKED_POINTERS];
 
+    int screenHeight;
+    int screenWidth;
     private int mDownPointers;
-    private boolean mSwipeFromTopFireable;
+    private boolean mSwipeFireable;
+    private boolean mDebugFireable;
 
     public SystemGestures(InputChannel inputChannel, Looper looper,
             Context context, Callbacks callbacks) {
@@ -73,23 +82,41 @@ public class SystemGestures extends InputEventReceiver {
     private void onPointerMotionEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                mSwipeFromTopFireable = true;
+                mSwipeFireable = true;
+                mDebugFireable = true;
                 mDownPointers = 0;
                 captureDown(event, 0);
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 captureDown(event, event.getActionIndex());
+                if (mDebugFireable) {
+                    mDebugFireable = event.getPointerCount() < 5;
+                    if (!mDebugFireable) {
+                        if (DEBUG) Slog.d(TAG, "Firing debug");
+                        mCallbacks.onDebug();
+                    }
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (mSwipeFromTopFireable && detectSwipeFromTop(event)) {
-                    mSwipeFromTopFireable = false;
-                    if (DEBUG) Slog.d(TAG, "Firing onSwipeFromTop");
-                    mCallbacks.onSwipeFromTop();
+                if (mSwipeFireable) {
+                    final int swipe = detectSwipe(event);
+                    mSwipeFireable = swipe == SWIPE_NONE;
+                    if (swipe == SWIPE_FROM_TOP) {
+                        if (DEBUG) Slog.d(TAG, "Firing onSwipeFromTop");
+                        mCallbacks.onSwipeFromTop();
+                    } else if (swipe == SWIPE_FROM_BOTTOM) {
+                        if (DEBUG) Slog.d(TAG, "Firing onSwipeFromBottom");
+                        mCallbacks.onSwipeFromBottom();
+                    } else if (swipe == SWIPE_FROM_RIGHT) {
+                        if (DEBUG) Slog.d(TAG, "Firing onSwipeFromRight");
+                        mCallbacks.onSwipeFromRight();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mSwipeFromTopFireable = false;
+                mSwipeFireable = false;
+                mDebugFireable = false;
                 break;
             default:
                 if (DEBUG) Slog.d(TAG, "Ignoring " + event);
@@ -102,9 +129,11 @@ public class SystemGestures extends InputEventReceiver {
         if (DEBUG) Slog.d(TAG, "pointer " + pointerId +
                 " down pointerIndex=" + pointerIndex + " trackingIndex=" + i);
         if (i != UNTRACKED_POINTER) {
+            mDownX[i] = event.getX(pointerIndex);
             mDownY[i] = event.getY(pointerIndex);
             mDownTime[i] = event.getEventTime();
-            if (DEBUG) Slog.d(TAG, "pointer " + pointerId + " down y=" + mDownY[i]);
+            if (DEBUG) Slog.d(TAG, "pointer " + pointerId +
+                    " down x=" + mDownX[i] + " y=" + mDownY[i]);
         }
     }
 
@@ -121,7 +150,7 @@ public class SystemGestures extends InputEventReceiver {
         return mDownPointers - 1;
     }
 
-    private boolean detectSwipeFromTop(MotionEvent move) {
+    private int detectSwipe(MotionEvent move) {
         final int historySize = move.getHistorySize();
         final int pointerCount = move.getPointerCount();
         for (int p = 0; p < pointerCount; p++) {
@@ -130,30 +159,50 @@ public class SystemGestures extends InputEventReceiver {
             if (i != UNTRACKED_POINTER) {
                 for (int h = 0; h < historySize; h++) {
                     final long time = move.getHistoricalEventTime(h);
+                    final float x = move.getHistoricalX(p, h);
                     final float y = move.getHistoricalY(p,  h);
-                    if (detectSwipeFromTop(i, time, y)) {
-                        return true;
+                    final int swipe = detectSwipe(i, time, x, y);
+                    if (swipe != SWIPE_NONE) {
+                        return swipe;
                     }
                 }
-                if (detectSwipeFromTop(i, move.getEventTime(), move.getY(p))) {
-                    return true;
+                final int swipe = detectSwipe(i, move.getEventTime(), move.getX(p), move.getY(p));
+                if (swipe != SWIPE_NONE) {
+                    return swipe;
                 }
             }
         }
-        return false;
+        return SWIPE_NONE;
     }
 
-    private boolean detectSwipeFromTop(int i, long time, float y) {
+    private int detectSwipe(int i, long time, float x, float y) {
+        final float fromX = mDownX[i];
         final float fromY = mDownY[i];
         final long elapsed = time - mDownTime[i];
         if (DEBUG) Slog.d(TAG, "pointer " + mDownPointerId[i]
-                + " moved from.y=" + fromY + " to.y=" + y + " in " + elapsed);
-        return fromY <= mSwipeStartThreshold
+                + " moved (" + fromX + "->" + x + "," + fromY + "->" + y + ") in " + elapsed);
+        if (fromY <= mSwipeStartThreshold
                 && y > fromY + mSwipeEndThreshold
-                && elapsed < SWIPE_TIMEOUT_MS;
+                && elapsed < SWIPE_TIMEOUT_MS) {
+            return SWIPE_FROM_TOP;
+        }
+        if (fromY >= screenHeight - mSwipeStartThreshold
+                && y < fromY - mSwipeEndThreshold
+                && elapsed < SWIPE_TIMEOUT_MS) {
+            return SWIPE_FROM_BOTTOM;
+        }
+        if (fromX >= screenWidth - mSwipeStartThreshold
+                && x < fromX - mSwipeEndThreshold
+                && elapsed < SWIPE_TIMEOUT_MS) {
+            return SWIPE_FROM_RIGHT;
+        }
+        return SWIPE_NONE;
     }
 
     interface Callbacks {
         void onSwipeFromTop();
+        void onSwipeFromBottom();
+        void onSwipeFromRight();
+        void onDebug();
     }
 }

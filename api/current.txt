@@ -26447,6 +26447,7 @@ package android.view {
     field public static final int SOUND_EFFECTS_ENABLED = 134217728; // 0x8000000
     field public static final deprecated int STATUS_BAR_HIDDEN = 1; // 0x1
     field public static final deprecated int STATUS_BAR_VISIBLE = 0; // 0x0
+    field public static final int SYSTEM_UI_FLAG_ALLOW_OVERLAY = 2048; // 0x800
     field public static final int SYSTEM_UI_FLAG_FULLSCREEN = 4; // 0x4
     field public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2; // 0x2
     field public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 1024; // 0x400
