@@ -16,8 +16,8 @@
 
 package android.security;
 
-import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLKeyHolder;
+import com.android.org.conscrypt.OpenSSLEngine;
+import com.android.org.conscrypt.OpenSSLKeyHolder;
 
 import android.util.Log;
 

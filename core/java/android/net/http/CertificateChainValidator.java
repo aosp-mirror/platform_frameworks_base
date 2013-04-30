@@ -16,6 +16,8 @@
 
 package android.net.http;
 
+import com.android.org.conscrypt.SSLParametersImpl;
+import com.android.org.conscrypt.TrustManagerImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -30,8 +32,6 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.X509TrustManager;
-import org.apache.harmony.xnet.provider.jsse.SSLParametersImpl;
-import org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
 
 /**
  * Class responsible for all server certificate validation functionality
