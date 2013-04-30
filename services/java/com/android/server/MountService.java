@@ -36,7 +36,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -866,9 +865,7 @@ class MountService extends IMountService.Stub
                 updatePublicVolumeState(volume, Environment.MEDIA_BAD_REMOVAL);
                 action = Intent.ACTION_MEDIA_BAD_REMOVAL;
             } else if (code == VoldResponseCode.FstrimCompleted) {
-                if (Build.IS_DEBUGGABLE) {
-                    EventLogTags.writeFstrimFinish(SystemClock.elapsedRealtime());
-                }
+                EventLogTags.writeFstrimFinish(SystemClock.elapsedRealtime());
             } else {
                 Slog.e(TAG, String.format("Unknown code {%d}", code));
             }
