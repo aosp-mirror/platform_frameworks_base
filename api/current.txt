@@ -12408,7 +12408,7 @@ package android.media {
     method public android.database.Cursor getCursor();
     method public static int getDefaultType(android.net.Uri);
     method public static android.net.Uri getDefaultUri(int);
-    method public boolean getIncludeDrm();
+    method public deprecated boolean getIncludeDrm();
     method public android.media.Ringtone getRingtone(int);
     method public static android.media.Ringtone getRingtone(android.content.Context, android.net.Uri);
     method public int getRingtonePosition(android.net.Uri);
@@ -12418,14 +12418,14 @@ package android.media {
     method public int inferStreamType();
     method public static boolean isDefault(android.net.Uri);
     method public static void setActualDefaultRingtoneUri(android.content.Context, int, android.net.Uri);
-    method public void setIncludeDrm(boolean);
+    method public deprecated void setIncludeDrm(boolean);
     method public void setStopPreviousRingtone(boolean);
     method public void setType(int);
     method public void stopPreviousRingtone();
     field public static final java.lang.String ACTION_RINGTONE_PICKER = "android.intent.action.RINGTONE_PICKER";
     field public static final java.lang.String EXTRA_RINGTONE_DEFAULT_URI = "android.intent.extra.ringtone.DEFAULT_URI";
     field public static final java.lang.String EXTRA_RINGTONE_EXISTING_URI = "android.intent.extra.ringtone.EXISTING_URI";
-    field public static final java.lang.String EXTRA_RINGTONE_INCLUDE_DRM = "android.intent.extra.ringtone.INCLUDE_DRM";
+    field public static final deprecated java.lang.String EXTRA_RINGTONE_INCLUDE_DRM = "android.intent.extra.ringtone.INCLUDE_DRM";
     field public static final java.lang.String EXTRA_RINGTONE_PICKED_URI = "android.intent.extra.ringtone.PICKED_URI";
     field public static final java.lang.String EXTRA_RINGTONE_SHOW_DEFAULT = "android.intent.extra.ringtone.SHOW_DEFAULT";
     field public static final java.lang.String EXTRA_RINGTONE_SHOW_SILENT = "android.intent.extra.ringtone.SHOW_SILENT";
