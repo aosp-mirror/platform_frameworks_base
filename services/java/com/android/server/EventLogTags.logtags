@@ -162,3 +162,15 @@ option java_package com.android.server
 # IntentFirewall.java
 # ---------------------------
 51400 ifw_intent_matched (Intent Type|1|5),(Component Name|3),(Caller Uid|1|5),(Caller Pkg Count|1|1),(Caller Pkgs|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
+
+# ---------------------------
+# IdleMaintenanceService.java
+# ---------------------------
+2753 idle_maintenance_window_start (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+2754 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+
+# ---------------------------
+# MountService.java
+# ---------------------------
+2755 fstrim_start (time|2|3)
+2756 fstrim_finish (time|2|3)
