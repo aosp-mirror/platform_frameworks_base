@@ -86,7 +86,7 @@ public class ActionBarView extends AbsActionBarView {
             ActionBar.DISPLAY_TITLE_MULTIPLE_LINES;
 
     private static final int DEFAULT_CUSTOM_GRAVITY = Gravity.START | Gravity.CENTER_VERTICAL;
-    
+
     private int mNavigationMode;
     private int mDisplayOptions = -1;
     private CharSequence mTitle;
@@ -113,7 +113,7 @@ public class ActionBarView extends AbsActionBarView {
 
     private int mProgressBarPadding;
     private int mItemPadding;
-    
+
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
     private int mProgressStyle;
@@ -127,7 +127,7 @@ public class ActionBarView extends AbsActionBarView {
 
     private MenuBuilder mOptionsMenu;
     private boolean mMenuPrepared;
-    
+
     private ActionBarContextView mContextView;
 
     private ActionMenuItem mLogoNavItem;
@@ -188,7 +188,7 @@ public class ActionBarView extends AbsActionBarView {
                 ActionBar.NAVIGATION_MODE_STANDARD);
         mTitle = a.getText(R.styleable.ActionBar_title);
         mSubtitle = a.getText(R.styleable.ActionBar_subtitle);
-        
+
         mLogo = a.getDrawable(R.styleable.ActionBar_logo);
         if (mLogo == null) {
             if (context instanceof Activity) {
@@ -232,7 +232,7 @@ public class ActionBarView extends AbsActionBarView {
         mExpandedHomeLayout.setOnClickListener(mExpandedActionViewUpListener);
         mExpandedHomeLayout.setContentDescription(getResources().getText(
                 R.string.action_bar_up_description));
-        
+
         // This needs to highlight/be focusable on its own.
         // TODO: Clean up the handoff between expanded/normal.
         final Drawable upBackground = mUpGoerFive.getBackground();
@@ -261,9 +261,9 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
-        
+
         a.recycle();
-        
+
         mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
 
         mUpGoerFive.setOnClickListener(mUpClickListener);
@@ -553,6 +553,7 @@ public class ActionBarView extends AbsActionBarView {
         if (mLogoNavItem != null) {
             mLogoNavItem.setTitle(title);
         }
+        mUpGoerFive.setContentDescription(buildHomeContentDescription());
     }
 
     public CharSequence getSubtitle() {
@@ -569,6 +570,7 @@ public class ActionBarView extends AbsActionBarView {
                     (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle));
             mTitleLayout.setVisibility(visible ? VISIBLE : GONE);
         }
+        mUpGoerFive.setContentDescription(buildHomeContentDescription());
     }
 
     public void setHomeButtonEnabled(boolean enable) {
@@ -682,7 +684,7 @@ public class ActionBarView extends AbsActionBarView {
                     removeView(mCustomNavView);
                 }
             }
-            
+
             if (mTitleLayout != null &&
                     (flagsChanged & ActionBar.DISPLAY_TITLE_MULTIPLE_LINES) != 0) {
                 if ((options & ActionBar.DISPLAY_TITLE_MULTIPLE_LINES) != 0) {
@@ -755,7 +757,7 @@ public class ActionBarView extends AbsActionBarView {
                     removeView(mTabScrollView);
                 }
             }
-            
+
             switch (mode) {
             case ActionBar.NAVIGATION_MODE_LIST:
                 if (mSpinner == null) {
@@ -808,11 +810,11 @@ public class ActionBarView extends AbsActionBarView {
     public View getCustomNavigationView() {
         return mCustomNavView;
     }
-    
+
     public int getNavigationMode() {
         return mNavigationMode;
     }
-    
+
     public int getDisplayOptions() {
         return mDisplayOptions;
     }
@@ -952,7 +954,7 @@ public class ActionBarView extends AbsActionBarView {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
                     "with android:layout_width=\"match_parent\" (or fill_parent)");
         }
-        
+
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         if (heightMode != MeasureSpec.AT_MOST) {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
@@ -963,7 +965,7 @@ public class ActionBarView extends AbsActionBarView {
 
         int maxHeight = mContentHeight >= 0 ?
                 mContentHeight : MeasureSpec.getSize(heightMeasureSpec);
-        
+
         final int verticalPadding = getPaddingTop() + getPaddingBottom();
         final int paddingLeft = getPaddingLeft();
         final int paddingRight = getPaddingRight();
@@ -999,7 +1001,7 @@ public class ActionBarView extends AbsActionBarView {
             availableWidth = Math.max(0, availableWidth - homeOffsetWidth);
             leftOfCenter = Math.max(0, availableWidth - homeOffsetWidth);
         }
-        
+
         if (mMenuView != null && mMenuView.getParent() == this) {
             availableWidth = measureChildView(mMenuView, availableWidth, exactHeightSpec, 0);
             rightOfCenter = Math.max(0, rightOfCenter - mMenuView.getMeasuredWidth());
