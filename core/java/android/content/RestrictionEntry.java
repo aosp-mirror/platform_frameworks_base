@@ -109,6 +109,7 @@ public class RestrictionEntry implements Parcelable {
      */
     public RestrictionEntry(String key, String selectedString) {
         this.key = key;
+        this.type = TYPE_CHOICE;
         this.currentValue = selectedString;
     }
 
@@ -119,6 +120,7 @@ public class RestrictionEntry implements Parcelable {
      */
     public RestrictionEntry(String key, boolean selectedState) {
         this.key = key;
+        this.type = TYPE_BOOLEAN;
         setSelectedState(selectedState);
     }
 
@@ -129,6 +131,7 @@ public class RestrictionEntry implements Parcelable {
      */
     public RestrictionEntry(String key, String[] selectedStrings) {
         this.key = key;
+        this.type = TYPE_MULTI_SELECT;
         this.currentValues = selectedStrings;
     }
 
