@@ -4171,7 +4171,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             handleAppDiedLocked(app, true, allowRestart);
             mLruProcesses.remove(app);
             Process.killProcessQuiet(pid);
-            
+
             if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
                     addAppLocked(app.info, false);
@@ -4182,7 +4182,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             mRemovedProcesses.add(app);
         }
-        
+
         return needRestart;
     }
 
@@ -4196,7 +4196,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 gone = true;
             }        
         }
-        
+
         if (gone) {
             Slog.w(TAG, "Process " + app + " failed to attach");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, app.userId,
@@ -5101,6 +5101,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * 
      * This can be called with or without the global lock held.
      */
+    @Override
     public int checkPermission(String permission, int pid, int uid) {
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -5267,6 +5268,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return (modeFlags&perm.modeFlags) == modeFlags;
     }
 
+    @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
         enforceNotIsolatedCaller("checkUriPermission");
 
@@ -5407,6 +5409,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return targetUid;
     }
 
+    @Override
     public int checkGrantUriPermission(int callingUid, String targetPkg,
             Uri uri, int modeFlags) {
         enforceNotIsolatedCaller("checkGrantUriPermission");
@@ -5559,6 +5562,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         grantUriPermissionUncheckedFromIntentLocked(needed, owner);
     }
 
+    @Override
     public void grantUriPermission(IApplicationThread caller, String targetPkg,
             Uri uri, int modeFlags) {
         enforceNotIsolatedCaller("grantUriPermission");
@@ -6094,7 +6098,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "getTaskThumbnails()");
             TaskRecord tr = recentTaskForIdLocked(id);
             if (tr != null) {
-                return tr.stack.getTaskThumbnailsLocked(tr);
+                return tr.getTaskThumbnailsLocked();
             }
         }
         return null;
@@ -6107,7 +6111,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "getTaskTopThumbnail()");
             TaskRecord tr = recentTaskForIdLocked(id);
             if (tr != null) {
-                return tr.stack.getTaskTopThumbnailLocked(tr);
+                return tr.getTaskTopThumbnailLocked();
             }
         }
         return null;
@@ -6122,8 +6126,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 TaskRecord tr = recentTaskForIdLocked(taskId);
                 if (tr != null) {
-                    return tr.stack.removeTaskActivitiesLocked(taskId, subTaskIndex,
-                            true) != null;
+                    return tr.removeTaskActivitiesLocked(subTaskIndex, true) != null;
                 }
                 return false;
             } finally {
@@ -6190,7 +6193,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 TaskRecord tr = recentTaskForIdLocked(taskId);
                 if (tr != null) {
-                    ActivityRecord r = tr.stack.removeTaskActivitiesLocked(taskId, -1, false);
+                    ActivityRecord r = tr.removeTaskActivitiesLocked(-1, false);
                     if (r != null) {
                         cleanUpRemovedTaskLocked(tr, flags);
                         return true;

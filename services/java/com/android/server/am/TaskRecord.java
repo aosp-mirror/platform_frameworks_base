@@ -20,10 +20,13 @@ import static com.android.server.am.ActivityManagerService.TAG;
 import static com.android.server.am.ActivityStack.DEBUG_ADD_REMOVE;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.IThumbnailRetriever;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -64,11 +67,11 @@ class TaskRecord extends ThumbnailHolder {
     void touchActiveTime() {
         lastActiveTime = android.os.SystemClock.elapsedRealtime();
     }
-    
+
     long getInactiveDuration() {
         return android.os.SystemClock.elapsedRealtime() - lastActiveTime;
     }
-    
+
     void setIntent(Intent _intent, ActivityInfo info) {
         stringName = null;
 
@@ -259,6 +262,125 @@ class TaskRecord extends ThumbnailHolder {
         }
 
         return null;
+    }
+
+    public ActivityManager.TaskThumbnails getTaskThumbnailsLocked() {
+        TaskAccessInfo info = getTaskAccessInfoLocked(true);
+        final ActivityRecord resumedActivity = stack.mResumedActivity;
+        if (resumedActivity != null && resumedActivity.thumbHolder == this) {
+            info.mainThumbnail = stack.screenshotActivities(resumedActivity);
+        }
+        if (info.mainThumbnail == null) {
+            info.mainThumbnail = lastThumbnail;
+        }
+        return info;
+    }
+
+    public Bitmap getTaskTopThumbnailLocked() {
+        final ActivityRecord resumedActivity = stack.mResumedActivity;
+        if (resumedActivity != null && resumedActivity.task == this) {
+            // This task is the current resumed task, we just need to take
+            // a screenshot of it and return that.
+            return stack.screenshotActivities(resumedActivity);
+        }
+        // Return the information about the task, to figure out the top
+        // thumbnail to return.
+        TaskAccessInfo info = getTaskAccessInfoLocked(true);
+        if (info.numSubThumbbails <= 0) {
+            return info.mainThumbnail != null ? info.mainThumbnail : lastThumbnail;
+        }
+        return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
+    }
+
+    public ActivityRecord removeTaskActivitiesLocked(int subTaskIndex,
+            boolean taskRequired) {
+        TaskAccessInfo info = getTaskAccessInfoLocked(false);
+        if (info.root == null) {
+            if (taskRequired) {
+                Slog.w(TAG, "removeTaskLocked: unknown taskId " + taskId);
+            }
+            return null;
+        }
+
+        if (subTaskIndex < 0) {
+            // Just remove the entire task.
+            performClearTaskAtIndexLocked(info.rootIndex);
+            return info.root;
+        }
+
+        if (subTaskIndex >= info.subtasks.size()) {
+            if (taskRequired) {
+                Slog.w(TAG, "removeTaskLocked: unknown subTaskIndex " + subTaskIndex);
+            }
+            return null;
+        }
+
+        // Remove all of this task's activities starting at the sub task.
+        TaskAccessInfo.SubTask subtask = info.subtasks.get(subTaskIndex);
+        performClearTaskAtIndexLocked(subtask.index);
+        return subtask.activity;
+    }
+
+    public TaskAccessInfo getTaskAccessInfoLocked(boolean inclThumbs) {
+        final TaskAccessInfo thumbs = new TaskAccessInfo();
+        // How many different sub-thumbnails?
+        final int NA = mActivities.size();
+        int j = 0;
+        ThumbnailHolder holder = null;
+        while (j < NA) {
+            ActivityRecord ar = mActivities.get(j);
+            if (!ar.finishing) {
+                thumbs.root = ar;
+                thumbs.rootIndex = j;
+                holder = ar.thumbHolder;
+                if (holder != null) {
+                    thumbs.mainThumbnail = holder.lastThumbnail;
+                }
+                j++;
+                break;
+            }
+            j++;
+        }
+
+        if (j >= NA) {
+            return thumbs;
+        }
+
+        ArrayList<TaskAccessInfo.SubTask> subtasks = new ArrayList<TaskAccessInfo.SubTask>();
+        thumbs.subtasks = subtasks;
+        while (j < NA) {
+            ActivityRecord ar = mActivities.get(j);
+            j++;
+            if (ar.finishing) {
+                continue;
+            }
+            if (ar.thumbHolder != holder && holder != null) {
+                thumbs.numSubThumbbails++;
+                holder = ar.thumbHolder;
+                TaskAccessInfo.SubTask sub = new TaskAccessInfo.SubTask();
+                sub.holder = holder;
+                sub.activity = ar;
+                sub.index = j-1;
+                subtasks.add(sub);
+            }
+        }
+        if (thumbs.numSubThumbbails > 0) {
+            thumbs.retriever = new IThumbnailRetriever.Stub() {
+                @Override
+                public Bitmap getThumbnail(int index) {
+                    if (index < 0 || index >= thumbs.subtasks.size()) {
+                        return null;
+                    }
+                    TaskAccessInfo.SubTask sub = thumbs.subtasks.get(index);
+                    ActivityRecord resumedActivity = stack.mResumedActivity;
+                    if (resumedActivity != null && resumedActivity.thumbHolder == sub.holder) {
+                        return stack.screenshotActivities(resumedActivity);
+                    }
+                    return sub.holder.lastThumbnail;
+                }
+            };
+        }
+        return thumbs;
     }
 
     void dump(PrintWriter pw, String prefix) {
