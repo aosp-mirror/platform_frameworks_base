@@ -219,12 +219,6 @@ static bool throwExceptionAsNecessary(
     case ERROR_DRM_TAMPER_DETECTED:
         drmMessage = "Invalid state";
         break;
-    case ERROR_DRM_NOT_PROVISIONED:
-        drmMessage = "Not provisioned";
-        break;
-    case ERROR_DRM_DEVICE_REVOKED:
-        drmMessage = "Device revoked";
-        break;
     default:
         break;
     }
@@ -238,6 +232,12 @@ static bool throwExceptionAsNecessary(
     if (err == BAD_VALUE) {
         jniThrowException(env, "java/lang/IllegalArgumentException", msg);
         return true;
+    } else if (err == ERROR_DRM_NOT_PROVISIONED) {
+        jniThrowException(env, "android/media/NotProvisionedException", msg);
+        return true;
+    } else if (err == ERROR_DRM_DEVICE_REVOKED) {
+        jniThrowException(env, "android/media/DeniedByServerException", msg);
+        return true;
     } else if (err != OK) {
         String8 errbuf;
         if (drmMessage != NULL) {
@@ -248,6 +248,7 @@ static bool throwExceptionAsNecessary(
                 msg = errbuf.string();
             }
         }
+        ALOGE("Illegal state exception: %s", msg);
         jniThrowException(env, "java/lang/IllegalStateException", msg);
         return true;
     }
@@ -574,7 +575,7 @@ static void android_media_MediaDrm_native_setup(
     if (err != OK) {
         jniThrowException(
                 env,
-                "android/media/MediaDrmException",
+                "android/media/UnsupportedSchemeException",
                 "Failed to instantiate drm object.");
         return;
     }

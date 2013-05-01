@@ -17,10 +17,11 @@
 package android.media;
 
 /**
- * Base class for MediaDrm exceptions
+ * Exception thrown when the provisioning server or key server denies a
+ * certficate or license for a device.
  */
-public class MediaDrmException extends Exception {
-    public MediaDrmException(String detailMessage) {
+public final class DeniedByServerException extends MediaDrmException {
+    public DeniedByServerException(String detailMessage) {
         super(detailMessage);
     }
 }
