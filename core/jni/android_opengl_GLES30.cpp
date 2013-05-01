@@ -5145,7 +5145,7 @@ static JNINativeMethod methods[] = {
 {"glGetStringi", "(II)Ljava/lang/String;", (void *) android_glGetStringi__II },
 {"glCopyBufferSubData", "(IIIII)V", (void *) android_glCopyBufferSubData__IIIII },
 {"glGetUniformIndices", "(I[Ljava/lang/String;[II)V", (void *) android_glGetUniformIndices_array },
-{"glGetUniformIndices", "(I[Ljava/lang/String;[Ljava/nio/IntBuffer)V", (void *) android_glGetUniformIndices_buffer },
+{"glGetUniformIndices", "(I[Ljava/lang/String;Ljava/nio/IntBuffer;)V", (void *) android_glGetUniformIndices_buffer },
 {"glGetActiveUniformsiv", "(II[III[II)V", (void *) android_glGetActiveUniformsiv__II_3III_3II },
 {"glGetActiveUniformsiv", "(IILjava/nio/IntBuffer;ILjava/nio/IntBuffer;)V", (void *) android_glGetActiveUniformsiv__IILjava_nio_IntBuffer_2ILjava_nio_IntBuffer_2 },
 {"glGetUniformBlockIndex", "(ILjava/lang/String;)I", (void *) android_glGetUniformBlockIndex__ILjava_lang_String_2 },
