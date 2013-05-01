@@ -260,7 +260,7 @@ public class TextureView extends View {
     @Override
     public void setLayerType(int layerType, Paint paint) {
         if (paint != mLayerPaint) {
-            mLayerPaint = paint;
+            mLayerPaint = paint == null ? new Paint() : paint;
             invalidate();
         }
     }
