@@ -25,6 +25,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -56,8 +57,6 @@ public class NotificationPanelView extends PanelView {
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
-
-        setContentDescription(resources.getString(R.string.accessibility_desc_notification_shade));
     }
 
     @Override
@@ -69,6 +68,17 @@ public class NotificationPanelView extends PanelView {
                 "notifications,v=" + vel);
         }
         super.fling(vel, always);
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            event.getText()
+                    .add(getContext().getString(R.string.accessibility_desc_notification_shade));
+            return true;
+        }
+
+        return super.dispatchPopulateAccessibilityEvent(event);
     }
 
     // We draw the handle ourselves so that it's always glued to the bottom of the window.
