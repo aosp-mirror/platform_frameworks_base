@@ -164,17 +164,18 @@ static void captureCallback(void* user,
 
     visualizer_callback_cookie *callbackInfo = (visualizer_callback_cookie *)user;
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    AutoMutex lock(&callbackInfo->callback_data_lock);
+
+    if (!user || !env) {
+        ALOGW("captureCallback error user %p, env %p", user, env);
+        return;
+    }
 
     ALOGV("captureCallback: callbackInfo %p, visualizer_ref %p visualizer_class %p",
             callbackInfo,
             callbackInfo->visualizer_ref,
             callbackInfo->visualizer_class);
 
-    if (!user || !env) {
-        ALOGW("captureCallback error user %p, env %p", user, env);
-        return;
-    }
+    AutoMutex lock(&callbackInfo->callback_data_lock);
 
     if (waveformSize != 0 && waveform != NULL) {
         jbyteArray jArray;
