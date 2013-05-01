@@ -95,7 +95,8 @@ public class Vpn extends BaseNetworkStateTracker {
     private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
     private PendingIntent mStatusIntent;
-    private boolean mEnableNotif = true;
+    private volatile boolean mEnableNotif = true;
+    private volatile boolean mEnableTeardown = true;
     private final IConnectivityManager mConnService;
 
     public Vpn(Context context, VpnCallback callback, INetworkManagementService netService,
@@ -113,8 +114,21 @@ public class Vpn extends BaseNetworkStateTracker {
         }
     }
 
+    /**
+     * Set if this object is responsible for showing its own notifications. When
+     * {@code false}, notifications are handled externally by someone else.
+     */
     public void setEnableNotifications(boolean enableNotif) {
         mEnableNotif = enableNotif;
+    }
+
+    /**
+     * Set if this object is responsible for watching for {@link NetworkInfo}
+     * teardown. When {@code false}, teardown is handled externally by someone
+     * else.
+     */
+    public void setEnableTeardown(boolean enableTeardown) {
+        mEnableTeardown = enableTeardown;
     }
 
     @Override
@@ -647,6 +661,8 @@ public class Vpn extends BaseNetworkStateTracker {
         private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (!mEnableTeardown) return;
+
                 if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                     if (intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE,
                             ConnectivityManager.TYPE_NONE) == mOuterConnection.get()) {
@@ -688,7 +704,6 @@ public class Vpn extends BaseNetworkStateTracker {
             IntentFilter filter = new IntentFilter();
             filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             mContext.registerReceiver(mBroadcastReceiver, filter);
-
         }
 
         public void check(String interfaze) {
