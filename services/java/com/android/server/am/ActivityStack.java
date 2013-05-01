@@ -450,6 +450,14 @@ final class ActivityStack {
         return null;
     }
 
+    final TaskRecord topTask() {
+        final int size = mTaskHistory.size();
+        if (size > 0) {
+            return mTaskHistory.get(size - 1);
+        }
+        return null;
+    }
+
     TaskRecord taskForIdLocked(int id) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
@@ -1227,7 +1235,7 @@ final class ActivityStack {
             return false;
         }
 
-        if (prev != null && prev.mLaunchHomeTaskNext && prev.finishing &&
+        if (prev != null && prev.mLaunchHomeTaskNext && prev.finishing && topTask() == prev.task &&
                 prev.task.getTopActivity() == null) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
             return mStackSupervisor.resumeHomeActivity(prev);

@@ -7549,6 +7549,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void setAlwaysFinish(boolean enabled) {
         enforceCallingPermission(android.Manifest.permission.SET_ALWAYS_FINISH,
                 "setAlwaysFinish()");
@@ -7562,6 +7563,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void setActivityController(IActivityController controller) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "setActivityController()");
@@ -7570,6 +7572,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void setUserIsMonkey(boolean userIsMonkey) {
         synchronized (this) {
             synchronized (mPidsSelfLocked) {
@@ -7587,6 +7590,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public boolean isUserAMonkey() {
         synchronized (this) {
             // If there is a controller also implies the user is a monkey.
@@ -12637,7 +12641,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // activity to check if its configuration needs to change.
             starting = mainStack.topRunningActivityLocked(null);
         }
-        
+
         if (starting != null) {
             kept = mainStack.ensureActivityConfigurationLocked(starting, changes);
             // And we need to make sure at this point that all other activities
@@ -12648,7 +12652,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (values != null && mWindowManager != null) {
             mWindowManager.setNewConfiguration(mConfiguration);
         }
-        
+
         return kept;
     }
 
@@ -12664,7 +12668,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                 && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH);
     }
-    
+
     /**
      * Save the locale.  You must be inside a synchronized (this) block.
      */
