@@ -6079,7 +6079,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         long callingId = Binder.clearCallingIdentity();
         try {
             boolean sendAdded = false;
-            boolean isSystem = false;
             Bundle extras = new Bundle(1);
 
             // writer
@@ -6093,28 +6092,29 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mSettings.writePackageRestrictionsLPr(userId);
                     extras.putInt(Intent.EXTRA_UID, UserHandle.getUid(userId, pkgSetting.appId));
                     sendAdded = true;
-                    isSystem = (pkgSetting.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
                 }
             }
 
             if (sendAdded) {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                         packageName, extras, null, null, new int[] {userId});
-                if (isSystem) {
-                    // The just-installed/enabled app is bundled on the system, so presumed
-                    // to be able to run automatically without needing an explicit launch.
-                    // Send it a BOOT_COMPLETED if it would ordinarily have gotten one.
-                    Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED)
-                            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                            .setPackage(packageName);
-                    try {
-                        IActivityManager am = ActivityManagerNative.getDefault();
+                try {
+                    IActivityManager am = ActivityManagerNative.getDefault();
+                    final boolean isSystem =
+                            isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
+                    if (isSystem && am.isUserRunning(userId, false)) {
+                        // The just-installed/enabled app is bundled on the system, so presumed
+                        // to be able to run automatically without needing an explicit launch.
+                        // Send it a BOOT_COMPLETED if it would ordinarily have gotten one.
+                        Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED)
+                                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                                .setPackage(packageName);
                         am.broadcastIntent(null, bcIntent, null, null, 0, null, null, null,
                                 android.app.AppOpsManager.OP_NONE, false, false, userId);
-                    } catch (RemoteException e) {
-                        // shouldn't happen
-                        Slog.w(TAG, "Unable to bootstrap installed package", e);
                     }
+                } catch (RemoteException e) {
+                    // shouldn't happen
+                    Slog.w(TAG, "Unable to bootstrap installed package", e);
                 }
             }
         } finally {
