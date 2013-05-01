@@ -17,10 +17,11 @@
 package android.media;
 
 /**
- * Base class for MediaDrm exceptions
+ * Exception thrown when an attempt is made to construct a MediaDrm object
+ * using a crypto scheme UUID that is not supported by the device
  */
-public class MediaDrmException extends Exception {
-    public MediaDrmException(String detailMessage) {
+public final class UnsupportedSchemeException extends MediaDrmException {
+    public UnsupportedSchemeException(String detailMessage) {
         super(detailMessage);
     }
 }
