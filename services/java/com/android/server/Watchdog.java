@@ -477,6 +477,12 @@ public class Watchdog extends Thread {
             // Only kill the process if the debugger is not attached.
             if (!Debug.isDebuggerConnected()) {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + name);
+                Slog.w(TAG, "Main thread stack trace:");
+                StackTraceElement[] stackTrace = mHandler.getLooper().getThread().getStackTrace();
+                for (StackTraceElement element: stackTrace) {
+                    Slog.w(TAG, "\tat " + element);
+                }
+                Slog.w(TAG, "<End of main thread stack trace>");
                 Process.killProcess(Process.myPid());
                 System.exit(10);
             } else {
