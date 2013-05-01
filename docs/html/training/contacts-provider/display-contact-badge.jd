@@ -169,8 +169,8 @@ trainingnavtop=true
     // Gets a content URI for the contact
     mContactUri =
             Contacts.getLookupUri(
-                Cursor.getLong(mIdColumn),
-                Cursor.getString(mLookupKeyColumn)
+                mCursor.getLong(mIdColumn),
+                mCursor.getString(mLookupKeyColumn)
             );
     mBadge.assignContactUri(mContactUri);
 </pre>
@@ -221,7 +221,7 @@ trainingnavtop=true
      * Assuming the current Cursor position is the contact you want,
      * gets the thumbnail ID
      */
-    mThumbnailUri = Cursor.getString(mThumbnailColumn);
+    mThumbnailUri = mCursor.getString(mThumbnailColumn);
     ...
 </pre>
 <p>
