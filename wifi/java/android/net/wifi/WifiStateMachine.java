@@ -3598,6 +3598,7 @@ public class WifiStateMachine extends StateMachine {
                     if (!isWifiTethered(stateChange.active)) {
                         loge("Tethering reports wifi as untethered!, shut down soft Ap");
                         setHostApRunning(null, false);
+                        setHostApRunning(null, true);
                     }
                     return HANDLED;
                 case CMD_STOP_AP:
