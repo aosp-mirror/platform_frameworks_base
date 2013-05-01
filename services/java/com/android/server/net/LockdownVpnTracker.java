@@ -128,7 +128,10 @@ public class LockdownVpnTracker {
             mAcceptedEgressIface = null;
             mVpn.stopLegacyVpn();
         }
-        if (egressDisconnected) return;
+        if (egressDisconnected) {
+            hideNotification();
+            return;
+        }
 
         final int egressType = egressInfo.getType();
         if (vpnInfo.getDetailedState() == DetailedState.FAILED) {
@@ -192,6 +195,7 @@ public class LockdownVpnTracker {
         Slog.d(TAG, "initLocked()");
 
         mVpn.setEnableNotifications(false);
+        mVpn.setEnableTeardown(false);
 
         final IntentFilter resetFilter = new IntentFilter(ACTION_LOCKDOWN_RESET);
         mContext.registerReceiver(mResetReceiver, resetFilter, CONNECTIVITY_INTERNAL, null);
@@ -235,6 +239,7 @@ public class LockdownVpnTracker {
 
         mContext.unregisterReceiver(mResetReceiver);
         mVpn.setEnableNotifications(true);
+        mVpn.setEnableTeardown(true);
     }
 
     public void reset() {
