@@ -37,6 +37,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import com.android.server.UiThread;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -190,12 +191,12 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private final DisplayViewport mTempDefaultViewport = new DisplayViewport();
     private final DisplayViewport mTempExternalTouchViewport = new DisplayViewport();
 
-    public DisplayManagerService(Context context, Handler mainHandler, Handler uiHandler) {
+    public DisplayManagerService(Context context, Handler mainHandler) {
         mContext = context;
         mHeadless = SystemProperties.get(SYSTEM_HEADLESS).equals("1");
 
         mHandler = new DisplayManagerHandler(mainHandler.getLooper());
-        mUiHandler = uiHandler;
+        mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
 

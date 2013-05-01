@@ -53,12 +53,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -74,6 +72,7 @@ import android.util.Pair;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
@@ -82,7 +81,6 @@ import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -381,10 +379,7 @@ public class SyncManager {
         mSyncAdapters = new SyncAdaptersCache(mContext);
         mSyncQueue = new SyncQueue(mContext.getPackageManager(), mSyncStorageEngine, mSyncAdapters);
 
-        HandlerThread syncThread = new HandlerThread("SyncHandlerThread",
-                Process.THREAD_PRIORITY_BACKGROUND);
-        syncThread.start();
-        mSyncHandler = new SyncHandler(syncThread.getLooper());
+        mSyncHandler = new SyncHandler(BackgroundThread.get().getLooper());
 
         mSyncAdapters.setListener(new RegisteredServicesCacheListener<SyncAdapterType>() {
             @Override

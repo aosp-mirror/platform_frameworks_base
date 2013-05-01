@@ -56,7 +56,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -74,6 +73,7 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.FgThread;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -113,7 +113,6 @@ public class AccountManagerService
     private final PackageManager mPackageManager;
     private UserManager mUserManager;
 
-    private HandlerThread mMessageThread;
     private final MessageHandler mMessageHandler;
 
     // Messages that can be sent on mHandler
@@ -234,9 +233,7 @@ public class AccountManagerService
         mContext = context;
         mPackageManager = packageManager;
 
-        mMessageThread = new HandlerThread("AccountManagerService");
-        mMessageThread.start();
-        mMessageHandler = new MessageHandler(mMessageThread.getLooper());
+        mMessageHandler = new MessageHandler(FgThread.get().getLooper());
 
         mAuthenticatorCache = authenticatorCache;
         mAuthenticatorCache.setListener(this, null /* Handler */);

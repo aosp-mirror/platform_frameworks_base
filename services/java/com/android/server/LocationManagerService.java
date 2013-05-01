@@ -63,6 +63,7 @@ import android.util.Slog;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GeofenceManager;
@@ -93,7 +94,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String WAKELOCK_KEY = TAG;
-    private static final String THREAD_NAME = TAG;
 
     // Location resolution level: no location data whatsoever
     private static final int RESOLUTION_LEVEL_NONE = 0;
@@ -143,7 +143,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private LocationWorkerHandler mLocationHandler;
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
     private LocationBlacklist mBlacklist;
-    private HandlerThread mHandlerThread;
 
     // --- fields below are protected by mWakeLock ---
     private int mPendingBroadcasts;
@@ -216,9 +215,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
 
             // prepare worker thread
-            mHandlerThread = new HandlerThread(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
-            mHandlerThread.start();
-            mLocationHandler = new LocationWorkerHandler(mHandlerThread.getLooper());
+            mLocationHandler = new LocationWorkerHandler(BackgroundThread.get().getLooper());
 
             // prepare mLocationHandler's dependents
             mLocationFudger = new LocationFudger(mContext, mLocationHandler);

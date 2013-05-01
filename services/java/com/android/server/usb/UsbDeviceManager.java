@@ -32,11 +32,9 @@ import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
@@ -48,6 +46,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.FgThread;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -158,11 +157,7 @@ public class UsbDeviceManager {
 
         readOemUsbOverrideConfig();
 
-        // create a thread for our Handler
-        HandlerThread thread = new HandlerThread("UsbDeviceManager",
-                Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-        mHandler = new UsbHandler(thread.getLooper());
+        mHandler = new UsbHandler(FgThread.get().getLooper());
 
         if (nativeIsStartRequested()) {
             if (DEBUG) Slog.d(TAG, "accessory attached at boot");

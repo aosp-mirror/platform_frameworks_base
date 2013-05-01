@@ -34,6 +34,7 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
+import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.DisplayManagerService;
@@ -701,8 +702,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public static WindowManagerService main(final Context context,
             final PowerManagerService pm, final DisplayManagerService dm,
-            final InputManagerService im,
-            final Handler uiHandler, final Handler wmHandler,
+            final InputManagerService im, final Handler wmHandler,
             final boolean haveInputMethods, final boolean showBootMsgs,
             final boolean onlyCore) {
         final WindowManagerService[] holder = new WindowManagerService[1];
@@ -710,7 +710,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 holder[0] = new WindowManagerService(context, pm, dm, im,
-                        uiHandler, haveInputMethods, showBootMsgs, onlyCore);
+                        haveInputMethods, showBootMsgs, onlyCore);
             }
         }, 0);
         return holder[0];
@@ -732,7 +732,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, PowerManagerService pm,
             DisplayManagerService displayManager, InputManagerService inputManager,
-            Handler uiHandler,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -795,7 +794,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mFxSession = new SurfaceSession();
         mAnimator = new WindowAnimator(this);
 
-        initPolicy(uiHandler);
+        initPolicy(UiThread.getHandler());
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);

@@ -154,30 +154,6 @@ class ServerThread extends Thread {
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
 
-        // Create a shared handler thread for UI within the system server.
-        // This thread is used by at least the following components:
-        // - WindowManagerPolicy
-        // - KeyguardViewManager
-        // - DisplayManagerService
-        HandlerThread uiHandlerThread = new HandlerThread("UI");
-        uiHandlerThread.start();
-        Handler uiHandler = new Handler(uiHandlerThread.getLooper());
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                //Looper.myLooper().setMessageLogging(new LogPrinter(
-                //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
-                android.os.Process.setThreadPriority(
-                        android.os.Process.THREAD_PRIORITY_FOREGROUND);
-                android.os.Process.setCanSelfBackground(false);
-
-                // For debug builds, log event loop stalls to dropbox for analysis.
-                if (StrictMode.conditionallyEnableDebugLogging()) {
-                    Slog.i(TAG, "Enabled StrictMode logging for UI Looper");
-                }
-            }
-        });
-
         // Create a handler thread just for the window manager to enjoy.
         HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
         wmHandlerThread.start();
@@ -231,7 +207,7 @@ class ServerThread extends Thread {
 
         try {
             Slog.i(TAG, "Display Manager");
-            display = new DisplayManagerService(context, wmHandler, uiHandler);
+            display = new DisplayManagerService(context, wmHandler);
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
@@ -319,14 +295,14 @@ class ServerThread extends Thread {
             Slog.i(TAG, "Init Watchdog");
             Watchdog.getInstance().init(context, battery, power, alarm,
                     ActivityManagerService.self());
+            Watchdog.getInstance().addThread(wmHandler, "WindowManager thread");
 
             Slog.i(TAG, "Input Manager");
             inputManager = new InputManagerService(context, wmHandler);
 
             Slog.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, power, display, inputManager,
-                    uiHandler, wmHandler,
-                    factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
+                    wmHandler, factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);

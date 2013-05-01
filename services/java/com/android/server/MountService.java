@@ -37,7 +37,6 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -485,7 +484,6 @@ class MountService extends IMountService.Stub
         }
     };
 
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
 
     void waitForAsecScan() {
@@ -820,7 +818,7 @@ class MountService extends IMountService.Stub
             }
 
             if (code == VoldResponseCode.VolumeDiskInserted) {
-                new Thread() {
+                new Thread("MountService#VolumeDiskInserted") {
                     @Override
                     public void run() {
                         try {
@@ -1105,7 +1103,7 @@ class MountService extends IMountService.Stub
             /*
              * USB mass storage disconnected while enabled
              */
-            new Thread() {
+            new Thread("MountService#AvailabilityChange") {
                 @Override
                 public void run() {
                     try {
@@ -1304,9 +1302,7 @@ class MountService extends IMountService.Stub
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");
 
-        mHandlerThread = new HandlerThread("MountService");
-        mHandlerThread.start();
-        mHandler = new MountServiceHandler(mHandlerThread.getLooper());
+        mHandler = new MountServiceHandler(IoThread.get().getLooper());
 
         // Watch for user changes
         final IntentFilter userFilter = new IntentFilter();
@@ -1328,7 +1324,7 @@ class MountService extends IMountService.Stub
                 idleMaintenanceFilter, null, mHandler);
 
         // Add OBB Action Handler to MountService thread.
-        mObbActionHandler = new ObbActionHandler(mHandlerThread.getLooper());
+        mObbActionHandler = new ObbActionHandler(IoThread.get().getLooper());
 
         /*
          * Create the connection to vold with a maximum queue of twice the
