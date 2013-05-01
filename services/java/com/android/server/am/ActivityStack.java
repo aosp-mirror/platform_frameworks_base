@@ -3310,7 +3310,12 @@ final class ActivityStack {
                         r.app = null;
                     }
                     lastTask = r.task;
-                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop", true);
+                    if (finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
+                            true)) {
+                        // r has been deleted from mActivities, accommodate.
+                        --numActivities;
+                        --activityNdx;
+                    }
                 }
             }
         }
