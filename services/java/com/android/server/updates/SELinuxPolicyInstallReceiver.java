@@ -94,11 +94,15 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
 
     private void unpackBundle() throws IOException {
         BufferedInputStream stream = new BufferedInputStream(new FileInputStream(updateContent));
-        int[] chunkLengths = readChunkLengths(stream);
-        installFile(new File(updateDir, seappContextsPath), stream, chunkLengths[0]);
-        installFile(new File(updateDir, propertyContextsPath), stream, chunkLengths[1]);
-        installFile(new File(updateDir, fileContextsPath), stream, chunkLengths[2]);
-        installFile(new File(updateDir, sepolicyPath), stream, chunkLengths[3]);
+        try {
+            int[] chunkLengths = readChunkLengths(stream);
+            installFile(new File(updateDir, seappContextsPath), stream, chunkLengths[0]);
+            installFile(new File(updateDir, propertyContextsPath), stream, chunkLengths[1]);
+            installFile(new File(updateDir, fileContextsPath), stream, chunkLengths[2]);
+            installFile(new File(updateDir, sepolicyPath), stream, chunkLengths[3]);
+        } finally {
+            IoUtils.closeQuietly(stream);
+        }
     }
 
     private void applyUpdate() throws IOException, ErrnoException {
@@ -124,10 +128,10 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     private void setEnforcingMode(Context context) {
         String mode = Settings.Global.getString(context.getContentResolver(),
             Settings.Global.SELINUX_STATUS);
-        if (mode.equals("1")) {
+        if ("1".equals(mode)) {
             Slog.i(TAG, "Setting enforcing mode");
             SystemProperties.set("persist.selinux.enforcing", mode);
-        } else if (mode.equals("0")) {
+        } else if ("0".equals(mode)) {
             Slog.i(TAG, "Tried to set permissive mode, ignoring");
         } else {
             Slog.e(TAG, "Got invalid enforcing mode: " + mode);
