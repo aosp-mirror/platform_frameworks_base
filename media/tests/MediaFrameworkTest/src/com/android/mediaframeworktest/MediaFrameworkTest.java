@@ -48,9 +48,9 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 
- 
+
 public class MediaFrameworkTest extends Activity implements SurfaceHolder.Callback {
-    
+
     //public static Surface video_sf;
     public static SurfaceView mSurfaceView;
     private MediaController mMediaController;
@@ -58,10 +58,10 @@ public class MediaFrameworkTest extends Activity implements SurfaceHolder.Callba
     private MediaPlayer mpmidi;
     private MediaPlayer mpmp3;
     private String testfilepath = "/sdcard/awb.awb";
-    
+
     public static AssetFileDescriptor midiafd;
     public static AssetFileDescriptor mp3afd;
-    
+
     public static Bitmap mDestBitmap;
     public static ImageView mOverlayView;
     private SurfaceHolder mSurfaceHolder = null;
@@ -82,10 +82,10 @@ public class MediaFrameworkTest extends Activity implements SurfaceHolder.Callba
         mSurfaceHolder = mSurfaceView.getHolder();
         mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         mSurfaceHolder.addCallback(this);
-        
+
         //Get the midi fd
         midiafd = this.getResources().openRawResourceFd(R.raw.testmidi);
-        
+
         //Get the mp3 fd
         mp3afd = this.getResources().openRawResourceFd(R.raw.testmp3);
         mOverlayView.setLayoutParams(lp);
