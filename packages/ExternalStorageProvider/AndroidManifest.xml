@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.externalstorage">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application android:label="@string/app_label">
+        <provider
+            android:name=".ExternalStorageProvider"
+            android:authorities="com.android.externalstorage"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <meta-data
+                android:name="android.content.DOCUMENT_PROVIDER"
+                android:value="true" />
+        </provider>
+    </application>
+</manifest>

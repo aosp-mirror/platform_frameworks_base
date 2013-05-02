@@ -25,7 +25,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -51,6 +50,9 @@ public final class DocumentsContract {
      * @see #buildContentsUri(Uri)
      */
     public static final String MIME_TYPE_DIRECTORY = "vnd.android.cursor.dir/doc";
+
+    /** {@hide} */
+    public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
 
     /**
      * {@link DocumentColumns#GUID} value representing the root directory of a

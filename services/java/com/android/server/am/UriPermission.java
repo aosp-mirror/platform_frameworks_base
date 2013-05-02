@@ -217,13 +217,13 @@ class UriPermission {
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.print("userHandle=" + userHandle);
-        pw.print("sourcePkg=" + sourcePkg);
-        pw.println("targetPkg=" + targetPkg);
+        pw.print(" sourcePkg=" + sourcePkg);
+        pw.println(" targetPkg=" + targetPkg);
 
         pw.print(prefix);
         pw.print("modeFlags=0x" + Integer.toHexString(modeFlags));
-        pw.print("globalModeFlags=0x" + Integer.toHexString(globalModeFlags));
-        pw.println("persistedModeFlags=0x" + Integer.toHexString(persistedModeFlags));
+        pw.print(" globalModeFlags=0x" + Integer.toHexString(globalModeFlags));
+        pw.println(" persistedModeFlags=0x" + Integer.toHexString(persistedModeFlags));
 
         if (mReadOwners != null) {
             pw.print(prefix);
