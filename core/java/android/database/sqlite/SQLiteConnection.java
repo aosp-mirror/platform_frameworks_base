@@ -1077,7 +1077,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         printer.println("  isPrimaryConnection: " + mIsPrimaryConnection);
         printer.println("  onlyAllowReadOnlyOperations: " + mOnlyAllowReadOnlyOperations);
 
-        mRecentOperations.dump(printer);
+        mRecentOperations.dump(printer, verbose);
 
         if (verbose) {
             mPreparedStatementCache.dump(printer);
@@ -1376,7 +1376,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         private void logOperationLocked(int cookie, String detail) {
             final Operation operation = getOperationLocked(cookie);
             StringBuilder msg = new StringBuilder();
-            operation.describe(msg);
+            operation.describe(msg, false);
             if (detail != null) {
                 msg.append(", ").append(detail);
             }
@@ -1399,14 +1399,14 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 final Operation operation = mOperations[mIndex];
                 if (operation != null && !operation.mFinished) {
                     StringBuilder msg = new StringBuilder();
-                    operation.describe(msg);
+                    operation.describe(msg, false);
                     return msg.toString();
                 }
                 return null;
             }
         }
 
-        public void dump(Printer printer) {
+        public void dump(Printer printer, boolean verbose) {
             synchronized (mOperations) {
                 printer.println("  Most recently executed operations:");
                 int index = mIndex;
@@ -1418,7 +1418,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                         msg.append("    ").append(n).append(": [");
                         msg.append(operation.getFormattedStartTime());
                         msg.append("] ");
-                        operation.describe(msg);
+                        operation.describe(msg, verbose);
                         printer.println(msg.toString());
 
                         if (index > 0) {
@@ -1449,7 +1449,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         public Exception mException;
         public int mCookie;
 
-        public void describe(StringBuilder msg) {
+        public void describe(StringBuilder msg, boolean verbose) {
             msg.append(mKind);
             if (mFinished) {
                 msg.append(" took ").append(mEndTime - mStartTime).append("ms");
@@ -1461,7 +1461,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             if (mSql != null) {
                 msg.append(", sql=\"").append(trimSqlForDisplay(mSql)).append("\"");
             }
-            if (mBindArgs != null && mBindArgs.size() != 0) {
+            if (verbose && mBindArgs != null && mBindArgs.size() != 0) {
                 msg.append(", bindArgs=[");
                 final int count = mBindArgs.size();
                 for (int i = 0; i < count; i++) {
