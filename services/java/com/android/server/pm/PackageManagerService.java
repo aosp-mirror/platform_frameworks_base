@@ -9164,17 +9164,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         PackageParser.Package p;
         boolean dataOnly = false;
+        String libDirPath = null;
         String asecPath = null;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
+            PackageSetting ps = mSettings.mPackages.get(packageName);
             if(p == null) {
                 dataOnly = true;
-                PackageSetting ps = mSettings.mPackages.get(packageName);
                 if((ps == null) || (ps.pkg == null)) {
                     Slog.w(TAG, "Package named '" + packageName +"' doesn't exist.");
                     return false;
                 }
                 p = ps.pkg;
+            }
+            if (ps != null) {
+                libDirPath = ps.nativeLibraryPathString;
             }
             if (p != null && (isExternal(p) || isForwardLocked(p))) {
                 String secureContainerId = cidFromCodePath(p.applicationInfo.sourceDir);
@@ -9194,8 +9198,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 publicSrcDir = applicationInfo.publicSourceDir;
             }
         }
-        int res = mInstaller.getSizeInfo(packageName, userHandle, p.mPath, publicSrcDir,
-                asecPath, pStats);
+        int res = mInstaller.getSizeInfo(packageName, userHandle, p.mPath, libDirPath,
+                publicSrcDir, asecPath, pStats);
         if (res < 0) {
             return false;
         }
