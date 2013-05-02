@@ -286,6 +286,10 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
 
     private void cancelLoadingThumbnailsAndIcons() {
+        if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
+            return;
+        }
+
         if (mTaskLoader != null) {
             mTaskLoader.cancel(false);
             mTaskLoader = null;
