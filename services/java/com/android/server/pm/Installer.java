@@ -307,8 +307,8 @@ public final class Installer {
         return execute(builder.toString());
     }
 
-    public int getSizeInfo(String pkgName, int persona, String apkPath, String fwdLockApkPath,
-            String asecPath, PackageStats pStats) {
+    public int getSizeInfo(String pkgName, int persona, String apkPath, String libDirPath,
+            String fwdLockApkPath, String asecPath, PackageStats pStats) {
         StringBuilder builder = new StringBuilder("getsize");
         builder.append(' ');
         builder.append(pkgName);
@@ -316,6 +316,8 @@ public final class Installer {
         builder.append(persona);
         builder.append(' ');
         builder.append(apkPath);
+        builder.append(' ');
+        builder.append(libDirPath != null ? libDirPath : "!");
         builder.append(' ');
         builder.append(fwdLockApkPath != null ? fwdLockApkPath : "!");
         builder.append(' ');
