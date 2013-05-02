@@ -6202,6 +6202,7 @@ package android.content {
     field public static final java.lang.String EXTRA_INTENT = "android.intent.extra.INTENT";
     field public static final java.lang.String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
     field public static final java.lang.String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
+    field public static final java.lang.String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
     field public static final java.lang.String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final java.lang.String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
     field public static final java.lang.String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
