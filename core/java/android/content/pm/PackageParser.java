@@ -287,7 +287,10 @@ public class PackageParser {
         pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.installLocation = p.installLocation;
-        pi.requiredForAllUsers = p.mRequiredForAllUsers;
+        if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0
+                || (pi.applicationInfo.flags&ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+            pi.requiredForAllUsers = p.mRequiredForAllUsers;
+        }
         pi.restrictedAccountType = p.mRestrictedAccountType;
         pi.requiredAccountType = p.mRequiredAccountType;
         pi.firstInstallTime = firstInstallTime;
@@ -1812,11 +1815,12 @@ public class PackageParser {
                     false)) {
                 ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
             }
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestApplication_requiredForAllUsers,
-                    false)) {
-                owner.mRequiredForAllUsers = true;
-            }
+        }
+
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_requiredForAllUsers,
+                false)) {
+            owner.mRequiredForAllUsers = true;
         }
 
         String restrictedAccountType = sa.getString(com.android.internal.R.styleable
