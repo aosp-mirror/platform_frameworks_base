@@ -197,15 +197,18 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             // Create screenshot directory if it doesn't exist
             mScreenshotDir.mkdirs();
 
+            // media provider uses seconds, not milliseconds
+            long dateSeconds = mImageTime / 1000;
+
             // Save the screenshot to the MediaStore
             ContentValues values = new ContentValues();
             ContentResolver resolver = context.getContentResolver();
             values.put(MediaStore.Images.ImageColumns.DATA, mImageFilePath);
             values.put(MediaStore.Images.ImageColumns.TITLE, mImageFileName);
             values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, mImageFileName);
-            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, mImageTime);
-            values.put(MediaStore.Images.ImageColumns.DATE_ADDED, mImageTime);
-            values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, mImageTime);
+            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, dateSeconds);
+            values.put(MediaStore.Images.ImageColumns.DATE_ADDED, dateSeconds);
+            values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, dateSeconds);
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
             values.put(MediaStore.Images.ImageColumns.WIDTH, mImageWidth);
             values.put(MediaStore.Images.ImageColumns.HEIGHT, mImageHeight);
