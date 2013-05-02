@@ -3236,9 +3236,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Extra used to communicate set of acceptable MIME types for
-     * {@link #ACTION_GET_CONTENT} or {@link #ACTION_OPEN_DOC}. The type of the
+     * {@link #ACTION_GET_CONTENT} or {@link #ACTION_OPEN_DOCUMENT}. The type of the
      * extra is <code>ArrayList&lt;String&gt;</code>.
-     * @hide
      */
     public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
 
