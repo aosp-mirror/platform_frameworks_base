@@ -160,7 +160,6 @@ public class SurfaceView extends View {
     int mHeight = -1;
     int mFormat = -1;
     final Rect mSurfaceFrame = new Rect();
-    Rect mTmpDirty;
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
     boolean mUpdateWindowNeeded;
     boolean mReportDrawNeeded;
@@ -795,14 +794,6 @@ public class SurfaceView extends View {
 
             Canvas c = null;
             if (!mDrawingStopped && mWindow != null) {
-                if (dirty == null) {
-                    if (mTmpDirty == null) {
-                        mTmpDirty = new Rect();
-                    }
-                    mTmpDirty.set(mSurfaceFrame);
-                    dirty = mTmpDirty;
-                }
-
                 try {
                     c = mSurface.lockCanvas(dirty);
                 } catch (Exception e) {
