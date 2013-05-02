@@ -422,8 +422,71 @@ public class PackageManagerService extends IPackageManager.Stub {
     PackageParser.Package mPlatformPackage;
 
     // Set of pending broadcasts for aggregating enable/disable of components.
-    final HashMap<String, ArrayList<String>> mPendingBroadcasts
-            = new HashMap<String, ArrayList<String>>();
+    static class PendingPackageBroadcasts {
+        // for each user id, a map of <package name -> components within that package>
+        final SparseArray<HashMap<String, ArrayList<String>>> mUidMap;
+
+        public PendingPackageBroadcasts() {
+            mUidMap = new SparseArray<HashMap<String, ArrayList<String>>>();
+        }
+
+        public ArrayList<String> get(int userId, String packageName) {
+            HashMap<String, ArrayList<String>> packages = getOrAllocate(userId);
+            return packages.get(packageName);
+        }
+
+        public void put(int userId, String packageName, ArrayList<String> components) {
+            HashMap<String, ArrayList<String>> packages = getOrAllocate(userId);
+            packages.put(packageName, components);
+        }
+
+        public void remove(int userId, String packageName) {
+            HashMap<String, ArrayList<String>> packages = mUidMap.get(userId);
+            if (packages != null) {
+                packages.remove(packageName);
+            }
+        }
+
+        public void remove(int userId) {
+            mUidMap.remove(userId);
+        }
+
+        public int userIdCount() {
+            return mUidMap.size();
+        }
+
+        public int userIdAt(int n) {
+            return mUidMap.keyAt(n);
+        }
+
+        public HashMap<String, ArrayList<String>> packagesForUserId(int userId) {
+            return mUidMap.get(userId);
+        }
+
+        public int size() {
+            // total number of pending broadcast entries across all userIds
+            int num = 0;
+            for (int i = 0; i< mUidMap.size(); i++) {
+                num += mUidMap.valueAt(i).size();
+            }
+            return num;
+        }
+
+        public void clear() {
+            mUidMap.clear();
+        }
+
+        private HashMap<String, ArrayList<String>> getOrAllocate(int userId) {
+            HashMap<String, ArrayList<String>> map = mUidMap.get(userId);
+            if (map == null) {
+                map = new HashMap<String, ArrayList<String>>();
+                mUidMap.put(userId, map);
+            }
+            return map;
+        }
+    }
+    final PendingPackageBroadcasts mPendingBroadcasts = new PendingPackageBroadcasts();
+
     // Service Connection to remote media container service to copy
     // package uri's from external media onto secure containers
     // or internal storage.
@@ -667,16 +730,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                         packages = new String[size];
                         components = new ArrayList[size];
                         uids = new int[size];
-                        Iterator<Map.Entry<String, ArrayList<String>>>
-                                it = mPendingBroadcasts.entrySet().iterator();
-                        int i = 0;
-                        while (it.hasNext() && i < size) {
-                            Map.Entry<String, ArrayList<String>> ent = it.next();
-                            packages[i] = ent.getKey();
-                            components[i] = ent.getValue();
-                            PackageSetting ps = mSettings.mPackages.get(ent.getKey());
-                            uids[i] = (ps != null) ? ps.appId : -1;
-                            i++;
+                        int i = 0;  // filling out the above arrays
+
+                        for (int n = 0; n < mPendingBroadcasts.userIdCount(); n++) {
+                            int packageUserId = mPendingBroadcasts.userIdAt(n);
+                            Iterator<Map.Entry<String, ArrayList<String>>> it
+                                    = mPendingBroadcasts.packagesForUserId(packageUserId)
+                                            .entrySet().iterator();
+                            while (it.hasNext() && i < size) {
+                                Map.Entry<String, ArrayList<String>> ent = it.next();
+                                packages[i] = ent.getKey();
+                                components[i] = ent.getValue();
+                                PackageSetting ps = mSettings.mPackages.get(ent.getKey());
+                                uids[i] = (ps != null)
+                                        ? UserHandle.getUid(packageUserId, ps.appId)
+                                        : -1;
+                                i++;
+                            }
                         }
                         size = i;
                         mPendingBroadcasts.clear();
@@ -9541,8 +9611,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             mSettings.writePackageRestrictionsLPr(userId);
-            packageUid = UserHandle.getUid(userId, pkgSetting.appId);
-            components = mPendingBroadcasts.get(packageName);
+            components = mPendingBroadcasts.get(userId, packageName);
             final boolean newPackage = components == null;
             if (newPackage) {
                 components = new ArrayList<String>();
@@ -9554,10 +9623,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 sendNow = true;
                 // Purge entry from pending broadcast list if another one exists already
                 // since we are sending one right away.
-                mPendingBroadcasts.remove(packageName);
+                mPendingBroadcasts.remove(userId, packageName);
             } else {
                 if (newPackage) {
-                    mPendingBroadcasts.put(packageName, components);
+                    mPendingBroadcasts.put(userId, packageName, components);
                 }
                 if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
                     // Schedule a message
@@ -9569,6 +9638,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         long callingId = Binder.clearCallingIdentity();
         try {
             if (sendNow) {
+                packageUid = UserHandle.getUid(userId, pkgSetting.appId);
                 sendPackageChangedBroadcast(packageName,
                         (flags&PackageManager.DONT_KILL_APP) != 0, components, packageUid);
             }
@@ -10704,8 +10774,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Called by UserManagerService */
     void cleanUpUserLILPw(int userHandle) {
-        if (mDirtyUsers.remove(userHandle));
+        mDirtyUsers.remove(userHandle);
         mSettings.removeUserLPr(userHandle);
+        mPendingBroadcasts.remove(userHandle);
         if (mInstaller != null) {
             // Technically, we shouldn't be doing this with the package lock
             // held.  However, this is very rare, and there is already so much
