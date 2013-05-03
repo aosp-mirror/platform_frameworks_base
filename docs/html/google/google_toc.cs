@@ -40,6 +40,10 @@
           <span class="en">Google Maps</span></a>
       </li>
 
+       <li><a href="<?cs var:toroot?>google/play-services/games.html">
+          <span class="en">Games</span></a>
+      </li>
+
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>reference/gms-packages.html">
