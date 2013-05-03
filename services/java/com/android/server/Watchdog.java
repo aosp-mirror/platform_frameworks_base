@@ -553,7 +553,7 @@ public class Watchdog extends Thread {
             if (!Debug.isDebuggerConnected()) {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + name);
                 Slog.w(TAG, "Main thread stack trace:");
-                StackTraceElement[] stackTrace = mHandler.getLooper().getThread().getStackTrace();
+                StackTraceElement[] stackTrace = Looper.getMainLooper().getThread().getStackTrace();
                 for (StackTraceElement element: stackTrace) {
                     Slog.w(TAG, "\tat " + element);
                 }
