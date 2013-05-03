@@ -106,7 +106,6 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.Message;
@@ -134,6 +133,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Objects;
+import com.android.server.IoThread;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
@@ -274,7 +274,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final RemoteCallbackList<INetworkPolicyListener> mListeners = new RemoteCallbackList<
             INetworkPolicyListener>();
 
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
 
     private final AtomicFile mPolicyFile;
@@ -306,9 +305,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNetworkManager = checkNotNull(networkManagement, "missing networkManagement");
         mTime = checkNotNull(time, "missing TrustedTime");
 
-        mHandlerThread = new HandlerThread(TAG);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
+        mHandler = new Handler(IoThread.get().getLooper(), mHandlerCallback);
 
         mSuppressDefaultPolicy = suppressDefaultPolicy;
 

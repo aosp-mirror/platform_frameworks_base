@@ -33,7 +33,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -115,7 +114,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     // used inside handler thread
     private boolean mEnable;
     private int mState;
-    private HandlerThread mThread;
     private final BluetoothHandler mHandler;
 
     private void registerForAirplaneMode(IntentFilter filter) {
@@ -188,9 +186,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     };
 
     BluetoothManagerService(Context context) {
-        mThread = new HandlerThread("BluetoothManager");
-        mThread.start();
-        mHandler = new BluetoothHandler(mThread.getLooper());
+        mHandler = new BluetoothHandler(IoThread.get().getLooper());
 
         mContext = context;
         mBluetooth = null;

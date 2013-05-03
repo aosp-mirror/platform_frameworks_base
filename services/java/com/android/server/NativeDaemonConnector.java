@@ -19,7 +19,6 @@ package com.android.server;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.LocalLog;
@@ -81,9 +80,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     @Override
     public void run() {
-        HandlerThread thread = new HandlerThread(TAG + ".CallbackHandler");
-        thread.start();
-        mCallbackHandler = new Handler(thread.getLooper(), this);
+        mCallbackHandler = new Handler(FgThread.get().getLooper(), this);
 
         while (true) {
             try {

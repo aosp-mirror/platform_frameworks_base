@@ -80,15 +80,13 @@ public class Watchdog extends Thread {
     static Watchdog sWatchdog;
 
     /* This handler will be used to post message back onto the main thread */
-    final Handler mHandler;
-    final ArrayList<Monitor> mMonitors = new ArrayList<Monitor>();
+    final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<HandlerChecker>();
+    final HandlerChecker mMonitorChecker;
     ContentResolver mResolver;
     BatteryService mBattery;
     PowerManagerService mPower;
     AlarmManagerService mAlarm;
     ActivityManagerService mActivity;
-    boolean mCompleted;
-    Monitor mCurrentMonitor;
 
     int mPhonePid;
 
@@ -111,40 +109,65 @@ public class Watchdog extends Thread {
     int mReqRecheckInterval= -1;  // >= 0 if a specific recheck interval has been requested
 
     /**
-     * Used for scheduling monitor callbacks and checking memory usage.
+     * Used for checking status of handle threads and scheduling monitor callbacks.
      */
-    final class HeartbeatHandler extends Handler {
-        HeartbeatHandler(Looper looper) {
-            super(looper);
+    public final class HandlerChecker implements Runnable {
+        private final Handler mHandler;
+        private final String mName;
+        private final ArrayList<Monitor> mMonitors = new ArrayList<Monitor>();
+        private final boolean mCheckReboot;
+        private boolean mCompleted;
+        private Monitor mCurrentMonitor;
+
+        HandlerChecker(Handler handler, String name, boolean checkReboot) {
+            mHandler = handler;
+            mName = name;
+            mCheckReboot = checkReboot;
+        }
+
+        public void addMonitor(Monitor monitor) {
+            mMonitors.add(monitor);
+        }
+
+        public void scheduleCheckLocked() {
+            mCompleted = false;
+            mCurrentMonitor = null;
+            mHandler.postAtFrontOfQueue(this);
+        }
+
+        public boolean isCompletedLocked() {
+            return mCompleted;
+        }
+
+        public String describeBlockedStateLocked() {
+            return mCurrentMonitor == null ? mName : mCurrentMonitor.getClass().getName();
         }
 
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MONITOR: {
-                    // See if we should force a reboot.
-                    int rebootInterval = mReqRebootInterval >= 0
-                            ? mReqRebootInterval : REBOOT_DEFAULT_INTERVAL;
-                    if (mRebootInterval != rebootInterval) {
-                        mRebootInterval = rebootInterval;
-                        // We have been running long enough that a reboot can
-                        // be considered...
-                        checkReboot(false);
-                    }
+        public void run() {
+            // See if we should force a reboot.
+            if (mCheckReboot) {
+                int rebootInterval = mReqRebootInterval >= 0
+                        ? mReqRebootInterval : REBOOT_DEFAULT_INTERVAL;
+                if (mRebootInterval != rebootInterval) {
+                    mRebootInterval = rebootInterval;
+                    // We have been running long enough that a reboot can
+                    // be considered...
+                    checkReboot(false);
+                }
+            }
 
-                    final int size = mMonitors.size();
-                    for (int i = 0 ; i < size ; i++) {
-                        synchronized (Watchdog.this) {
-                            mCurrentMonitor = mMonitors.get(i);
-                        }
-                        mCurrentMonitor.monitor();
-                    }
+            final int size = mMonitors.size();
+            for (int i = 0 ; i < size ; i++) {
+                synchronized (Watchdog.this) {
+                    mCurrentMonitor = mMonitors.get(i);
+                }
+                mCurrentMonitor.monitor();
+            }
 
-                    synchronized (Watchdog.this) {
-                        mCompleted = true;
-                        mCurrentMonitor = null;
-                    }
-                } break;
+            synchronized (Watchdog.this) {
+                mCompleted = true;
+                mCurrentMonitor = null;
             }
         }
     }
@@ -189,9 +212,23 @@ public class Watchdog extends Thread {
 
     private Watchdog() {
         super("watchdog");
-        // Explicitly bind the HeartbeatHandler to run on the ServerThread, so
-        // that it can't get accidentally bound to another thread.
-        mHandler = new HeartbeatHandler(Looper.getMainLooper());
+        // Initialize handler checkers for each common thread we want to check.  Note
+        // that we are not currently checking the background thread, since it can
+        // potentially hold longer running operations with no guarantees about the timeliness
+        // of operations there.
+
+        // The shared foreground thread is the main checker.  It is where we
+        // will also dispatch monitor checks and do other work.
+        mMonitorChecker = new HandlerChecker(FgThread.getHandler(), "foreground thread", true);
+        mHandlerCheckers.add(mMonitorChecker);
+        // Add checker for main thread.  We only do a quick check since there
+        // can be UI running on the thread.
+        mHandlerCheckers.add(new HandlerChecker(new Handler(Looper.getMainLooper()),
+                "main thread", false));
+        // Add checker for shared UI thread.
+        mHandlerCheckers.add(new HandlerChecker(UiThread.getHandler(), "ui thread", false));
+        // And also check IO thread.
+        mHandlerCheckers.add(new HandlerChecker(IoThread.getHandler(), "i/o thread", false));
     }
 
     public void init(Context context, BatteryService battery,
@@ -226,9 +263,18 @@ public class Watchdog extends Thread {
     public void addMonitor(Monitor monitor) {
         synchronized (this) {
             if (isAlive()) {
-                throw new RuntimeException("Monitors can't be added while the Watchdog is running");
+                throw new RuntimeException("Monitors can't be added once the Watchdog is running");
             }
-            mMonitors.add(monitor);
+            mMonitorChecker.addMonitor(monitor);
+        }
+    }
+
+    public void addThread(Handler thread, String name) {
+        synchronized (this) {
+            if (isAlive()) {
+                throw new RuntimeException("Threads can't be added once the Watchdog is running");
+            }
+            mHandlerCheckers.add(new HandlerChecker(thread, name, false));
         }
     }
 
@@ -382,6 +428,30 @@ public class Watchdog extends Thread {
         return newTime;
     }
 
+    private boolean haveAllCheckersCompletedLocked() {
+        for (int i=0; i<mHandlerCheckers.size(); i++) {
+            HandlerChecker hc = mHandlerCheckers.get(i);
+            if (!hc.isCompletedLocked()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String describeBlockedCheckersLocked() {
+        StringBuilder builder = new StringBuilder(128);
+        for (int i=0; i<mHandlerCheckers.size(); i++) {
+            HandlerChecker hc = mHandlerCheckers.get(i);
+            if (!hc.isCompletedLocked()) {
+                if (builder.length() > 0) {
+                    builder.append(", ");
+                }
+                builder.append(hc.describeBlockedStateLocked());
+            }
+        }
+        return builder.toString();
+    }
+
     @Override
     public void run() {
         boolean waitedHalf = false;
@@ -389,8 +459,14 @@ public class Watchdog extends Thread {
             final String name;
             synchronized (this) {
                 long timeout = TIME_TO_WAIT;
-                mCompleted = false;
-                mHandler.sendEmptyMessage(MONITOR);
+                if (!waitedHalf) {
+                    // If we are not at the half-point of waiting, perform a
+                    // new set of checks.  Otherwise we are still waiting for a previous set.
+                    for (int i=0; i<mHandlerCheckers.size(); i++) {
+                        HandlerChecker hc = mHandlerCheckers.get(i);
+                        hc.scheduleCheckLocked();
+                    }
+                }
 
                 // NOTE: We use uptimeMillis() here because we do not want to increment the time we
                 // wait while asleep. If the device is asleep then the thing that we are waiting
@@ -406,7 +482,7 @@ public class Watchdog extends Thread {
                     timeout = TIME_TO_WAIT - (SystemClock.uptimeMillis() - start);
                 }
 
-                if (mCompleted) {
+                if (haveAllCheckersCompletedLocked()) {
                     // The monitors have returned.
                     waitedHalf = false;
                     continue;
@@ -423,8 +499,7 @@ public class Watchdog extends Thread {
                     continue;
                 }
 
-                name = (mCurrentMonitor != null) ?
-                    mCurrentMonitor.getClass().getName() : "main thread blocked";
+                name = describeBlockedCheckersLocked();
             }
 
             // If we got here, that means that the system is most likely hung.

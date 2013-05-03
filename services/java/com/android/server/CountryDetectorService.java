@@ -20,6 +20,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.server.location.ComprehensiveCountryDetector;
 
 import android.content.Context;
@@ -29,8 +30,6 @@ import android.location.ICountryDetector;
 import android.location.ICountryListener;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -169,8 +168,7 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
 
     void systemReady() {
         // Shall we wait for the initialization finish.
-        Thread thread = new Thread(this, "CountryDetectorService");
-        thread.start();
+        BackgroundThread.getHandler().post(this);
     }
 
     private void initialize() {
@@ -187,12 +185,9 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     }
 
     public void run() {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        Looper.prepare();
         mHandler = new Handler();
         initialize();
         mSystemReady = true;
-        Looper.loop();
     }
 
     protected void setCountryListener(final CountryListener listener) {
