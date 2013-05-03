@@ -19,9 +19,6 @@
 
 #include <GLES2/gl2.h>
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-
 #include <ui/GraphicBuffer.h>
 
 #include <utils/KeyedVector.h>
@@ -30,6 +27,7 @@
 
 #include <SkBitmap.h>
 
+#include "Image.h"
 #include "Texture.h"
 #include "UvMapper.h"
 
@@ -92,7 +90,7 @@ public:
         friend class AssetAtlas;
     };
 
-    AssetAtlas(): mWidth(0), mHeight(0), mTexture(0), mImage(EGL_NO_IMAGE_KHR) { }
+    AssetAtlas(): mWidth(0), mHeight(0), mTexture(0), mImage(NULL) { }
     ~AssetAtlas() { terminate(); }
 
     /**
@@ -160,7 +158,7 @@ private:
     uint32_t mHeight;
 
     GLuint mTexture;
-    EGLImageKHR mImage;
+    Image* mImage;
 
     KeyedVector<SkBitmap*, Entry*> mEntries;
 }; // class AssetAtlas

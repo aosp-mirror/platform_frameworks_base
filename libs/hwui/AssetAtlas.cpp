@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "AssetAtlas.h"
 
 #include <GLES2/gl2ext.h>
-
-#include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
@@ -30,41 +26,26 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 void AssetAtlas::init(sp<GraphicBuffer> buffer, int* map, int count) {
-    if (mImage != EGL_NO_IMAGE_KHR) {
+    if (mImage) {
         return;
     }
 
-    // Create the EGLImage object that maps the GraphicBuffer
-    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer->getNativeBuffer();
-    EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
+    mImage = new Image(buffer);
+    mTexture = mImage->getTexture();
 
-    mImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
-            EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
+    if (mTexture) {
+        mWidth = buffer->getWidth();
+        mHeight = buffer->getHeight();
 
-    if (mImage == EGL_NO_IMAGE_KHR) {
-        ALOGW("Error creating atlas image (%#x)", eglGetError());
-        return;
+        createEntries(map, count);
+    } else {
+        delete mImage;
     }
-
-    // Create a 2D texture to sample from the EGLImage
-    glGenTextures(1, &mTexture);
-    glBindTexture(GL_TEXTURE_2D, mTexture);
-    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, mImage);
-
-    mWidth = buffer->getWidth();
-    mHeight = buffer->getHeight();
-
-    createEntries(map, count);
 }
 
 void AssetAtlas::terminate() {
-    if (mImage != EGL_NO_IMAGE_KHR) {
-        eglDestroyImageKHR(eglGetDisplay(EGL_DEFAULT_DISPLAY), mImage);
-        mImage = EGL_NO_IMAGE_KHR;
-
-        glDeleteTextures(1, &mTexture);
-        mTexture = 0;
+    if (mImage) {
+        delete mImage;
 
         for (size_t i = 0; i < mEntries.size(); i++) {
             delete mEntries.valueAt(i);
