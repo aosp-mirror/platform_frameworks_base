@@ -371,15 +371,15 @@ class ServiceRecord extends Binder {
                         return;
                     }
                     try {
-                        if (foregroundNoti.icon == 0) {
+                        if (localForegroundNoti.icon == 0) {
                             // It is not correct for the caller to supply a notification
                             // icon, but this used to be able to slip through, so for
                             // those dirty apps give it the app's icon.
-                            foregroundNoti.icon = appInfo.icon;
+                            localForegroundNoti.icon = appInfo.icon;
 
                             // Do not allow apps to present a sneaky invisible content view either.
-                            foregroundNoti.contentView = null;
-                            foregroundNoti.bigContentView = null;
+                            localForegroundNoti.contentView = null;
+                            localForegroundNoti.bigContentView = null;
                             CharSequence appName = appInfo.loadLabel(
                                     ams.mContext.getPackageManager());
                             if (appName == null) {
@@ -395,7 +395,7 @@ class ServiceRecord extends Binder {
                                         appInfo.packageName, null));
                                 PendingIntent pi = PendingIntent.getActivity(ams.mContext, 0,
                                         runningIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                foregroundNoti.setLatestEventInfo(ctx,
+                                localForegroundNoti.setLatestEventInfo(ctx,
                                         ams.mContext.getString(
                                                 com.android.internal.R.string
                                                         .app_running_notification_title,
@@ -406,10 +406,10 @@ class ServiceRecord extends Binder {
                                                 appName),
                                         pi);
                             } catch (PackageManager.NameNotFoundException e) {
-                                foregroundNoti.icon = 0;
+                                localForegroundNoti.icon = 0;
                             }
                         }
-                        if (foregroundNoti.icon == 0) {
+                        if (localForegroundNoti.icon == 0) {
                             // Notifications whose icon is 0 are defined to not show
                             // a notification, silently ignoring it.  We don't want to
                             // just ignore it, we want to prevent the service from
