@@ -134,6 +134,7 @@ public:
     inline const jfloat* getAdvances() const { return mAdvances.array(); }
     inline size_t getAdvancesCount() const { return mAdvances.size(); }
     inline jfloat getTotalAdvance() const { return mTotalAdvance; }
+    inline const SkRect& getBounds() const { return mBounds; }
     inline const jchar* getGlyphs() const { return mGlyphs.array(); }
     inline size_t getGlyphsCount() const { return mGlyphs.size(); }
     inline const jfloat* getPos() const { return mPos.array(); }
@@ -148,6 +149,11 @@ public:
      * Total number of advances
      */
     jfloat mTotalAdvance;
+
+    /**
+     * Bounds containing all glyphs
+     */
+    SkRect mBounds;
 
     /**
      * Glyphs vector
@@ -208,12 +214,12 @@ private:
 
     void computeValues(const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags,
-            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance, SkRect* outBounds,
             Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos);
 
     void computeRunValues(const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, bool isRTL,
-            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance, SkRect* outBounds,
             Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos);
 
     SkTypeface* setCachedTypeface(SkTypeface** typeface, hb_script_t script, SkTypeface::Style style);

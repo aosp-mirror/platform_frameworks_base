@@ -2846,8 +2846,8 @@ mat4 OpenGLRenderer::findBestFontTransform(const mat4& transform) const {
     return fontTransform;
 }
 
-status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, const float* positions, SkPaint* paint, float length,
+status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float x, float y,
+        const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
         DrawOpMode drawOpMode) {
 
     if (drawOpMode == kDrawOpMode_Immediate &&
@@ -2855,24 +2855,8 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         return DrawGlInfo::kStatusDone;
     }
 
-    if (length < 0.0f) length = paint->measureText(text, bytesCount);
-    switch (paint->getTextAlign()) {
-        case SkPaint::kCenter_Align:
-            x -= length / 2.0f;
-            break;
-        case SkPaint::kRight_Align:
-            x -= length;
-            break;
-        default:
-            break;
-    }
-
-    SkPaint::FontMetrics metrics;
-    paint->getFontMetrics(&metrics, 0.0f);
     if (drawOpMode == kDrawOpMode_Immediate) {
-        if (quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom)) {
-            return DrawGlInfo::kStatusDone;
-        }
+        if (quickReject(bounds)) return DrawGlInfo::kStatusDone;
     } else {
         // merged draw operations don't need scissor, but clip should still be valid
         mCaches.setScissorEnabled(mScissorOptimizationDisabled);
@@ -2923,7 +2907,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     // TODO: Implement better clipping for scaled/rotated text
     const Rect* clip = !pureTranslate ? NULL : mSnapshot->clipRect;
-    Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
+    Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;
     TextSetupFunctor functor(*this, x, y, pureTranslate, alpha, mode, paint);
@@ -2934,20 +2918,20 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
         status = fontRenderer.renderPosText(&paintCopy, clip, text, 0, bytesCount, count, x, y,
-                positions, hasActiveLayer ? &bounds : NULL, &functor, forceFinish);
+                positions, hasActiveLayer ? &layerBounds : NULL, &functor, forceFinish);
     } else {
         status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
-                positions, hasActiveLayer ? &bounds : NULL, &functor, forceFinish);
+                positions, hasActiveLayer ? &layerBounds : NULL, &functor, forceFinish);
     }
 
     if ((status || drawOpMode != kDrawOpMode_Immediate) && hasActiveLayer) {
         if (!pureTranslate) {
-            transform.mapRect(bounds);
+            transform.mapRect(layerBounds);
         }
-        dirtyLayerUnchecked(bounds, getRegion());
+        dirtyLayerUnchecked(layerBounds, getRegion());
     }
 
-    drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
+    drawTextDecorations(text, bytesCount, totalAdvance, oldX, oldY, paint);
 
     return DrawGlInfo::kStatusDrew;
 }
@@ -3231,17 +3215,12 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
 #define kStdUnderline_Offset    (1.0f / 9.0f)
 #define kStdUnderline_Thickness (1.0f / 18.0f)
 
-void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float length,
+void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float underlineWidth,
         float x, float y, SkPaint* paint) {
     // Handle underline and strike-through
     uint32_t flags = paint->getFlags();
     if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
         SkPaint paintCopy(*paint);
-        float underlineWidth = length;
-        // If length is > 0.0f, we already measured the text for the text alignment
-        if (length <= 0.0f) {
-            underlineWidth = paintCopy.measureText(text, bytesCount);
-        }
 
         if (CC_LIKELY(underlineWidth > 0.0f)) {
             const float textSize = paintCopy.getTextSize();

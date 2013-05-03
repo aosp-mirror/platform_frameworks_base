@@ -220,6 +220,9 @@ public:
     DrawBoundedOp(float left, float top, float right, float bottom, SkPaint* paint)
             : DrawOp(paint), mLocalBounds(left, top, right, bottom) {}
 
+    DrawBoundedOp(const Rect& localBounds, SkPaint* paint)
+            : DrawOp(paint), mLocalBounds(localBounds) {}
+
     // Calculates bounds as smallest rect encompassing all points
     // NOTE: requires at least 1 vertex, and doesn't account for stroke size (should be handled in
     // subclass' constructor)
@@ -1272,23 +1275,10 @@ private:
 class DrawTextOp : public DrawBoundedOp {
 public:
     DrawTextOp(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float length)
-            : DrawBoundedOp(paint), mText(text), mBytesCount(bytesCount), mCount(count),
-            mX(x), mY(y), mPositions(positions), mLength(length) {
-        // duplicates bounds calculation from OpenGLRenderer::drawText, but doesn't alter mX
-        SkPaint::FontMetrics metrics;
-        paint->getFontMetrics(&metrics, 0.0f);
-        switch (paint->getTextAlign()) {
-        case SkPaint::kCenter_Align:
-            x -= length / 2.0f;
-            break;
-        case SkPaint::kRight_Align:
-            x -= length;
-            break;
-        default:
-            break;
-        }
-        mLocalBounds.set(x, mY + metrics.fTop, x + length, mY + metrics.fBottom);
+            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds)
+            : DrawBoundedOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
+            mX(x), mY(y), mPositions(positions), mTotalAdvance(totalAdvance) {
+        mLocalBounds.translate(x,y);
         memset(&mPrecacheTransform.data[0], 0xff, 16 * sizeof(float));
     }
 
@@ -1314,7 +1304,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawText(mText, mBytesCount, mCount, mX, mY,
-                mPositions, getPaint(renderer), mLength);
+                mPositions, getPaint(renderer), mTotalAdvance, mLocalBounds);
     }
 
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
@@ -1327,7 +1317,8 @@ public:
 
             DrawTextOp& op = *((DrawTextOp*)ops[i]);
             status |= renderer.drawText(op.mText, op.mBytesCount, op.mCount, op.mX, op.mY,
-                    op.mPositions, op.getPaint(renderer), op.mLength, drawOpMode);
+                    op.mPositions, op.getPaint(renderer), op.mTotalAdvance, op.mLocalBounds,
+                    drawOpMode);
         }
         return status;
     }
@@ -1345,7 +1336,7 @@ private:
     float mX;
     float mY;
     const float* mPositions;
-    float mLength;
+    float mTotalAdvance;
     mat4 mPrecacheTransform;
 };
 

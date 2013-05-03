@@ -318,6 +318,7 @@ hash_t TextLayoutCacheKey::hash() const {
  */
 TextLayoutValue::TextLayoutValue(size_t contextCount) :
         mTotalAdvance(0), mElapsedTime(0) {
+    mBounds.setEmpty();
     // Give a hint for advances and glyphs vectors size
     mAdvances.setCapacity(contextCount);
     mGlyphs.setCapacity(contextCount);
@@ -345,11 +346,11 @@ TextLayoutShaper::~TextLayoutShaper() {
     hb_buffer_destroy(mBuffer);
 }
 
-void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* paint, const UChar* chars,
-        size_t start, size_t count, size_t contextCount, int dirFlags) {
-
+void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* paint,
+        const UChar* chars, size_t start, size_t count, size_t contextCount, int dirFlags) {
     computeValues(paint, chars, start, count, contextCount, dirFlags,
-            &value->mAdvances, &value->mTotalAdvance, &value->mGlyphs, &value->mPos);
+            &value->mAdvances, &value->mTotalAdvance, &value->mBounds,
+            &value->mGlyphs, &value->mPos);
 #if DEBUG_ADVANCES
     ALOGD("Advances - start = %d, count = %d, contextCount = %d, totalAdvance = %f", start, count,
             contextCount, value->mTotalAdvance);
@@ -358,7 +359,7 @@ void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* pain
 
 void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
-        Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+        Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance, SkRect* outBounds,
         Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos) {
         *outTotalAdvance = 0;
         if (!count) {
@@ -454,7 +455,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
                                     i, startRun, lengthRun, isRTL);
 #endif
                             computeRunValues(paint, chars, startRun, lengthRun, contextCount, isRTL,
-                                    outAdvances, outTotalAdvance, outGlyphs, outPos);
+                                    outAdvances, outTotalAdvance, outBounds, outGlyphs, outPos);
 
                         }
                     }
@@ -478,7 +479,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
                     "-- run-start = %d, run-len = %d, isRTL = %d", start, count, isRTL);
 #endif
             computeRunValues(paint, chars, start, count, contextCount, isRTL,
-                    outAdvances, outTotalAdvance, outGlyphs, outPos);
+                    outAdvances, outTotalAdvance, outBounds, outGlyphs, outPos);
         }
 
 #if DEBUG_GLYPHS
@@ -675,7 +676,7 @@ static void logGlyphs(hb_buffer_t* buffer) {
 
 void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* contextChars,
         size_t start, size_t count, size_t contextCount, bool isRTL,
-        Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+        Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance, SkRect* outBounds,
         Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos) {
     if (!count) {
         // We cannot shape an empty run.
@@ -749,12 +750,22 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* conte
             size_t cluster = info[i].cluster - start;
             float xAdvance = HBFixedToFloat(positions[i].x_advance);
             outAdvances->replaceAt(outAdvances->itemAt(cluster) + xAdvance, cluster);
-            outGlyphs->add(info[i].codepoint + glyphBaseCount);
+            jchar glyphId = info[i].codepoint + glyphBaseCount;
+            outGlyphs->add(glyphId);
             float xo = HBFixedToFloat(positions[i].x_offset);
             float yo = -HBFixedToFloat(positions[i].y_offset);
-            outPos->add(totalAdvance + xo + yo * skewX);
-            outPos->add(yo);
+
+            float xpos = totalAdvance + xo + yo * skewX;
+            float ypos = yo;
+            outPos->add(xpos);
+            outPos->add(ypos);
             totalAdvance += xAdvance;
+
+            // TODO: consider using glyph cache
+            const SkGlyph& metrics = mShapingPaint.getGlyphMetrics(glyphId, NULL);
+            outBounds->join(xpos + metrics.fLeft, ypos + metrics.fTop,
+                    xpos + metrics.fLeft + metrics.fWidth, ypos + metrics.fTop + metrics.fHeight);
+
         }
     }
 

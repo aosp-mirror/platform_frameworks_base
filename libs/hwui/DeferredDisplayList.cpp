@@ -85,8 +85,8 @@ public:
     }
 
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
-        DEFER_LOGD("%d  replaying DrawingBatch %p, with %d ops (batch id %x, merge id %p)",
-                index, this, mOps.size(), mOps[0]->getBatchId(), mOps[0]->getMergeId());
+        DEFER_LOGD("%d  replaying DrawBatch %p, with %d ops (batch id %x, merge id %p)",
+                index, this, mOps.size(), getBatchId(), getMergeId());
 
         status_t status = DrawGlInfo::kStatusDone;
         DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
@@ -193,10 +193,10 @@ public:
     }
 
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
-        DEFER_LOGD("%d  replaying DrawingBatch %p, with %d ops (batch id %x, merge id %p)",
+        DEFER_LOGD("%d  replaying MergingDrawBatch %p, with %d ops (batch id %x, merge id %p)",
                 index, this, mOps.size(), getBatchId(), getMergeId());
         if (mOps.size() == 1) {
-            return DrawBatch::replay(renderer, dirty, false);
+            return DrawBatch::replay(renderer, dirty, 0);
         }
 
         DrawOp* op = mOps[0];

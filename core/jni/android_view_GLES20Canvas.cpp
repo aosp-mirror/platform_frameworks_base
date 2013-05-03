@@ -574,6 +574,20 @@ static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject claz
 // Text
 // ----------------------------------------------------------------------------
 
+static float xOffsetForTextAlign(SkPaint* paint, float totalAdvance) {
+    switch (paint->getTextAlign()) {
+        case SkPaint::kCenter_Align:
+            return -totalAdvance / 2.0f;
+            break;
+        case SkPaint::kRight_Align:
+            return -totalAdvance;
+            break;
+        default:
+            break;
+    }
+    return 0;
+}
+
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
@@ -586,8 +600,12 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     jfloat totalAdvance = value->getTotalAdvance();
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y,
-            positions, paint, totalAdvance);
+    const SkRect& r = value->getBounds();
+    android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
+
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
+            x + xOffsetForTextAlign(paint, totalAdvance), y, positions,
+            paint, totalAdvance, bounds);
 }
 
 static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
@@ -617,8 +635,12 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     jfloat totalAdvance = value->getTotalAdvance();
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y,
-            positions, paint, totalAdvance);
+    const SkRect& r = value->getBounds();
+    android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
+
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
+            x + xOffsetForTextAlign(paint, totalAdvance), y, positions,
+            paint, totalAdvance, bounds);
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,

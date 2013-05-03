@@ -241,6 +241,9 @@ public:
 
     ANDROID_API const Rect& getClipBounds();
     ANDROID_API bool quickReject(float left, float top, float right, float bottom);
+    bool quickReject(const Rect& bounds) {
+        return quickReject(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    }
     bool quickRejectNoScissor(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
     virtual bool clipPath(SkPath* path, SkRegion::Op op);
@@ -280,7 +283,7 @@ public:
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
             const float* positions, SkPaint* paint);
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float length = -1.0f,
+            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate);
     virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
 
@@ -824,12 +827,12 @@ private:
      *
      * @param text The text to decor
      * @param bytesCount The number of bytes in the text
-     * @param length The length in pixels of the text, can be <= 0.0f to force a measurement
+     * @param totalAdvance The total advance in pixels, defines underline/strikethrough length
      * @param x The x coordinate where the text will be drawn
      * @param y The y coordinate where the text will be drawn
      * @param paint The paint to draw the text with
      */
-    void drawTextDecorations(const char* text, int bytesCount, float length,
+    void drawTextDecorations(const char* text, int bytesCount, float totalAdvance,
             float x, float y, SkPaint* paint);
 
    /**

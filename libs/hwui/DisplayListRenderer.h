@@ -121,7 +121,8 @@ public:
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
             const float* positions, SkPaint* paint);
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float length, DrawOpMode drawOpMode);
+            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
+            DrawOpMode drawOpMode);
 
     virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
 

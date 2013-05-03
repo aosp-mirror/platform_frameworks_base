@@ -420,17 +420,16 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
 
 status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, SkPaint* paint,
-        float length, DrawOpMode drawOpMode) {
+        float totalAdvance, const Rect& bounds, DrawOpMode drawOpMode) {
 
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
-
-    if (length < 0.0f) length = paint->measureText(text, bytesCount);
 
     text = refText(text, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
     paint = refPaint(paint);
 
-    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count, x, y, positions, paint, length);
+    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
+            x, y, positions, paint, totalAdvance, bounds);
     addDrawOp(op);
     return DrawGlInfo::kStatusDone;
 }
