@@ -705,7 +705,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         synchronized(mMethodMap) {
-                            checkCurrentLocaleChangedLocked();
+                            resetStateIfCurrentLocaleChangedLocked();
                         }
                     }
                 }, filter);
@@ -781,7 +781,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void checkCurrentLocaleChangedLocked() {
+    private void resetStateIfCurrentLocaleChangedLocked() {
         resetAllInternalStateLocked(true /* updateOnlyWhenLocaleChanged */,
                 true /* resetDefaultImeLocked */);
     }
@@ -791,12 +791,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // InputMethodFileManager should be reset when the user is changed
         mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
-        final boolean needsToResetDefaultIme = TextUtils.isEmpty(defaultImiId);
+        final boolean initialUserSwitch = TextUtils.isEmpty(defaultImiId);
         if (DEBUG) {
             Slog.d(TAG, "Switch user: " + newUserId + " current ime = " + defaultImiId);
         }
         resetAllInternalStateLocked(false  /* updateOnlyWhenLocaleChanged */,
-                needsToResetDefaultIme);
+                initialUserSwitch /* needsToResetDefaultIme */);
+        if (initialUserSwitch) {
+            InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mContext.getPackageManager(),
+                    mSettings.getEnabledInputMethodListLocked());
+        }
     }
 
     @Override
@@ -838,7 +842,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
                 if (!mImeSelectedOnBoot) {
                     Slog.w(TAG, "Reset the default IME as \"Resource\" is ready here.");
-                    checkCurrentLocaleChangedLocked();
+                    resetStateIfCurrentLocaleChangedLocked();
+                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                            mContext.getPackageManager(),
+                            mSettings.getEnabledInputMethodListLocked());
                 }
                 mLastSystemLocale = mRes.getConfiguration().locale;
                 try {
@@ -1599,6 +1606,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             mSettings.getCurrentUserId());
                     if (ai != null && ai.enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Update state(" + imm.getId()
+                                    + "): DISABLED_UNTIL_USED -> DEFAULT");
+                        }
                         mIPackageManager.setApplicationEnabledSetting(imm.getPackageName(),
                                 PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
                                 PackageManager.DONT_KILL_APP, mSettings.getCurrentUserId(),
