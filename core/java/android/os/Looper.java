@@ -289,6 +289,16 @@ public final class Looper {
         return mQueue;
     }
 
+    /**
+     * Return whether this looper's thread is currently idle, waiting for new work
+     * to do.  This is intrinsically racy, since its state can change before you get
+     * the result back.
+     * @hide
+     */
+    public boolean isIdling() {
+        return mQueue.isIdling();
+    }
+
     public void dump(Printer pw, String prefix) {
         pw = PrefixPrinter.create(pw, prefix);
         pw.println(this.toString());

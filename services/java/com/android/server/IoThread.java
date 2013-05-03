@@ -47,14 +47,14 @@ public final class IoThread extends HandlerThread {
     }
 
     public static IoThread get() {
-        synchronized (UiThread.class) {
+        synchronized (IoThread.class) {
             ensureThreadLocked();
             return sInstance;
         }
     }
 
     public static Handler getHandler() {
-        synchronized (UiThread.class) {
+        synchronized (IoThread.class) {
             ensureThreadLocked();
             return sHandler;
         }

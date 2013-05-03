@@ -94,12 +94,12 @@ extern "C" status_t system_init()
     if (methodId == NULL) {
         return UNKNOWN_ERROR;
     }
-    env->CallStaticVoidMethod(clazz, methodId);
 
-    ALOGI("System server: entering thread pool.\n");
+    ALOGI("System server: entering thread pool.");
     ProcessState::self()->startThreadPool();
-    IPCThreadState::self()->joinThreadPool();
-    ALOGI("System server: exiting thread pool.\n");
+
+    // This is the main thread of the system server, and will never exit.
+    env->CallStaticVoidMethod(clazz, methodId);
 
     return NO_ERROR;
 }
