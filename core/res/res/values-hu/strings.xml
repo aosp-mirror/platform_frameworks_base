@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Lehetővé teszi az alkalmazás számára a mikrofonnal való hangfelvételt.Az engedéllyel rendelkező alkalmazás az Ön jóváhagyása nélkül, bármikor rögzíthet hanganyagot."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotók és videók készítése"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Lehetővé teszi az alkalmazás számára, hogy a fényképezőgéppel fotókat és videókat készítsen. Az engedéllyel rendelkező alkalmazás bármikor, az Ön jóváhagyása nélkül használhatja a fényképezőgépet."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"átviteljelző LED letiltása, ha a kamera használatban van"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Lehetővé teszi egy előre telepített rendszeralkalmazás számára, hogy letiltsa a kamerahasználatot jelző LED-et."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"a táblagép végleges deaktiválása"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"telefon végleges letiltása"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Lehetővé teszi az alkalmazás számára, hogy teljesen deaktiválják a táblagépet. Ez nagyon veszélyes."</string>
@@ -1493,8 +1491,7 @@
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
     <string name="owner_name" msgid="2716755460376028154">"Tulajdonos"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hiba"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Ez az alkalmazás nem támogatja a korlátozott profilokkal rendelkező fiókokat"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nincs megfelelő alkalmazás a művelet elvégzésére."</string>
     <string name="revoke" msgid="5404479185228271586">"Visszavonás"</string>
 </resources>

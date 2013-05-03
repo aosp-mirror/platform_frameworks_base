@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Приложение сможет записывать аудио с помощью микрофона в любое время без уведомления."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Фото- и видеосъемка"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Приложение сможет снимать фотографии и видеоролики с помощью камеры в любое время без вашего разрешения."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Отключать светодиодный индикатор во время использования камеры"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Предустановленное системное приложение сможет отключать светодиодный индикатор использования камеры."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"Выключение планшета"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"Отключение телефона"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Приложение сможет отключить все функции планшетного ПК. Это очень опасно."</string>
@@ -1493,8 +1491,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Владелец"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ошибка"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Это приложение не поддерживается в аккаунтах для профилей с ограниченным доступом"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Невозможно обработать это действие"</string>
     <string name="revoke" msgid="5404479185228271586">"Отменить"</string>
 </resources>

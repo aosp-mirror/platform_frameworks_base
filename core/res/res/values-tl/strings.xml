@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Pinapayagan ang app na mag-record ng audio gamit ang mikropono. Pinapayagan ng pahintulot na ito ang app na mag-record ng audio anumang oras nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"kumuha ng mga larawan at video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Pinapayagan ang app na kumuha ng mga larawan at video gamit ang camera. Pinapayagan ng pahintulot na ito ang app na gamitin ang camera anumang oras nang wala ng iyong kumpirmasyon."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"i-disable ang LED na tagapagpahiwatig kapag ginagamit ang camera"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Pinapayagan ang isang paunang na-install na application ng system na i-disable ang LED na tagapagpahiwatig ng paggamit sa camera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"permanenteng huwag paganahin ang tablet"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"permanenteng huwag paganahin ang telepono"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Pinapayagan ang app na huwag paganahin nang permanente ang buong tablet. Lubos itong mapanganib."</string>
@@ -1493,8 +1491,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"May-ari"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Hindi sinusuportahan ng application na ito ang mga account para sa mga pinaghihigpitang profile"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Walang nakitang application na mangangasiwa sa pagkilos na ito"</string>
     <string name="revoke" msgid="5404479185228271586">"Bawiin"</string>
 </resources>

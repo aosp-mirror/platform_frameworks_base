@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"マイクを使った録音をアプリに許可します。これにより、アプリがいつでも確認なしで録音できるようになります。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"カメラでの写真と動画の撮影をアプリに許可します。これにより、アプリが確認なしでいつでもカメラを使用できるようになります。"</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"カメラの使用中に通信インジケータLEDを無効にする"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"カメラ使用インジケータLEDを無効にすることをプレインストールされているシステムアプリに許可します。"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"タブレットを完全に無効化"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"端末を永続的に無効にする"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"タブレット全体を完全に無効にすることをアプリに許可します。この許可は危険です。"</string>
@@ -1493,8 +1491,7 @@
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"エラー"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"このアプリでは制限付きプロフィールのアカウントはサポートしていません"</string>
     <string name="app_not_found" msgid="3429141853498927379">"この操作を行うアプリが見つかりません"</string>
     <string name="revoke" msgid="5404479185228271586">"取り消し"</string>
 </resources>
