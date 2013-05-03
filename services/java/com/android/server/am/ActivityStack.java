@@ -1235,10 +1235,17 @@ final class ActivityStack {
             return false;
         }
 
-        if (prev != null && prev.mLaunchHomeTaskNext && prev.finishing && topTask() == prev.task &&
-                prev.task.getTopActivity() == null) {
+        if (prev != null && prev.mLaunchHomeTaskNext && prev.finishing && prev.frontOfTask) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
-            return mStackSupervisor.resumeHomeActivity(prev);
+            final TaskRecord task = prev.task;
+            if (topTask() != task) {
+                // This task is going away but it was supposed to return to the home task.
+                // Now the task above it has to return to the home task instead.
+                final int taskNdx = mTaskHistory.indexOf(task) + 1;
+                mTaskHistory.get(taskNdx).mActivities.get(0).mLaunchHomeTaskNext = true;
+            } else {
+                return mStackSupervisor.resumeHomeActivity(prev);
+            }
         }
 
         // If we are sleeping, and there is no resumed activity, and the top
@@ -2948,7 +2955,7 @@ final class ActivityStack {
             }
             if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
                 // Caller wants the home activity moved with it.  To accomplish this,
-                // we'll just move the home task to the top first.
+                // we'll just indicate that this task returns to the home task.
                 task.mActivities.get(0).mLaunchHomeTaskNext = true;
             }
             moveTaskToFrontLocked(task, null, options);
@@ -3066,6 +3073,7 @@ final class ActivityStack {
 
         if (mResumedActivity != null && mResumedActivity.task == tr &&
                 mResumedActivity.mLaunchHomeTaskNext) {
+            // TODO: Can we skip the next line and just pass mResumedAct. to resumeHomeAct.()?
             mResumedActivity.mLaunchHomeTaskNext = false;
             return mStackSupervisor.resumeHomeActivity(null);
         }
