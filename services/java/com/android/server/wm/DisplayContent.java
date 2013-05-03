@@ -202,7 +202,8 @@ class DisplayContent {
     }
 
     /** Refer to {@link WindowManagerService#createStack(int, int, int, float)} */
-    TaskStack createStack(int stackId, int relativeStackId, int position, float weight) {
+    TaskStack createStack(WindowManagerService service, int stackId, int relativeStackId,
+            int position, float weight) {
         TaskStack newStack = null;
         if (DEBUG_STACK) Slog.d(TAG, "createStack: stackId=" + stackId + " relativeStackId="
                 + relativeStackId + " position=" + position + " weight=" + weight);
@@ -211,9 +212,9 @@ class DisplayContent {
                 throw new IllegalArgumentException("createStack: First stackId not "
                         + HOME_STACK_ID);
             }
-            StackBox newBox = new StackBox(this, null);
+            StackBox newBox = new StackBox(service, this, null);
             mStackBoxes.add(newBox);
-            newStack = new TaskStack(stackId, this);
+            newStack = new TaskStack(service, stackId, this);
             newStack.mStackBox = newBox;
             newBox.mStack = newStack;
             mHomeStack = newStack;
@@ -225,8 +226,8 @@ class DisplayContent {
                         || position == StackBox.TASK_STACK_GOES_UNDER) {
                     // Position indicates a new box is added at top level only.
                     if (box.contains(relativeStackId)) {
-                        StackBox newBox = new StackBox(this, null);
-                        newStack = new TaskStack(stackId, this);
+                        StackBox newBox = new StackBox(service, this, null);
+                        newStack = new TaskStack(service, stackId, this);
                         newStack.mStackBox = newBox;
                         newBox.mStack = newStack;
                         final int offset = position == StackBox.TASK_STACK_GOES_OVER ? 1 : 0;
@@ -368,6 +369,40 @@ class DisplayContent {
         if (userStacks != null) {
             userStacks.restore();
             mUserStacks.delete(newUserId);
+        }
+    }
+
+    void resetAnimationBackgroundAnimator() {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            mStackBoxes.get(stackBoxNdx).resetAnimationBackgroundAnimator();
+        }
+    }
+
+    boolean animateDimLayers() {
+        boolean result = false;
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            result |= mStackBoxes.get(stackBoxNdx).animateDimLayers();
+        }
+        return result;
+    }
+
+    void resetDimming() {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            mStackBoxes.get(stackBoxNdx).resetDimming();
+        }
+    }
+
+    boolean isDimming() {
+        boolean result = false;
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            result |= mStackBoxes.get(stackBoxNdx).isDimming();
+        }
+        return result;
+    }
+
+    void stopDimmingIfNeeded() {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            mStackBoxes.get(stackBoxNdx).stopDimmingIfNeeded();
         }
     }
 

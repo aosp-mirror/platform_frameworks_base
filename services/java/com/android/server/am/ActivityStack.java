@@ -244,10 +244,9 @@ final class ActivityStack {
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int LAUNCH_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
-    static final int RESUME_TOP_ACTIVITY_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
-    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
-    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
-    static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
+    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
+    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
+    static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
 
     static class ScheduleDestroyArgs {
         final ProcessRecord mOwner;
@@ -326,11 +325,6 @@ final class ActivityStack {
                             Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
                             mLaunchingActivity.release();
                         }
-                    }
-                } break;
-                case RESUME_TOP_ACTIVITY_MSG: {
-                    synchronized (mService) {
-                        mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
                     }
                 } break;
                 case STOP_TIMEOUT_MSG: {
@@ -774,7 +768,7 @@ final class ActivityStack {
         if (prev == null) {
             Slog.e(TAG, "Trying to pause when nothing is resumed",
                     new RuntimeException("here").fillInStackTrace());
-            mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+            mStackSupervisor.resumeTopActivitiesLocked();
             return;
         }
         if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSING: " + prev);
@@ -900,7 +894,7 @@ final class ActivityStack {
             } else {
                 if (r.configDestroy) {
                     destroyActivityLocked(r, true, false, "stop-config");
-                    mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+                    mStackSupervisor.resumeTopActivitiesLocked();
                 } else {
                     // Now that this process has stopped, we may want to consider
                     // it to be the previous app to try to keep around in case
@@ -969,7 +963,7 @@ final class ActivityStack {
 
         final ActivityStack topStack = mStackSupervisor.getFocusedStack();
         if (!mService.isSleepingOrShuttingDown()) {
-            topStack.resumeTopActivityLocked(prev);
+            mStackSupervisor.resumeTopActivitiesLocked(topStack, prev, null);
         } else {
             checkReadyForSleepLocked();
             ActivityRecord top = topStack.topRunningActivityLocked(null);
@@ -979,7 +973,7 @@ final class ActivityStack {
                 // activity on the stack is not the just paused activity,
                 // we need to go ahead and resume it to ensure we complete
                 // an in-flight app switch.
-                topStack.resumeTopActivityLocked(null);
+                mStackSupervisor.resumeTopActivitiesLocked(topStack, null, null);
             }
         }
 
@@ -1495,7 +1489,7 @@ final class ActivityStack {
                         + ", new next: " + nextNext);
                 if (nextNext != next) {
                     // Do over!
-                    mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
+                    mStackSupervisor.scheduleResumeTopActivities();
                 }
                 if (mStackSupervisor.reportResumedActivityLocked(next)) {
                     mNoAnimActivities.clear();
@@ -2465,7 +2459,7 @@ final class ActivityStack {
             boolean activityRemoved = destroyActivityLocked(r, true,
                     oomAdj, "finish-imm");
             if (activityRemoved) {
-                mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+                mStackSupervisor.resumeTopActivitiesLocked();
             }
             return activityRemoved ? null : r;
         }
@@ -2707,7 +2701,8 @@ final class ActivityStack {
             }
         }
         if (activityRemoved) {
-            mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+            mStackSupervisor.resumeTopActivitiesLocked();
+
         }
     }
 
@@ -2824,7 +2819,7 @@ final class ActivityStack {
                     removeActivityFromHistoryLocked(r);
                 }
             }
-            mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+            mStackSupervisor.resumeTopActivitiesLocked();
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -3000,7 +2995,7 @@ final class ActivityStack {
 
         mWindowManager.moveTaskToTop(tr.taskId);
 
-        mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+        mStackSupervisor.resumeTopActivitiesLocked();
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
 
         if (VALIDATE_TOKENS) {
@@ -3078,7 +3073,7 @@ final class ActivityStack {
             return mStackSupervisor.resumeHomeActivity(null);
         }
 
-        mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+        mStackSupervisor.resumeTopActivitiesLocked();
         return true;
     }
 
@@ -3426,7 +3421,7 @@ final class ActivityStack {
             ActivityStack stack = mStackSupervisor.getFocusedStack();
             if (stack == null) {
                 mStackSupervisor.resumeHomeActivity(null);
-            } else if (!stack.resumeTopActivityLocked(null)) {
+            } else if (!mStackSupervisor.resumeTopActivitiesLocked(stack, null, null)) {
                 // If there was nothing to resume, and we are not already
                 // restarting this process, but there is a visible activity that
                 // is hosted by the process...  then make sure all visible

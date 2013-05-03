@@ -26,6 +26,7 @@ import static com.android.server.am.ActivityManagerService.DEBUG_RESULTS;
 import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerService.DEBUG_USER_LEAVING;
+import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityManagerService.TAG;
 
 import android.app.Activity;
@@ -89,8 +90,9 @@ public class ActivityStackSupervisor {
     /** How long we wait until giving up on the last activity telling us it is idle. */
     static final int IDLE_TIMEOUT = 10*1000;
 
-    static final int IDLE_TIMEOUT_MSG = ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG; 
-    static final int IDLE_NOW_MSG = ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG + 1;
+    static final int IDLE_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG;
+    static final int IDLE_NOW_MSG = FIRST_SUPERVISOR_STACK_MSG + 1;
+    static final int RESUME_TOP_ACTIVITY_MSG = FIRST_SUPERVISOR_STACK_MSG + 2;
 
     final ActivityManagerService mService;
     final Context mContext;
@@ -236,7 +238,7 @@ public class ActivityStackSupervisor {
             prev.mLaunchHomeTaskNext = false;
         }
         if (mHomeStack.topRunningActivityLocked(null) != null) {
-            return mHomeStack.resumeTopActivityLocked(prev);
+            return resumeTopActivitiesLocked(mHomeStack, prev, null);
         }
         return mService.startHomeActivityLocked(mCurrentUser);
     }
@@ -1341,7 +1343,7 @@ public class ActivityStackSupervisor {
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
                             setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
-                            targetStack.resumeTopActivityLocked(null, options);
+                            resumeTopActivitiesLocked(targetStack, null, options);
                         } else {
                             ActivityOptions.abort(options);
                         }
@@ -1474,7 +1476,7 @@ public class ActivityStackSupervisor {
                             // resumed the top activity.
                             if (doResume) {
                                 setLaunchHomeTaskNextFlag(sourceRecord, null, topStack);
-                                topStack.resumeTopActivityLocked(null);
+                                resumeTopActivitiesLocked();
                             }
                             ActivityOptions.abort(options);
                             if ((startFlags&ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
@@ -1758,7 +1760,7 @@ public class ActivityStackSupervisor {
         }
 
         if (activityRemoved) {
-            getFocusedStack().resumeTopActivityLocked(null);
+            resumeTopActivitiesLocked();
         }
 
         return res;
@@ -1795,13 +1797,27 @@ public class ActivityStackSupervisor {
         return didSomething;
     }
 
-    void resumeTopActivitiesLocked() {
+    boolean resumeTopActivitiesLocked() {
+        return resumeTopActivitiesLocked(null, null, null);
+    }
+
+    boolean resumeTopActivitiesLocked(ActivityStack targetStack, ActivityRecord target,
+            Bundle targetOptions) {
+        if (targetStack == null) {
+            targetStack = getFocusedStack();
+        }
+        boolean result = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             if (isFrontStack(stack)) {
-                stack.resumeTopActivityLocked(null);
+                if (stack == targetStack) {
+                    result = stack.resumeTopActivityLocked(target, targetOptions);
+                } else {
+                    stack.resumeTopActivityLocked(null);
+                }
             }
         }
+        return result;
     }
 
     void finishTopRunningActivityLocked(ProcessRecord app) {
@@ -1854,7 +1870,7 @@ public class ActivityStackSupervisor {
             return;
         }
         stack.moveTask(taskId, toTop);
-        stack.resumeTopActivityLocked(null);
+        resumeTopActivitiesLocked();
     }
 
     ActivityRecord findTaskLocked(Intent intent, ActivityInfo info) {
@@ -1913,7 +1929,7 @@ public class ActivityStackSupervisor {
             final ActivityStack stack = mStacks.get(stackNdx);
             stack.awakeFromSleepingLocked();
             if (isFrontStack(stack)) {
-                stack.resumeTopActivityLocked(null);
+                resumeTopActivitiesLocked();
             }
         }
     }
@@ -2200,11 +2216,15 @@ public class ActivityStackSupervisor {
     }
 
     final void scheduleIdleLocked() {
-        mHandler.obtainMessage(IDLE_NOW_MSG).sendToTarget();
+        mHandler.sendEmptyMessage(IDLE_NOW_MSG);
     }
 
     void removeTimeoutsForActivityLocked(ActivityRecord r) {
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
+    }
+
+    final void scheduleResumeTopActivities() {
+        mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
     }
 
     private final class ActivityStackSupervisorHandler extends Handler {
@@ -2236,6 +2256,11 @@ public class ActivityStackSupervisor {
                 } break;
                 case IDLE_NOW_MSG: {
                     activityIdleInternal((ActivityRecord)msg.obj);
+                } break;
+                case RESUME_TOP_ACTIVITY_MSG: {
+                    synchronized (mService) {
+                        resumeTopActivitiesLocked();
+                    }
                 } break;
             }
         }
