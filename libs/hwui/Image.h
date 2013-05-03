@@ -17,8 +17,6 @@
 #ifndef ANDROID_HWUI_IMAGE_H
 #define ANDROID_HWUI_IMAGE_H
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -26,8 +24,6 @@
 #include <GLES2/gl2ext.h>
 
 #include <ui/GraphicBuffer.h>
-
-#include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
@@ -42,40 +38,8 @@ public:
      * cannot be created, getTexture() will return 0 and getImage() will
      * return EGL_NO_IMAGE_KHR.
      */
-    Image(sp<GraphicBuffer> buffer) {
-        // Create the EGLImage object that maps the GraphicBuffer
-        EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer->getNativeBuffer();
-        EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
-
-        mImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
-                EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
-
-        if (mImage == EGL_NO_IMAGE_KHR) {
-            ALOGW("Error creating image (%#x)", eglGetError());
-            mTexture = 0;
-        } else {
-            // Create a 2D texture to sample from the EGLImage
-            glGenTextures(1, &mTexture);
-            glBindTexture(GL_TEXTURE_2D, mTexture);
-            glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, mImage);
-
-            GLenum status = GL_NO_ERROR;
-            while ((status = glGetError()) != GL_NO_ERROR) {
-                ALOGW("Error creating image (%#x)", status);
-            }
-        }
-    }
-
-    ~Image() {
-        if (mImage != EGL_NO_IMAGE_KHR) {
-            eglDestroyImageKHR(eglGetDisplay(EGL_DEFAULT_DISPLAY), mImage);
-            mImage = EGL_NO_IMAGE_KHR;
-
-            glDeleteTextures(1, &mTexture);
-            mTexture = 0;
-        }
-    }
+    Image(sp<GraphicBuffer> buffer);
+    ~Image();
 
     /**
      * Returns the name of the GL texture that can be used to sample
