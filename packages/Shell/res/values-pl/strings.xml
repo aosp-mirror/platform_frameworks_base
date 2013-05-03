@@ -16,9 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="3701846017049540910">"Tuisskerm"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Foutverslag vasgevang"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Raak om jou foutverslag te deel"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Foutverslae bevat data van die stelsel se verskillende loglêers af, insluitend persoonlike en private inligting. Deel foutverslae net met programme en mense wat jy vertrou."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Wys hierdie boodskap volgende keer"</string>
+    <string name="app_label" msgid="3701846017049540910">"Powłoka"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Raport o błędach został zapisany"</string>
+    <string name="bugreport_finished_text" msgid="3559904746859400732">"Kliknij, by udostępnić raport o błędach"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"Raporty o błędach zawierają dane z różnych plików dzienników systemu, w tym dane osobowe i prywatne. Udostępniaj je tylko aplikacjom i osobom, którym ufasz."</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Pokaż ten komunikat następnym razem"</string>
 </resources>
