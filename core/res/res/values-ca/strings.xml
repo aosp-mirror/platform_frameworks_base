@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet que l\'aplicació enregistri àudio amb el micròfon. Aquest permís permet que l\'aplicació enregistri àudio en qualsevol moment sense la teva confirmació."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fes fotos i vídeos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet que l\'aplicació faci fotos i vídeos amb la càmera. Aquest permís permet que l\'aplicació utilitzi la càmera en qualsevol moment sense la teva confirmació."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desactiva la transmissió del LED indicador en fer servir la càmera"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permet que una aplicació dels sistema preinstal·lada desactivi el LED indicador d\'ús de la càmera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desactiva la tauleta de manera permanent"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desactivar definitivament el telèfon"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permet que l\'aplicació desactivi tota la tauleta de manera permanent. Aquesta acció és molt perillosa."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permet a l\'aplicació escriure a la targeta SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Canvia/esborra emmagatz. intern"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permet que l\'aplicació modifiqui el contingut de l\'emmagatzematge multimèdia intern."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"gestió emmagatzematge docum."</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Permet que l\'aplicació gestioni l\'emmagatzematge de documents."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"accedeix a l\'emmagatzematge extern per a tots els usuaris"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Permet que l\'aplicació accedeixi a l\'emmagatzematge extern per a tots els usuaris."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accedir al sistema de fitxers de la memòria cau"</string>
@@ -1057,7 +1057,7 @@
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecció de text"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Afegeix al diccionari"</string>
     <string name="deleteText" msgid="6979668428458199034">"Suprimeix"</string>
-    <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'entrada"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'introducció de text"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"S\'està acabant l\'espai d\'emmagatzematge"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"És possible que algunes funcions del sistema no funcionin"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permet que una aplicació indiqui la ruta de sortida de contingut multimèdia a altres dispositius externs."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Accedeix a l\'emmagatzematge protegit per contrasenya"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permet que una aplicació accedeixi a l\'emmagatzematge protegit per contrasenya."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Controla si es mostra o s\'amaga el bloqueig de les tecles."</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permet que una aplicació controli el bloqueig de les tecles."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos cops per controlar el zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No s\'ha pogut afegir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Vés"</string>
@@ -1281,7 +1279,7 @@
     <string name="deny" msgid="2081879885755434506">"Denega"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Permís sol·licitat"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"S\'ha sol·licitat permís"\n"per al compte <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="input_method_binding_label" msgid="1283557179944992649">"Mètode d\'entrada"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Mètode d\'introducció de text"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronització"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilitat"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Propietari"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"L\'aplicació no és compatible amb comptes de perfils restringits."</string>
     <string name="app_not_found" msgid="3429141853498927379">"No s\'ha trobat cap aplicació per processar aquesta acció"</string>
     <string name="revoke" msgid="5404479185228271586">"Revoca"</string>
 </resources>

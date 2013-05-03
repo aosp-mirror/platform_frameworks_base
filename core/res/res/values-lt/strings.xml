@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Leidžiama programai įrašyti garsą naudojant mikrofoną. Šis leidimas suteikia galimybę programai įrašyti garsą bet kada be jūsų patvirtinimo."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotografuoti ir filmuoti"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Leidžiama programai fotografuoti ir filmuoti kamera. Šis leidimas suteikia teisę programai naudoti kamerą bet kada be jūsų patvirtinimo."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"neleisti perduoti LED indikatoriaus, kai naudojamas fotoaparatas"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Leidžiama iš anksto įdiegtai sistemos programai išjungti fotoaparato naudojimo indikatoriaus LED."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"visam laikui neleisti planšetinio kompiuterio"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"visam laikui išjungti telefoną"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Leidžiama programai visam laikui išjungti visą planšetinį kompiuterį. Tai labai pavojinga."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Leidžiama programai rašyti į SD kortelę."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"keisti / ištr. vid. med. atm. tur."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Leidžiama programai keisti vidinės medijos saugyklos turinį."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"tvarkyti dokumentų saugyklą"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Leidžiama programai tvarkyti dokumentų saugyklą."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"pasiekti visų naud. išor. atm."</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Leidžiama programai pasiekti visų naudotojų išorinę atmintinę."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"pasiekti talpyklos failų sistemą"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Leidžiama programai nukreipti medijos išvestį į kitus išorinius įrenginius."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Pasiekti „KeyGuard“ saugyklą"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Programai leidžiama pasiekti „KeyGuard“ saugyklą."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Valdyti „KeyGuard“ rodymą ir slėpimą"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Programai leidžiama valdyti „KeyGuard“."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dukart palieskite, kad valdytumėte mastelio keitimą"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nepavyko pridėti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pradėti"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Dabartinis naudotojas: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Savininkas"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Klaida"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Ši programa nepalaiko apribotų profilių paskyrų"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nerasta programa šiam veiksmui apdoroti"</string>
     <string name="revoke" msgid="5404479185228271586">"Anuliuoti"</string>
 </resources>

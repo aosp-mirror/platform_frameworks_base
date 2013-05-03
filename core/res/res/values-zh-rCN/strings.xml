@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"允许该应用使用麦克风录制音频。此权限可让该应用不经您的确认即可随时录制音频。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"允许该应用使用相机拍摄照片和视频。此权限可让该应用随时使用相机，而无需您的确认。"</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"在相机使用过程中停用传输指示灯 LED"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"允许预装的系统应用禁止相机使用指示灯 LED。"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"永久停用平板电脑"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"永久停用手机"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"允许应用永久停用整个平板电脑，但这样非常危险。"</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"允许应用写入 SD 卡。"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/删除内部媒体存储设备的内容"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"允许应用修改内部媒体存储设备的内容。"</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"管理文档存储空间"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"允许应用管理文档存储空间。"</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"访问所有用户的外部存储设备"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"允许应用访问所有用户的外部存储设备。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"访问缓存文件系统"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"访问密钥保护安全存储空间"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"允许应用访问密钥保护安全存储空间。"</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"控制是显示还是隐藏锁屏"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"允许应用控制锁屏。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="owner_name" msgid="2716755460376028154">"机主"</string>
     <string name="error_message_title" msgid="4510373083082500195">"错误"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"此应用不支持受限个人资料的帐户"</string>
     <string name="app_not_found" msgid="3429141853498927379">"找不到可处理此操作的应用"</string>
     <string name="revoke" msgid="5404479185228271586">"撤消"</string>
 </resources>

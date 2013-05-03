@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"マイクを使った録音をアプリに許可します。これにより、アプリがいつでも確認なしで録音できるようになります。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"カメラでの写真と動画の撮影をアプリに許可します。これにより、アプリが確認なしでいつでもカメラを使用できるようになります。"</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"カメラの使用中に通信インジケータLEDを無効にする"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"カメラ使用インジケータLEDを無効にすることをプレインストールされているシステムアプリに許可します。"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"タブレットを完全に無効化"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"端末を永続的に無効にする"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"タブレット全体を完全に無効にすることをアプリに許可します。この許可は危険です。"</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SDカードへの書き込みをアプリに許可します。"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"内部メディアストレージの内容の変更/削除"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"内部メディアストレージの内容を変更することをアプリに許可します。"</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"ドキュメントストレージの管理"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"ドキュメントストレージの管理をアプリに許可します。"</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"全ユーザー外部ストレージへのアクセス"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"すべてのユーザーの外部ストレージへのアクセスをアプリに許可します。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"キャッシュファイルシステムにアクセス"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"キーガードセキュアストレージへのアクセス"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"キーガードセキュアストレージへのアクセスをアプリに許可する"</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"キーガードの表示/非表示の制御"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"キーガードの制御をアプリに許可します。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ダブルタップでズームコントロール"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ウィジェットを追加できませんでした。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"移動"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"エラー"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"このアプリでは制限付きプロフィールのアカウントはサポートしていません"</string>
     <string name="app_not_found" msgid="3429141853498927379">"この操作を行うアプリが見つかりません"</string>
     <string name="revoke" msgid="5404479185228271586">"取り消し"</string>
 </resources>

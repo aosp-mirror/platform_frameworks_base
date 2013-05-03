@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikácii zaznamenávať zvuk pomocou mikrofónu. Toto povolenie umožňuje aplikácii zaznamenávať zvuk kedykoľvek bez vášho potvrdenia."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snímanie fotografií a natáčanie videí"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikácii fotografovať a nahrávať videá pomocou fotoaparátu. Toto povolenie umožňuje aplikácii používať fotoaparát kedykoľvek a bez vášho potvrdenia."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Zakázať indikátor LED prenosu pri používaní fotoaparátu"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Umožňuje v predinštalovanej systémovej aplikácii zakázať indikátor LED používania fotoaparátu."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trvalé zakázanie tabletu"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trvalé vypnutie telefónu"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Umožňuje aplikácii natrvalo zakázať celý tablet. Toto je veľmi nebezpečné nastavenie."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Umožňuje aplikácii zápis na kartu SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"úprava alebo odstránenie obsahu interného ukladacieho priestoru média"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Umožňuje aplikácii zmeniť obsah interného ukladacieho priestoru média."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"správa ukladacieho priestoru dokumentov"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Umožňuje aplikácii spravovať ukladací priestor dokumentov."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"pristupovať k externému ukladaciemu priestoru pre všetkých používateľov"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Umožňuje aplikácii pristupovať k externému ukladaciemu priestoru pre všetkých používateľov."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"pristupovať do súborového systému vyrovnávacej pamäte"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikácii smerovať výstup médií do ďalších externých zariadení."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Prístup k ukladaciemu priestoru zabezpečenému technológiou keyguard"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Umožňuje aplikácii získať prístup k ukladaciemu priestoru zabezpečenému technológiou keyguard."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Ovládanie zobrazenia alebo skrytia technológie keyguard"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Umožňuje aplikácii ovládať technológiu keyguard."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ovládacie prvky lupy zobrazíte dvojitým dotknutím"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Hľadať"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Vlastník"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Chyba"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Táto aplikácia nepodporuje účty pre profily s obmedzením"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Aplikácia potrebná na spracovanie tejto akcie sa nenašla"</string>
     <string name="revoke" msgid="5404479185228271586">"Odvolať"</string>
 </resources>

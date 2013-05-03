@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Hiermee kan de app audio opnemen met de microfoon. Met deze toestemming kan de app op elk moment audio opnemen, zonder om uw bevestiging te vragen."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"foto\'s en video\'s maken"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Hiermee kan de app foto\'s en video\'s maken met de camera. Met deze toestemming kan de app de camera altijd gebruiken, zonder uw bevestiging."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"indicatielampje uitschakelen wanneer camera wordt gebruikt"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Staat toe dat een vooraf geïnstalleerde systeemapp het indicatielampje voor cameragebruik uitschakelt."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"tablet permanent uitschakelen"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"telefoon permanent uitschakelen"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Hiermee kan de app de gehele tablet permanent uitschakelen. Dit is erg gevaarlijk."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Hiermee kan de app schrijven naar de SD-kaart."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"inh. mediaopsl. wijz./verw."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Hiermee kan de app de inhoud van de interne mediaopslag aanpassen."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"documentopslag beheren"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Hiermee kan de app documentopslag beheren."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"toegang tot externe opslag van alle gebruikers"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Hiermee krijgt de app toegang tot externe opslag van alle gebruikers."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"het cachebestandssysteem openen"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Hiermee kan een app media-uitvoer naar andere externe apparaten doorsturen."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Toegang tot opslag met toetsbeveiliging"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Hiermee krijgt een app toegang tot opslag met toetsbeveiliging."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Weergeven en verbergen van toetsbeveiliging beheren"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Staat toe dat een app de toetsbeveiliging beheert."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer aan voor zoomregeling"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kan widget niet toevoegen."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ga"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigenaar"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fout"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Deze app biedt geen ondersteuning voor accounts voor beperkte profielen"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Er is geen app gevonden om deze actie uit te voeren"</string>
     <string name="revoke" msgid="5404479185228271586">"Intrekken"</string>
 </resources>

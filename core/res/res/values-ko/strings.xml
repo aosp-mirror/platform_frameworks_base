@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"앱이 마이크로 오디오를 녹음할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 사용자의 확인 없이 언제든지 오디오를 녹음할 수 있습니다."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"앱이 카메라로 사진과 동영상을 찍을 수 있도록 허용합니다. 이 권한을 사용하면 앱이 언제든지 사용자의 확인 없이 카메라를 사용할 수 있습니다."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"카메라를 사용할 때 전송 표시 LED 사용 중지"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"사전 설치된 시스템 애플리케이션에서 카메라 사용 표시 LED를 사용 중지하도록 허용합니다."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"영구적으로 태블릿 사용 안함"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"휴대전화를 영구적으로 사용 중지"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"앱이 태블릿을 영구적으로 사용중지할 수 있게 합니다. 이 기능은 매우 위험합니다."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"앱이 SD 카드에 쓸 수 있도록 허용합니다."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"내부 미디어 저장소 콘텐츠 수정/삭제"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"앱이 내부 미디어 저장소의 콘텐츠를 수정할 수 있도록 허용합니다."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"문서 저장공간 관리"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"앱이 문서 저장공간을 관리할 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"모든 사용자의 외부 저장소에 액세스"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"앱이 모든 사용자의 외부 저장소에 액세스하도록 허용합니다."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"캐시 파일시스템 액세스"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"앱이 미디어 출력을 기타 외부 기기에 연결할 수 있도록 허용합니다."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"키가드 보안 저장소 액세스"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"애플리케이션에서 키가드 보안 저장소에 액세스하도록 허용합니다."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"키가드 표시 및 숨기기 설정"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"애플리케이션에서 키가드를 제어하도록 허용합니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"확대/축소하려면 두 번 터치하세요."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"위젯을 추가할 수 없습니다."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"이동"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"이 애플리케이션은 제한된 프로필의 계정을 지원하지 않습니다."</string>
     <string name="app_not_found" msgid="3429141853498927379">"이 작업을 처리하는 애플리케이션을 찾을 수 없습니다."</string>
     <string name="revoke" msgid="5404479185228271586">"취소"</string>
 </resources>

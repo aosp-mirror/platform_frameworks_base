@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Aplikaciji omogućuje snimanje zvuka mikrofonom. Ta dozvola aplikaciji omogućuje snimanje zvuka u bilo kojem trenutku bez vašeg odobrenja."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimi fotografije i videozapise"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogućuje snimanje slika i videozapisa fotoaparatom. Ta dozvola aplikaciji omogućuje upotrebu fotoaparata u bilo kojem trenutku bez vašeg odobrenja."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"onemogućavanje lampice pokazivača prijenosa kada je fotoaparat u upotrebi"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Omogućuje unaprijed instaliranim aplikacijama sustava onemogućavanje lampice pokazivača upotrebe fotoaparata."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trajno onemogući tabletni uređaj"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trajno onemogućavanje telefona"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Aplikaciji omogućuje trajno isključivanje cijelog tabletnog računala. To je vrlo opasno."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Aplikaciji omogućuje pisanje na SD karticu."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"izmijeni/izbriši sadržaj pohranjen na internim medijima"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Aplikaciji omogućuje izmjenu sadržaja pohranjenog na internim medijima."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"upravljanje pohr. dokumenata"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Omogućuje aplikaciji upravljanje pohranom dokumenata."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"pristup vanjskoj pohrani svima"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Omogućuje aplikaciji pristup vanjskoj pohrani za sve korisnike."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"pristup sustavu datoteka predmemorije"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Aplikaciji omogućuje usmjeravanje medijskog izlaza na druge vanjske uređaje."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Pristup zaključanoj sigurnoj pohrani"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Omogućuje aplikaciji pristupanje zaključanoj sigurnoj pohrani."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Upravljanje prikazivanjem i skrivanjem zaključavanja tipkovnice"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Omogućuje aplikaciji upravljanje zaključavanjem tipkovnice."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dodirnite dvaput za upravljanje zumiranjem"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget nije moguće dodati."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Idi"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Trenutačni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Vlasnik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Pogreška"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Aplikacija ne podržava račune za ograničene profile"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nije pronađena aplikacija za upravljanje ovom radnjom"</string>
     <string name="revoke" msgid="5404479185228271586">"Opozovi"</string>
 </resources>

@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Võimaldab rakendusel salvestada mikrofoniga heli. See luba võimaldab rakendusel salvestada heli igal ajal ilma teie kinnituseta."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"piltide ja videote tegemine"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Võimaldab rakendusel teha kaameraga pilte ja videoid. See luba võimaldab rakendusel kasutada kaamerat mis tahes ajal teie kinnituseta."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"keela kaamera kasutamisel näidikutule kasutamine"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Lubab eelinstallitud süsteemirakendusel keelata kaamera näidikutule kasutamise."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"blokeeri tahvelarvuti jäädavalt"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"blokeeri telefon jäädavalt"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Võimaldab rakendusel kogu tahvelarvuti jäädavalt keelata. See on väga ohtlik."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Võimaldab rakendusel kirjutada SD-kaardile."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"sisemälu sisu muutm./kustut."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Võimaldab rakendusel muuta sisemise andmekandja sisu."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"dokumendi talletuse haldamine"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Lubab rakendusel hallata dokumendi talletamist."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"juurdepääs välismäluseadmele (kõikidele kasutajatele)"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Võimaldab rakenduse kõikidel kasutajatel pöörduda välismäluseadme poole."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"juurdepääs vahemälu failisüsteemile"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Võimaldab rakendusel koostada teekonna meediaväljundist teistesse välistesse seadmetesse."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Juurdepääs võtmekaitsega turvalisele talletusruumile"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Lubab rakendusel hankida juurdepääsu võtmekaitsega turvalisele talletusruumile."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Võtmekaitse kuvamise ja peitmise juhtimine"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Lubab rakendusel võtmekaitset juhtida."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Suumi juhtimiseks puudutage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Praegune kasutaja <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Omanik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Viga"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"See rakendus ei toeta piiratud profiilide kontosid"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Selle toimingu käsitlemiseks ei leitud ühtegi rakendust"</string>
     <string name="revoke" msgid="5404479185228271586">"Tühista"</string>
 </resources>

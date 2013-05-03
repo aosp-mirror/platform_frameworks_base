@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Memungkinkan aplikasi merekam audio dengan mikrofon. Izin ini memungkinkan aplikasi merekam audio kapan saja tanpa konfirmasi Anda."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Memungkinkan aplikasi mengambil gambar dan video dengan kamera. Izin ini memungkinkan aplikasi menggunakan kamera kapan saja tanpa konfirmasi Anda."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"nonaktifkan transmisi LED indikator saat kamera digunakan"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Izinkan aplikasi sistem yang sudah dipasang sebelumnya menonaktifkan LED indikator penggunaan kamera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"noaktifkan tablet secara permanen"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"nonaktifkan ponsel secara permanen"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Mengizinkan apl menonaktifkan seluruh tablet secara permanen. Ini sangat berbahaya."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Memungkinkan apl menulis ke kartu SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"ubah/hapus konten penyimpanan media internal"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Mengizinkan apl memodifikasi konten penyimpanan media internal."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"mengelola penyimpanan dokumen"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Mengizinkan aplikasi mengelola penyimpanan dokumen."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"akses penyimpanan eksternal"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Izinkan aplikasi mengakses penyimpanan eksternal untuk semua pengguna."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"akses sistem file cache."</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Memungkinkan aplikasi menentukan rute keluaran media ke perangkat eksternal lainnya."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Mengakses pengaman penyimpanan aman"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Mengizinkan aplikasi mengakses pengaman penyimpanan aman."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Kontrol untuk menampilkan dan menyembunyikan pengaman"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Izinkan aplikasi untuk mengontrol pengaman."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mengontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Buka"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Pengguna saat ini <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Pemilik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Kesalahan"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Aplikasi ini tidak mendukung akun untuk profil yang dibatasi"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Tidak ada aplikasi yang ditemukan untuk menangani tindakan ini"</string>
     <string name="revoke" msgid="5404479185228271586">"Cabut"</string>
 </resources>
