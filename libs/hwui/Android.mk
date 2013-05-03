@@ -22,6 +22,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		Extensions.cpp \
 		FboCache.cpp \
 		GradientCache.cpp \
+		Image.cpp \
 		Layer.cpp \
 		LayerCache.cpp \
 		LayerRenderer.cpp \
