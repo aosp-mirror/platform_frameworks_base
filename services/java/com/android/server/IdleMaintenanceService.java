@@ -17,11 +17,12 @@
 package com.android.server;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -40,7 +41,6 @@ import android.util.Log;
  * The current implementation is very simple. The start of a maintenance
  * window is announced if: the screen is off or showing a dream AND the
  * battery level is more than twenty percent AND at least one hour passed
- * since the screen went off or a dream started (i.e. since the last user
  * activity).
  *
  * The end of a maintenance window is announced only if: a start was
@@ -48,27 +48,44 @@ import android.util.Log;
  */
 public class IdleMaintenanceService extends BroadcastReceiver {
 
-    private final boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     private static final String LOG_TAG = IdleMaintenanceService.class.getSimpleName();
 
     private static final int LAST_USER_ACTIVITY_TIME_INVALID = -1;
 
-    private static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
+    private static final long MIN_IDLE_MAINTENANCE_INTERVAL_MILLIS = 24 * 60 * 60 * 1000; // 1 day
 
     private static final int MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_CHARGING = 30; // percent
 
     private static final int MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_NOT_CHARGING = 80; // percent
 
-    private static final int MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_RUNNING = 10; // percent
+    private static final int MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_RUNNING = 20; // percent
 
-    private static final long MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START = 60 * 60 * 1000; // 1 hour
+    private static final long MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START = 71 * 60 * 1000; // 71 min
 
-    private final Intent mIdleMaintenanceStartIntent =
-            new Intent(Intent.ACTION_IDLE_MAINTENANCE_START);
+    private static final long MAX_IDLE_MAINTENANCE_DURATION = 71 * 60 * 1000; // 71 min
 
-    private final Intent mIdleMaintenanceEndIntent =
-            new Intent(Intent.ACTION_IDLE_MAINTENANCE_END);
+    private static final String ACTION_UPDATE_IDLE_MAINTENANCE_STATE =
+        "com.android.server.IdleMaintenanceService.action.UPDATE_IDLE_MAINTENANCE_STATE";
+
+    private static final Intent sIdleMaintenanceStartIntent;
+    static {
+        sIdleMaintenanceStartIntent = new Intent(Intent.ACTION_IDLE_MAINTENANCE_START);
+        sIdleMaintenanceStartIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+    };
+
+    private static final Intent sIdleMaintenanceEndIntent;
+    static {
+        sIdleMaintenanceEndIntent = new Intent(Intent.ACTION_IDLE_MAINTENANCE_END);
+        sIdleMaintenanceEndIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+    }
+
+    private final AlarmManager mAlarmService;
+
+    private final BatteryService mBatteryService;
+
+    private final PendingIntent mUpdateIdleMaintenanceStatePendingIntent;
 
     private final Context mContext;
 
@@ -76,29 +93,36 @@ public class IdleMaintenanceService extends BroadcastReceiver {
 
     private final Handler mHandler;
 
-    private long mLastIdleMaintenanceStartTimeMillis = SystemClock.elapsedRealtime();
+    private long mLastIdleMaintenanceStartTimeMillis;
 
     private long mLastUserActivityElapsedTimeMillis = LAST_USER_ACTIVITY_TIME_INVALID;
 
-    private int mBatteryLevel;
-
-    private boolean mBatteryCharging;
-
     private boolean mIdleMaintenanceStarted;
 
-    public IdleMaintenanceService(Context context) {
+    public IdleMaintenanceService(Context context, BatteryService batteryService) {
         mContext = context;
+        mBatteryService = batteryService;
+
+        mAlarmService = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
 
         mHandler = new Handler(mContext.getMainLooper());
 
+        Intent intent = new Intent(ACTION_UPDATE_IDLE_MAINTENANCE_STATE);
+        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mUpdateIdleMaintenanceStatePendingIntent = PendingIntent.getBroadcast(mContext, 0,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         register(mContext.getMainLooper());
     }
 
     public void register(Looper looper) {
         IntentFilter intentFilter = new IntentFilter();
+
+        // Alarm actions.
+        intentFilter.addAction(ACTION_UPDATE_IDLE_MAINTENANCE_STATE);
 
         // Battery actions.
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
@@ -115,67 +139,117 @@ public class IdleMaintenanceService extends BroadcastReceiver {
                 intentFilter, null, new Handler(looper));
     }
 
+    private void scheduleUpdateIdleMaintenanceState(long delayMillis) {
+        final long triggetRealTimeMillis = SystemClock.elapsedRealtime() + delayMillis;
+        mAlarmService.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggetRealTimeMillis,
+                mUpdateIdleMaintenanceStatePendingIntent);
+    }
+
+    private void unscheduleUpdateIdleMaintenanceState() {
+        mAlarmService.cancel(mUpdateIdleMaintenanceStatePendingIntent);
+    }
+
     private void updateIdleMaintenanceState() {
         if (mIdleMaintenanceStarted) {
-            // Idle maintenance can be interrupted only by
-            // a change of the device state.
-            if (!deviceStatePermitsIdleMaintenanceRunning()) {
+            // Idle maintenance can be interrupted by user activity, or duration
+            // time out, or low battery.
+            if (!lastUserActivityPermitsIdleMaintenanceRunning()
+                    || !batteryLevelAndMaintenanceTimeoutPermitsIdleMaintenanceRunning()) {
+                unscheduleUpdateIdleMaintenanceState();
                 mIdleMaintenanceStarted = false;
                 EventLogTags.writeIdleMaintenanceWindowFinish(SystemClock.elapsedRealtime(),
-                        mLastUserActivityElapsedTimeMillis, mBatteryLevel,
-                        mBatteryCharging ? 1 : 0);
+                        mLastUserActivityElapsedTimeMillis, mBatteryService.getBatteryLevel(),
+                        isBatteryCharging() ? 1 : 0);
                 sendIdleMaintenanceEndIntent();
+                // We stopped since we don't have enough battery or timed out but the
+                // user is not using the device, so we should be able to run maintenance
+                // in the next maintenance window since the battery may be charged
+                // without interaction and the min interval between maintenances passed.
+                if (!batteryLevelAndMaintenanceTimeoutPermitsIdleMaintenanceRunning()) {
+                    scheduleUpdateIdleMaintenanceState(
+                            getNextIdleMaintenanceIntervalStartFromNow());
+                }
             }
         } else if (deviceStatePermitsIdleMaintenanceStart()
                 && lastUserActivityPermitsIdleMaintenanceStart()
                 && lastRunPermitsIdleMaintenanceStart()) {
+            // Now that we started idle maintenance, we should schedule another
+            // update for the moment when the idle maintenance times out.
+            scheduleUpdateIdleMaintenanceState(MAX_IDLE_MAINTENANCE_DURATION);
             mIdleMaintenanceStarted = true;
             EventLogTags.writeIdleMaintenanceWindowStart(SystemClock.elapsedRealtime(),
-                    mLastUserActivityElapsedTimeMillis, mBatteryLevel,
-                    mBatteryCharging ? 1 : 0);
+                    mLastUserActivityElapsedTimeMillis, mBatteryService.getBatteryLevel(),
+                    isBatteryCharging() ? 1 : 0);
             mLastIdleMaintenanceStartTimeMillis = SystemClock.elapsedRealtime();
             sendIdleMaintenanceStartIntent();
+        } else if (lastUserActivityPermitsIdleMaintenanceStart()) {
+             if (lastRunPermitsIdleMaintenanceStart()) {
+                // The user does not use the device and we did not run maintenance in more
+                // than the min interval between runs, so schedule an update - maybe the
+                // battery will be charged latter.
+                scheduleUpdateIdleMaintenanceState(MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START);
+             } else {
+                 // The user does not use the device but we have run maintenance in the min
+                 // interval between runs, so schedule an update after the min interval ends.
+                 scheduleUpdateIdleMaintenanceState(
+                         getNextIdleMaintenanceIntervalStartFromNow());
+             }
         }
     }
 
+    private long getNextIdleMaintenanceIntervalStartFromNow() {
+        return mLastIdleMaintenanceStartTimeMillis + MIN_IDLE_MAINTENANCE_INTERVAL_MILLIS
+                - SystemClock.elapsedRealtime();
+    }
+
     private void sendIdleMaintenanceStartIntent() {
-        if (DEBUG) {
-            Log.i(LOG_TAG, "Broadcasting " + Intent.ACTION_IDLE_MAINTENANCE_START);
-        }
         mWakeLock.acquire();
-        mContext.sendOrderedBroadcastAsUser(mIdleMaintenanceStartIntent, UserHandle.ALL,
+        mContext.sendOrderedBroadcastAsUser(sIdleMaintenanceStartIntent, UserHandle.ALL,
                 null, this, mHandler, Activity.RESULT_OK, null, null);
     }
 
     private void sendIdleMaintenanceEndIntent() {
-        if (DEBUG) {
-            Log.i(LOG_TAG, "Broadcasting " + Intent.ACTION_IDLE_MAINTENANCE_END);
-        }
         mWakeLock.acquire();
-        mContext.sendOrderedBroadcastAsUser(mIdleMaintenanceEndIntent, UserHandle.ALL,
+        mContext.sendOrderedBroadcastAsUser(sIdleMaintenanceEndIntent, UserHandle.ALL,
                 null, this, mHandler, Activity.RESULT_OK, null, null);
     }
 
     private boolean deviceStatePermitsIdleMaintenanceStart() {
-        final int minBatteryLevel = mBatteryCharging
+        final int minBatteryLevel = isBatteryCharging()
                 ? MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_CHARGING
                 : MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_START_NOT_CHARGING;
         return (mLastUserActivityElapsedTimeMillis != LAST_USER_ACTIVITY_TIME_INVALID
-                && mBatteryLevel > minBatteryLevel);
-    }
-
-    private boolean deviceStatePermitsIdleMaintenanceRunning() {
-        return (mLastUserActivityElapsedTimeMillis != LAST_USER_ACTIVITY_TIME_INVALID
-                && mBatteryLevel > MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_RUNNING);
+                && mBatteryService.getBatteryLevel() > minBatteryLevel);
     }
 
     private boolean lastUserActivityPermitsIdleMaintenanceStart() {
-        return (SystemClock.elapsedRealtime() - mLastUserActivityElapsedTimeMillis
-                > MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START);
+        // The last time the user poked the device is above the threshold.
+        return (mLastUserActivityElapsedTimeMillis != LAST_USER_ACTIVITY_TIME_INVALID
+                && SystemClock.elapsedRealtime() - mLastUserActivityElapsedTimeMillis
+                    > MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START);
     }
 
     private boolean lastRunPermitsIdleMaintenanceStart() {
-        return SystemClock.elapsedRealtime() - mLastIdleMaintenanceStartTimeMillis > MILLIS_IN_DAY;
+        // Enough time passed since the last maintenance run.
+        return SystemClock.elapsedRealtime() - mLastIdleMaintenanceStartTimeMillis
+                > MIN_IDLE_MAINTENANCE_INTERVAL_MILLIS;
+    }
+
+    private boolean lastUserActivityPermitsIdleMaintenanceRunning() {
+        // The user is not using the device.
+        return (mLastUserActivityElapsedTimeMillis != LAST_USER_ACTIVITY_TIME_INVALID);
+    }
+
+    private boolean batteryLevelAndMaintenanceTimeoutPermitsIdleMaintenanceRunning() {
+        // Battery not too low and the maintenance duration did not timeout.
+        return (mBatteryService.getBatteryLevel() > MIN_BATTERY_LEVEL_IDLE_MAINTENANCE_RUNNING
+                && mLastIdleMaintenanceStartTimeMillis + MAX_IDLE_MAINTENANCE_DURATION
+                        > SystemClock.elapsedRealtime());
+    }
+
+    private boolean isBatteryCharging() {
+        return mBatteryService.getPlugType() > 0
+                && mBatteryService.getInvalidCharger() == 0;
     }
 
     @Override
@@ -185,24 +259,38 @@ public class IdleMaintenanceService extends BroadcastReceiver {
         }
         String action = intent.getAction();
         if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
-            final int maxBatteryLevel = intent.getExtras().getInt(BatteryManager.EXTRA_SCALE);
-            final int currBatteryLevel = intent.getExtras().getInt(BatteryManager.EXTRA_LEVEL);
-            mBatteryLevel = (int) (((float) maxBatteryLevel / 100) * currBatteryLevel);
-            final int pluggedState = intent.getExtras().getInt(BatteryManager.EXTRA_PLUGGED);
-            final int chargerState = intent.getExtras().getInt(
-                    BatteryManager.EXTRA_INVALID_CHARGER, 0);
-            mBatteryCharging = (pluggedState > 0 && chargerState == 0);
+            // We care about battery only if maintenance is in progress so we can
+            // stop it if battery is too low. Note that here we assume that the
+            // maintenance clients are properly holding a wake lock. We will
+            // refactor the maintenance to use services instead of intents for the
+            // next release. The only client for this for now is internal an holds
+            // a wake lock correctly.
+            if (mIdleMaintenanceStarted) {
+                updateIdleMaintenanceState();
+            }
         } else if (Intent.ACTION_SCREEN_ON.equals(action)
                 || Intent.ACTION_DREAMING_STOPPED.equals(action)) {
             mLastUserActivityElapsedTimeMillis = LAST_USER_ACTIVITY_TIME_INVALID;
+            // Unschedule any future updates since we already know that maintenance
+            // cannot be performed since the user is back.
+            unscheduleUpdateIdleMaintenanceState();
+            // If the screen went on/stopped dreaming, we know the user is using the
+            // device which means that idle maintenance should be stopped if running.
+            updateIdleMaintenanceState();
         } else if (Intent.ACTION_SCREEN_OFF.equals(action)
                 || Intent.ACTION_DREAMING_STARTED.equals(action)) {
             mLastUserActivityElapsedTimeMillis = SystemClock.elapsedRealtime();
+            // If screen went off/started dreaming, we may be able to start idle maintenance
+            // after the minimal user inactivity elapses. We schedule an alarm for when
+            // this timeout elapses since the device may go to sleep by then.
+            scheduleUpdateIdleMaintenanceState(MIN_USER_INACTIVITY_IDLE_MAINTENANCE_START);
+        } else if (ACTION_UPDATE_IDLE_MAINTENANCE_STATE.equals(action)) {
+            updateIdleMaintenanceState();
         } else if (Intent.ACTION_IDLE_MAINTENANCE_START.equals(action)
                 || Intent.ACTION_IDLE_MAINTENANCE_END.equals(action)) {
+            // We were holding a wake lock while broadcasting the idle maintenance
+            // intents but now that we finished the broadcast release the wake lock.
             mWakeLock.release();
-            return;
         }
-        updateIdleMaintenanceState();
     }
 }

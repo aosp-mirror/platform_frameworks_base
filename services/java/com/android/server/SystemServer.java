@@ -745,7 +745,7 @@ class ServerThread extends Thread {
 
             try {
                 Slog.i(TAG, "IdleMaintenanceService");
-                new IdleMaintenanceService(context);
+                new IdleMaintenanceService(context, battery);
             } catch (Throwable e) {
                 reportWtf("starting IdleMaintenanceService", e);
             }

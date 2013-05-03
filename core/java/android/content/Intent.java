@@ -2356,6 +2356,8 @@ public class Intent implements Parcelable, Cloneable {
      * </p>
      *
      * @see #ACTION_IDLE_MAINTENANCE_END
+     *
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_IDLE_MAINTENANCE_START =
@@ -2383,6 +2385,8 @@ public class Intent implements Parcelable, Cloneable {
      * by the system.
      *
      * @see #ACTION_IDLE_MAINTENANCE_START
+     *
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_IDLE_MAINTENANCE_END =
