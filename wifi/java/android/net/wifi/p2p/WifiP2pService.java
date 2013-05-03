@@ -48,6 +48,7 @@ import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Handler;
@@ -628,6 +629,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case DhcpStateMachine.CMD_ON_QUIT:
                 case WifiMonitor.P2P_PROV_DISC_FAILURE_EVENT:
                 case SET_MIRACAST_MODE:
+                case WifiP2pManager.START_LISTEN:
+                case WifiP2pManager.STOP_LISTEN:
+                case WifiP2pManager.SET_CHANNEL:
                     break;
                 case WifiStateMachine.CMD_ENABLE_P2P:
                     // Enable is lazy and has no response
@@ -729,7 +733,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.START_WPS_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
-               default:
+                case WifiP2pManager.START_LISTEN:
+                    replyToMessage(message, WifiP2pManager.START_LISTEN_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.STOP_LISTEN:
+                    replyToMessage(message, WifiP2pManager.STOP_LISTEN_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+
+                default:
                     return NOT_HANDLED;
             }
             return HANDLED;
@@ -1022,6 +1035,35 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case SET_MIRACAST_MODE:
                     mWifiNative.setMiracastMode(message.arg1);
                     break;
+                case WifiP2pManager.START_LISTEN:
+                    if (DBG) logd(getName() + " start listen mode");
+                    mWifiNative.p2pFlush();
+                    if (mWifiNative.p2pExtListen(true, 500, 500)) {
+                        replyToMessage(message, WifiP2pManager.START_LISTEN_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.START_LISTEN_FAILED);
+                    }
+                    break;
+                case WifiP2pManager.STOP_LISTEN:
+                    if (DBG) logd(getName() + " stop listen mode");
+                    if (mWifiNative.p2pExtListen(false, 0, 0)) {
+                        replyToMessage(message, WifiP2pManager.STOP_LISTEN_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.STOP_LISTEN_FAILED);
+                    }
+                    mWifiNative.p2pFlush();
+                    break;
+                case WifiP2pManager.SET_CHANNEL:
+                    Bundle p2pChannels = (Bundle) message.obj;
+                    int lc = p2pChannels.getInt("lc", 0);
+                    int oc = p2pChannels.getInt("oc", 0);
+                    if (DBG) logd(getName() + " set listen and operating channel");
+                    if (mWifiNative.p2pSetChannel(lc, oc)) {
+                        replyToMessage(message, WifiP2pManager.SET_CHANNEL_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.SET_CHANNEL_FAILED);
+                    }
+                    break;
                 default:
                    return NOT_HANDLED;
             }
@@ -1169,6 +1211,35 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     } else {
                         loge("Unexpected group creation, remove " + mGroup);
                         mWifiNative.p2pGroupRemove(mGroup.getInterface());
+                    }
+                    break;
+                case WifiP2pManager.START_LISTEN:
+                    if (DBG) logd(getName() + " start listen mode");
+                    mWifiNative.p2pFlush();
+                    if (mWifiNative.p2pExtListen(true, 500, 500)) {
+                        replyToMessage(message, WifiP2pManager.START_LISTEN_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.START_LISTEN_FAILED);
+                    }
+                    break;
+                case WifiP2pManager.STOP_LISTEN:
+                    if (DBG) logd(getName() + " stop listen mode");
+                    if (mWifiNative.p2pExtListen(false, 0, 0)) {
+                        replyToMessage(message, WifiP2pManager.STOP_LISTEN_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.STOP_LISTEN_FAILED);
+                    }
+                    mWifiNative.p2pFlush();
+                    break;
+                case WifiP2pManager.SET_CHANNEL:
+                    Bundle p2pChannels = (Bundle) message.obj;
+                    int lc = p2pChannels.getInt("lc", 0);
+                    int oc = p2pChannels.getInt("oc", 0);
+                    if (DBG) logd(getName() + " set listen and operating channel");
+                    if (mWifiNative.p2pSetChannel(lc, oc)) {
+                        replyToMessage(message, WifiP2pManager.SET_CHANNEL_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.SET_CHANNEL_FAILED);
                     }
                     break;
                 default:

@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.display.WifiDisplay;
+import android.hardware.display.WifiDisplaySessionInfo;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.AudioManager;
 import android.media.RemoteDisplay;
@@ -76,6 +77,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private static final int MAX_THROUGHPUT = 50;
     private static final int CONNECTION_TIMEOUT_SECONDS = 60;
     private static final int RTSP_TIMEOUT_SECONDS = 15;
+    private static final int RTSP_TIMEOUT_SECONDS_CERT_MODE = 120;
 
     private static final int DISCOVER_PEERS_MAX_RETRIES = 10;
     private static final int DISCOVER_PEERS_RETRY_DELAY_MILLIS = 500;
@@ -146,6 +148,10 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private int mAdvertisedDisplayHeight;
     private int mAdvertisedDisplayFlags;
 
+    // Certification
+    private boolean mWifiDisplayCertMode;
+    private WifiP2pDevice mThisDevice;
+
     public WifiDisplayController(Context context, Handler handler, Listener listener) {
         mContext = context;
         mHandler = handler;
@@ -158,6 +164,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         context.registerReceiver(mWifiP2pReceiver, intentFilter, null, mHandler);
 
         ContentObserver settingsObserver = new ContentObserver(mHandler) {
@@ -170,6 +177,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
         final ContentResolver resolver = mContext.getContentResolver();
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.WIFI_DISPLAY_ON), false, settingsObserver);
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON), false, settingsObserver);
         updateSettings();
     }
 
@@ -177,6 +186,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
         final ContentResolver resolver = mContext.getContentResolver();
         mWifiDisplayOnSetting = Settings.Global.getInt(resolver,
                 Settings.Global.WIFI_DISPLAY_ON, 0) != 0;
+        mWifiDisplayCertMode = Settings.Global.getInt(resolver,
+                Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON, 0) != 0;
 
         updateWfdEnableState();
     }
@@ -220,6 +231,18 @@ final class WifiDisplayController implements DumpUtils.Dump {
             if (device.deviceAddress.equals(address)) {
                 connect(device);
             }
+        }
+    }
+
+    public void requestPause() {
+        if (mRemoteDisplay != null) {
+            mRemoteDisplay.pause();
+        }
+    }
+
+    public void requestResume() {
+        if (mRemoteDisplay != null) {
+            mRemoteDisplay.resume();
         }
     }
 
@@ -482,6 +505,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             Slog.i(TAG, "Disconnecting from Wifi display: " + mConnectedDevice.deviceName);
             mDisconnectingDevice = mConnectedDevice;
             mConnectedDevice = null;
+            mConnectedDeviceGroupInfo = null;
 
             unadvertiseDisplay();
 
@@ -548,8 +572,12 @@ final class WifiDisplayController implements DumpUtils.Dump {
             return; // wait for asynchronous callback
         }
 
-        // Step 4. If we wanted to disconnect, then mission accomplished.
+        // Step 4. If we wanted to disconnect, or we're updating after starting an
+        // autonomous GO, then mission accomplished.
         if (mDesiredDevice == null) {
+            if (mWifiDisplayCertMode) {
+                mListener.onDisplaySessionInfo(getSessionInfo(mConnectedDeviceGroupInfo, 0));
+            }
             unadvertiseDisplay();
             return; // done
         }
@@ -625,12 +653,17 @@ final class WifiDisplayController implements DumpUtils.Dump {
             mRemoteDisplay = RemoteDisplay.listen(iface, new RemoteDisplay.Listener() {
                 @Override
                 public void onDisplayConnected(Surface surface,
-                        int width, int height, int flags) {
+                        int width, int height, int flags, int session) {
                     if (mConnectedDevice == oldDevice && !mRemoteDisplayConnected) {
                         Slog.i(TAG, "Opened RTSP connection with Wifi display: "
                                 + mConnectedDevice.deviceName);
                         mRemoteDisplayConnected = true;
                         mHandler.removeCallbacks(mRtspTimeout);
+
+                        if (mWifiDisplayCertMode) {
+                            mListener.onDisplaySessionInfo(
+                                    getSessionInfo(mConnectedDeviceGroupInfo, session));
+                        }
 
                         final WifiDisplay display = createWifiDisplay(mConnectedDevice);
                         advertiseDisplay(display, surface, width, height, flags);
@@ -658,8 +691,29 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 }
             }, mHandler);
 
-            mHandler.postDelayed(mRtspTimeout, RTSP_TIMEOUT_SECONDS * 1000);
+            // Use extended timeout value for certification, as some tests require user inputs
+            int rtspTimeout = mWifiDisplayCertMode ?
+                    RTSP_TIMEOUT_SECONDS_CERT_MODE : RTSP_TIMEOUT_SECONDS;
+
+            mHandler.postDelayed(mRtspTimeout, rtspTimeout * 1000);
         }
+    }
+
+    private WifiDisplaySessionInfo getSessionInfo(WifiP2pGroup info, int session) {
+        if (info == null) {
+            return null;
+        }
+        Inet4Address addr = getInterfaceAddress(info);
+        WifiDisplaySessionInfo sessionInfo = new WifiDisplaySessionInfo(
+                !info.getOwner().deviceAddress.equals(mThisDevice.deviceAddress),
+                session,
+                info.getOwner().deviceAddress + " " + info.getNetworkName(),
+                info.getPassphrase(),
+                (addr != null) ? addr.getHostAddress() : "");
+        if (DEBUG) {
+            Slog.d(TAG, sessionInfo.toString());
+        }
+        return sessionInfo;
     }
 
     private void handleStateChanged(boolean enabled) {
@@ -676,7 +730,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private void handleConnectionChanged(NetworkInfo networkInfo) {
         mNetworkInfo = networkInfo;
         if (mWfdEnabled && networkInfo.isConnected()) {
-            if (mDesiredDevice != null) {
+            if (mDesiredDevice != null || mWifiDisplayCertMode) {
                 mWifiP2pManager.requestGroupInfo(mWifiP2pChannel, new GroupInfoListener() {
                     @Override
                     public void onGroupInfoAvailable(WifiP2pGroup info) {
@@ -698,6 +752,25 @@ final class WifiDisplayController implements DumpUtils.Dump {
                             return;
                         }
 
+                        if (mWifiDisplayCertMode) {
+                            boolean owner = info.getOwner().deviceAddress
+                                    .equals(mThisDevice.deviceAddress);
+                            if (owner && info.getClientList().isEmpty()) {
+                                // this is the case when we started Autonomous GO,
+                                // and no client has connected, save group info
+                                // and updateConnection()
+                                mConnectingDevice = mDesiredDevice = null;
+                                mConnectedDeviceGroupInfo = info;
+                                updateConnection();
+                            } else if (mConnectingDevice == null && mDesiredDevice == null) {
+                                // this is the case when we received an incoming connection
+                                // from the sink, update both mConnectingDevice and mDesiredDevice
+                                // then proceed to updateConnection() below
+                                mConnectingDevice = mDesiredDevice = owner ?
+                                        info.getClientList().iterator().next() : info.getOwner();
+                            }
+                        }
+
                         if (mConnectingDevice != null && mConnectingDevice == mDesiredDevice) {
                             Slog.i(TAG, "Connected to Wifi display: "
                                     + mConnectingDevice.deviceName);
@@ -712,6 +785,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 });
             }
         } else {
+            mConnectedDeviceGroupInfo = null;
             disconnect();
 
             // After disconnection for a group, for some reason we have a tendency
@@ -910,6 +984,13 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 }
 
                 handleConnectionChanged(networkInfo);
+            } else if (action.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
+                mThisDevice = (WifiP2pDevice) intent.getParcelableExtra(
+                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+                if (DEBUG) {
+                    Slog.d(TAG, "Received WIFI_P2P_THIS_DEVICE_CHANGED_ACTION: mThisDevice= "
+                            + mThisDevice);
+                }
             }
         }
     };
@@ -928,6 +1009,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
         void onDisplayChanged(WifiDisplay display);
         void onDisplayConnected(WifiDisplay display,
                 Surface surface, int width, int height, int flags);
+        void onDisplaySessionInfo(WifiDisplaySessionInfo sessionInfo);
         void onDisplayDisconnected();
     }
 }

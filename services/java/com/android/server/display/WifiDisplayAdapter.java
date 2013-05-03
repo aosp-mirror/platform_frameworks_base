@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
+import android.hardware.display.WifiDisplaySessionInfo;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.RemoteDisplay;
 import android.os.Handler;
@@ -93,6 +94,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     private WifiDisplay[] mDisplays = WifiDisplay.EMPTY_ARRAY;
     private WifiDisplay[] mAvailableDisplays = WifiDisplay.EMPTY_ARRAY;
     private WifiDisplay[] mRememberedDisplays = WifiDisplay.EMPTY_ARRAY;
+    private WifiDisplaySessionInfo mSessionInfo;
 
     private boolean mPendingStatusChangeBroadcast;
     private boolean mPendingNotificationUpdate;
@@ -204,6 +206,36 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         return false;
     }
 
+    public void requestPauseLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "requestPauseLocked");
+        }
+
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDisplayController != null) {
+                    mDisplayController.requestPause();
+                }
+            }
+        });
+      }
+
+    public void requestResumeLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "requestResumeLocked");
+        }
+
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDisplayController != null) {
+                    mDisplayController.requestResume();
+                }
+            }
+        });
+    }
+
     public void requestDisconnectLocked() {
         if (DEBUG) {
             Slog.d(TAG, "requestDisconnectedLocked");
@@ -267,7 +299,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         if (mCurrentStatus == null) {
             mCurrentStatus = new WifiDisplayStatus(
                     mFeatureState, mScanState, mActiveDisplayState,
-                    mActiveDisplay, mDisplays);
+                    mActiveDisplay, mDisplays, mSessionInfo);
         }
 
         if (DEBUG) {
@@ -576,6 +608,14 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                     mActiveDisplay = display;
                     scheduleStatusChangedBroadcastLocked();
                 }
+            }
+        }
+
+        @Override
+        public void onDisplaySessionInfo(WifiDisplaySessionInfo sessionInfo) {
+            synchronized (getSyncRoot()) {
+                mSessionInfo = sessionInfo;
+                scheduleStatusChangedBroadcastLocked();
             }
         }
 
