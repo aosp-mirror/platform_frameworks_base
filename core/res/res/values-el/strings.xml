@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Επιτρέπει στην εφαρμογή την εγγραφή ήχου με το μικρόφωνο. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να εγγράφει ήχο ανά πάσα στιγμή χωρίς την έγκρισή σας."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"λήψη φωτογραφιών και βίντεο"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Επιτρέπει στην εφαρμογή τη λήψη φωτογραφιών και βίντεο με τη φωτογραφική μηχανή. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να χρησιμοποιεί τη φωτογραφική μηχανή ανά πάσα στιγμή χωρίς την έγκρισή σας."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"απενεργοποίηση ένδειξης LED μετάδοσης όταν χρησιμοποιείται η φωτογραφική μηχανή"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Επιτρέπει σε μια προεγκατεστημένη εφαρμογή συστήματος να απενεργοποιήσει την ένδειξη LED χρήσης της φωτογραφικής μηχανής."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"μόνιμη απενεργοποίηση του tablet"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"μόνιμη απενεργοποίηση τηλεφώνου"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Επιτρέπει στην εφαρμογή τη μόνιμη απενεργοποίηση όλων των λειτουργιών του tablet, το οποίο είναι εξαιρετικά επικίνδυνο."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"τροπ./διαγ. περ. απ. εσ. μνήμ."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Επιτρέπει στην εφαρμογή να τροποποιήσει τα περιεχόμενα των εσωτερικών μέσων αποθήκευσης."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"διαχείριση αποθ.χώρου εγγράφων"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Επιτρέπει στην εφαρμογή τη διαχείριση του αποθηκευτικού χώρου εγγράφων."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"πρόσβ.εξωτ.χωρ. αποθ. όλων των χρηστ."</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση σε εξωτερικό χώρο αποθήκευσης για όλους τους χρήστες."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"πρόσβαση στο σύστημα αρχείων προσωρινής μνήμης"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Επιτρέπει σε μια εφαρμογή τη διαγραφή διαδρομής δεδομένων εξόδου μέσων σε άλλες εξωτερικές συσκευές."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Πρόσβαση στον ασφαλή αποθηκευτικό χώρο με κλείδωμα"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση στον ασφαλή αποθηκευτικό χώρο με κλείδωμα."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Έλεγχος εμφάνισης και απόκρυψης κλειδώματος πληκτρολογίου"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Επιτρέπει σε μια εφαρμογή τον έλεγχο του κλειδώματος πληκτρολογίου."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Αγγίξτε δύο φορές για έλεγχο εστίασης"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Δεν ήταν δυνατή η προσθήκη του γραφικού στοιχείου."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Μετάβαση"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Κάτοχος"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Σφάλμα"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Αυτή η εφαρμογή δεν υποστηρίζει λογαριασμούς για περιορισμένα προφίλ"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Δεν υπάρχει εφαρμογή για τη διαχείριση αυτής της ενέργειας"</string>
     <string name="revoke" msgid="5404479185228271586">"Ανάκληση"</string>
 </resources>

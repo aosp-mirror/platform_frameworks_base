@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite que la aplicación grabe audio con el micrófono. La aplicación puede utilizar este permiso para grabar audio en cualquier momento sin tener la confirmación del usuario."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"realizar fotografías y vídeos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que la aplicación haga fotos o grabe vídeos con la cámara. Este permiso autoriza a la aplicación a utilizar la cámara en cualquier momento sin tu confirmación."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"inhabilitar el indicador LED de transmisión mientras se utiliza la cámara"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite que una aplicación de sistema instalada previamente inhabilite el indicador LED que advierte del uso de la cámara."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"inhabilitar tablet de forma permanente"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"inhabilitar el teléfono de forma permanente"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permite que la aplicación inhabilite todas las funciones del tablet de forma permanente. Este permiso es muy peligroso."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite que la aplicación escriba en la tarjeta SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modificar o eliminar el contenido del almacenamiento de medios interno"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permite que la aplicación modifique el contenido del almacenamiento multimedia interno."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"administrar el almacenamiento de documentos"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Permite que la aplicación administre el almacenamiento de documentos."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"acceder al almacenamiento externo de todos los usuarios"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Permite que la aplicación acceda al almacenamiento externo de todos los usuarios."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"acceder al sistema de archivos almacenado en caché"</string>
@@ -1074,7 +1074,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Completar acción utilizando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"Seleccionar una acción"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acción"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Seleccionar una aplicación para el dispositivo USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Ninguna aplicación puede realizar esta acción."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -1109,7 +1109,7 @@
     <string name="old_app_description" msgid="2082094275580358049">"No iniciar la nueva aplicación"</string>
     <string name="new_app_action" msgid="5472756926945440706">"Iniciar <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Detener la aplicación anterior sin guardar"</string>
-    <string name="sendText" msgid="5209874571959469142">"Seleccionar una acción para el texto"</string>
+    <string name="sendText" msgid="5209874571959469142">"Selecciona una acción para el texto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumen del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volumen multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Reproduciendo a través de Bluetooth"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que la aplicación dirija salidas de medios a otros dispositivos externos."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Acceder al almacenamiento seguro de bloqueos"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permite que una aplicación acceda al almacenamiento seguro de bloqueos."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Controlar cuándo se muestra y se oculta el bloqueo"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permite que una aplicación controle los bloqueos."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se ha podido añadir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1456,7 +1454,7 @@
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desconectar"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Has olvidado el patrón?"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"El patrón es incorrecto."</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"El patrón es incorrecto"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Contraseña incorrecta"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN incorrecto"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Inténtalo de nuevo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Usuario actual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Esta aplicación no admite cuentas de perfiles restringidos"</string>
     <string name="app_not_found" msgid="3429141853498927379">"No se ha encontrado ninguna aplicación que pueda realizar esta acción."</string>
     <string name="revoke" msgid="5404479185228271586">"Revocar"</string>
 </resources>

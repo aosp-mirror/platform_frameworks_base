@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"للسماح للتطبيق بتسجيل الصوت باستخدام الميكروفون. ويتيح هذا الإذن للتطبيق تسجيل الصوت في أي وقت وبدون موافقة منك."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"التقاط صور ومقاطع فيديو"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"للسماح للتطبيق بالتقاط صور ومقاطع فيديو من خلال الكاميرا. ويتيح هذا الإذن للتطبيق استخدام الكاميرا في أي وقت وبدون موافقة منك."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"تعطيل مؤشر LED للإرسال عندما تكون الكاميرا قيد الاستخدام"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"للسماح لتطبيق نظام مثبت مسبقًا لتعطيل مؤشر LED لاستخدام الكاميرا."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"تعطيل الجهاز اللوحي نهائيًا"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"تعطيل الهاتف على الدوام"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"للسماح للتطبيق بتعطيل الجهاز اللوحي بالكامل بشكل دائم. هذا خطير للغاية."</string>
@@ -615,6 +613,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"للسماح للتطبيق بالكتابة إلى بطاقة SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"تعديل/حذف محتويات وحدة تخزين الوسائط الداخلية"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"للسماح للتطبيق بتعديل محتويات وحدة تخزين الوسائط الداخلية."</string>
+    <!-- no translation found for permlab_manageDocs (5778318598448849829) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDocs (8704323176914121484) -->
+    <skip />
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"الوصول إلى سعة التخزين الخارجية لجميع المستخدمين"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"للسماح للتطبيق بالدخول إلى سعة التخزين الخارجية لجميع المستخدمين."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"الدخول إلى نظام ملفات ذاكرة التخزين المؤقت"</string>
@@ -1259,10 +1261,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"للسماح للتطبيق بتوجيه إخراج الوسائط إلى أجهزة خارجية أخرى."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"الدخول إلى التخزين المحمي بقفل المفاتيح"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"السماح لأحد التطبيقات بالدخول إلى التخزين المحمي بقفل المفاتيح."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"التحكم في عرض وإخفاء قفل المفاتيح"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"للسماح لأحد التطبيقات بالتحكم في قفل المفاتيح."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"المس مرتين للتحكم في التكبير/التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"تنفيذ"</string>
@@ -1499,8 +1499,7 @@
     <string name="user_switched" msgid="3768006783166984410">"المستخدم الحالي <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"المالك"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خطأ"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"هذا التطبيق لا يتوافق مع حسابات الملفات الشخصية المقيدة"</string>
     <string name="app_not_found" msgid="3429141853498927379">"لم يتم العثور على تطبيق يمكنه التعامل مع هذا الإجراء."</string>
     <string name="revoke" msgid="5404479185228271586">"إلغاء"</string>
 </resources>

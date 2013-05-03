@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite aplicaţiei să efectueze înregistrări audio cu ajutorul microfonului. Cu această permisiune aplicaţia efectuează oricând înregistrări audio fără confirmare."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"realizarea de fotografii şi videoclipuri"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite aplicaţiei să realizeze fotografii şi videoclipuri cu camera foto. Cu această permisiune aplicaţia utilizează camera foto oricând şi fără confirmare."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"dezactivează ledul care indică când este utilizată camera foto"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite unei aplicații de sistem preinstalate să dezactiveze ledul care indică utilizarea camerei foto."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"dezactivarea permanentă a computerului tablet PC"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"dezactivare permanentă a telefonului"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permite aplicaţiei să dezactiveze definitiv întreaga tabletă. Acest lucru este foarte periculos."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite aplicaţiei să scrie pe cardul SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./şterg. conţinutul media stocat intern"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permite aplicaţiei să modifice conţinutul stocării media interne."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"gestionare stocare documente"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Permite aplicației să gestioneze stocarea documentelor."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"acces. stoc. ext. pt. toţi utilizat."</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Permite aplicaţiei să acceseze stocarea externă pentru toţi utilizatorii."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accesare sistem de fişiere cache"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite unei aplicaţii să direcţioneze rezultate media către alte dispozitive externe."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Accesează stocarea securizată când tastatura este blocată"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permite unei aplicații să acceseze stocarea securizată când tastatura este blocată."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Stabilește afișarea și ascunderea blocării tastaturii"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permite unei aplicații să controleze blocarea tastaturii."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Atingeţi de două ori pentru a mări/micşora"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nu s-a putut adăuga widgetul."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Accesaţi"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietar"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Eroare"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Această aplicație nu acceptă conturi pentru profilurile cu permisiuni limitate"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nicio aplicație pentru gestionarea acestei acțiuni"</string>
     <string name="revoke" msgid="5404479185228271586">"Revocați"</string>
 </resources>

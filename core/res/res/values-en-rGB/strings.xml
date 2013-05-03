@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Allows the app to record audio with the microphone. This permission allows the app to record audio at any time without your confirmation."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"take pictures and videos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Allows the app to take pictures and videos with the camera. This permission allows the app to use the camera at any time without your confirmation."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"disable transmit indicator LED when camera is in use"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Allows a pre-installed system application to disable the camera use indicator LED."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"permanently disable tablet"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"permanently disable phone"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Allows the app to permanently disable the entire tablet. This is very dangerous."</string>
@@ -570,12 +568,12 @@
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"change background data usage setting"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Allows the app to change the background data usage setting."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"view Wi-Fi connections"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Allows the app to view information about Wi-FI networking, such as whether Wi-FI is enabled and name of connected Wi-FI devices."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Allows the app to view information about Wi-Fi networking, such as whether Wi-Fi is enabled and name of connected Wi-Fi devices."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"connect and disconnect from Wi-Fi"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Allows the app to connect to and disconnect from Wi-FI access points and to make changes to device configuration for Wi-FI networks."</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Allows the app to connect to and disconnect from Wi-Fi access points and to make changes to device configuration for Wi-Fi networks."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"allow Wi-Fi Multicast reception"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Allows the app to receive packets sent to all devices on a Wi-FI network using multicast addresses, not just your tablet. It uses more power than the non-multicast mode."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Allows the app to receive packets sent to all devices on a Wi-FI network using multicast addresses, not just your phone. It uses more power than the non-multicast mode."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your tablet. It uses more power than the non-multicast mode."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your phone. It uses more power than the non-multicast mode."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"access Bluetooth settings"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Allows the app to configure the local Bluetooth tablet and to discover and pair with remote devices."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Allows the app to configure the local Bluetooth phone and to discover and pair with remote devices."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Allows the app to write to the SD card."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modify/delete internal media storage contents"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Allows the app to modify the contents of the internal media storage."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"manage document storage"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Allows the app to manage document storage."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"access external storage of all users"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Allows the app to access external storage for all users."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"access the cache file system"</string>
@@ -1157,7 +1157,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Type the required PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"The tablet will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"The phone will temporarily disconnect from Wi-FI while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"The phone will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Insert character"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sending SMS messages"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; is sending a large number of SMS messages. Do you want to allow this app to continue sending messages?"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Allows an application to route media output to other external devices."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Access keyguard secure storage"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Allows an application to access keyguard secure storage."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Control displaying and hiding keyguard"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Allows an application to control keyguard."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Touch twice for zoom control"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Couldn\'t add widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Go"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Current user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Owner"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"This application does not support accounts for restricted profiles"</string>
     <string name="app_not_found" msgid="3429141853498927379">"No application found to handle this action"</string>
     <string name="revoke" msgid="5404479185228271586">"Revoke"</string>
 </resources>

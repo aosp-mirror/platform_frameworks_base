@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"एप्लिकेशन को माइक्रोफ़ोन द्वारा ऑडियो रिकार्ड करने देता है. यह अनुमति एप्लिकेशन को आपकी पुष्टि के बिना किसी भी समय ऑडियो रिकार्ड करने देती है."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"चित्र और वीडियो लें"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"एप्लिकेशन को कैमरे से चित्र और वीडियो लेने देता है. यह अनुमति एप्लिकेशन को किसी भी समय आपकी पुष्टि के बिना कैमरे का उपयोग करने देती है."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"कैमरा उपयोग में होने पर संचारण संकेतक LED अक्षम करें"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"पहले से इंस्टॉल किए गए सिस्टम एप्लिकेशन को कैमरे को संकेतक LED का उपयोग करने से अक्षम करती है."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"स्‍थायी रूप से टेबलेट अक्षम करें"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"फ़ोन को स्‍थायी रूप से अक्षम करें"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"एप्‍लिकेशन को संपूर्ण टेबलेट को स्‍थायी रूप से अक्षम करने देता है. यह बहुत खतरनाक है."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"एप्लिकेशन को SD कार्ड पर लिखने देता है."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"आंतरिक मीडिया संग्रहण सामग्रियों को बदलें/हटाएं"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"एप्लिकेशन को आंतरिक मीडिया संग्रहण की सामग्री को संशोधित करने देता है."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"दस्तावेज़ संग्रहण प्रबंधित करें"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"एप्लिकेशन को दस्तावेज़ संग्रहण प्रबंधित करने की अनुमति दें."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"सभी उपयोगकर्ताओं के बाहरी संग्रहण तक पहुंचें"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"एप्लिकेशन को सभी उपयोगकर्ताओं के बाहरी संग्रहण तक पहुंचने दें."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"कैश फ़ाइल सिस्‍टम में पहंचे"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"एप्लिकेशन को मीडिया आउटपुट को अन्य बाहरी उपकरणों पर रूट करने देता है."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"कीगार्ड सुरक्षित संग्रहण एक्सेस करें"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"एप्लिकेशन को कीगार्ड सुरक्षित संग्रहण एक्सेस करने देती है."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"कीगार्ड दिखाना और छिपाना नियंत्रित करें"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"एप्लिकेशन को कीगार्ड नियंत्रित करने देती है."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ज़ूम नियंत्रण के लिए दो बार स्पर्श करें"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट नहीं जोड़ा जा सका."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जाएं"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"यह एप्लिकेशन प्रतिबंधित प्रोफ़ाइल के खातों का समर्थन नहीं करता है"</string>
     <string name="app_not_found" msgid="3429141853498927379">"इस कार्यवाही को प्रबंधित करने के लिए कोई एप्लिकेशन नहीं मिला"</string>
     <string name="revoke" msgid="5404479185228271586">"निरस्‍त करें"</string>
 </resources>

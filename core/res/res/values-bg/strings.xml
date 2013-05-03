@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Разрешава на приложението да записва звук с микрофона. Това разрешение му позволява да го прави по всяко време без потвърждение от ваша страна."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"правене на снимки и видеоклипове"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Разрешава на приложението да прави снимки и видеоклипове с камерата. Това разрешение му позволява да я използва по всяко време без потвърждение от ваша страна."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"деактивиране на светодиодния индикатор за предаване, когато камерата се използва"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Разрешава на предварително инсталирано системно приложение да деактивира светодиодния индикатор за използване на камерата."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"деактивиране на таблета за постоянно"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"деактивиране на телефона за постоянно"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Разрешава на приложението да деактивира целия таблет за постоянно. Това е много опасно."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Разрешава на приложението да записва върху SD картата."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"пром./изтр. на съдърж. на вътр. мултим. хранил."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Разрешава на приложението да променя съдържанието на вътрешното мултимедийно хранилище."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"управл. на хранил. с документи"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Разрешава на приложението да управлява хранилището с документи."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"достъп до външ. хранилище за всички потребители"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Разрешава на приложението достъп до външното хранилище за всички потребители."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"достъп до файловата система на кеша"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Разрешава на приложението да насочва изходящата мултимедия към други външни устройства."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Достъп до надеждното хранилище, свързано с функцията за защита на клавишите"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Позволява на приложението да осъществява достъп до надеждното хранилище, свързано с функцията за защита на клавишите."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Контролиране на показването и скриването на функцията за защита на клавишите"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Разрешава на приложението да контролира функцията за защита на клавишите."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Докоснете двукратно за управление на промяната на мащаба"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Приспособлението не можа да бъде добавено."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Старт"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Собственик"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Това приложение не поддържа профили за потребителски профили с ограничена функционалност"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Няма намерено приложение за извършване на това действие"</string>
     <string name="revoke" msgid="5404479185228271586">"Отмяна"</string>
 </resources>

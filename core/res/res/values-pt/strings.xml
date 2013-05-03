@@ -615,6 +615,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite que o aplicativo grave em seu cartão SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modificar/excluir conteúdos de armazenamento de mídia internos"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permite que o aplicativo modifique o conteúdo da mídia de armazenamento interno."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"gerenciar armaz. de documentos"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Permitir que o aplicativo gerencie o armazenamento de documentos."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"acessar arm. ext. dos usuários"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Permite que o aplicativo acesse o armazenamento externo para todos os usuários."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"acessar o sistema de arquivos de cache"</string>

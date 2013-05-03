@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet à l\'application d\'enregistrer des contenus audio à l\'aide du microphone. Cette autorisation lui donne la possibilité d\'enregistrer du contenu audio à tout moment sans votre consentement."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"désactiver l\'indicateur d\'émission LED lorsque la caméra est en cours d\'utilisation"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permet à une application système préinstallée de désactiver l\'indicateur LED d\'utilisation de la caméra."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"désactiver définitivement la tablette"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"désactiver définitivement le téléphone"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permet à l\'application de désactiver définitivement la tablette. Cette fonctionnalité peut avoir des répercussions très sérieuses."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permet à l\'application de modifier le contenu de la carte SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Modifier/Supprimer contenu mémoire interne"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permet à l\'application de modifier le contenu de la mémoire de stockage multimédia interne."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"gérer stockage des documents"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Permet à l\'application de gérer le stockage des documents."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"Accès stock. ext. tous utilis."</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Permet à l\'application d\'accéder à la mémoire de stockage externe pour tous les utilisateurs."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accéder au système de fichiers en cache"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permet à une application de diriger la sortie multimédia vers d\'autres appareils externes."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Accéder au stockage sécurisé keyguard"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permet à une application d\'accéder au stockage sécurisé keyguard."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Contrôler l\'affichage et le masquage de la protection des touches"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permet à une application de contrôler la protection des touches."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Appuyez deux fois pour régler le zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Impossible d\'ajouter le widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"OK"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propriétaire"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erreur"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Les comptes des profils limités ne sont pas acceptés pour cette application."</string>
     <string name="app_not_found" msgid="3429141853498927379">"Aucune application trouvée pour gérer cette action."</string>
     <string name="revoke" msgid="5404479185228271586">"Révoquer"</string>
 </resources>

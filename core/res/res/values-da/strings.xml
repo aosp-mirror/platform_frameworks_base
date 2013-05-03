@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tillader, at appen kan optage lyd med mikrofonen. Med denne tilladelse kan appen til enhver tid optage lyd uden din bekræftelse."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tag billeder og optag video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillader, at appen kan tage billeder og videoer med kameraet. Med denne tilladelse kan appen til enhver tid bruge kameraet uden din bekræftelse."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"deaktiver sendelysdioden, når kameraet er i brug"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Tillader, at en forudinstalleret systemapplikation deaktiverer lysdioden for brug af kameraet."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"deaktiver tabletcomputeren permanent"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"deaktiver telefonen permanent"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Tillader, at appen kan deaktivere hele din tablet permanent. Dette er meget farligt."</string>
@@ -615,6 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Tillader, at appen kan skrive til SD-kortet."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Rediger/slet internt medielagringsindhold"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Tillader, appen kan ændre indholdet af det interne medielager."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"administrer dokumentlagring"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Tillader, at appen kan administrere dokumentlagring."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"få adgang til alle brugeres eksterne lagre"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Tillader, at appen får adgang til eksterne lagre for alle brugere."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"få adgang til cache-filsystemet"</string>
@@ -1259,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Tillader, at en applikation viderefører medieoutput til andre eksterne enheder."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Få adgang nøglebeskyttet lager"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Tillader, at en applikation får adgang til et nøglebeskyttet lager."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Administrer, om nøglebeskyttelse skal vises eller skjules"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tillader, at en applikation styrer nøglebeskyttelsen."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryk to gange for zoomstyring"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget kunne ikke tilføjes."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gå"</string>
@@ -1499,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Ejer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fejl"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Denne applikation understøtter ikke konti for begrænsede profiler"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Der blev ikke fundet nogen applikation, der kan håndtere denne handling"</string>
     <string name="revoke" msgid="5404479185228271586">"Tilbagekald"</string>
 </resources>

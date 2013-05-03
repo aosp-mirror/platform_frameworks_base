@@ -615,6 +615,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Membenarkan apl menulis ke kad SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"ubh suai/pdm kdg strn mdia dlm"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Membenarkan apl mengubah suai kandungan storan media dalaman."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"urus storan dokumen"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Membenarkan apl mengurus storan dokumen."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"mengakses storan luaran untuk semua pengguna"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Membenarkan apl untuk mengakses storan luaran untuk semua pengguna."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"akses sistem fail cache"</string>
