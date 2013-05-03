@@ -496,8 +496,14 @@ public class SurfaceControl {
         if (displayToken == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
-        int nativeSurface = surface != null ? surface.mNativeObject : 0;
-        nativeSetDisplaySurface(displayToken, nativeSurface);
+
+        if (surface != null) {
+            synchronized (surface.mLock) {
+                nativeSetDisplaySurface(displayToken, surface.mNativeObject);
+            }
+        } else {
+            nativeSetDisplaySurface(displayToken, 0);
+        }
     }
 
     public static IBinder createDisplay(String name, boolean secure) {

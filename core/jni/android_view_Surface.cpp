@@ -55,8 +55,7 @@ static const char* const OutOfResourcesException =
 static struct {
     jclass clazz;
     jfieldID mNativeObject;
-    jfieldID mNativeObjectLock;
-    jfieldID mCanvas;
+    jfieldID mLock;
     jmethodID ctor;
 } gSurfaceClassInfo;
 
@@ -93,7 +92,7 @@ sp<ANativeWindow> android_view_Surface_getNativeWindow(JNIEnv* env, jobject surf
 sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
     sp<Surface> sur;
     jobject lock = env->GetObjectField(surfaceObj,
-            gSurfaceClassInfo.mNativeObjectLock);
+            gSurfaceClassInfo.mLock);
     if (env->MonitorEnter(lock) == JNI_OK) {
         sur = reinterpret_cast<Surface *>(
                 env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeObject));
@@ -200,12 +199,13 @@ static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCa
   SkSafeUnref(previousCanvas);
 }
 
-static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObject, jobject dirtyRectObj) {
+static void nativeLockCanvas(JNIEnv* env, jclass clazz,
+        jint nativeObject, jobject canvasObj, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
         doThrowIAE(env);
-        return NULL;
+        return;
     }
 
     Rect dirtyRect;
@@ -226,11 +226,10 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
                 OutOfResourcesException :
                 "java/lang/IllegalArgumentException";
         jniThrowException(env, exception, NULL);
-        return NULL;
+        return;
     }
 
     // Associate a SkCanvas object to this surface
-    jobject canvasObj = env->GetObjectField(surfaceObj, gSurfaceClassInfo.mCanvas);
     env->SetIntField(canvasObj, gCanvasClassInfo.mSurfaceFormat, outBuffer.format);
 
     SkBitmap bitmap;
@@ -259,17 +258,10 @@ static jobject nativeLockCanvas(JNIEnv* env, jobject surfaceObj, jint nativeObje
         env->SetIntField(dirtyRectObj, gRectClassInfo.right,  dirtyRect.right);
         env->SetIntField(dirtyRectObj, gRectClassInfo.bottom, dirtyRect.bottom);
     }
-
-    return canvasObj;
 }
 
-static void nativeUnlockCanvasAndPost(JNIEnv* env, jobject surfaceObj, jint nativeObject, jobject canvasObj) {
-    jobject ownCanvasObj = env->GetObjectField(surfaceObj, gSurfaceClassInfo.mCanvas);
-    if (!env->IsSameObject(ownCanvasObj, canvasObj)) {
-        doThrowIAE(env);
-        return;
-    }
-
+static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
+        jint nativeObject, jobject canvasObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
     if (!isSurfaceValid(surface)) {
         return;
@@ -288,8 +280,8 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jobject surfaceObj, jint nati
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCopyFrom(JNIEnv* env, jclass clazz,
-        jint nativeObject, jint surfaceControlNativeObj) {
+static jint nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
+        jint surfaceControlNativeObj) {
     /*
      * This is used by the WindowManagerService just after constructing
      * a Surface and is necessary for returning the Surface reference to
@@ -297,17 +289,11 @@ static jint nativeCopyFrom(JNIEnv* env, jclass clazz,
      */
 
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
-    sp<Surface> other(ctrl->getSurface());
-    if (other != NULL) {
-        other->incStrong(&sRefBaseOwner);
+    sp<Surface> surface(ctrl->getSurface());
+    if (surface != NULL) {
+        surface->incStrong(&sRefBaseOwner);
     }
-
-    sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
-    if (sur != NULL) {
-        sur->decStrong(&sRefBaseOwner);
-    }
-
-    return int(other.get());
+    return reinterpret_cast<jint>(surface.get());
 }
 
 static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
@@ -368,12 +354,12 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeIsValid },
     {"nativeIsConsumerRunningBehind", "(I)Z",
             (void*)nativeIsConsumerRunningBehind },
-    {"nativeLockCanvas", "(ILandroid/graphics/Rect;)Landroid/graphics/Canvas;",
+    {"nativeLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)V",
             (void*)nativeLockCanvas },
     {"nativeUnlockCanvasAndPost", "(ILandroid/graphics/Canvas;)V",
             (void*)nativeUnlockCanvasAndPost },
-    {"nativeCopyFrom", "(II)I",
-            (void*)nativeCopyFrom },
+    {"nativeCreateFromSurfaceControl", "(I)I",
+            (void*)nativeCreateFromSurfaceControl },
     {"nativeReadFromParcel", "(ILandroid/os/Parcel;)I",
             (void*)nativeReadFromParcel },
     {"nativeWriteToParcel", "(ILandroid/os/Parcel;)V",
@@ -389,10 +375,8 @@ int register_android_view_Surface(JNIEnv* env)
     gSurfaceClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
     gSurfaceClassInfo.mNativeObject =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "I");
-    gSurfaceClassInfo.mNativeObjectLock =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObjectLock", "Ljava/lang/Object;");
-    gSurfaceClassInfo.mCanvas =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvas", "Landroid/graphics/Canvas;");
+    gSurfaceClassInfo.mLock =
+            env->GetFieldID(gSurfaceClassInfo.clazz, "mLock", "Ljava/lang/Object;");
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");
 
     clazz = env->FindClass("android/graphics/Canvas");
