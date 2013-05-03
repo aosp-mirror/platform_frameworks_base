@@ -58,4 +58,11 @@ interface IActivityController
      * immediately.
      */
     int appNotResponding(String processName, int pid, String processStats);
+
+    /**
+     * The system process watchdog has detected that the system seems to be
+     * hung.  Return 1 to continue waiting, or -1 to let it continue with its
+     * normal kill.
+     */
+    int systemNotResponding(String msg);
 }
