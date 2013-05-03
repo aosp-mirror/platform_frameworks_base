@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -28,6 +29,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.textservice.SpellCheckerInfo;
+import android.view.textservice.TextServicesManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -357,6 +360,78 @@ public class InputMethodUtils {
         return !subtype.isAuxiliary();
     }
 
+    public static void setNonSelectedSystemImesDisabledUntilUsed(
+            PackageManager packageManager, List<InputMethodInfo> enabledImis) {
+        if (DEBUG) {
+            Slog.d(TAG, "setNonSelectedSystemImesDisabledUntilUsed");
+        }
+        final String[] systemImesDisabledUntilUsed = Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_disabledUntilUsedPreinstalledImes);
+        if (systemImesDisabledUntilUsed == null || systemImesDisabledUntilUsed.length == 0) {
+            return;
+        }
+        // Only the current spell checker should be treated as an enabled one.
+        final SpellCheckerInfo currentSpellChecker =
+                TextServicesManager.getInstance().getCurrentSpellChecker();
+        for (final String packageName : systemImesDisabledUntilUsed) {
+            if (DEBUG) {
+                Slog.d(TAG, "check " + packageName);
+            }
+            boolean enabledIme = false;
+            for (int j = 0; j < enabledImis.size(); ++j) {
+                final InputMethodInfo imi = enabledImis.get(j);
+                if (packageName.equals(imi.getPackageName())) {
+                    enabledIme = true;
+                    break;
+                }
+            }
+            if (enabledIme) {
+                // enabled ime. skip
+                continue;
+            }
+            if (currentSpellChecker != null
+                    && packageName.equals(currentSpellChecker.getPackageName())) {
+                // enabled spell checker. skip
+                if (DEBUG) {
+                    Slog.d(TAG, packageName + " is the current spell checker. skip");
+                }
+                continue;
+            }
+            ApplicationInfo ai = null;
+            try {
+                ai = packageManager.getApplicationInfo(packageName,
+                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS);
+            } catch (NameNotFoundException e) {
+                Slog.w(TAG, "NameNotFoundException: " + packageName, e);
+            }
+            if (ai == null) {
+                // No app found for packageName
+                continue;
+            }
+            final boolean isSystemPackage = (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+            if (!isSystemPackage) {
+                continue;
+            }
+            setDisabledUntilUsed(packageManager, packageName);
+        }
+    }
+
+    private static void setDisabledUntilUsed(PackageManager packageManager, String packageName) {
+        final int state = packageManager.getApplicationEnabledSetting(packageName);
+        if (state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            if (DEBUG) {
+                Slog.d(TAG, "Update state(" + packageName + "): DISABLED_UNTIL_USED");
+            }
+            packageManager.setApplicationEnabledSetting(packageName,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED, 0);
+        } else {
+            if (DEBUG) {
+                Slog.d(TAG, packageName + " is already DISABLED_UNTIL_USED");
+            }
+        }
+    }
+
     /**
      * Utility class for putting and getting settings for InputMethod
      * TODO: Move all putters and getters of settings to this class.
@@ -405,8 +480,7 @@ public class InputMethodUtils {
 
         public void setCurrentUserId(int userId) {
             if (DEBUG) {
-                Slog.d(TAG, "--- Swtich the current user from " + mCurrentUserId + " to "
-                        + userId + ", new ime = " + getSelectedInputMethod());
+                Slog.d(TAG, "--- Swtich the current user from " + mCurrentUserId + " to " + userId);
             }
             // IMMS settings are kept per user, so keep track of current user
             mCurrentUserId = userId;
