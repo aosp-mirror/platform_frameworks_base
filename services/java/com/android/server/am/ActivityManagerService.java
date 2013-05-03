@@ -2871,7 +2871,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (config != null) {
                 r.frozenBeforeDestroy = true;
                 if (!updateConfigurationLocked(config, r, false, false)) {
-                    r.task.stack.resumeTopActivityLocked(null);
+                    mStackSupervisor.resumeTopActivitiesLocked();
                 }
             }
             Binder.restoreCallingIdentity(origId);

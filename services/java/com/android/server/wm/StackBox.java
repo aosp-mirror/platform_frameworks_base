@@ -24,11 +24,10 @@ import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 public class StackBox {
     /** Used with {@link WindowManagerService#createStack}. To left of, lower l/r Rect values. */
-    public static final int TASK_STACK_GOES_BEFORE = 0; // 
+    public static final int TASK_STACK_GOES_BEFORE = 0;
     /** Used with {@link WindowManagerService#createStack}. To right of, higher l/r Rect values. */
     public static final int TASK_STACK_GOES_AFTER = 1;
     /** Used with {@link WindowManagerService#createStack}. Vertical: lower t/b Rect values. */
@@ -39,6 +38,9 @@ public class StackBox {
     public static final int TASK_STACK_GOES_OVER = 4;
     /** Used with {@link WindowManagerService#createStack}. Put on a lower layer on display. */
     public static final int TASK_STACK_GOES_UNDER = 5;
+
+    /** The service */
+    final WindowManagerService mService;
 
     /** The display this box sits in. */
     final DisplayContent mDisplayContent;
@@ -68,13 +70,11 @@ public class StackBox {
     /** Dirty flag. Something inside this or some descendant of this has changed. */
     boolean layoutNeeded;
 
-    /** Used to keep from reallocating a temporary array to hold the list of Tasks below */
-    ArrayList<Task> mTmpTasks = new ArrayList<Task>();
-
     /** Used to keep from reallocating a temporary Rect for propagating bounds to child boxes */
     Rect mTmpRect = new Rect();
 
-    StackBox(DisplayContent displayContent, StackBox parent) {
+    StackBox(WindowManagerService service, DisplayContent displayContent, StackBox parent) {
+        mService = service;
         mDisplayContent = displayContent;
         mParent = parent;
     }
@@ -84,15 +84,6 @@ public class StackBox {
         layoutNeeded = true;
         if (mParent != null) {
             mParent.makeDirty();
-        }
-    }
-
-    /** Propagate #layoutNeeded top down. */
-    void makeClean() {
-        layoutNeeded = false;
-        if (mFirst != null) {
-            mFirst.makeClean();
-            mSecond.makeClean();
         }
     }
 
@@ -132,10 +123,7 @@ public class StackBox {
      * @return true if this is the first child.
      */
     boolean isFirstChild() {
-        if (mParent == null) {
-            return false;
-        }
-        return mParent.mFirst == this;
+        return mParent != null && mParent.mFirst == this;
     }
 
     /** Returns the bounds of the specified TaskStack if it is contained in this StackBox.
@@ -180,7 +168,7 @@ public class StackBox {
         }
 
         // Found it!
-        TaskStack stack = new TaskStack(stackId, mDisplayContent);
+        TaskStack stack = new TaskStack(mService, stackId, mDisplayContent);
         TaskStack firstStack;
         TaskStack secondStack;
         switch (position) {
@@ -213,32 +201,16 @@ public class StackBox {
                 break;
         }
 
-        mFirst = new StackBox(mDisplayContent, this);
+        mFirst = new StackBox(mService, mDisplayContent, this);
         firstStack.mStackBox = mFirst;
         mFirst.mStack = firstStack;
 
-        mSecond = new StackBox(mDisplayContent, this);
+        mSecond = new StackBox(mService, mDisplayContent, this);
         secondStack.mStackBox = mSecond;
         mSecond.mStack = secondStack;
 
         mStack = null;
         return stack;
-    }
-
-    /**
-     * @return List of all Tasks underneath this StackBox. The order is currently mFirst followed
-     * by mSecond putting mSecond Tasks more recent than mFirst Tasks.
-     * TODO: Change to MRU ordering.
-     */
-    ArrayList<Task> getTasks() {
-        mTmpTasks.clear();
-        if (mStack != null) {
-            mTmpTasks.addAll(mStack.getTasks());
-        } else {
-            mTmpTasks.addAll(mFirst.getTasks());
-            mTmpTasks.addAll(mSecond.getTasks());
-        }
-        return mTmpTasks;
     }
 
     /** Return the stackId of the first mFirst StackBox with a non-null mStack */
@@ -303,6 +275,7 @@ public class StackBox {
         if (mStack != null) {
             change = !mBounds.equals(bounds);
             mBounds.set(bounds);
+            mStack.setBounds(bounds);
         } else {
             mTmpRect.set(bounds);
             if (mVertical) {
@@ -324,6 +297,51 @@ public class StackBox {
             }
         }
         return change;
+    }
+
+    void resetAnimationBackgroundAnimator() {
+        if (mStack != null) {
+            mStack.resetAnimationBackgroundAnimator();
+            return;
+        }
+        mFirst.resetAnimationBackgroundAnimator();
+        mSecond.resetAnimationBackgroundAnimator();
+    }
+
+    boolean animateDimLayers() {
+        if (mStack != null) {
+            return mStack.animateDimLayers();
+        }
+        boolean result = mFirst.animateDimLayers();
+        result |= mSecond.animateDimLayers();
+        return result;
+    }
+
+    void resetDimming() {
+        if (mStack != null) {
+            mStack.resetDimmingTag();
+            return;
+        }
+        mFirst.resetDimming();
+        mSecond.resetDimming();
+    }
+
+    boolean isDimming() {
+        if (mStack != null) {
+            return mStack.isDimming();
+        }
+        boolean result = mFirst.isDimming();
+        result |= mSecond.isDimming();
+        return result;
+    }
+
+    void stopDimmingIfNeeded() {
+        if (mStack != null) {
+            mStack.stopDimmingIfNeeded();
+            return;
+        }
+        mFirst.stopDimmingIfNeeded();
+        mSecond.stopDimmingIfNeeded();
     }
 
     public void dump(String prefix, PrintWriter pw) {

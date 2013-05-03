@@ -565,7 +565,6 @@ public class WindowManagerService extends IWindowManager.Stub
         Object mLastWindowFreezeSource = null;
         private Session mHoldScreen = null;
         private boolean mObscured = false;
-        boolean mDimming = false;
         private boolean mSyswin = false;
         private float mScreenBrightness = -1;
         private float mButtonBrightness = -1;
@@ -1869,6 +1868,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 windows.add(foundI, wallpaper);
                 mWindowsChanged = true;
                 changed |= ADJUST_WALLPAPER_LAYERS_CHANGED;
+            }
+        }
+
+        final TaskStack targetStack =
+                mWallpaperTarget == null ? null : mWallpaperTarget.getStack();
+        if ((changed & ADJUST_WALLPAPER_LAYERS_CHANGED) != 0 &&
+                targetStack != null && !targetStack.isHomeStack()) {
+            // If the wallpaper target is not on the home stack then make sure that all windows
+            // from other non-home stacks are above the wallpaper.
+            for (i = foundI - 1; i >= 0; --i) {
+                WindowState win = windows.get(i);
+                if (!win.isVisibleLw()) {
+                    continue;
+                }
+                final TaskStack winStack = win.getStack();
+                if (winStack != null && !winStack.isHomeStack() && winStack != targetStack) {
+                    windows.remove(i);
+                    windows.add(foundI + 1, win);
+                }
             }
         }
 
@@ -3591,9 +3609,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (computeScreenConfigurationLocked(mTempConfiguration)) {
                 if (currentConfig.diff(mTempConfiguration) != 0) {
                     mWaitingForConfig = true;
-                    getDefaultDisplayContentLocked().layoutNeeded = true;
+                    final DisplayContent displayContent = getDefaultDisplayContentLocked();
+                    displayContent.layoutNeeded = true;
                     int anim[] = new int[2];
-                    if (mAnimator.isDimmingLocked(Display.DEFAULT_DISPLAY)) {
+                    if (displayContent.isDimming()) {
                         anim[0] = anim[1] = 0;
                     } else {
                         mPolicy.selectRotationAnimationLw(anim);
@@ -3696,13 +3715,15 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Call while in a Surface transaction. */
     void setFocusedStackLayer() {
         mFocusedStackLayer = 0;
-        final WindowList windows = mFocusedApp.allAppWindows;
-        for (int i = windows.size() - 1; i >= 0; --i) {
-            final WindowState win = windows.get(i);
-            final int animLayer = win.mWinAnimator.mAnimLayer;
-            if (win.mAttachedWindow == null && win.isVisibleLw() &&
-                    animLayer > mFocusedStackLayer) {
-                mFocusedStackLayer = animLayer + LAYER_OFFSET_FOCUSED_STACK;
+        if (mFocusedApp != null) {
+            final WindowList windows = mFocusedApp.allAppWindows;
+            for (int i = windows.size() - 1; i >= 0; --i) {
+                final WindowState win = windows.get(i);
+                final int animLayer = win.mWinAnimator.mAnimLayer;
+                if (win.mAttachedWindow == null && win.isVisibleLw() &&
+                        animLayer > mFocusedStackLayer) {
+                    mFocusedStackLayer = animLayer + LAYER_OFFSET_FOCUSED_STACK;
+                }
             }
         }
         if (DEBUG_LAYERS) Slog.v(TAG, "Setting FocusedStackFrame to layer=" +
@@ -4793,7 +4814,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent = getDefaultDisplayContentLocked();
             }
             TaskStack stack =
-                    displayContent.createStack(stackId, relativeStackId, position, weight);
+                    displayContent.createStack(this, stackId, relativeStackId, position, weight);
             mStackIdToStack.put(stackId, stack);
             displayContent.moveStack(stack, true);
         }
@@ -5826,9 +5847,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
         mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
-        getDefaultDisplayContentLocked().layoutNeeded = true;
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        displayContent.layoutNeeded = true;
         final int[] anim = new int[2];
-        if (mAnimator.isDimmingLocked(Display.DEFAULT_DISPLAY)) {
+        if (displayContent.isDimming()) {
             anim[0] = anim[1] = 0;
         } else {
             mPolicy.selectRotationAnimationLw(anim);
@@ -5846,7 +5868,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // the rotation animation for the new rotation.
         computeScreenConfigurationLocked(null);
 
-        final DisplayContent displayContent = getDefaultDisplayContentLocked();
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         if (!inTransaction) {
             if (SHOW_TRANSACTIONS) {
@@ -7912,8 +7933,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 layerChanged = true;
                 anyLayerChanged = true;
             }
-            if (layerChanged && mAnimator.isDimmingLocked(winAnimator)) {
-                // Force an animation pass just to update the mDimAnimator layer.
+            if (layerChanged && w.getStack().isDimming(winAnimator)) {
+                // Force an animation pass just to update the mDimLayer layer.
                 scheduleAnimationLocked();
             }
             if (DEBUG_LAYERS) Slog.v(TAG, "Assign layer " + w + ": "
@@ -8671,11 +8692,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if ((attrs.flags & FLAG_DIM_BEHIND) != 0
                 && w.isDisplayedLw()
                 && !w.mExiting) {
-            mInnerFields.mDimming = true;
             final WindowStateAnimator winAnimator = w.mWinAnimator;
-            if (!mAnimator.isDimmingLocked(winAnimator)) {
+            final TaskStack stack = w.getStack();
+            stack.setDimmingTag();
+            if (!stack.isDimming(winAnimator)) {
                 if (localLOGV) Slog.v(TAG, "Win " + w + " start dimming.");
-                startDimmingLocked(winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount);
+                stack.startDimmingIfNeeded(winAnimator);
             }
         }
     }
@@ -8844,8 +8866,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 } while (displayContent.pendingLayoutChanges != 0);
 
                 mInnerFields.mObscured = false;
-                mInnerFields.mDimming = false;
                 mInnerFields.mSyswin = false;
+                displayContent.resetDimming();
 
                 // Only used if default window
                 final boolean someoneLosingFocus = !mLosingFocus.isEmpty();
@@ -8862,7 +8884,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         handleNotObscuredLocked(w, currentTime, innerDw, innerDh);
                     }
 
-                    if (!mInnerFields.mDimming) {
+                    if (!w.getStack().testDimmingTag()) {
                         handleFlagDimBehind(w, innerDw, innerDh);
                     }
 
@@ -9005,9 +9027,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDisplayManagerService.setDisplayHasContent(displayId, hasUniqueContent,
                         true /* inTraversal, must call performTraversalInTrans... below */);
 
-                if (!mInnerFields.mDimming && mAnimator.isDimmingLocked(displayId)) {
-                    stopDimmingLocked(displayId);
-                }
+                getDisplayContentLocked(displayId).stopDimmingIfNeeded();
 
                 if (updateAllDrawn) {
                     updateAllDrawnLocked(displayContent);
@@ -9415,14 +9435,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void startDimmingLocked(final WindowStateAnimator winAnimator, final float target) {
-        mAnimator.setDimWinAnimatorLocked(winAnimator.mWin.getDisplayId(), winAnimator);
-    }
-
-    void stopDimmingLocked(int displayId) {
-        mAnimator.setDimWinAnimatorLocked(displayId, null);
-    }
-
     private boolean needsLayout() {
         DisplayContentsIterator iterator = new DisplayContentsIterator();
         while (iterator.hasNext()) {
@@ -9466,6 +9478,24 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return doRequest;
+    }
+
+    /** If a window that has an animation specifying a colored background is the current wallpaper
+     * target, then the color goes *below* the wallpaper so we don't cause the wallpaper to
+     * suddenly disappear. */
+    int adjustAnimationBackground(WindowStateAnimator winAnimator) {
+        final WindowState win = winAnimator.mWin;
+        if (mWallpaperTarget == win || mLowerWallpaperTarget == win
+                || mUpperWallpaperTarget == win) {
+            WindowList windows = win.getWindowList();
+            for (int i = windows.size() - 1; i >= 0; --i) {
+                WindowState testWin = windows.get(i);
+                if (testWin.mIsWallpaper) {
+                    return testWin.mWinAnimator.mAnimLayer;
+                }
+            }
+        }
+        return winAnimator.mAnimLayer;
     }
 
     boolean reclaimSomeSurfaceMemoryLocked(WindowStateAnimator winAnimator, String operation,
@@ -9829,7 +9859,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(multidisplay): rotation on main screen only.
             DisplayInfo displayInfo = displayContent.getDisplayInfo();
             // Get rotation animation again, with new top window
-            boolean isDimming = mAnimator.isDimmingLocked(Display.DEFAULT_DISPLAY);
+            boolean isDimming = displayContent.isDimming();
             if (!mPolicy.validateRotationAnimationLw(mExitAnimId, mEnterAnimId, isDimming)) {
                 mExitAnimId = mEnterAnimId = 0;
             }
