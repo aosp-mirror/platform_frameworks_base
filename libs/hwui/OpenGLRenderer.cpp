@@ -21,7 +21,6 @@
 #include <sys/types.h>
 
 #include <SkCanvas.h>
-#include <SkPathMeasure.h>
 #include <SkTypeface.h>
 
 #include <utils/Log.h>
@@ -120,6 +119,7 @@ OpenGLRenderer::OpenGLRenderer():
 
     mFirstSnapshot = new Snapshot;
     mFrameStarted = false;
+    mCountOverdraw = false;
 
     mScissorOptimizationDisabled = false;
 }
@@ -222,6 +222,7 @@ status_t OpenGLRenderer::prepare(bool opaque) {
 
 status_t OpenGLRenderer::prepareDirty(float left, float top,
         float right, float bottom, bool opaque) {
+
     setupFrameState(left, top, right, bottom, opaque);
 
     // Layer renderers will start the frame immediately
@@ -253,7 +254,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 }
 
 status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
-    if (!opaque) {
+    if (!opaque || mCountOverdraw) {
         mCaches.enableScissor();
         mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -333,6 +334,10 @@ void OpenGLRenderer::finish() {
             mCaches.dumpMemoryUsage();
         }
 #endif
+    }
+
+    if (mCountOverdraw) {
+        countOverdraw();
     }
 
     mFrameStarted = false;
@@ -522,6 +527,21 @@ void OpenGLRenderer::renderOverdraw() {
         drawColor(0x7fff0000, SkXfermode::kSrcOver_Mode);
         mCaches.stencil.disable();
     }
+}
+
+void OpenGLRenderer::countOverdraw() {
+    size_t count = mWidth * mHeight;
+    uint32_t* buffer = new uint32_t[count];
+    glReadPixels(0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, &buffer[0]);
+
+    size_t total = 0;
+    for (size_t i = 0; i < count; i++) {
+        total += buffer[i] & 0xff;
+    }
+
+    mOverdraw = total / float(count);
+
+    delete[] buffer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1656,6 +1676,8 @@ void OpenGLRenderer::setupDraw(bool clear) {
     mDescription.hasDebugHighlight = !mCaches.debugOverdraw &&
             mCaches.debugStencilClip == Caches::kStencilShowHighlight &&
             mCaches.stencil.isTestEnabled();
+
+    mDescription.emulateStencil = mCountOverdraw;
 }
 
 void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
@@ -3546,6 +3568,19 @@ void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, f
 
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         ProgramDescription& description, bool swapSrcDst) {
+    if (mCountOverdraw) {
+        if (!mCaches.blend) glEnable(GL_BLEND);
+        if (mCaches.lastSrcMode != GL_ONE || mCaches.lastDstMode != GL_ONE) {
+            glBlendFunc(GL_ONE, GL_ONE);
+        }
+
+        mCaches.blend = true;
+        mCaches.lastSrcMode = GL_ONE;
+        mCaches.lastDstMode = GL_ONE;
+
+        return;
+    }
+
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
 
     if (blend) {

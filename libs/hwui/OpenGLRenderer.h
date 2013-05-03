@@ -192,6 +192,14 @@ public:
      */
     virtual void resume();
 
+    ANDROID_API void setCountOverdrawEnabled(bool enabled) {
+        mCountOverdraw = enabled;
+    }
+
+    ANDROID_API float getOverdraw() {
+        return mCountOverdraw ? mOverdraw : 0.0f;
+    }
+
     ANDROID_API status_t invokeFunctors(Rect& dirty);
     ANDROID_API void detachFunctor(Functor* functor);
     ANDROID_API void attachFunctor(Functor* functor);
@@ -981,6 +989,7 @@ private:
 
     void debugOverdraw(bool enable, bool clear);
     void renderOverdraw();
+    void countOverdraw();
 
     /**
      * Should be invoked every time the glScissor is modified.
@@ -1071,6 +1080,12 @@ private:
 
     // No-ops start/endTiling when set
     bool mSuppressTiling;
+
+
+    // If true, this renderer will setup drawing to emulate
+    // an increment stencil buffer in the color buffer
+    bool mCountOverdraw;
+    float mOverdraw;
 
     // Optional name of the renderer
     String8 mName;

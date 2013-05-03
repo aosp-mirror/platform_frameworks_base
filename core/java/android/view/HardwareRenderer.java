@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.ComponentCallbacks2;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -45,7 +46,6 @@ import javax.microedition.khronos.opengles.GL;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static javax.microedition.khronos.egl.EGL10.*;
@@ -165,15 +165,32 @@ public abstract class HardwareRenderer {
             "debug.hwui.show_layers_updates";
 
     /**
-     * Turn on to show overdraw level.
+     * Controls overdraw debugging.
      *
      * Possible values:
-     * "true", to enable overdraw debugging
      * "false", to disable overdraw debugging
+     * "show", to show overdraw areas on screen
+     * "count", to display an overdraw counter
      *
      * @hide
      */
-    public static final String DEBUG_SHOW_OVERDRAW_PROPERTY = "debug.hwui.show_overdraw";
+    public static final String DEBUG_OVERDRAW_PROPERTY = "debug.hwui.overdraw";
+
+    /**
+     * Value for {@link #DEBUG_OVERDRAW_PROPERTY}. When the property is set to this
+     * value, overdraw will be shown on screen by coloring pixels.
+     *
+     * @hide
+     */
+    public static final String OVERDRAW_PROPERTY_SHOW = "show";
+
+    /**
+     * Value for {@link #DEBUG_OVERDRAW_PROPERTY}. When the property is set to this
+     * value, an overdraw counter will be shown on screen.
+     *
+     * @hide
+     */
+    public static final String OVERDRAW_PROPERTY_COUNT = "count";
 
     /**
      * Turn on to debug non-rectangular clip operations.
@@ -765,6 +782,17 @@ public abstract class HardwareRenderer {
         private static final int PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
         private static final int PROFILE_DRAW_DP_PER_MS = 7;
 
+        private static final String[] VISUALIZERS = {
+                PROFILE_PROPERTY_VISUALIZE_BARS,
+                PROFILE_PROPERTY_VISUALIZE_LINES
+        };
+
+        private static final String[] OVERDRAW = {
+                OVERDRAW_PROPERTY_SHOW,
+                OVERDRAW_PROPERTY_COUNT
+        };
+        private static final int OVERDRAW_TYPE_COUNT = 1;
+
         static EGL10 sEgl;
         static EGLDisplay sEglDisplay;
         static EGLConfig sEglConfig;
@@ -810,7 +838,9 @@ public abstract class HardwareRenderer {
         Paint mProfilePaint;
 
         boolean mDebugDirtyRegions;
-        boolean mShowOverdraw;
+        int mDebugOverdraw = -1;
+        HardwareLayer mDebugOverdrawLayer;
+        Paint mDebugOverdrawPaint;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -829,18 +859,13 @@ public abstract class HardwareRenderer {
             loadSystemProperties(null);
         }
 
-        private static final String[] VISUALIZERS = {
-                PROFILE_PROPERTY_VISUALIZE_BARS,
-                PROFILE_PROPERTY_VISUALIZE_LINES
-        };
-
         @Override
         boolean loadSystemProperties(Surface surface) {
             boolean value;
             boolean changed = false;
 
             String profiling = SystemProperties.get(PROFILE_PROPERTY);
-            int graphType = Arrays.binarySearch(VISUALIZERS, profiling);
+            int graphType = search(VISUALIZERS, profiling);
             value = graphType >= 0;
 
             if (graphType != mProfileVisualizerType) {
@@ -897,11 +922,19 @@ public abstract class HardwareRenderer {
                 }
             }
 
-            value = SystemProperties.getBoolean(
-                    HardwareRenderer.DEBUG_SHOW_OVERDRAW_PROPERTY, false);
-            if (value != mShowOverdraw) {
+            String overdraw = SystemProperties.get(HardwareRenderer.DEBUG_OVERDRAW_PROPERTY);
+            int debugOverdraw = search(OVERDRAW, overdraw);
+            if (debugOverdraw != mDebugOverdraw) {
                 changed = true;
-                mShowOverdraw = value;
+                mDebugOverdraw = debugOverdraw;
+
+                if (mDebugOverdraw != OVERDRAW_TYPE_COUNT) {
+                    if (mDebugOverdrawLayer != null) {
+                        mDebugOverdrawLayer.destroy();
+                        mDebugOverdrawLayer = null;
+                        mDebugOverdrawPaint = null;
+                    }
+                }
             }
 
             if (nLoadProperties()) {
@@ -909,6 +942,13 @@ public abstract class HardwareRenderer {
             }
 
             return changed;
+        }
+
+        private static int search(String[] values, String value) {
+            for (int i = 0; i < values.length; i++) {
+                if (values[i].equals(value)) return i;
+            }
+            return -1;
         }
 
         @Override
@@ -1392,6 +1432,8 @@ public abstract class HardwareRenderer {
                         canvas.restoreToCount(saveCount);
                         view.mRecreateDisplayList = false;
 
+                        debugOverdraw(attachInfo, dirty, canvas, displayList);
+
                         mFrameCount++;
 
                         debugDirtyRegions(dirty, canvas);
@@ -1409,6 +1451,61 @@ public abstract class HardwareRenderer {
                     attachInfo.mIgnoreDirtyState = false;
                 }
             }
+        }
+
+        abstract void countOverdraw(HardwareCanvas canvas);
+        abstract float getOverdraw(HardwareCanvas canvas);
+
+        private void debugOverdraw(View.AttachInfo attachInfo, Rect dirty,
+                HardwareCanvas canvas, DisplayList displayList) {
+
+            if (mDebugOverdraw == OVERDRAW_TYPE_COUNT) {
+                // TODO: Use an alpha layer allocated from a GraphicBuffer
+                // The alpha format will help with rendering performance and
+                // the GraphicBuffer will let us skip the read pixels step
+                if (mDebugOverdrawLayer == null) {
+                    mDebugOverdrawLayer = createHardwareLayer(mWidth, mHeight, true);
+                } else if (mDebugOverdrawLayer.getWidth() != mWidth ||
+                        mDebugOverdrawLayer.getHeight() != mHeight) {
+                    mDebugOverdrawLayer.resize(mWidth, mHeight);
+                }
+
+                if (!mDebugOverdrawLayer.isValid()) {
+                    mDebugOverdraw = -1;
+                    return;
+                }
+
+                HardwareCanvas layerCanvas = mDebugOverdrawLayer.start(canvas, dirty);
+                countOverdraw(layerCanvas);
+                final int restoreCount = layerCanvas.save();
+                layerCanvas.drawDisplayList(displayList, null, DisplayList.FLAG_CLIP_CHILDREN);
+                layerCanvas.restoreToCount(restoreCount);
+                mDebugOverdrawLayer.end(canvas);
+
+                float overdraw = getOverdraw(layerCanvas);
+                DisplayMetrics metrics = attachInfo.mRootView.getResources().getDisplayMetrics();
+
+                drawOverdrawCounter(canvas, overdraw, metrics.density);
+            }
+        }
+
+        private void drawOverdrawCounter(HardwareCanvas canvas, float overdraw, float density) {
+            final String text = String.format("%.2fx", overdraw);
+            final Paint paint = setupPaint(density);
+            // HSBtoColor will clamp the values in the 0..1 range
+            paint.setColor(Color.HSBtoColor(0.28f - 0.28f * overdraw / 3.5f, 0.8f, 1.0f));
+
+            canvas.drawText(text, density * 4.0f, mHeight - paint.getFontMetrics().bottom, paint);
+        }
+
+        private Paint setupPaint(float density) {
+            if (mDebugOverdrawPaint == null) {
+                mDebugOverdrawPaint = new Paint();
+                mDebugOverdrawPaint.setAntiAlias(true);
+                mDebugOverdrawPaint.setShadowLayer(density * 3.0f, 0.0f, 0.0f, 0xff000000);
+                mDebugOverdrawPaint.setTextSize(density * 20.0f);
+            }
+            return mDebugOverdrawPaint;
         }
 
         private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {
@@ -2016,6 +2113,16 @@ public abstract class HardwareRenderer {
         @Override
         public HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque) {
             return new GLES20RenderLayer(width, height, isOpaque);
+        }
+
+        @Override
+        void countOverdraw(HardwareCanvas canvas) {
+            ((GLES20Canvas) canvas).setCountOverdrawEnabled(true);
+        }
+
+        @Override
+        float getOverdraw(HardwareCanvas canvas) {
+            return ((GLES20Canvas) canvas).getOverdraw();
         }
 
         @Override
