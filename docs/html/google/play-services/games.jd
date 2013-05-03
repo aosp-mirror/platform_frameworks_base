@@ -1,0 +1,69 @@
+page.title=Google Play Games
+header.hide=1
+
+@jd:body
+
+<div class="landing-banner">
+        
+<div class="col-6">
+  <img src="{@docRoot}images/google/game_services.png" alt="">
+</div>
+<div class="col-6">
+
+<h1 itemprop="name" style="margin-bottom:0;">Google Play Games Platform Services</h1>
+  <p itemprop="description">
+  Google Play Games Platform Services lets you integrate popular gaming features such as achievements, leaderboards, and real-time multiplayer gameplay in your apps. Players can sign in using their Google+ identities and share their gaming experience with friends.
+  </p>
+  <p>Visit <a class="external-link"
+    href="https://developers.google.com/games/services/">developers.google.com/games/services</a> for more information about integrating game services into your app.
+</p>
+</div>
+</div>
+
+<div class="landing-docs">
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Key Developer Features</h3>
+    <h4>Drive engagement with leaderboards</h4>
+    <p>Let players compare scores with friends using leaderboards or see how they rank against other players worldwide. Games Platform Services  automatically maintains daily, weekly, and all-time high scores. <a class="external-link" href="https://developers.google.com/games/services/android/leaderboards">Build leaderboards</a>.</p>
+    
+    <h4>Reward players with achievements</h4>
+    <p>Add hidden and incremental achievements to encourage users to explore your game in new and interesting ways. You can use the built-in UI for Android to display achievement progress.
+    <a class="external-link" href="https://developers.google.com/games/services/android/achievements">Add achievements to your game</a>.</p>
+    </a>
+
+    <h4>Create real-time multiplayer games</h4>
+    <p>Make your game more dynamic by letting multiple players compete or cooperate simultaneously. You can use the Games Platform Services API to invite game participants or auto-match players anonymously, and exchange data between game clients. <a class="external-link" href="https://developers.google.com/games/services/android/multiplayer">Develop real-time multiplayer games</a>.</p>
+    
+    <h4>Save game progress to the cloud</h4>
+    <p>Store game data on Google servers using Cloud Save. Synchronize game progress seamlessly across all your users' devices. <a class="external-link" href="https://developers.google.com/games/services/android/cloudsave">Save games in the cloud</a>.</p>
+  </div>
+
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Getting Started</h3>
+    <h4>1. Get the Google Play services SDK</h4>
+    <p>The Games Platform Services API for Android is part of the Google Play services platform.</p>
+    <p>To use game services, <a href="{@docRoot}google/play-services/setup.html">set up</a>
+      the Google Play services SDK. Then, see the <a class="external-link"
+      href="https://developers.google.com/games/services/android/quickstart">
+      Getting Started guide</a> to set up your app.
+    </p>
+            
+    <h4>2. Run the sample</h4>
+    
+    <p>Once you've installed the Google Play services package, <a class="external-link"
+      href="https://developers.google.com/games/services/downloads/">download the game services samples</a> to learn how to use the major components of the Games Platform Services APIs.
+    </p>
+    
+    <h4>3. Read the documentation</h4>
+    
+    <p>Read the <a class="external-link" href="https://developers.google.com/games/services/terms">
+    API Terms of Service</a>.</p> 
+    <p>Detailed documentation for the Games Platform Services is available at <a class="external-link"
+    href="https://developers.google.com/games/services/">developers.google.com/games/services</a>.
+    </p>
+    <p>For quick access while developing your Android apps, the
+      <a href="{@docRoot}reference/com/google/android/gms/games/package-summary.html">Games Platform Services API for Android reference</a> is available here on developer.android.com.</p>
+  </div>
+
+</div>
