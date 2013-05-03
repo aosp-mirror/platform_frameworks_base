@@ -1809,6 +1809,8 @@ public abstract class HardwareRenderer {
         @Override
         void initAtlas() {
             IBinder binder = ServiceManager.getService("assetatlas");
+            if (binder == null) return;
+
             IAssetAtlas atlas = IAssetAtlas.Stub.asInterface(binder);
             try {
                 GraphicBuffer buffer = atlas.getBuffer();
