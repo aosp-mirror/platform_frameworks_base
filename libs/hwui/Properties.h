@@ -71,9 +71,9 @@ enum DebugLevel {
 
 /**
  * Used to enable/disable overdraw debugging. The accepted values are
- * "true" and "false". The default value is "false".
+ * "show", "count" and "false". The default value is "false".
  */
-#define PROPERTY_DEBUG_OVERDRAW "debug.hwui.show_overdraw"
+#define PROPERTY_DEBUG_OVERDRAW "debug.hwui.overdraw"
 
 /**
  * Used to enable/disable non-rectangular clipping debugging.

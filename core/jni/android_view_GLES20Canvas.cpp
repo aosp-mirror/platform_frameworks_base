@@ -185,6 +185,16 @@ static void android_view_GLES20Canvas_setName(JNIEnv* env,
     }
 }
 
+static void android_view_GLES20Canvas_setCountOverdrawEnabled(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jboolean enabled) {
+    renderer->setCountOverdrawEnabled(enabled);
+}
+
+static jfloat android_view_GLES20Canvas_getOverdraw(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer) {
+    return renderer->getOverdraw();
+}
+
 // ----------------------------------------------------------------------------
 // Functor
 // ----------------------------------------------------------------------------
@@ -943,6 +953,9 @@ static JNINativeMethod gMethods[] = {
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
     { "nSetName",           "(ILjava/lang/String;)V",
             (void*) android_view_GLES20Canvas_setName },
+
+    { "nSetCountOverdrawEnabled", "(IZ)V",     (void*) android_view_GLES20Canvas_setCountOverdrawEnabled },
+    { "nGetOverdraw",             "(I)F",      (void*) android_view_GLES20Canvas_getOverdraw },
 
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 

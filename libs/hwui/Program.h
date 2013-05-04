@@ -85,6 +85,7 @@ namespace uirenderer {
 #define PROGRAM_HAS_COLORS 42
 
 #define PROGRAM_HAS_DEBUG_HIGHLIGHT 43
+#define PROGRAM_EMULATE_STENCIL 44
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -163,6 +164,7 @@ struct ProgramDescription {
     float gamma;
 
     bool hasDebugHighlight;
+    bool emulateStencil;
 
     /**
      * Resets this description. All fields are reset back to the default
@@ -275,6 +277,7 @@ struct ProgramDescription {
         if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
         if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
         if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
+        if (emulateStencil) key |= programid(0x1) << PROGRAM_EMULATE_STENCIL;
         return key;
     }
 

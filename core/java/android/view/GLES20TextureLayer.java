@@ -63,6 +63,11 @@ class GLES20TextureLayer extends GLES20Layer {
     }
 
     @Override
+    HardwareCanvas start(Canvas currentCanvas, Rect dirty) {
+        return null;
+    }
+
+    @Override
     void end(Canvas currentCanvas) {
     }
 

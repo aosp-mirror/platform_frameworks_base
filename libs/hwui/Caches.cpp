@@ -152,7 +152,7 @@ bool Caches::initProperties() {
 
     if (property_get(PROPERTY_DEBUG_OVERDRAW, property, NULL) > 0) {
         INIT_LOGD("  Overdraw debug enabled: %s", property);
-        debugOverdraw = !strcmp(property, "true");
+        debugOverdraw = !strcmp(property, "show");
     } else {
         debugOverdraw = false;
     }
