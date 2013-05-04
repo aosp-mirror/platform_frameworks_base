@@ -266,6 +266,9 @@ redirects:
 - from: /training/cloudsync/aesync.html
   to: /google/gcm/index.html
 
+- from: /training/basics/location/...
+  to: /training/location/...
+
 # -------------------- MISC ----------------------
 
 - from: /shareables/...
