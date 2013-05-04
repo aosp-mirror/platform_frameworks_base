@@ -1,0 +1,89 @@
+page.title=Location APIs
+page.tags="location","geofence", "geofencing", "activity recognition", "activity detection", "gps"
+header.hide=1
+@jd:body
+
+
+    <div class="landing-banner">
+
+<div class="col-6">
+    <img src="{@docRoot}images/google/gps-location.png" alt="Location APIs Logo">
+</div>
+
+<div class="col-6">
+
+<h1 itemprop="name" style="margin-bottom:0;">Location APIs</h1>
+<p itemprop="description">
+    The location APIs make it easy for you to build location-aware applications, without needing to
+    focus on the details of the underlying location technology. They also let you minimize
+    power consumption by using all of the capabilities of the device hardware.
+</p>
+
+<p>
+    To get started, first <a href="{@docRoot}google/play-services/setup.html">set up</a>
+    the Google Play services SDK. You can learn how to use the APIs in the training
+    class <a href="{@docRoot}training/basics/location/index.html">Making Your App Location Aware</a>, 
+    and details are available in the <a href="{@docRoot}reference/com/google/android/location/package-summary.html">Location API reference</a>. To look at a code example, <a href="">download the sample app</a>.
+</p>
+</div>
+</div>
+<div class="landing-docs">
+  <h3 style="clear:left">Key Developer Features</h3>
+  <div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+
+
+<h4 style="font-weight:bold">Fused location provider</h4>
+<ul>
+    <li>
+        <em>Simple APIs</em>: Lets you specify high-level needs like "high accuracy" or "low power", instead of
+        having to worry about location providers.
+    </li>
+    <li>
+        <em>Always-on location</em>: Gives your apps immediate access to the best, most recent location.
+    </li>
+    <li>
+        <em>Power-efficiency</em>: Minimizes your app's use of power. Based on all incoming location requests and available sensors, fused location provider chooses the most efficient way to meet those needs.
+    </li>
+    <li>
+        <em>Versatility</em>: Meets a wide range of needs, from foreground uses that need highly accurate
+        location to background uses that need periodic location updates with negligible power impact.
+    </li>
+
+</ul>
+
+<h4 style="font-weight:bold">Geofencing APIs</h4>
+<ul>
+    <li>
+        <em>Simple but powerful APIs</em>: Allows batch addition and removal of geofences. Ability to manage
+        multiple geofences at the same time. Ability to filter alerts for both entry and exit or
+        entry only or exit only.
+    </li>
+    <li>
+        <em>Optimized for battery</em>: Adjusts location updates based on user’s proximity to the geofence
+        and user’s modality (still, walking, driving, and so on).
+    </li>
+</ul>
+</div>
+
+<div class="layout-content-col span-6">
+<h4 style="font-weight:bold">Activity recognition</h4>
+<ul>
+    <li>
+        Uses low-power sensors to recognize the user's current physical activity, such as walking,
+        cycling, or driving, or remaining still.
+    </li>
+    <li>
+        Great for adding movement awareness to location awareness. Apps can adjust the amount of
+        location awareness they provide, based on the current user movement. For example, a
+        navigation app can request more frequent updates when the user is driving.
+    </li>
+    <li>
+        Features for advanced applications: For advanced applications that want to do their own
+        post-processing, this API also makes available confidence values for each of the activities.
+        It also includes two activities that indicate unreliable measurements: unknown and tilt.
+    </li>
+</ul>
+</div>
+</div>
