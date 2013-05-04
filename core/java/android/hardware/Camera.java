@@ -1146,6 +1146,12 @@ public class Camera {
     private native void enableFocusMoveCallback(int enable);
 
     /**
+     * Send a raw command to the camera driver
+     * @hide
+     */
+    public native void sendRawCommand(int arg1, int arg2, int arg3);
+
+    /**
      * Callback interface used to signal the moment of actual image capture.
      *
      * @see #takePicture(ShutterCallback, PictureCallback, PictureCallback, PictureCallback)
