@@ -1328,4 +1328,7 @@
          applied. -->
     <bool name="config_hasRemovableLid">false</bool>
 
+    <!-- Integer to configure panel auto brightness mode when changed -->
+    <integer name="config_panelAutoBrightnessValue">-1</integer>
+
 </resources>
