@@ -1202,22 +1202,6 @@ android_eglCopyBuffers
     return (EGLBoolean) 0;
 }
 
-/* EGLBoolean eglPresentationTimeANDROID ( EGLDisplay dpy, EGLSurface sur, EGLnsecsANDROID time ) */
-static jboolean
-android_eglPresentationTimeANDROID
-  (JNIEnv *_env, jobject _this, jobject dpy, jobject sur, jlong time) {
-    EGLBoolean _returnValue = (EGLBoolean) 0;
-    EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
-    EGLSurface sur_native = (EGLSurface) fromEGLHandle(_env, eglsurfaceGetHandleID, sur);
-
-    _returnValue = eglPresentationTimeANDROID(
-        (EGLDisplay)dpy_native,
-        (EGLSurface)sur_native,
-        (EGLnsecsANDROID)time
-    );
-    return _returnValue;
-}
-
 static const char *classPathName = "android/opengl/EGL14";
 
 static JNINativeMethod methods[] = {
@@ -1256,7 +1240,6 @@ static JNINativeMethod methods[] = {
 {"eglWaitNative", "(I)Z", (void *) android_eglWaitNative },
 {"eglSwapBuffers", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;)Z", (void *) android_eglSwapBuffers },
 {"eglCopyBuffers", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;I)Z", (void *) android_eglCopyBuffers },
-{"eglPresentationTimeANDROID", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;J)Z", (void *) android_eglPresentationTimeANDROID },
 };
 
 int register_android_opengl_jni_EGL14(JNIEnv *_env)
