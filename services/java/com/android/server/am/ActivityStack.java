@@ -291,8 +291,7 @@ final class ActivityStack {
                             mService.logAppTooSlow(r.app, r.pauseTime,
                                     "pausing " + r);
                         }
-
-                        activityPausedLocked(r != null ? r.appToken : null, true);
+                        activityPausedLocked(r.appToken, true);
                     }
                 } break;
                 case LAUNCH_TICK_MSG: {
@@ -581,7 +580,7 @@ final class ActivityStack {
      * matters on the home stack. All other stacks are single user.
      * @return whether there are any activities for the specified user.
      */
-    final boolean switchUserLocked(int userId, UserStartedState uss) {
+    final boolean switchUserLocked(int userId) {
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
@@ -592,10 +591,9 @@ final class ActivityStack {
 
         // Move userId's tasks to the top.
         boolean haveActivities = false;
-        TaskRecord task = null;
         int index = mTaskHistory.size();
         for (int i = 0; i < index; ++i) {
-            task = mTaskHistory.get(i);
+            TaskRecord task = mTaskHistory.get(i);
             if (task.userId == userId) {
                 haveActivities = true;
                 mTaskHistory.remove(i);
@@ -840,13 +838,6 @@ final class ActivityStack {
         }
     }
 
-    final void activityResumedLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forToken(token);
-        if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; dropping state of: " + r);
-        r.icicle = null;
-        r.haveState = false;
-    }
-
     final void activityPausedLocked(IBinder token, boolean timeout) {
         if (DEBUG_PAUSE) Slog.v(
             TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
@@ -1065,8 +1056,7 @@ final class ActivityStack {
         boolean showHomeBehindStack = false;
         boolean behindFullscreen = !mStackSupervisor.isFrontStack(this) &&
                 !(forceHomeShown && isHomeStack());
-        int taskNdx;
-        for (taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
@@ -2214,7 +2204,7 @@ final class ActivityStack {
 
             // If this activity is fullscreen, set up to hide those under it.
             if (DEBUG_VISBILITY) Slog.v(TAG, "Idle activity for " + res);
-            ensureActivitiesVisibleLocked(null, 0);
+            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
         }
 
         return res;
@@ -3428,7 +3418,7 @@ final class ActivityStack {
                 // activities are running, taking care of restarting this
                 // process.
                 if (hasVisibleActivities) {
-                    ensureActivitiesVisibleLocked(null, 0);
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                 }
             }
         }

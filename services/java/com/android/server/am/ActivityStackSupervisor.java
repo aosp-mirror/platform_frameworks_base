@@ -52,6 +52,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -84,6 +85,7 @@ public class ActivityStackSupervisor {
     static final boolean DEBUG_APP = DEBUG || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG || false;
     static final boolean DEBUG_STATES = DEBUG || false;
+    static final boolean DEBUG_IDLE = DEBUG || false;
 
     public static final int HOME_STACK_ID = 0;
 
@@ -347,10 +349,11 @@ public class ActivityStackSupervisor {
                               + hr.intent.getComponent().flattenToShortString(), e);
                         throw e;
                     }
-                } else {
-                    stack.ensureActivitiesVisibleLocked(hr, null, processName, 0, false);
                 }
             }
+        }
+        if (!didSomething) {
+            ensureActivitiesVisibleLocked(null, 0);
         }
         return didSomething;
     }
@@ -1637,6 +1640,8 @@ public class ActivityStackSupervisor {
 
         ActivityRecord r = ActivityRecord.forToken(token);
         if (r != null) {
+            if (DEBUG_IDLE) Slog.d(TAG, "activityIdleInternalLocked: Callers=" +
+                    Debug.getCallers(4));
             mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
             r.finishLaunchTickingLocked();
             res = r.task.stack.activityIdleInternalLocked(token, fromTimeout, config);
@@ -1996,7 +2001,7 @@ public class ActivityStackSupervisor {
         }
 
         mStartingUsers.add(uss);
-        boolean haveActivities = mHomeStack.switchUserLocked(userId, uss);
+        boolean haveActivities = mHomeStack.switchUserLocked(userId);
 
         resumeTopActivitiesLocked();
 
@@ -2211,6 +2216,7 @@ public class ActivityStackSupervisor {
     }
 
     void scheduleIdleTimeoutLocked(ActivityRecord next) {
+        if (DEBUG_IDLE) Slog.d(TAG, "scheduleIdleTimeoutLocked: Callers=" + Debug.getCallers(4));
         Message msg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG, next);
         mHandler.sendMessageDelayed(msg, IDLE_TIMEOUT);
     }
@@ -2220,6 +2226,7 @@ public class ActivityStackSupervisor {
     }
 
     void removeTimeoutsForActivityLocked(ActivityRecord r) {
+        if (DEBUG_IDLE) Slog.d(TAG, "removeTimeoutsForActivity: Callers=" + Debug.getCallers(4));
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
     }
 
@@ -2243,6 +2250,8 @@ public class ActivityStackSupervisor {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case IDLE_TIMEOUT_MSG: {
+                    if (DEBUG_IDLE) Slog.d(TAG, "handleMessage: IDLE_TIMEOUT_MSG: Callers=" +
+                            Debug.getCallers(4));
                     if (mService.mDidDexOpt) {
                         mService.mDidDexOpt = false;
                         Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
