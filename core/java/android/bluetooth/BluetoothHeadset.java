@@ -815,27 +815,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Notify Headset of phone roam state change.
-     * This is a backdoor for phone app to call BluetoothHeadset since
-     * there is currently not a good way to get roaming state change outside
-     * of phone app.
-     *
-     * @hide
-     */
-    public void roamChanged(boolean roaming) {
-        if (mService != null && isEnabled()) {
-            try {
-                mService.roamChanged(roaming);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-    }
-
-    /**
      * Send Headset of CLCC response
      *
      * @hide
