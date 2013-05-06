@@ -1711,6 +1711,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         final KeyEventDispatcher mKeyEventDispatcher = new KeyEventDispatcher();
 
+        boolean mWasConnectedAndDied;
+
         // Handler only for dispatching accessibility events since we use event
         // types as message types allowing us to remove messages per event type.
         public Handler mEventDispatchHandler = new Handler(mMainHandler.getLooper()) {
@@ -1865,8 +1867,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
                 UserState userState = getUserStateLocked(mUserId);
                 addServiceLocked(this, userState);
-                if (userState.mBindingServices.contains(mComponentName)) {
+                if (userState.mBindingServices.contains(mComponentName) || mWasConnectedAndDied) {
                     userState.mBindingServices.remove(mComponentName);
+                    mWasConnectedAndDied = false;
                     try {
                        mServiceInterface.setConnection(this, mId);
                        onUserStateChangedLocked(userState);
@@ -2220,7 +2223,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mServiceInterface = null;
         }
 
-        public boolean isInitializedLocked() {
+        public boolean isConnectedLocked() {
             return (mService != null);
         }
 
@@ -2230,9 +2233,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // whose handling the death recipient is unlinked and still get a call
                 // on binderDied since the call was made before we unlink but was
                 // waiting on the lock we held during the force stop handling.
-                if (!isInitializedLocked()) {
+                if (!isConnectedLocked()) {
                     return;
                 }
+                mWasConnectedAndDied = true;
                 mKeyEventDispatcher.flush();
                 UserState userState = getUserStateLocked(mUserId);
                 // The death recipient is unregistered in removeServiceLocked
@@ -2245,7 +2249,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userState.mEnabledServices.remove(mComponentName);
                     userState.destroyUiAutomationService();
                 }
-                onUserStateChangedLocked(userState);
             }
         }
 
