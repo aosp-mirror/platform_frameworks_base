@@ -346,6 +346,8 @@ public final class KeyChain {
             List<X509Certificate> chain = store
                     .getCertificateChain(toCertificate(certificateBytes));
             return chain.toArray(new X509Certificate[chain.size()]);
+        } catch (CertificateException e) {
+            throw new KeyChainException(e);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
         } catch (RuntimeException e) {
