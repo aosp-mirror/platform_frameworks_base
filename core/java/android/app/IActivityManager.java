@@ -377,6 +377,8 @@ public interface IActivityManager extends IInterface {
 
     public void killUid(int uid, String reason) throws RemoteException;
 
+    public void hang(IBinder who, boolean allowRestart) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -638,4 +640,5 @@ public interface IActivityManager extends IInterface {
     int GET_LAUNCHED_FROM_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+163;
     int KILL_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
     int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
+    int HANG_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+166;
 }
