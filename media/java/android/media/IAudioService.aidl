@@ -34,21 +34,23 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
     
-    void adjustVolume(int direction, int flags);
+    void adjustVolume(int direction, int flags, String callingPackage);
 
-    oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction);
+    oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
+            String callingPackage);
 
-    void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags);
+    void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
+            String callingPackage);
 
-    void adjustStreamVolume(int streamType, int direction, int flags);
+    void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
 
-    void adjustMasterVolume(int direction, int flags);
+    void adjustMasterVolume(int direction, int flags, String callingPackage);
 
-    void setStreamVolume(int streamType, int index, int flags);
+    void setStreamVolume(int streamType, int index, int flags, String callingPackage);
 
     oneway void setRemoteStreamVolume(int index);
 
-    void setMasterVolume(int index, int flags);
+    void setMasterVolume(int index, int flags, String callingPackage);
     
     void setStreamSolo(int streamType, boolean state, IBinder cb);
    	

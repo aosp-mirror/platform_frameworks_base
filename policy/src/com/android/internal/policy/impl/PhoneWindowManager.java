@@ -3567,7 +3567,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 keycode == KeyEvent.KEYCODE_VOLUME_UP
                             ? AudioManager.ADJUST_RAISE
                             : AudioManager.ADJUST_LOWER,
-                    0);
+                    0,
+                    mContext.getBasePackageName());
         } catch (RemoteException e) {
             Log.w(TAG, "IAudioService.adjustStreamVolume() threw RemoteException " + e);
         } finally {

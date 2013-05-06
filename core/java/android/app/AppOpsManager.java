@@ -95,8 +95,17 @@ public class AppOpsManager {
     public static final int OP_PLAY_AUDIO = 28;
     public static final int OP_READ_CLIPBOARD = 29;
     public static final int OP_WRITE_CLIPBOARD = 30;
+    public static final int OP_TAKE_MEDIA_BUTTONS = 31;
+    public static final int OP_TAKE_AUDIO_FOCUS = 32;
+    public static final int OP_AUDIO_MASTER_VOLUME = 33;
+    public static final int OP_AUDIO_VOICE_VOLUME = 34;
+    public static final int OP_AUDIO_RING_VOLUME = 35;
+    public static final int OP_AUDIO_MEDIA_VOLUME = 36;
+    public static final int OP_AUDIO_ALARM_VOLUME = 37;
+    public static final int OP_AUDIO_NOTIFICATION_VOLUME = 38;
+    public static final int OP_AUDIO_BLUETOOTH_VOLUME = 39;
     /** @hide */
-    public static final int _NUM_OP = 31;
+    public static final int _NUM_OP = 40;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -138,6 +147,15 @@ public class AppOpsManager {
             OP_PLAY_AUDIO,
             OP_READ_CLIPBOARD,
             OP_WRITE_CLIPBOARD,
+            OP_TAKE_MEDIA_BUTTONS,
+            OP_TAKE_AUDIO_FOCUS,
+            OP_AUDIO_MASTER_VOLUME,
+            OP_AUDIO_VOICE_VOLUME,
+            OP_AUDIO_RING_VOLUME,
+            OP_AUDIO_MEDIA_VOLUME,
+            OP_AUDIO_ALARM_VOLUME,
+            OP_AUDIO_NOTIFICATION_VOLUME,
+            OP_AUDIO_BLUETOOTH_VOLUME,
     };
 
     /**
@@ -176,6 +194,15 @@ public class AppOpsManager {
             "PLAY_AUDIO",
             "READ_CLIPBOARD",
             "WRITE_CLIPBOARD",
+            "TAKE_MEDIA_BUTTONS",
+            "TAKE_AUDIO_FOCUS",
+            "AUDIO_MASTER_VOLUME",
+            "AUDIO_VOICE_VOLUME",
+            "AUDIO_RING_VOLUME",
+            "AUDIO_MEDIA_VOLUME",
+            "AUDIO_ALARM_VOLUME",
+            "AUDIO_NOTIFICATION_VOLUME",
+            "AUDIO_BLUETOOTH_VOLUME",
     };
 
     /**
@@ -214,6 +241,15 @@ public class AppOpsManager {
             null, // no permission for playing audio
             null, // no permission for reading clipboard
             null, // no permission for writing clipboard
+            null, // no permission for taking media buttons
+            null, // no permission for taking audio focus
+            null, // no permission for changing master volume
+            null, // no permission for changing voice volume
+            null, // no permission for changing ring volume
+            null, // no permission for changing media volume
+            null, // no permission for changing alarm volume
+            null, // no permission for changing notification volume
+            null, // no permission for changing bluetooth volume
     };
 
     /**
