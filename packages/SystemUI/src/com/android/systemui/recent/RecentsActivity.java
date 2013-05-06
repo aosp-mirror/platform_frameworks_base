@@ -127,6 +127,9 @@ public class RecentsActivity extends Activity {
         }
         mShowing = true;
         if (mRecentsPanel != null) {
+            // Call and refresh the recent tasks list in case we didn't preload tasks
+            // or in case we don't get an onNewIntent
+            mRecentsPanel.refreshRecentTasksList();
             mRecentsPanel.refreshViews();
         }
         super.onStart();
