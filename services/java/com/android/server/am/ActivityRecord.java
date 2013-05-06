@@ -54,6 +54,9 @@ import java.util.HashSet;
  * An entry in the history stack, representing an activity.
  */
 final class ActivityRecord {
+    static final String TAG = ActivityManagerService.TAG;
+    static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
+
     final ActivityManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
     final ActivityInfo info; // all about me
@@ -295,10 +298,7 @@ final class ActivityRecord {
 
         @Override public boolean keyDispatchingTimedOut() {
             ActivityRecord activity = weakActivity.get();
-            if (activity != null) {
-                return activity.keyDispatchingTimedOut();
-            }
-            return false;
+            return activity != null && activity.keyDispatchingTimedOut();
         }
 
         @Override public long getKeyDispatchingTimeout() {
@@ -417,10 +417,10 @@ final class ActivityRecord {
             if (intent != null && (aInfo.flags & ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS) != 0) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             }
-            
+
             packageName = aInfo.applicationInfo.packageName;
             launchMode = aInfo.launchMode;
-            
+
             AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
                     realTheme, com.android.internal.R.styleable.Window);
             fullscreen = ent != null && !ent.array.getBoolean(
@@ -429,30 +429,24 @@ final class ActivityRecord {
                     com.android.internal.R.styleable.Window_windowIsTranslucent, false);
             noDisplay = ent != null && ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowNoDisplay, false);
-            
-            if (!_componentSpecified || _launchedFromUid == Process.myUid()
-                    || _launchedFromUid == 0) {
-                // If we know the system has determined the component, then
-                // we can consider this to be a home activity...
-                if (Intent.ACTION_MAIN.equals(_intent.getAction()) &&
-                        _intent.hasCategory(Intent.CATEGORY_HOME) &&
-                        _intent.getCategories().size() == 1 &&
-                        _intent.getData() == null &&
-                        _intent.getType() == null &&
-                        (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                        !ResolverActivity.class.getName().equals(realActivity.getClassName())) {
+
+            // If we know the system has determined the component, then
+            // we can consider this to be a home activity...
+            // Note the last check is so we don't count the resolver
+            // activity as being home...  really, we don't care about
+            // doing anything special with something that comes from
+            // the core framework package.
+            isHomeActivity =
+                    (!_componentSpecified || _launchedFromUid == Process.myUid()
+                            || _launchedFromUid == 0) &&
+                    Intent.ACTION_MAIN.equals(_intent.getAction()) &&
+                    _intent.hasCategory(Intent.CATEGORY_HOME) &&
+                    _intent.getCategories().size() == 1 &&
+                    _intent.getData() == null &&
+                    _intent.getType() == null &&
+                    (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
+                    !ResolverActivity.class.getName().equals(realActivity.getClassName());
                     // This sure looks like a home activity!
-                    // Note the last check is so we don't count the resolver
-                    // activity as being home...  really, we don't care about
-                    // doing anything special with something that comes from
-                    // the core framework package.
-                    isHomeActivity = true;
-                } else {
-                    isHomeActivity = false;
-                }
-            } else {
-                isHomeActivity = false;
-            }
 
             immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
         } else {
@@ -580,7 +574,7 @@ final class ActivityRecord {
         }
         newIntents.add(intent);
     }
-    
+
     /**
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
@@ -714,9 +708,6 @@ final class ActivityRecord {
     }
 
     void updateThumbnail(Bitmap newThumbnail, CharSequence description) {
-        if ((intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
-            // This is a logical break in the task; it repre
-        }
         if (thumbHolder != null) {
             if (newThumbnail != null) {
                 if (ActivityManagerService.DEBUG_THUMBNAILS) Slog.i(ActivityManagerService.TAG,
@@ -764,20 +755,20 @@ final class ActivityRecord {
         // so it is best to leave as-is.
         return app != null && !app.crashing && !app.notResponding;
     }
-    
+
     public void startFreezingScreenLocked(ProcessRecord app, int configChanges) {
         if (mayFreezeScreenLocked(app)) {
             service.mWindowManager.startAppFreezingScreen(appToken, configChanges);
         }
     }
-    
+
     public void stopFreezingScreenLocked(boolean force) {
         if (force || frozenBeforeDestroy) {
             frozenBeforeDestroy = false;
             service.mWindowManager.stopAppFreezingScreen(appToken, force);
         }
     }
-    
+
     public void windowsDrawn() {
         synchronized(service) {
             if (launchTime != 0) {
@@ -817,7 +808,6 @@ final class ActivityRecord {
 
     public void windowsVisible() {
         synchronized(service) {
-            final ActivityStack stack = task.stack;
             mStackSupervisor.reportActivityVisibleLocked(this);
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
@@ -858,7 +848,7 @@ final class ActivityRecord {
                 ActivityManagerService.TAG, "windowsGone(): " + this);
         nowVisible = false;
     }
-    
+
     private ActivityRecord getWaitingHistoryRecordLocked() {
         // First find the real culprit...  if we are waiting
         // for another app to start, then we have paused dispatching
@@ -876,7 +866,7 @@ final class ActivityRecord {
                 r = this;
             }
         }
-        
+
         return r;
     }
 
@@ -889,7 +879,7 @@ final class ActivityRecord {
         }
         return service.inputDispatchingTimedOut(anrApp, r, this, false);
     }
-    
+
     /** Returns the key dispatching timeout for this application token. */
     public long getKeyDispatchingTimeout() {
         synchronized(service) {
@@ -903,7 +893,7 @@ final class ActivityRecord {
      * currently pausing, or is resumed.
      */
     public boolean isInterestingToUserLocked() {
-        return visible || nowVisible || state == ActivityState.PAUSING || 
+        return visible || nowVisible || state == ActivityState.PAUSING ||
                 state == ActivityState.RESUMED;
     }
 
@@ -924,6 +914,13 @@ final class ActivityRecord {
                         + intent.getComponent(), e);
             }
         }
+    }
+
+    static void activityResumedLocked(IBinder token) {
+        final ActivityRecord r = ActivityRecord.forToken(token);
+        if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; dropping state of: " + r);
+        r.icicle = null;
+        r.haveState = false;
     }
 
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
@@ -947,7 +944,7 @@ final class ActivityRecord {
         return null;
     }
 
-    static final ActivityStack getStackLocked(IBinder token) {
+    static ActivityStack getStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
             return r.task.stack;

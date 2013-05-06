@@ -4597,7 +4597,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
-                stack.activityResumedLocked(token);
+                ActivityRecord.activityResumedLocked(token);
             }
         }
         Binder.restoreCallingIdentity(origId);

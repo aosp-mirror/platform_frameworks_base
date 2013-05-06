@@ -5647,14 +5647,16 @@ public class WindowManagerService extends IWindowManager.Stub
             int[] buffer = new int[bm.getWidth() * bm.getHeight()];
             bm.getPixels(buffer, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
             boolean allBlack = true;
+            final int firstColor = buffer[0];
             for (int i = 0; i < buffer.length; i++) {
-                if (buffer[i] != Color.BLACK) {
+                if (buffer[i] != firstColor) {
                     allBlack = false;
                     break;
                 }
             }
             if (allBlack) {
-                Slog.i(TAG, "Screenshot " + appWin + " was all black! mSurfaceLayer=" +
+                Slog.i(TAG, "Screenshot " + appWin + " was monochrome(" +
+                        Integer.toHexString(firstColor) + ")! mSurfaceLayer=" +
                         (appWin != null ? appWin.mWinAnimator.mSurfaceLayer : "null") +
                         " minLayer=" + minLayer + " maxLayer=" + maxLayer);
             }
