@@ -306,10 +306,9 @@ public final class NsdManager {
             switch (message.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                    mConnected.countDown();
                     break;
                 case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
-                    // Ignore
+                    mConnected.countDown();
                     break;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                     Log.e(TAG, "Channel lost");
