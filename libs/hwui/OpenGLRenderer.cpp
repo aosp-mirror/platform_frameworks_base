@@ -3645,7 +3645,7 @@ void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mod
     getAlphaAndModeDirect(paint, alpha,  mode);
     if (mDrawModifiers.mOverrideLayerAlpha < 1.0f) {
         // if drawing a layer, ignore the paint's alpha
-        *alpha = mDrawModifiers.mOverrideLayerAlpha;
+        *alpha = mDrawModifiers.mOverrideLayerAlpha * 255;
     }
     *alpha *= mSnapshot->alpha;
 }
