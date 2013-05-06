@@ -312,7 +312,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"禁止切换应用"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"阻止用户切换到其他应用。"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"获取当前应用的信息"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"允许应用针对目前在屏幕前台运行的应用检索相关隐私信息。"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"允许应用检索目前在屏幕前台运行的应用专有的信息。"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"监控所有应用的启动"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"允许应用监视和控制系统是如何启动活动的。恶意应用可能会完全破坏系统。此权限只有在进行开发时才需要，正常使用情况下绝不需要。"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"发送包删除的广播"</string>
@@ -627,7 +627,7 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允许应用管理网络政策和定义专门针对应用的规则。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改网络使用情况记录方式"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允许该应用修改对于各应用的网络使用情况的统计方式。普通应用不应使用此权限。"</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"查看通知"</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"访问通知"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"允许该应用检索、检查并清除通知，包括其他应用发布的通知。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"绑定到通知侦听器服务"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允许应用绑定到通知侦听器服务的顶级接口（普通应用绝不需要此权限）。"</string>

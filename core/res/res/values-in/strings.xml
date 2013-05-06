@@ -468,7 +468,7 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Memungkinkan aplikasi merekam audio dengan mikrofon. Izin ini memungkinkan aplikasi merekam audio kapan saja tanpa konfirmasi Anda."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Memungkinkan aplikasi mengambil gambar dan video dengan kamera. Izin ini memungkinkan aplikasi menggunakan kamera kapan saja tanpa konfirmasi Anda."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"nonaktifkan transmisi LED indikator saat kamera digunakan"</string>
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"nonaktifkan LED indikator transmisi saat kamera digunakan"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Izinkan aplikasi sistem yang sudah dipasang sebelumnya menonaktifkan LED indikator penggunaan kamera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"noaktifkan tablet secara permanen"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"nonaktifkan ponsel secara permanen"</string>
@@ -613,7 +613,7 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Memungkinkan apl menulis ke kartu SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"ubah/hapus konten penyimpanan media internal"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Mengizinkan apl memodifikasi konten penyimpanan media internal."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"mengelola penyimpanan dokumen"</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"kelola penyimpanan dokumen"</string>
     <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Mengizinkan aplikasi mengelola penyimpanan dokumen."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"akses penyimpanan eksternal"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Izinkan aplikasi mengakses penyimpanan eksternal untuk semua pengguna."</string>

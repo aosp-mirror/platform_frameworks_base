@@ -613,10 +613,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"للسماح للتطبيق بالكتابة إلى بطاقة SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"تعديل/حذف محتويات وحدة تخزين الوسائط الداخلية"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"للسماح للتطبيق بتعديل محتويات وحدة تخزين الوسائط الداخلية."</string>
-    <!-- no translation found for permlab_manageDocs (5778318598448849829) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDocs (8704323176914121484) -->
-    <skip />
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"إدارة السعة التخزينية للمستند"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"السماح للتطبيق بإدارة السعة التخزينية للمستند."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"الوصول إلى سعة التخزين الخارجية لجميع المستخدمين"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"للسماح للتطبيق بالدخول إلى سعة التخزين الخارجية لجميع المستخدمين."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"الدخول إلى نظام ملفات ذاكرة التخزين المؤقت"</string>

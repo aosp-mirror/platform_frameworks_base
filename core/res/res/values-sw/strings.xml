@@ -156,7 +156,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Zima simu"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ripoti ya hitilafu"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Chukua ripoti ya hitilafu"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali yako ya sasa ya kifaa, ili kutuma ujumbe wa barua pepe. Itachukua muda mfupi kuanza ripoti ya hitilafu mpaka itakapokuwa tayari kutumwa; tafadhali vumilia."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali ya kifaa chako kwa sasa, na itume kama barua pepe. Itachukua muda mfupi tangu ripoti ya hitilafu ianze kuzalishwa hadi iwe tayari kutumwa; vumilia."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mtindo wa kimya"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sauti Imezimwa"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sauti imewashwa"</string>
@@ -1497,7 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Mmiliki"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hitilafu"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Programu hii haiwezi kutumiwa na akaunti za wasifu zilizodhibitiwa"</string>
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Programu hii haiwezi kutumiwa na akaunti za wasifu zilizowekewa vikwazo"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Hakuna programu iliyopatikana ili kushughulikia kitendo hiki"</string>
     <string name="revoke" msgid="5404479185228271586">"Batilisha"</string>
 </resources>
