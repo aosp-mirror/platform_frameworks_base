@@ -236,6 +236,15 @@ public final class BatteryService extends Binder {
         }
     }
 
+    /**
+     * Returns a non-zero value if an  unsupported charger is attached.
+     */
+    public int getInvalidCharger() {
+        synchronized (mLock) {
+            return mInvalidCharger;
+        }
+    }
+
     private void shutdownIfNoPowerLocked() {
         // shut down gracefully if our battery is critically low and we are not powered.
         // wait until the system has booted before attempting to display the shutdown dialog.
