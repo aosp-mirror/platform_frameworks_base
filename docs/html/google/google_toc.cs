@@ -27,23 +27,24 @@
       <li><a href="<?cs var:toroot?>google/play-services/setup.html">
           <span class="en">Setup</span></a>
       </li>
-
-      <li><a href="<?cs var:toroot?>google/play-services/auth.html">
-          <span class="en">Authorization</span></a>
+      <li><a href="<?cs var:toroot?>google/play-services/games.html">
+          <span class="en">Games</span></a>
       </li>
-
       <li><a href="<?cs var:toroot?>google/play-services/plus.html">
           <span class="en">Google+</span></a>
       </li>
-
       <li><a href="<?cs var:toroot?>google/play-services/maps.html">
           <span class="en">Google Maps</span></a>
       </li>
-
-       <li><a href="<?cs var:toroot?>google/play-services/games.html">
-          <span class="en">Games</span></a>
+      <li><a href="<?cs var:toroot?>google/play-services/location.html">
+          <span class="en">Location</span></a>
       </li>
-
+      <li><a href="<?cs var:toroot?>google/play-services/gcm.html">
+          <span class="en">GCM</span></a>
+      </li>
+      <li><a href="<?cs var:toroot?>google/play-services/auth.html">
+          <span class="en">Authorization</span></a>
+      </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>reference/gms-packages.html">
