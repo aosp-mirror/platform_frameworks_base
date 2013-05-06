@@ -81,7 +81,6 @@ void PatchCache::clear() {
 void PatchCache::clearCache() {
     LruCache<PatchDescription, Patch*>::Iterator i(mCache);
     while (i.next()) {
-        ALOGD("Delete %p", i.value());
         delete i.value();
     }
     mCache.clear();
