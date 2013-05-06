@@ -299,8 +299,8 @@ void DisplayList::updateMatrix() {
                 if (mWidth != mPrevWidth || mHeight != mPrevHeight) {
                     mPrevWidth = mWidth;
                     mPrevHeight = mHeight;
-                    mPivotX = mPrevWidth / 2;
-                    mPivotY = mPrevHeight / 2;
+                    mPivotX = mPrevWidth / 2.0f;
+                    mPivotY = mPrevHeight / 2.0f;
                 }
             }
             if ((mMatrixFlags & ROTATION_3D) == 0) {
