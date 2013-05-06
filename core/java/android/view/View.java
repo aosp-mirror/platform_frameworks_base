@@ -11764,10 +11764,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Resolve all RTL related properties.
      *
+     * @return true if resolution of RTL properties has been done
+     *
      * @hide
      */
-    public void resolveRtlPropertiesIfNeeded() {
-        if (!needRtlPropertiesResolution()) return;
+    public boolean resolveRtlPropertiesIfNeeded() {
+        if (!needRtlPropertiesResolution()) return false;
 
         // Order is important here: LayoutDirection MUST be resolved first
         if (!isLayoutDirectionResolved()) {
@@ -11788,6 +11790,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             resolveDrawables();
         }
         onRtlPropertiesChanged(getLayoutDirection());
+        return true;
     }
 
     /**
@@ -11840,6 +11843,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @return true if RTL properties need resolution.
+     *
      */
     private boolean needRtlPropertiesResolution() {
         return (mPrivateFlags2 & ALL_RTL_PROPERTIES_RESOLVED) != ALL_RTL_PROPERTIES_RESOLVED;

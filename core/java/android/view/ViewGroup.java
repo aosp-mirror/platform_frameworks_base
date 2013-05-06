@@ -5525,15 +5525,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
-    public void resolveRtlPropertiesIfNeeded() {
-        super.resolveRtlPropertiesIfNeeded();
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.isLayoutDirectionInherited()) {
-                child.resolveRtlPropertiesIfNeeded();
+    public boolean resolveRtlPropertiesIfNeeded() {
+        final boolean result = super.resolveRtlPropertiesIfNeeded();
+        // We dont need to resolve the children RTL properties if nothing has changed for the parent
+        if (result) {
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child.isLayoutDirectionInherited()) {
+                    child.resolveRtlPropertiesIfNeeded();
+                }
             }
         }
+        return result;
     }
 
     /**
