@@ -14571,7 +14571,6 @@ package android.opengl {
     method public static int eglGetError();
     method public static boolean eglInitialize(android.opengl.EGLDisplay, int[], int, int[], int);
     method public static boolean eglMakeCurrent(android.opengl.EGLDisplay, android.opengl.EGLSurface, android.opengl.EGLSurface, android.opengl.EGLContext);
-    method public static boolean eglPresentationTimeANDROID(android.opengl.EGLDisplay, android.opengl.EGLSurface, long);
     method public static int eglQueryAPI();
     method public static boolean eglQueryContext(android.opengl.EGLDisplay, android.opengl.EGLContext, int, int[], int);
     method public static java.lang.String eglQueryString(android.opengl.EGLDisplay, int);
@@ -14708,6 +14707,15 @@ package android.opengl {
   }
 
   public class EGLDisplay extends android.opengl.EGLObjectHandle {
+  }
+
+  public class EGLExt {
+    ctor public EGLExt();
+    method public static boolean eglPresentationTimeANDROID(android.opengl.EGLDisplay, android.opengl.EGLSurface, long);
+    field public static final int EGL_CONTEXT_FLAGS_KHR = 12540; // 0x30fc
+    field public static final int EGL_CONTEXT_MAJOR_VERSION_KHR = 12440; // 0x3098
+    field public static final int EGL_CONTEXT_MINOR_VERSION_KHR = 12539; // 0x30fb
+    field public static final int EGL_OPENGL_ES3_BIT_KHR = 64; // 0x40
   }
 
   public abstract class EGLObjectHandle {
