@@ -392,7 +392,7 @@ int register_android_view_Surface(JNIEnv* env)
     jclass clazz = env->FindClass("android/view/Surface");
     gSurfaceClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
     gSurfaceClassInfo.mNativeObject =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "I");
+            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeSurface", "I");
     gSurfaceClassInfo.mLock =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mLock", "Ljava/lang/Object;");
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");

@@ -499,7 +499,7 @@ public class SurfaceControl {
 
         if (surface != null) {
             synchronized (surface.mLock) {
-                nativeSetDisplaySurface(displayToken, surface.mNativeObject);
+                nativeSetDisplaySurface(displayToken, surface.mNativeSurface);
             }
         } else {
             nativeSetDisplaySurface(displayToken, 0);
