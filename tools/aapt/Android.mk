@@ -24,6 +24,7 @@ aapt_src_files := \
 	Resource.cpp \
     pseudolocalize.cpp \
     SourcePos.cpp \
+	WorkQueue.cpp \
     ZipEntry.cpp \
     ZipFile.cpp
 

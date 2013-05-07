@@ -19,6 +19,7 @@
 
 #include <utils/LruCache.h>
 #include <utils/Vector.h>
+#include <utils/StrongPointer.h>
 
 #include <SkPaint.h>
 

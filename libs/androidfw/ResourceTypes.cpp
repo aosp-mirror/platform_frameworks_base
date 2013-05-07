@@ -24,7 +24,6 @@
 #include <utils/Log.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
-#include <utils/TextOutput.h>
 
 #include <stdlib.h>
 #include <string.h>

@@ -14,7 +14,7 @@
 #include "FileFinder.h"
 #include "CacheUpdater.h"
 
-#include <utils/WorkQueue.h>
+#include "WorkQueue.h"
 
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"

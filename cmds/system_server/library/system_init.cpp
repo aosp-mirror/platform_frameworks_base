@@ -11,7 +11,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
-#include <utils/TextOutput.h>
+#include <binder/TextOutput.h>
 #include <utils/Log.h>
 
 #include <SurfaceFlinger.h>

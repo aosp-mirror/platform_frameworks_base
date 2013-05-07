@@ -22,9 +22,13 @@ commonUtilsSources:= \
     Asset.cpp \
     AssetDir.cpp \
     AssetManager.cpp \
+    misc.cpp \
     ObbFile.cpp \
     ResourceTypes.cpp \
-    StreamingZipInflater.cpp
+    StreamingZipInflater.cpp \
+    ZipFileCRO.cpp \
+    ZipFileRO.cpp \
+    ZipUtils.cpp
 
 # formerly in libui
 commonUiSources:= \

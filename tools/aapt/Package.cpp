@@ -8,10 +8,13 @@
 #include "ResourceTable.h"
 #include "ResourceFilter.h"
 
+#include <androidfw/misc.h>
+
 #include <utils/Log.h>
 #include <utils/threads.h>
 #include <utils/List.h>
 #include <utils/Errors.h>
+#include <utils/misc.h>
 
 #include <sys/types.h>
 #include <dirent.h>
