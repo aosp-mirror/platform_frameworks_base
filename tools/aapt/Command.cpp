@@ -7,6 +7,7 @@
 #include "Bundle.h"
 #include "ResourceFilter.h"
 #include "ResourceTable.h"
+#include "Images.h"
 #include "XMLNode.h"
 
 #include <utils/Log.h>
