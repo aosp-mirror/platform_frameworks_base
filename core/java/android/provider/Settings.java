@@ -4076,6 +4076,13 @@ public final class Settings {
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
         /**
+         * Whether or not to enable the dial pad autocomplete functionality.
+         *
+         * @hide
+         */
+        public static final String DIALPAD_AUTOCOMPLETE = "dialpad_autocomplete";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -4115,7 +4122,8 @@ public final class Settings {
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
-            UI_NIGHT_MODE
+            UI_NIGHT_MODE,
+            DIALPAD_AUTOCOMPLETE
         };
 
         /**
