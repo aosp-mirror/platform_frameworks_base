@@ -93,6 +93,7 @@ public class Watchdog extends Thread {
 
     int mPhonePid;
     IActivityController mController;
+    boolean mAllowRestart = true;
 
     final Calendar mCalendar = Calendar.getInstance();
     int mMinScreenOff = MEMCHECK_DEFAULT_MIN_SCREEN_OFF;
@@ -267,6 +268,12 @@ public class Watchdog extends Thread {
     public void setActivityController(IActivityController controller) {
         synchronized (this) {
             mController = controller;
+        }
+    }
+
+    public void setAllowRestart(boolean allowRestart) {
+        synchronized (this) {
+            mAllowRestart = allowRestart;
         }
     }
 
@@ -467,6 +474,7 @@ public class Watchdog extends Thread {
         boolean waitedHalf = false;
         while (true) {
             final String name;
+            final boolean allowRestart;
             synchronized (this) {
                 long timeout = TIME_TO_WAIT;
                 if (!waitedHalf) {
@@ -510,6 +518,7 @@ public class Watchdog extends Thread {
                 }
 
                 name = describeBlockedCheckersLocked();
+                allowRestart = mAllowRestart;
             }
 
             // If we got here, that means that the system is most likely hung.
@@ -579,7 +588,11 @@ public class Watchdog extends Thread {
             }
 
             // Only kill the process if the debugger is not attached.
-            if (!Debug.isDebuggerConnected()) {
+            if (Debug.isDebuggerConnected()) {
+                Slog.w(TAG, "Debugger connected: Watchdog is *not* killing the system process");
+            } else if (!allowRestart) {
+                Slog.w(TAG, "Restart not allowed: Watchdog is *not* killing the system process");
+            } else {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + name);
                 Slog.w(TAG, "Main thread stack trace:");
                 StackTraceElement[] stackTrace = Looper.getMainLooper().getThread().getStackTrace();
@@ -589,8 +602,6 @@ public class Watchdog extends Thread {
                 Slog.w(TAG, "<End of main thread stack trace>");
                 Process.killProcess(Process.myPid());
                 System.exit(10);
-            } else {
-                Slog.w(TAG, "Debugger connected: Watchdog is *not* killing the system process");
             }
 
             waitedHalf = false;

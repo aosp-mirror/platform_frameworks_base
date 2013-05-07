@@ -7943,6 +7943,45 @@ public final class ActivityManagerService extends ActivityManagerNative
         return killed;
     }
 
+    @Override
+    public void hang(final IBinder who, boolean allowRestart) {
+        if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+        }
+
+        final IBinder.DeathRecipient death = new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                synchronized (this) {
+                    notifyAll();
+                }
+            }
+        };
+
+        try {
+            who.linkToDeath(death, 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "hang: given caller IBinder is already dead.");
+            return;
+        }
+
+        synchronized (this) {
+            Watchdog.getInstance().setAllowRestart(allowRestart);
+            Slog.i(TAG, "Hanging system process at request of pid " + Binder.getCallingPid());
+            synchronized (death) {
+                while (who.isBinderAlive()) {
+                    try {
+                        death.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+            Watchdog.getInstance().setAllowRestart(true);
+        }
+    }
+
     public final void startRunning(String pkg, String cls, String action,
             String data) {
         synchronized(this) {

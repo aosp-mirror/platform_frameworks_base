@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -95,6 +96,7 @@ public class Am extends BaseCommand {
                 "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
                 "       am clear-debug-app\n" +
                 "       am monitor [--gdb <port>]\n" +
+                "       am hang [--allow-restart]\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
@@ -172,6 +174,9 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am monitor: start monitoring for crashes or ANRs.\n" +
                 "    --gdb: start gdbserv on the given port at crash/ANR\n" +
+                "\n" +
+                "am hang: hang the system.\n" +
+                "    --allow-restart: allow watchdog to perform normal system restart\n" +
                 "\n" +
                 "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
                 "\n" +
@@ -265,6 +270,8 @@ public class Am extends BaseCommand {
             runBugReport();
         } else if (op.equals("monitor")) {
             runMonitor();
+        } else if (op.equals("hang")) {
+            runHang();
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
         } else if (op.equals("to-uri")) {
@@ -1318,6 +1325,22 @@ public class Am extends BaseCommand {
 
         MyActivityController controller = new MyActivityController(gdbPort);
         controller.run();
+    }
+
+    private void runHang() throws Exception {
+        String opt;
+        boolean allowRestart = false;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--allow-restart")) {
+                allowRestart = true;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+
+        System.out.println("Hanging the system...");
+        mAm.hang(new Binder(), allowRestart);
     }
 
     private void runScreenCompat() throws Exception {
