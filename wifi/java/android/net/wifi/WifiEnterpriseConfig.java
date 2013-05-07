@@ -87,6 +87,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     private static final String ENGINE_KEY          = "engine";
     private static final String ENGINE_ID_KEY       = "engine_id";
     private static final String PRIVATE_KEY_ID_KEY  = "key_id";
+    private static final String OPP_KEY_CACHING     = "proactive_key_caching";
 
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate mCaCert;
@@ -258,6 +259,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             case Eap.TLS:
             case Eap.TTLS:
                 mFields.put(EAP_KEY, Eap.strings[eapMethod]);
+                mFields.put(OPP_KEY_CACHING, "1");
                 break;
             default:
                 throw new IllegalArgumentException("Unknown EAP method");
