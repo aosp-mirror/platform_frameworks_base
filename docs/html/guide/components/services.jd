@@ -252,19 +252,6 @@ document.</p>
 
 <h2 id="CreatingStartedService">Creating a Started Service</h2>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-  <h2>Targeting Android 1.6 or lower</h2>
-  <p>If you're building an application for Android 1.6 or lower, you need
-to implement {@link android.app.Service#onStart onStart()}, instead of {@link
-android.app.Service#onStartCommand onStartCommand()} (in Android 2.0,
-{@link android.app.Service#onStart onStart()} was deprecated in favor of {@link
-android.app.Service#onStartCommand onStartCommand()}).</p>
-  <p>For more information about providing compatibility with versions of Android older than 2.0, see
-the {@link android.app.Service#onStartCommand onStartCommand()} documentation.</p>
-</div>
-</div>
-
 <p>A started service is one that another component starts by calling {@link
 android.content.Context#startService startService()}, resulting in a call to the service's
 {@link android.app.Service#onStartCommand onStartCommand()} method.</p>
@@ -687,8 +674,11 @@ Intent notificationIntent = new Intent(this, ExampleActivity.class);
 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 notification.setLatestEventInfo(this, getText(R.string.notification_title),
         getText(R.string.notification_message), pendingIntent);
-startForeground(ONGOING_NOTIFICATION, notification);
+startForeground(ONGOING_NOTIFICATION_ID, notification);
 </pre>
+
+<p class="caution"><strong>Caution:</strong> The integer ID you give to {@link
+android.app.Service#startForeground startForeground()} must not be 0.</p>
 
 
 <p>To remove the service from the foreground, call {@link
@@ -696,14 +686,6 @@ android.app.Service#stopForeground stopForeground()}. This method takes a boolea
 whether to remove the status bar notification as well. This method does <em>not</em> stop the
 service. However, if you stop the service while it's still running in the foreground, then the
 notification is also removed.</p>
-
-<p class="note"><strong>Note:</strong> The methods {@link
-android.app.Service#startForeground startForeground()} and {@link
-android.app.Service#stopForeground stopForeground()} were introduced in Android 2.0 (API Level
-5). In order to run your service in the foreground on older versions of the platform, you must
-use the previous {@code setForeground()} method&mdash;see the {@link
-android.app.Service#startForeground startForeground()} documentation for information about how
-to provide backward compatibility.</p>
 
 <p>For more information about notifications, see <a
 href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Creating Status Bar
