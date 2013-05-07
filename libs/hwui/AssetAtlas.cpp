@@ -39,13 +39,17 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int* map, int count) {
 
         createEntries(map, count);
     } else {
+        ALOGW("Could not create atlas image");
+
         delete mImage;
+        mImage = NULL;
     }
 }
 
 void AssetAtlas::terminate() {
     if (mImage) {
         delete mImage;
+        mImage = NULL;
 
         for (size_t i = 0; i < mEntries.size(); i++) {
             delete mEntries.valueAt(i);
