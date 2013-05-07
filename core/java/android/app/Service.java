@@ -633,7 +633,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * 
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
-     * NotificationManager.notify(int, Notification)}.
+     * NotificationManager.notify(int, Notification)}; must not be 0.
      * @param notification The Notification to be displayed.
      * 
      * @see #stopForeground(boolean)
