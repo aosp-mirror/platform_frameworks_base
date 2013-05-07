@@ -36,6 +36,11 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
     private static final int DOWN = 3;
 
     @Override
+    public boolean canSelectArbitrarily() {
+        return true;
+    }
+
+    @Override
     protected boolean handleMovementKey(TextView widget, Spannable buffer, int keyCode,
             int movementMetaState, KeyEvent event) {
         switch (keyCode) {
