@@ -1109,6 +1109,18 @@ public class Am extends BaseCommand {
             }
         }
 
+        @Override
+        public int systemNotResponding(String message)
+                throws RemoteException {
+            synchronized (this) {
+                System.out.println("** ERROR: PROCESS NOT RESPONDING");
+                System.out.println("message: " + message);
+                System.out.println("#");
+                System.out.println("Allowing system to die.");
+                return -1;
+            }
+        }
+
         void killGdbLocked() {
             mGotGdbPrint = false;
             if (mGdbProcess != null) {

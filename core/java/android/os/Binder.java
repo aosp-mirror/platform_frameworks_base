@@ -49,6 +49,11 @@ public class Binder implements IBinder {
     private static final boolean FIND_POTENTIAL_LEAKS = false;
     private static final String TAG = "Binder";
 
+    /**
+     * Control whether dump() calls are allowed.
+     */
+    private static String sDumpDisabled = null;
+
     /* mObject is used by native code, do not remove or rename */
     private int mObject;
     private IInterface mOwner;
@@ -224,7 +229,23 @@ public class Binder implements IBinder {
         }
         return null;
     }
-    
+
+    /**
+     * Control disabling of dump calls in this process.  This is used by the system
+     * process watchdog to disable incoming dump calls while it has detecting the system
+     * is hung and is reporting that back to the activity controller.  This is to
+     * prevent the controller from getting hung up on bug reports at this point.
+     * @hide
+     *
+     * @param msg The message to show instead of the dump; if null, dumps are
+     * re-enabled.
+     */
+    public static void setDumpDisabled(String msg) {
+        synchronized (Binder.class) {
+            sDumpDisabled = msg;
+        }
+    }
+
     /**
      * Default implementation is a stub that returns false.  You will want
      * to override this to do the appropriate unmarshalling of transactions.
@@ -269,7 +290,15 @@ public class Binder implements IBinder {
         FileOutputStream fout = new FileOutputStream(fd);
         PrintWriter pw = new PrintWriter(fout);
         try {
-            dump(fd, pw, args);
+            final String disabled;
+            synchronized (Binder.class) {
+                disabled = sDumpDisabled;
+            }
+            if (disabled == null) {
+                dump(fd, pw, args);
+            } else {
+                pw.println(sDumpDisabled);
+            }
         } finally {
             pw.flush();
         }

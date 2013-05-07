@@ -2920,6 +2920,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         resumeOK = mController.activityResuming(next.packageName);
                     } catch (RemoteException e) {
                         mController = null;
+                        Watchdog.getInstance().setActivityController(null);
                     }
 
                     if (!resumeOK) {
@@ -3413,6 +3414,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (res < 0 && app.pid != MY_PID) Process.killProcess(app.pid);
             } catch (RemoteException e) {
                 mController = null;
+                Watchdog.getInstance().setActivityController(null);
             }
         }
 
@@ -3516,6 +3518,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } catch (RemoteException e) {
                 mController = null;
+                Watchdog.getInstance().setActivityController(null);
             }
         }
 
@@ -7569,6 +7572,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "setActivityController()");
         synchronized (this) {
             mController = controller;
+            Watchdog.getInstance().setActivityController(controller);
         }
     }
 
@@ -8932,6 +8936,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 } catch (RemoteException e) {
                     mController = null;
+                    Watchdog.getInstance().setActivityController(null);
                 }
             }
 

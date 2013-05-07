@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import android.app.IActivityController;
+import android.os.Binder;
+import android.os.RemoteException;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.power.PowerManagerService;
 
@@ -89,6 +92,7 @@ public class Watchdog extends Thread {
     ActivityManagerService mActivity;
 
     int mPhonePid;
+    IActivityController mController;
 
     final Calendar mCalendar = Calendar.getInstance();
     int mMinScreenOff = MEMCHECK_DEFAULT_MIN_SCREEN_OFF;
@@ -257,6 +261,12 @@ public class Watchdog extends Thread {
             if ("com.android.phone".equals(name)) {
                 mPhonePid = pid;
             }
+        }
+    }
+
+    public void setActivityController(IActivityController controller) {
+        synchronized (this) {
+            mController = controller;
         }
     }
 
@@ -548,6 +558,25 @@ public class Watchdog extends Thread {
             try {
                 dropboxThread.join(2000);  // wait up to 2 seconds for it to return.
             } catch (InterruptedException ignored) {}
+
+            IActivityController controller;
+            synchronized (this) {
+                controller = mController;
+            }
+            if (controller != null) {
+                Slog.i(TAG, "Reporting stuck state to activity controller");
+                try {
+                    Binder.setDumpDisabled("Service dumps disabled due to hung system process.");
+                    // 1 = keep waiting, -1 = kill system
+                    int res = controller.systemNotResponding(name);
+                    if (res >= 0) {
+                        Slog.i(TAG, "Activity controller requested to coninue to wait");
+                        waitedHalf = false;
+                        continue;
+                    }
+                } catch (RemoteException e) {
+                }
+            }
 
             // Only kill the process if the debugger is not attached.
             if (!Debug.isDebuggerConnected()) {
