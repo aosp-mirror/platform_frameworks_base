@@ -1254,7 +1254,7 @@ public class ActivityStackSupervisor {
         }
 
         final ActivityStack sourceStack;
-        final TaskRecord sourceTask;
+        TaskRecord sourceTask;
         if (sourceRecord != null) {
             sourceTask = sourceRecord.task;
             sourceStack = sourceTask.stack;
@@ -1540,14 +1540,15 @@ public class ActivityStackSupervisor {
                 }
             }
         } else if (sourceRecord != null) {
-            targetStack = sourceRecord.task.stack;
+            sourceTask = sourceRecord.task;
+            targetStack = sourceTask.stack;
             moveHomeStack(targetStack.isHomeStack());
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
-                ActivityRecord top = sourceRecord.task.performClearTaskLocked(r, launchFlags);
+                ActivityRecord top = sourceTask.performClearTaskLocked(r, launchFlags);
                 keepCurTransition = true;
                 if (top != null) {
                     ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
@@ -1569,8 +1570,7 @@ public class ActivityStackSupervisor {
                 // In this case, we are launching an activity in our own task
                 // that may already be running somewhere in the history, and
                 // we want to shuffle it to the front of the stack if so.
-                final ActivityRecord top =
-                        targetStack.findActivityInHistoryLocked(r, sourceRecord.task);
+                final ActivityRecord top = sourceTask.findActivityInHistoryLocked(r);
                 if (top != null) {
                     final TaskRecord task = top.task;
                     task.moveActivityToFrontLocked(top);
@@ -1590,7 +1590,7 @@ public class ActivityStackSupervisor {
             // An existing activity is starting this new activity, so we want
             // to keep the new one in the same task as the one that is starting
             // it.
-            r.setTask(sourceRecord.task, sourceRecord.thumbHolder, false);
+            r.setTask(sourceTask, sourceRecord.thumbHolder, false);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task);
 
@@ -1644,7 +1644,7 @@ public class ActivityStackSupervisor {
                     Debug.getCallers(4));
             mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
             r.finishLaunchTickingLocked();
-            res = r.task.stack.activityIdleInternalLocked(token, fromTimeout, config);
+            res = r.task.stack.activityIdleInternalLocked(token);
             if (res != null) {
                 if (fromTimeout) {
                     reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
