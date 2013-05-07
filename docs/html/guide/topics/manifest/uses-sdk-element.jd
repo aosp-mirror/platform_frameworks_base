@@ -1,6 +1,5 @@
 page.title=&lt;uses-sdk&gt;
-parent.title=The AndroidManifest.xml File
-parent.link=manifest-intro.html
+page.tags="api levels","sdk version","minsdkversion","targetsdkversion","maxsdkversion"
 @jd:body
 
 
