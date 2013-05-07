@@ -1,0 +1,134 @@
+page.title=Get Started
+page.metaDescription=Get your apps ready for Google Play for Education.
+excludeFromSuggestions=true
+@jd:body
+
+<div style="position:absolute;margin-left: 636px;
+            margin-top:-76px;color:#777;">If you're interested<br>
+            <a href="{@docRoot}distribute/googleplay/edu/contact.html"
+            class="go-link"
+            style="display: block;text-align: right;">SIGN UP</a></div>
+
+<p>If you've got a great app for education or just an idea for one, plan to be a
+part of Google Play for Education to reach even more teachers and students. It's
+easy to participate, and you will be able to offer new or existing Android apps
+using the familiar tools in Google Play.</p>
+
+<p>To get started, review the sections in this document and learn about the
+safety, usability, and quality guidelines that apps should meet. Assess your
+apps against these guidelines and make any adjustments needed. You can use the
+linked resources to help you develop a great app for students that offers
+compelling content and an intuitive user experience on Android tablets.</p>
+
+<h2 id="requirements">Safety First</h2>
+
+<p>To participate, your apps must be designed to be usable and appropriate for
+the K-12 market. The basic requirements that your apps must meet are:</p>
+
+<ol>
+  <li>Apps and the ads they contain must not collect personally identifiable
+information other than user credentials or data required to operate and improve
+the app.</li>
+  <li>Apps must not use student data for purposes unrelated to its educational
+function.</li>
+  <li>Apps must have a content rating of "Everyone" or "Low Maturity" (apps with
+a "Medium Maturity" rating are allowed, if they have that rating solely because
+they allow communication between students).</li>
+  <li>App content, including ads displayed by the app, must be consistent with
+the app's maturity rating. The app must not display any “offensive” content, as
+described in the <a
+href="http://play.google.com/about/developer-content-policy.html">Google Play
+Developer Program Policies</a> and <a
+href="https://support.google.com/googleplay/android-developer/answer/188189">
+content-rating guidelines</a>.</p></li>
+</ol>
+
+
+<h2 id="approved">With the Help of Educators</h2>
+
+<p>App content submitted to Google Play for Education will be reviewed by
+educators who will categorize the apps and align them with <a
+href="http://www.corestandards.org/" class="external-link"
+target="_android">Common Core Standards</a>. This will help make your content
+discoverable in a way that is easy for teachers and administrators. </p>
+
+
+<h2 id="secure">Sold Simply</h2>
+
+<p>Google Play for Education provides a simple and secure environment in which
+educators can buy apps in a way that's easy for schools &mdash; through purchase
+orders. Your apps must support this environment by ensuring that they:</p>
+
+<ul>
+  <li>Sell all content and services through Google Play for Education</li>
+  <li>Permit Google Play to offer teachers limited free trials before purchase
+(through business terms only, no development work is needed)</li>
+</ul>
+
+<p>In addition, it's highly recommended that your apps:</p>
+<ul>
+  <li>Disable in-app purchase in any UI accessible to students.</li>
+</ul>
+
+<h2 id="quality">High Quality and Usability</h2>
+
+<p>Google Play for Education brings educational content to students and teachers
+on Android tablets. Your apps should be designed to perform well and look great
+on Android tablets, and they should offer the best user experience possible.
+</p>
+
+<p>High quality apps are engaging, intuitive, and offer compelling content.
+Google Play for Education will highlight high-quality apps for easy discovery in
+the store. Here are some recommendations for making your app easy for students
+and teachers to enjoy.</p>
+
+<ul>
+  <li>Meet Core app quality guidelines
+    <ul>
+      <li>Follow <a href="{@docRoot}design/index.html">Android Design Guidelines</a>. 
+      Pay special attention to the sections on <a href="{@docRoot}design/patterns/actionbar.html">Action
+      Bar</a>, <a href="{@docRoot}design/patterns/navigation.html">Navigation</a> and <a 
+      href="{@docRoot}design/patterns/pure-android.html">Pure Android</a>.</li>
+      <li>Test your apps against the <a href="{@docRoot}distribute/googleplay/quality/core.html">Core
+      App Quality Guidelines</a>.</li>
+    </ul>
+  </li>
+<li>Meet tablet app quality guidelines
+  <ul>
+   <li>Follow our best practices for tablet app development</li>
+   <li>Review the <a href="{@docRoot}distribute/googleplay/quality/tablet.html">Tablet App
+   Quality Checklist</a> and <a href="http://android-developers.blogspot.com/2012/11/designing-for-tablets-were-here-to-help.html"
+   class="external-link;" target="_android">blog post on designing for tablets</a></li>
+   <li>Check your Optimization Tips in the Google Play Developer Console (if you've already uploaded your app)</li>
+  </ul>
+<li>Strive for simplicity and highest usability for students
+  <ul>
+    <li>Design your app so that teachers and students can use all capabilities of your app without
+    having to sign-in to multiple accounts and remember multiple passwords. </li>
+    <li>For best experience, use Google sign-in in your apps, which provides seamless authentication
+    across apps. <!--Google Account login service and integrate with Google Drive where appropriate. --></li>
+  </ul>
+</li>
+</ul>
+<p>In addition, it's highly recommended that your apps:</p>
+<ul>
+  <li>Disable advertisements in any UI accessible to students.</li>
+</ul>
+
+
+<h2 id="strategies">Strategies for Development</h2>
+
+  <p>If you have an existing educational app in Google Play, the classroom
+environment offered by Google Play for Education presents a slightly different
+set of needs, requirements, and also opportunities.</p> 
+
+  <p>We're working to give you the tools you need to build for the classroom
+environment from a single APK, delivered as a single product to all of your
+users in Google Play. Our goal is to let you customize your app's UI and
+features as minimally or deeply as you need, to provide a simple, intuitive, and
+beautiful learning experience. </p>
+
+  <p>Watch for more information on developer tools coming in the weeks ahead.
+We'll update this page as we roll out tools for you to use. As a starting point,
+we recommend planning your app's design and ensuring its optimization on Nexus
+tablets.</p>
