@@ -470,11 +470,12 @@ public final class GeofenceHardwareImpl {
                     synchronized (mGeofences) {
                         callback = mGeofences.get(geofenceId);
                     }
-                    if (callback == null) return;
 
-                    try {
-                        callback.onGeofenceAdd(geofenceId, msg.arg2);
-                    } catch (RemoteException e) {Log.i(TAG, "Remote Exception:" + e);}
+                    if (callback != null) {
+                        try {
+                            callback.onGeofenceAdd(geofenceId, msg.arg2);
+                        } catch (RemoteException e) {Log.i(TAG, "Remote Exception:" + e);}
+                    }
                     releaseWakeLock();
                     break;
                 case REMOVE_GEOFENCE_CALLBACK:
@@ -482,13 +483,14 @@ public final class GeofenceHardwareImpl {
                     synchronized (mGeofences) {
                         callback = mGeofences.get(geofenceId);
                     }
-                    if (callback == null) return;
 
-                    try {
-                        callback.onGeofenceRemove(geofenceId, msg.arg2);
-                    } catch (RemoteException e) {}
-                    synchronized (mGeofences) {
-                        mGeofences.remove(geofenceId);
+                    if (callback != null) {
+                        try {
+                            callback.onGeofenceRemove(geofenceId, msg.arg2);
+                        } catch (RemoteException e) {}
+                        synchronized (mGeofences) {
+                            mGeofences.remove(geofenceId);
+                        }
                     }
                     releaseWakeLock();
                     break;
@@ -498,11 +500,12 @@ public final class GeofenceHardwareImpl {
                     synchronized (mGeofences) {
                         callback = mGeofences.get(geofenceId);
                     }
-                    if (callback == null) return;
 
-                    try {
-                        callback.onGeofencePause(geofenceId, msg.arg2);
-                    } catch (RemoteException e) {}
+                    if (callback != null) {
+                        try {
+                            callback.onGeofencePause(geofenceId, msg.arg2);
+                        } catch (RemoteException e) {}
+                    }
                     releaseWakeLock();
                     break;
 
@@ -511,11 +514,12 @@ public final class GeofenceHardwareImpl {
                     synchronized (mGeofences) {
                         callback = mGeofences.get(geofenceId);
                     }
-                    if (callback == null) return;
 
-                    try {
-                        callback.onGeofenceResume(geofenceId, msg.arg2);
-                    } catch (RemoteException e) {}
+                    if (callback != null) {
+                        try {
+                            callback.onGeofenceResume(geofenceId, msg.arg2);
+                        } catch (RemoteException e) {}
+                    }
                     releaseWakeLock();
                     break;
 
@@ -530,12 +534,14 @@ public final class GeofenceHardwareImpl {
                             " Transition: " + geofenceTransition.mTransition +
                             " Location: " + geofenceTransition.mLocation + ":" + mGeofences);
 
-                    try {
-                        callback.onGeofenceTransition(
-                                geofenceTransition.mGeofenceId, geofenceTransition.mTransition,
-                                geofenceTransition.mLocation, geofenceTransition.mTimestamp,
-                                GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE);
-                    } catch (RemoteException e) {}
+                    if (callback != null) {
+                        try {
+                            callback.onGeofenceTransition(
+                                    geofenceTransition.mGeofenceId, geofenceTransition.mTransition,
+                                    geofenceTransition.mLocation, geofenceTransition.mTimestamp,
+                                    GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE);
+                        } catch (RemoteException e) {}
+                    }
                     releaseWakeLock();
                     break;
                 case GEOFENCE_CALLBACK_BINDER_DIED:
@@ -572,16 +578,16 @@ public final class GeofenceHardwareImpl {
                     available = (val == GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE ?
                             true : false);
                     callbackList = mCallbacks[GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE];
-                    if (callbackList == null) return;
+                    if (callbackList != null) {
+                        if (DEBUG) Log.d(TAG, "MonitoringSystemChangeCallback: GPS : " + available);
 
-                    if (DEBUG) Log.d(TAG, "MonitoringSystemChangeCallback: GPS : " + available);
-
-                    for (IGeofenceHardwareMonitorCallback c: callbackList) {
-                        try {
-                            c.onMonitoringSystemChange(
-                                    GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE, available,
-                                    location);
-                        } catch (RemoteException e) {}
+                        for (IGeofenceHardwareMonitorCallback c: callbackList) {
+                            try {
+                                c.onMonitoringSystemChange(
+                                        GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE, available,
+                                        location);
+                            } catch (RemoteException e) {}
+                        }
                     }
                     releaseWakeLock();
                     break;
