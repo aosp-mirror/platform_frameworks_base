@@ -9,6 +9,12 @@ redirects:
   to: /about/versions/android-\1
   pattern: True
 
+- from: /about/versions/index.html
+  to: /about/index.html
+
+- from: /about/versions/api-levels.html
+  to: /guide/topics/manifest/uses-sdk-element.html#ApiLevels
+
 - from: /sdk/adding-components.html
   to: /sdk/exploring.html
 
