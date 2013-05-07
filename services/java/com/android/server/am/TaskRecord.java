@@ -383,6 +383,24 @@ class TaskRecord extends ThumbnailHolder {
         return thumbs;
     }
 
+    /**
+     * Find the activity in the history stack within the given task.  Returns
+     * the index within the history at which it's found, or < 0 if not found.
+     */
+    final ActivityRecord findActivityInHistoryLocked(ActivityRecord r) {
+        final ComponentName realActivity = r.realActivity;
+        for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord candidate = mActivities.get(activityNdx);
+            if (candidate.finishing) {
+                continue;
+            }
+            if (candidate.realActivity.equals(realActivity)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         if (numActivities != 0 || rootWasReset || userId != 0) {
             pw.print(prefix); pw.print("numActivities="); pw.print(numActivities);

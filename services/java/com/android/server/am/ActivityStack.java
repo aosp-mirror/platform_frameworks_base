@@ -971,28 +971,28 @@ final class ActivityStack {
 
         if (prev != null) {
             prev.resumeKeyDispatchingLocked();
-        }
 
-        if (prev.app != null && prev.cpuTimeAtResume > 0
-                && mService.mBatteryStatsService.isOnBattery()) {
-            long diff = 0;
-            synchronized (mService.mProcessStatsThread) {
-                diff = mService.mProcessStats.getCpuTimeForPid(prev.app.pid)
-                        - prev.cpuTimeAtResume;
-            }
-            if (diff > 0) {
-                BatteryStatsImpl bsi = mService.mBatteryStatsService.getActiveStatistics();
-                synchronized (bsi) {
-                    BatteryStatsImpl.Uid.Proc ps =
-                            bsi.getProcessStatsLocked(prev.info.applicationInfo.uid,
-                            prev.info.packageName);
-                    if (ps != null) {
-                        ps.addForegroundTimeLocked(diff);
+            if (prev.app != null && prev.cpuTimeAtResume > 0
+                    && mService.mBatteryStatsService.isOnBattery()) {
+                long diff;
+                synchronized (mService.mProcessStatsThread) {
+                    diff = mService.mProcessStats.getCpuTimeForPid(prev.app.pid)
+                            - prev.cpuTimeAtResume;
+                }
+                if (diff > 0) {
+                    BatteryStatsImpl bsi = mService.mBatteryStatsService.getActiveStatistics();
+                    synchronized (bsi) {
+                        BatteryStatsImpl.Uid.Proc ps =
+                                bsi.getProcessStatsLocked(prev.info.applicationInfo.uid,
+                                prev.info.packageName);
+                        if (ps != null) {
+                            ps.addForegroundTimeLocked(diff);
+                        }
                     }
                 }
             }
+            prev.cpuTimeAtResume = 0; // reset it
         }
-        prev.cpuTimeAtResume = 0; // reset it
     }
 
     /**
@@ -1000,7 +1000,7 @@ final class ActivityStack {
      * the resumed state (either by launching it or explicitly telling it),
      * this function updates the rest of our state to match that fact.
      */
-    private final void completeResumeLocked(ActivityRecord next) {
+    private void completeResumeLocked(ActivityRecord next) {
         next.idle = false;
         next.results = null;
         next.newIntents = null;
@@ -1035,10 +1035,8 @@ final class ActivityStack {
     final boolean ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean forceHomeShown) {
         ActivityRecord r = topRunningActivityLocked(null);
-        if (r != null) {
-            return ensureActivitiesVisibleLocked(r, starting, null, configChanges, forceHomeShown);
-        }
-        return false;
+        return r != null &&
+                ensureActivitiesVisibleLocked(r, starting, null, configChanges, forceHomeShown);
     }
 
     /**
@@ -1220,13 +1218,27 @@ final class ActivityStack {
             return false;
         }
 
-        if (prev != null && prev.mLaunchHomeTaskNext && prev.finishing && prev.frontOfTask) {
+        final TaskRecord nextTask = next.task;
+        final TaskRecord prevTask = prev != null ? prev.task : null;
+        if (prevTask != null && prev.mLaunchHomeTaskNext && prev.finishing && prev.frontOfTask) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
-            final TaskRecord task = prev.task;
-            if (topTask() != task) {
+            if (prevTask == nextTask) {
+                ArrayList<ActivityRecord> activities = prevTask.mActivities;
+                final int numActivities = activities.size();
+                for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+                    final ActivityRecord r = activities.get(activityNdx);
+                    // r is usually the same as next, but what if two activities were launched
+                    // before prev finished?
+                    if (!r.finishing) {
+                        r.mLaunchHomeTaskNext = true;
+                        r.frontOfTask = true;
+                        break;
+                    }
+                }
+            } else if (prevTask != topTask()) {
                 // This task is going away but it was supposed to return to the home task.
                 // Now the task above it has to return to the home task instead.
-                final int taskNdx = mTaskHistory.indexOf(task) + 1;
+                final int taskNdx = mTaskHistory.indexOf(prevTask) + 1;
                 mTaskHistory.get(taskNdx).mActivities.get(0).mLaunchHomeTaskNext = true;
             } else {
                 return mStackSupervisor.resumeHomeActivity(prev);
@@ -1386,13 +1398,13 @@ final class ActivityStack {
         // We are starting up the next activity, so tell the window manager
         // that the previous one will be hidden soon.  This way it can know
         // to ignore it when computing the desired screen orientation.
-        boolean noAnim = false;
+        boolean anim = true;
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG,
                         "Prepare close transition: prev=" + prev);
                 if (mNoAnimActivities.contains(prev)) {
-                    noAnim = true;
+                    anim = false;
                     mWindowManager.prepareAppTransition(AppTransition.TRANSIT_NONE, false);
                 } else {
                     mWindowManager.prepareAppTransition(prev.task == next.task
@@ -1404,7 +1416,7 @@ final class ActivityStack {
             } else {
                 if (DEBUG_TRANSITION) Slog.v(TAG, "Prepare open transition: prev=" + prev);
                 if (mNoAnimActivities.contains(next)) {
-                    noAnim = true;
+                    anim = false;
                     mWindowManager.prepareAppTransition(AppTransition.TRANSIT_NONE, false);
                 } else {
                     mWindowManager.prepareAppTransition(prev.task == next.task
@@ -1419,13 +1431,13 @@ final class ActivityStack {
         } else {
             if (DEBUG_TRANSITION) Slog.v(TAG, "Prepare open transition: no previous");
             if (mNoAnimActivities.contains(next)) {
-                noAnim = true;
+                anim = false;
                 mWindowManager.prepareAppTransition(AppTransition.TRANSIT_NONE, false);
             } else {
                 mWindowManager.prepareAppTransition(AppTransition.TRANSIT_ACTIVITY_OPEN, false);
             }
         }
-        if (!noAnim) {
+        if (anim) {
             next.applyOptionsLocked();
         } else {
             next.clearOptionsLocked();
@@ -1457,7 +1469,7 @@ final class ActivityStack {
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
-            boolean updated = false;
+            boolean notUpdated = true;
             if (mStackSupervisor.isFrontStack(this)) {
                 Configuration config = mWindowManager.updateOrientationFromAppTokens(
                         mService.mConfiguration,
@@ -1465,10 +1477,10 @@ final class ActivityStack {
                 if (config != null) {
                     next.frozenBeforeDestroy = true;
                 }
-                updated = mService.updateConfigurationLocked(config, next, false, false);
+                notUpdated = !mService.updateConfigurationLocked(config, next, false, false);
             }
 
-            if (!updated) {
+            if (notUpdated) {
                 // The configuration update wasn't able to keep the existing
                 // instance of the activity, and instead started a new one.
                 // We should be all done, but let's just make sure our activity
@@ -1586,7 +1598,6 @@ final class ActivityStack {
 
     final void startActivityLocked(ActivityRecord r, boolean newTask,
             boolean doResume, boolean keepCurTransition, Bundle options) {
-        TaskRecord task = null;
         TaskRecord rTask = r.task;
         final int taskId = rTask.taskId;
         if (taskForIdLocked(taskId) == null || newTask) {
@@ -1598,6 +1609,7 @@ final class ActivityStack {
             mTaskHistory.add(rTask);
             mWindowManager.moveTaskToTop(taskId);
         }
+        TaskRecord task = null;
         if (!newTask) {
             // If starting in an existing task, find where that is...
             boolean startIt = true;
@@ -1830,9 +1842,7 @@ final class ActivityStack {
                 final int targetTaskId = targetTask.taskId;
                 mWindowManager.setAppGroupId(target.appToken, targetTaskId);
 
-                ThumbnailHolder curThumbHolder = target.thumbHolder;
-                boolean gotOptions = !canMoveOptions;
-
+                boolean noOptions = canMoveOptions;
                 final int start = replyChainEnd < 0 ? i : replyChainEnd;
                 for (int srcPos = start; srcPos >= i; --srcPos) {
                     p = activities.get(srcPos);
@@ -1840,12 +1850,12 @@ final class ActivityStack {
                         continue;
                     }
 
-                    curThumbHolder = p.thumbHolder;
+                    ThumbnailHolder curThumbHolder = p.thumbHolder;
                     canMoveOptions = false;
-                    if (!gotOptions && topOptions == null) {
+                    if (noOptions && topOptions == null) {
                         topOptions = p.takeOptionsLocked();
                         if (topOptions != null) {
-                            gotOptions = true;
+                            noOptions = false;
                         }
                     }
                     if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing activity " + p + " from task="
@@ -1881,18 +1891,17 @@ final class ActivityStack {
                 } else {
                     end = replyChainEnd;
                 }
-                ActivityRecord p = null;
-                boolean gotOptions = !canMoveOptions;
+                boolean noOptions = canMoveOptions;
                 for (int srcPos = i; srcPos <= end; srcPos++) {
-                    p = activities.get(srcPos);
+                    ActivityRecord p = activities.get(srcPos);
                     if (p.finishing) {
                         continue;
                     }
                     canMoveOptions = false;
-                    if (!gotOptions && topOptions == null) {
+                    if (noOptions && topOptions == null) {
                         topOptions = p.takeOptionsLocked();
                         if (topOptions != null) {
-                            gotOptions = true;
+                            noOptions = false;
                         }
                     }
                     if (DEBUG_TASKS) Slog.w(TAG,
@@ -1922,7 +1931,7 @@ final class ActivityStack {
      * @param topTaskIsHigher True if #task has already been processed by resetTaskIfNeededLocked.
      * @param forceReset Flag passed in to resetTaskIfNeededLocked.
      */
-    private final int resetAffinityTaskIfNeededLocked(TaskRecord affinityTask, TaskRecord task,
+    private int resetAffinityTaskIfNeededLocked(TaskRecord affinityTask, TaskRecord task,
             boolean topTaskIsHigher, boolean forceReset, int taskInsertionPoint) {
         int replyChainEnd = -1;
         final int taskId = task.taskId;
@@ -2004,7 +2013,6 @@ final class ActivityStack {
                     // below so it remains singleTop.
                     if (target.info.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
                         ArrayList<ActivityRecord> taskActivities = task.mActivities;
-                        boolean found = false;
                         int targetNdx = taskActivities.indexOf(target);
                         if (targetNdx > 0) {
                             ActivityRecord p = taskActivities.get(targetNdx - 1);
@@ -2073,25 +2081,6 @@ final class ActivityStack {
         }
 
         return taskTop;
-    }
-
-    /**
-     * Find the activity in the history stack within the given task.  Returns
-     * the index within the history at which it's found, or < 0 if not found.
-     */
-    final ActivityRecord findActivityInHistoryLocked(ActivityRecord r, TaskRecord task) {
-        final ComponentName realActivity = r.realActivity;
-        ArrayList<ActivityRecord> activities = task.mActivities;
-        for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord candidate = activities.get(activityNdx);
-            if (candidate.finishing) {
-                continue;
-            }
-            if (candidate.realActivity.equals(realActivity)) {
-                return candidate;
-            }
-        }
-        return null;
     }
 
     void sendActivityResultLocked(int callingUid, ActivityRecord r,
@@ -2178,24 +2167,11 @@ final class ActivityStack {
         }
     }
 
-    final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
-            Configuration config) {
+    final ActivityRecord activityIdleInternalLocked(final IBinder token) {
         if (localLOGV) Slog.v(TAG, "Activity idle: " + token);
 
-        ActivityRecord res = null;
-
-        ArrayList<ActivityRecord> stops = null;
-        ArrayList<ActivityRecord> finishes = null;
-        ArrayList<UserStartedState> startingUsers = null;
-        int NS = 0;
-        int NF = 0;
-        IApplicationThread sendThumbnail = null;
-        boolean booting = false;
-        boolean enableScreen = false;
-        boolean activityRemoved = false;
-
         // Get the activity record.
-        res = isInStackLocked(token);
+        ActivityRecord res = isInStackLocked(token);
         if (res != null) {
             // No longer need to keep the device awake.
             if (mResumedActivity == res && mLaunchingActivity.isHeld()) {
