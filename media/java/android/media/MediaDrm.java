@@ -363,11 +363,16 @@ public final class MediaDrm {
 
     /**
      * A key response is received from the license server by the app, then it is
-     * provided to the DRM engine plugin using provideKeyResponse. The byte array
-     * returned is a keySetId that can be used to later restore the keys to a new
-     * session with the method {@link #restoreKeys}, enabling offline key use.
+     * provided to the DRM engine plugin using provideKeyResponse.  When the
+     * response is for an offline key request, a keySetId is returned that can be
+     * used to later restore the keys to a new session with the method
+     * {@link #restoreKeys}.
+     * When the response is for a streaming or release request, null is returned.
      *
-     * @param sessionId the session ID for the DRM session
+     * @param scope may be a sessionId or keySetId depending on the type of the
+     * response.  Scope should be set to the sessionId when the response is for either
+     * streaming or offline key requests.  Scope should be set to the keySetId when
+     * the response is for a release request.
      * @param response the byte array response from the server
      *
      * @throws NotProvisionedException if the response indicates that
@@ -375,7 +380,7 @@ public final class MediaDrm {
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request
      */
-    public native byte[] provideKeyResponse(byte[] sessionId, byte[] response)
+    public native byte[] provideKeyResponse(byte[] scope, byte[] response)
         throws NotProvisionedException, DeniedByServerException;
 
 
