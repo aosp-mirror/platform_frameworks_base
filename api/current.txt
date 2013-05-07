@@ -8051,6 +8051,7 @@ package android.database {
 
   public class MatrixCursor.RowBuilder {
     method public android.database.MatrixCursor.RowBuilder add(java.lang.Object);
+    method public android.database.MatrixCursor.RowBuilder offer(java.lang.String, java.lang.Object);
   }
 
   public class MergeCursor extends android.database.AbstractCursor {
