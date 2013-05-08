@@ -32,6 +32,11 @@
             </intent-filter>
         </activity>
     </application>
+    <!-- default test runner -->
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.android.connectivitymanagertest"
+        android:label="default instrumentation test runner"
+    />
     <!--
     This declares that this app uses the instrumentation test runner targeting
     the package of connectivitymanagertest. To run the tests use the command:
