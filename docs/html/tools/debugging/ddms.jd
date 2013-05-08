@@ -192,7 +192,6 @@ parent.link=index.html
   
   <p>Before you start method profiling in DDMS, be aware of the following restrictions:</p>
     <ul>
-      <li>Android 1.5 devices are not supported.</li>
       <li>Android 2.1 and earlier devices must
       have an SD card present and your application must have permission to write to the SD card.
       <li>Android 2.2 and later devices do not need an SD card. The trace log files are 

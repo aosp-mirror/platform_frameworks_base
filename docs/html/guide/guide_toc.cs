@@ -521,9 +521,6 @@
           <li><a href="<?cs var:toroot ?>guide/practices/screen-compat-mode.html">
             <span class="en">Screen Compatibility Mode</span>
           </a></li>
-          <!--<li><a href="<?cs var:toroot ?>guide/practices/screens-support-1.5.html">
-            <span class="en">Strategies for Android 1.5</span>
-          </a></li> -->
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/practices/tablets-and-handsets.html">
