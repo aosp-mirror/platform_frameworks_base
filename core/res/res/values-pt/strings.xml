@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite que o aplicativo grave áudio com o microfone. Esta permissão autoriza o aplicativo a gravar áudio a qualquer momento, sem sua confirmação."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tirar fotos e gravar vídeos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que o aplicativo tire fotos e filme vídeos com a câmera. Esta permissão autoriza o aplicativo a usar a câmera a qualquer momento sem sua confirmação."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desativar a transmissão do LED indicador quando a câmera estiver em uso"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite que um aplicativo do sistema pré-instalado desative o LED indicador de uso da câmera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desativar permanentemente o tablet"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desativar permanentemente o telefone"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permite que o aplicativo desative todo o tablet permanentemente. Isso é muito perigoso."</string>
@@ -1261,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que um aplicativo faça o roteamento de saída de mídia para outros dispositivos externos."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Acessar o armazenamento seguro do bloqueio de teclado"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permite que o aplicativo acesse o armazenamento seguro do bloqueio de teclado."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Controlar a exibição e ocultação do bloqueio de tela"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permite que o aplicativo controle o bloqueio de teclado."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toque duas vezes para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Não foi possível adicionar widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1501,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietário"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erro"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Este aplicativo não suporta contas para perfis restritos"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nenhum aplicativo encontrado para executar a ação"</string>
     <string name="revoke" msgid="5404479185228271586">"Revogar"</string>
 </resources>
