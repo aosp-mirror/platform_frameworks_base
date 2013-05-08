@@ -525,13 +525,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // Now make sure the window fits in the overall display.
         Gravity.applyDisplay(mAttrs.gravity, df, mFrame);
 
-        // Make sure the overscan, content and visible frames are inside of the
+        // Make sure the content and visible frames are inside of the
         // final window frame.
-        mOverscanFrame.set(Math.max(mOverscanFrame.left, mFrame.left),
-                Math.max(mOverscanFrame.top, mFrame.top),
-                Math.min(mOverscanFrame.right, mFrame.right),
-                Math.min(mOverscanFrame.bottom, mFrame.bottom));
-
         mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
                 Math.max(mContentFrame.top, mFrame.top),
                 Math.min(mContentFrame.right, mFrame.right),
