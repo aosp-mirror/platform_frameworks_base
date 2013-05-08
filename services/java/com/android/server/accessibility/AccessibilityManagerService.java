@@ -1375,29 +1375,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void updateTouchExplorationLocked(UserState userState) {
-        userState.mIsTouchExplorationEnabled = false;
+        boolean enabled = false;
         final int serviceCount = userState.mBoundServices.size();
         for (int i = 0; i < serviceCount; i++) {
             Service service = userState.mBoundServices.get(i);
-            if (tryEnableTouchExplorationLocked(service)) {
+            if (canRequestAndRequestsTouchExplorationLocked(service)) {
+                enabled = true;
                 break;
             }
         }
+        if (enabled != userState.mIsTouchExplorationEnabled) {
+            userState.mIsTouchExplorationEnabled = enabled;
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, enabled ? 1 : 0,
+                    userState.mUserId);
+        }
     }
 
-    private boolean tryEnableTouchExplorationLocked(Service service) {
+    private boolean canRequestAndRequestsTouchExplorationLocked(Service service) {
+        // Service not ready or cannot request the feature - well nothing to do.
         if (!service.canReceiveEventsLocked() || !service.mRequestTouchExplorationMode) {
-            return false;
-        }
-        UserState userState = getUserStateLocked(service.mUserId);
-        if (userState.mIsTouchExplorationEnabled) {
             return false;
         }
         // UI test automation service can always enable it.
         if (service.mIsAutomation) {
-            userState.mIsTouchExplorationEnabled = true;
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, service.mUserId);
             return true;
         }
         if (service.mResolveInfo.serviceInfo.applicationInfo.targetSdkVersion
@@ -1405,29 +1406,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Up to JB-MR1 we had a white list with services that can enable touch
             // exploration. When a service is first started we show a dialog to the
             // use to get a permission to white list the service.
-            if (!userState.mTouchExplorationGrantedServices.contains(service.mComponentName)) {
-                if (mEnableTouchExplorationDialog == null
-                        || (mEnableTouchExplorationDialog != null
-                            && !mEnableTouchExplorationDialog.isShowing())) {
-                    mMainHandler.obtainMessage(
-                            MainHandler.MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG,
-                            service).sendToTarget();
-                }
-            } else {
-                userState.mIsTouchExplorationEnabled = true;
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, service.mUserId);
+            UserState userState = getUserStateLocked(service.mUserId);
+            if (userState.mTouchExplorationGrantedServices.contains(service.mComponentName)) {
                 return true;
+            } else if (mEnableTouchExplorationDialog == null
+                    || !mEnableTouchExplorationDialog.isShowing()) {
+                mMainHandler.obtainMessage(
+                        MainHandler.MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG,
+                        service).sendToTarget();
             }
         } else {
             // Starting in JB-MR2 we request an accessibility service to declare
             // certain capabilities in its meta-data to allow it to enable the
             // corresponding features.
-            if (service.mIsAutomation || (service.mAccessibilityServiceInfo.getCapabilities()
+            if ((service.mAccessibilityServiceInfo.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION) != 0) {
-                userState.mIsTouchExplorationEnabled = true;
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, service.mUserId);
                 return true;
             }
         }
@@ -1435,29 +1428,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void updateEnhancedWebAccessibilityLocked(UserState userState) {
-        userState.mIsEnhancedWebAccessibilityEnabled = false;
+        boolean enabled = false;
         final int serviceCount = userState.mBoundServices.size();
         for (int i = 0; i < serviceCount; i++) {
             Service service = userState.mBoundServices.get(i);
-            if (tryEnableEnhancedWebAccessibilityLocked(service)) {
-                return;
+            if (canRequestAndRequestsEnhancedWebAccessibilityLocked(service)) {
+                enabled = true;
+                break;
             }
+        }
+        if (enabled != userState.mIsEnhancedWebAccessibilityEnabled) {
+            userState.mIsEnhancedWebAccessibilityEnabled = enabled;
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, enabled ? 1 : 0,
+                    userState.mUserId);
         }
     }
 
-    private boolean tryEnableEnhancedWebAccessibilityLocked(Service service) {
+    private boolean canRequestAndRequestsEnhancedWebAccessibilityLocked(Service service) {
         if (!service.canReceiveEventsLocked() || !service.mRequestEnhancedWebAccessibility ) {
-            return false;
-        }
-        UserState userState = getUserStateLocked(service.mUserId);
-        if (userState.mIsEnhancedWebAccessibilityEnabled) {
             return false;
         }
         if (service.mIsAutomation || (service.mAccessibilityServiceInfo.getCapabilities()
                & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0) {
-            userState.mIsEnhancedWebAccessibilityEnabled = true;
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 1, userState.mUserId);
             return true;
         }
         return false;
