@@ -107,7 +107,6 @@ parent.link=index.html
   <ul>
     <li>If you are using the {@link android.os.Debug} class, your device or emulator must have an SD card
      and your application must have permission to write to the SD card. </li>
-    <li>If you are using DDMS, Android 1.5 devices are not supported.</li>
     <li>If you are using DDMS, Android 2.1 and earlier devices must
     have an SD card present and your application must have permission to write to the SD card.
     <li>If you are using DDMS, Android 2.2 and later devices do not need an SD card. The trace log files are 
