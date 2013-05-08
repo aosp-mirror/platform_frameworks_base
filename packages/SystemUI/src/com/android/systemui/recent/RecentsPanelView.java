@@ -46,6 +46,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
@@ -365,6 +366,14 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
+    protected void onAttachedToWindow () {
+        super.onAttachedToWindow();
+        final ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.setDrawDuringWindowsAnimating(true);
+        }
+    }
+
     public void onUiHidden() {
         mCallUiHiddenBeforeNextReload = false;
         if (!mShowing && mRecentTaskDescriptions != null) {
@@ -562,7 +571,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 !mRecentTasksLoader.isFirstScreenful()) {
             int timeSinceWindowAnimation =
                     (int) (System.currentTimeMillis() - mWindowAnimationStartTime);
-            final int minStartDelay = 125;
+            final int minStartDelay = 150;
             final int startDelay = Math.max(0, Math.min(
                     minStartDelay - timeSinceWindowAnimation, minStartDelay));
             final int duration = 250;

@@ -205,6 +205,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
     boolean mWindowsAnimating;
+    boolean mDrawDuringWindowsAnimating;
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
     int mClientWindowLayoutFlags;
@@ -1358,8 +1359,10 @@ public final class ViewRootImpl implements ViewParent,
 
                 final int surfaceGenerationId = mSurface.getGenerationId();
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
-                mWindowsAnimating |=
-                        (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_ANIMATING) != 0;
+                if (!mDrawDuringWindowsAnimating) {
+                    mWindowsAnimating |=
+                            (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_ANIMATING) != 0;
+                }
 
                 if (DEBUG_LAYOUT) Log.v(TAG, "relayout: frame=" + frame.toShortString()
                         + " overscan=" + mPendingOverscanInsets.toShortString()
@@ -2532,6 +2535,16 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         displayLists.clear();
+    }
+
+    /**
+     * @hide
+     */
+    public void setDrawDuringWindowsAnimating(boolean value) {
+        mDrawDuringWindowsAnimating = value;
+        if (value) {
+            handleDispatchDoneAnimating();
+        }
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
