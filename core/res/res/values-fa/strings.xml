@@ -1260,7 +1260,7 @@
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"دسترسی به فضای ذخیره‌سازی ایمن محافظ کلید"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"به یک برنامه کاربردی برای دسترسی به فضای ذخیره‌سازی ایمن محافظ کلید اجازه می‌دهد."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"کنترل نمایش و پنهان کردن محافظ کلید"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"به یک برنامه جهت کنترل محافظ کلید اجازه می‌دهد."</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"اجازه می‌دهد برنامه‌ای محافظ کلید را کنترل کند."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"دوبار لمس کنید تا بزرگنمایی کنترل شود"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"افزودن ابزارک انجام نشد."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"برو"</string>
