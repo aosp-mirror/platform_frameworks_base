@@ -534,10 +534,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (visible.bottom > frame.bottom) visible.bottom = frame.bottom;
 
         final Rect overscanInsets = mOverscanInsets;
-        overscanInsets.left = overscan.left-frame.left;
-        overscanInsets.top = overscan.top-frame.top;
-        overscanInsets.right = frame.right-overscan.right;
-        overscanInsets.bottom = frame.bottom-overscan.bottom;
+        overscanInsets.left = overscan.left > frame.left ? overscan.left-frame.left : 0;
+        overscanInsets.top = overscan.top > frame.top ? overscan.top-frame.top : 0;
+        overscanInsets.right = overscan.right < frame.right ? frame.right-overscan.right : 0;
+        overscanInsets.bottom = overscan.bottom < frame.bottom ? frame.bottom-overscan.bottom : 0;
 
         final Rect contentInsets = mContentInsets;
         contentInsets.left = content.left-frame.left;
