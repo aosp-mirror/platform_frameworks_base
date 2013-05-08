@@ -172,6 +172,7 @@ public class FocusFinder {
         try {
             // Note: This sort is stable.
             mSequentialFocusComparator.setRoot(root);
+            mSequentialFocusComparator.setIsLayoutRtl(root.isLayoutRtl());
             Collections.sort(focusables, mSequentialFocusComparator);
         } finally {
             mSequentialFocusComparator.recycle();
@@ -180,9 +181,9 @@ public class FocusFinder {
         final int count = focusables.size();
         switch (direction) {
             case View.FOCUS_FORWARD:
-                return getForwardFocusable(root, focused, focusables, count);
+                return getNextFocusable(focused, focusables, count);
             case View.FOCUS_BACKWARD:
-                return getBackwardFocusable(root, focused, focusables, count);
+                return getPreviousFocusable(focused, focusables, count);
         }
         return focusables.get(count - 1);
     }
@@ -239,13 +240,6 @@ public class FocusFinder {
         return closest;
     }
 
-    private static View getForwardFocusable(ViewGroup root, View focused,
-                                            ArrayList<View> focusables, int count) {
-        return (root.isLayoutRtl()) ?
-                getPreviousFocusable(focused, focusables, count) :
-                getNextFocusable(focused, focusables, count);
-    }
-
     private static View getNextFocusable(View focused, ArrayList<View> focusables, int count) {
         if (focused != null) {
             int position = focusables.lastIndexOf(focused);
@@ -257,13 +251,6 @@ public class FocusFinder {
             return focusables.get(0);
         }
         return null;
-    }
-
-    private static View getBackwardFocusable(ViewGroup root, View focused,
-                                             ArrayList<View> focusables, int count) {
-        return (root.isLayoutRtl()) ?
-                getNextFocusable(focused, focusables, count) :
-                getPreviousFocusable(focused, focusables, count);
     }
 
     private static View getPreviousFocusable(View focused, ArrayList<View> focusables, int count) {
@@ -619,6 +606,7 @@ public class FocusFinder {
         private final Rect mFirstRect = new Rect();
         private final Rect mSecondRect = new Rect();
         private ViewGroup mRoot;
+        private boolean mIsLayoutRtl;
 
         public void recycle() {
             mRoot = null;
@@ -626,6 +614,10 @@ public class FocusFinder {
 
         public void setRoot(ViewGroup root) {
             mRoot = root;
+        }
+
+        public void setIsLayoutRtl(boolean b) {
+            mIsLayoutRtl = b;
         }
 
         public int compare(View first, View second) {
@@ -641,17 +633,17 @@ public class FocusFinder {
             } else if (mFirstRect.top > mSecondRect.top) {
                 return 1;
             } else if (mFirstRect.left < mSecondRect.left) {
-                return -1;
+                return mIsLayoutRtl ? 1 : -1;
             } else if (mFirstRect.left > mSecondRect.left) {
-                return 1;
+                return mIsLayoutRtl ? -1 : 1;
             } else if (mFirstRect.bottom < mSecondRect.bottom) {
                 return -1;
             } else if (mFirstRect.bottom > mSecondRect.bottom) {
                 return 1;
             } else if (mFirstRect.right < mSecondRect.right) {
-                return -1;
+                return mIsLayoutRtl ? 1 : -1;
             } else if (mFirstRect.right > mSecondRect.right) {
-                return 1;
+                return mIsLayoutRtl ? -1 : 1;
             } else {
                 // The view are distinct but completely coincident so we consider
                 // them equal for our purposes.  Since the sort is stable, this
