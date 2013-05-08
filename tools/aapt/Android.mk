@@ -26,7 +26,8 @@ aapt_src_files := \
     SourcePos.cpp \
 	WorkQueue.cpp \
     ZipEntry.cpp \
-    ZipFile.cpp
+    ZipFile.cpp \
+	qsort_r_compat.c
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
