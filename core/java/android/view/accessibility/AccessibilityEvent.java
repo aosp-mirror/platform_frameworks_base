@@ -1248,7 +1248,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     if (eventTypeCount > 0) {
                         builder.append(", ");
                     }
-                    builder.append("TYPE_CURRENT_AT_GRANULARITY_MOVEMENT_CHANGED");
+                    builder.append("TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY");
                     eventTypeCount++;
                 } break;
                 case TYPE_GESTURE_DETECTION_START: {
