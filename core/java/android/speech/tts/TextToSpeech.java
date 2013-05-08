@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Set;
 
 /**
@@ -1128,9 +1129,23 @@ public class TextToSpeech {
                 if (loc == null) {
                     return LANG_NOT_SUPPORTED;
                 }
-                String language = loc.getISO3Language();
-                String country = loc.getISO3Country();
+                String language = null, country = null;
+                try {
+                    language = loc.getISO3Language();
+                } catch (MissingResourceException e) {
+                    Log.w(TAG, "Couldn't retrieve ISO 639-2/T language code for locale: " + loc, e);
+                    return LANG_NOT_SUPPORTED;
+                }
+
+                try {
+                    country = loc.getISO3Country();
+                } catch (MissingResourceException e) {
+                    Log.w(TAG, "Couldn't retrieve ISO 3166 country code for locale: " + loc, e);
+                    return LANG_NOT_SUPPORTED;
+                }
+
                 String variant = loc.getVariant();
+
                 // Check if the language, country, variant are available, and cache
                 // the available parts.
                 // Note that the language is not actually set here, instead it is cached so it
@@ -1195,8 +1210,23 @@ public class TextToSpeech {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                return service.isLanguageAvailable(loc.getISO3Language(),
-                        loc.getISO3Country(), loc.getVariant());
+                String language = null, country = null;
+
+                try {
+                    language = loc.getISO3Language();
+                } catch (MissingResourceException e) {
+                    Log.w(TAG, "Couldn't retrieve ISO 639-2/T language code for locale: " + loc, e);
+                    return LANG_NOT_SUPPORTED;
+                }
+
+                try {
+                    country = loc.getISO3Country();
+                } catch (MissingResourceException e) {
+                    Log.w(TAG, "Couldn't retrieve ISO 3166 country code for locale: " + loc, e);
+                    return LANG_NOT_SUPPORTED;
+                }
+
+                return service.isLanguageAvailable(language, country, loc.getVariant());
             }
         }, LANG_NOT_SUPPORTED, "isLanguageAvailable");
     }
