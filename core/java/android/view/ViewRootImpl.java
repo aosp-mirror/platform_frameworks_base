@@ -2671,7 +2671,6 @@ public final class ViewRootImpl implements ViewParent,
 
             AccessibilityNodeInfo focusNode = mAccessibilityFocusedVirtualView;
             View focusHost = mAccessibilityFocusedHost;
-            focusHost.clearAccessibilityFocusNoCallbacks();
 
             // Wipe the state of the current accessibility focus since
             // the call into the provider to clear accessibility focus
@@ -2680,6 +2679,10 @@ public final class ViewRootImpl implements ViewParent,
             // invocation happens.
             mAccessibilityFocusedHost = null;
             mAccessibilityFocusedVirtualView = null;
+
+            // Clear accessibility focus on the host after clearing state since
+            // this method may be reentrant.
+            focusHost.clearAccessibilityFocusNoCallbacks();
 
             AccessibilityNodeProvider provider = focusHost.getAccessibilityNodeProvider();
             if (provider != null) {
