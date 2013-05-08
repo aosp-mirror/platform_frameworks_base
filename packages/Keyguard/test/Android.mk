@@ -20,8 +20,9 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := KeyguardTest
 
-# Remove this to verify permission checks are working correctly
+# Remove these to verify permission checks are working correctly
 LOCAL_CERTIFICATE := platform
+LOCAL_PRIVILEGED_MODULE := true
 
 # LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 

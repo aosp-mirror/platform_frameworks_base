@@ -25,6 +25,7 @@ LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
 LOCAL_PACKAGE_NAME := SharedStorageBackup
 LOCAL_CERTIFICATE := platform
+LOCAL_PRIVILEGED_MODULE := true
 
 include $(BUILD_PACKAGE)
 

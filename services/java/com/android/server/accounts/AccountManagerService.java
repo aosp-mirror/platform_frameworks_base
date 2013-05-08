@@ -2540,7 +2540,7 @@ public class AccountManagerService
         return userId;
     }
 
-    private boolean inSystemImage(int callingUid) {
+    private boolean isPrivileged(int callingUid) {
         final int callingUserId = UserHandle.getUserId(callingUid);
 
         final PackageManager userPackageManager;
@@ -2556,7 +2556,7 @@ public class AccountManagerService
             try {
                 PackageInfo packageInfo = userPackageManager.getPackageInfo(name, 0 /* flags */);
                 if (packageInfo != null
-                        && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -2567,7 +2567,7 @@ public class AccountManagerService
     }
 
     private boolean permissionIsGranted(Account account, String authTokenType, int callerUid) {
-        final boolean inSystemImage = inSystemImage(callerUid);
+        final boolean isPrivileged = isPrivileged(callerUid);
         final boolean fromAuthenticator = account != null
                 && hasAuthenticatorUid(account.type, callerUid);
         final boolean hasExplicitGrants = account != null
@@ -2578,7 +2578,7 @@ public class AccountManagerService
                     + ": is authenticator? " + fromAuthenticator
                     + ", has explicit permission? " + hasExplicitGrants);
         }
-        return fromAuthenticator || hasExplicitGrants || inSystemImage;
+        return fromAuthenticator || hasExplicitGrants || isPrivileged;
     }
 
     private boolean hasAuthenticatorUid(String accountType, int callingUid) {

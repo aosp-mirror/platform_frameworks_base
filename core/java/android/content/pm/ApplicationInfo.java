@@ -338,6 +338,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_CANT_SAVE_STATE = 1<<28;
 
     /**
+     * Value for {@link #flags}: set to {@code true} if the application
+     * is permitted to hold privileged permissions.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_PRIVILEGED = 1<<29;
+
+    /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and

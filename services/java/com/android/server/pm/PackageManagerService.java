@@ -71,7 +71,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
-import android.content.pm.KeySet;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -114,15 +113,12 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Environment.UserEnvironment;
 import android.os.UserManager;
-import android.provider.Settings.Secure;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
-import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -280,6 +276,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     // This is the object monitoring the system app dir.
     final FileObserver mSystemInstallObserver;
 
+    // This is the object monitoring the privileged system app dir.
+    final FileObserver mPrivilegedInstallObserver;
+
     // This is the object monitoring the system app dir.
     final FileObserver mVendorInstallObserver;
 
@@ -295,6 +294,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final File mFrameworkDir;
     final File mSystemAppDir;
+    final File mPrivilegedAppDir;
     final File mVendorAppDir;
     final File mAppInstallDir;
     final File mDalvikCacheDir;
@@ -1058,13 +1058,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         mNoDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
         mSettings = new Settings(context);
-        mSettings.addSharedUserLPw("android.uid.system",
-                Process.SYSTEM_UID, ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID, ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.log", LOG_UID, ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.nfc", NFC_UID, ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.bluetooth", BLUETOOTH_UID, ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID, ApplicationInfo.FLAG_SYSTEM);
+        mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
+                ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID,
+                ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.log", LOG_UID,
+                ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.nfc", NFC_UID,
+                ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.bluetooth", BLUETOOTH_UID,
+                ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
+                ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
@@ -1246,7 +1251,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanMode | SCAN_NO_DEX, 0);
 
-            // Collect all system packages.
+            // Collected privileged system packages.
+            mPrivilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
+            mPrivilegedInstallObserver = new AppDirObserver(
+                    mPrivilegedAppDir.getPath(), OBSERVER_EVENTS, true);
+            mPrivilegedInstallObserver.startWatching();
+                scanDirLI(mPrivilegedAppDir, PackageParser.PARSE_IS_SYSTEM
+                        | PackageParser.PARSE_IS_SYSTEM_DIR
+                        | PackageParser.PARSE_IS_PRIVILEGED, scanMode, 0);
+
+            // Collect ordinary system packages.
             mSystemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
                 mSystemAppDir.getPath(), OBSERVER_EVENTS, true);
@@ -3240,7 +3254,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ProviderInfo> queryContentProviders(String processName,
             int uid, int flags) {
         ArrayList<ProviderInfo> finalList = null;
-
         // reader
         synchronized (mPackages) {
             final Iterator<PackageParser.Provider> i = mProvidersByComponent.values().iterator();
@@ -3316,7 +3329,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (DEBUG_PACKAGE_SCANNING) {
-            Log.d(TAG, "Scanning app dir " + dir);
+            Log.d(TAG, "Scanning app dir " + dir + " scanMode=" + scanMode
+                    + " flags=0x" + Integer.toHexString(flags));
         }
 
         int i;
@@ -3970,6 +3984,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        }
+
+        if ((parseFlags&PackageParser.PARSE_IS_PRIVILEGED) != 0) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_PRIVILEGED;
         }
 
         if (pkg.packageName.equals("android")) {
@@ -5363,7 +5381,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         == PackageManager.SIGNATURE_MATCH);
         if (!allowed && (bp.protectionLevel
                 & PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
-            if (isSystemApp(pkg)) {
+            if (isPrivilegedApp(pkg)) {
                 // For updated system applications, a system permission
                 // is granted only if it had been defined by the original application.
                 if (isUpdatedSystemApp(pkg)) {
@@ -8564,6 +8582,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isSystemApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private static boolean isPrivilegedApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
     }
 
     private static boolean isSystemApp(ApplicationInfo info) {
