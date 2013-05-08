@@ -254,6 +254,11 @@ public class KeyguardViewMediator {
     private final float mLockSoundVolume;
 
     /**
+     * Cache of avatar drawables, for use by KeyguardMultiUserAvatar.
+     */
+    private static MultiUserAvatarCache sMultiUserAvatarCache = new MultiUserAvatarCache();
+
+    /**
      * The callback used by the keyguard view to tell the {@link KeyguardViewMediator}
      * various things.
      */
@@ -333,6 +338,12 @@ public class KeyguardViewMediator {
         @Override
         public void onUserRemoved(int userId) {
             mLockPatternUtils.removeUser(userId);
+            sMultiUserAvatarCache.clear(userId);
+        }
+
+        @Override
+        public void onUserInfoChanged(int userId) {
+            sMultiUserAvatarCache.clear(userId);
         }
 
         @Override
@@ -1430,5 +1441,9 @@ public class KeyguardViewMediator {
     private boolean isAssistantAvailable() {
         return mSearchManager != null
                 && mSearchManager.getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
+    }
+
+    public static MultiUserAvatarCache getAvatarCache() {
+        return sMultiUserAvatarCache;
     }
 }
