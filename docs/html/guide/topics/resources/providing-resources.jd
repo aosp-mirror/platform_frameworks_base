@@ -21,14 +21,8 @@ device configurations</li>
         <li><a href="#AliasResources">Creating alias resources</a></li>
       </ol>
     </li>
-    <li><a href="#Compatibility">Providing the Best Device Compatibility with Resources</a>
-      <ol>
-        <li><a href="#ScreenCompatibility">Providing screen resource compatibility for Android
-1.5</a></li>
-      </ol>
-    </li>
+    <li><a href="#Compatibility">Providing the Best Device Compatibility with Resources</a></li>
     <li><a href="#BestMatch">How Android Finds the Best-matching Resource</a></li>
-    <li><a href="#KnownIssues">Known Issues</a></li>
   </ol>
 
   <h2>See also</h2>
@@ -783,9 +777,6 @@ orientation" described above.</p>
 1.6 or higher). See the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API levels</a> document for more information
 about these values.</p>
-        <p class="caution"><strong>Caution:</strong> Android 1.5 and 1.6 only match resources
-with this qualifier when it exactly matches the platform version. See the section below about <a
-href="#KnownIssues">Known Issues</a> for more information.</p>
       </td>
     </tr>
 </table>
@@ -970,70 +961,7 @@ greater, you <em>do not</em> need default drawable resources when you provide al
 resources with the <a href="#DensityQualifier">screen density</a> qualifier. Even without default
 drawable resources, Android can find the best match among the alternative screen densities and scale
 the bitmaps as necessary. However, for the best experience on all types of devices, you should
-provide alternative drawables for all three types of density. If your <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> is
-<em>less than</em> 4 (Android 1.5 or lower), be aware that the screen size, density, and aspect
-qualifiers are not supported on Android 1.5 or lower, so you might need to perform additional
-compatibility for these versions.</p>
-
-
-<h3 id="ScreenCompatibility">Providing screen resource compatibility for Android 1.5</h3>
-
-<p>Android 1.5 (and lower) does not support the following configuration qualifers:</p>
-<dl>
-  <dt><a href="#DensityQualifier">Density</a></dt>
-    <dd>{@code ldpi}, {@code mdpi}, {@code ldpi}, and {@code nodpi}</dd>
-  <dt><a href="#ScreenSizeQualifier">Screen size</a></dt>
-    <dd>{@code small}, {@code normal}, and {@code large}</dd>
-  <dt><a href="#ScreenAspectQualifier">Screen aspect</a></dt>
-    <dd>{@code long} and {@code notlong}</dd>
-</dl>
-
-<p>These configuration qualifiers were introduced in Android 1.6, so Android 1.5 (API level 3) and
-lower does not support them. If you use these configuration qualifiers and do not provide
-corresponding default resources, then an Android 1.5 device might use any one of the resource
-directories named with the above screen configuration qualifiers, because it ignores these
-qualifiers and uses whichever otherwise-matching drawable resource it finds first.</p>
-
-<p>For example, if your application supports Android 1.5 and includes drawable resources for
-each density type ({@code drawable-ldpi/}, {@code drawable-mdpi/}, and {@code drawable-ldpi/}),
-and does <em>not</em> include default drawable resources ({@code drawable/}), then
-an Android 1.5 will use drawables from any one of the alternative resource directories, which
-can result in a user interface that's less than ideal.<p>
-
-<p>So, to provide compatibility with Android 1.5 (and lower) when using the screen configuration
-qualifiers:</p>
-<ol>
-  <li>Provide default resources that are for medium-density, normal, and notlong screens.
-
-    <p>Because all Android 1.5 devices have medium-density, normal, not-long screens, you can
-place these kinds of resources in the corresponding default resource directory. For example, put all
-medium density drawable resources in {@code drawable/} (instead of {@code drawable-mdpi/}),
-put {@code normal} size resources in the corresponding default resource directory, and {@code
-notlong} resources in the corresponding default resource directory.</p>
-  </li>
-
-  <li>Ensure that your <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools</a> version
-is r6 or greater.
-
-    <p>You need SDK Tools, Revision 6 (or greater), because it includes a new packaging tool that
-automatically applies an appropriate <a href="#VersionQualifier">version qualifier</a> to any
-resource directory named with a qualifier that does not exist in Android 1.0. For example, because
-the density qualifier was introduced in Android 1.6 (API level 4), when the packaging tool
-encounters a resource directory using the density qualifier, it adds {@code v4} to the directory
-name to ensure that older versions do not use those resources (only API level 4 and higher support
-that qualifier). Thus, by putting your medium-density resources in a directory <em>without</em> the
-{@code mdpi} qualifier, they are still accessible by Android 1.5, and any device that supports the
-density qualifer and has a medium-density screen also uses the default resources (which are mdpi)
-because they are the best match for the device (instead of using the {@code ldpi} or {@code hdpi}
-resources).</p>
-</li>
-</ol>
-
-<p class="note"><strong>Note:</strong> Later versions of Android, such as API level 8,
-introduce other configuration qualifiers that older version do not support. To provide the best
-compatibility, you should always include a set of default resources for each type of resource
-that your application uses, as discussed above to provide the best device compatibility.</p>
+provide alternative drawables for all three types of density.</p>
 
 
 
@@ -1162,29 +1090,3 @@ type, and input method), while <code>drawable-en</code> has only one parameter t
 
 <p>To learn more about how to use resources in your application, continue to <a
 href="accessing-resources.html">Accessing Resources</a>.</p>
-
-
-
-
-<h2 id="KnownIssues">Known Issues</h2>
-
-<h3>Android 1.5 and 1.6: Version qualifier performs exact match, instead of best match</h3>
-
-<p>The correct behavior is for the system to match resources marked with a <a
-href="#VersionQualifier">version qualifier</a> equal
-to or less than the platform version on the device, but on Android 1.5 and 1.6, (API level 3 and 4),
-there is a bug that causes the system to match resources marked with the version qualifier
-only when it exactly matches the version on the device.</p>
-
-<p><b>The workaround:</b> To provide version-specific resources, abide by this behavior. However,
-because this bug is fixed in versions of Android available after 1.6, if
-you need to differentiate resources between Android 1.5, 1.6, and later versions, then you only need
-to apply the version qualifier to the 1.6 resources and one to match all later versions. Thus, this
-is effectively a non-issue.</p>
-
-<p>For example, if you want drawable resources that are different on each Android 1.5, 1.6,
-and 2.0.1 (and later), create three drawable directories: {@code drawable/} (for 1.5 and lower),
-{@code drawable-v4} (for 1.6), and {@code drawable-v6} (for 2.0.1 and later&mdash;version 2.0, v5,
-is no longer available).</p>
-
-

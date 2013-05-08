@@ -149,18 +149,6 @@ parent.link=index.html
         find instructions for setting up and running the test application in the
         <a href="#EditorCommandLine">appendix</a> of this document.
     </li>
-    <li>
-        Android 1.5 platform (API Level 3) or higher. You must have the Android 1.5 platform
-        (API Level 3) or higher installed in your SDK, because this tutorial uses APIs that
-        were introduced in that version.
-        <p>
-            If you are not sure which platforms are installed in your SDK,
-            open the Android SDK and AVD Manager and check in the
-            <strong>Installed Packages</strong> panel.
-            If aren't sure how to download a platform into your SDK,
-            read <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.
-        </p>
-    </li>
   </ul>
 <h2 id="DownloadCode">Installing the Tutorial Sample Code</h2>
 <p>
