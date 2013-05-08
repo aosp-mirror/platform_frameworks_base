@@ -69,8 +69,8 @@ parent.link=index.html
 
   <p>Be certain to create multiple AVDs upon which to test your application. You should have one
   AVD for each platform and screen type with which your application is compatible. For instance, if
-  your application compiles against the Android 1.5 (API Level 3) platform, you should create an
-  AVD for each platform equal to and greater than 1.5 and an AVD for each <a href=
+  your application compiles against the Android 4.0 (API Level 14) platform, you should create an
+  AVD for each platform equal to and greater than 4.0 and an AVD for each <a href=
   "{@docRoot}guide/practices/screens_support.html">screen type</a> you support, then test your
   application on each one.</p>
 

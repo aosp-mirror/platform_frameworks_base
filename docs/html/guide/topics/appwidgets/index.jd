@@ -466,19 +466,6 @@ AppWidgetProvider
     methods as appropriate.</dd> 
 </dl>
 
-<p class="warning"><strong>Note:</strong> In Android 1.5, there is a known issue
-in which the
-<code>onDeleted()</code> method will not be called when it should be. To work
-around this issue, 
-you can implement {@link
-android.appwidget.AppWidgetProvider#onReceive(Context,Intent)
-onReceive()} as described in this 
-<a
-href="http://groups.google.com/group/android-developers/msg/e405ca19df2170e2">
-Group post</a>
-to receive the <code>onDeleted()</code> callback.
-</p>
-
 <p>The most important AppWidgetProvider callback is 
 {@link android.appwidget.AppWidgetProvider#onUpdate(android.content.Context, android.appwidget.AppWidgetManager, int[]) onUpdate()} 
 because it is called when
