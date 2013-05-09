@@ -35,7 +35,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.MediaController.MediaPlayerControl;
@@ -76,6 +75,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     // All the stuff we need for playing and showing a video
     private SurfaceHolder mSurfaceHolder = null;
     private MediaPlayer mMediaPlayer = null;
+    private int         mAudioSession;
     private int         mVideoWidth;
     private int         mVideoHeight;
     private int         mSurfaceWidth;
@@ -244,6 +244,11 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         release(false);
         try {
             mMediaPlayer = new MediaPlayer();
+            if (mAudioSession != 0) {
+                mMediaPlayer.setAudioSessionId(mAudioSession);
+            } else {
+                mAudioSession = mMediaPlayer.getAudioSessionId();
+            }
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
@@ -598,6 +603,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         }
     }
 
+    @Override
     public void start() {
         if (isInPlaybackState()) {
             mMediaPlayer.start();
@@ -606,6 +612,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         mTargetState = STATE_PLAYING;
     }
 
+    @Override
     public void pause() {
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
@@ -624,6 +631,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         openVideo();
     }
 
+    @Override
     public int getDuration() {
         if (isInPlaybackState()) {
             return mMediaPlayer.getDuration();
@@ -632,6 +640,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         return -1;
     }
 
+    @Override
     public int getCurrentPosition() {
         if (isInPlaybackState()) {
             return mMediaPlayer.getCurrentPosition();
@@ -639,6 +648,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         return 0;
     }
 
+    @Override
     public void seekTo(int msec) {
         if (isInPlaybackState()) {
             mMediaPlayer.seekTo(msec);
@@ -648,10 +658,12 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         }
     }
 
+    @Override
     public boolean isPlaying() {
         return isInPlaybackState() && mMediaPlayer.isPlaying();
     }
 
+    @Override
     public int getBufferPercentage() {
         if (mMediaPlayer != null) {
             return mCurrentBufferPercentage;
@@ -666,15 +678,28 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                 mCurrentState != STATE_PREPARING);
     }
 
+    @Override
     public boolean canPause() {
         return mCanPause;
     }
 
+    @Override
     public boolean canSeekBackward() {
         return mCanSeekBack;
     }
 
+    @Override
     public boolean canSeekForward() {
         return mCanSeekForward;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        if (mAudioSession == 0) {
+            MediaPlayer foo = new MediaPlayer();
+            mAudioSession = foo.getAudioSessionId();
+            foo.release();
+        }
+        return mAudioSession;
     }
 }
