@@ -26,6 +26,7 @@ import android.opengl.EGL14;
 import android.os.Debug;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.EventLog;
 import android.util.Log;
@@ -60,8 +61,9 @@ import java.util.ArrayList;
  * @hide
  */
 public class ZygoteInit {
-
     private static final String TAG = "Zygote";
+
+    private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
 
     private static final String ANDROID_SOCKET_ENV = "ANDROID_SOCKET_zygote";
 
@@ -232,7 +234,9 @@ public class ZygoteInit {
     }
 
     private static void preloadOpenGL() {
-        EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+        if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false)) {
+            EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+        }
     }
 
     /**
