@@ -37,6 +37,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -1311,7 +1312,9 @@ class MountService extends IMountService.Stub
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");
 
-        mHandler = new MountServiceHandler(IoThread.get().getLooper());
+        HandlerThread hthread = new HandlerThread(TAG);
+        hthread.start();
+        mHandler = new MountServiceHandler(hthread.getLooper());
 
         // Watch for user changes
         final IntentFilter userFilter = new IntentFilter();

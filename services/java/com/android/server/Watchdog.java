@@ -33,7 +33,6 @@ import android.os.BatteryManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -135,6 +134,16 @@ public class Watchdog extends Thread {
         }
 
         public void scheduleCheckLocked() {
+            if (!mCheckReboot && mMonitors.size() == 0 && mHandler.getLooper().isIdling()) {
+                // If the target looper is or just recently was idling, then
+                // there is no reason to enqueue our checker on it since that
+                // is as good as it not being deadlocked.  This avoid having
+                // to do a context switch to check the thread.  Note that we
+                // only do this if mCheckReboot is false and we have no
+                // monitors, since those would need to be executed at this point.
+                mCompleted = true;
+                return;
+            }
             mCompleted = false;
             mCurrentMonitor = null;
             mHandler.postAtFrontOfQueue(this);

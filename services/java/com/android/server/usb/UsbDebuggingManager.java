@@ -161,7 +161,7 @@ public class UsbDebuggingManager implements Runnable {
 
                     mAdbEnabled = true;
 
-                    mThread = new Thread(UsbDebuggingManager.this, "UsbDebuggingManager");
+                    mThread = new Thread(UsbDebuggingManager.this, TAG);
                     mThread.start();
 
                     break;

@@ -75,7 +75,7 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class ServerThread extends Thread {
+class ServerThread {
     private static final String TAG = "SystemServer";
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
@@ -87,8 +87,7 @@ class ServerThread extends Thread {
         Log.wtf(TAG, "BOOT FAILURE " + msg, e);
     }
 
-    @Override
-    public void run() {
+    public void initAndLoop() {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN,
             SystemClock.uptimeMillis());
 
@@ -1119,8 +1118,10 @@ public class SystemServer {
 
     public static final void init2() {
         Slog.i(TAG, "Entered the Android system server!");
-        Thread thr = new ServerThread();
-        thr.setName("android.server.ServerThread");
-        thr.start();
+
+        // This used to be its own separate thread, but now it is
+        // just the loop we run on the main thread.
+        ServerThread thr = new ServerThread();
+        thr.initAndLoop();
     }
 }

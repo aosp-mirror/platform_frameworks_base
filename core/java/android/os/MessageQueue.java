@@ -52,6 +52,7 @@ public final class MessageQueue {
     private native static void nativeDestroy(int ptr);
     private native static void nativePollOnce(int ptr, int timeoutMillis);
     private native static void nativeWake(int ptr);
+    private native static boolean nativeIsIdling(int ptr);
 
     /**
      * Callback interface for discovering when a thread is going to block
@@ -377,6 +378,10 @@ public final class MessageQueue {
             }
             return false;
         }
+    }
+
+    boolean isIdling() {
+        return nativeIsIdling(mPtr);
     }
 
     void removeMessages(Handler h, int what, Object object) {
