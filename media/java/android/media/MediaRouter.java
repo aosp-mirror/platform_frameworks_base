@@ -53,6 +53,9 @@ public class MediaRouter {
     private static final String TAG = "MediaRouter";
 
     static class Static implements DisplayManager.DisplayListener {
+        // Time between wifi display scans when actively scanning in milliseconds.
+        private static final int WIFI_DISPLAY_SCAN_INTERVAL = 15000;
+
         final Resources mResources;
         final IAudioService mAudioService;
         final DisplayManager mDisplayService;
@@ -73,14 +76,26 @@ public class MediaRouter {
         RouteInfo mSelectedRoute;
 
         WifiDisplayStatus mLastKnownWifiDisplayStatus;
+        boolean mActivelyScanningWifiDisplays;
 
         final IAudioRoutesObserver.Stub mAudioRoutesObserver = new IAudioRoutesObserver.Stub() {
+            @Override
             public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
                 mHandler.post(new Runnable() {
                     @Override public void run() {
                         updateAudioRoutes(newRoutes);
                     }
                 });
+            }
+        };
+
+        final Runnable mScanWifiDisplays = new Runnable() {
+            @Override
+            public void run() {
+                if (mActivelyScanningWifiDisplays) {
+                    mDisplayService.scanWifiDisplays();
+                    mHandler.postDelayed(this, WIFI_DISPLAY_SCAN_INTERVAL);
+                }
             }
         };
 
@@ -195,6 +210,32 @@ public class MediaRouter {
             }
         }
 
+        void updateActiveScan() {
+            if (hasActiveScanCallbackOfType(ROUTE_TYPE_LIVE_VIDEO)) {
+                if (!mActivelyScanningWifiDisplays) {
+                    mActivelyScanningWifiDisplays = true;
+                    mHandler.post(mScanWifiDisplays);
+                }
+            } else {
+                if (mActivelyScanningWifiDisplays) {
+                    mActivelyScanningWifiDisplays = false;
+                    mHandler.removeCallbacks(mScanWifiDisplays);
+                }
+            }
+        }
+
+        private boolean hasActiveScanCallbackOfType(int type) {
+            final int count = mCallbacks.size();
+            for (int i = 0; i < count; i++) {
+                CallbackInfo cbi = mCallbacks.get(i);
+                if ((cbi.flags & CALLBACK_FLAG_ACTIVE_SCAN) != 0
+                        && (cbi.type & type) != 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         @Override
         public void onDisplayAdded(int displayId) {
             updatePresentationDisplays(displayId);
@@ -270,6 +311,33 @@ public class MediaRouter {
      */
     public static final int ROUTE_TYPE_USER = 0x00800000;
 
+    /**
+     * Flag for {@link #addCallback}: Actively scan for routes while this callback
+     * is registered.
+     * <p>
+     * When this flag is specified, the media router will actively scan for new
+     * routes.  Certain routes, such as wifi display routes, may not be discoverable
+     * except when actively scanning.  This flag is typically used when the route picker
+     * dialog has been opened by the user to ensure that the route information is
+     * up to date.
+     * </p><p>
+     * Active scanning may consume a significant amount of power and may have intrusive
+     * effects on wireless connectivity.  Therefore it is important that active scanning
+     * only be requested when it is actually needed to satisfy a user request to
+     * discover and select a new route.
+     * </p>
+     */
+    public static final int CALLBACK_FLAG_ACTIVE_SCAN = 1 << 0;
+
+    /**
+     * Flag for {@link #addCallback}: Do not filter route events.
+     * <p>
+     * When this flag is specified, the callback will be invoked for event that affect any
+     * route event if they do not match the callback's associated media route selector.
+     * </p>
+     */
+    public static final int CALLBACK_FLAG_UNFILTERED_EVENTS = 1 << 1;
+
     // Maps application contexts
     static final HashMap<Context, MediaRouter> sRouters = new HashMap<Context, MediaRouter>();
 
@@ -343,20 +411,48 @@ public class MediaRouter {
      * Add a callback to listen to events about specific kinds of media routes.
      * If the specified callback is already registered, its registration will be updated for any
      * additional route types specified.
+     * <p>
+     * This is a convenience method that has the same effect as calling
+     * {@link #addCallback(int, Callback, int)} without flags.
+     * </p>
      *
      * @param types Types of routes this callback is interested in
      * @param cb Callback to add
      */
     public void addCallback(int types, Callback cb) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo info = sStatic.mCallbacks.get(i);
-            if (info.cb == cb) {
-                info.type |= types;
-                return;
-            }
+        addCallback(types, cb, 0);
+    }
+
+    /**
+     * Add a callback to listen to events about specific kinds of media routes.
+     * If the specified callback is already registered, its registration will be updated for any
+     * additional route types specified.
+     * <p>
+     * By default, the callback will only be invoked for events that affect routes
+     * that match the specified selector.  The filtering may be disabled by specifying
+     * the {@link #CALLBACK_FLAG_UNFILTERED_EVENTS} flag.
+     * </p>
+     *
+     * @param types Types of routes this callback is interested in
+     * @param cb Callback to add
+     * @param flags Flags to control the behavior of the callback.
+     * May be zero or a combination of {@link #CALLBACK_FLAG_ACTIVE_SCAN} and
+     * {@link #CALLBACK_FLAG_UNFILTERED_EVENTS}.
+     */
+    public void addCallback(int types, Callback cb, int flags) {
+        CallbackInfo info;
+        int index = findCallbackInfo(cb);
+        if (index >= 0) {
+            info = sStatic.mCallbacks.get(index);
+            info.type |= types;
+            info.flags |= flags;
+        } else {
+            info = new CallbackInfo(cb, types, flags, this);
+            sStatic.mCallbacks.add(info);
         }
-        sStatic.mCallbacks.add(new CallbackInfo(cb, types, this));
+        if ((info.flags & CALLBACK_FLAG_ACTIVE_SCAN) != 0) {
+            sStatic.updateActiveScan();
+        }
     }
 
     /**
@@ -365,14 +461,26 @@ public class MediaRouter {
      * @param cb Callback to remove
      */
     public void removeCallback(Callback cb) {
+        int index = findCallbackInfo(cb);
+        if (index >= 0) {
+            CallbackInfo info = sStatic.mCallbacks.remove(index);
+            if ((info.flags & CALLBACK_FLAG_ACTIVE_SCAN) != 0) {
+                sStatic.updateActiveScan();
+            }
+        } else {
+            Log.w(TAG, "removeCallback(" + cb + "): callback not registered");
+        }
+    }
+
+    private int findCallbackInfo(Callback cb) {
         final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            if (sStatic.mCallbacks.get(i).cb == cb) {
-                sStatic.mCallbacks.remove(i);
-                return;
+            final CallbackInfo info = sStatic.mCallbacks.get(i);
+            if (info.cb == cb) {
+                return i;
             }
         }
-        Log.w(TAG, "removeCallback(" + cb + "): callback not registered");
+        return -1;
     }
 
     /**
@@ -431,12 +539,10 @@ public class MediaRouter {
         }
 
         if (oldRoute != null) {
-            // TODO filter types properly
             dispatchRouteUnselected(types & oldRoute.getSupportedTypes(), oldRoute);
         }
         sStatic.mSelectedRoute = route;
         if (route != null) {
-            // TODO filter types properly
             dispatchRouteSelected(types & route.getSupportedTypes(), route);
         }
     }
@@ -671,7 +777,7 @@ public class MediaRouter {
 
     static void dispatchRouteSelected(int type, RouteInfo info) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & type) != 0) {
+            if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteSelected(cbi.router, type, info);
             }
         }
@@ -679,7 +785,7 @@ public class MediaRouter {
 
     static void dispatchRouteUnselected(int type, RouteInfo info) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & type) != 0) {
+            if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteUnselected(cbi.router, type, info);
             }
         }
@@ -687,7 +793,7 @@ public class MediaRouter {
 
     static void dispatchRouteChanged(RouteInfo info) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & info.mSupportedTypes) != 0) {
+            if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteChanged(cbi.router, info);
             }
         }
@@ -695,7 +801,7 @@ public class MediaRouter {
 
     static void dispatchRouteAdded(RouteInfo info) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & info.mSupportedTypes) != 0) {
+            if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteAdded(cbi.router, info);
             }
         }
@@ -703,7 +809,7 @@ public class MediaRouter {
 
     static void dispatchRouteRemoved(RouteInfo info) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & info.mSupportedTypes) != 0) {
+            if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteRemoved(cbi.router, info);
             }
         }
@@ -711,7 +817,7 @@ public class MediaRouter {
 
     static void dispatchRouteGrouped(RouteInfo info, RouteGroup group, int index) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & group.mSupportedTypes) != 0) {
+            if (cbi.filterRouteEvent(group)) {
                 cbi.cb.onRouteGrouped(cbi.router, info, group, index);
             }
         }
@@ -719,7 +825,7 @@ public class MediaRouter {
 
     static void dispatchRouteUngrouped(RouteInfo info, RouteGroup group) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & group.mSupportedTypes) != 0) {
+            if (cbi.filterRouteEvent(group)) {
                 cbi.cb.onRouteUngrouped(cbi.router, info, group);
             }
         }
@@ -727,7 +833,7 @@ public class MediaRouter {
 
     static void dispatchRouteVolumeChanged(RouteInfo info) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & info.mSupportedTypes) != 0) {
+            if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteVolumeChanged(cbi.router, info);
             }
         }
@@ -735,7 +841,7 @@ public class MediaRouter {
 
     static void dispatchRoutePresentationDisplayChanged(RouteInfo info) {
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if ((cbi.type & info.mSupportedTypes) != 0) {
+            if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRoutePresentationDisplayChanged(cbi.router, info);
             }
         }
@@ -1892,24 +1998,33 @@ public class MediaRouter {
 
     static class CallbackInfo {
         public int type;
+        public int flags;
         public final Callback cb;
         public final MediaRouter router;
 
-        public CallbackInfo(Callback cb, int type, MediaRouter router) {
+        public CallbackInfo(Callback cb, int type, int flags, MediaRouter router) {
             this.cb = cb;
             this.type = type;
+            this.flags = flags;
             this.router = router;
+        }
+
+        public boolean filterRouteEvent(RouteInfo route) {
+            return (flags & CALLBACK_FLAG_UNFILTERED_EVENTS) != 0
+                    || (type & route.mSupportedTypes) != 0;
         }
     }
 
     /**
      * Interface for receiving events about media routing changes.
      * All methods of this interface will be called from the application's main thread.
+     * <p>
+     * A Callback will only receive events relevant to routes that the callback
+     * was registered for unless the {@link MediaRouter#CALLBACK_FLAG_UNFILTERED_EVENTS}
+     * flag was specified in {@link MediaRouter#addCallback(int, Callback, int)}.
+     * </p>
      *
-     * <p>A Callback will only receive events relevant to routes that the callback
-     * was registered for.</p>
-     *
-     * @see MediaRouter#addCallback(int, Callback)
+     * @see MediaRouter#addCallback(int, Callback, int)
      * @see MediaRouter#removeCallback(Callback)
      */
     public static abstract class Callback {
