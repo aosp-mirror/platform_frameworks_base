@@ -70,7 +70,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     };
 
     MediaRouter mRouter;
-    DisplayManager mDisplayService;
     private int mRouteTypes;
 
     private LayoutInflater mInflater;
@@ -98,7 +97,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mRouter = (MediaRouter) activity.getSystemService(Context.MEDIA_ROUTER_SERVICE);
-        mDisplayService = (DisplayManager) activity.getSystemService(Context.DISPLAY_SERVICE);
+        mRouter.addCallback(mRouteTypes, mCallback, MediaRouter.CALLBACK_FLAG_ACTIVE_SCAN);
     }
 
     @Override
@@ -121,15 +120,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
     public void setRouteTypes(int types) {
         mRouteTypes = types;
-        if ((mRouteTypes & MediaRouter.ROUTE_TYPE_LIVE_VIDEO) != 0 && mDisplayService == null) {
-            final Context activity = getActivity();
-            if (activity != null) {
-                mDisplayService = (DisplayManager) activity.getSystemService(
-                        Context.DISPLAY_SERVICE);
-            }
-        } else {
-            mDisplayService = null;
-        }
     }
 
     void updateVolume() {
@@ -192,7 +182,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         list.setOnItemClickListener(mAdapter);
 
         mListView = list;
-        mRouter.addCallback(mRouteTypes, mCallback);
 
         mAdapter.scrollToSelectedItem();
 
@@ -202,14 +191,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new RouteChooserDialog(getActivity(), getTheme());
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mDisplayService != null) {
-            mDisplayService.scanWifiDisplays();
-        }
     }
 
     private static class ViewHolder {
