@@ -2377,7 +2377,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         intent.setComponent(mTopComponent);
         if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             intent.addCategory(Intent.CATEGORY_HOME);
-            intent.addCategory(Intent.CATEGORY_DEFAULT);
         }
         ActivityInfo aInfo =
             resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
