@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_VERTEX_H
 #define ANDROID_HWUI_VERTEX_H
 
+#include "Vector.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -30,6 +32,15 @@ struct Vertex {
         vertex[0].position[0] = x;
         vertex[0].position[1] = y;
     }
+
+    static inline void set(Vertex* vertex, vec2 val) {
+        set(vertex, val.x, val.y);
+    }
+
+    static inline void copyWithOffset(Vertex* vertex, const Vertex& src, float x, float y) {
+        set(vertex, src.position[0] + x, src.position[1] + y);
+    }
+
 }; // struct Vertex
 
 /**
@@ -79,6 +90,12 @@ struct AlphaVertex : Vertex {
     static inline void set(AlphaVertex* vertex, float x, float y, float alpha) {
         Vertex::set(vertex, x, y);
         vertex[0].alpha = alpha;
+    }
+
+    static inline void copyWithOffset(AlphaVertex* vertex, const AlphaVertex& src,
+            float x, float y) {
+        Vertex::set(vertex, src.position[0] + x, src.position[1] + y);
+        vertex[0].alpha = src.alpha;
     }
 
     static inline void setColor(AlphaVertex* vertex, float alpha) {

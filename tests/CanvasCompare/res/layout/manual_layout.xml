@@ -64,7 +64,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
+    <com.android.test.hwuicompare.NearestImageView
         android:id="@+id/compare_image_view"
         android:layout_width="@dimen/layer_width_double"
         android:layout_height="@dimen/layer_height_double"
