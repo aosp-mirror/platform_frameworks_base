@@ -2567,8 +2567,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the system when a user's information changes. Carries an extra
      * {@link #EXTRA_USER_HANDLE} to indicate which user's information changed.
-     * This is only sent to registered receivers, not manifest receivers. It is sent to the user
-     * whose information has changed.
+     * This is only sent to registered receivers, not manifest receivers. It is sent to all users.
      * @hide
      */
     public static final String ACTION_USER_INFO_CHANGED =
