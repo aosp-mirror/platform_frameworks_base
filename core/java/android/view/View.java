@@ -2362,6 +2362,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
 
     /**
+     * Flag for {@link #setSystemUiVisibility(int)}: View would like to receive touch events
+     * when hiding the status bar with {@link #SYSTEM_UI_FLAG_FULLSCREEN} and/or hiding the
+     * navigation bar with {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION} instead of having the system
+     * clear these flags upon interaction.  The system may compensate by temporarily overlaying
+     * transparent system ui while also delivering the event.
+     */
+    public static final int SYSTEM_UI_FLAG_ALLOW_OVERLAY = 0x00000800;
+
+    /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
      */
     public static final int STATUS_BAR_HIDDEN = SYSTEM_UI_FLAG_LOW_PROFILE;
@@ -2487,10 +2496,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * out of the public fields to keep the undefined bits out of the developer's way.
      *
      * Flag to specify that the status bar should temporarily overlay underlying content
-     * that is otherwise assuming the status bar is hidden.  The status bar will typically
+     * that is otherwise assuming the status bar is hidden.  The status bar may
      * have some degree of transparency while in this temporary overlay mode.
      */
     public static final int STATUS_BAR_OVERLAY = 0x04000000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to specify that the navigation bar should temporarily overlay underlying content
+     * that is otherwise assuming the navigation bar is hidden.  The navigation bar mayu
+     * have some degree of transparency while in this temporary overlay mode.
+     */
+    public static final int NAVIGATION_BAR_OVERLAY = 0x08000000;
 
     /**
      * @hide

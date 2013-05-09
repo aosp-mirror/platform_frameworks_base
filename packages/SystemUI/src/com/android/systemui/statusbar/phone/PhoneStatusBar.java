@@ -132,6 +132,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
     private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
 
+    private static final int STATUS_OR_NAV_OVERLAY =
+            View.STATUS_BAR_OVERLAY | View.NAVIGATION_BAR_OVERLAY;
     private static final long AUTOHIDE_TIMEOUT_MS = 3000;
     private static final float TRANSPARENT_ALPHA = 0.7f;
 
@@ -312,7 +314,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private final Runnable mAutohide = new Runnable() {
         @Override
         public void run() {
-            int requested = mSystemUiVisibility & ~View.STATUS_BAR_OVERLAY;
+            int requested = mSystemUiVisibility & ~STATUS_OR_NAV_OVERLAY;
             notifyUiVisibilityChanged(requested);
         }};
 
@@ -806,7 +808,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.OPAQUE);
+                PixelFormat.TRANSLUCENT);
         // this will allow the navbar to run in an overlay on devices that support this
         if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
@@ -1682,9 +1684,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // Reschedule suspended auto-hide if necessary
-        if (mAutohideSuspended) {
-            scheduleAutohide();
-        }
+        resumeAutohide();
     }
 
     /**
@@ -1875,13 +1875,20 @@ public class PhoneStatusBar extends BaseStatusBar {
                 setStatusBarLowProfile(lightsOut);
             }
 
-            if (0 != (diff & View.STATUS_BAR_OVERLAY)) {
-                boolean overlay = 0 != (vis & View.STATUS_BAR_OVERLAY);
-                if (overlay) {
-                    setTransparent(true);
+            boolean sbOverlayChanged = 0 != (diff & View.STATUS_BAR_OVERLAY);
+            boolean nbOverlayChanged = 0 != (diff & View.NAVIGATION_BAR_OVERLAY);
+            if (sbOverlayChanged || nbOverlayChanged) {
+                boolean sbOverlay = 0 != (vis & View.STATUS_BAR_OVERLAY);
+                boolean nbOverlay = 0 != (vis & View.NAVIGATION_BAR_OVERLAY);
+                if (sbOverlayChanged) {
+                    setTransparent(mStatusBarView, sbOverlay);
+                }
+                if (nbOverlayChanged) {
+                    setTransparent(mNavigationBarView, nbOverlay);
+                }
+                if (sbOverlayChanged && sbOverlay || nbOverlayChanged && nbOverlay) {
                     scheduleAutohide();
                 } else {
-                    setTransparent(false);
                     cancelAutohide();
                 }
             }
@@ -1889,9 +1896,17 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    private void suspendAutohide() {
+    @Override
+    public void resumeAutohide() {
+        if (mAutohideSuspended) {
+            scheduleAutohide();
+        }
+    }
+
+    @Override
+    public void suspendAutohide() {
         mHandler.removeCallbacks(mAutohide);
-        mAutohideSuspended = (0 != (mSystemUiVisibility & View.STATUS_BAR_OVERLAY));
+        mAutohideSuspended = 0 != (mSystemUiVisibility & STATUS_OR_NAV_OVERLAY);
     }
 
     private void cancelAutohide() {
@@ -1904,10 +1919,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         mHandler.postDelayed(mAutohide, AUTOHIDE_TIMEOUT_MS);
     }
 
-    private void setTransparent(boolean transparent) {
+    private void setTransparent(View view, boolean transparent) {
         float alpha = transparent ? TRANSPARENT_ALPHA : 1;
-        if (DEBUG) Slog.d(TAG, "Setting alpha to " + alpha);
-        mStatusBarView.setAlpha(alpha);
+        if (DEBUG) Slog.d(TAG, "Setting " + (view == mStatusBarView ? "status bar" :
+                view == mNavigationBarView ? "navigation bar" : "view") +  " alpha to " + alpha);
+        view.setAlpha(alpha);
     }
 
     private void setStatusBarLowProfile(boolean lightsOut) {
