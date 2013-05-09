@@ -123,9 +123,9 @@ enum DebugLevel {
 
 /**
  * Indicates whether PBOs can be used to back pixel buffers.
- * Accepted values are "true" and "false".
+ * Accepted values are "true" and "false". Default is true.
  */
-#define PROPERTY_ENABLE_GPU_PIXEL_BUFFERS "hwui.use_gpu_pixel_buffers"
+#define PROPERTY_ENABLE_GPU_PIXEL_BUFFERS "ro.hwui.use_gpu_pixel_buffers"
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
