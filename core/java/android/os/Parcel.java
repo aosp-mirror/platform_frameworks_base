@@ -2094,14 +2094,14 @@ public final class Parcel {
                     creator = (Parcelable.Creator)f.get(null);
                 }
                 catch (IllegalAccessException e) {
-                    Log.e(TAG, "Class not found when unmarshalling: "
-                                        + name + ", e: " + e);
+                    Log.e(TAG, "Illegal access when unmarshalling: "
+                                        + name, e);
                     throw new BadParcelableException(
                             "IllegalAccessException when unmarshalling: " + name);
                 }
                 catch (ClassNotFoundException e) {
                     Log.e(TAG, "Class not found when unmarshalling: "
-                                        + name + ", e: " + e);
+                                        + name, e);
                     throw new BadParcelableException(
                             "ClassNotFoundException when unmarshalling: " + name);
                 }
