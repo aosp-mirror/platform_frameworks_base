@@ -1187,6 +1187,10 @@ public final class BluetoothDevice implements Parcelable {
         IBluetoothManager managerService = adapter.getBluetoothManager();
         try {
             IBluetoothGatt iGatt = managerService.getBluetoothGatt();
+            if (iGatt == null) {
+                // BLE is not supported
+                return null;
+            }
             BluetoothGatt gatt = new BluetoothGatt(context, iGatt, this);
             gatt.connect(autoConnect, callback);
             return gatt;
