@@ -822,27 +822,26 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint) {
         baseGlyphCount = paint->getBaseGlyphCount(firstUnichar);
     }
 
+    SkTypeface* scriptTypeface = NULL;
     if (baseGlyphCount != 0) {
-        SkTypeface::Style style = SkTypeface::kNormal;
-        if (typeface != NULL) {
-            style = typeface->style();
-        }
-        typeface = typefaceForScript(paint, typeface, hb_buffer_get_script(mBuffer));
-        if (!typeface) {
-            baseGlyphCount = 0;
-            typeface = SkTypeface::CreateFromName(NULL, style);
+        scriptTypeface = typefaceForScript(paint, typeface,
+            hb_buffer_get_script(mBuffer));
 #if DEBUG_GLYPHS
-            ALOGD("Using Default Typeface");
+        ALOGD("Using Default Typeface for script %c%c%c%c",
+            HB_UNTAG(hb_buffer_get_script(mBuffer)));
 #endif
-        }
+    }
+    if (scriptTypeface) {
+        typeface = scriptTypeface;
     } else {
-        if (!typeface) {
+        baseGlyphCount = 0;
+        if (typeface) {
+            SkSafeRef(typeface);
+        } else {
             typeface = SkTypeface::CreateFromName(NULL, SkTypeface::kNormal);
 #if DEBUG_GLYPHS
             ALOGD("Using Default Typeface (normal style)");
 #endif
-        } else {
-            SkSafeRef(typeface);
         }
     }
 
