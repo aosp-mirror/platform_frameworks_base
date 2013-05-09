@@ -24,12 +24,14 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -54,6 +56,8 @@ import java.util.ArrayList;
  */
 public class Notification implements Parcelable
 {
+    private static final String TAG = "Notification";
+
     /**
      * Use all default values (where applicable).
      */
@@ -694,7 +698,14 @@ public class Notification implements Parcelable
         }
 
         if (this.extras != null) {
-            that.extras = new Bundle(this.extras);
+            try {
+                that.extras = new Bundle(this.extras);
+                // will unparcel
+                that.extras.size();
+            } catch (BadParcelableException e) {
+                Log.e(TAG, "could not unparcel extras from notification: " + this, e);
+                that.extras = null;
+            }
         }
 
         if (this.actions != null) {
@@ -728,6 +739,21 @@ public class Notification implements Parcelable
             extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
             extras.remove(Notification.EXTRA_PICTURE);
         }
+    }
+
+    /**
+     * Make sure this CharSequence is safe to put into a bundle, which basically
+     * means it had better not be some custom Parcelable implementation.
+     * @hide
+     */
+    public static CharSequence safeCharSequence(CharSequence cs) {
+        if (cs instanceof Parcelable) {
+            Log.e(TAG, "warning: " + cs.getClass().getCanonicalName()
+                    + " instance is a custom Parcelable and not allowed in Notification");
+            return cs.toString();
+        }
+
+        return cs;
     }
 
     public int describeContents() {
@@ -1127,7 +1153,7 @@ public class Notification implements Parcelable
          * Set the first line of text in the platform notification template.
          */
         public Builder setContentTitle(CharSequence title) {
-            mContentTitle = title;
+            mContentTitle = safeCharSequence(title);
             return this;
         }
 
@@ -1135,16 +1161,17 @@ public class Notification implements Parcelable
          * Set the second line of text in the platform notification template.
          */
         public Builder setContentText(CharSequence text) {
-            mContentText = text;
+            mContentText = safeCharSequence(text);
             return this;
         }
 
         /**
          * Set the third line of text in the platform notification template.
-         * Don't use if you're also using {@link #setProgress(int, int, boolean)}; they occupy the same location in the standard template.
+         * Don't use if you're also using {@link #setProgress(int, int, boolean)}; they occupy the
+         * same location in the standard template.
          */
         public Builder setSubText(CharSequence text) {
-            mSubText = text;
+            mSubText = safeCharSequence(text);
             return this;
         }
 
@@ -1165,7 +1192,7 @@ public class Notification implements Parcelable
          * right (to the right of a smallIcon if it has been placed there).
          */
         public Builder setContentInfo(CharSequence info) {
-            mContentInfo = info;
+            mContentInfo = safeCharSequence(info);
             return this;
         }
 
@@ -1245,7 +1272,7 @@ public class Notification implements Parcelable
          * @see Notification#tickerText
          */
         public Builder setTicker(CharSequence tickerText) {
-            mTickerText = tickerText;
+            mTickerText = safeCharSequence(tickerText);
             return this;
         }
 
@@ -1258,7 +1285,7 @@ public class Notification implements Parcelable
          * @see Notification#tickerView
          */
         public Builder setTicker(CharSequence tickerText, RemoteViews views) {
-            mTickerText = tickerText;
+            mTickerText = safeCharSequence(tickerText);
             mTickerView = views;
             return this;
         }
@@ -1441,7 +1468,7 @@ public class Notification implements Parcelable
          * @param intent PendingIntent to be fired when the action is invoked.
          */
         public Builder addAction(int icon, CharSequence title, PendingIntent intent) {
-            mActions.add(new Action(icon, title, intent));
+            mActions.add(new Action(icon, safeCharSequence(title), intent));
             return this;
         }
 
@@ -1859,7 +1886,7 @@ public class Notification implements Parcelable
          * This defaults to the value passed to setContentTitle().
          */
         public BigPictureStyle setBigContentTitle(CharSequence title) {
-            internalSetBigContentTitle(title);
+            internalSetBigContentTitle(safeCharSequence(title));
             return this;
         }
 
@@ -1867,7 +1894,7 @@ public class Notification implements Parcelable
          * Set the first line of text after the detail section in the big form of the template.
          */
         public BigPictureStyle setSummaryText(CharSequence cs) {
-            internalSetSummaryText(cs);
+            internalSetSummaryText(safeCharSequence(cs));
             return this;
         }
 
@@ -1952,7 +1979,7 @@ public class Notification implements Parcelable
          * This defaults to the value passed to setContentTitle().
          */
         public BigTextStyle setBigContentTitle(CharSequence title) {
-            internalSetBigContentTitle(title);
+            internalSetBigContentTitle(safeCharSequence(title));
             return this;
         }
 
@@ -1960,7 +1987,7 @@ public class Notification implements Parcelable
          * Set the first line of text after the detail section in the big form of the template.
          */
         public BigTextStyle setSummaryText(CharSequence cs) {
-            internalSetSummaryText(cs);
+            internalSetSummaryText(safeCharSequence(cs));
             return this;
         }
 
@@ -1969,7 +1996,7 @@ public class Notification implements Parcelable
          * template in place of the content text.
          */
         public BigTextStyle bigText(CharSequence cs) {
-            mBigText = cs;
+            mBigText = safeCharSequence(cs);
             return this;
         }
 
@@ -2048,7 +2075,7 @@ public class Notification implements Parcelable
          * This defaults to the value passed to setContentTitle().
          */
         public InboxStyle setBigContentTitle(CharSequence title) {
-            internalSetBigContentTitle(title);
+            internalSetBigContentTitle(safeCharSequence(title));
             return this;
         }
 
@@ -2056,7 +2083,7 @@ public class Notification implements Parcelable
          * Set the first line of text after the detail section in the big form of the template.
          */
         public InboxStyle setSummaryText(CharSequence cs) {
-            internalSetSummaryText(cs);
+            internalSetSummaryText(safeCharSequence(cs));
             return this;
         }
 
@@ -2064,7 +2091,7 @@ public class Notification implements Parcelable
          * Append a line to the digest section of the Inbox notification.
          */
         public InboxStyle addLine(CharSequence cs) {
-            mTexts.add(cs);
+            mTexts.add(safeCharSequence(cs));
             return this;
         }
 
