@@ -727,7 +727,13 @@ public class NotificationManagerService extends INotificationManager.Stub
                         && info.userid == userid) {
                     mListeners.remove(i);
                     if (info.connection != null) {
-                        mContext.unbindService(info.connection);
+                        try {
+                            mContext.unbindService(info.connection);
+                        } catch (IllegalArgumentException ex) {
+                            // something happened to the service: we think we have a connection
+                            // but it's bogus.
+                            Slog.e(TAG, "Listener " + name + " could not be unbound: " + ex);
+                        }
                     }
                 }
             }
