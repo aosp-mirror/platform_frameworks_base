@@ -146,11 +146,13 @@ public class Canvas {
      * Replace existing canvas while ensuring that the swap has occurred before
      * the previous native canvas is unreferenced.
      */
-    private void safeCanvasSwap(int nativeCanvas) {
+    private void safeCanvasSwap(int nativeCanvas, boolean copyState) {
         final int oldCanvas = mNativeCanvas;
         mNativeCanvas = nativeCanvas;
         mFinalizer.mNativeCanvas = nativeCanvas;
-        copyNativeCanvasState(oldCanvas, mNativeCanvas);
+        if (copyState) {
+            copyNativeCanvasState(oldCanvas, mNativeCanvas);
+        }
         finalizer(oldCanvas);
     }
     
@@ -180,9 +182,10 @@ public class Canvas {
     }
 
     /**
-     * Specify a bitmap for the canvas to draw into. As a side-effect, the
-     * canvas' target density is updated to match that of the bitmap while all
-     * other state such as the layers, filters, matrix, and clip are reset.
+     * Specify a bitmap for the canvas to draw into. All canvas state such as 
+     * layers, filters, and the save/restore stack are reset with the exception
+     * of the current matrix and clip stack. Additionally, as a side-effect
+     * the canvas' target density is updated to match that of the bitmap.
      *
      * @param bitmap Specifies a mutable bitmap for the canvas to draw into.
      * @see #setDensity(int)
@@ -194,7 +197,7 @@ public class Canvas {
         }
 
         if (bitmap == null) {
-            safeCanvasSwap(initRaster(0));
+            safeCanvasSwap(initRaster(0), false);
             mDensity = Bitmap.DENSITY_NONE;
         } else {
             if (!bitmap.isMutable()) {
@@ -202,7 +205,7 @@ public class Canvas {
             }
             throwIfRecycled(bitmap);
 
-            safeCanvasSwap(initRaster(bitmap.ni()));
+            safeCanvasSwap(initRaster(bitmap.ni()), true);
             mDensity = bitmap.mDensity;
         }
 
