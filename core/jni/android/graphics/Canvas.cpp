@@ -964,16 +964,10 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
                               jobject bounds) {
         SkRect   r;
         SkIRect ir;
-        bool     result = canvas->getClipBounds(&r);
+        bool result = canvas->getClipBounds(&r);
 
         if (!result) {
             r.setEmpty();
-        } else {
-            // ensure the clip is not larger than the canvas
-            SkRect canvasRect;
-            SkISize deviceSize = canvas->getDeviceSize();
-            canvasRect.iset(0, 0, deviceSize.fWidth, deviceSize.fHeight);
-            r.intersect(canvasRect);
         }
         r.round(&ir);
 

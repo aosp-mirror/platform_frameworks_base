@@ -781,7 +781,10 @@ public class Canvas {
     }
 
     /**
-     * Retrieve the clip bounds, returning true if they are non-empty.
+     * Return the bounds of the current clip (in local coordinates) in the
+     * bounds parameter, and return true if it is non-empty. This can be useful
+     * in a way similar to quickReject, in that it tells you that drawing
+     * outside of these bounds will be clipped out.
      *
      * @param bounds Return the clip bounds here. If it is null, ignore it but
      *               still return true if the current clip is non-empty.
@@ -792,7 +795,7 @@ public class Canvas {
     }
     
     /**
-     * Retrieve the clip bounds.
+     * Retrieve the bounds of the current clip (in local coordinates).
      *
      * @return the clip bounds, or [0, 0, 0, 0] if the clip is empty.
      */
