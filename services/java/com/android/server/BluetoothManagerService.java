@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1088,10 +1089,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                 if (isUp) {
                     // connect to GattService
-                    Intent i = new Intent(IBluetoothGatt.class.getName());
-                    if (!mContext.bindServiceAsUser(i, mConnection, Context.BIND_AUTO_CREATE,
-                                                    UserHandle.CURRENT)) {
-                        Log.e(TAG, "Fail to bind to: " + IBluetoothGatt.class.getName());
+                    if (mContext.getPackageManager().hasSystemFeature(
+                                                     PackageManager.FEATURE_BLUETOOTH_LE)) {
+                        Intent i = new Intent(IBluetoothGatt.class.getName());
+                        if (!mContext.bindServiceAsUser(i, mConnection, Context.BIND_AUTO_CREATE,
+                                                        UserHandle.CURRENT)) {
+                            Log.e(TAG, "Fail to bind to: " + IBluetoothGatt.class.getName());
+                        }
                     }
                 } else {
                     //If Bluetooth is off, send service down event to proxy objects, and unbind

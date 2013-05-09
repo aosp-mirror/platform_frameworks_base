@@ -1472,9 +1472,13 @@ public final class BluetoothAdapter {
 
             try {
                 IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
+                if (iGatt == null) {
+                    // BLE is not supported
+                    return false;
+                }
+
                 UUID uuid = UUID.randomUUID();
                 GattCallbackWrapper wrapper = new GattCallbackWrapper(this, callback, serviceUuids);
-
                 iGatt.registerClient(new ParcelUuid(uuid), wrapper);
                 if (wrapper.scanStarted()) {
                     mLeScanClients.put(callback, wrapper);
