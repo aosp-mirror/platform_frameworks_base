@@ -22,6 +22,7 @@ import static libcore.io.OsConstants.S_IRWXO;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.net.LocalServerSocket;
+import android.opengl.EGL14;
 import android.os.Debug;
 import android.os.Process;
 import android.os.SystemClock;
@@ -227,6 +228,11 @@ public class ZygoteInit {
     static void preload() {
         preloadClasses();
         preloadResources();
+        preloadOpenGL();
+    }
+
+    private static void preloadOpenGL() {
+        EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
     }
 
     /**
