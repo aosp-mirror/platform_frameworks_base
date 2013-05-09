@@ -124,20 +124,32 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         mUserImage = (ImageView) findViewById(R.id.keyguard_user_avatar);
         mUserName = (TextView) findViewById(R.id.keyguard_user_name);
 
-        Bitmap icon = null; 
-        try {
-            icon = BitmapFactory.decodeFile(rewriteIconPath(user.iconPath));
-        } catch (Exception e) {
-            if (DEBUG) Log.d(TAG, "failed to open profile icon " + user.iconPath, e);
+        mFramed = (KeyguardCircleFramedDrawable)
+                KeyguardViewMediator.getAvatarCache().get(user.id);
+
+        // If we can't find it or the params don't match, create the drawable again
+        if (mFramed == null
+                || !mFramed.verifyParams(mIconSize, mFrameColor, mStroke, mFrameShadowColor,
+                        mShadowRadius, mHighlightColor)) {
+            Bitmap icon = null;
+            try {
+                icon = BitmapFactory.decodeFile(rewriteIconPath(user.iconPath));
+            } catch (Exception e) {
+                if (DEBUG) Log.d(TAG, "failed to open profile icon " + user.iconPath, e);
+            }
+
+            if (icon == null) {
+                icon = BitmapFactory.decodeResource(mContext.getResources(),
+                        com.android.internal.R.drawable.ic_contact_picture);
+            }
+
+            mFramed = new KeyguardCircleFramedDrawable(icon, (int) mIconSize, mFrameColor, mStroke,
+                    mFrameShadowColor, mShadowRadius, mHighlightColor);
+            KeyguardViewMediator.getAvatarCache().put(user.id, mFramed);
         }
 
-        if (icon == null) {
-            icon = BitmapFactory.decodeResource(mContext.getResources(),
-                    com.android.internal.R.drawable.ic_contact_picture);
-        }
+        mFramed.reset();
 
-        mFramed = new KeyguardCircleFramedDrawable(icon, (int) mIconSize, mFrameColor, mStroke,
-                mFrameShadowColor, mShadowRadius, mHighlightColor);
         mUserImage.setImageDrawable(mFramed);
         mUserName.setText(mUserInfo.name);
         setOnClickListener(mUserSelector);

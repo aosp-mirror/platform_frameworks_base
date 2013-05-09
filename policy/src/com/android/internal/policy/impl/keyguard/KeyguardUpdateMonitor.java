@@ -91,6 +91,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
     private static final int MSG_SET_CURRENT_CLIENT_ID = 315;
     protected static final int MSG_SET_PLAYBACK_STATE = 316;
+    protected static final int MSG_USER_INFO_CHANGED = 317;
 
 
     private static KeyguardUpdateMonitor sInstance;
@@ -177,6 +178,9 @@ public class KeyguardUpdateMonitor {
                     break;
                 case MSG_SET_PLAYBACK_STATE:
                     handleSetPlaybackState(msg.arg1, msg.arg2, (Long) msg.obj);
+                    break;
+                case MSG_USER_INFO_CHANGED:
+                    handleUserInfoChanged(msg.arg1);
                     break;
             }
         }
@@ -276,6 +280,17 @@ public class KeyguardUpdateMonitor {
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_BOOT_COMPLETED));
+            }
+        }
+    };
+
+    private final BroadcastReceiver mBroadcastAllReceiver = new BroadcastReceiver() {
+
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_INFO_CHANGED,
+                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId()), 0));
             }
         }
     };
@@ -389,7 +404,6 @@ public class KeyguardUpdateMonitor {
         return sInstance;
     }
 
-
     protected void handleSetGenerationId(int clientGeneration, boolean clearing, PendingIntent p) {
         mDisplayClientState.clientGeneration = clientGeneration;
         mDisplayClientState.clearing = clearing;
@@ -419,6 +433,15 @@ public class KeyguardUpdateMonitor {
             }
         } else {
             Log.w(TAG, "Ignoring generation id " + generationId + " because it's not current");
+        }
+    }
+
+    private void handleUserInfoChanged(int userId) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onUserInfoChanged(userId);
+            }
         }
     }
 
@@ -455,6 +478,10 @@ public class KeyguardUpdateMonitor {
         bootCompleteFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         bootCompleteFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBroadcastReceiver, bootCompleteFilter);
+
+        final IntentFilter userInfoFilter = new IntentFilter(Intent.ACTION_USER_INFO_CHANGED);
+        context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, userInfoFilter,
+                null, null);
 
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
