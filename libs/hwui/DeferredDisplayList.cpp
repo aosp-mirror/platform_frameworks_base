@@ -98,8 +98,8 @@ public:
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
             renderer.eventMark(op->name());
 #endif
-            status |= op->applyDraw(renderer, dirty);
             logBuffer.writeCommand(0, op->name());
+            status |= op->applyDraw(renderer, dirty);
 
 #if DEBUG_MERGE_BEHAVIOR
             Rect& bounds = mOps[i]->state.mBounds;
@@ -200,10 +200,10 @@ public:
         }
 
         DrawOp* op = mOps[0];
-        status_t status = op->multiDraw(renderer, dirty, mOps, mBounds);
         DisplayListLogBuffer& buffer = DisplayListLogBuffer::getInstance();
         buffer.writeCommand(0, "multiDraw");
         buffer.writeCommand(1, op->name());
+        status_t status = op->multiDraw(renderer, dirty, mOps, mBounds);
 
 #if DEBUG_MERGE_BEHAVIOR
         renderer.drawScreenSpaceColorRect(mBounds.left, mBounds.top, mBounds.right, mBounds.bottom,
