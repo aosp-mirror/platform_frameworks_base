@@ -2526,7 +2526,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mStatusHideybar = HIDEYBAR_HIDING;
             mStatusBar.hideLw(true);
         }
-        if (mNavigationHideybar == HIDEYBAR_SHOWING &&
+        if (mNavigationBar != null && mNavigationHideybar == HIDEYBAR_SHOWING &&
                 0 == (visibility & View.NAVIGATION_BAR_OVERLAY)) {
             mNavigationHideybar = HIDEYBAR_HIDING;
             mNavigationBar.hideLw(true);
@@ -4163,6 +4163,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (hideybar == HIDEYBAR_SHOWING) {
             if (DEBUG) Slog.d(TAG, "Not showing " + tag + " hideybar, already shown");
             return false;
+        } else if (win == null) {
+            if (DEBUG) Slog.d(TAG, "Not showing " + tag + " hideybar, bar doesn't exist");
+            return false;
         } else if (win.isDisplayedLw()) {
             if (DEBUG) Slog.d(TAG, "Not showing " + tag + " hideybar, bar already visible");
             return false;
@@ -5076,7 +5079,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean hideNavigationBarSysui =
                     (tmpVisibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
             boolean navigationHideyAllowed =
-                    hideNavigationBarSysui && overlayAllowed;
+                    hideNavigationBarSysui && overlayAllowed && mNavigationBar != null;
             if (!navigationHideyAllowed) {
                 mNavigationHideybar = HIDEYBAR_NONE;
             } else {
