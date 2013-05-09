@@ -1262,6 +1262,11 @@ public class AccountManagerService
         final boolean customTokens =
             authenticatorInfo != null && authenticatorInfo.type.customTokens;
 
+        // Check to see that the app is authorized to access the account, in case it's a
+        // restricted account.
+        if (!ArrayUtils.contains(getAccounts((String) null), account)) {
+            throw new IllegalArgumentException("no such account");
+        }
         // skip the check if customTokens
         final int callerUid = Binder.getCallingUid();
         final boolean permissionGranted = customTokens ||
