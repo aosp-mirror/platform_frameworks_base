@@ -253,6 +253,11 @@ class VideoDumpView extends GLSurfaceView implements MediaPlayerControl {
     }
 
     @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+ 
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         attachMediaController();
         return true;
