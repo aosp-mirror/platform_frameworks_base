@@ -94,11 +94,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
-    private static final int MAX_WAKELOCKS_PER_UID = 30;
-
-    // The system process gets more.  It is special.  Oh so special.
-    // With, you know, special needs.  Like this.
-    private static final int MAX_WAKELOCKS_PER_UID_IN_SYSTEM = 50;
+    private static final int MAX_WAKELOCKS_PER_UID = 50;
 
     private static final String BATCHED_WAKELOCK_NAME = "*overflow*";
 
@@ -4136,8 +4132,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             Wakelock wl = mWakelockStats.get(name);
             if (wl == null) {
                 final int N = mWakelockStats.size();
-                if (N > MAX_WAKELOCKS_PER_UID && (mUid != Process.SYSTEM_UID
-                        || N > MAX_WAKELOCKS_PER_UID_IN_SYSTEM)) {
+                if (N > MAX_WAKELOCKS_PER_UID) {
                     name = BATCHED_WAKELOCK_NAME;
                     wl = mWakelockStats.get(name);
                 }
