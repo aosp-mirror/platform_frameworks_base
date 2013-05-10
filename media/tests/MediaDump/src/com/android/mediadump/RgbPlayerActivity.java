@@ -244,6 +244,11 @@ public class RgbPlayerActivity extends Activity {
         public void start() {
             mIsPlaying = true;
         }
+
+        @Override
+        public int getAudioSessionId() {
+            return 0;
+        }
     }
 
 }
