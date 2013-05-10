@@ -107,6 +107,11 @@ class KeyguardUpdateMonitorCallback {
     void onUserRemoved(int userId) { }
 
     /**
+     * Called when the user's info changed.
+     */
+    void onUserInfoChanged(int userId) { }
+
+    /**
      * Called when boot completed.
      *
      * Note, this callback will only be received if boot complete occurs after registering with

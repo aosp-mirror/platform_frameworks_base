@@ -296,7 +296,7 @@ public class UserManagerService extends IUserManager.Stub {
         Intent changedIntent = new Intent(Intent.ACTION_USER_INFO_CHANGED);
         changedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         changedIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcastAsUser(changedIntent, new UserHandle(userId));
+        mContext.sendBroadcastAsUser(changedIntent, UserHandle.ALL);
     }
 
     @Override
