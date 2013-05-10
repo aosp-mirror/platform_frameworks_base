@@ -30008,6 +30008,7 @@ package android.widget {
     method public abstract boolean canPause();
     method public abstract boolean canSeekBackward();
     method public abstract boolean canSeekForward();
+    method public abstract int getAudioSessionId();
     method public abstract int getBufferPercentage();
     method public abstract int getCurrentPosition();
     method public abstract int getDuration();
@@ -31114,6 +31115,7 @@ package android.widget {
     method public boolean canPause();
     method public boolean canSeekBackward();
     method public boolean canSeekForward();
+    method public int getAudioSessionId();
     method public int getBufferPercentage();
     method public int getCurrentPosition();
     method public int getDuration();

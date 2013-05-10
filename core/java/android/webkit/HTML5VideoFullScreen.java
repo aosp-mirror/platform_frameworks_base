@@ -341,6 +341,14 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     }
 
     @Override
+    public int getAudioSessionId() {
+        if (mPlayer == null) {
+            return 0;
+        }
+        return mPlayer.getAudioSessionId();
+    }
+
+    @Override
     public void showControllerInFullScreen() {
         if (mMediaController != null) {
             mMediaController.show(0);
