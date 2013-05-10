@@ -12271,6 +12271,7 @@ package android.media {
     method public int getVolume();
     method public int getVolumeHandling();
     method public int getVolumeMax();
+    method public boolean isConnecting();
     method public boolean isEnabled();
     method public void requestSetVolume(int);
     method public void requestUpdateVolume(int);
