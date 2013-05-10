@@ -1312,6 +1312,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                          * TODO: Verify multi-channel scenarios and supplicant behavior are
                          * better before adding a time out in future
                          */
+                        //Set group idle timeout of 10 sec, to avoid GO beaconing incase of any
+                        //failure during 4-way Handshake.
+                        if (!mAutonomousGroup) {
+                            mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
+                        }
                         startDhcpServer(mGroup.getInterface());
                     } else {
                         mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
@@ -1507,6 +1512,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.AP_STA_CONNECTED_EVENT:
                     WifiP2pDevice device = (WifiP2pDevice) message.obj;
                     String deviceAddress = device.deviceAddress;
+                    // Clear timeout that was set when group was started.
+                    mWifiNative.setP2pGroupIdle(mGroup.getInterface(), 0);
                     if (deviceAddress != null) {
                         if (mSavedProvDiscDevice != null &&
                                 deviceAddress.equals(mSavedProvDiscDevice.deviceAddress)) {
