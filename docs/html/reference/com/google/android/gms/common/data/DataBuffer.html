@@ -75,6 +75,9 @@
 
 <html>
 <head>
+
+
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
@@ -92,15 +95,9 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
 <script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
 <script type="text/javascript">
   var toRoot = "/";
-  
   var devsite = false;
-  
 </script>
 <script src="/assets/js/docs.js" type="text/javascript"></script>
-
-<script src="/gms_navtree_data.js" type="text/javascript"></script>
-<script src="/gcm_navtree_data.js" type="text/javascript"></script>
-
 
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -119,6 +116,8 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
+<a name="top"></a>
+
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -134,24 +133,24 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
             <ul class="nav-x col-9">
                 <li class="design">
                   <a href="/design/index.html"
-                  zh-TW-lang="設計"
-                  zh-CN-lang="设计"
+                  zh-tw-lang="設計"
+                  zh-cn-lang="设计"
                   ru-lang="Проектирование"
                   ko-lang="디자인"
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
                 <li class="develop"><a href="/develop/index.html"
-                  zh-TW-lang="開發"
-                  zh-CN-lang="开发"
+                  zh-tw-lang="開發"
+                  zh-cn-lang="开发"
                   ru-lang="Разработка"
                   ko-lang="개발"
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
                 <li class="distribute last"><a href="/distribute/index.html"
-                  zh-TW-lang="發佈"
-                  zh-CN-lang="分发"
+                  zh-tw-lang="發佈"
+                  zh-cn-lang="分发"
                   ru-lang="Распространение"
                   ko-lang="배포"
                   ja-lang="配布"
@@ -180,7 +179,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
       
-
       
       
         <div class="header">Language</div>
@@ -191,8 +189,8 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-CN">中文 (中国)</option>
-                <option value="zh-TW">中文 (台灣)</option>
+                <option value="zh-cn">中文 (中国)</option>
+                <option value="zh-tw">中文 (台灣)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -224,13 +222,34 @@ onkeyup="return search_changed(event, false, '/')" />
         <div class="right"></div>
     </div>
   </div>
-  <div id="search_filtered_wrapper">
-    <div id="search_filtered_div" class="no-display">
-        <ul id="search_filtered">
-        </ul>
+
+  <div class="search_filtered_wrapper reference">
+    <div class="suggest-card reference no-display">
+      <ul class="search_filtered">
+      </ul>
     </div>
   </div>
-  
+
+  <div class="search_filtered_wrapper docs">
+    <div class="suggest-card dummy no-display">&nbsp;</div>
+    <div class="suggest-card develop no-display">
+      <ul class="search_filtered">
+      </ul>
+      <div class="child-card guides no-display">
+      </div>
+      <div class="child-card training no-display">
+      </div>
+    </div>
+    <div class="suggest-card design no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+    <div class="suggest-card distribute no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
   </div>
   <!-- /New Search>
           
@@ -251,32 +270,32 @@ onkeyup="return search_changed(event, false, '/')" />
                     <li class="develop">
                       <ul>
                         <li><a href="/training/index.html"
-                          zh-TW-lang="訓練課程"
-                          zh-CN-lang="培训"
+                          zh-tw-lang="訓練課程"
+                          zh-cn-lang="培训"
                           ru-lang="Курсы"
                           ko-lang="교육"
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
                         <li><a href="/guide/components/index.html"
-                          zh-TW-lang="API 指南"
-                          zh-CN-lang="API 指南"
+                          zh-tw-lang="API 指南"
+                          zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
                           ko-lang="API 가이드"
                           ja-lang="API ガイド"
                           es-lang="Guías de la API"               
                           >API Guides</a></li>
                         <li><a href="/reference/packages.html"
-                          zh-TW-lang="參考資源"
-                          zh-CN-lang="参考"
+                          zh-tw-lang="參考資源"
+                          zh-cn-lang="参考"
                           ru-lang="Справочник"
                           ko-lang="참조문서"
                           ja-lang="リファレンス"
                           es-lang="Referencia"               
                           >Reference</a></li>
                         <li><a href="/tools/index.html"
-                          zh-TW-lang="相關工具"
-                          zh-CN-lang="工具"
+                          zh-tw-lang="相關工具"
+                          zh-cn-lang="工具"
                           ru-lang="Инструменты"
                           ko-lang="도구"
                           ja-lang="ツール"
@@ -312,39 +331,38 @@ onkeyup="return search_changed(event, false, '/')" />
   </div>
     
     
-    
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
-                  zh-TW-lang="訓練課程"
-                  zh-CN-lang="培训"
+                  zh-tw-lang="訓練課程"
+                  zh-cn-lang="培训"
                   ru-lang="Курсы"
                   ko-lang="교육"
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
                 <li class="guide"><a href="/guide/components/index.html"
-                  zh-TW-lang="API 指南"
-                  zh-CN-lang="API 指南"
+                  zh-tw-lang="API 指南"
+                  zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
                   ko-lang="API 가이드"
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
                 <li class="reference"><a href="/reference/packages.html"
-                  zh-TW-lang="參考資源"
-                  zh-CN-lang="参考"
+                  zh-tw-lang="參考資源"
+                  zh-cn-lang="参考"
                   ru-lang="Справочник"
                   ko-lang="참조문서"
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
                 <li class="tools"><a href="/tools/index.html"
-                  zh-TW-lang="相關工具"
-                  zh-CN-lang="工具"
+                  zh-tw-lang="相關工具"
+                  zh-cn-lang="工具"
                   ru-lang="Инструменты"
                   ko-lang="도구"
                   ja-lang="ツール"
@@ -358,9 +376,15 @@ onkeyup="return search_changed(event, false, '/')" />
         
     </div>
     <!-- /Sendondary x-nav -->
+  
+
+
+
 
   
 
+
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -383,19 +407,24 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
       </li>
-
-      <li><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span></a>
+      <li><a href="/google/play-services/games.html">
+          <span class="en">Games</span></a>
       </li>
-
       <li><a href="/google/play-services/plus.html">
           <span class="en">Google+</span></a>
       </li>
-
       <li><a href="/google/play-services/maps.html">
           <span class="en">Google Maps</span></a>
       </li>
-
+      <li><a href="/google/play-services/location.html">
+          <span class="en">Location</span></a>
+      </li>
+      <li><a href="/google/play-services/gcm.html">
+          <span class="en">GCM</span></a>
+      </li>
+      <li><a href="/google/play-services/auth.html">
+          <span class="en">Authorization</span></a>
+      </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
           <a href="/reference/gms-packages.html">
@@ -558,6 +587,8 @@ onkeyup="return search_changed(event, false, '/')" />
     </script>
 
 
+     
+
 
 
 <div class="col-12"  id="doc-col">
@@ -591,17 +622,11 @@ Summary:
 
 
 
-  <a href="#lfields">Fields</a>
-  
 
 
 
 
-  &#124; <a href="#proctors">Protected Ctors</a>
-  
-
-
-  &#124; <a href="#pubmethods">Methods</a>
+  <a href="#pubmethods">Methods</a>
   
 
 
@@ -689,9 +714,25 @@ Summary:
               >
           
             
+              <a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a>,
+            
+              <a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a>,
+            
+              <a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a>,
+            
+              <a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a>,
+            
+              <a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a>,
+            
+              <a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a>,
+            
               <a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a>,
             
-              <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a>
+              <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a>,
+            
+              <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a>,
+            
+              <a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a>
             
           
       </div>
@@ -700,12 +741,44 @@ Summary:
               >
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a></td>
+              <td class="jd-descrcol" width="100%">Data structure providing access to a list of achievements.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a></td>
+              <td class="jd-descrcol" width="100%">Data structure providing access to a list of app states.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a></td>
+              <td class="jd-descrcol" width="100%">Data structure providing access to a list of games.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a></td>
+              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Invitation data.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
+              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing Leaderboard data.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
+              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></td>
               <td class="jd-descrcol" width="100%">Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a></code> objects.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a></td>
+              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing match participant data.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a></td>
               <td class="jd-descrcol" width="100%">Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> objects.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a></td>
+              <td class="jd-descrcol" width="100%">Data structure providing access to a list of players.&nbsp;</td>
           </tr>
   </table>
       </div>
@@ -766,56 +839,11 @@ Summary:
 
 
 
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          protected
-          
-          final
-          <a href="/reference/com/google/android/gms/common/data/DataHolder.html">DataHolder</a></nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#mDataHolder">mDataHolder</a></td>
-          <td class="jd-descrcol" width="100%">The <code><a href="/reference/com/google/android/gms/common/data/DataHolder.html">DataHolder</a></code> that backs this data buffer.</td>
-      </tr>
-      
-    
-
-</table>
 
 
 
 
 
-
-
-
-
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="proctors" class="jd-sumtable"><tr><th colspan="12">Protected Constructors</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#DataBuffer(com.google.android.gms.common.data.DataHolder)">DataBuffer</a></span>(<a href="/reference/com/google/android/gms/common/data/DataHolder.html">DataHolder</a> dataHolder)</nobr>
-        
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -893,6 +921,22 @@ Summary:
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#isClosed()">isClosed</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1191,82 +1235,12 @@ From interface
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
-
-
-
-
-<A NAME="mDataHolder"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected 
-         
-        final 
-        <a href="/reference/com/google/android/gms/common/data/DataHolder.html">DataHolder</a>
-      </span>
-        mDataHolder
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The <code><a href="/reference/com/google/android/gms/common/data/DataHolder.html">DataHolder</a></code> that backs this data buffer.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-
 <!-- Public ctors -->
 
 
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
-
-<h2>Protected Constructors</h2>
-
-
-
-<A NAME="DataBuffer(com.google.android.gms.common.data.DataHolder)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">DataBuffer</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/data/DataHolder.html">DataHolder</a> dataHolder)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1391,6 +1365,35 @@ From interface
         int
       </span>
       <span class="sympad">getCount</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isClosed()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isClosed</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
