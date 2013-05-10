@@ -784,25 +784,21 @@ public class MediaRouter {
 
         for (int i = 0; i < newDisplays.length; i++) {
             final WifiDisplay d = newDisplays[i];
-            final WifiDisplay oldRemembered = findMatchingDisplay(d, oldDisplays);
-            if (oldRemembered == null) {
-                addRouteStatic(makeWifiDisplayRoute(d,
-                        findMatchingDisplay(d, availableDisplays) != null));
+            final boolean available = findMatchingDisplay(d, availableDisplays) != null;
+            RouteInfo route = findWifiDisplayRoute(d);
+            if (route == null) {
+                route = makeWifiDisplayRoute(d, available);
+                addRouteStatic(route);
                 wantScan = true;
             } else {
-                final boolean available = findMatchingDisplay(d, availableDisplays) != null;
-                final RouteInfo route = findWifiDisplayRoute(d);
                 updateWifiDisplayRoute(route, d, available, newStatus);
             }
             if (d.equals(activeDisplay)) {
-                final RouteInfo activeRoute = findWifiDisplayRoute(d);
-                if (activeRoute != null) {
-                    selectRouteStatic(activeRoute.getSupportedTypes(), activeRoute);
+                selectRouteStatic(route.getSupportedTypes(), route);
 
-                    // Don't scan if we're already connected to a wifi display,
-                    // the scanning process can cause a hiccup with some configurations.
-                    blockScan = true;
-                }
+                // Don't scan if we're already connected to a wifi display,
+                // the scanning process can cause a hiccup with some configurations.
+                blockScan = true;
             }
         }
         for (int i = 0; i < oldDisplays.length; i++) {
