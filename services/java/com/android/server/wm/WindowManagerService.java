@@ -58,7 +58,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -1861,15 +1860,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Now stick it in.
                 if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
                     Slog.v(TAG, "Moving wallpaper " + wallpaper
-                            + " from " + oldIndex + " to " + foundI);
+                            + " from " + oldIndex + " to " + 0);
                 }
 
-                windows.add(foundI, wallpaper);
+                windows.add(0, wallpaper);
                 mWindowsChanged = true;
                 changed |= ADJUST_WALLPAPER_LAYERS_CHANGED;
             }
         }
 
+        /*
         final TaskStack targetStack =
                 mWallpaperTarget == null ? null : mWallpaperTarget.getStack();
         if ((changed & ADJUST_WALLPAPER_LAYERS_CHANGED) != 0 &&
@@ -1888,6 +1888,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
+        */
 
         if (targetChanged && DEBUG_WALLPAPER_LIGHT) {
             Slog.d(TAG, "New wallpaper: target=" + mWallpaperTarget
@@ -4628,7 +4629,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-
+        // Never put an app window underneath wallpaper.
+        for (int pos = NW - 1; pos >= 0; pos--) {
+            if (windows.get(pos).mIsWallpaper) {
+                if (DEBUG_REORDER) Slog.v(TAG, "Found wallpaper @" + pos);
+                return pos + 1;
+            }
+        }
         return 0;
     }
 
@@ -4692,36 +4699,43 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void moveTaskWindowsLocked(Task task) {
-        DisplayContent displayContent = task.getDisplayContent();
+    private void moveStackWindowsLocked(TaskStack stack) {
+        DisplayContent displayContent = stack.getDisplayContent();
 
         // First remove all of the windows from the list.
-        AppTokenList tokens = task.mAppTokens;
-        final int numTokens = tokens.size();
-        for (int tokenNdx = numTokens - 1; tokenNdx >= 0; --tokenNdx) {
-            tmpRemoveAppWindowsLocked(tokens.get(tokenNdx));
+        final ArrayList<Task> tasks = stack.getTasks();
+        final int numTasks = tasks.size();
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            final int numTokens = tokens.size();
+            for (int tokenNdx = numTokens - 1; tokenNdx >= 0; --tokenNdx) {
+                tmpRemoveAppWindowsLocked(tokens.get(tokenNdx));
+            }
         }
 
         // And now add them back at the correct place.
         // Where to start adding?
-        int pos = findAppWindowInsertionPointLocked(tokens.get(0));
-        for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
-            final AppWindowToken wtoken = tokens.get(tokenNdx);
-            if (wtoken != null) {
-                final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
-                if (newPos != pos) {
-                    displayContent.layoutNeeded = true;
+        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+            int pos = findAppWindowInsertionPointLocked(tokens.get(0));
+            final int numTokens = tokens.size();
+            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                final AppWindowToken wtoken = tokens.get(tokenNdx);
+                if (wtoken != null) {
+                    final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
+                    if (newPos != pos) {
+                        displayContent.layoutNeeded = true;
+                    }
+                    pos = newPos;
                 }
-                pos = newPos;
             }
         }
+
         if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                 false /*updateInputWindows*/)) {
             assignLayersLocked(displayContent.getWindowList());
         }
 
-        updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                false /*updateInputWindows*/);
         mInputMonitor.setUpdateInputWindowsNeededLw();
         performLayoutAndPlaceSurfacesLocked();
         mInputMonitor.updateInputWindowsLw(false /*force*/);
@@ -4753,7 +4767,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 stack.moveTaskToTop(task);
                 displayContent.moveStack(stack, true);
-                moveTaskWindowsLocked(task);
+                moveStackWindowsLocked(stack);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4770,9 +4784,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " not found in mTaskIdToTask");
                     return;
                 }
-                task.mStack.moveTaskToBottom(task);
-                moveTaskWindowsLocked(task);
-                task.getDisplayContent().moveStack(task.mStack, false);
+                final TaskStack stack = task.mStack;
+                stack.moveTaskToBottom(task);
+                task.getDisplayContent().moveStack(stack, false);
+                moveStackWindowsLocked(stack);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
