@@ -31792,7 +31792,7 @@ package java.io {
     ctor public CharConversionException(java.lang.String);
   }
 
-  public abstract interface Closeable {
+  public abstract interface Closeable implements java.lang.AutoCloseable {
     method public abstract void close() throws java.io.IOException;
   }
 
@@ -32115,7 +32115,7 @@ package java.io {
     ctor public NotSerializableException(java.lang.String);
   }
 
-  public abstract interface ObjectInput implements java.io.DataInput {
+  public abstract interface ObjectInput implements java.lang.AutoCloseable java.io.DataInput {
     method public abstract int available() throws java.io.IOException;
     method public abstract void close() throws java.io.IOException;
     method public abstract int read() throws java.io.IOException;
@@ -32177,7 +32177,7 @@ package java.io {
     method public abstract void validateObject() throws java.io.InvalidObjectException;
   }
 
-  public abstract interface ObjectOutput implements java.io.DataOutput {
+  public abstract interface ObjectOutput implements java.lang.AutoCloseable java.io.DataOutput {
     method public abstract void close() throws java.io.IOException;
     method public abstract void flush() throws java.io.IOException;
     method public abstract void write(byte[]) throws java.io.IOException;
@@ -32683,6 +32683,10 @@ package java.lang {
     ctor public AssertionError(long);
     ctor public AssertionError(float);
     ctor public AssertionError(double);
+  }
+
+  public abstract interface AutoCloseable {
+    method public abstract void close() throws java.lang.Exception;
   }
 
   public final class Boolean implements java.lang.Comparable java.io.Serializable {
@@ -34740,7 +34744,7 @@ package java.net {
     method public synchronized void setSocketAddress(java.net.SocketAddress);
   }
 
-  public class DatagramSocket {
+  public class DatagramSocket implements java.io.Closeable {
     ctor public DatagramSocket() throws java.net.SocketException;
     ctor public DatagramSocket(int) throws java.net.SocketException;
     ctor public DatagramSocket(int, java.net.InetAddress) throws java.net.SocketException;
@@ -35096,7 +35100,7 @@ package java.net {
     method public abstract java.util.List<java.security.cert.Certificate> getServerCertificateChain() throws javax.net.ssl.SSLPeerUnverifiedException;
   }
 
-  public class ServerSocket {
+  public class ServerSocket implements java.io.Closeable {
     ctor public ServerSocket() throws java.io.IOException;
     ctor public ServerSocket(int) throws java.io.IOException;
     ctor public ServerSocket(int, int) throws java.io.IOException;
@@ -35122,7 +35126,7 @@ package java.net {
     method public static synchronized void setSocketFactory(java.net.SocketImplFactory) throws java.io.IOException;
   }
 
-  public class Socket {
+  public class Socket implements java.io.Closeable {
     ctor public Socket();
     ctor public Socket(java.net.Proxy);
     ctor public Socket(java.lang.String, int) throws java.io.IOException, java.net.UnknownHostException;
@@ -35800,9 +35804,10 @@ package java.nio.channels {
     field public static final java.nio.channels.FileChannel.MapMode READ_WRITE;
   }
 
-  public abstract class FileLock {
+  public abstract class FileLock implements java.lang.AutoCloseable {
     ctor protected FileLock(java.nio.channels.FileChannel, long, long, boolean);
     method public final java.nio.channels.FileChannel channel();
+    method public final void close() throws java.io.IOException;
     method public final boolean isShared();
     method public abstract boolean isValid();
     method public final boolean overlaps(long, long);
@@ -35917,7 +35922,7 @@ package java.nio.channels {
     field public static final int OP_WRITE = 4; // 0x4
   }
 
-  public abstract class Selector {
+  public abstract class Selector implements java.io.Closeable {
     ctor protected Selector();
     method public abstract void close() throws java.io.IOException;
     method public abstract boolean isOpen();
@@ -37853,7 +37858,7 @@ package java.sql {
     method public abstract void truncate(long) throws java.sql.SQLException;
   }
 
-  public abstract interface Connection implements java.sql.Wrapper {
+  public abstract interface Connection implements java.lang.AutoCloseable java.sql.Wrapper {
     method public abstract void clearWarnings() throws java.sql.SQLException;
     method public abstract void close() throws java.sql.SQLException;
     method public abstract void commit() throws java.sql.SQLException;
@@ -38282,7 +38287,7 @@ package java.sql {
     method public abstract void setObject(java.lang.Object) throws java.sql.SQLException;
   }
 
-  public abstract interface ResultSet implements java.sql.Wrapper {
+  public abstract interface ResultSet implements java.lang.AutoCloseable java.sql.Wrapper {
     method public abstract boolean absolute(int) throws java.sql.SQLException;
     method public abstract void afterLast() throws java.sql.SQLException;
     method public abstract void beforeFirst() throws java.sql.SQLException;
@@ -38788,7 +38793,7 @@ package java.sql {
     method public abstract java.lang.String getSavepointName() throws java.sql.SQLException;
   }
 
-  public abstract interface Statement implements java.sql.Wrapper {
+  public abstract interface Statement implements java.lang.AutoCloseable java.sql.Wrapper {
     method public abstract void addBatch(java.lang.String) throws java.sql.SQLException;
     method public abstract void cancel() throws java.sql.SQLException;
     method public abstract void clearBatch() throws java.sql.SQLException;
@@ -40547,7 +40552,7 @@ package java.util {
     field public static final long TTL_NO_EXPIRATION_CONTROL = -2L; // 0xfffffffffffffffeL
   }
 
-  public final class Scanner implements java.util.Iterator {
+  public final class Scanner implements java.io.Closeable java.util.Iterator {
     ctor public Scanner(java.io.File) throws java.io.FileNotFoundException;
     ctor public Scanner(java.io.File, java.lang.String) throws java.io.FileNotFoundException;
     ctor public Scanner(java.lang.String);
@@ -42667,7 +42672,7 @@ package java.util.zip {
     ctor public ZipException(java.lang.String);
   }
 
-  public class ZipFile {
+  public class ZipFile implements java.io.Closeable {
     ctor public ZipFile(java.io.File) throws java.io.IOException, java.util.zip.ZipException;
     ctor public ZipFile(java.lang.String) throws java.io.IOException;
     ctor public ZipFile(java.io.File, int) throws java.io.IOException;
