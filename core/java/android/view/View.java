@@ -15476,8 +15476,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param accessibilityId The accessibility id.
      * @return The found view.
+     *
+     * @hide
      */
-    View findViewByAccessibilityIdTraversal(int accessibilityId) {
+    public View findViewByAccessibilityIdTraversal(int accessibilityId) {
         if (getAccessibilityViewId() == accessibilityId) {
             return this;
         }
