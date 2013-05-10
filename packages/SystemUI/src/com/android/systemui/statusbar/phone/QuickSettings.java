@@ -507,8 +507,8 @@ class QuickSettings {
                         : mContext.getString(R.string.status_bar_settings_battery_meter_format,
                                 batteryState.batteryLevel);
                 }
-                d.setLevel(batteryState.batteryLevel);
                 batteryTile.setImageDrawable(d);
+                batteryTile.getImageView().setImageLevel(batteryState.batteryLevel);
                 batteryTile.setText(t);
                 batteryTile.setContentDescription(
                         mContext.getString(R.string.accessibility_quick_settings_battery, t));
