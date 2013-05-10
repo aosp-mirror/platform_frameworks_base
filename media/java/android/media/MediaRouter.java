@@ -1354,10 +1354,22 @@ public class MediaRouter {
         }
 
         /**
-         * @return true if this route is enabled and may be selected
+         * Returns true if this route is enabled and may be selected.
+         *
+         * @return True if this route is enabled.
          */
         public boolean isEnabled() {
             return mEnabled;
+        }
+
+        /**
+         * Returns true if the route is in the process of connecting and is not
+         * yet ready for use.
+         *
+         * @return True if this route is in the process of connecting.
+         */
+        public boolean isConnecting() {
+            return mStatusCode == STATUS_CONNECTING;
         }
 
         void setStatusInt(CharSequence status) {
