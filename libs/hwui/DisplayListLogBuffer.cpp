@@ -77,12 +77,13 @@ void DisplayListLogBuffer::outputCommands(FILE *file)
         if (tmpBufferPtr == mEnd) {
             break;
         }
+
+        fprintf(file, "%*s%s\n", 2 * tmpBufferPtr->level, "", tmpBufferPtr->label);
+
         OpLog* nextOp = tmpBufferPtr++;
         if (tmpBufferPtr > mBufferLast) {
             tmpBufferPtr = mBufferFirst;
         }
-
-        fprintf(file, "%*s%s\n", tmpBufferPtr->level*2, "", tmpBufferPtr->label);
     }
 }
 

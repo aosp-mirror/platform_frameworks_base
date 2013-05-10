@@ -511,8 +511,8 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
     for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
         DisplayListOp *op = mDisplayListData->displayListOps[i];
 
-        handler(op, saveCount, mClipToBounds);
         logBuffer.writeCommand(level, op->name());
+        handler(op, saveCount, mClipToBounds);
     }
 
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
