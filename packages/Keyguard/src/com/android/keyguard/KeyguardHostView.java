@@ -325,10 +325,15 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private int getWidgetPosition(int id) {
-        final int children = mAppWidgetContainer.getChildCount();
+        final KeyguardWidgetPager appWidgetContainer = mAppWidgetContainer;
+        final int children = appWidgetContainer.getChildCount();
         for (int i = 0; i < children; i++) {
-            if (mAppWidgetContainer.getWidgetPageAt(i).getContent().getId() == id) {
+            final View content = appWidgetContainer.getWidgetPageAt(i).getContent();
+            if (content != null && content.getId() == id) {
                 return i;
+            } else if (content == null) {
+                // Attempt to track down bug #8886916
+                Log.w(TAG, "*** Null content at " + "i=" + i + ",id=" + id + ",N=" + children);
             }
         }
         return -1;
