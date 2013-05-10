@@ -122,14 +122,6 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         mUserImage = (ImageView) findViewById(R.id.keyguard_user_avatar);
         mUserName = (TextView) findViewById(R.id.keyguard_user_name);
 
-        Bitmap icon = mUserManager.getUserIcon(user.id);
-
-        if (icon == null) {
-            if (DEBUG) Log.w(TAG, "Couldn't get user icon for user id " + user.id);
-            icon = BitmapFactory.decodeResource(mContext.getResources(),
-                    R.drawable.ic_contact_picture);
-        }
-
         mFramed = (KeyguardCircleFramedDrawable)
                 KeyguardViewMediator.getAvatarCache().get(user.id);
 
