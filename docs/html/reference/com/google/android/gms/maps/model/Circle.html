@@ -75,6 +75,9 @@
 
 <html>
 <head>
+
+
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
@@ -92,15 +95,9 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
 <script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
 <script type="text/javascript">
   var toRoot = "/";
-  
   var devsite = false;
-  
 </script>
 <script src="/assets/js/docs.js" type="text/javascript"></script>
-
-<script src="/gms_navtree_data.js" type="text/javascript"></script>
-<script src="/gcm_navtree_data.js" type="text/javascript"></script>
-
 
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -119,6 +116,8 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
+<a name="top"></a>
+
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -134,24 +133,24 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
             <ul class="nav-x col-9">
                 <li class="design">
                   <a href="/design/index.html"
-                  zh-TW-lang="設計"
-                  zh-CN-lang="设计"
+                  zh-tw-lang="設計"
+                  zh-cn-lang="设计"
                   ru-lang="Проектирование"
                   ko-lang="디자인"
                   ja-lang="設計"
                   es-lang="Diseñar"               
                   >Design</a></li>
                 <li class="develop"><a href="/develop/index.html"
-                  zh-TW-lang="開發"
-                  zh-CN-lang="开发"
+                  zh-tw-lang="開發"
+                  zh-cn-lang="开发"
                   ru-lang="Разработка"
                   ko-lang="개발"
                   ja-lang="開発"
                   es-lang="Desarrollar"               
                   >Develop</a></li>
                 <li class="distribute last"><a href="/distribute/index.html"
-                  zh-TW-lang="發佈"
-                  zh-CN-lang="分发"
+                  zh-tw-lang="發佈"
+                  zh-cn-lang="分发"
                   ru-lang="Распространение"
                   ko-lang="배포"
                   ja-lang="配布"
@@ -180,7 +179,6 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
       
-
       
       
         <div class="header">Language</div>
@@ -191,8 +189,8 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-CN">中文 (中国)</option>
-                <option value="zh-TW">中文 (台灣)</option>
+                <option value="zh-cn">中文 (中国)</option>
+                <option value="zh-tw">中文 (台灣)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -224,13 +222,34 @@ onkeyup="return search_changed(event, false, '/')" />
         <div class="right"></div>
     </div>
   </div>
-  <div id="search_filtered_wrapper">
-    <div id="search_filtered_div" class="no-display">
-        <ul id="search_filtered">
-        </ul>
+
+  <div class="search_filtered_wrapper reference">
+    <div class="suggest-card reference no-display">
+      <ul class="search_filtered">
+      </ul>
     </div>
   </div>
-  
+
+  <div class="search_filtered_wrapper docs">
+    <div class="suggest-card dummy no-display">&nbsp;</div>
+    <div class="suggest-card develop no-display">
+      <ul class="search_filtered">
+      </ul>
+      <div class="child-card guides no-display">
+      </div>
+      <div class="child-card training no-display">
+      </div>
+    </div>
+    <div class="suggest-card design no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+    <div class="suggest-card distribute no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
   </div>
   <!-- /New Search>
           
@@ -251,32 +270,32 @@ onkeyup="return search_changed(event, false, '/')" />
                     <li class="develop">
                       <ul>
                         <li><a href="/training/index.html"
-                          zh-TW-lang="訓練課程"
-                          zh-CN-lang="培训"
+                          zh-tw-lang="訓練課程"
+                          zh-cn-lang="培训"
                           ru-lang="Курсы"
                           ko-lang="교육"
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
                         <li><a href="/guide/components/index.html"
-                          zh-TW-lang="API 指南"
-                          zh-CN-lang="API 指南"
+                          zh-tw-lang="API 指南"
+                          zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
                           ko-lang="API 가이드"
                           ja-lang="API ガイド"
                           es-lang="Guías de la API"               
                           >API Guides</a></li>
                         <li><a href="/reference/packages.html"
-                          zh-TW-lang="參考資源"
-                          zh-CN-lang="参考"
+                          zh-tw-lang="參考資源"
+                          zh-cn-lang="参考"
                           ru-lang="Справочник"
                           ko-lang="참조문서"
                           ja-lang="リファレンス"
                           es-lang="Referencia"               
                           >Reference</a></li>
                         <li><a href="/tools/index.html"
-                          zh-TW-lang="相關工具"
-                          zh-CN-lang="工具"
+                          zh-tw-lang="相關工具"
+                          zh-cn-lang="工具"
                           ru-lang="Инструменты"
                           ko-lang="도구"
                           ja-lang="ツール"
@@ -312,39 +331,38 @@ onkeyup="return search_changed(event, false, '/')" />
   </div>
     
     
-    
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap">
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
-                  zh-TW-lang="訓練課程"
-                  zh-CN-lang="培训"
+                  zh-tw-lang="訓練課程"
+                  zh-cn-lang="培训"
                   ru-lang="Курсы"
                   ko-lang="교육"
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
                 <li class="guide"><a href="/guide/components/index.html"
-                  zh-TW-lang="API 指南"
-                  zh-CN-lang="API 指南"
+                  zh-tw-lang="API 指南"
+                  zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
                   ko-lang="API 가이드"
                   ja-lang="API ガイド"
                   es-lang="Guías de la API"               
                   >API Guides</a></li>
                 <li class="reference"><a href="/reference/packages.html"
-                  zh-TW-lang="參考資源"
-                  zh-CN-lang="参考"
+                  zh-tw-lang="參考資源"
+                  zh-cn-lang="参考"
                   ru-lang="Справочник"
                   ko-lang="참조문서"
                   ja-lang="リファレンス"
                   es-lang="Referencia"               
                   >Reference</a></li>
                 <li class="tools"><a href="/tools/index.html"
-                  zh-TW-lang="相關工具"
-                  zh-CN-lang="工具"
+                  zh-tw-lang="相關工具"
+                  zh-cn-lang="工具"
                   ru-lang="Инструменты"
                   ko-lang="도구"
                   ja-lang="ツール"
@@ -358,9 +376,15 @@ onkeyup="return search_changed(event, false, '/')" />
         
     </div>
     <!-- /Sendondary x-nav -->
+  
+
+
+
 
   
 
+
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -383,19 +407,24 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play-services/setup.html">
           <span class="en">Setup</span></a>
       </li>
-
-      <li><a href="/google/play-services/auth.html">
-          <span class="en">Authorization</span></a>
+      <li><a href="/google/play-services/games.html">
+          <span class="en">Games</span></a>
       </li>
-
       <li><a href="/google/play-services/plus.html">
           <span class="en">Google+</span></a>
       </li>
-
       <li><a href="/google/play-services/maps.html">
           <span class="en">Google Maps</span></a>
       </li>
-
+      <li><a href="/google/play-services/location.html">
+          <span class="en">Location</span></a>
+      </li>
+      <li><a href="/google/play-services/gcm.html">
+          <span class="en">GCM</span></a>
+      </li>
+      <li><a href="/google/play-services/auth.html">
+          <span class="en">Authorization</span></a>
+      </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
           <a href="/reference/gms-packages.html">
@@ -558,6 +587,8 @@ onkeyup="return search_changed(event, false, '/')" />
     </script>
 
 
+     
+
 
 
 <div class="col-12"  id="doc-col">
@@ -666,26 +697,30 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">A circle on the earth's surface (spherical cap).
 
- <p>A circle has the following properties.
+ <p>A circle has the following properties.</p>
  <dl>
  <dt>Center</dt>
- <dd>The center is specified as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
+ <dd>The center of the Circle is specified as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</dd>
  <dt>Radius</dt>
- <dd>The radius is specified in meters. It should be zero or greater.
+ <dd>The radius of the circle, specified in meters. It should be zero or greater.</dd>
  <dt>Stroke Width</dt>
- <dd>The width of the circle outline in screen pixels.
+ <dd>The width of the circle's outline in screen pixels.
  The width is constant and independent of the camera's
- zoom level.</dd>
+ zoom level. The default value is 10.</dd>
  <dt>Stroke Color</dt>
  <dd>The color of the circle outline in ARGB format, the same format used by
- <code><a href="/reference/android/graphics/Color.html">Color</a></code>.</dd>
+ <code><a href="/reference/android/graphics/Color.html">Color</a></code>. The default value is black
+ (<code>0xff000000</code>).</dd>
  <dt>Fill Color</dt>
  <dd>The color of the circle fill in ARGB format, the same format used by
- <code><a href="/reference/android/graphics/Color.html">Color</a></code>.</dd>
+ <code><a href="/reference/android/graphics/Color.html">Color</a></code>. The default value is transparent
+ (<code>0x00000000</code>).</dd>
  <dt>Z-Index</dt>
- <dd>The order in which this circle is drawn with respect to other overlays. An
- overlay with a larger z-index is drawn over overlays with smaller z-indices. The order of
- overlays with the same z-index value is arbitrary.</dd>
+ <dd>The order in which this tile overlay is drawn with respect to other overlays (including
+ <code><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html">GroundOverlay</a></code>s, <code><a href="/reference/com/google/android/gms/maps/model/TileOverlay.html">TileOverlay</a></code>s, <code><a href="/reference/com/google/android/gms/maps/model/Polyline.html">Polyline</a></code>s, and <code><a href="/reference/com/google/android/gms/maps/model/Polygon.html">Polygon</a></code>s but
+ not <code><a href="/reference/com/google/android/gms/maps/model/Marker.html">Marker</a></code>s). An overlay with a larger z-index is drawn over overlays with smaller
+ z-indices. The order of overlays with the same z-index is arbitrary.
+ The default zIndex is 0.</dd>
  <dt>Visibility</dt>
  <dd>Indicates if the circle is visible or invisible, i.e., whether it is drawn on the map. An
  invisible polygon is not drawn, but retains all of its other properties. The default is
@@ -693,7 +728,7 @@ Summary:
  </dl>
 
  <p>Methods that modify a Polygon must be called on the main thread. If not, an
- <code><a href="/reference/java/lang/IllegalStateException.html">IllegalStateException</a></code> will be thrown at runtime.
+ <code><a href="/reference/java/lang/IllegalStateException.html">IllegalStateException</a></code> will be thrown at runtime.</p>
  <h3>Example</h3>
 
  <pre> <code>GoogleMap map;
@@ -708,9 +743,15 @@ Summary:
 
  <p class="note">
  Note that the current map renderer is unable to draw the circle fill
- if the circle encompasses either North and/or South pole. However the
+ if the circle encompasses either the North or South pole. However, the
  outline will still be drawn correctly.
  </p>
+
+ <h3>Developer Guide</h3>
+ <p>
+ For more information, read the <a
+ href="https://developers.google.com/maps/documentation/android/shapes">Shapes</a>
+ developer guide.
 </p>
 
 
@@ -778,34 +819,18 @@ Summary:
             
             
             
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#equals(java.lang.Object)">equals</a></span>(Object other)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
             <a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getCenter()">getCenter</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</div>
+        <div class="jd-descrdiv">Returns the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -817,13 +842,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getFillColor()">getFillColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the fill color.</div>
+        <div class="jd-descrdiv">Returns the fill color of this Circle.</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -835,13 +860,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getId()">getId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the id.</div>
+        <div class="jd-descrdiv">Returns this circle's id.</div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -853,13 +878,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getRadius()">getRadius</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the radius in meters.</div>
+        <div class="jd-descrdiv">Returns the circle's radius, in meters.</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -871,25 +896,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getStrokeColor()">getStrokeColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the stroke color.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            float</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getStrokeWidth()">getStrokeWidth</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">Gets the stroke width.</div>
+        <div class="jd-descrdiv">Returns the stroke color.</div>
   
   </td></tr>
 
@@ -905,9 +912,9 @@ Summary:
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getZIndex()">getZIndex</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getStrokeWidth()">getStrokeWidth</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the zIndex.</div>
+        <div class="jd-descrdiv">Returns the stroke width.</div>
   
   </td></tr>
 
@@ -920,11 +927,13 @@ Summary:
             
             
             
-            int</nobr>
+            float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#hashCode()">hashCode</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getZIndex()">getZIndex</a></span>()</nobr>
         
+        <div class="jd-descrdiv">Returns the zIndex.</div>
+  
   </td></tr>
 
 
@@ -941,7 +950,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#isVisible()">isVisible</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the visibility of this circle.</div>
+        <div class="jd-descrdiv">Checks whether the circle is visible.</div>
   
   </td></tr>
 
@@ -959,7 +968,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#remove()">remove</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Removes from the map.</div>
+        <div class="jd-descrdiv">Removes this circle from the map.</div>
   
   </td></tr>
 
@@ -1067,7 +1076,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setVisible(boolean)">setVisible</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">Sets the visibility.</div>
+        <div class="jd-descrdiv">Sets the visibility of the circle.</div>
   
   </td></tr>
 
@@ -1348,35 +1357,6 @@ From class
 
 
 
-<A NAME="equals(java.lang.Object)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        boolean
-      </span>
-      <span class="sympad">equals</span>
-      <span class="normal">(Object other)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
 <A NAME="getCenter()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1400,10 +1380,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>geographic center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>
+      <ul class="nolist"><li>The geographic center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
 </li></ul>
   </div>
 
@@ -1434,10 +1414,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the fill color.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the fill color of this Circle.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>color in the <code><a href="/reference/android/graphics/Color.html">Color</a></code> format
+      <ul class="nolist"><li>The fill color of the circle in ARGB format.
 </li></ul>
   </div>
 
@@ -1468,7 +1448,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the id.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns this circle's id.
 </p></div>
 
     </div>
@@ -1498,10 +1478,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the radius in meters.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the circle's radius, in meters.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>radius in meters
+      <ul class="nolist"><li>The radius in meters.
 </li></ul>
   </div>
 
@@ -1532,10 +1512,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the stroke color.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the stroke color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>color in the <code><a href="/reference/android/graphics/Color.html">Color</a></code> format
+      <ul class="nolist"><li>The color of the circle in ARGB format.
 </li></ul>
   </div>
 
@@ -1566,10 +1546,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the stroke width.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the stroke width.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>width in screen pixels
+      <ul class="nolist"><li>The width in screen pixels.
 </li></ul>
   </div>
 
@@ -1600,41 +1580,12 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the zIndex.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the zIndex.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>zIndex value
+      <ul class="nolist"><li>The zIndex of this circle.
 </li></ul>
   </div>
-
-    </div>
-</div>
-
-
-<A NAME="hashCode()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        int
-      </span>
-      <span class="sympad">hashCode</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1663,10 +1614,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the visibility of this circle.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Checks whether the circle is visible.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>false if the circle is invisible
+      <ul class="nolist"><li>True if the circle is visible; false if it is invisible.
 </li></ul>
   </div>
 
@@ -1697,7 +1648,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Removes from the map.
+  <div class="jd-tagdata jd-tagdescr"><p>Removes this circle from the map.
 </p></div>
 
     </div>
@@ -1729,13 +1680,13 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the center using a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
 
- <p>The center must not be null.</p></div>
+ <p>The center must not be null, as there is no default value.</p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>center</td>
-          <td>geographic center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code></td>
+          <td>The geographic center of the circle, specified as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</td>
         </tr>
       </table>
   </div>
@@ -1781,14 +1732,13 @@ From class
 
  <p>The fill color is the color inside the circle, in the integer
  format specified by <code><a href="/reference/android/graphics/Color.html">Color</a></code>.
- If <code><a href="/reference/android/graphics/Color.html#TRANSPARENT">TRANSPARENT</a></code> is used then no fill is
- drawn.</p></div>
+ If TRANSPARENT is used then no fill is drawn.</p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>color</td>
-          <td>color in the <code><a href="/reference/android/graphics/Color.html">Color</a></code> format
+          <td>The color in the <code><a href="/reference/android/graphics/Color.html">Color</a></code> format.
 </td>
         </tr>
       </table>
@@ -1823,13 +1773,13 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the radius in meters.
 
- <p>The radius must be zero or greater.</p></div>
+ <p>The radius must be zero or greater.</p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>radius</td>
-          <td>radius in meters</td>
+          <td>The radius, in meters.</td>
         </tr>
       </table>
   </div>
@@ -1875,14 +1825,13 @@ From class
 
  <p>The stroke color is the color of this circle's outline, in the integer
  format specified by <code><a href="/reference/android/graphics/Color.html">Color</a></code>.
- If <code><a href="/reference/android/graphics/Color.html#TRANSPARENT">TRANSPARENT</a></code> is used then no outline is
- drawn.</p></div>
+ If TRANSPARENT is used then no outline is drawn.</p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>color</td>
-          <td>color in the <code><a href="/reference/android/graphics/Color.html">Color</a></code> format
+          <td>The stroke color in the <code><a href="/reference/android/graphics/Color.html">Color</a></code> format.
 </td>
         </tr>
       </table>
@@ -1919,13 +1868,13 @@ From class
 
  <p>The stroke width is the width (in screen pixels) of the circle's
  outline. It must be zero or greater. If it is zero then no outline is
- drawn.</p></div>
+ drawn. The default value is 10.</p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>width</td>
-          <td>width in screen pixels</td>
+          <td>The stroke width, in screen pixels.</td>
         </tr>
       </table>
   </div>
@@ -1967,16 +1916,16 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility.
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility of the circle.
 
- <p>If this circle is not visible then it is not drawn, but all other
- state is preserved.</p></div>
+ <p>If this circle is not visible then it will not be drawn. All other
+ state is preserved. Defaults to True.</p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>visible</td>
-          <td>false to make this circle invisible
+          <td>false to make this circle invisible.
 </td>
         </tr>
       </table>
@@ -2012,13 +1961,13 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Sets the zIndex.
 
  <p>Overlays (such as circles) with higher zIndices are drawn above
- those with lower indices.</p></div>
+ those with lower indices.</p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>zIndex</td>
-          <td>zIndex value
+          <td>The zIndex value.
 </td>
         </tr>
       </table>
