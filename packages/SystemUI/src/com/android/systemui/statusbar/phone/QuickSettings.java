@@ -819,8 +819,10 @@ class QuickSettings {
             if (ContactsContract.Intents.ACTION_PROFILE_CHANGED.equals(action) ||
                     Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
                 try {
-                    final int userId = ActivityManagerNative.getDefault().getCurrentUser().id;
-                    if (getSendingUserId() == userId) {
+                    final int currentUser = ActivityManagerNative.getDefault().getCurrentUser().id;
+                    final int changedUser =
+                            intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId());
+                    if (changedUser == currentUser) {
                         reloadUserInfo();
                     }
                 } catch (RemoteException e) {
