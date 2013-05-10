@@ -405,6 +405,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
 
         Watchdog.getInstance().addMonitor(this);
+        Watchdog.getInstance().addThread(mHandler, mHandlerThread.getName());
 
         // Forcibly turn the screen on at boot so that it is in a known power state.
         // We do this in init() rather than in the constructor because setting the

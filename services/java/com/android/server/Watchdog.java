@@ -120,6 +120,14 @@ public class Watchdog extends Thread {
             return mCompleted;
         }
 
+        public Thread getThread() {
+            return mHandler.getLooper().getThread();
+        }
+
+        public String getName() {
+            return mName;
+        }
+
         public String describeBlockedStateLocked() {
             return mCurrentMonitor == null ? mName : mCurrentMonitor.getClass().getName();
         }
@@ -256,16 +264,24 @@ public class Watchdog extends Thread {
         return true;
     }
 
-    private String describeBlockedCheckersLocked() {
-        StringBuilder builder = new StringBuilder(128);
+    private ArrayList<HandlerChecker> getBlockedCheckersLocked() {
+        ArrayList<HandlerChecker> checkers = new ArrayList<HandlerChecker>();
         for (int i=0; i<mHandlerCheckers.size(); i++) {
             HandlerChecker hc = mHandlerCheckers.get(i);
             if (!hc.isCompletedLocked()) {
-                if (builder.length() > 0) {
-                    builder.append(", ");
-                }
-                builder.append(hc.describeBlockedStateLocked());
+                checkers.add(hc);
             }
+        }
+        return checkers;
+    }
+
+    private String describeCheckersLocked(ArrayList<HandlerChecker> checkers) {
+        StringBuilder builder = new StringBuilder(128);
+        for (int i=0; i<checkers.size(); i++) {
+            if (builder.length() > 0) {
+                builder.append(", ");
+            }
+            builder.append(checkers.get(i).describeBlockedStateLocked());
         }
         return builder.toString();
     }
@@ -274,6 +290,7 @@ public class Watchdog extends Thread {
     public void run() {
         boolean waitedHalf = false;
         while (true) {
+            final ArrayList<HandlerChecker> blockedCheckers;
             final String name;
             final boolean allowRestart;
             synchronized (this) {
@@ -318,7 +335,8 @@ public class Watchdog extends Thread {
                     continue;
                 }
 
-                name = describeBlockedCheckersLocked();
+                blockedCheckers = getBlockedCheckersLocked();
+                name = describeCheckersLocked(blockedCheckers);
                 allowRestart = mAllowRestart;
             }
 
@@ -395,12 +413,15 @@ public class Watchdog extends Thread {
                 Slog.w(TAG, "Restart not allowed: Watchdog is *not* killing the system process");
             } else {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + name);
-                Slog.w(TAG, "Main thread stack trace:");
-                StackTraceElement[] stackTrace = Looper.getMainLooper().getThread().getStackTrace();
-                for (StackTraceElement element: stackTrace) {
-                    Slog.w(TAG, "\tat " + element);
+                for (int i=0; i<blockedCheckers.size(); i++) {
+                    Slog.w(TAG, blockedCheckers.get(i).getName() + " stack trace:");
+                    StackTraceElement[] stackTrace
+                            = blockedCheckers.get(i).getThread().getStackTrace();
+                    for (StackTraceElement element: stackTrace) {
+                        Slog.w(TAG, "    at " + element);
+                    }
                 }
-                Slog.w(TAG, "<End of main thread stack trace>");
+                Slog.w(TAG, "*** GOODBYE!");
                 Process.killProcess(Process.myPid());
                 System.exit(10);
             }
