@@ -18,7 +18,7 @@
     android:orientation="horizontal"
     android:layout_width="304dp"
     android:layout_height="match_parent"
-    android:background="@drawable/keyboard_popup_panel_trans_background">
+    android:background="@drawable/keyboard_background">
 
     <GridView
         android:id="@+id/characterPicker"
@@ -35,15 +35,5 @@
         android:fadingEdge="none"
         android:layout_gravity="center_vertical"
         android:listSelector="#0000"
-    />
-
-    <Button
-        android:id="@+id/cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:background="@drawable/btn_close"
-        android:layout_gravity="center_vertical"
     />
 </LinearLayout>

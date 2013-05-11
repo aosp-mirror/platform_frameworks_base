@@ -44,7 +44,6 @@ public class CharacterPickerDialog extends Dialog
     private String mOptions;
     private boolean mInsert;
     private LayoutInflater mInflater;
-    private Button mCancelButton;
 
     /**
      * Creates a new CharacterPickerDialog that presents the specified
@@ -71,15 +70,13 @@ public class CharacterPickerDialog extends Dialog
         params.token = mView.getApplicationWindowToken();
         params.type = params.TYPE_APPLICATION_ATTACHED_DIALOG;
         params.flags = params.flags | Window.FEATURE_NO_TITLE;
+        setCanceledOnTouchOutside(true);
 
         setContentView(R.layout.character_picker);
 
         GridView grid = (GridView) findViewById(R.id.characterPicker);
         grid.setAdapter(new OptionsAdapter(getContext()));
         grid.setOnItemClickListener(this);
-
-        mCancelButton = (Button) findViewById(R.id.cancel);
-        mCancelButton.setOnClickListener(this);
     }
 
     /**
@@ -88,6 +85,16 @@ public class CharacterPickerDialog extends Dialog
     public void onItemClick(AdapterView parent, View view, int position, long id) {
         String result = String.valueOf(mOptions.charAt(position));
         replaceCharacterAndClose(result);
+    }
+
+    /**
+     * Handles clicks on the character buttons.
+     */
+    public void onClick(View v) {
+        if (v instanceof Button) {
+            CharSequence result = ((Button) v).getText();
+            replaceCharacterAndClose(result);
+        }
     }
 
     private void replaceCharacterAndClose(CharSequence replace) {
@@ -99,18 +106,6 @@ public class CharacterPickerDialog extends Dialog
         }
 
         dismiss();
-    }
-
-    /**
-     * Handles clicks on the Cancel button.
-     */
-    public void onClick(View v) {
-        if (v == mCancelButton) {
-            dismiss();
-        } else if (v instanceof Button) {
-            CharSequence result = ((Button) v).getText();
-            replaceCharacterAndClose(result);
-        }
     }
 
     private class OptionsAdapter extends BaseAdapter {
