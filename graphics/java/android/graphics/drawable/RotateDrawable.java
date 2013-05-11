@@ -316,6 +316,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
                     mDrawable = source.mDrawable.getConstantState().newDrawable();
                 }
                 mDrawable.setCallback(owner);
+                mDrawable.setLayoutDirection(source.mDrawable.getLayoutDirection());
                 mPivotXRel = source.mPivotXRel;
                 mPivotX = source.mPivotX;
                 mPivotYRel = source.mPivotYRel;
