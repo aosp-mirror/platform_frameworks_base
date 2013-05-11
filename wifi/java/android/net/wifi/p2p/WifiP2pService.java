@@ -1356,6 +1356,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
                         mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(mContext,
                                 P2pStateMachine.this, mGroup.getInterface());
+                        // TODO: We should use DHCP state machine PRE message like WifiStateMachine
+                        mWifiNative.setP2pPowerSave(mGroup.getInterface(), false);
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
                         WifiP2pDevice groupOwner = mGroup.getOwner();
                         WifiP2pDevice peer = mPeers.get(groupOwner.deviceAddress);
