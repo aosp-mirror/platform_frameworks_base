@@ -151,7 +151,7 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
- $(TOP)/frameworks/av/include \
+	$(TOP)/frameworks/av/include \
 	external/skia/include/core \
 	external/skia/include/effects \
 	external/skia/include/images \
@@ -224,6 +224,7 @@ endif
 
 LOCAL_MODULE:= libandroid_runtime
 
+include external/stlport/libstlport.mk
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
