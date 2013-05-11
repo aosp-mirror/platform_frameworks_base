@@ -231,6 +231,7 @@ endif
 
 LOCAL_MODULE:= libandroid_runtime
 
+include external/stlport/libstlport.mk
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
