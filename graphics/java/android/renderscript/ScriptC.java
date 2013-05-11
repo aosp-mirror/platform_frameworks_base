@@ -106,7 +106,7 @@ public class ScriptC extends Script {
             mCachePath = f.getAbsolutePath();
             f.mkdirs();
         }
-        Log.v(TAG, "Create script for resource = " + resName);
+        //        Log.v(TAG, "Create script for resource = " + resName);
         return rs.nScriptCCreate(resName, mCachePath, pgm, pgmLength);
     }
 }
