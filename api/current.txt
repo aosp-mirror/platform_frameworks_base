@@ -31963,7 +31963,7 @@ package java.io {
     method public abstract boolean accept(java.io.File);
   }
 
-  public class FileInputStream extends java.io.InputStream implements java.io.Closeable {
+  public class FileInputStream extends java.io.InputStream {
     ctor public FileInputStream(java.io.File) throws java.io.FileNotFoundException;
     ctor public FileInputStream(java.io.FileDescriptor);
     ctor public FileInputStream(java.lang.String) throws java.io.FileNotFoundException;
@@ -31977,7 +31977,7 @@ package java.io {
     ctor public FileNotFoundException(java.lang.String);
   }
 
-  public class FileOutputStream extends java.io.OutputStream implements java.io.Closeable {
+  public class FileOutputStream extends java.io.OutputStream {
     ctor public FileOutputStream(java.io.File) throws java.io.FileNotFoundException;
     ctor public FileOutputStream(java.io.File, boolean) throws java.io.FileNotFoundException;
     ctor public FileOutputStream(java.io.FileDescriptor);
