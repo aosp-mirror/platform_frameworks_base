@@ -33401,6 +33401,9 @@ package java.lang {
     ctor public RuntimePermission(java.lang.String, java.lang.String);
   }
 
+  public abstract class SafeVarargs implements java.lang.annotation.Annotation {
+  }
+
   public class SecurityException extends java.lang.RuntimeException {
     ctor public SecurityException();
     ctor public SecurityException(java.lang.String);
