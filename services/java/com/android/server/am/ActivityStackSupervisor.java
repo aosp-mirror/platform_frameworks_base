@@ -304,7 +304,7 @@ public class ActivityStackSupervisor {
             final int stackId = stack.mStackId;
             final int nextStackId = mWindowManager.removeStack(stackId);
             // TODO: Perhaps we need to let the ActivityManager determine the next focus...
-            if (mFocusedStack.mStackId == stackId) {
+            if (getFocusedStack().mStackId == stackId) {
                 mFocusedStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
             }
         }
@@ -1189,6 +1189,13 @@ public class ActivityStackSupervisor {
                 mStackState = STACK_STATE_HOME_TO_FRONT;
             }
         } else {
+            if (r.task.stack == mHomeStack) {
+                // Try to correct, but how did we get here?
+                Slog.e(TAG, "!!! setFocusedStack: home stack used for non-home activity !!!",
+                        new RuntimeException("here").fillInStackTrace());
+                moveTaskToStack(r.task.taskId, getCorrectStack(r).mStackId, true);
+                // r.task.stack has now changed.
+            }
             mFocusedStack = r.task.stack;
             if (mStackState != STACK_STATE_HOME_IN_BACK) {
                 mStackState = STACK_STATE_HOME_TO_BACK;
@@ -1598,10 +1605,9 @@ public class ActivityStackSupervisor {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            ActivityStack lastStack = getLastStack();
-            targetStack = lastStack != null ? lastStack : mHomeStack;
+            targetStack = getCorrectStack(r);
             moveHomeStack(targetStack.isHomeStack());
-            ActivityRecord prev = lastStack == null ? null : targetStack.topActivity();
+            ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task
                     : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
                     null, true);
