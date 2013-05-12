@@ -701,9 +701,9 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody"><p>Interface for Google Cloud Messaging for Android.
+<p itemprop="articleBody"><p>Google Cloud Messaging for Android.
 
- <p>This class requires Google Play Services version 3.1.
+ <p>This class requires Google Play services version 3.1 or higher.
 
  <p>In order to receive GCM messages you need to declare a permission and a BroadcastReceiver
  in your manifest. This is a backward-compatible subset of what was required in previous
@@ -717,7 +717,7 @@ Summary:
  order to wake up the application.
 
  <p>The <code>com.google.android.c2dm.permission.SEND</code> permission is held by
- Google Play Services.
+ Google Play services.
  This prevents other code from invoking the broadcast receiver.
  Here is an excerpt from the manifest:
 
