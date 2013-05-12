@@ -305,6 +305,7 @@ public class ActivityStackSupervisor {
             final int nextStackId = mWindowManager.removeStack(stackId);
             // TODO: Perhaps we need to let the ActivityManager determine the next focus...
             if (mFocusedStack.mStackId == stackId) {
+                // If this is the last app stack, set mFocusedStack to null.
                 mFocusedStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
             }
         }
@@ -455,19 +456,16 @@ public class ActivityStackSupervisor {
     }
 
     ActivityRecord topRunningActivityLocked() {
-        ActivityRecord r = null;
-        if (mFocusedStack != null) {
-            r = mFocusedStack.topRunningActivityLocked(null);
-            if (r != null) {
-                return r;
-            }
+        final ActivityStack focusedStack = getFocusedStack();
+        ActivityRecord r = focusedStack.topRunningActivityLocked(null);
+        if (r != null) {
+            return r;
         }
+
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.mCurrentUser != mCurrentUser) {
-                continue;
-            }
-            if (stack != mFocusedStack && isFrontStack(stack)) {
+            if (stack.mCurrentUser == mCurrentUser && stack != focusedStack &&
+                    isFrontStack(stack)) {
                 r = stack.topRunningActivityLocked(null);
                 if (r != null) {
                     return r;
@@ -1162,7 +1160,7 @@ public class ActivityStackSupervisor {
     }
 
     ActivityStack getCorrectStack(ActivityRecord r) {
-        if (!r.isHomeActivity) {
+        if (!r.isHomeActivity || (r.task != null && !r.task.isHomeTask())) {
             int stackNdx;
             for (stackNdx = mStacks.size() - 1; stackNdx > 0; --stackNdx) {
                 if (mStacks.get(stackNdx).mCurrentUser == mCurrentUser) {
@@ -1184,7 +1182,7 @@ public class ActivityStackSupervisor {
         if (r == null) {
             return;
         }
-        if (r.isHomeActivity) {
+        if (r.isHomeActivity || (r.task != null && r.task.isHomeTask())) {
             if (mStackState != STACK_STATE_HOME_IN_FRONT) {
                 mStackState = STACK_STATE_HOME_TO_FRONT;
             }
@@ -1598,10 +1596,9 @@ public class ActivityStackSupervisor {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            ActivityStack lastStack = getLastStack();
-            targetStack = lastStack != null ? lastStack : mHomeStack;
+            targetStack = getCorrectStack(r);
             moveHomeStack(targetStack.isHomeStack());
-            ActivityRecord prev = lastStack == null ? null : targetStack.topActivity();
+            ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task
                     : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
                     null, true);

@@ -57,6 +57,8 @@ class TaskRecord extends ThumbnailHolder {
     /** Current stack */
     ActivityStack stack;
 
+    private boolean mHomeTask;
+
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent, ActivityStack _stack) {
         taskId = _taskId;
         affinity = info.taskAffinity;
@@ -153,19 +155,16 @@ class TaskRecord extends ThumbnailHolder {
     }
 
     void addActivityToTop(ActivityRecord r) {
+        addActivityAtIndex(mActivities.size(), r);
+    }
+
+    void addActivityAtIndex(int index, ActivityRecord r) {
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.fullscreen) {
             // Was not previously in list.
             numFullscreen++;
         }
-        mActivities.add(r);
-    }
-
-    void addActivityAtIndex(int index, ActivityRecord r) {
-        if (!mActivities.remove(r) && r.fullscreen) {
-            // Was not previously in list.
-            numFullscreen++;
-        }
+        mHomeTask = r.isHomeActivity;
         mActivities.add(index, r);
     }
 
@@ -183,10 +182,9 @@ class TaskRecord extends ThumbnailHolder {
      * task starting at a specified index.
      */
     final void performClearTaskAtIndexLocked(int activityNdx) {
-        final ArrayList<ActivityRecord> activities = mActivities;
-        int numActivities = activities.size();
+        int numActivities = mActivities.size();
         for ( ; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = activities.get(activityNdx);
+            final ActivityRecord r = mActivities.get(activityNdx);
             if (r.finishing) {
                 continue;
             }
@@ -216,19 +214,18 @@ class TaskRecord extends ThumbnailHolder {
      * or null if none was found.
      */
     final ActivityRecord performClearTaskLocked(ActivityRecord newR, int launchFlags) {
-        final ArrayList<ActivityRecord> activities = mActivities;
-        int numActivities = activities.size();
+        int numActivities = mActivities.size();
         for (int activityNdx = numActivities - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord r = activities.get(activityNdx);
+            ActivityRecord r = mActivities.get(activityNdx);
             if (r.finishing) {
                 continue;
             }
             if (r.realActivity.equals(newR.realActivity)) {
                 // Here it is!  Now finish everything in front...
-                ActivityRecord ret = r;
+                final ActivityRecord ret = r;
 
                 for (++activityNdx; activityNdx < numActivities; ++activityNdx) {
-                    r = activities.get(activityNdx);
+                    r = mActivities.get(activityNdx);
                     if (r.finishing) {
                         continue;
                     }
@@ -249,10 +246,8 @@ class TaskRecord extends ThumbnailHolder {
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
                         && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
                     if (!ret.finishing) {
-                        if (activities.contains(ret)) {
-                            stack.finishActivityLocked(ret, Activity.RESULT_CANCELED, null,
-                                    "clear", false);
-                        }
+                        stack.finishActivityLocked(ret, Activity.RESULT_CANCELED, null,
+                                "clear", false);
                         return null;
                     }
                 }
@@ -319,6 +314,10 @@ class TaskRecord extends ThumbnailHolder {
         TaskAccessInfo.SubTask subtask = info.subtasks.get(subTaskIndex);
         performClearTaskAtIndexLocked(subtask.index);
         return subtask.activity;
+    }
+
+    boolean isHomeTask() {
+        return mHomeTask;
     }
 
     public TaskAccessInfo getTaskAccessInfoLocked(boolean inclThumbs) {
