@@ -114,7 +114,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
  * WindowManagerPolicy implementation for the Android phone UI.  This
  * introduces a new method suffix, Lp, for an internal lock of the
  * PhoneWindowManager.  This is used to protect some internal state, and
- * can be acquired with either thw Lw and Li lock held, so has the restrictions
+ * can be acquired with either the Lw and Li lock held, so has the restrictions
  * of both of those when held.
  */
 public class PhoneWindowManager implements WindowManagerPolicy {
@@ -921,18 +921,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 new SystemGestures.Callbacks() {
                     @Override
                     public void onSwipeFromTop() {
-                        showHideybars(mStatusBar);
+                        if (mStatusBar != null) {
+                            requestHideybars(mStatusBar);
+                        }
                     }
                     @Override
                     public void onSwipeFromBottom() {
-                        if (mNavigationBarOnBottom) {
-                            showHideybars(mNavigationBar);
+                        if (mNavigationBar != null && mNavigationBarOnBottom) {
+                            requestHideybars(mNavigationBar);
                         }
                     }
                     @Override
                     public void onSwipeFromRight() {
-                        if (!mNavigationBarOnBottom) {
-                            showHideybars(mNavigationBar);
+                        if (mNavigationBar != null && !mNavigationBarOnBottom) {
+                            requestHideybars(mNavigationBar);
                         }
                     }
                     @Override
@@ -2436,13 +2438,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    /**
-     * A delayed callback use to determine when it is okay to re-allow applications
-     * to use certain system UI flags.  This is used to prevent applications from
-     * spamming system UI changes that prevent the navigation bar from being shown.
-     */
-    final Runnable mAllowSystemUiDelay = new Runnable() {
-        @Override public void run() {
+    private final Runnable mClearHideNavigationFlag = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
+                // Clear flags.
+                mForceClearedSystemUiFlags &=
+                        ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+            }
+            mWindowManagerFuncs.reevaluateStatusBarVisibility();
         }
     };
 
@@ -2466,7 +2470,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                         // When the user taps down, we re-show the nav bar.
                         boolean changed = false;
-                        synchronized (mLock) {
+                        synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
                             // Any user activity always causes us to show the
                             // navigation controls, if they had been hidden.
                             // We also clear the low profile and only content
@@ -2488,16 +2492,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             if (mForceClearedSystemUiFlags != newVal) {
                                 mForceClearedSystemUiFlags = newVal;
                                 changed = true;
-                                mHandler.postDelayed(new Runnable() {
-                                    @Override public void run() {
-                                        synchronized (mLock) {
-                                            // Clear flags.
-                                            mForceClearedSystemUiFlags &=
-                                                    ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-                                        }
-                                        mWindowManagerFuncs.reevaluateStatusBarVisibility();
-                                    }
-                                }, 1000);
+                                mHandler.postDelayed(mClearHideNavigationFlag, 1000);
                             }
                         }
                         if (changed) {
@@ -2521,7 +2516,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public int adjustSystemUiVisibilityLw(int visibility) {
-        if (mStatusHideybar == HIDEYBAR_SHOWING &&
+        if (mStatusBar != null && mStatusHideybar == HIDEYBAR_SHOWING &&
                 0 == (visibility & View.STATUS_BAR_OVERLAY)) {
             mStatusHideybar = HIDEYBAR_HIDING;
             mStatusBar.hideLw(true);
@@ -4134,7 +4129,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // force a re-application of focused window sysui visibility.
                 // the window may never have been shown for this user
                 // e.g. the keyguard when going through the new-user setup flow
-                synchronized(mLock) {
+                synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
                     mLastSystemUiFlags = 0;
                     updateSystemUiVisibilityLw();
                 }
@@ -4142,8 +4137,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    private void showHideybars(WindowState swipeTarget) {
-        synchronized(mLock) {
+    private void requestHideybars(WindowState swipeTarget) {
+        synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             boolean sb = checkShowHideybar("status", mStatusHideybar, mStatusBar);
             boolean nb = checkShowHideybar("navigation", mNavigationHideybar, mNavigationBar);
             if (sb || nb) {
@@ -5056,9 +5051,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     || (hideStatusBarSysui && overlayAllowed)
                     || statusBarHasFocus;
 
-            if (!statusHideyAllowed) {
+            if (mStatusBar == null || !statusHideyAllowed) {
                 mStatusHideybar = HIDEYBAR_NONE;
-                if (hideStatusBarSysui) {
+                if (mStatusBar != null && hideStatusBarSysui) {
                     // clear the clearable flags instead
                     int newVal = mResettingSystemUiFlags | View.SYSTEM_UI_CLEARABLE_FLAGS;
                     if (newVal != mResettingSystemUiFlags) {
