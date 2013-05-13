@@ -329,6 +329,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.setState(getState());
                 d.setLevel(getLevel());
                 d.setBounds(getBounds());
+                d.setLayoutDirection(getLayoutDirection());
             }
         } else {
             mCurrDrawable = null;
@@ -485,6 +486,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                         mDrawables[i] = origDr[i].getConstantState().newDrawable();
                     }
                     mDrawables[i].setCallback(owner);
+                    mDrawables[i].setLayoutDirection(origDr[i].getLayoutDirection());
                 }
 
                 mCheckedConstantState = mCanConstantState = true;
