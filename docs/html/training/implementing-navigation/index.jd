@@ -1,5 +1,5 @@
 page.title=Implementing Effective Navigation
-page.tags="viewpager","tasks","back","up"
+page.tags="viewpager","tasks","back","up","swipe view","drawer"
 
 trainingnavtop=true
 startpage=true
@@ -12,9 +12,9 @@ startpage=true
 <h2>Dependencies and prerequisites</h2>
 
 <ul>
-  <li>API level 14</li>
+  <li>Android 2.2 or higher</li>
   <li>Understanding of fragments and Android layouts</li>
-  <li><a href="{@docRoot}tools/extras/support-library.html">The Android Support Package</a></li>
+  <li><a href="{@docRoot}tools/extras/support-library.html">Android Support Library</a></li>
   <li><a href="{@docRoot}training/design-navigation/index.html">Designing Effective Navigation</a></li>
 </ul>
 
@@ -40,28 +40,38 @@ startpage=true
 
 <p>This class demonstrates how to implement the key navigation design patterns detailed in the
 <a href="{@docRoot}training/design-navigation/index.html">Designing Effective Navigation</a> class.
-The lessons in this class cover implementing navigation up, down, and across your application's <a
-href="{@docRoot}training/design-navigation/screen-planning.html#diagram- relationships">screen
-map</a>.</p>
+</p>
 
-<p>After reading through the lessons in this class and exploring the associated sample application
-(see right), you should also have a basic understanding of how to use
-{@link android.app.ActionBar} and {@link android.support.v4.view.ViewPager}, two components that are fundamental to core app navigation.</p>
+<p>After reading the lessons in this class, you should have a strong understanding of how to
+implement navigation patterns with tabs, swipe views, and a navigation drawer. You should also
+understand how to provide proper <em>Up</em> and <em>Back</em> navigation.</p>
+
+<p class="note"><strong>Note:</strong> Several elements of this class require the
+<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> APIs.
+If you have not used the Support Library before, follow the lesson about <a
+href="{@docRoot}training/basics/fragments/support-lib.html">Using the Support Library</a>
+to get your project set up.</p>
 
 
 <h2 id="lessons">Lessons</h2>
 
-
 <dl>
-  <dt><strong><a href="lateral.html">Implementing Lateral Navigation</a></strong></dt>
-    <dd>Learn how to implement tabs and horizontal paging (swipe views).</dd>
+  <dt><strong><a href="lateral.html">Creating Swipe Views with Tabs</a></strong></dt>
+    <dd>Learn how to implement tabs in the action bar and provide
+    horizontal paging (swipe views) to navigate between tabs.</dd>
 
-  <dt><strong><a href="ancestral.html">Implementing Ancestral Navigation</a></strong></dt>
-    <dd>Learn how to implement <em>Up</em> navigation.</dd>
+  <dt><strong><a href="nav-drawer.html">Creating a Navigation Drawer</a></strong></dt>
+    <dd>Learn how to build an interface with a hidden navigation drawer on the side
+    of the screen that opens with a swipe or by pressing the action bar's app icon.</dd>
 
-  <dt><strong><a href="temporal.html">Implementing Temporal Navigation</a></strong></dt>
-    <dd>Learn how to correctly handle the <em>Back</em> button.</dd>
+  <dt><strong><a href="ancestral.html">Providing Up Navigation</a></strong></dt>
+    <dd>Learn how to implement <em>Up</em> navigation using the action bar's app icon.</dd>
+
+  <dt><strong><a href="temporal.html">Providing Proper Back Navigation</a></strong></dt>
+    <dd>Learn how to correctly handle the <em>Back</em> button in special cases,
+    including how to insert activities into the back stack when deep-linking the user
+    from notifications or app widgets.</dd>
 
   <dt><strong><a href="descendant.html">Implementing Descendant Navigation</a></strong></dt>
-    <dd>Learn the finer points of implementing navigation into your application's information hierarchy.</dd>
+    <dd>Learn the finer points of navigating down into your application's information hierarchy.</dd>
 </dl>
