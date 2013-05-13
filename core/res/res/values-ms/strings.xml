@@ -468,10 +468,8 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Membenarkan apl untuk merakam audio menggunakan mikrofon. Kebenaran ini membenarkan apl untuk merakam audio pada bila-bila masa tanpa pengesahan anda."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Membenarkan apl mengambil gambar dan video menggunakan kamera. Kebenaran ini membenarkan apl untuk menggunakan kamera pada bila-bila masa tanpa pengesahan anda."</string>
-    <!-- no translation found for permlab_cameraDisableTransmitLed (2651072630501126222) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraDisableTransmitLed (4764585465480295341) -->
-    <skip />
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"lumpuhkan LED penunjuk penghantaran semasa kamera sedang digunakan"</string>
+    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Membenarkan aplikasi sistem yang diprapasang untuk melumpuhkan LED penunjuk penggunaan kamera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"melumpuhkan tablet secara kekal"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"lumpuhkan telefon secara kekal"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Membenarkan apl melumpuhkan keseluruhan tablet secara kekal. Ini amat berbahaya."</string>
@@ -1261,10 +1259,8 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Membenarkan apl untuk membuat laluan output media ke peranti luaran lain."</string>
     <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Akses storan selamat pengawal kekunci"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Membenarkan aplikasi mengakses storan selamat pengawal kekunci."</string>
-    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
-    <skip />
-    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
-    <skip />
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Kawal paparkan dan sembunyikan pengawal kekunci"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Membenarkan aplikasi untuk mengawal pengawal kekunci."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mendapatkan kawalan zum"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pergi"</string>
@@ -1501,8 +1497,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Pengguna semasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Pemilik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ralat"</string>
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Apl ini tidak menyokong akaun untuk profil yang disekat"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Tidak menemui aplikasi untuk mengendalikan tindakan ini"</string>
     <string name="revoke" msgid="5404479185228271586">"Batalkan"</string>
 </resources>

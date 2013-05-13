@@ -567,9 +567,9 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"መተግበሪያ የእውታረ መረቡን ግንኙነት ትይይዝ ሁኔታ ለመለወጥ ይፈቅዳል።"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"የዳራ ውሂብ አጠቃቀም ቅንብር ለውጥ"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"የዳራ ውሂብ አጠቃቀም ቅንብሮች  ለመለወጥ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"የገመድ አልባ ግኑኝነቶችን እይ"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"የWi-Fi ግኑኝነቶችን እይ"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"መተግበሪያው አንደ Wi-Fi እንደነቃ እና የተገናኙ የWi-Fi መሳሪያዎችን ስም የመሳሰሉ የWi-Fi አውታረ መረብ መረጃዎችን እንዲያይ ይፈቅድለታል።"</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"ከገመድ አልባ ጋር ተገናኝና ተላቀቅ"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"ከWi-Fi ጋር ተገናኝና ተላቀቅ"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"መተግበሪያው ከWi-Fi መዳረሻ ነጥቦች ጋር እንዲገናኝና እንዲለያይ እንዲሁም ለWi-Fi አውታረ መረቦች የመሳሪያ ውቅር ለውጦች እንዲያደርግ ይፈቅድለታል።"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"የWi-Fi ብዙስምሪትተቀባይፍቀድ"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"መተግበሪያው ባለብዙ ስምሪት አድራሻዎችን በመጠቀም ጡባዊ ቱኮህን ብቻ ሳይሆን በWi-Fi አውታረ መረብ ላሉ መሳሪያዎች በሙሉ የተላኩ እሽጎችን እንዲቀበል ይፈቅድለታል። ባለብዙ ስምሪት ካልሆነው ሁኔታ የበለጠ ሃይል ይጠቀማል።"</string>
@@ -1131,7 +1131,7 @@
     <string name="ringtone_unknown" msgid="5477919988701784788">"ያልታወቀ የስልክ ጥሪ ድምፅ"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"የWi-Fi አውታረ መረብ አለ"</item>
-    <item quantity="other" msgid="4192424489168397386">"የWiFi አውታረ መረቦች አሉ"</item>
+    <item quantity="other" msgid="4192424489168397386">"የWi-Fi አውታረ መረቦች አሉ"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
     <item quantity="one" msgid="1634101450343277345">"አውታረ መረብ ሲኖር Wi-Fi ክፈት"</item>
