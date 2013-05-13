@@ -131,9 +131,9 @@ class KeyguardMultiUserAvatar extends FrameLayout {
                         mShadowRadius, mHighlightColor)) {
             Bitmap icon = null;
             try {
-                icon = BitmapFactory.decodeFile(rewriteIconPath(user.iconPath));
+                icon = mUserManager.getUserIcon(user.id);
             } catch (Exception e) {
-                if (DEBUG) Log.d(TAG, "failed to open profile icon " + user.iconPath, e);
+                if (DEBUG) Log.d(TAG, "failed to get profile icon " + user, e);
             }
 
             if (icon == null) {
