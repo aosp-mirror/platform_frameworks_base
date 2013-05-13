@@ -513,6 +513,12 @@ public class WindowAnimator {
 
                 testTokenMayBeDrawnLocked(displayId);
 
+                final ScreenRotationAnimation screenRotationAnimation =
+                        mDisplayContentsAnimators.valueAt(i).mScreenRotationAnimation;
+                if (screenRotationAnimation != null) {
+                    screenRotationAnimation.updateSurfacesInTransaction();
+                }
+
                 mAnimating |= mService.getDisplayContentLocked(displayId).animateDimLayers();
 
                 //TODO (multidisplay): Magnification is supported only for the default display.
