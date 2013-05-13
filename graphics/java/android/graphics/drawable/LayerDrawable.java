@@ -589,12 +589,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {
-        if (getLayoutDirection() != layoutDirection) {
-            final ChildDrawable[] array = mLayerState.mChildren;
-            final int N = mLayerState.mNum;
-            for (int i = 0; i < N; i++) {
-                array[i].mDrawable.setLayoutDirection(layoutDirection);
-            }
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            array[i].mDrawable.setLayoutDirection(layoutDirection);
         }
         super.setLayoutDirection(layoutDirection);
     }
@@ -641,6 +639,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                         r.mDrawable = or.mDrawable.getConstantState().newDrawable();
                     }
                     r.mDrawable.setCallback(owner);
+                    r.mDrawable.setLayoutDirection(or.mDrawable.getLayoutDirection());
                     r.mInsetL = or.mInsetL;
                     r.mInsetT = or.mInsetT;
                     r.mInsetR = or.mInsetR;
