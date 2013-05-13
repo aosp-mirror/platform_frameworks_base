@@ -17065,28 +17065,29 @@ package android.os {
     ctor public Debug.MemoryInfo();
     method public int describeContents();
     method public static java.lang.String getOtherLabel(int);
+    method public int getOtherPrivateClean(int);
     method public int getOtherPrivateDirty(int);
     method public int getOtherPss(int);
     method public int getOtherSharedClean(int);
     method public int getOtherSharedDirty(int);
+    method public int getOtherSwappablePss(int);
+    method public int getTotalPrivateClean();
     method public int getTotalPrivateDirty();
     method public int getTotalPss();
     method public int getTotalSharedClean();
     method public int getTotalSharedDirty();
+    method public int getTotalSwappablePss();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public int dalvikPrivateDirty;
     field public int dalvikPss;
-    field public int dalvikSharedClean;
     field public int dalvikSharedDirty;
     field public int nativePrivateDirty;
     field public int nativePss;
-    field public int nativeSharedClean;
     field public int nativeSharedDirty;
     field public int otherPrivateDirty;
     field public int otherPss;
-    field public int otherSharedClean;
     field public int otherSharedDirty;
   }
 
