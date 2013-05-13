@@ -614,20 +614,25 @@
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/implementing-navigation/index.html"
              description=
-             "How to implement various navigation patterns such as swipe views and up navigation."
+             "How to implement various navigation patterns such as swipe views,
+             a navigation drawer, and up navigation."
             >Implementing Effective Navigation</a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/implementing-navigation/lateral.html">
-            Implementing Lateral Navigation
+            Creating Swipe Views with Tabs
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/implementing-navigation/nav-drawer.html">
+            Creating a Navigation Drawer
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/implementing-navigation/ancestral.html">
-            Implementing Ancestral Navigation
+            Providing Up Navigation
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/implementing-navigation/temporal.html">
-            Implementing Temporal Navigation
+            Providing Proper Back Navigation
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/implementing-navigation/descendant.html">
