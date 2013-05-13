@@ -2208,6 +2208,14 @@
         android:description="@string/permdesc_bindNotificationListenerService"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to call into a carrier setup flow. It is up to the
+         carrier setup application to enforce that this permission is required
+         @hide This is not a third-party API (intended for OEMs and system apps). -->
+    <permission android:name="android.permission.INVOKE_CARRIER_SETUP"
+        android:label="@string/permlab_invokeCarrierSetup"
+        android:description="@string/permdesc_invokeCarrierSetup"
+        android:protectionLevel="signature|system" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
