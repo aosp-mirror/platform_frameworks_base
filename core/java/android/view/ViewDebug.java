@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -43,7 +44,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -964,6 +970,48 @@ public class ViewDebug {
         } while (klass != Object.class);
     }
 
+    private static Object callMethodOnAppropriateTheadBlocking(final Method method,
+            final Object object) throws IllegalAccessException, InvocationTargetException,
+            TimeoutException {
+        if (!(object instanceof View)) {
+            return method.invoke(object, (Object[]) null);
+        }
+
+        final View view = (View) object;
+        Callable<Object> callable = new Callable<Object>() {
+                @Override
+                public Object call() throws IllegalAccessException, InvocationTargetException {
+                    return method.invoke(view, (Object[]) null);
+                }
+        };
+        FutureTask<Object> future = new FutureTask<Object>(callable);
+        // Try to use the handler provided by the view
+        Handler handler = view.getHandler();
+        // Fall back on using the main thread
+        if (handler == null) {
+            handler = new Handler(android.os.Looper.getMainLooper());
+        }
+        handler.post(future);
+        while (true) {
+            try {
+                return future.get(CAPTURE_TIMEOUT, java.util.concurrent.TimeUnit.MILLISECONDS);
+            } catch (ExecutionException e) {
+                Throwable t = e.getCause();
+                if (t instanceof IllegalAccessException) {
+                    throw (IllegalAccessException)t;
+                }
+                if (t instanceof InvocationTargetException) {
+                    throw (InvocationTargetException)t;
+                }
+                throw new RuntimeException("Unexpected exception", t);
+            } catch (InterruptedException e) {
+                // Call get again
+            } catch (CancellationException e) {
+                throw new RuntimeException("Unexpected cancellation exception", e);
+            }
+        }
+    }
+
     private static void exportMethods(Context context, Object view, BufferedWriter out,
             Class<?> klass, String prefix) throws IOException {
 
@@ -974,8 +1022,7 @@ public class ViewDebug {
             final Method method = methods[i];
             //noinspection EmptyCatchBlock
             try {
-                // TODO: This should happen on the UI thread
-                Object methodValue = method.invoke(view, (Object[]) null);
+                Object methodValue = callMethodOnAppropriateTheadBlocking(method, view);
                 final Class<?> returnType = method.getReturnType();
                 final ExportedProperty property = sAnnotations.get(method);
                 String categoryPrefix =
@@ -1033,6 +1080,7 @@ public class ViewDebug {
                 writeEntry(out, categoryPrefix + prefix, method.getName(), "()", methodValue);
             } catch (IllegalAccessException e) {
             } catch (InvocationTargetException e) {
+            } catch (TimeoutException e) {
             }
         }
     }
