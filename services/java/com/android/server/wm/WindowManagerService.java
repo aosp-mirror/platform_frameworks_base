@@ -8731,7 +8731,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!wtoken.allDrawn) {
                     int numInteresting = wtoken.numInterestingWindows;
                     if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
-                        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                        if (DEBUG_VISIBILITY) Slog.v(TAG,
                                 "allDrawn: " + wtoken
                                 + " interesting=" + numInteresting
                                 + " drawn=" + wtoken.numDrawnWindows);
@@ -8948,7 +8948,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 // make this happen.
                                 displayContent.pendingLayoutChanges |=
                                         WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
-                                if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                                if (DEBUG_LAYOUT_REPEATS) {
                                     debugLayoutRepeats(
                                         "dream and commitFinishDrawingLocked true",
                                         displayContent.pendingLayoutChanges);
@@ -8960,7 +8960,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 mInnerFields.mWallpaperMayChange = true;
                                 displayContent.pendingLayoutChanges |=
                                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                                if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                                if (DEBUG_LAYOUT_REPEATS) {
                                     debugLayoutRepeats(
                                         "wallpaper and commitFinishDrawingLocked true",
                                         displayContent.pendingLayoutChanges);
@@ -8986,8 +8986,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                             if ((w.isOnScreen() || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
                                     && !w.mExiting && !w.mDestroying) {
-                                if (WindowManagerService.DEBUG_VISIBILITY ||
-                                        WindowManagerService.DEBUG_ORIENTATION) {
+                                if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
                                     Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
                                             + ", isAnimating=" + winAnimator.isAnimating());
                                     if (!w.isDrawnLw()) {
@@ -9004,8 +9003,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                         atoken.numInterestingWindows++;
                                         if (w.isDrawnLw()) {
                                             atoken.numDrawnWindows++;
-                                            if (WindowManagerService.DEBUG_VISIBILITY ||
-                                                    WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
+                                            if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG,
                                                     "tokenMayBeDrawn: " + atoken
                                                     + " freezingScreen=" + atoken.mAppAnimator.freezingScreen
                                                     + " mAppFreezing=" + w.mAppFreezing);
@@ -9104,8 +9102,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mWallpaperForceHidingChanged = false;
 
         if (mInnerFields.mWallpaperMayChange) {
-            if (WindowManagerService.DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                    "Wallpaper may change!  Adjusting");
+            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Wallpaper may change!  Adjusting");
             defaultDisplay.pendingLayoutChanges |=
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("WallpaperMayChange",
