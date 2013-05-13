@@ -32442,6 +32442,7 @@ package java.lang {
 
   public class AssertionError extends java.lang.Error {
     ctor public AssertionError();
+    ctor public AssertionError(java.lang.String, java.lang.Throwable);
     ctor public AssertionError(java.lang.Object);
     ctor public AssertionError(boolean);
     ctor public AssertionError(char);
@@ -32459,6 +32460,7 @@ package java.lang {
     ctor public Boolean(java.lang.String);
     ctor public Boolean(boolean);
     method public boolean booleanValue();
+    method public static int compare(boolean, boolean);
     method public int compareTo(java.lang.Boolean);
     method public static boolean getBoolean(java.lang.String);
     method public static boolean parseBoolean(java.lang.String);
@@ -32473,6 +32475,7 @@ package java.lang {
   public final class Byte extends java.lang.Number implements java.lang.Comparable {
     ctor public Byte(byte);
     ctor public Byte(java.lang.String) throws java.lang.NumberFormatException;
+    method public static int compare(byte, byte);
     method public int compareTo(java.lang.Byte);
     method public static java.lang.Byte decode(java.lang.String) throws java.lang.NumberFormatException;
     method public double doubleValue();
@@ -32510,16 +32513,20 @@ package java.lang {
     method public static int codePointBefore(char[], int, int);
     method public static int codePointCount(java.lang.CharSequence, int, int);
     method public static int codePointCount(char[], int, int);
+    method public static int compare(char, char);
     method public int compareTo(java.lang.Character);
     method public static int digit(char, int);
     method public static int digit(int, int);
     method public static char forDigit(int, int);
     method public static byte getDirectionality(char);
     method public static byte getDirectionality(int);
+    method public static java.lang.String getName(int);
     method public static int getNumericValue(char);
     method public static int getNumericValue(int);
     method public static int getType(char);
     method public static int getType(int);
+    method public static char highSurrogate(int);
+    method public static boolean isBmpCodePoint(int);
     method public static boolean isDefined(char);
     method public static boolean isDefined(int);
     method public static boolean isDigit(char);
@@ -32548,6 +32555,7 @@ package java.lang {
     method public static boolean isSpaceChar(char);
     method public static boolean isSpaceChar(int);
     method public static boolean isSupplementaryCodePoint(int);
+    method public static boolean isSurrogate(char);
     method public static boolean isSurrogatePair(char, char);
     method public static boolean isTitleCase(char);
     method public static boolean isTitleCase(int);
@@ -32560,6 +32568,7 @@ package java.lang {
     method public static boolean isValidCodePoint(int);
     method public static boolean isWhitespace(char);
     method public static boolean isWhitespace(int);
+    method public static char lowSurrogate(int);
     method public static int offsetByCodePoints(java.lang.CharSequence, int, int);
     method public static int offsetByCodePoints(char[], int, int, int, int);
     method public static char reverseBytes(char);
@@ -33088,6 +33097,7 @@ package java.lang {
     ctor public Integer(int);
     ctor public Integer(java.lang.String) throws java.lang.NumberFormatException;
     method public static int bitCount(int);
+    method public static int compare(int, int);
     method public int compareTo(java.lang.Integer);
     method public static java.lang.Integer decode(java.lang.String) throws java.lang.NumberFormatException;
     method public double doubleValue();
@@ -33139,12 +33149,14 @@ package java.lang {
   public class LinkageError extends java.lang.Error {
     ctor public LinkageError();
     ctor public LinkageError(java.lang.String);
+    ctor public LinkageError(java.lang.String, java.lang.Throwable);
   }
 
   public final class Long extends java.lang.Number implements java.lang.Comparable {
     ctor public Long(long);
     ctor public Long(java.lang.String) throws java.lang.NumberFormatException;
     method public static int bitCount(long);
+    method public static int compare(long, long);
     method public int compareTo(java.lang.Long);
     method public static java.lang.Long decode(java.lang.String) throws java.lang.NumberFormatException;
     method public double doubleValue();
@@ -33460,6 +33472,7 @@ package java.lang {
   public final class Short extends java.lang.Number implements java.lang.Comparable {
     ctor public Short(java.lang.String) throws java.lang.NumberFormatException;
     ctor public Short(short);
+    method public static int compare(short, short);
     method public int compareTo(java.lang.Short);
     method public static java.lang.Short decode(java.lang.String) throws java.lang.NumberFormatException;
     method public double doubleValue();
@@ -33731,6 +33744,7 @@ package java.lang {
     method public static java.util.Map<java.lang.String, java.lang.String> getenv();
     method public static int identityHashCode(java.lang.Object);
     method public static java.nio.channels.Channel inheritedChannel() throws java.io.IOException;
+    method public static java.lang.String lineSeparator();
     method public static void load(java.lang.String);
     method public static void loadLibrary(java.lang.String);
     method public static java.lang.String mapLibraryName(java.lang.String);
@@ -34162,6 +34176,10 @@ package java.lang.reflect {
 
   public class Modifier {
     ctor public Modifier();
+    method public static int classModifiers();
+    method public static int constructorModifiers();
+    method public static int fieldModifiers();
+    method public static int interfaceModifiers();
     method public static boolean isAbstract(int);
     method public static boolean isFinal(int);
     method public static boolean isInterface(int);
@@ -34174,6 +34192,7 @@ package java.lang.reflect {
     method public static boolean isSynchronized(int);
     method public static boolean isTransient(int);
     method public static boolean isVolatile(int);
+    method public static int methodModifiers();
     method public static java.lang.String toString(int);
     field public static final int ABSTRACT = 1024; // 0x400
     field public static final int FINAL = 16; // 0x10
@@ -34710,6 +34729,7 @@ package java.net {
     method public java.lang.String getHostAddress();
     method public java.lang.String getHostName();
     method public static java.net.InetAddress getLocalHost() throws java.net.UnknownHostException;
+    method public static java.net.InetAddress getLoopbackAddress();
     method public boolean isAnyLocalAddress();
     method public boolean isLinkLocalAddress();
     method public boolean isLoopbackAddress();
@@ -34732,6 +34752,7 @@ package java.net {
     method public final boolean equals(java.lang.Object);
     method public final java.net.InetAddress getAddress();
     method public final java.lang.String getHostName();
+    method public final java.lang.String getHostString();
     method public final int getPort();
     method public final int hashCode();
     method public final boolean isUnresolved();
@@ -34788,10 +34809,12 @@ package java.net {
   }
 
   public final class NetworkInterface {
+    method public static java.net.NetworkInterface getByIndex(int) throws java.net.SocketException;
     method public static java.net.NetworkInterface getByInetAddress(java.net.InetAddress) throws java.net.SocketException;
     method public static java.net.NetworkInterface getByName(java.lang.String) throws java.net.SocketException;
     method public java.lang.String getDisplayName();
     method public byte[] getHardwareAddress() throws java.net.SocketException;
+    method public int getIndex();
     method public java.util.Enumeration<java.net.InetAddress> getInetAddresses();
     method public java.util.List<java.net.InterfaceAddress> getInterfaceAddresses();
     method public int getMTU() throws java.net.SocketException;
@@ -39462,11 +39485,19 @@ package java.util {
     method public int nextClearBit(int);
     method public int nextSetBit(int);
     method public void or(java.util.BitSet);
+    method public int previousClearBit(int);
+    method public int previousSetBit(int);
     method public void set(int);
     method public void set(int, boolean);
     method public void set(int, int, boolean);
     method public void set(int, int);
     method public int size();
+    method public byte[] toByteArray();
+    method public long[] toLongArray();
+    method public static java.util.BitSet valueOf(long[]);
+    method public static java.util.BitSet valueOf(java.nio.LongBuffer);
+    method public static java.util.BitSet valueOf(byte[]);
+    method public static java.util.BitSet valueOf(java.nio.ByteBuffer);
     method public void xor(java.util.BitSet);
   }
 
@@ -39599,7 +39630,10 @@ package java.util {
     method public static java.util.SortedSet<E> checkedSortedSet(java.util.SortedSet<E>, java.lang.Class<E>);
     method public static void copy(java.util.List<? super T>, java.util.List<? extends T>);
     method public static boolean disjoint(java.util.Collection<?>, java.util.Collection<?>);
+    method public static java.util.Enumeration<T> emptyEnumeration();
+    method public static java.util.Iterator<T> emptyIterator();
     method public static final java.util.List<T> emptyList();
+    method public static java.util.ListIterator<T> emptyListIterator();
     method public static final java.util.Map<K, V> emptyMap();
     method public static final java.util.Set<T> emptySet();
     method public static java.util.Enumeration<T> enumeration(java.util.Collection<T>);
@@ -39652,11 +39686,16 @@ package java.util {
   public class ConcurrentModificationException extends java.lang.RuntimeException {
     ctor public ConcurrentModificationException();
     ctor public ConcurrentModificationException(java.lang.String);
+    ctor public ConcurrentModificationException(java.lang.String, java.lang.Throwable);
+    ctor public ConcurrentModificationException(java.lang.Throwable);
   }
 
   public final class Currency implements java.io.Serializable {
+    method public static java.util.Set<java.util.Currency> getAvailableCurrencies();
     method public java.lang.String getCurrencyCode();
     method public int getDefaultFractionDigits();
+    method public java.lang.String getDisplayName();
+    method public java.lang.String getDisplayName(java.util.Locale);
     method public static java.util.Currency getInstance(java.lang.String);
     method public static java.util.Currency getInstance(java.util.Locale);
     method public java.lang.String getSymbol();
@@ -41963,6 +42002,7 @@ package java.util.logging {
     method public static java.util.logging.Logger getAnonymousLogger();
     method public static java.util.logging.Logger getAnonymousLogger(java.lang.String);
     method public java.util.logging.Filter getFilter();
+    method public static java.util.logging.Logger getGlobal();
     method public java.util.logging.Handler[] getHandlers();
     method public java.util.logging.Level getLevel();
     method public static java.util.logging.Logger getLogger(java.lang.String);
@@ -42309,6 +42349,7 @@ package java.util.zip {
     ctor public Deflater(int, boolean);
     method public int deflate(byte[]);
     method public synchronized int deflate(byte[], int, int);
+    method public synchronized int deflate(byte[], int, int, int);
     method public synchronized void end();
     method public synchronized void finish();
     method public synchronized boolean finished();
@@ -42331,8 +42372,11 @@ package java.util.zip {
     field public static final int DEFAULT_STRATEGY = 0; // 0x0
     field public static final int DEFLATED = 8; // 0x8
     field public static final int FILTERED = 1; // 0x1
+    field public static final int FULL_FLUSH = 3; // 0x3
     field public static final int HUFFMAN_ONLY = 2; // 0x2
     field public static final int NO_COMPRESSION = 0; // 0x0
+    field public static final int NO_FLUSH = 0; // 0x0
+    field public static final int SYNC_FLUSH = 2; // 0x2
   }
 
   public class DeflaterInputStream extends java.io.FilterInputStream {
@@ -42344,9 +42388,12 @@ package java.util.zip {
   }
 
   public class DeflaterOutputStream extends java.io.FilterOutputStream {
-    ctor public DeflaterOutputStream(java.io.OutputStream, java.util.zip.Deflater);
     ctor public DeflaterOutputStream(java.io.OutputStream);
+    ctor public DeflaterOutputStream(java.io.OutputStream, java.util.zip.Deflater);
     ctor public DeflaterOutputStream(java.io.OutputStream, java.util.zip.Deflater, int);
+    ctor public DeflaterOutputStream(java.io.OutputStream, boolean);
+    ctor public DeflaterOutputStream(java.io.OutputStream, java.util.zip.Deflater, boolean);
+    ctor public DeflaterOutputStream(java.io.OutputStream, java.util.zip.Deflater, int, boolean);
     method protected void deflate() throws java.io.IOException;
     method public void finish() throws java.io.IOException;
     field protected byte[] buf;
