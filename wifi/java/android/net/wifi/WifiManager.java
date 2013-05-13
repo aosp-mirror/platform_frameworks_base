@@ -408,15 +408,6 @@ public class WifiManager {
             "android.net.wifi.action.REQUEST_SCAN_ALWAYS_AVAILABLE";
 
     /**
-     * Activity Action: Show a system activity that notifies the user that
-     * scanning is still available when Wi-Fi is turned off
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_NOTIFY_SCAN_ALWAYS_AVAILABLE =
-            "android.net.wifi.action.NOTIFY_SCAN_ALWAYS_AVAILABLE";
-
-    /**
      * Activity Action: Pick a Wi-Fi network to connect to.
      * <p>Input: Nothing.
      * <p>Output: Nothing.
