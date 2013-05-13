@@ -420,6 +420,11 @@ public interface WindowManagerPolicy {
 
         public void shutdown(boolean confirm);
         public void rebootSafeMode(boolean confirm);
+
+        /**
+         * Return the window manager lock needed to correctly call "Lw" methods.
+         */
+        public Object getWindowManagerLock();
     }
 
     /** Window has been added to the screen. */

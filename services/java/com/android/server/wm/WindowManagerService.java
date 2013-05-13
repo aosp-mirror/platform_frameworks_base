@@ -10855,4 +10855,9 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.updateDisplayInfo();
         }
     }
+
+    @Override
+    public Object getWindowManagerLock() {
+        return mWindowMap;
+    }
 }
