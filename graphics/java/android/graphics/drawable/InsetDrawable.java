@@ -276,6 +276,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
                     mDrawable = orig.mDrawable.getConstantState().newDrawable();
                 }
                 mDrawable.setCallback(owner);
+                mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
                 mInsetLeft = orig.mInsetLeft;
                 mInsetTop = orig.mInsetTop;
                 mInsetRight = orig.mInsetRight;
