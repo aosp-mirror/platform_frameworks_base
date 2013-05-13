@@ -1,10 +1,6 @@
-page.title=Implementing Lateral Navigation
-parent.title=Implementing Effective Navigation
-parent.link=index.html
+page.title=Creating Swipe Views with Tabs
 
 trainingnavtop=true
-next.title=Implementing Ancestral Navigation
-next.link=ancestral.html
 
 @jd:body
 
@@ -13,10 +9,12 @@ next.link=ancestral.html
 
 <h2>This lesson teaches you to</h2>
 <ol>
-  <li><a href="#tabs">Implement Tabs</a></li>
-  <li><a href="#horizontal-paging">Implement Horizontal Paging (Swipe Views)</a></li>
-  <li><a href="#swipe-tabs">Implement Swiping Between Tabs</a></li>
+  <li><a href="#horizontal-paging">Implement Swipe Views</a></li>
+  <li><a href="#tabs">Add Tabs to the Action Bar</a></li>
+  <li><a href="#swipe-tabs">Change Tabs with Swipe Views</a></li>
+  <li><a href="#PagerTitleStrip">Use a Title Strip Instead of Tabs</a></li>
 </ol>
+
 
 <h2>You should also read</h2>
 <ul>
@@ -37,92 +35,60 @@ next.link=ancestral.html
 </div>
 
 
-<p><em>Lateral navigation</em> is navigation between sibling screens in the application's screen hierarchy (sometimes referred to as a screen map). The most prominent lateral navigation patterns are tabs and horizontal paging (also known as swipe views). This pattern and others are described in <a href="{@docRoot}training/design-navigation/descendant-lateral.html">Designing Effective Navigation</a>. This lesson covers how to implement several of the primary lateral navigation patterns in Android.</p>
+<p>Swipe views provide lateral navigation between sibling screens such as tabs with
+a horizontal finger gesture (a pattern sometimes known as horizontal paging). This lesson teaches
+you how to create a tab layout with swipe views for switching between tabs, or how to show
+a title strip instead of tabs.</p>
 
-<h2 id="tabs">Implement Tabs</h2>
+<div class="note design">
+<p><strong>Swipe View Design</strong></p>
+<p>Before implementing these features, you should understand the concepts and recommendations
+as described in <a href="{@docRoot}training/design-navigation/descendant-lateral.html">Designing
+Effective Navigation</a> and the <a href="{@docRoot}design/patterns/swipe-views.html">Swipe
+Views</a> design guide.</p>
+</div>
 
-<p>Tabs allow the user to navigate between sibling screens by selecting the appropriate tab indicator available at the top of the display. In Android 3.0 and later, tabs are implemented using the {@link android.app.ActionBar} class, and are generally set up in {@link android.app.Activity#onCreate Activity.onCreate()}. In some cases, such as when horizontal space is limited and/or the number of tabs is large, an appropriate alternate presentation for tabs is a dropdown list (sometimes implemented using a {@link android.widget.Spinner}).</p>
 
-<p>In previous versions of Android, tabs could be implemented using a
-{@link android.widget.TabWidget} and {@link android.widget.TabHost}.</p>
 
-<p>As of Android 3.0, however, you should use either {@link android.app.ActionBar#NAVIGATION_MODE_TABS} or {@link android.app.ActionBar#NAVIGATION_MODE_LIST} along with the {@link android.app.ActionBar} class.</p>
 
-<h3>Implement the Tabs Pattern with NAVIGATION_MODE_TABS</h3>
 
-<p>To create tabs, you can use the following code in your activity's {@link android.app.Activity#onCreate onCreate()} method. Note that the exact presentation of tabs may vary per device and by the current device configuration, to make best use of available screen space. For example, Android may automatically collapse tabs into a dropdown list if tabs don't fit horizontally in the action bar.</p>
+<h2 id="horizontal-paging">Implement Swipe Views</h2>
 
-<pre>
-{@literal @}Override
-public void onCreate(Bundle savedInstanceState) {
-    ...
-    final ActionBar actionBar = getActionBar();
+<p>You can create swipe views in your app using the {@link android.support.v4.view.ViewPager}
+widget, available in the
+<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>. The
+{@link android.support.v4.view.ViewPager} is a layout widget in which each child view is
+a separate page (a separate tab) in the layout.</p>
 
-    // Specify that tabs should be displayed in the action bar.
-    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-    // Create a tab listener that is called when the user changes tabs.
-    ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-        public void onTabSelected(ActionBar.Tab tab,
-                FragmentTransaction ft) { }
-
-        public void onTabUnselected(ActionBar.Tab tab,
-                FragmentTransaction ft) { }
-
-        public void onTabReselected(ActionBar.Tab tab,
-                FragmentTransaction ft) { }
-    };
-
-    // Add 3 tabs.
-    for (int i = 0; i &lt; 3; i++) {
-        actionBar.addTab(
-                actionBar.newTab()
-                        .setText("Tab " + (i + 1))
-                        .setTabListener(tabListener));
-    }
-    ...
-}
-</pre>
-
-<h3>Implement the Tabs Pattern with NAVIGATION_MODE_LIST</h3>
-
-<p>To use a dropdown list instead, use the following code in your activity's {@link android.app.Activity#onCreate onCreate()} method. Dropdown lists are often preferable in cases where more information must be shown per navigation item, such as unread message counts, or where the number of available navigation items is large.</p>
+<p>To set up your layout with {@link android.support.v4.view.ViewPager}, add a
+{@code &lt;ViewPager>} element to your XML layout. For example, if each page in the swipe view
+should consume the entire layout, then your layout looks like this:</p>
 
 <pre>
-{@literal @}Override
-public void onCreate(Bundle savedInstanceState) {
-    ...
-    final ActionBar actionBar = getActionBar();
-
-    // Specify that a dropdown list should be displayed in the action bar.
-    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-    actionBar.setListNavigationCallbacks(
-            // Specify a SpinnerAdapter to populate the dropdown list.
-            new ArrayAdapter<String>(
-                    actionBar.getThemedContext(),
-                    android.R.layout.simple_list_item_1,
-                    android.R.id.text1,
-                    new String[]{ "Tab 1", "Tab 2", "Tab 3" }),
-
-            // Provide a listener to be called when an item is selected.
-            new ActionBar.OnNavigationListener() {
-                public boolean onNavigationItemSelected(
-                        int position, long id) {
-                    // Take action here, e.g. switching to the
-                    // corresponding fragment.
-                    return true;
-                }
-            });
-    ...
-}
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;android.support.v4.view.ViewPager
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
 </pre>
 
-<h2 id="horizontal-paging">Implement Horizontal Paging (Swipe Views)</h2>
+<p>To insert child views that represent each page,
+you need to hook this layout to a {@link android.support.v4.view.PagerAdapter}.
+There are two kinds of adapter you can use:</p>
 
-<p>Horizontal paging, or swipe views, allow users to <a href="{@docRoot}design/patterns/swipe-views.html">swipe</a> horizontally on the current screen to navigate to adjacent screens. This pattern can be implemented using the {@link android.support.v4.view.ViewPager} widget, currently available as part of the <a href="{@docRoot}tools/extras/support-library.html">Android Support Package</a>. For navigating between sibling screens representing a fixed number of sections, it's best to provide the {@link android.support.v4.view.ViewPager} with a {@link android.support.v4.app.FragmentPagerAdapter}. For horizontal paging across collections of objects, it's best to use a {@link android.support.v4.app.FragmentStatePagerAdapter}, which destroys fragments as the user navigates to other pages, minimizing memory usage.</p>
+<dl>
+    <dt>{@link android.support.v4.app.FragmentPagerAdapter}</dt>
+        <dd>This is best when navigating between sibling screens representing a fixed, small
+        number of pages.</dd>
+    <dt>{@link android.support.v4.app.FragmentStatePagerAdapter}</dt>
+        <dd>This is best for paging across a collection of objects
+for which the number of pages is undetermined. It destroys
+fragments as the user navigates to other pages, minimizing memory usage.</dd>
+</dl>
 
-<p>Below is an example of using a {@link android.support.v4.view.ViewPager} to swipe across a collection of objects.</p>
+<p>For example, here's how you might use {@link android.support.v4.app.FragmentStatePagerAdapter}
+to swipe across a collection of {@link android.app.Fragment} objects:</p>
 
 <pre>
 public class CollectionDemoActivity extends FragmentActivity {
@@ -147,8 +113,7 @@ public class CollectionDemoActivity extends FragmentActivity {
 
 // Since this is an object collection, use a FragmentStatePagerAdapter,
 // and NOT a FragmentPagerAdapter.
-public class DemoCollectionPagerAdapter extends
-        FragmentStatePagerAdapter {
+public class DemoCollectionPagerAdapter extends FragmentStatePagerAdapter {
     public DemoCollectionPagerAdapter(FragmentManager fm) {
         super(fm);
     }
@@ -194,7 +159,125 @@ public static class DemoObjectFragment extends Fragment {
 }
 </pre>
 
-<p>You can also add indicators to your horizontal paging UI by adding a {@link android.support.v4.view.PagerTitleStrip}. Below is an example layout XML file for an activity whose entire contents are a {@link android.support.v4.view.ViewPager} and a top-aligned {@link android.support.v4.view.PagerTitleStrip} inside it. Individual pages (provided by the adapter) occupy the remaining space inside the {@link android.support.v4.view.ViewPager}.</p>
+<p>This example shows only the code necessary to create the swipe views. The following
+sections show how you can add tabs to help facilitate navigation between pages.</p>
+
+
+<h2 id="tabs">Add Tabs to the Action Bar</h2>
+
+<p>Action bar
+<a href="{@docRoot}design/building-blocks/tabs.html">tabs</a> offer users a familiar interface
+for navigating between and identifying sibling screens in your app.</p>
+
+<p>To create tabs using {@link android.app.ActionBar}, you need to enable
+{@link android.app.ActionBar#NAVIGATION_MODE_TABS}, then create several instances of
+{@link android.app.ActionBar.Tab} and supply an implementation of
+the {@link android.app.ActionBar.TabListener} interface for each one.
+For example, in your activity's {@link
+android.app.Activity#onCreate onCreate()} method, you can use code similar to this:</p>
+
+<pre>
+{@literal @}Override
+public void onCreate(Bundle savedInstanceState) {
+    final ActionBar actionBar = getActionBar();
+    ...
+
+    // Specify that tabs should be displayed in the action bar.
+    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+    // Create a tab listener that is called when the user changes tabs.
+    ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+            // show the given tab
+        }
+
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            // hide the given tab
+        }
+
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            // probably ignore this event
+        }
+    };
+
+    // Add 3 tabs, specifying the tab's text and TabListener
+    for (int i = 0; i &lt; 3; i++) {
+        actionBar.addTab(
+                actionBar.newTab()
+                        .setText("Tab " + (i + 1))
+                        .setTabListener(tabListener));
+    }
+}
+</pre>
+
+<p>How you handle the {@link android.app.ActionBar.TabListener} callbacks to change tabs
+depends on how you've constructed your content. But if you're using fragments for each tab with
+{@link android.support.v4.view.ViewPager} as shown above, the following
+section shows how to switch between pages when the user selects a tab and also update the selected
+tab when the user swipes between pages.</p>
+
+
+<h2 id="swipe-tabs">Change Tabs with Swipe Views</h2>
+
+<p>To switch between pages in a {@link android.support.v4.view.ViewPager} when the user selects
+a tab, implement your {@link android.app.ActionBar.TabListener} to select the appropriate page
+by calling {@link android.support.v4.view.ViewPager#setCurrentItem setCurrentItem()} on your
+{@link android.support.v4.view.ViewPager}:</p>
+
+<pre>
+{@literal @}Override
+public void onCreate(Bundle savedInstanceState) {
+    ...
+
+    // Create a tab listener that is called when the user changes tabs.
+    ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+            // When the tab is selected, switch to the
+            // corresponding page in the ViewPager.
+            mViewPager.setCurrentItem(tab.getPosition());
+        }
+        ...
+    };
+}
+</pre>
+
+<p>Likewise, you should select the corresponding tab when the user swipes between pages with a
+touch gesture. You can set up this behavior by implementing the
+{@link android.support.v4.view.ViewPager.OnPageChangeListener} interface to change
+the current tab each time the page changes. For example:</p>
+
+<pre>
+{@literal @}Override
+public void onCreate(Bundle savedInstanceState) {
+    ...
+
+    mViewPager = (ViewPager) findViewById(R.id.pager);
+    mViewPager.setOnPageChangeListener(
+            new ViewPager.SimpleOnPageChangeListener() {
+                {@literal @}Override
+                public void onPageSelected(int position) {
+                    // When swiping between pages, select the
+                    // corresponding tab.
+                    getActionBar().setSelectedNavigationItem(position);
+                }
+            });
+    ...
+}
+</pre>
+
+
+
+<h2 id="PagerTitleStrip">Use a Title Strip Instead of Tabs</h2>
+
+<p>If you don't want to include action bar tabs and prefer to provide
+<a href="{@docRoot}design/building-blocks/tabs.html#scrollable">scrollable tabs</a> for a shorter
+visual profile, you can use {@link android.support.v4.view.PagerTitleStrip} with
+your swipe views.</p>
+
+<p>Below is an example layout XML file for an
+activity whose entire contents are a {@link android.support.v4.view.ViewPager} and a top-aligned
+{@link android.support.v4.view.PagerTitleStrip} inside it. Individual pages (provided by the
+adapter) occupy the remaining space inside the {@link android.support.v4.view.ViewPager}.</p>
 
 <pre>
 &lt;android.support.v4.view.ViewPager
@@ -214,43 +297,4 @@ public static class DemoObjectFragment extends Fragment {
         android:paddingBottom="4dp" /&gt;
 
 &lt;/android.support.v4.view.ViewPager&gt;
-</pre>
-
-<h2 id="swipe-tabs">Implement Swiping Between Tabs</h2>
-
-<p>One of the key design recommendations in Android 4.0 for tabs is to <a href="{@docRoot}design/patterns/swipe-views.html">allow swiping</a> between them where appropriate. This behavior enables users to swipe horizontally across the selected tab's contents to navigate to adjacent tabs, without needed to directly interact with the tabs themselves. To implement this, you can use a {@link android.support.v4.view.ViewPager} in conjunction with the {@link android.app.ActionBar} tabs API.</p>
-
-<p>Upon observing the current page changing, select the corresponding tab. You can set up this behavior using an {@link android.support.v4.view.ViewPager.OnPageChangeListener} in your activity's {@link android.app.Activity#onCreate onCreate()} method:</p>
-
-<pre>
-{@literal @}Override
-public void onCreate(Bundle savedInstanceState) {
-    ...
-    mViewPager.setOnPageChangeListener(
-            new ViewPager.SimpleOnPageChangeListener() {
-                {@literal @}Override
-                public void onPageSelected(int position) {
-                    // When swiping between pages, select the
-                    // corresponding tab.
-                    getActionBar().setSelectedNavigationItem(position);
-                }
-            });
-    ...
-}
-</pre>
-
-<p>And upon selecting a tab, switch to the corresponding page in the {@link android.support.v4.view.ViewPager}. To do this, add an {@link android.app.ActionBar.TabListener} to your tab when creating it using the {@link android.app.ActionBar#newTab newTab()} method:</p>
-
-<pre>
-actionBar.newTab()
-        ...
-        .setTabListener(new ActionBar.TabListener() {
-            public void onTabSelected(ActionBar.Tab tab,
-                    FragmentTransaction ft) {
-                // When the tab is selected, switch to the
-                // corresponding page in the ViewPager.
-                mViewPager.setCurrentItem(tab.getPosition());
-            }
-            ...
-        }));
 </pre>
