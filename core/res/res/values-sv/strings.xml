@@ -889,7 +889,7 @@
     <string name="autofill_county" msgid="237073771020362891">"Kommun"</string>
     <string name="autofill_island" msgid="4020100875984667025">"Ö"</string>
     <string name="autofill_district" msgid="8400735073392267672">"Distrikt"</string>
-    <string name="autofill_department" msgid="5343279462564453309">"Department"</string>
+    <string name="autofill_department" msgid="5343279462564453309">"Avdelning"</string>
     <string name="autofill_prefecture" msgid="2028499485065800419">"Prefektur"</string>
     <string name="autofill_parish" msgid="8202206105468820057">"Församling"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Område"</string>

@@ -458,10 +458,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Mengizinkan apl menggunakan fitur tingkat rendah SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"baca buffer frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Mengizinkan apl membaca konten penyangga frame."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"mengonfigurasi tampilan Wifi"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Izinkan aplikasi mengonfigurasi dan terhubung ke tampilan Wifi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"mengontrol tampilan Wifi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Izinkan aplikasi mengontrol fitur tingkat rendah dari tampilan Wifi."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"mengonfigurasi tampilan Wi-Fi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Izinkan aplikasi mengonfigurasi dan terhubung ke tampilan Wi-Fi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"mengontrol tampilan Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Izinkan aplikasi mengontrol fitur tingkat rendah dari tampilan Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekam audio"</string>
@@ -1141,10 +1141,10 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Tidak dapat tersambung ke Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" memiliki sambungan internet yang buruk."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Langsung"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Memulai Wi-Fi Langsung. Opsi ini akan mematikan hotspot/klien Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Tidak dapat memulai Wi-Fi Langsung."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Langsung aktif"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Memulai Wi-Fi Direct. Opsi ini akan mematikan hotspot/klien Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Tidak dapat memulai Wi-Fi Direct."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct aktif"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Sentuh untuk setelan"</string>
     <string name="accept" msgid="1645267259272829559">"Terima"</string>
     <string name="decline" msgid="2112225451706137894">"Tolak"</string>
