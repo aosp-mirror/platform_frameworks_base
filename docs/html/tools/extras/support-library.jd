@@ -49,6 +49,45 @@ the Support Package, as denoted by revision number.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Support Package, revision 13</a> <em>(May 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v4.widget.DrawerLayout} for creating a
+            <a href="{@docRoot}training/implementing-navigation/nav-drawer.html">Navigation
+            Drawer</a> that can be pulled in from the edge of a window.</li>
+          <li>Added {@link android.support.v4.widget.SlidingPaneLayout} widget for creating linked
+            summary and detail views that appropriately adapt to various screen sizes.</li>
+          <li>Added {@link android.support.v4.app.ActionBarDrawerToggle} as a way to tie
+            together the functions of {@link android.support.v4.widget.DrawerLayout} and {@link
+            android.app.ActionBar}.</li>
+          <li>Added {@link android.support.v4.widget.ViewDragHelper} as a new common component
+            for dragging views within a parent view.</li>
+          <li>Added {@link android.support.v4.widget.ScrollerCompat} to provide {@link
+            android.widget.Scroller} and {@link android.widget.OverScroller} compatibility support.
+            </li>
+          <li>Updated {@link android.support.v4.view.ViewPager} to throw an exception if the
+            associated {@link android.support.v4.view.PagerAdapter} class is modified without a call
+            to {@link android.support.v4.view.PagerAdapter#notifyDataSetChanged notifyDataSetChanged()}.
+            </li>
+          <li>Fixed an issue with {@link android.support.v4.view.ViewPager} children drawing sort
+            order.</li>
+          <li>Fixed {@link android.support.v4.view.GestureDetectorCompat} to dispatch missing
+            {@link android.view.GestureDetector.SimpleOnGestureListener#onSingleTapConfirmed} calls
+            between tap timeout and long press events.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 12</a> <em>(February 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
