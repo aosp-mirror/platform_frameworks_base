@@ -104,7 +104,6 @@ public class Am extends BaseCommand {
                 "       am stop-user <USER_ID>\n" +
                 "       am stack create <TASK_ID> <RELATIVE_STACK_ID> <POSITION> <WEIGHT>\n" +
                 "       am stack movetask <STACK_ID> <TASK_ID> [true|false]\n" +
-                "       am stack resize <STACK_ID> <WEIGHT>\n" +
                 "       am stack dump\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
@@ -199,8 +198,6 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
-                "\n" +
-                "am stack resize: change <STACK_ID> relative size to new <WEIGHT>.\n" +
                 "\n" +
                 "am stack dump: list the hierarchy of stacks.\n" +
                 "\n" +
@@ -1484,8 +1481,6 @@ public class Am extends BaseCommand {
             runStackCreate();
         } else if (op.equals("movetask")) {
             runStackMoveTask();
-        } else if (op.equals("resize")) {
-            runStackResize();
         } else if (op.equals("dump")) {
             runStackDump();
         } else {
@@ -1529,18 +1524,6 @@ public class Am extends BaseCommand {
 
         try {
             mAm.moveTaskToStack(taskId, stackId, toTop);
-        } catch (RemoteException e) {
-        }
-    }
-
-    private void runStackResize() throws Exception {
-        String stackIdStr = nextArgRequired();
-        int stackId = Integer.valueOf(stackIdStr);
-        String weightStr = nextArgRequired();
-        float weight = Float.valueOf(weightStr);
-
-        try {
-            mAm.resizeStack(stackId, weight);
         } catch (RemoteException e) {
         }
     }

@@ -6326,11 +6326,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        if (stackId == HOME_STACK_ID) {
-            Slog.e(TAG, "moveTaskToStack: Attempt to move task to home stack",
-                    new RuntimeException("here").fillInStackTrace());
-            return;
-        }
         synchronized (this) {
             mWindowManager.moveTaskToStack(taskId, stackId, toTop);
             mStackSupervisor.moveTaskToStack(taskId, stackId, toTop);
@@ -6393,8 +6388,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void sendPendingThumbnail(ActivityRecord r, IBinder token,
             Bitmap thumbnail, CharSequence description, boolean always) {
-        TaskRecord task;
-        ArrayList<PendingThumbnailsRecord> receivers = null;
+        TaskRecord task = null;
+        ArrayList receivers = null;
 
         //System.out.println("Send pending thumbnail: " + r);
 
@@ -6420,11 +6415,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             int N = mPendingThumbnails.size();
             int i=0;
             while (i<N) {
-                PendingThumbnailsRecord pr = mPendingThumbnails.get(i);
+                PendingThumbnailsRecord pr =
+                    (PendingThumbnailsRecord)mPendingThumbnails.get(i);
                 //System.out.println("Looking in " + pr.pendingRecords);
                 if (pr.pendingRecords.remove(r)) {
                     if (receivers == null) {
-                        receivers = new ArrayList<PendingThumbnailsRecord>();
+                        receivers = new ArrayList();
                     }
                     receivers.add(pr);
                     if (pr.pendingRecords.size() == 0) {
@@ -6442,7 +6438,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int N = receivers.size();
             for (int i=0; i<N; i++) {
                 try {
-                    PendingThumbnailsRecord pr = receivers.get(i);
+                    PendingThumbnailsRecord pr =
+                        (PendingThumbnailsRecord)receivers.get(i);
                     pr.receiver.newThumbnail(
                         task != null ? task.taskId : -1, thumbnail, description);
                     if (pr.finished) {
