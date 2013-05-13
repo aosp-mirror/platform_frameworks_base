@@ -4842,14 +4842,6 @@ public final class Settings {
                 "wifi_scan_always_enabled";
 
        /**
-        * Setting to indicate whether the user should be notified that scans are still
-        * available when Wi-Fi is turned off
-        * @hide
-        */
-       public static final String WIFI_NOTIFY_SCAN_ALWAYS_AVAILABLE =
-                "wifi_notify_scan_always_enabled";
-
-       /**
         * Used to save the Wifi_ON state prior to tethering.
         * This state will be checked to restore Wifi after
         * the user turns off tethering.
