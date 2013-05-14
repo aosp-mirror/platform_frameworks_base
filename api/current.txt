@@ -34112,11 +34112,14 @@ package java.lang {
     ctor public Throwable(java.lang.String);
     ctor public Throwable(java.lang.String, java.lang.Throwable);
     ctor public Throwable(java.lang.Throwable);
+    ctor protected Throwable(java.lang.String, java.lang.Throwable, boolean, boolean);
+    method public final void addSuppressed(java.lang.Throwable);
     method public java.lang.Throwable fillInStackTrace();
     method public java.lang.Throwable getCause();
     method public java.lang.String getLocalizedMessage();
     method public java.lang.String getMessage();
     method public java.lang.StackTraceElement[] getStackTrace();
+    method public final java.lang.Throwable[] getSuppressed();
     method public java.lang.Throwable initCause(java.lang.Throwable);
     method public void printStackTrace();
     method public void printStackTrace(java.io.PrintStream);
