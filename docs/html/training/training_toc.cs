@@ -193,9 +193,9 @@
       </li>
     </ul>
   </li><!-- end getting started -->
-  
-  
-  
+
+
+
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -204,7 +204,7 @@
       </a>
     </div>
     <ul>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/managing-audio/index.html"
@@ -255,8 +255,8 @@
     </ul>
   </li>
   <!-- End multimedia -->
-      
-      
+
+
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -265,7 +265,7 @@
       </a>
     </div>
     <ul>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/displaying-bitmaps/index.html"
@@ -364,7 +364,7 @@
     </ul>
   </li>
   <!-- End graphics and animation -->
-      
+
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -399,7 +399,7 @@
           </li>
         </ul>
       </li>
-      
+
        <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/network-ops/index.html"
@@ -473,8 +473,8 @@
     </ul>
   </li>
   <!-- End connectivity and cloud -->
-  
-  
+
+
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -541,23 +541,33 @@
 
       <li class="nav-section">
         <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/basics/location/index.html"
-             description=
-             "How to add location-aware features to your app by aqcuiring the user's current
-             location."
-            >Making Your App Location Aware</a>
+          <a href="<?cs var:toroot ?>training/location/index.html"
+             description="How to add location-aware features to your app by getting the user's current location.">
+             Making Your App Location-Aware
+          </a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/location/locationmanager.html">
-            Using the Location Manager
-          </a>
+          <li>
+            <a href="<?cs var:toroot ?>training/location/retrieve-current.html">
+            Retrieving the Current Location
+            </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/location/currentlocation.html">
-            Obtaining the Current Location
-          </a>
+          <li>
+            <a href="<?cs var:toroot ?>training/location/receive-location-updates.html">
+            Receiving Location Updates
+            </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/location/geocoding.html">
+          <li>
+            <a href="<?cs var:toroot ?>training/location/display-address.html">
             Displaying a Location Address
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/location/geofencing.html">
+            Creating and Monitoring Geofences
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/location/activity-recognition.html">
+          Recognizing the User's Current Activity
           </a>
           </li>
         </ul>
@@ -565,8 +575,8 @@
     </ul>
   </li>
   <!-- End privacy and location -->
-      
-      
+
+
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -701,8 +711,8 @@
           </li>
         </ul>
       </li>
-      
-      
+
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="/training/multiscreen/index.html"
@@ -760,7 +770,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/custom-views/index.html"
@@ -815,7 +825,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/accessibility/index.html"
@@ -835,11 +845,11 @@
           </li>
         </ul>
       </li>
-      
+
     </ul>
   </li>
   <!-- End best UX and UI -->
-  
+
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -849,7 +859,7 @@
       </a>
     </div>
     <ul>
-         
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/gestures/index.html"
@@ -884,7 +894,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/keyboard-input/index.html"
@@ -924,7 +934,7 @@
       </a>
     </div>
     <ul>
-      
+
       <li>
         <a href="<?cs var:toroot ?>training/articles/perf-tips.html"
            description=
@@ -932,7 +942,7 @@
            responsiveness and battery efficiency."
           >Performance Tips</a>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/improving-layouts/index.html"
@@ -1001,7 +1011,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="/training/monitoring-device-state/index.html"
@@ -1067,7 +1077,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li>
         <a href="<?cs var:toroot ?>training/articles/perf-anr.html"
            description=
@@ -1075,7 +1085,7 @@
            display an &quot;Application Not Responding&quot; dialog."
           >Keeping Your App Responsive</a>
       </li>
-      
+
       <li>
         <a href="<?cs var:toroot ?>training/articles/perf-jni.html"
            description=
@@ -1090,8 +1100,8 @@
       </li>
     </ul>
   </li> <!-- end of Performance -->
-      
-      
+
+
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -1115,7 +1125,7 @@
            "How to ensure that your app is secure when performing network transactions."
           >Security with HTTPS and SSL</a>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/enterprise/index.html"
@@ -1167,7 +1177,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/multiple-apks/index.html"
