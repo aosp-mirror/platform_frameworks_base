@@ -7105,7 +7105,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
                     final boolean extendSelection = arguments.getBoolean(
                             AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN);
-                    return nextAtGranularity(granularity, extendSelection);
+                    return traverseAtGranularity(granularity, true, extendSelection);
                 }
             } break;
             case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY: {
@@ -7114,7 +7114,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
                     final boolean extendSelection = arguments.getBoolean(
                             AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN);
-                    return previousAtGranularity(granularity, extendSelection);
+                    return traverseAtGranularity(granularity, false, extendSelection);
                 }
             } break;
             case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
@@ -7139,7 +7139,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
-    private boolean nextAtGranularity(int granularity, boolean extendSelection) {
+    private boolean traverseAtGranularity(int granularity, boolean forward,
+            boolean extendSelection) {
         CharSequence text = getIterableTextForAccessibility();
         if (text == null || text.length() == 0) {
             return false;
@@ -7150,60 +7151,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         int current = getAccessibilitySelectionEnd();
         if (current == ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
-            current = 0;
+            current = forward ? 0 : text.length();
         }
-        final int[] range = iterator.following(current);
+        final int[] range = forward ? iterator.following(current) : iterator.preceding(current);
         if (range == null) {
             return false;
         }
-        final int start = range[0];
-        final int end = range[1];
+        final int segmentStart = range[0];
+        final int segmentEnd = range[1];
+        int selectionStart;
+        int selectionEnd;
         if (extendSelection && isAccessibilitySelectionExtendable()) {
-            int selectionStart = getAccessibilitySelectionStart();
+            selectionStart = getAccessibilitySelectionStart();
             if (selectionStart == ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
-                selectionStart = start;
+                selectionStart = forward ? segmentStart : segmentEnd;
             }
-            setAccessibilitySelection(selectionStart, end);
+            selectionEnd = forward ? segmentEnd : segmentStart;
         } else {
-            setAccessibilitySelection(end, end);
+            selectionStart = selectionEnd= forward ? segmentEnd : segmentStart;
         }
-        sendViewTextTraversedAtGranularityEvent(
-                AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY,
-                granularity, start, end);
-        return true;
-    }
-
-    private boolean previousAtGranularity(int granularity, boolean extendSelection) {
-        CharSequence text = getIterableTextForAccessibility();
-        if (text == null || text.length() == 0) {
-            return false;
-        }
-        TextSegmentIterator iterator = getIteratorForGranularity(granularity);
-        if (iterator == null) {
-            return false;
-        }
-        int current = getAccessibilitySelectionStart();
-        if (current == ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
-            current = text.length();
-        }
-        final int[] range = iterator.preceding(current);
-        if (range == null) {
-            return false;
-        }
-        final int start = range[0];
-        final int end = range[1];
-        if (extendSelection && isAccessibilitySelectionExtendable()) {
-            int selectionEnd = getAccessibilitySelectionEnd();
-            if (selectionEnd == ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
-                selectionEnd = end;
-            }
-            setAccessibilitySelection(start, selectionEnd);
-        } else {
-            setAccessibilitySelection(start, start);
-        }
-        sendViewTextTraversedAtGranularityEvent(
-                AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY,
-                granularity, start, end);
+        setAccessibilitySelection(selectionStart, selectionEnd);
+        final int action = forward ? AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY
+                : AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY;
+        sendViewTextTraversedAtGranularityEvent(action, granularity, segmentStart, segmentEnd);
         return true;
     }
 
