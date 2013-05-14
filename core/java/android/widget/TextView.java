@@ -8722,8 +8722,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && getAccessibilitySelectionEnd() == end) {
             return;
         }
+        // Hide all selection controllers used for adjusting selection
+        // since we are doing so explicitlty by other means and these
+        // controllers interact with how selection behaves.
+        if (mEditor != null) {
+            mEditor.hideControllers();
+        }
         CharSequence text = getIterableTextForAccessibility();
-        if (start >= 0 && start <= end && end <= text.length()) {
+        if (Math.min(start, end) >= 0 && Math.max(start, end) <= text.length()) {
             Selection.setSelection((Spannable) text, start, end);
         } else {
             Selection.removeSelection((Spannable) text);
