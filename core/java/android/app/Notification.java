@@ -432,51 +432,32 @@ public class Notification implements Parcelable
 
     /**
      * Additional semantic data to be carried around with this Notification.
-     * @hide
      */
     public Bundle extras = new Bundle();
 
     // extras keys for Builder inputs
-    /** @hide */
     public static final String EXTRA_TITLE = "android.title";
-    /** @hide */
     public static final String EXTRA_TITLE_BIG = EXTRA_TITLE + ".big";
-    /** @hide */
     public static final String EXTRA_TEXT = "android.text";
-    /** @hide */
     public static final String EXTRA_SUB_TEXT = "android.subText";
-    /** @hide */
     public static final String EXTRA_INFO_TEXT = "android.infoText";
-    /** @hide */
     public static final String EXTRA_SUMMARY_TEXT = "android.summaryText";
-    /** @hide */
     public static final String EXTRA_SMALL_ICON = "android.icon";
-    /** @hide */
     public static final String EXTRA_LARGE_ICON = "android.largeIcon";
-    /** @hide */
     public static final String EXTRA_LARGE_ICON_BIG = EXTRA_LARGE_ICON + ".big";
-    /** @hide */
     public static final String EXTRA_PROGRESS = "android.progress";
-    /** @hide */
     public static final String EXTRA_PROGRESS_MAX = "android.progressMax";
-    /** @hide */
     public static final String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
-    /** @hide */
     public static final String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
-    /** @hide */
     public static final String EXTRA_SHOW_WHEN = "android.showWhen";
-    /** @hide from BigPictureStyle */
     public static final String EXTRA_PICTURE = "android.picture";
-    /** @hide from InboxStyle */
     public static final String EXTRA_TEXT_LINES = "android.textLines";
 
     // extras keys for other interesting pieces of information
-    /** @hide */
     public static final String EXTRA_PEOPLE = "android.people";
 
     /**
      * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
-     * @hide
      */
     public static class Action implements Parcelable {
         public int icon;
@@ -530,9 +511,6 @@ public class Notification implements Parcelable
         };
     }
 
-    /**
-     * @hide
-     */
     public Action[] actions;
 
     /**
@@ -1450,7 +1428,6 @@ public class Notification implements Parcelable
          * called.
          *
          * @see Notification#extras
-         * @hide
          */
         public Builder setExtras(Bundle bag) {
             mExtras = bag;
