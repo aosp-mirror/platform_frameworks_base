@@ -2,15 +2,8 @@ page.title=Location Strategies
 page.tags="geolocation","maps","mapview"
 @jd:body
 
-<div id="qv-wrapper">
-<div id="qv">
-
-  <h2>Quickview</h2>
-  <ul>
-    <li>The Network Location Provider provides good location data without using GPS</li>
-    <li>Obtaining user location can consume a lot of battery, so be careful how
-long you listen for updates</li>
-  </ul>
+<div id="tb-wrapper">
+<div id="tb">
   <h2>In this document</h2>
   <ol>
     <li><a href="#Challenges">Challenges in Determining User Location</a></li>
@@ -38,7 +31,21 @@ long you listen for updates</li>
   </ol>
 </div>
 </div>
-
+<div class="note">
+<p>
+    <strong>Note:</strong> The strategies described in this guide apply to the platform location
+    API in {@link android.location}. The Google Location Services API, part of Google Play
+    Services, provides a more powerful, high-level framework that automatically handles location
+    providers, user movement, and location accuracy. It also handles
+    location update scheduling based on power consumption parameters you provide. In most cases,
+    you'll get better battery performance, as well as more appropriate accuracy, by using the
+    Location Services API.
+</p>
+<p>
+    To learn more about the Location Services API, see
+    <a href="{@docRoot}google/play-services/location.html">Google Location Services for Android</a>.
+</p>
+</div>
   <p>Knowing where the user is allows your application to be smarter and deliver
 better information to the user. When developing a location-aware application for Android, you can
 utilize GPS and Android's Network Location Provider to acquire the user location. Although
@@ -185,7 +192,7 @@ application is listening for location updates and the events that occur during t
 <img src="{@docRoot}images/location/getting-location.png" alt="" />
 <p class="img-caption"><strong>Figure 1.</strong> A timeline representing the window in which an
 application listens for location updates.</p>
-    
+
   <p>This model of a window&mdash;during which location updates are received&mdash;frames many of
 the decisions you need to make when adding location-based services to your application.</p>
 
@@ -210,7 +217,7 @@ locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener)
 
 
   <h3 id="FastFix">Getting a fast fix with the last known location</h3>
-  
+
   <p>The time it takes for your location listener to receive the first location fix is often too
 long for users wait. Until a more accurate location is provided to your location listener, you
 should utilize a cached location by calling {@link
@@ -224,7 +231,7 @@ Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvid
 
 
   <h3 id="StopListening">Deciding when to stop listening for updates</h3>
-  
+
   <p>The logic of deciding when new fixes are no longer necessary might range from very simple to
 very complex depending on your application. A short gap between when the location is acquired and
 when the location is used, improves the accuracy of the estimate. Always beware that listening for a
@@ -251,7 +258,7 @@ varies depending on the use-cases of the application and field testing.</p>
 estimate.</li>
     <li>Check which provider the new location is from and determine if you trust it more.</li>
   </ul>
-  
+
   <p>An elaborate example of this logic can look something like this:</p>
 
 <pre>
@@ -320,13 +327,13 @@ good performance needs some adjustment. Here are some things you might change to
 balance between the two.</p>
 
   <h4>Reduce the size of the window</h4>
-  
+
   <p>A smaller window in which you listen for location updates means less interaction with GPS and
 network location services, thus, preserving battery life. But it also allows for fewer locations
 from which to choose a best estimate.</p>
 
   <h4>Set the location providers to return updates less frequently</h4>
-  
+
   <p>Reducing the rate at which new updates appear during the window can also improve battery
 efficiency, but at the cost of accuracy. The value of the trade-off depends on how your
 application is used. You can reduce the rate of updates by increasing the parameters in {@link
@@ -334,14 +341,14 @@ android.location.LocationManager#requestLocationUpdates requestLocationUpdates()
 interval time and minimum distance change.</p>
 
   <h4>Restrict a set of providers</h4>
-  
+
   <p>Depending on the environment where your application is used or the desired level of accuracy,
 you might choose to use only the Network Location Provider or only GPS, instead of both. Interacting
 with only one of the services reduces battery usage at a potential cost of accuracy.</p>
 
 
   <h2>Common application cases</h2>
-  
+
   <p>There are many reasons you might want to obtain the user location in your application. Below
 are a couple scenarios in which you can use the user location to enrich your application. Each
 scenario also describes good practices for when you should start and stop listening for the
@@ -349,7 +356,7 @@ location, in order to get a good reading and help preserve battery life.</p>
 
 
   <h3>Tagging user-created content with a location</h3>
-  
+
   <p>You might be creating an application where user-created content is tagged with a location.
 Think of users sharing their local experiences, posting a review for a restaurant, or recording some
 content that can be augmented with their current location. A model of how this
@@ -358,7 +365,7 @@ interaction might happen, with respect to the location services, is visualized i
   <img src="{@docRoot}images/location/content-tagging.png" alt="" />
 <p class="img-caption"><strong>Figure 2.</strong> A timeline representing the window in which
 the user location is obtained and listening stops when the user consumes the current location.</p>
-  
+
   <p>This lines up with the previous model of how user location is obtained in code (figure 1). For
 best location accuracy, you might choose to start listening for location updates when users begin
 creating
@@ -368,7 +375,7 @@ content takes and judge if this duration allows for efficient collection of a lo
 
 
   <h3>Helping the user decide on where to go</h3>
-  
+
   <p>You might be creating an application that attempts to provide users with a set
 of options about where to go. For example, you're looking to provide a list of nearby restaurants,
 stores, and entertainment and the order of recommendations changes depending on the user
@@ -381,7 +388,7 @@ location.</p>
   </ul>
 
   <p>This kind of model is visualized in figure 3.</p>
-  
+
   <img src="{@docRoot}images/location/where-to-go.png" alt="" />
 <p class="img-caption"><strong>Figure 3.</strong> A timeline representing the window in which a
 dynamic set of data is updated each time the user location updates.</p>
