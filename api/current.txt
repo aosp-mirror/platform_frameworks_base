@@ -41424,6 +41424,11 @@ package java.util.zip {
 
 package javax.crypto {
 
+  public class AEADBadTagException extends javax.crypto.BadPaddingException {
+    ctor public AEADBadTagException();
+    ctor public AEADBadTagException(java.lang.String);
+  }
+
   public class BadPaddingException extends java.security.GeneralSecurityException {
     ctor public BadPaddingException(java.lang.String);
     ctor public BadPaddingException();
@@ -41464,6 +41469,9 @@ package javax.crypto {
     method public final int update(byte[], int, int, byte[]) throws javax.crypto.ShortBufferException;
     method public final int update(byte[], int, int, byte[], int) throws javax.crypto.ShortBufferException;
     method public final int update(java.nio.ByteBuffer, java.nio.ByteBuffer) throws javax.crypto.ShortBufferException;
+    method public final void updateAAD(byte[]);
+    method public final void updateAAD(byte[], int, int);
+    method public final void updateAAD(java.nio.ByteBuffer);
     method public final byte[] wrap(java.security.Key) throws javax.crypto.IllegalBlockSizeException, java.security.InvalidKeyException;
     field public static final int DECRYPT_MODE = 2; // 0x2
     field public static final int ENCRYPT_MODE = 1; // 0x1
@@ -41503,6 +41511,8 @@ package javax.crypto {
     method protected abstract byte[] engineUpdate(byte[], int, int);
     method protected abstract int engineUpdate(byte[], int, int, byte[], int) throws javax.crypto.ShortBufferException;
     method protected int engineUpdate(java.nio.ByteBuffer, java.nio.ByteBuffer) throws javax.crypto.ShortBufferException;
+    method protected void engineUpdateAAD(byte[], int, int);
+    method protected void engineUpdateAAD(java.nio.ByteBuffer);
     method protected byte[] engineWrap(java.security.Key) throws javax.crypto.IllegalBlockSizeException, java.security.InvalidKeyException;
   }
 
@@ -41759,6 +41769,13 @@ package javax.crypto.spec {
     method public java.math.BigInteger getG();
     method public java.math.BigInteger getP();
     method public java.math.BigInteger getY();
+  }
+
+  public class GCMParameterSpec implements java.security.spec.AlgorithmParameterSpec {
+    ctor public GCMParameterSpec(int, byte[]);
+    ctor public GCMParameterSpec(int, byte[], int, int);
+    method public byte[] getIV();
+    method public int getTLen();
   }
 
   public class IvParameterSpec implements java.security.spec.AlgorithmParameterSpec {
