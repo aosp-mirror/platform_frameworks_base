@@ -425,6 +425,16 @@ public interface Cursor extends Closeable {
     void setNotificationUri(ContentResolver cr, Uri uri);
 
     /**
+     * Return the URI at which notifications of changes in this Cursor's data
+     * will be delivered, as previously set by {@link #setNotificationUri}.
+     * @return Returns a URI that can be used with
+     * {@link ContentResolver#registerContentObserver(android.net.Uri, boolean, ContentObserver)
+     * ContentResolver.registerContentObserver} to find out about changes to this Cursor's
+     * data.  May be null if no notification URI has been set.
+     */
+    Uri getNotificationUri();
+
+    /**
      * onMove() will only be called across processes if this method returns true.
      * @return whether all cursor movement should result in a call to onMove().
      */
