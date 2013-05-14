@@ -4,33 +4,41 @@ page.title=Location and Maps
 <div id="qv-wrapper">
 <div id="qv">
 
-  <h2>Quickview</h2>
-  <ul>
-    <li>Android provides a location framework that your application can use to determine the
-device's location and bearing and register for updates</li>
-    <li>A Google Maps external library is available that lets you display and manage Maps data</li>
-  </ul>
-
-  <h2>In this document</h2>
+<h2>In this document</h2>
   <ol>
     <li><a href="#location">Location Services</a></li>
     <li><a href="#maps">Google Maps Android API</a></li>
   </ol>
-  
-</div>
-</div>
 
-<p>Location and maps-based apps offer a compelling experience on mobile devices. You
-can build these capabilities into your app using the classes of the {@link
-android.location} package and the Google Maps Android API. The sections below provide
-an introduction to how you can add the features.
+</div>
+</div>
+<div class="note">
+<p>
+    <strong>Note:</strong> This is a guide to the <i>Android framework</i> location APIs in the
+    package {@link android.location}. The Google Location Services API, part of Google Play
+    Services, provides a more powerful, high-level framework that automates tasks such as
+    location provider choice and power management. Location Services also provides new
+    features such as activity detection that aren't available in the framework API. Developers who
+    are using the framework API, as well as developers who are just now adding location-awareness
+    to their apps, should strongly consider using the Location Services API.
+</p>
+<p>
+    To learn more about the Location Services API, see
+    <a href="{@docRoot}google/play-services/location.html">Google Location Services for Android</a>.
+</p>
+</div>
+<p>
+    Location and maps-based apps offer a compelling experience on mobile devices. You
+    can build these capabilities into your app using the classes of the {@link
+    android.location} package and the Google Maps Android API. The sections below provide
+    an introduction to how you can add the features.
 </p>
 
 <h2 id="location">Location Services</h2>
 
 <p>Android gives your applications access to the location services supported by
 the device through classes in the {@code android.location} package. The
-central component of the location framework is the 
+central component of the location framework is the
 {@link android.location.LocationManager} system service, which provides APIs to
 determine location and bearing of the underlying device (if available). </p>
 
@@ -59,7 +67,7 @@ href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a> g
 
 <h2 id="maps">Google Maps Android API</h2>
 
-<p>With the 
+<p>With the
 <a href="http://developers.google.com/maps/documentation/android/">Google Maps Android API</a>,
 you can add maps to your app that are based on Google
 Maps data. The API automatically handles access to Google Maps servers, data downloading,
