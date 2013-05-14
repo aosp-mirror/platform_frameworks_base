@@ -399,8 +399,8 @@ public final class GeofenceHardwareImpl {
         boolean available = false;
         if (status == GeofenceHardware.GPS_GEOFENCE_AVAILABLE) available = true;
 
-        int val = (available ? GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE :
-                GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE);
+        int val = (available ? GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE :
+                GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE);
         setMonitorAvailability(GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE, val);
 
         acquireWakeLock();
