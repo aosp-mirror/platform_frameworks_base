@@ -2,6 +2,13 @@ page.title=Settings
 page.tags="preferences","sharedpreferences"
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/settings.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Settings</p>
+  </div>
+</a>
+
 <p>Settings is a place in your app where users indicate their preferences for how your app should
 behave. This benefits users because:</p>
 
@@ -680,13 +687,6 @@ it doesn't mean anything to most users and would have taken up a lot of space.</
   </div>
 </div>
 
-
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to build a settings interface, see the
-  <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>
-  API guide.</p>
-</div>
 
 
 <h2 id="checklist">Checklist</h2>

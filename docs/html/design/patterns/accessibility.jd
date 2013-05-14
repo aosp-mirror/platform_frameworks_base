@@ -2,6 +2,13 @@ page.title=Accessibility
 page.tags="accessibility","navigation","input"
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}training/accessibility/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Implementing Accessibility</p>
+  </div>
+</a>
+
 <p>One of Android's missions is to organize the world's information and make it universally accessible and useful. Accessibility is the measure of how successfully a product can be used by people with varying abilities. Our mission applies to all users-including people with disabilities such as visual impairment, color deficiency, hearing loss, and limited dexterity.</p>
 <p><a href="https://www.google.com/#hl=en&q=universal+design&fp=1">Universal design</a> is the practice of making products that are inherently accessible to all users, regardless of ability. The Android design patterns were created in accordance with universal design principles, and following them will help your app meet basic usability standards. Adhering to universal design and enabling Android's accessibility tools will make your app as accessible as possible.</p>
 <p>Robust support for accessibility will increase your app's user base. It may also be required for adoption by some organizations.</p>
@@ -70,13 +77,6 @@ page.tags="accessibility","navigation","input"
 <h4>Try it out yourself</h4>
 <p>Turn on the TalkBack service in <strong>Settings > Accessibility</strong> and navigate your application using directional controls or eyes-free navigation.</p>
 
-
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to properly implement accessibility in your app, see the
-  <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
-  API guide.</p>
-</div>
 
 
 <h2>Checklist</h2>

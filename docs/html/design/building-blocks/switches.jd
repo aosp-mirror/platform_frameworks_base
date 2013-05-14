@@ -4,14 +4,33 @@ page.tags="switch","checkbox","radiobutton","button"
 
 <p>Switches allow the user to select options. There are three kinds of switches: checkboxes, radio
 buttons, and on/off switches.</p>
+
+
+
 <h2 id="checkboxes">Checkboxes</h2>
+
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/checkbox.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Checkboxes</p>
+  </div>
+</a>
 
 <p>Checkboxes allow the user to select multiple options from a set. Avoid using a single checkbox to
 turn an option off or on. Instead, use an on/off switch.</p>
 
   <img src="{@docRoot}design/media/switches_checkboxes.png">
 
+
+
 <h2 id="radio-buttons">Radio Buttons</h2>
+
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/radiobutton.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Radio Buttons</p>
+  </div>
+</a>
 
 <p>Radio buttons allow the user to select one option from a set. Use radio buttons for exclusive
 selection if you think that the user needs to see all available options side-by-side. Otherwise,
@@ -19,16 +38,19 @@ consider a spinner, which uses less space.</p>
 
   <img src="{@docRoot}design/media/switches_radios.png">
 
+
+
 <h2 id="switches">On/off Switches</h2>
+
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/togglebutton.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Toggle Buttons</p>
+  </div>
+</a>
 
 <p>On/off switches toggle the state of a single settings option.</p>
 
   <img src="{@docRoot}design/media/switches_switches.png">
 
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to create these different switches,
-  see the <a href="{@docRoot}guide/topics/ui/controls/checkbox.html">Checkboxes</a>,
-  <a href="{@docRoot}guide/topics/ui/controls/radiobutton.html">Radio Buttons</a>, or
-  <a href="{@docRoot}guide/topics/ui/controls/togglebutton.html">Toggle Buttons</a> API guides.</p>
-</div>
+
