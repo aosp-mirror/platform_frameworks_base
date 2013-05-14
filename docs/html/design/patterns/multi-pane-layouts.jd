@@ -2,6 +2,14 @@ page.title=Multi-pane Layouts
 page.tags="tablet","navigation","layout","fragment"
 @jd:body
 
+
+<a class="notice-developers" href="{@docRoot}training/basics/fragments/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Building a Dynamic UI with Fragments</p>
+  </div>
+</a>
+
 <p>When writing an app for Android, keep in mind that Android devices come in many different screen
 sizes and types. Make sure that your app consistently provides a balanced and aesthetically pleasing
 layout by adjusting its content to varying screen sizes and orientations.</p>
@@ -87,15 +95,6 @@ you can use to adjust the layout after orientation change while keeping function
   </div>
 </div>
 
-
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to create multi-pane layouts, read
-  see the <a href="{@docRoot}training/basics/fragments/index.html">Building
-  a Dynamic UI with Fragments</a> and
-  <a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a>.
-  </p>
-</div>
 
 
 

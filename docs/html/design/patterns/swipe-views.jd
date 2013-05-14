@@ -2,6 +2,13 @@ page.title=Swipe Views
 page.tags="viewpager","navigation","tabs"
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}training/implementing-navigation/lateral.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Swipe Views with Tabs</p>
+  </div>
+</a>
+
 <p>Efficient navigation is one of the cornerstones of a well-designed app. While apps are generally
 built in a hierarchical fashion, there are instances where horizontal navigation can flatten
 vertical hierarchies and make access to related data items faster and more enjoyable. Swipe views
@@ -78,13 +85,4 @@ using the swipe gesture to navigate to the next/previous detail view.</p>
     </ul>
   </div>
 </div>
-
-
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to create swipe views, read
-  <a href="{@docRoot}training/implementing-navigation/lateral.html">Implementing Lateral Navigation</a>.
-  </p>
-</div>
-
 
