@@ -2,6 +2,13 @@ page.title=Spinners
 page.tags="spinner","dropdown"
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/spinner.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Spinners</p>
+  </div>
+</a>
+
 <p>Spinners provide a quick way to select one value from a set. In the default state, a spinner shows
 its currently selected value. Touching the spinner displays a dropdown menu with all other available
 values, from which the user can select a new one.</p>
@@ -37,9 +44,3 @@ tabs.</p>
   Spinners in the Holo Dark and Holo Light themes, in various states.
 </div>
 
-
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to create spinners,
-  see the <a href="{@docRoot}guide/topics/ui/controls/spinner.html">Spinners</a> API guide.</p>
-</div>
