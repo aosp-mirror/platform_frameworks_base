@@ -74,7 +74,12 @@ final class ActivityRecord {
     final boolean fullscreen; // covers the full screen?
     final boolean noDisplay;  // activity is not displayed?
     final boolean componentSpecified;  // did caller specifiy an explicit component?
-    final boolean isHomeActivity; // do we consider this to be a home activity?
+
+    static final int APPLICATION_ACTIVITY_TYPE = 0;
+    static final int HOME_ACTIVITY_TYPE = 1;
+    static final int RECENTS_ACTIVITY_TYPE = 2;
+    final int mActivityType;
+
     final String baseDir;   // where activity source (resources etc) located
     final String resDir;   // where public activity source (public resources etc) located
     final String dataDir;   // where activity data should go
@@ -158,7 +163,7 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
-                pw.print(" isHomeActivity="); pw.println(isHomeActivity);
+                pw.print(" mActivityType="); pw.println(mActivityType);
         pw.print(prefix); pw.print("compat="); pw.print(compat);
                 pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
                 pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
@@ -436,17 +441,22 @@ final class ActivityRecord {
             // activity as being home...  really, we don't care about
             // doing anything special with something that comes from
             // the core framework package.
-            isHomeActivity =
-                    (!_componentSpecified || _launchedFromUid == Process.myUid()
-                            || _launchedFromUid == 0) &&
+            if ((!_componentSpecified || _launchedFromUid == Process.myUid()
+                    || _launchedFromUid == 0) &&
                     Intent.ACTION_MAIN.equals(_intent.getAction()) &&
                     _intent.hasCategory(Intent.CATEGORY_HOME) &&
                     _intent.getCategories().size() == 1 &&
                     _intent.getData() == null &&
                     _intent.getType() == null &&
                     (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                    !ResolverActivity.class.getName().equals(realActivity.getClassName());
-                    // This sure looks like a home activity!
+                    !ResolverActivity.class.getName().equals(realActivity.getClassName())) {
+                // This sure looks like a home activity!
+                mActivityType = HOME_ACTIVITY_TYPE;
+            } else if (realActivity.getClassName().contains("com.android.systemui.recent")) {
+                mActivityType = RECENTS_ACTIVITY_TYPE;
+            } else {
+                mActivityType = APPLICATION_ACTIVITY_TYPE;
+            }
 
             immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
         } else {
@@ -460,7 +470,7 @@ final class ActivityRecord {
             packageName = null;
             fullscreen = true;
             noDisplay = false;
-            isHomeActivity = false;
+            mActivityType = APPLICATION_ACTIVITY_TYPE;
             immersive = false;
         }
     }
@@ -513,6 +523,18 @@ final class ActivityRecord {
 
     boolean isInHistory() {
         return inHistory;
+    }
+
+    boolean isHomeActivity() {
+        return mActivityType == HOME_ACTIVITY_TYPE;
+    }
+
+    boolean isRecentsActivity() {
+        return mActivityType == RECENTS_ACTIVITY_TYPE;
+    }
+
+    boolean isApplicationActivity() {
+        return mActivityType == APPLICATION_ACTIVITY_TYPE;
     }
 
     void makeFinishing() {
@@ -580,7 +602,6 @@ final class ActivityRecord {
      * method will be called at the proper time.
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent) {
-        boolean sent = false;
         // The activity now gets access to the data associated with this Intent.
         service.grantUriPermissionFromIntentLocked(callingUid, packageName,
                 intent, getUriPermissionsLocked());
@@ -589,6 +610,7 @@ final class ActivityRecord {
         // device is sleeping, then all activities are stopped, so in that
         // case we will deliver it if this is the current top activity on its
         // stack.
+        boolean unsent = true;
         if ((state == ActivityState.RESUMED || (service.mSleeping
                         && task.stack.topRunningActivityLocked(null) == this))
                 && app != null && app.thread != null) {
@@ -597,7 +619,7 @@ final class ActivityRecord {
                 intent = new Intent(intent);
                 ar.add(intent);
                 app.thread.scheduleNewIntent(ar, appToken);
-                sent = true;
+                unsent = false;
             } catch (RemoteException e) {
                 Slog.w(ActivityManagerService.TAG,
                         "Exception thrown sending new intent to " + this, e);
@@ -606,7 +628,7 @@ final class ActivityRecord {
                         "Exception thrown sending new intent to " + this, e);
             }
         }
-        if (!sent) {
+        if (unsent) {
             addNewIntentLocked(new Intent(intent));
         }
     }

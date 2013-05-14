@@ -8486,7 +8486,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Iterator<ActivityRecord> it = mHomeProcess.activities.iterator();
             while (it.hasNext()) {
                 ActivityRecord r = it.next();
-                if (r.isHomeActivity) {
+                if (r.isHomeActivity()) {
                     Log.i(TAG, "Clearing package preferred activities from " + r.packageName);
                     try {
                         ActivityThread.getPackageManager()

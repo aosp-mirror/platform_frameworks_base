@@ -57,7 +57,7 @@ class TaskRecord extends ThumbnailHolder {
     /** Current stack */
     ActivityStack stack;
 
-    private boolean mHomeTask;
+    private boolean mApplicationTask;
 
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent, ActivityStack _stack) {
         taskId = _taskId;
@@ -164,7 +164,7 @@ class TaskRecord extends ThumbnailHolder {
             // Was not previously in list.
             numFullscreen++;
         }
-        mHomeTask = r.isHomeActivity;
+        mApplicationTask = r.isApplicationActivity();
         mActivities.add(index, r);
     }
 
@@ -316,8 +316,8 @@ class TaskRecord extends ThumbnailHolder {
         return subtask.activity;
     }
 
-    boolean isHomeTask() {
-        return mHomeTask;
+    boolean isApplicationTask() {
+        return mApplicationTask;
     }
 
     public TaskAccessInfo getTaskAccessInfoLocked(boolean inclThumbs) {

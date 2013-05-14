@@ -2251,7 +2251,7 @@ final class ActivityStack {
                 if (r.state == ActivityState.RESUMED
                         || r.state == ActivityState.PAUSING
                         || r.state == ActivityState.PAUSED) {
-                    if (!r.isHomeActivity || mService.mHomeProcess != r.app) {
+                    if (!r.isHomeActivity() || mService.mHomeProcess != r.app) {
                         Slog.w(TAG, "  Force finishing activity "
                                 + r.intent.getComponent().flattenToShortString());
                         finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed", false);
@@ -2932,7 +2932,7 @@ final class ActivityStack {
 
         final int numTasks = mTaskHistory.size();
         final int index = mTaskHistory.indexOf(tr);
-        if (numTasks == 0 || index < 0 || index == numTasks - 1)  {
+        if (numTasks == 0 || index < 0)  {
             // nothing to do!
             if (reason != null &&
                     (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
@@ -2942,6 +2942,8 @@ final class ActivityStack {
             }
             return;
         }
+
+        mStackSupervisor.moveHomeStack(isHomeStack());
 
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
