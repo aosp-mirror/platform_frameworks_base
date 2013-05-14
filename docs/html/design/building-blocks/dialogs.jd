@@ -2,6 +2,13 @@ page.title=Dialogs
 page.tags="dialog","alert","popup","toast"
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/dialogs.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Dialogs</p>
+  </div>
+</a>
+
 <p>Dialogs prompt the user for decisions or additional information required by the app to continue a
 task. Such requests can range from simple Cancel/OK decisions to more complex layouts asking the
 user to adjust settings or enter text.</p>
@@ -123,11 +130,6 @@ available based on the title and the text of the action buttons.</p>
   </div>
 </div>
 
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to build dialogs in your app,
-  see the <a href="{@docRoot}guide/topics/ui/dialogs.html">Dialogs</a> API guide.</p>
-</div>
 
 <h2 id="popups">Popups</h2>
 
@@ -144,11 +146,18 @@ advances the workflow, and simply touching outside the popup dismisses it.</p>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
 
-    <div class="vspace size-6"></div>
+    <div class="vspace size-3"></div>
 
 <p>Toasts provide lightweight feedback about an operation in a small popup. For example, navigating
 away from an email before you send it triggers a "Draft saved" toast to let you know that you can
 continue editing later. Toasts automatically disappear after a timeout.</p>
+
+<a class="notice-developers left" href="{@docRoot}guide/topics/ui/notifiers/toasts.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Toasts</p>
+  </div>
+</a>
 
   </div>
   <div class="layout-content-col span-7">
@@ -158,9 +167,3 @@ continue editing later. Toasts automatically disappear after a timeout.</p>
   </div>
 </div>
 
-
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to create toasts,
-  see the <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Toasts</a> API guide.</p>
-</div>

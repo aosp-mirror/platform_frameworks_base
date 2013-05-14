@@ -2,6 +2,13 @@ page.title=Backwards Compatibility
 page.tags="support"
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Supporting Different Devices</p>
+  </div>
+</a>
+
 <p>Significant changes in Android 3.0 included:</p>
 <ul>
 <li>Deprecation of navigation hardware keys (Back, Menu, Search, Home) in favor of handling navigation

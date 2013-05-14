@@ -4,6 +4,13 @@ page.tags="gridview","layout","listview"
 
 <img src="{@docRoot}design/media/gridview_overview.png">
 
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/layout/gridview.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Grid View</p>
+  </div>
+</a>
+
 <p>Grid lists are an alternative to standard list views. They are best suited for showing data sets
 that represent themselves through images. In contrast to simple lists, grid lists may scroll either
 vertically or horizontally.</p>

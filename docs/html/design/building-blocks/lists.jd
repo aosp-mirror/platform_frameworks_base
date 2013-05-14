@@ -2,6 +2,13 @@ page.title=Lists
 page.tags="listview","layout"
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/layout/listview.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>List View</p>
+  </div>
+</a>
+
 <p>Lists present multiple line items in a vertical arrangement. They can be used for data selection as
 well as drilldown navigation.</p>
 
