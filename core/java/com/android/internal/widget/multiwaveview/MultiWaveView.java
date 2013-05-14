@@ -1006,17 +1006,13 @@ public class MultiWaveView extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        final int width = right - left;
-        final int height = bottom - top;
 
         // Target placement width/height. This puts the targets on the greater of the ring
         // width or the specified outer radius.
         final float placementWidth = Math.max(mOuterRing.getWidth(), 2 * mOuterRadius);
         final float placementHeight = Math.max(mOuterRing.getHeight(), 2 * mOuterRadius);
-        float newWaveCenterX = mHorizontalInset
-                + Math.max(width, mMaxTargetWidth + placementWidth) / 2;
-        float newWaveCenterY = mVerticalInset
-                + Math.max(height, + mMaxTargetHeight + placementHeight) / 2;
+        float newWaveCenterX = mHorizontalInset + (mMaxTargetWidth + placementWidth) / 2;
+        float newWaveCenterY = mVerticalInset + (mMaxTargetHeight + placementHeight) / 2;
 
         if (mInitialLayout) {
             hideChevrons();
