@@ -109,6 +109,24 @@ choice.</p>
 <p>Google Play offers convenient options for managing how your apps are
 delivered to users.</p>
 
+<h3 id="abc">Alpha and beta testing, staged rollouts</h3>
+
+<p>It's always valuable to get real-world feedback from users, especially before
+launch. Google Play makes it easy to distribute pre-release versions of your app
+to alpha and beta test groups anywhere in the world. You can start with a small
+group of alpha testers, then move to a larger group of beta testers. Once users
+are added, they access your app's store listing and install the app. User
+feedback from alpha and beta testers goes directly to you and is not posted as
+public reviews. </p>
+
+<p>To help you ensure quality and protect your app ratings, you can choose a
+staged rollout when launching an app or an update. With staged rollout, you
+distribute the production version of your app to a percentage of users. You can
+adjust the percentage as you go, starting small and increasing until your app is
+available to all users.</p>
+
+<h3 id="multiple-apk">Multiple APK support</h3>
+
 <p>In most cases, it’s easy to create an app that supports all of your targeted
 screen sizes and platform versions from a single APK. Distributing a single APK
 to all of your users is a highly recommended approach, because it’s the easiest

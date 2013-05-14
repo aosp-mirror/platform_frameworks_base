@@ -1,4 +1,5 @@
-page.title=Publishing Checklist for Google Play
+page.title=Launch Checklist
+page.tags="publishing","launch","Google Play", "Developer Console"
 @jd:body
 
 <div id="qv-wrapper"><div id="qv">
@@ -6,7 +7,7 @@ page.title=Publishing Checklist for Google Play
 <ol>
 <li><a href="#process">1. Understand the publishing process</a></li>
 <li><a href="#policies">2. Understand Google Play policies</a></li>
-<li><a href="#core-app-quality">3. Test for Core App Quality</a></li>
+<li><a href="#core-app-quality">3. Test for core app quality</a></li>
 <li><a href="#rating">4. Determine your content rating</a></li>
 <li><a href="#countries">5. Determine country distribution</a></li>
 <li><a href="#size">6. Confirm the app's overall size</a></li>
@@ -17,10 +18,11 @@ page.title=Publishing Checklist for Google Play
 <li><a href="#localize">11. Start localization early</a></li>
 <li><a href="#graphics">12. Prepare promotional graphics</a></li>
 <li><a href="#apk">13. Build the release-ready APK</a></li>
-<li><a href="#product-page">14. Complete the product details</a></li>
-<li><a href="#badges">15. Use Google Play badges</a></li>
-<li><a href="#final-checks">16. Final checks and publishing</a></li>
-<li><a href="#support">17. Support users after launch</a></li>
+<li><a href="#beta">14. Plan a beta release</a></li>
+<li><a href="#product-page">15. Complete the product details</a></li>
+<li><a href="#badges">16. Use Google Play badges</a></li>
+<li><a href="#final-checks">17. Final checks and publishing</a></li>
+<li><a href="#support">18. Support users after launch</a></li>
 </ol>
 </div></div>
 
@@ -171,10 +173,14 @@ your localization needs are, both in your app and in its Google Play listing
 details, and start the work of localization well in advance of your
 launch target date.</p>
 
+<p>See <a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization
+Checklist</a> for key steps and considerations in the localizing process. </p>
+
 <table>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
+<li><strong><a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization Checklist</a></strong> &mdash; Overview of key steps and considerations for localizing your Android app.</li>
 <li><strong><a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=138294&topic=2365624&ctx=topic">Supported locations for distributing applications</a></strong> on Google Play.
 .</li>
 </ul>
@@ -363,10 +369,7 @@ launch date.</p>
 <li>Localizing the app's graphic assets, screenshots, and videos that accompany your store listing.</li>
 </ul>
 
-<p>To get started localizing your app, work with your development team to extract
-any resource or coded strings for translation. Also identify images, icons, or
-other assets that should be language- or locale-specific. Hand these off to  
-a translator.</p>
+<p>See <a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization Checklist</a> for key steps and considerations in the localizing process. </p>
 
 <p>To localize your store listing, first create and finalize your app title, description, 
 and promotional text. Collect and send all of these for localization. You can optionally
@@ -391,7 +394,8 @@ when you upload assets and configure your product details.</p>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}guide/topics/resources/localization.html">Localization</a></strong> &mdash; How to supply localized resources in your app.</li>
+<li><strong><a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization Checklist</a></strong> &mdash; Overview of key steps and considerations for localizing your Android app.</li>
+<li><strong><a href="{@docRoot}guide/topics/resources/localization.html">Localizing with Resources</a></strong> &mdash; Developer guide to localizing resources in your app.</li>
 </ul>
 </td>
 </tr>
@@ -478,7 +482,33 @@ recent version before publishing. </p>
 </tr>
 </table>
 
-<h2 id="product-page">14. Complete the app's product details</h2>
+<h2 id="beta">14. Plan a beta release</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Easy beta testing</h2>
+<p>Google Play now lets you set up groups of alpha and beta testers, anywhere around the world. Check out this powerful feature next time you sign in to the Developer Console.</p>
+</div>
+</div>
+
+<p>Before launching your app, it's always valuable to get real-world feedback
+from users &mdash; even more so when you are launching a new app. It's highly
+recommended that you distribute a pre-release version of your app to users
+across your key markets and provide an easy means for them to provide feedback
+and report bugs. </p>
+
+<p>Google Play can help you set up a beta program for your app. After you sign
+in to the Developer Console and upload your APK, you can set up groups of users
+for alpha testing and beta testing the app. You can start with a small group of
+alpha testers, then move to a larger group of beta testers. Once users are
+added, they access your app's store listing and install the app. User feedback
+from alpha and beta testers goes directly to you and is not posted as public
+reviews. </p>
+
+<p>The feedback you receive will help you adjust your UI, translations, and
+store listing to ensure a great experience for users. </p>
+
+<h2 id="product-page">15. Complete the app's product details</h2>
 
 <p>On Google Play, your app's product information is shown to users on its
 product details page, the page that users visit to learn more about your app and
@@ -523,7 +553,7 @@ in the app description, release notes, promotional campaigns, and elsewhere.</p>
 </tr>
 </table>
 
-<h2 id="badges">15. Use Google Play badges and links in your promotional
+<h2 id="badges">16. Use Google Play badges and links in your promotional
 campaigns</h2>
 
 <p>Google Play badges give you an officially branded way of promoting your app
@@ -552,7 +582,7 @@ and reviews, or any other channel available.</p>
 </tr>
 </table>
 
-<h2 id="final-checks">16. Final checks and publishing</h2> 
+<h2 id="final-checks">17. Final checks and publishing</h2> 
 
 <p>When you think you are ready to publish, sign in to the Developer Console and take a few moments for a few
 final checks.</p>
@@ -590,7 +620,7 @@ final checks.</p>
 </table>
 
 
-<h2 id="support">17. Support users after launch</h2>
+<h2 id="support">18. Support users after launch</h2>
 
 <p>After you publish an app or an app update, it's crucial for you to support
 your customers. Prompt and courteous support can provide a better experience for
