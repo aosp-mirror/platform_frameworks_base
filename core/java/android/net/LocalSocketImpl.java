@@ -147,7 +147,7 @@ class LocalSocketImpl
         public void flush() throws IOException {
             FileDescriptor myFd = fd;
             if (myFd == null) throw new IOException("socket closed");
-            while(pending_native(fd) > 0) {
+            while(pending_native(myFd) > 0) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
