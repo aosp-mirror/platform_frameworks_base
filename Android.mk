@@ -464,7 +464,8 @@ framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
 	$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR) \
-	$(foreach lib,$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES),$(call intermediates-dir-for,JAVA_LIBRARIES,$(lib),,COMMON))
+	$(foreach lib,$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES),$(call intermediates-dir-for,JAVA_LIBRARIES,$(lib),,COMMON)) \
+	$(foreach lib,$(FRAMEWORKS_SUPPORT_JAVA_LIBRARIES),$(call intermediates-dir-for,JAVA_LIBRARIES,$(lib)-res,,COMMON))
 
 framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
     frameworks/base/docs/knowntags.txt
