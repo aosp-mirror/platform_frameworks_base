@@ -1,0 +1,297 @@
+page.title=GCM Cloud Connection Server
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Quickview</h2>
+
+<ul>
+<li>Get an introduction to key CCS terms and concepts.</li>
+<li>Learn how to send and receive both upstream and downstream messages in CCS.</li>
+</ul>
+
+
+<h2>In this document</h2>
+
+<ol class="toc">
+  <li><a href="#gcm">CCS vs. GCM HTTP</a> </li>
+  <li><a href="#usage">How to Use CCS</a>
+    <ol>
+      <li><a href="#send_msg">Sending Messages</a></li>
+      <li><a href="#format">Message Format</a></li>
+      <li><a href="#msg_examples">Message Examples</a></li>
+    </ol>
+  </li>
+  <li><a href="#flow">Control Flow</a> </li>
+</ol>
+
+<h2>See Also</h2>
+
+<ol class="toc">
+<li><a href="{@docRoot}google/play-services/gcm/gs.html">Getting Started</a></li>
+<li><a href="https://services.google.com/fb/forms/gcm/" class="external-link" target="_android">CCS and User Notifications Signup Form</a></li>
+</ol>
+
+</div>
+</div>
+
+<p class="note"><strong>Note:</strong> To try out this feature, sign up using <a href="https://services.google.com/fb/forms/gcm/">this form</a>.</p>
+
+<p>The GCM Cloud Connection Server (CCS) allows third party servers to communicate with Android devices by  establishing a persistent TCP connection with Google servers using the XMPP protocol. This communication is asynchronous and bidirectional.</p>
+<p>You can continue to use the HTTP request mechanism to send messages to GCM servers, side-by-side with CCS which uses XMPP. Some of the benefits of CCS include:</p>
+<ul>
+  <li>The asynchronous nature of XMPP allows you to send more messages with fewer resources.</li>
+  <li>Communication is bidirectional&mdash;not only can the server send messages to the device, but the device can send messages back to the server.</li>
+<li>You can send messages back using the same connection used for receiving, thereby improving battery life.</li>
+</ul>
+
+<p>The upstream messaging (device-to-cloud) feature of CCS is part of the Google Play services platform. Upstream messaging is available through the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs. To use upstream messaging and the new streamlined registration process, you must <a href="{@docRoot}google/play-services/setup.html">set up</a> the Google Play services SDK.</p>
+
+<h2 id="gcm">CCS vs. GCM HTTP</h2>
+
+<p>CCS messaging differs from GCM HTTP messaging in the following ways:</p>
+<ul>
+  <li>Upstream/Downstream messages
+    <ul>
+      <li>GCM HTTP: Downstream only: cloud-to-device. </li>
+      <li>CCS: Upstream and downstream (device-to-cloud, cloud-to-device). </li>
+    </ul>
+  </li>
+  <li>Asynchronous messaging
+    <ul>
+      <li>GCM HTTP: 3rd-party servers send messages as HTTP POST requests and wait for a response. This mechanism is synchronous and causes the sender to block before sending another message.</li>
+      <li>CCS: 3rd-party servers connect to Google infrastructure using a persistent XMPP connection and send/receive messages to/from all their devices at full line speed. CCS sends acknowledgements or failure notifications (in the form of special ACK and NACK JSON-encoded XMPP messages) asynchronously.</li>
+    </ul>
+  </li>
+
+  <li>JSON
+    <ul>
+      <li>GCM HTTP: JSON messages sent as HTTP POST.</li>
+      <li>CCS: JSON messages encapsulated in XMPP messages.</li>
+    </ul>
+  </li>
+</ul>
+<p>This document describes how to use CCS. For general concepts and information on how to use GCM HTTP, see the <a href="gcm.html">GCM Architectural Overview</a>.</p>
+
+<h2 id="usage">How to Use CCS</h2>
+
+<p>GCM Cloud Connection Server (CCS) is an XMPP endpoint, running on {@code http://gcm.googleapis.com} port 5235.</p>
+
+<p>CCS requires a Transport Layer Security (TLS) connection. That means the  XMPP client must initiate a TLS connection.
+For example in smack, you would call {@code setSocketFactory(SSLSocketFactory)}, similar to “old style SSL” XMPP connections and https.</p>
+
+<p>CCS requires a SASL PLAIN authentication mechanism using {@code &lt;your_GCM_Sender_Id&gt;&#64;gcm.googleapis.com} (GCM sender ID) and the API key as the password, where the sender ID and API key are the same as described in <a href="gs.html">Getting Started</a>.</p>
+
+<p> You can use most XMPP libraries to interact with CCS.</p>
+
+<h3 id="send_msg">Sending messages</h3>
+
+<p>The following snippets illustrate how to perform authentication in CCS.</p>
+<h4>Client</h4>
+<pre>&lt;stream:stream to=&quot;gcm.googleapis.com&quot; 
+        version=&quot;1.0&quot; xmlns=&quot;jabber:client&quot; 
+        xmlns:stream=&quot;http://etherx.jabber.org/streams&quot;/&gt;
+</pre>
+<h4>Server</h4>
+<pre>&lt;str:features xmlns:str=&quot;http://etherx.jabber.org/streams&quot;&gt;
+ &lt;mechanisms xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;&gt;
+   &lt;mechanism&gt;X-OAUTH2&lt;/mechanism&gt;
+   &lt;mechanism&gt;X-GOOGLE-TOKEN&lt;/mechanism&gt;
+   &lt;mechanism&gt;PLAIN&lt;/mechanism&gt;
+ &lt;/mechanisms&gt;
+&lt;/str:features&gt;
+</pre>
+
+<h4>Client</h4>
+<pre>&lt;auth mechanism=&quot;PLAIN&quot;
+xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;&gt;MTI2MjAwMzQ3OTMzQHByb2plY3RzLmdjbS5hb
+mRyb2lkLmNvbQAxMjYyMDAzNDc5FzNAcHJvamVjdHMtZ2EtLmFuZHJvaWQuY29tAEFJe
+mFTeUIzcmNaTmtmbnFLZEZiOW1oekNCaVlwT1JEQTJKV1d0dw==&lt;/auth&gt;
+</pre>
+<h4>Server</h4>
+<pre>&lt;success xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;/&gt;</pre>
+
+<h3 id="format">Message Format</h3>
+<p>CCS uses normal XMPP <code>&lt;message&gt;</code> stanzas. The body of the message must be:
+</p>
+<pre>
+&lt;gcm xmlns:google:mobile:data&gt;
+    <em>JSON payload</em>
+&lt;/gcm&gt;
+</pre>
+
+<p>The JSON payload for server-to-device is similar to what the GCM http endpoint uses, with these exceptions:</p>
+<ul>
+  <li>There is no support for multiple recipients.</li>
+  <li>{@code to} is used instead of {@code registration_ids}.</li>
+  <li>CCS adds the field {@code message_id}, which is required. This ID uniquely identifies the message in an XMPP connection. The ACK or NACK from CCS uses the {@code message_id} to identify a message sent from 3rd-party servers to CCS. Therefore, it's important that this {@code message_id} not only be unique, but always present.</li>
+
+  <li>For ACK/NACK messages that are special control messages, you also need to include a {@code message_type} field in the JSON message. For example:
+
+<pre>message_type = ('ack' OR 'nack');</pre>
+  </li>
+</ul>
+<p>For each message a device sends to the server, you need to send an ACK message. You never need to send a NACK message. If you don't send an ACK for a message, CCS will just resend it.
+</p>
+<p>CCS also sends an ACK or NACK for each server-to-device message. If you do not receive either, it means that the TCP connection was closed in the middle of the operation and your server needs to resend the messages.
+</p>
+
+<h3 id="msg_examples">Message Examples</h3>
+
+<p>Here is an XMPP stanza containing the JSON message from a 3rd-party server to CCS:
+
+</p>
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;to&quot;:&quot;REGISTRATION_ID&quot;,  // &quot;to&quot; replaces &quot;registration_ids&quot;
+      &quot;message_id&quot;:&quot;m-1366082849205&quot; // new required field
+      &quot;data&quot;:
+      {
+          &quot;hello&quot;:&quot;world&quot;,
+      }
+      &quot;time_to_live&quot;:&quot;600&quot;,
+      &quot;delay_while_idle&quot;: true/false
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
+
+<p>Here is an XMPP stanza containing the ACK/NACK message from CCS to 3rd-party server:
+</p>
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;from&quot;:&quot;REGID&quot;,
+      &quot;message_id&quot;:&quot;m-1366082849205&quot;
+      &quot;message_type&quot;:&quot;ack&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;
+
+&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;from&quot;:&quot;REGID&quot;,
+      &quot;message_id&quot;:&quot;m-1366082849205&quot;
+      &quot;error&quot;: ERROR_CODE,
+      &quot;message_type&quot;:&quot;nack&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
+
+<h4>Upstream Messages</h4>
+
+<p>Using CCS and the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">GoogleCloudMessaging</a> API, you can send messages from a user's device to the cloud.</p>
+
+<p>Here is how you send an upstream message using the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">GoogleCloudMessaging</a> API. For a complete example, see <a href="gs.html#gs_example">Getting Started</a>:</p>
+
+<pre>GoogleCloudMessaging gcm = GoogleCloudMessaging.get(context);
+String GCM_SENDER_ID = "Your-Sender-ID";
+AtomicInteger msgId = new AtomicInteger();
+String id = Integer.toString(msgId.incrementAndGet());
+Bundle data = new Bundle();
+// Bundle data consists of a key-value pair
+data.putString("hello", "world");
+// "time to live" parameter
+int ttl = [0 seconds, 4 weeks]
+
+gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, ttl, data);
+</pre>
+
+<p>This call generates the necessary XMPP stanza for sending the upstream message. The message goes from the app on the device to CCS to the 3rd-party server. The stanza has the following format:</p>
+
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;category&quot;:&quot;com.example.yourapp&quot;, // to know which app sent it
+      &quot;data&quot;:
+      {
+          &quot;hello&quot;:&quot;world&quot;,
+      },
+      &quot;message_id&quot;:&quot;m-123&quot;,
+      &quot;from&quot;:&quot;REGID&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;</pre>
+
+<p>Here is the format of the ACK expected by CCS from 3rd-party servers in response to the above message:</p>
+
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;to&quot;:&quot;REGID&quot;,
+      &quot;message_id&quot;:&quot;m-123&quot;
+      &quot;message_type&quot;:&quot;ack&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;</pre>
+
+<h4 id="python">Python Example</h4>
+<p>This example illustrates how to connect,
+send, and receive GCM messages using XMPP. It shouldn't be used as-is
+on a production deployment.</p>
+
+<pre>
+import sys, json, xmpp
+SERVER = ('gcm.googleapis.com', 5235)
+#USERNAME = '&lt;your_numeric_project_id&gt;'
+#PASSWORD = '&lt;your_gcm_api_key&gt;'
+
+# Unique message id for downstream messages
+sent_message_id = 0
+
+def message_callback(session, message):
+  global sent_message_id
+  gcm = message.getTags('gcm')
+
+  if gcm:
+    gcm_json = gcm[0].getData()
+    msg = json.loads(gcm_json)
+    msg_id = msg['message_id']
+    device_reg_id = msg['from']
+
+    # Ignore non-standard messages (e.g. acks/nacks).
+    if not msg.has_key('message_type'):
+      # Acknowledge the incoming message.
+      send({'to': device_reg_id,
+            'message_type': 'ack',
+            'message_id': msg_id})
+
+      # Send a response back to the server.
+      send({'to': device_reg_id,
+            'message_id' : str(sent_message_id),
+            'data': {'pong': 1}})
+      sent_message_id = sent_message_id + 1
+
+def send(json_dict):
+  template = (&quot;&lt;message from='{0}' to='gcm@google.com'&gt;&quot;
+              &quot;&lt;gcm xmlns='google:mobile:data'&gt;{1}&lt;/gcm&gt;&lt;/message&gt;&quot;)
+  client.send(xmpp.protocol.Message(
+      node=template.format(client.Bind.bound[0],
+                           json.dumps(json_dict))))
+
+client = xmpp.Client(SERVER[0], debug=['socket'])
+client.connect(server=SERVER, secure=1, use_srv=False)
+auth = client.auth(USERNAME, PASSWORD, 'test')
+if not auth:
+  print 'Authentication failed!'
+  sys.exit(1)
+
+client.RegisterHandler('message', message_callback)
+
+while True:
+  client.Process(1)</pre>
+
+<h2 id="flow">Control Flow</h2>
+
+<p>Every message sent by a 3rd-party server to CCS receives either an ACK or a NACK response. A single connection can have at most 1000 messages that were sent without having yet received a response.</p>
+
+<p>To enforce this policy, the app can maintain a counter of sent messages that increments on each send and decrements on each ACK or NACK. If the counter exceeds 1000, the app should stop sending messages until an ACK or NACK is received.</p>
+
+<p>Conversely, when CCS sends messages to a 3rd-party server, it expects ACKs for each message it sends, and it will not send more than 1000 unacknowledged messages.</p>
+
+<p>The ACKs and messages must match on each connection. You can only send an ACK for a message on the connection on which it was received.</p>
+
