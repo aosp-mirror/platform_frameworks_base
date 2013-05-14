@@ -1,0 +1,590 @@
+page.title=Receiving Location Updates
+trainingnavtop=true
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li><a href="#Permissions">Request Location Permission</a></li>
+    <li><a href="#PlayServices">Check for Google Play Services</a></li>
+    <li><a href="#DefineCallbacks">Define Location Services Callbacks</a></li>
+    <li><a href="#UpdateParameters">Specify Update Parameters</a></li>
+    <li><a href="#StartUpdates">Start Location Updates</a></li>
+    <li><a href="#StopUpdates">Stop Location Updates</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}google/play-services/setup.html">Setup Google Play Services SDK</a>
+    </li>
+    <li>
+        <a href="retrieve-current.html">Retrieving the Current Location</a>
+    </li>
+ </ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="http://developer.android.com/shareables/training/LocationUpdates.zip" class="button">Download the sample</a>
+  <p class="filename">LocationUpdates.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>
+    If your app does navigation or tracking, you probably want to get the user's
+    location at regular intervals. While you can do this with
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#getLastLocation()">LocationClient.getLastLocation()</a></code>,
+    a more direct approach is to request periodic updates from Location Services. In
+    response, Location Services automatically updates your app with the best available location,
+    based on the currently-available location providers such as WiFi and GPS.
+</p>
+<p>
+    To get periodic location updates from Location Services, you send a request using a location
+    client. Depending on the form of the request, Location Services either invokes a callback
+    method and passes in a {@link android.location.Location} object, or issues an
+    {@link android.content.Intent} that contains the location in its extended data. The accuracy and
+    frequency of the updates are affected by the location permissions you've requested and the
+    parameters you pass to Location Services with the request.
+</p>
+<!-- Request permission -->
+<h2 id="Permissions">Specify App Permissions</h2>
+<p>
+    Apps that use Location Services must request location permissions. Android has two location
+    permissions, {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION}
+    and {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}. The
+    permission you choose affects the accuracy of the location updates you receive.
+    For example, If you request only coarse location permission, Location Services obfuscates the
+    updated location to an accuracy that's roughly equivalent to a city block.
+</p>
+<p>
+    Requesting {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} implies
+    a request for {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION}.
+</p>
+<p>
+    For example, to add the coarse location permission to your manifest, insert the following as a
+    child element of
+    the
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+    element:
+</p>
+<pre>
+&lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/&gt;
+</pre>
+<!-- Check for Google Play services -->
+<h2 id="PlayServices">Check for Google Play Services</h2>
+<p>
+    Location Services is part of the Google Play services APK. Since it's hard to anticipate the
+    state of the user's device, you should always check that the APK is installed before you attempt
+    to connect to Location Services. To check that the APK is installed, call
+<code><a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">GooglePlayServicesUtil.isGooglePlayServicesAvailable()</a></code>,
+    which returns one of the
+    integer result codes listed in the API reference documentation. If you encounter an error,
+    call
+<code><a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">GooglePlayServicesUtil.getErrorDialog()</a></code>
+    to retrieve localized dialog that prompts users to take the correct action, then display
+    the dialog in a {@link android.support.v4.app.DialogFragment}. The dialog may allow the
+    user to correct the problem, in which case Google Play services may send a result back to your
+    activity. To handle this result, override the method
+    {@link android.support.v4.app.FragmentActivity#onActivityResult onActivityResult()}
+
+</p>
+<p class="note">
+    <strong>Note:</strong> To make your app compatible with
+    platform version 1.6 and later, the activity that displays the
+    {@link android.support.v4.app.DialogFragment} must subclass
+    {@link android.support.v4.app.FragmentActivity} instead of {@link android.app.Activity}. Using
+    {@link android.support.v4.app.FragmentActivity} also allows you to call
+    {@link android.support.v4.app.FragmentActivity#getSupportFragmentManager
+    getSupportFragmentManager()} to display the {@link android.support.v4.app.DialogFragment}.
+</p>
+<p>
+    Since you usually need to check for Google Play services in more than one place in your code,
+    define a method that encapsulates the check, then call the method before each connection
+    attempt. The following snippet contains all of the code required to check for Google
+    Play services:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity {
+    ...
+    // Global constants
+    /*
+     * Define a request code to send to Google Play services
+     * This code is returned in Activity.onActivityResult
+     */
+    private final static int
+            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    ...
+    // Define a DialogFragment that displays the error dialog
+    public static class ErrorDialogFragment extends DialogFragment {
+        // Global field to contain the error dialog
+        private Dialog mDialog;
+        // Default constructor. Sets the dialog field to null
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
+        }
+        // Set the dialog to display
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
+        }
+        // Return a Dialog to the DialogFragment.
+        &#64;Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
+        }
+    }
+    ...
+    /*
+     * Handle results returned to the FragmentActivity
+     * by Google Play services
+     */
+    &#64;Override
+    protected void onActivityResult(
+            int requestCode, int resultCode, Intent data) {
+        // Decide what to do based on the original request code
+        switch (requestCode) {
+            ...
+            case CONNECTION_FAILURE_RESOLUTION_REQUEST :
+            /*
+             * If the result code is Activity.RESULT_OK, try
+             * to connect again
+             */
+                switch (resultCode) {
+                    case Activity.RESULT_OK :
+                    /*
+                     * Try the request again
+                     */
+                    ...
+                    break;
+                }
+            ...
+        }
+        ...
+    }
+    ...
+    private boolean servicesConnected() {
+        // Check that Google Play services is available
+        int resultCode =
+                GooglePlayServicesUtil.
+                        isGooglePlayServicesAvailable(this);
+        // If Google Play services is available
+        if (ConnectionResult.SUCCESS == resultCode) {
+            // In debug mode, log the status
+            Log.d("Location Updates",
+                    "Google Play services is available.");
+            // Continue
+            return true;
+        // Google Play services was not available for some reason
+        } else {
+            // Get the error code
+            int errorCode = connectionResult.getErrorCode();
+            // Get the error dialog from Google Play services
+            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
+                    errorCode,
+                    this,
+                    CONNECTION_FAILURE_RESOLUTION_REQUEST);
+            // If Google Play services can provide an error dialog
+            if (errorDialog != null) {
+                // Create a new DialogFragment for the error dialog
+                ErrorDialogFragment errorFragment =
+                        new ErrorDialogFragment();
+                // Set the dialog in the DialogFragment
+                errorFragment.setDialog(errorDialog);
+                // Show the error dialog in the DialogFragment
+                errorFragment.show(
+                        getSupportFragmentManager(),
+                        "Location Updates");
+            }
+        }
+    }
+    ...
+}
+</pre>
+<p>
+    Snippets in the following sections call this method to verify that Google Play services is
+    available.
+</p>
+<!--
+    Define Location Services Callbacks
+ -->
+<h2 id="DefineCallbacks">Define Location Services Callbacks</h2>
+<p>
+    Before you request location updates, you must first implement the interfaces that Location
+    Services uses to communicate connection status to your app:
+</p>
+<dl>
+    <dt>
+<code><a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">ConnectionCallbacks</a></code>
+    </dt>
+    <dd>
+        Specifies methods that Location Services calls when a location client is connected or
+        disconnected.
+    </dd>
+    <dt>
+<code><a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">OnConnectionFailedListener</a></code>
+    </dt>
+    <dd>
+        Specifies a method that Location Services calls if an error occurs while attempting to
+        connect the location client. This method uses the previously-defined {@code showErrorDialog}
+        method to display an error dialog that attempts to fix the problem using Google Play
+        services.
+    </dd>
+</dl>
+<p>
+    The following snippet shows how to specify the interfaces and define the methods:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity implements
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener {
+    ...
+    /*
+     * Called by Location Services when the request to connect the
+     * client finishes successfully. At this point, you can
+     * request the current location or start periodic updates
+     */
+    &#64;Override
+    public void onConnected(Bundle dataBundle) {
+        // Display the connection status
+        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+    }
+    ...
+    /*
+     * Called by Location Services if the connection to the
+     * location client drops because of an error.
+     */
+    &#64;Override
+    public void onDisconnected() {
+        // Display the connection status
+        Toast.makeText(this, "Disconnected. Please re-connect.",
+                Toast.LENGTH_SHORT).show();
+    }
+    ...
+    /*
+     * Called by Location Services if the attempt to
+     * Location Services fails.
+     */
+    &#64;Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        /*
+         * Google Play services can resolve some errors it detects.
+         * If the error has a resolution, try sending an Intent to
+         * start a Google Play services activity that can resolve
+         * error.
+         */
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(
+                        this,
+                        CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                /*
+                * Thrown if Google Play services canceled the original
+                * PendingIntent
+                */
+            } catch (IntentSender.SendIntentException e) {
+                // Log the error
+                e.printStackTrace();
+            }
+        } else {
+            /*
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
+            showErrorDialog(connectionResult.getErrorCode());
+        }
+    }
+    ...
+}
+</pre>
+<h3>Define the location update callback</h3>
+<p>
+    Location Services sends location updates to your app either as an {@link android.content.Intent}
+    or as an argument passed to a callback method you define. This lesson shows you how to get the
+    update using a callback method, because that pattern works best for most use cases. If you want
+    to receive updates in the form of an {@link android.content.Intent}, read the lesson
+    <a href="activity-recognition.html">Recognizing the User's Current Activity</a>, which
+    presents a similar pattern.
+</p>
+<p>
+    The callback method that Location Services invokes to send a location update to your app is
+    specified in the
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationListener.html">LocationListener</a></code>
+    interface, in the method
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationListener.html#onLocationChanged(android.location.Location)">onLocationChanged()</a></code>.
+    The incoming argument is a {@link android.location.Location} object containing the location's
+    latitude and longitude. The following snippet shows how to specify the interface and define
+    the method:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity implements
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationListener {
+    ...
+    // Define the callback method that receives location updates
+    &#64;Override
+    public void onLocationChanged(Location location) {
+        // Report to the UI that the location was updated
+        String msg = "Updated Location: " +
+                Double.toString(location.getLatitude()) + "," +
+                Double.toString(location.getLongitude());
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+    ...
+}
+</pre>
+<p>
+    Now that you have the callbacks prepared, you can set up the request for location updates.
+    The first step is to specify the parameters that control the updates.
+</p>
+<!-- Specify update parameters -->
+<h2 id="UpdateParameters">Specify Update Parameters</h2>
+<p>
+    Location Services allows you to control the interval between updates and the location accuracy
+    you want, by setting the values in a
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a></code>
+    object and then sending this object as part of your request to start updates.
+</p>
+<p>
+    First, set the following interval parameters:
+</p>
+<dl>
+    <dt>
+        Update interval
+    </dt>
+    <dd>
+        Set by
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">LocationRequest.setInterval()</a></code>.
+        This method sets the rate in milliseconds at which your app prefers to receive location
+        updates. If no other apps are receiving updates from Location Services, your app will
+        receive updates at this rate.
+    </dd>
+    <dt>
+        Fastest update interval
+    </dt>
+    <dd>
+        Set by
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setFastestInterval(long)">LocationRequest.setFastestInterval()</a></code>.
+        This method sets the <b>fastest</b> rate in milliseconds at which your app can handle
+        location updates. You need to set this rate because other apps also affect the rate
+        at which updates are sent. Location Services sends out updates at the fastest rate that any
+        app requested by calling
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">LocationRequest.setInterval()</a></code>.
+        If this rate is faster than your app can handle, you may encounter problems with UI flicker
+        or data overflow. To prevent this, call
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setFastestInterval(long)">LocationRequest.setFastestInterval()</a></code>
+        to set an upper limit to the update rate.
+        <p>
+            Calling
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setFastestInterval(long)">LocationRequest.setFastestInterval()</a></code>
+            also helps to save power. When you request a preferred update rate by calling
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">LocationRequest.setInterval()</a></code>,
+            and a maximum rate by calling
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setFastestInterval(long)">LocationRequest.setFastestInterval()</a></code>,
+            then your app gets the same update rate as the fastest rate in the system. If other
+            apps have requested a faster rate, you get the benefit of a faster rate. If no other
+            apps have a faster rate request outstanding, your app receives updates at the rate you specified
+        with
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">LocationRequest.setInterval()</a></code>.
+        </p>
+    </dd>
+</dl>
+<p>
+    Next, set the accuracy parameter. In a foreground app, you need constant location updates with
+    high accuracy, so use the setting
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_HIGH_ACCURACY">LocationRequest.PRIORITY_HIGH_ACCURACY</a></code>.
+</p>
+<p>
+    The following snippet shows how to set the update interval and accuracy in
+    {@link android.support.v4.app.FragmentActivity#onCreate onCreate()}:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity implements
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationListener {
+    ...
+    // Global constants
+    ...
+    // Milliseconds per second
+    private static final int MILLISECONDS_PER_SECOND = 1000;
+    // Update frequency in seconds
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
+    // Update frequency in milliseconds
+    private static final long UPDATE_INTERVAL =
+            MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN SECONDS;
+    // The fastest update frequency, in seconds
+    private static final int FASTEST_INTERVAL_IN_SECONDS = 1;
+    // A fast frequency ceiling in milliseconds
+    private static final long FASTEST_INTERVAL =
+            MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
+    ...
+    // Define an object that holds accuracy and frequency parameters
+    LocationResult mLocationRequest;
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Create the LocationRequest object
+        mLocationRequest = LocationRequest.create();
+        // Use high accuracy
+        mLocationRequest.setPriority(
+                LocationRequest.PRIORITY_HIGH_ACCURACY);
+        // Set the update interval to 5 seconds
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        // Set the fastest update interval to 1 second
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        ...
+    }
+    ...
+}
+</pre>
+<p class="note">
+   <strong>Note:</strong> If your app accesses the network or does other long-running work after
+   receiving a location update, adjust the fastest interval to a slower value. This prevents your
+   app from receiving updates it can't use. Once the long-running work is done, set the fastest
+   interval back to a fast value.
+</p>
+<!-- Start Location Updates -->
+<h2 id="StartUpdates">Start Location Updates</h2>
+<p>
+    To send the request for location updates, create a location client in
+    {@link android.support.v4.app.FragmentActivity#onCreate onCreate()}, then connect it and make
+    the request by calling
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener)">requestLocationUpdates()</a></code>.
+    Since your client must be connected for your app to receive updates, you should
+    connect the client and make the request in
+    {@link android.support.v4.app.FragmentActivity#onStart onStart()}. This ensures that you always
+    have a valid, connected client while your app is visible.
+</p>
+<p>
+    Remember that the user may want to turn off location updates for various reasons. You should
+    provide a way for the user to do this, and you should ensure that you don't start updates in
+    {@link android.support.v4.app.FragmentActivity#onStart onStart()} if updates were previously
+    turned off. To track the user's preference, store it in your app's
+    {@link android.content.SharedPreferences} in
+    {@link android.support.v4.app.FragmentActivity#onPause onPause()} and retrieve it in
+    {@link android.support.v4.app.FragmentActivity#onResume onResume()}.
+</p>
+<p>
+    The following snippet shows how to set up the client in
+    {@link android.support.v4.app.FragmentActivity#onCreate onCreate()}, and how to connect it
+    and request updates in {@link android.support.v4.app.FragmentActivity#onStart onStart()}:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity implements
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationListener {
+    ...
+    // Global variables
+    ...
+    LocationClient mLocationClient;
+    boolean mUpdatesRequested;
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        // Open the shared preferences
+        mPrefs = getSharedPreferences("SharedPreferences",
+                Context.MODE_PRIVATE);
+        // Get a SharedPreferences editor
+        mEditor = mPrefs.edit();
+        /*
+         * Create a new location client, using the enclosing class to
+         * handle callbacks.
+         */
+        mLocationClient = new LocationClient(this, this, this);
+        // Start with updates turned off
+        mUpdatesRequested = false;
+        ...
+    }
+    ...
+    &#64;Override
+    protected void onPause() {
+        // Save the current setting for updates
+        mEditor.putBoolean("KEY_UPDATES_ON", mUpdatesRequested);
+        mEditor.commit();
+        super.onPause();
+    }
+    ...
+    &#64;Override
+    protected void onStart() {
+        ...
+        mLocationClient.connect();
+    }
+    ...
+    &#64;Override
+    protected void onResume() {
+        /*
+         * Get any previous setting for location updates
+         * Gets "false" if an error occurs
+         */
+        if (mPrefs.contains("KEY_UPDATES_ON")) {
+            mUpdatesRequested =
+                    mPrefs.getBoolean("KEY_UPDATES_ON", false);
+
+        // Otherwise, turn off location updates
+        } else {
+            mEditor.putBoolean("KEY_UPDATES_ON", false);
+            mEditor.commit();
+        }
+    }
+    ...
+}
+</pre>
+<p>
+    For more information about saving preferences, read
+<a href="{@docRoot}training/basics/data-storage/shared-preferences.html">Saving Key-Value Sets</a>.
+</p>
+<!--
+    Stop Location Updates
+ -->
+<h2 id="StopUpdates">Stop Location Updates</h2>
+<p>
+    To stop location updates, save the state of the update flag in
+    {@link android.support.v4.app.FragmentActivity#onPause onPause()}, and stop updates in
+    {@link android.support.v4.app.FragmentActivity#onStop onStop()} by calling
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#removeLocationUpdates(com.google.android.gms.location.LocationListener)">removeLocationUpdates(LocationListener)</a></code>.
+    For example:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity implements
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationListener {
+    ...
+    /*
+     * Called when the Activity is no longer visible at all.
+     * Stop updates and disconnect.
+     */
+    &#64;Override
+    protected void onStop() {
+        // If the client is connected
+        if (mLocationClient.isConnected()) {
+            stopPeriodicUpdates();
+        }
+        /*
+         * After disconnect() is called, the client is
+         * considered "dead".
+         */
+        mLocationClient.disconnect();
+        super.onStop();
+    }
+    ...
+}
+</pre>
+<p>
+    You now have the basic structure of an app that requests and receives periodic location updates.
+    You can combine the features described in this lesson with the geofencing, activity recognition,
+    or reverse geocoding features described in other lessons in this class.
+</p>
+<p>
+    The next lesson, <a href="display-address.html">Displaying a Location Address</a>, shows you how
+    to use the current location to display the current street address.
+</p>

@@ -1,0 +1,280 @@
+page.title=Displaying a Location Address
+
+trainingnavtop=true
+
+@jd:body
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#DefineTask">Define the Address Lookup Task</a></li>
+  <li><a href="#DisplayResults">Define a Method to Display the Results</a></li>
+  <li><a href="#RunTask">Run the Lookup Task</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}google/play-services/setup.html">Setup Google Play Services SDK</a>
+    </li>
+    <li>
+        <a href="retrieve-current.html">Retrieving the Current Location</a>
+    </li>
+    <li>
+        <a href="receive-location-updates.html">Receiving Location Updates</a>
+    </li>
+</ul>
+<h2>Try it out</h2>
+
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/LocationUpdates.zip" class="button">Download
+  the sample app</a>
+<p class="filename">LocationUpdates.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>
+    The lessons <a href="retrieve-current.html">Retrieving the Current Location</a> and
+    <a href="receive-location-updates.html">Receiving Location Updates</a> describe how to get the
+    user's current location in the form of a {@link android.location.Location} object that
+    contains latitude and longitude coordinates. Although latitude and longitude are useful for
+    calculating distance or displaying a map position, in many cases the address of the location is
+    more useful.
+</p>
+<p>
+    The Android platform API provides a feature that returns an estimated street addresses for
+    latitude and longitude values. This lesson shows you how to use this address lookup feature.
+</p>
+<p class="note">
+    <strong>Note:</strong> Address lookup requires a backend service that is not included in the
+    core Android framework. If this backend service is not available,
+    {@link android.location.Geocoder#getFromLocation Geocoder.getFromLocation()} returns an empty
+    list. The helper method {@link android.location.Geocoder#isPresent isPresent()}, available
+    in API level 9 and later, checks to see if the backend service is available.
+</p>
+<p>
+    The snippets in the following sections assume that your app has already retrieved the
+    current location and stored it as a {@link android.location.Location} object in the global
+    variable {@code mLocation}.
+</p>
+<!--
+    Define the address lookup task
+-->
+<h2 id="DefineTask">Define the Address Lookup Task</h2>
+<p>
+To get an address for a given latitude and longitude, call
+{@link android.location.Geocoder#getFromLocation Geocoder.getFromLocation()}, which returns a
+list of addresses. The method is synchronous, and may take a long time to do its work, so you
+should call the method from the {@link android.os.AsyncTask#doInBackground
+doInBackground()} method of an {@link android.os.AsyncTask}.
+</p>
+<p>
+While your app is getting the address, display an indeterminate activity
+indicator to show that your app is working in the background. Set the indicator's initial state
+to {@code android:visibility="gone"}, to make it invisible and remove it from the layout
+hierarchy. When you start the address lookup, you set its visibility to "visible".
+</p>
+<p>
+The following snippet shows how to add an indeterminate {@link android.widget.ProgressBar} to
+your layout file:
+</p>
+<pre>
+&lt;ProgressBar
+android:id="&#64;+id/address_progress"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_centerHorizontal="true"
+android:indeterminate="true"
+android:visibility="gone" /&gt;
+</pre>
+<p>
+To create the background task, define a subclass of {@link android.os.AsyncTask} that calls
+{@link android.location.Geocoder#getFromLocation getFromLocation()} and returns an address.
+Define a {@link android.widget.TextView} object {@code mAddress} to contain the returned
+address, and a {@link android.widget.ProgressBar} object that allows you to control the
+indeterminate activity indicator. For example:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity {
+    ...
+    private TextView mAddress;
+    private ProgressBar mActivityIndicator;
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ...
+    mAddress = (TextView) findViewById(R.id.address);
+    mActivityIndicator =
+            (ProgressBar) findViewById(R.id.address_progress);
+    }
+    ...
+    /**
+    * A subclass of AsyncTask that calls getFromLocation() in the
+    * background. The class definition has these generic types:
+    * Location - A {@link android.location.Location} object containing
+    * the current location.
+    * Void     - indicates that progress units are not used
+    * String   - An address passed to onPostExecute()
+    */
+    private class GetAddressTask extends
+            AsyncTask&lt;Location, Void, String&gt; {
+        Context mContext;
+        public GetAddressTask(Context context) {
+            super();
+            mContext = context;
+        }
+        ...
+        /**
+         * Get a Geocoder instance, get the latitude and longitude
+         * look up the address, and return it
+         *
+         * &#64;params params One or more Location objects
+         * &#64;return A string containing the address of the current
+         * location, or an empty string if no address can be found,
+         * or an error message
+         */
+        &#64;Override
+        protected String doInBackground(Location... params) {
+            Geocoder geocoder =
+                    new Geocoder(mContext, Locale.getDefault());
+            // Get the current location from the input parameter list
+            Location loc = params[0];
+            // Create a list to contain the result address
+            List&lt;Address&gt; addresses = null;
+            try {
+                /*
+                 * Return 1 address.
+                 */
+                addresses = geocoder.getFromLocation(loc.getLatitude(),
+                        loc.getLongitude(), 1);
+            } catch (IOException e1) {
+            Log.e("LocationSampleActivity",
+                    "IO Exception in getFromLocation()");
+            e1.printStackTrace();
+            return ("IO Exception trying to get address");
+            } catch (IllegalArgumentException e2) {
+            // Error message to post in the log
+            String errorString = "Illegal arguments " +
+                    Double.toString(loc.getLatitude()) +
+                    " , " +
+                    Double.toString(loc.getLongitude()) +
+                    " passed to address service";
+            Log.e("LocationSampleActivity", errorString);
+            e2.printStackTrace();
+            return errorString;
+            }
+            // If the reverse geocode returned an address
+            if (addresses != null &amp;&amp; addresses.size() &gt; 0) {
+                // Get the first address
+                Address address = addresses.get(0);
+                /*
+                 * Format the first line of address (if available),
+                 * city, and country name.
+                 */
+                String addressText = String.format(
+                        "&#037;s, &#037;s, &#037;s",
+                        // If there's a street address, add it
+                        address.getMaxAddressLineIndex() &gt; 0 ?
+                                address.getAddressLine(0) : "",
+                        // Locality is usually a city
+                        address.getLocality(),
+                        // The country of the address
+                        address.getCountryName());
+                // Return the text
+                return addressText;
+            } else {
+                return "No address found";
+            }
+        }
+        ...
+    }
+    ...
+}
+</pre>
+<p>
+The next section shows you how to display the address in the user interface.
+</p>
+<!-- Define a method to display the address -->
+<h2 id="DisplayResults">Define a Method to Display the Results</h2>
+<p>
+    {@link android.os.AsyncTask#doInBackground doInBackground()} returns the result of the address
+    lookup as a {@link java.lang.String}. This value is passed to
+    {@link android.os.AsyncTask#onPostExecute onPostExecute()}, where you do further processing
+    on the results. Since {@link android.os.AsyncTask#onPostExecute onPostExecute()}
+    runs on the UI thread, it can update the user interface; for example, it can turn off the
+    activity indicator and display the results to the user:
+</p>
+<pre>
+    private class GetAddressTask extends
+            AsyncTask&lt;Location, Void, String&gt; {
+        ...
+        /**
+         * A method that's called once doInBackground() completes. Turn
+         * off the indeterminate activity indicator and set
+         * the text of the UI element that shows the address. If the
+         * lookup failed, display the error message.
+         */
+        &#64;Override
+        protected void onPostExecute(String address) {
+            // Set activity indicator visibility to "gone"
+            mActivityIndicator.setVisibility(View.GONE);
+            // Display the results of the lookup.
+            mAddress.setText(address);
+        }
+        ...
+    }
+</pre>
+<p>
+    The final step is to run the address lookup.
+</p>
+<!-- Get and display the address -->
+<h2 id="RunTask">Run the Lookup Task</h2>
+<p>
+    To get the address, call {@link android.os.AsyncTask#execute execute()}. For example, the
+    following snippet starts the address lookup when the user clicks the "Get Address" button:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity {
+    ...
+    /**
+     * The "Get Address" button in the UI is defined with
+     * android:onClick="getAddress". The method is invoked whenever the
+     * user clicks the button.
+     *
+     * &#64;param v The view object associated with this method,
+     * in this case a Button.
+     */
+    public void getAddress(View v) {
+        // Ensure that a Geocoder services is available
+        if (Build.VERSION.SDK_INT &gt;=
+                Build.VERSION_CODES.GINGERBREAD
+                            &amp;&amp;
+                Geocoder.isPresent()) {
+            // Show the activity indicator
+            mActivityIndicator.setVisibility(View.VISIBLE);
+            /*
+             * Reverse geocoding is long-running and synchronous.
+             * Run it on a background thread.
+             * Pass the current location to the background task.
+             * When the task finishes,
+             * onPostExecute() displays the address.
+             */
+            (new GetAddressTask(this)).execute(mLocation);
+        }
+        ...
+    }
+    ...
+}
+</pre>
+<p>
+    The next lesson, <a href="geofencing.html">Creating and Monitoring Geofences</a>, demonstrates
+    how to define locations of interest called <b>geofences</b> and how to use geofence monitoring
+    to detect the user's proximity to a location of interest.
+</p>
