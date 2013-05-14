@@ -251,11 +251,11 @@ public class ActivityStackSupervisor {
             return;
         }
         if ((sourceRecord == null && getLastStack() == mHomeStack) ||
-                (sourceRecord != null && sourceRecord.isHomeActivity)) {
+                (sourceRecord != null && sourceRecord.isHomeActivity())) {
             if (r == null) {
                 r = stack.topRunningActivityLocked(null);
             }
-            if (r != null && !r.isHomeActivity && r.isRootActivity()) {
+            if (r != null && !r.isHomeActivity() && r.isRootActivity()) {
                 r.mLaunchHomeTaskNext = true;
             }
         }
@@ -839,7 +839,7 @@ public class ActivityStackSupervisor {
                         r.userId, System.identityHashCode(r),
                         r.task.taskId, r.shortComponentName);
             }
-            if (r.isHomeActivity) {
+            if (r.isHomeActivity()) {
                 mService.mHomeProcess = app;
             }
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
@@ -1160,7 +1160,7 @@ public class ActivityStackSupervisor {
     }
 
     ActivityStack getCorrectStack(ActivityRecord r) {
-        if (!r.isHomeActivity || (r.task != null && !r.task.isHomeTask())) {
+        if (r.isApplicationActivity() || (r.task != null && r.task.isApplicationTask())) {
             int stackNdx;
             for (stackNdx = mStacks.size() - 1; stackNdx > 0; --stackNdx) {
                 if (mStacks.get(stackNdx).mCurrentUser == mCurrentUser) {
@@ -1182,7 +1182,7 @@ public class ActivityStackSupervisor {
         if (r == null) {
             return;
         }
-        if (r.isHomeActivity || (r.task != null && r.task.isHomeTask())) {
+        if (!r.isApplicationActivity() || (r.task != null && !r.task.isApplicationTask())) {
             if (mStackState != STACK_STATE_HOME_IN_FRONT) {
                 mStackState = STACK_STATE_HOME_TO_FRONT;
             }
