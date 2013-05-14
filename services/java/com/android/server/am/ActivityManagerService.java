@@ -1576,6 +1576,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (this) {
                 mService = m;
                 mLooper = Looper.myLooper();
+                Watchdog.getInstance().addThread(new Handler(mLooper), getName());
                 notifyAll();
             }
 

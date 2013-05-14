@@ -41,6 +41,7 @@ import com.android.server.DeviceStorageMonitorService;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 
+import com.android.server.Watchdog;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -1093,6 +1094,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             mHandlerThread.start();
             mHandler = new PackageHandler(mHandlerThread.getLooper());
+            Watchdog.getInstance().addThread(mHandler, mHandlerThread.getName());
 
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");
