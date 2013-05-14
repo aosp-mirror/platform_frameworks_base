@@ -1,15 +1,9 @@
-page.title=GCM: Getting Started
+page.title=Getting Started with GCM
 page.tags="cloud","push","messaging"
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
-
-<h2>Quickview</h2>
-
-<ul>
-<li>Walk through the steps of creating a GCM app.</li>
-</ul>
 
 
 <h2>In this document</h2>
@@ -18,15 +12,37 @@ page.tags="cloud","push","messaging"
 <li><a href="#create-proj">Creating a Google API Project</a></li>
 <li><a href="#gcm-service">Enabling the GCM Service</a></li>
 <li><a href="#access-key">Obtaining an API Key</a></li>
-<li><a href="#libs">Installing the Helper Libraries</a></li>
 <li><a href="#android-app">Writing the Android Application</a>
-<li><a href="#server-app">Writing the Server-side Application</a> </li>
+</ol>
+
+<h2>See Also</h2>
+
+<ol class="toc">
+<li><a href="https://code.google.com/apis/console">Google APIs Console page</a></li>
+<li><a href="{@docRoot}google/gcm/helper.html">Using the GCM Helper Libraries</a></li>
+<li><a href="https://services.google.com/fb/forms/gcm/" class="external-link" target="_android">CCS and User Notifications Signup Form</a></li>
 </ol>
 
 </div>
 </div>
 
-<p>This document describes how to write an Android application and the  server-side logic, using the client and server <a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">helper libraries</a> provided by GCM.</p>
+<p>The sections below guide you through the process of setting up a GCM
+implementation.
+Before you start, make sure to <a href="/google/play-services/setup.html">set up
+the Google Play Services SDK</a>. You need this SDK to use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> methods. Strictly speaking, the only thing you absolutely need this API for is upstream (device-to-cloud) messaging, but it also offers a streamlined registration API that is recommended.</p>
+
+
+<!--the basic steps are:
+
+<ul>
+<li>Creating a Google APIs Project</li>
+<li>Setting up GCM in your apps</li>
+<li>Integrating </li>
+
+<p>Note that a full GCM implementation requires a server-side implementation, in addition to the client implementation in your app. For complete information, make sure to read the <a href="/google/gcm/index.html">Google Cloud Messaging documentation</a>.
+--> 
+
+
 
 
 <h2 id="create-proj">Creating a Google API project</h2>
@@ -58,174 +74,260 @@ page.tags="cloud","push","messaging"
 <ol>
   <li> In the main Google APIs Console page, select <strong>API Access</strong>. You will see a screen that resembles the following:</li><br />
 
-<div style="width:408px;margin:1.5em;">
-<div style="width:410px;border:1px solid #DDD;">
+
 <img src="{@docRoot}images/gcm/gcm-api-access.png" style="width:400px;padding:4px;margin-bottom:0em;">
-</div>
-</div>
+
 
   <li>Click  <strong>Create new Server key</strong>. Either a server key or a browser key should work. The advantage to using a server key is that it allows you to whitelist IP addresses. The following screen appears:</li><br />
 
-<div style="width:408px;margin:1.5em;">
-<div style="width:410px;border:1px solid #DDD;">
+
 <img src="{@docRoot}images/gcm/gcm-config-server-key.png" style="width:400px;padding:4px;margin-bottom:0em;">
-</div>
-</div>
+
   
   <li>Click <strong>Create</strong>:</li><br />
   
-<div style="width:408px;margin:1.5em;">
-<div style="width:410px;border:1px solid #DDD;">
+
 <img src="{@docRoot}images/gcm/gcm-api-key.png" style="width:400px;padding:4px;margin-bottom:0em;">
-</div>
-</div>
+
 
 
 </ol>
 <p> Take note of the <strong>API key</strong> value (<code>YourKeyWillBeShownHere</code>) in this example, as it will be used later on.</p>
 <p class="note"><strong>Note:</strong> If you need to rotate the key, click  <strong>Generate new key</strong>. A new key  will be created while the old one will still be active for up to 24 hours. If you want to get rid of the old key immediately (for example, if you feel it was compromised), click <strong>Delete key</strong>.</p>
 
-<h2 id="libs">Install the Helper Libraries</h2>
-<p>To perform the steps described in the following sections, you must first install the 
-<a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">helper libraries</a>. Note that while using the helper libraries is recommended, it is not required. See the <a href="gcm.html#writing_apps">GCM Architectural Overview</a> for a description of how to write apps without using the helper libraries.
-
-<p>To install the helper libraries, choose 
-<strong>Extras &gt; Google Cloud Messaging for Android Library</strong>
-from the SDK Manager. This creates a <code>gcm</code> directory under
-<code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these
-subdirectories: <code>gcm-client</code>, <code>gcm-server</code>,
-<code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>,
-and <code>samples/gcm-demo-appengine</code>.</p>
-
-<p class="note"><strong>Note:</strong> If you don't see <strong>Extras &gt; Google Cloud Messaging for Android Library</strong> in the SDK Manager, make sure you are running version 20 or higher. Be sure to restart the SDK Manager after updating it.</p>
 
 <h2 id="android-app">Writing the Android Application</h2>
 <p>This section describes the steps involved in writing an Android application that uses GCM.</p>
-<h4>Step 1: Copy the gcm.jar file into your application classpath</h4>
-<p> To write your Android application, first copy the <code>gcm.jar</code> file from the SDK's <code>gcm-client/dist</code> directory to your application classpath.</p>
-<h4>Step 2: Make the following changes in the application's Android manifest</h4>
-<ol>
-  <li>GCM requires Android 2.2 or later, so if your application cannot work without GCM, add the following line, where <em>xx</em> is the latest target SDK version:</li>
 
-<pre class="prettyprint pretty-xml">&lt;uses-sdk android:minSdkVersion=&quot;8&quot; android:targetSdkVersion=&quot;xx&quot;/&gt;</pre>
-
-  <li>Declare and use a custom permission so only this application can receive GCM messages:<br>
-  </li>
-
-<pre class="prettyprint pretty-xml">&lt;permission android:name=&quot;my_app_package.permission.C2D_MESSAGE&quot; android:protectionLevel=&quot;signature&quot; /&gt;
-&lt;uses-permission android:name=&quot;my_app_package.permission.C2D_MESSAGE&quot; /&gt; </pre>
-<p> This permission must be called <code>my_app_package.permission.C2D_MESSAGE</code> (where <code>my_app_package</code> is the package name of your app as defined by the manifest tag), otherwise it will not  work.</p>
-<p class="note"><strong>Note:</strong> This permission is not required if you are targeting your application to 4.1 or above (i.e., minSdkVersion 16)</p>
-
-  <li>Add the following permissions:</li>
-
-<pre class="prettyprint pretty-xml">&lt;!-- App receives GCM messages. --&gt;
-&lt;uses-permission android:name=&quot;com.google.android.c2dm.permission.RECEIVE&quot; /&gt;
-&lt;!-- GCM connects to Google Services. --&gt;
-&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt; 
-&lt;!-- GCM requires a Google account. --&gt;
-&lt;uses-permission android:name=&quot;android.permission.GET_ACCOUNTS&quot; /&gt;
-&lt;!-- Keeps the processor from sleeping when a message is received. --&gt;
-&lt;uses-permission android:name=&quot;android.permission.WAKE_LOCK&quot; /&gt;</pre>
-
-  <li>Add the following broadcast receiver:</li>
-
-<pre class="prettyprint pretty-xml">&lt;receiver android:name=&quot;com.google.android.gcm.GCMBroadcastReceiver&quot; android:permission=&quot;com.google.android.c2dm.permission.SEND&quot; &gt;
-  &lt;intent-filter&gt;
-    &lt;action android:name=&quot;com.google.android.c2dm.intent.RECEIVE&quot; /&gt;
-    &lt;action android:name=&quot;com.google.android.c2dm.intent.REGISTRATION&quot; /&gt;
-    &lt;category android:name=&quot;my_app_package&quot; /&gt;
-  &lt;/intent-filter&gt;
-&lt;/receiver&gt;</pre>
-<p> This broadcast receiver is responsible for handling the 2 intents that can be sent by GCM (<code>com.google.android.c2dm.intent.RECEIVE</code> and <code>com.google.android.c2dm.intent.REGISTRATION</code>) and should be defined in the manifest (rather than programmatically) so that these intents can be received even if the application is not running. By setting the <code>com.google.android.c2dm.permission.SEND</code> permission, you are ensuring that only intents sent by the GCM system framework are sent to the receiver (a regular application cannot issue intents with that permission).</p>
-<p> Notice that <code>android:name</code> in the category tag must be replaced by your application's package name (and the category tag  is not required for applications targeted to minSdkVersion 16 and higher).<br>
-  </p>
-
-  <li>Add the following intent service:</li>
-
-
- <pre class="prettyprint pretty-xml">&lt;service android:name=&quot;.GCMIntentService&quot; /&gt;</pre>
-
-</ol>
-<p>This intent service will be called by the <code>GCMBroadcastReceiver</code> (which is provided by the GCM library), as shown in the next step. It must be a subclass of <code>com.google.android.gcm.GCMBaseIntentService</code>, must contain a public constructor, and should be named <code>my_app_package.GCMIntentService</code> (unless you use a subclass of <code>GCMBroadcastReceiver</code> that overrides the method used to name the service).</p>
-
-<p>The intent service must also define its sender ID(s). It does this as follows:</p>
+<h4 id="manifest">Step 1: Make the following changes in the application's Android manifest</h4>
 <ul>
-  <li>If the value is static, the service's default constructor should call <code>super(senderIds)</code>.</li>
-  <li>If the value is dynamic, the service should override the <code>getSenderIds()</code> method.</li>
+  <li>The <code>com.google.android.c2dm.permission.RECEIVE</code> permission so the Android application can register and receive messages.</li>
+  <li>The <code>android.permission.INTERNET</code> permission so the Android application can send the registration ID to the 3rd party server.</li>
+  <li>The <code>android.permission.GET_ACCOUNTS</code> permission as GCM requires a Google account (necessary only if if the device is running a version lower than Android 4.0.4)</li>
+  <li>The <code>android.permission.WAKE_LOCK</code> permission so the application can keep the processor from sleeping when a message is received. Optional&mdash;use only if the app wants to keep the device from sleeping.</li>
+  <li>An <code>applicationPackage + &quot;.permission.C2D_MESSAGE</code> permission to prevent other Android applications from registering and receiving the Android application's
+messages. The permission name must exactly match this pattern&mdash;otherwise the Android application will not receive the messages.</li>
+   <li>A receiver for <code>com.google.android.c2dm.intent.RECEIVE</code>, with the category set
+as <code>applicationPackage</code>. The receiver should require the <code>com.google.android.c2dm.SEND</code> permission, so that only the GCM
+Framework can send a message to it. Note that the receiving
+of messages is implemented as an <a href="{@docRoot}guide/components/intents-filters.html">intent</a>.</li>
+  <li>An intent service to handle the intents received by the broadcast receiver. Optional.</li>
+  <li>If the GCM feature is critical to the Android application's function, be sure to
+set <code>android:minSdkVersion=&quot;8&quot;</code> in the manifest. This
+ensures that the Android application cannot be installed in an environment in which it
+could not run properly. </li>
 </ul>
 
+<p>Here are excerpts from a manifest that supports GCM:</p>
 
-<h4>Step 3: Write the my_app_package.GCMIntentService class</h4>
+<pre class="prettyprint pretty-xml">
+&lt;manifest package="com.example.gcm" ...&gt;
 
-<p>Next write the <code>my_app_package.GCMIntentService</code> class, overriding the following callback methods (which are called by <code>GCMBroadcastReceiver</code>):<br>
-</p>
+    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/&gt;
+    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+    &lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;
+    &lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;
+    &lt;uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" /&gt;
+
+    &lt;permission android:name="com.example.gcm.permission.C2D_MESSAGE" 
+        android:protectionLevel="signature" /&gt;
+    &lt;uses-permission android:name="com.example.gcm.permission.C2D_MESSAGE" /&gt;
+
+    &lt;application ...&gt;
+        &lt;receiver
+            android:name=".MyBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" &gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="com.google.android.c2dm.intent.RECEIVE" /&gt;
+                &lt;category android:name="com.example.gcm" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/receiver&gt;
+        &lt;service android:name=".MyIntentService" /&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;
+</pre>
+
+
+<h4>Step 2: Register for GCM</h4>
+
+<p>An Android application running on a mobile device registers to receive messages by calling 
+the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> method 
+<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#register">{@code register(senderID...)}</a>.
+This method registers the application for GCM and returns the registration ID. This streamlined approach replaces the previous
+GCM registration process.</p>
+
+<h4> Step 3: Write your application</h4>
+
+<p>Finally, write your application. GCM offers a variety of ways to get the job done:</p>
+
 <ul>
-  <li><code>onRegistered(Context context, String regId)</code>: Called after a registration intent is received, passes the registration ID assigned by GCM to that device/application pair as parameter. Typically, you should send the <code>regid</code> to your server so it can use it to send messages to this device.</li>
-  <li><code>onUnregistered(Context context, String regId)</code>: Called after the device has been unregistered from GCM. Typically, you should send the <code>regid</code> to the server so it unregisters the device.</li>
-  <li><code>onMessage(Context context, Intent intent)</code>: Called when your server sends a message to GCM, and GCM delivers it to the device. If the message has a payload, its contents are available as extras in the intent.</li>
-  <li><code>onError(Context context, String errorId)</code>: Called when the device tries to register or unregister, but GCM returned an error. Typically, there is nothing to be done other than evaluating the error (returned by errorId) and trying to fix the problem.</li>
-  <li> <code>onRecoverableError(Context context, String errorId)</code>: Called when the device tries to register or unregister, but the GCM servers are unavailable. The GCM library will retry the operation using exponential backup, unless this method is overridden and returns false. This method is optional and should be overridden only if you want to display the message to the user or cancel the retry attempts. 
-  </li>
+  <li>For your messaging server, you can either use the new <a href="ccs.html">GCM Cloud Connection Server</a> (CCS), the older <a href="gcm.html">GCM HTTP server</a>, or both in tandem.</li>
+  <li>To write your client application, you can use any of the following:
+    <ul>
+      <li>The helper libraries, which are described in the <a href="{@docRoot}google/gcm/demo.html">Demo App Tutorial</a> and <a href="{@docRoot}google/gcm/helper.html">Using the GCM Helper Libraries</a>.</li>
+      <li>The approach described in the <a href="{@docRoot}google/gcm/gcm.html#writing_apps">GCM Architectural Overview</a>.</li>
+      <li>Regardless, you must use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs if you are doing upstream (device-to-cloud) messaging. Even if you are not doing upstream messaging, we recommend that you use this API to take advantage of the streamlined registration process&mdash;described above and shown in the following sample.</li>
+</ul>
+</li>
+  
 </ul>
 
-<p class="note"><strong>Note:</strong> The methods above run in the intent service's thread and hence are free to make network calls without the risk of blocking the UI thread.</p>
+<h5 id="gs_example">Example</h5>
 
-<h4> Step 4: Write your application's main activity</h4>
-Add the following import statement in your application's main activity:
-<pre class="prettyprint pretty-java">import com.google.android.gcm.GCMRegistrar;</pre>
-<p> In the <code>onCreate()</code> method, add the following code:</p>
-<pre class="prettyprint pretty-java">GCMRegistrar.checkDevice(this);
-GCMRegistrar.checkManifest(this);
-final String regId = GCMRegistrar.getRegistrationId(this);
-if (regId.equals("")) {
-  GCMRegistrar.register(this, SENDER_ID);
-} else {
-  Log.v(TAG, "Already registered");
+<p>Here is a sample application that illustrates how to use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs. In this example, the sender is a <a href="{@docRoot}google/gcm/ccs.html">CCS</a> echo server. The sample consists of a main Activity ({@code DemoActivity}) and a broadcast receiver ({@code GcmBroadcastReceiver}).</p>
+
+<p>An Android application needs to register with GCM servers before it can receive messages. So in its {@code onCreate()} method, {@code DemoActivity} checks to see whether the app is registered with GCM and with the server:</p>
+
+<pre>public class DemoActivity extends Activity {
+
+    public static final String EXTRA_MESSAGE = "message";
+    public static final String PROPERTY_REG_ID = "registration_id";
+    /**
+     * You can use your own project ID instead. This sender is a test CCS 
+     * echo server.
+     */
+    String GCM_SENDER_ID = "Your-Sender-ID";
+
+    // Tag for log messages.
+    static final String TAG = "GCMDemo";
+
+    TextView mDisplay;
+    GoogleCloudMessaging gcm;
+    AtomicInteger msgId = new AtomicInteger();
+    SharedPreferences prefs;
+    String regid;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Make sure the app is registered with GCM and with the server
+        prefs = getSharedPreferences(DemoActivity.class.getSimpleName(), 
+                Context.MODE_PRIVATE);
+        setContentView(R.layout.main);
+
+        mDisplay = (TextView) findViewById(R.id.display);
+
+        regid = prefs.getString(PROPERTY_REG_ID, null);
+ 
+        // If there is no registration ID, the app isn't registered.
+        // Call registerBackground() to register it.
+        if (regid == null) {
+            registerBackground();
+        }
+
+        gcm = GoogleCloudMessaging.getInstance(this);
+    }</pre>
+
+<p>If the app isn't registered, {@code DemoActivity} calls the following {@code registerBackground()} method to register it. Note that because GCM methods are blocking, this has to take place on a background thread. This sample uses {@link android.os.AsyncTask} to accomplish this:</p>
+
+<pre>private void registerBackground() {
+    new AsyncTask<Void, Void, String>() {
+        &#64;Override
+        protected String doInBackground(Void... params) {
+            String msg = "";
+            try {
+                regid = gcm.register(GCM_SENDER_ID);
+                msg = "Device registered, registration id=" + regid;
+
+                // You should send the registration ID to your server over HTTP, 
+                // so it can use GCM/HTTP or CCS to send messages to your app.
+
+                // For this demo: we don't need to send it because the device  
+                // will send upstream messages to a server that will echo back 
+                // the message using the 'from' address in the message. 
+	
+                // Save the regid for future use - no need to register again.
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(PROPERTY_REG_ID, regid);
+                editor.commit();
+            } catch (IOException ex) {
+                msg = "Error :" + ex.getMessage();
+            }
+            return msg;
+        }
+        // Once registration is done, display the registration status
+        // string in the Activity's UI.
+        &#64;Override
+        protected void onPostExecute(String msg) {
+            mDisplay.append(msg + "\n");
+        }
+    }.execute(null, null, null);
 }</pre>
-<p>The <code>checkDevice()</code> method verifies that the device supports GCM and throws an exception if it does not (for instance, if it is an emulator that does not contain the Google APIs). Similarly, the <code>checkManifest()</code> method verifies that the application manifest contains meets all the requirements described in <a href="#android-app">Writing the Android Application</a> (this method is only necessary when you are developing the application; once the application is ready to be published, you can remove it).</p>
 
-<p>Once the sanity checks are done, the device calls <code>GCMRegsistrar.register()</code> to register the device, passing the <code>SENDER_ID</code> you got when you signed up for GCM. But since the <code>GCMRegistrar</code> singleton keeps track of the registration ID upon the arrival of registration intents, you can call <code>GCMRegistrar.getRegistrationId()</code> first to check if the device is already registered.</p>
-<p class="note"><strong>Note:</strong> It is possible that the device was successfully registered to GCM but failed to send the registration ID to your server, in which case you should retry. See <a href="adv.html#reg-state">Advanced Topics</a> for more details on how to handle this scenario.</p>
+<p>When the user clicks the app's <strong>Echo</strong> button, the app generates the necessary XMPP stanza for the message, which it sends to the echo server:</p>
+<pre>public void onClick(final View view) {
+    if (view == findViewById(R.id.send)) {
+        new AsyncTask<Void, Void, String>() {
+            &#64;Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                try {
+                    Bundle data = new Bundle();
+                    // data is a key-value pair.
+                    data.putString("hello", "world");
+                    String id = Integer.toString(msgId.incrementAndGet());
+                    gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, data);
+                    msg = "Sending message";
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+                }
+                return msg;
+            }
 
-<h2 id="server-app">Writing the Server-side Application</h2>
+            &#64;Override
+            protected void onPostExecute(String msg) {
+                // Displays the text "Sending message"
+                mDisplay.append(msg + "\n");
+            }
+        }.execute(null, null, null);
+    }
+}</pre>
 
-<p>To write the server-side application:</p>
-<ol>
-  <li> Copy the <code>gcm-server.jar</code> file from the SDK's <code>gcm-server/dist</code> directory to your server classpath.</li>
-  <li>Create a servlet (or other server-side mechanism) that can be used by the Android application to send the registration ID received by GCM . The application might also need to send other information&mdash;such as the user's email address or username&mdash;so that the server can associate the registration ID with the user owning the device.</li>
-  <li>Similarly, create a servlet used to unregister registration IDs.<br>
-    </li>
-<li>When the server needs to send a message to the registration ID, it can use the <code>com.google.android.gcm.server.Sender</code> helper class from the GCM library. For example:</li>
-</ol>
+<p>As described above in <a href="#manifest">Step 1</a>, the app includes a broadcast receiver for the <code>com.google.android.c2dm.intent.RECEIVE</code> intent. This is the mechanism GCM uses to deliver messages. When {@code onClick()} calls {@code gcm.send()}, it triggers the broadcast receiver's {@code onReceive()} method, which has the responsibility of handling the GCM message. In this sample the receiver's {@code onReceive()} method calls {@code sendNotification()} to put the message into a notification:</p>
 
-<pre class="prettyprint pretty-java">import com.google.android.gcm.server.*;
+<pre>public class GcmBroadcastReceiver extends BroadcastReceiver {
+    static final String TAG = "GCMDemo";
+    public static final int NOTIFICATION_ID = 1;
+    private NotificationManager mNotificationManager;
+    NotificationCompat.Builder builder;
+    Context ctx;
+    
 
-Sender sender = new Sender(myApiKey);
-Message message = new Message.Builder().build();
-MulticastResult result = sender.send(message, devices, 5);</pre>
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
+        ctx = context;
+        String messageType = gcm.getMessageType(intent);
+        if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+            sendNotification("Send error: " + intent.getExtras().toString());
+        } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+            sendNotification("Deleted messages on server: " + 
+                    intent.getExtras().toString());
+        } else {
+            sendNotification("Received: " + intent.getExtras().toString());
+        }
+        setResultCode(Activity.RESULT_OK);
+    }
 
-<p> The snippet above does the following:
-<ul>
-<li>Creates a <code>Sender</code> object using your project's API key.</li>
-<li>Creates a message using a given registration ID (the message builder also has methods to set all message parameters such as the collapse key and payload data).</li>
-<li>Sends the message with a maximum of 5 retry attempts (in case the GCM servers are unavailable), and stores the response on result. </li>
-</ul>
-<p>It's now necessary to parse the result and take the proper action in the following cases:</p>
-<ul>
-  <li>If the message was created but the result returned a canonical registration ID, it's necessary to replace the current registration ID with the canonical one.</li>
-  <li>If the returned error is <code>NotRegistered</code>, it's necessary to remove that registration ID, because the application was uninstalled from the device.</li>
-</ul>
-<p> Here's a code snippet that handles these 2 conditions:</p>
-<pre class="prettyprint pretty-java">
-if (result.getMessageId() != null) {
- String canonicalRegId = result.getCanonicalRegistrationId();
- if (canonicalRegId != null) {
-   // same device has more than on registration ID: update database
- }
-} else {
- String error = result.getErrorCodeName();
- if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
-   // application has been removed from device - unregister database
- }
+    // Put the GCM message into a notification and post it.
+    private void sendNotification(String msg) {
+      mNotificationManager = (NotificationManager)
+              ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+      
+      PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0,
+          new Intent(ctx, DemoActivity.class), 0);
+      
+      NotificationCompat.Builder mBuilder =
+          new NotificationCompat.Builder(ctx)
+          .setSmallIcon(R.drawable.ic_stat_notification)
+          .setContentTitle("GCM Notification")
+          .setStyle(new NotificationCompat.BigTextStyle()
+                     .bigText(msg))
+          .setContentText(msg);
+      
+     mBuilder.setContentIntent(contentIntent);
+     mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+    }
 }</pre>
