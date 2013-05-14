@@ -22,7 +22,7 @@ page.title=Preparing for Release
     <ol>
       <li><a href="{@docRoot}tools/publishing/publishing_overview.html">Publishing Overview</a></li>
       <li><a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a></li>
-      <li><a href="{@docRoot}distribute/googleplay/publish/preparing.html">Publishing Checklist for Google Play</a></li>
+      <li><a href="{@docRoot}distribute/googleplay/publish/preparing.html">Launch Checklist for Google Play</a></li>
     </ol>
   </div>
 </div>
@@ -353,7 +353,7 @@ done testing and you are satisfied that the release version of your application
 behaves correctly, you can release your application to users. For more information, see
 <a href="{@docRoot}tools/publishing/publishing_overview.html#publishing-release">Releasing Your
 Application to Users</a>. If you are publishing your application on Google Play, see
-<a href="{@docRoot}distribute/googleplay/publish/preparing.html">Publishing Checklist
+<a href="{@docRoot}distribute/googleplay/publish/preparing.html">Launch Checklist
 for Google Play</a>.</p>
 
 

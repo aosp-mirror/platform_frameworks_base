@@ -14,7 +14,8 @@
     <ul>
       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/register.html">Get Started</a></li>
       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/console.html">Developer Console</a></li>
-      <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/preparing.html">Publishing Checklist</a></li>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/localizing.html">Localization Checklist</a></li>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/preparing.html">Launch Checklist</a></li>
     </ul>
   </li>
   
