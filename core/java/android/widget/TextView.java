@@ -6198,7 +6198,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         BoringLayout.Metrics hintBoring = UNKNOWN_BORING;
 
         if (mTextDir == null) {
-            getTextDirectionHeuristic();
+            mTextDir = getTextDirectionHeuristic();
         }
 
         int des = -1;
@@ -8539,6 +8539,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return ims.mBatchEditNesting > 0;
         }
         return mEditor.mInBatchEditControllers;
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        mTextDir = getTextDirectionHeuristic();
     }
 
     TextDirectionHeuristic getTextDirectionHeuristic() {
