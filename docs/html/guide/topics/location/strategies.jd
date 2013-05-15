@@ -1,5 +1,5 @@
 page.title=Location Strategies
-page.tags="geolocation","maps","mapview"
+excludeFromSuggestions=true
 @jd:body
 
 <div id="tb-wrapper">
