@@ -1,0 +1,213 @@
+page.title=Android Studio Tips and Tricks
+
+@jd:body
+
+
+<p>If you're unfamiliar with the IntelliJ IDEA interface, you might be wondering
+how to accomplish some common tasks in Android Studio. This page provides some tips
+to help you get going.</p>
+
+<p>For complete user documentation for the IntelliJ IDEA interface
+(upon which Android Studio is based), refer to the
+<a href="http://www.jetbrains.com/idea/index.html">IntelliJ IDEA documentation</a>.</p>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/tools/project-layout.png" alt="" />
+  <p class="img-caption"><strong>Figure 1.</strong> Gradle project structure</p>
+</div>
+
+<h2 id="Project">Project Structure</h2>
+
+<p>When you create a new project in Android Studio (or
+<a href="{@docRoot}sdk/installing/migrate.html">migrate a project from Eclipse</a>),
+you'll notice that the project structure appears differently than you may be used to.
+As shown in figure 1, almost all your project files are now inside the {@code src/} directory,
+including resources and the manifest file.</p>
+
+<p>The new project structure is due to the switch to a Gradle-based build system. This structure
+provides more flexibility to the build process and will allow multiple build variants (a feature not
+yet fully implemented). Everything still behaves as you expect, but some of the files have moved
+around. For the most part, you should need to modify only the files under the {@code src/}
+directory. More information about the Gradle project structure is available in the
+<a href="http://tools.android.com/tech-docs/new-build-system/user-guide">Gradle
+Plugin User Guide</a>.</p>
+
+
+
+<h2 id="Basics">Basic Operations</h2>
+
+<p>The following topics describe how to perform
+some basic development tasks with Android Studio.</p>
+
+<h3>Creating virtual devices</h3>
+
+<p>All the capabilities of the <a href="{@docRoot}tools/devices/managing-avds.html">Android
+Virtual Device Manager</a> are accessible directly from
+the Android Studio interface. Click the <strong>Android Virtual Device Manager</strong>
+<img src="{@docRoot}images/tools/avd-manager-studio.png"
+style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar to open it and create
+new virtual devices for running your app in the emulator.</p>
+
+
+<h3>Installing SDK updates</h3>
+
+<p>The <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
+is also accessible to download new Android tools, platforms, and libraries
+for your app. Click the <strong>SDK Manager</strong>
+<img src="{@docRoot}images/tools/sdk-manager-studio.png"
+style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar to open it and check
+for updates.</p>
+
+
+<h3>Creating new files</h3>
+
+<p>You can quickly add new code and resource files by clicking the appropriate directory in the
+<strong>Project</strong> pane and pressing CTRL + N (CMD + N, on Mac). Based on the type of
+directory selected, Android Studio offers to create the appropriate file type.</p>
+
+<p>For example, if you select a layout directory, press CTRL + N, and select
+<strong>Layout resource file</strong>, a dialog opens so you can name the file (you can exclude
+the {@code .xml} suffix) and choose a root view element. The editor then switches to the layout
+design editor so you can begin designing your layout.</p>
+
+
+<h3>Creating layouts</h3>
+
+<p>Android Studio offers an advanced layout editor that allows you to drag-and-drop widgets
+into your layout and preview your layout while editing the XML.</p>
+
+<p>While editing in the <strong>Text</strong> view, you can preview the layout on devices by opening
+the <strong>Preview</strong> pane available on the right side of the window. Within the
+Preview pane, you can modify the preview by changing various options at the top of the pane, including
+the preview device, layout theme, platform version and more. To preview the layout on multiple
+devices simultaneously, select <strong>Preview All Screen Sizes</strong> from the device drop-down.
+</p>
+
+<p>You can switch to the graphical editor by clicking <strong>Design</strong> at the
+bottom of the window. While editing in the Design view, you can show and hide the
+widgets available to drag-and-drop by clicking <strong>Palette</strong> on the
+left side of the window. Clicking <strong>Designer</strong> on the right side of the window reveals
+a panel with a layout hierarchy and a list of properties for each view in the layout.</p>
+
+
+<h3>Debugging</h3>
+
+<p>When you build and run your app with Android Studio, you can view adb and device log messages
+(logcat) in the DDMS pane by clicking <strong>Android</strong> at the bottom of the window.</p>
+
+<p>If you want to debug your app with the <a
+href="{@docRoot}tools/help/monitor.html">Android Debug Monitor</a>, you can launch it by
+clicking <strong>Monitor</strong> <img src="{@docRoot}images/tools/monitor-studio.png"
+style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar. The Debug Monitor is where
+you can find the complete set of <a href="{@docRoot}tools/debugging/ddms.html">DDMS</a>
+tools for profiling your app, controlling device
+behaviors, and more. It also includes the Hierarchy Viewer tools to help
+<a href="{@docRoot}tools/debugging/debugging-ui.html">optimize your layouts</a>.</p>
+
+
+
+
+
+<h2 id="KeyCommands">Keyboard Commands</h2>
+
+<p>The following tables list keyboard shortcuts for common operations.</p>
+
+<p class="note"><strong>Note:</strong> If you're using Mac OS X, update your keymap to use
+the Mac OS X 10.5+ version keymaps under <strong>Android Studio > Preferences > Keymap</strong>.</p>
+
+
+
+<p class="table-caption"><strong>Table 1.</strong> Programming key commands</p>
+<table>
+<tr><th>Action</th><th>Android Studio Key Command</th></tr>
+
+<tr>
+  <td>Command look-up (autocomplete command name)</td>
+  <td>CTRL + SHIFT + A</td>
+</tr>
+
+<tr>
+  <td>Project quick fix</td>
+  <td>ALT + ENTER</td>
+</tr>
+
+<tr>
+  <td>Reformat code</td>
+  <td>CTRL + ALT + L (Win)<br>
+      OPTION + CMD + L (Mac)</td>
+</tr>
+
+<tr>
+  <td>Show docs for selected API</td>
+  <td>CTRL + Q (Win)<br>
+      F1 (Mac)</td>
+</tr>
+
+<tr>
+  <td>Show parameters for selected method</td>
+  <td>CTRL + P</td>
+</tr>
+
+<tr>
+  <td>Generate method</td>
+  <td>ALT + Insert (Win)<br>
+      CMD + N (Mac)</td>
+</tr>
+
+<tr>
+  <td>Jump to source</td>
+  <td>F4 (Win)<br>
+      CMD + down-arrow (Mac)</td>
+</tr>
+
+<tr>
+  <td>Delete line</td>
+  <td>CTRL + Y (Win)<br>
+      CMD + Backspace (Mac)</td>
+</tr>
+
+<tr>
+  <td>Search by symbol name</td>
+  <td>CTRL + ALT + SHIFT + N (Win)<br>
+      OPTION + CMD + O (Mac)</td>
+</tr>
+
+</table>
+
+
+
+
+<p class="table-caption"><strong>Table 2.</strong> Project and editor key commands</p>
+<table>
+<tr><th>Action</th><th>Android Studio Key Command</th></tr>
+
+<tr>
+  <td>Build</td>
+  <td>CTRL + F9 (Win)<br>
+      CMD + F9 (Mac)</td>
+</tr>
+
+<tr>
+  <td>Build and run</td>
+  <td>SHIFT + F10 (Win)<br>
+      CTRL + R (Mac)</td>
+</tr>
+
+<tr>
+  <td>Toggle project visibility</td>
+  <td>ALT + 1 (Win)<br>
+      CMD + 1 (Mac)</td>
+</tr>
+
+<tr>
+  <td>Navigate open tabs</td>
+  <td>ALT + left-arrow; ALT + right-arrow (Win)<br>
+      CTRL + left-arrow; CTRL + right-arrow (Mac)</td>
+</tr>
+
+</table>
+
+<p>For a complete keymap reference guide, see the <a
+href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA</a>
+documentation.</p>
+
