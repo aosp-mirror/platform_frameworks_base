@@ -3502,7 +3502,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (compareSignatures(ps.signatures.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Signature mismatch!");
-                deletePackageLI(pkg.packageName, null, true, 0, null, false);
+                deletePackageLI(pkg.packageName, null, true, null, null, 0, null, false);
                 ps = null;
             } else {
                 /*
@@ -8079,6 +8079,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             updateSettingsLI(newPackage,
                     installerPackageName,
+                    null, null,
                     res);
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
@@ -8087,7 +8088,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // delete the package data and cache directories that it created in
                 // scanPackageLocked, unless those directories existed before we even tried to
                 // install.
-                deletePackageLI(pkgName, UserHandle.ALL, false,
+                deletePackageLI(pkgName, UserHandle.ALL, false, null, null,
                         dataDirExists ? PackageManager.DELETE_KEEP_DATA : 0,
                                 res.removedInfo, true);
             }
@@ -8100,6 +8101,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         PackageParser.Package oldPackage;
         String pkgName = pkg.packageName;
+        int[] allUsers;
+        boolean[] perUserInstalled;
+
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
@@ -8110,19 +8114,28 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
                 return;
             }
+
+            // In case of rollback, remember per-user/profile install state
+            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            allUsers = sUserManager.getUserIds();
+            perUserInstalled = new boolean[allUsers.length];
+            for (int i = 0; i < allUsers.length; i++) {
+                perUserInstalled[i] = ps.getInstalled(allUsers[i]);
+            }
         }
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
             replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
-                    user, installerPackageName, res);
+                    user, allUsers, perUserInstalled, installerPackageName, res);
         } else {
             replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
-                    user, installerPackageName, res);
+                    user, allUsers, perUserInstalled, installerPackageName, res);
         }
     }
 
     private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
+            int[] allUsers, boolean[] perUserInstalled,
             String installerPackageName, PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         String pkgName = deletedPackage.packageName;
@@ -8139,7 +8152,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // First delete the existing package while retaining the data directory
-        if (!deletePackageLI(pkgName, null, true, PackageManager.DELETE_KEEP_DATA,
+        if (!deletePackageLI(pkgName, null, true, null, null, PackageManager.DELETE_KEEP_DATA,
                 res.removedInfo, true)) {
             // If the existing package wasn't successfully deleted
             res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
@@ -8157,6 +8170,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 updateSettingsLI(newPackage,
                         installerPackageName,
+                        allUsers, perUserInstalled,
                         res);
                 updatedSettings = true;
             }
@@ -8170,7 +8184,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if(updatedSettings) {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, rolling pack: " + pkgName);
                 deletePackageLI(
-                        pkgName, null, true,
+                        pkgName, null, true, allUsers, perUserInstalled,
                         PackageManager.DELETE_KEEP_DATA,
                                 res.removedInfo, true);
             }
@@ -8206,6 +8220,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
+            int[] allUsers, boolean[] perUserInstalled,
             String installerPackageName, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                 + ", old=" + deletedPackage);
@@ -8268,7 +8283,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 newPkgSetting.firstInstallTime = oldPkgSetting.firstInstallTime;
                 newPkgSetting.lastUpdateTime = System.currentTimeMillis();
             }
-            updateSettingsLI(newPackage, installerPackageName, res);
+            updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
             updatedSettings = true;
         }
 
@@ -8314,8 +8329,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private void updateSettingsLI(PackageParser.Package newPackage,
-            String installerPackageName, PackageInstalledInfo res) {
+    private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
+            int[] allUsers, boolean[] perUserInstalled,
+            PackageInstalledInfo res) {
         String pkgName = newPackage.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
@@ -8352,6 +8368,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                             ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT,
                                     userHandle, installerPackageName);
                         }
+                    }
+                    // Also convey the prior install/uninstall state
+                    if (allUsers != null && perUserInstalled != null) {
+                        for (int i = 0; i < allUsers.length; i++) {
+                            if (DEBUG_INSTALL) {
+                                Slog.d(TAG, "    user " + allUsers[i]
+                                        + " => " + perUserInstalled[i]);
+                            }
+                            ps.setInstalled(perUserInstalled[i], allUsers[i]);
+                        }
+                        // these install state changes will be persisted in the
+                        // upcoming call to mSettings.writeLPr().
                     }
                 }
             }
@@ -8651,12 +8679,27 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         boolean removedForAllUsers = false;
         boolean systemUpdate = false;
+
+        // for the uninstall-updates case and restricted profiles, remember the per-
+        // userhandle installed state
+        int[] allUsers;
+        boolean[] perUserInstalled;
+        synchronized (mPackages) {
+            PackageSetting ps = mSettings.mPackages.get(packageName);
+            allUsers = sUserManager.getUserIds();
+            perUserInstalled = new boolean[allUsers.length];
+            for (int i = 0; i < allUsers.length; i++) {
+                perUserInstalled[i] = ps.getInstalled(allUsers[i]);
+            }
+        }
+
         synchronized (mInstallLock) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             res = deletePackageLI(packageName,
                     (flags & PackageManager.DELETE_ALL_USERS) != 0
                             ? UserHandle.ALL : new UserHandle(userId),
-                    true, flags | REMOVE_CHATTY, info, true);
+                    true, allUsers, perUserInstalled,
+                    flags | REMOVE_CHATTY, info, true);
             systemUpdate = info.isRemovedPackageSystemUpdate;
             if (res && !systemUpdate && mPackages.get(packageName) == null) {
                 removedForAllUsers = true;
@@ -8735,8 +8778,9 @@ public class PackageManagerService extends IPackageManager.Stub {
      * make sure this flag is set for partially installed apps. If not its meaningless to
      * delete a partially installed application.
      */
-    private void removePackageDataLI(PackageSetting ps, PackageRemovedInfo outInfo,
-            int flags, boolean writeSettings) {
+    private void removePackageDataLI(PackageSetting ps,
+            int[] allUserHandles, boolean[] perUserInstalled,
+            PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = ps.name;
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + ps);
         removePackageLI(ps, (flags&REMOVE_CHATTY) != 0);
@@ -8772,6 +8816,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     clearPackagePreferredActivitiesLPw(deletedPs.name, UserHandle.USER_ALL);
                 }
+                // make sure to preserve per-user disabled state if this removal was just
+                // a downgrade of a system app to the factory package
+                if (allUserHandles != null && perUserInstalled != null) {
+                    if (DEBUG_REMOVE) {
+                        Slog.d(TAG, "Propagating install state across downgrade");
+                    }
+                    for (int i = 0; i < allUserHandles.length; i++) {
+                        if (DEBUG_REMOVE) {
+                            Slog.d(TAG, "    user " + allUserHandles[i]
+                                    + " => " + perUserInstalled[i]);
+                        }
+                        ps.setInstalled(perUserInstalled[i], allUserHandles[i]);
+                    }
+                }
             }
             // can downgrade to reader
             if (writeSettings) {
@@ -8790,7 +8848,10 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Tries to delete system package.
      */
     private boolean deleteSystemPackageLI(PackageSetting newPs,
+            int[] allUserHandles, boolean[] perUserInstalled,
             int flags, PackageRemovedInfo outInfo, boolean writeSettings) {
+        final boolean applyUserRestrictions
+                = (allUserHandles != null) && (perUserInstalled != null);
         PackageSetting disabledPs = null;
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
@@ -8807,6 +8868,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else if (DEBUG_REMOVE) {
             Slog.d(TAG, "Deleting system pkg from data partition");
         }
+        if (DEBUG_REMOVE) {
+            if (applyUserRestrictions) {
+                Slog.d(TAG, "Remembering install states:");
+                for (int i = 0; i < allUserHandles.length; i++) {
+                    Slog.d(TAG, "   u=" + allUserHandles[i] + " inst=" + perUserInstalled[i]);
+                }
+            }
+        }
         // Delete the updated package
         outInfo.isRemovedPackageSystemUpdate = true;
         if (disabledPs.versionCode < newPs.versionCode) {
@@ -8816,8 +8885,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Preserve data by setting flag
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
-        boolean ret = deleteInstalledPackageLI(newPs, true, flags, outInfo,
-                writeSettings);
+        boolean ret = deleteInstalledPackageLI(newPs, true, flags,
+                allUserHandles, perUserInstalled, outInfo, writeSettings);
         if (!ret) {
             return false;
         }
@@ -8843,6 +8912,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             updatePermissionsLPw(newPkg.packageName, newPkg,
                     UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
+            if (applyUserRestrictions) {
+                if (DEBUG_REMOVE) {
+                    Slog.d(TAG, "Propagating install state across reinstall");
+                }
+                PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
+                for (int i = 0; i < allUserHandles.length; i++) {
+                    if (DEBUG_REMOVE) {
+                        Slog.d(TAG, "    user " + allUserHandles[i]
+                                + " => " + perUserInstalled[i]);
+                    }
+                    ps.setInstalled(perUserInstalled[i], allUserHandles[i]);
+                }
+                // Regardless of writeSettings we need to ensure that this restriction
+                // state propagation is persisted
+                mSettings.writeAllUsersPackageRestrictionsLPr();
+            }
             // can downgrade to reader here
             if (writeSettings) {
                 mSettings.writeLPr();
@@ -8852,14 +8937,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private boolean deleteInstalledPackageLI(PackageSetting ps,
-            boolean deleteCodeAndResources, int flags, PackageRemovedInfo outInfo,
-            boolean writeSettings) {
+            boolean deleteCodeAndResources, int flags,
+            int[] allUserHandles, boolean[] perUserInstalled,
+            PackageRemovedInfo outInfo, boolean writeSettings) {
         if (outInfo != null) {
             outInfo.uid = ps.appId;
         }
 
         // Delete package data from internal structures and also remove data if flag is set
-        removePackageDataLI(ps, outInfo, flags, writeSettings);
+        removePackageDataLI(ps, allUserHandles, perUserInstalled, outInfo, flags, writeSettings);
 
         // Delete application code and resources
         if (deleteCodeAndResources && (outInfo != null)) {
@@ -8873,7 +8959,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * This method handles package deletion in general
      */
     private boolean deletePackageLI(String packageName, UserHandle user,
-            boolean deleteCodeAndResources, int flags, PackageRemovedInfo outInfo,
+            boolean deleteCodeAndResources, int[] allUserHandles, boolean[] perUserInstalled,
+            int flags, PackageRemovedInfo outInfo,
             boolean writeSettings) {
         if (packageName == null) {
             Slog.w(TAG, "Attempt to delete null packageName.");
@@ -8950,7 +9037,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (dataOnly) {
             // Delete application data first
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing package data only");
-            removePackageDataLI(ps, outInfo, flags, writeSettings);
+            removePackageDataLI(ps, null, null, outInfo, flags, writeSettings);
             return true;
         }
         boolean ret = false;
@@ -8958,13 +9045,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package:" + ps.name);
             // When an updated system application is deleted we delete the existing resources as well and
             // fall back to existing code in system partition
-            ret = deleteSystemPackageLI(ps, flags, outInfo, writeSettings);
+            ret = deleteSystemPackageLI(ps, allUserHandles, perUserInstalled,
+                    flags, outInfo, writeSettings);
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package:" + ps.name);
             // Kill application pre-emptively especially for apps on sd.
             killApplication(packageName, ps.appId);
-            ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags, outInfo,
-                    writeSettings);
+            ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags,
+                    allUserHandles, perUserInstalled,
+                    outInfo, writeSettings);
         }
         return ret;
     }
@@ -10493,7 +10582,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Delete package internally
             PackageRemovedInfo outInfo = new PackageRemovedInfo();
             synchronized (mInstallLock) {
-                boolean res = deletePackageLI(pkgName, null, false,
+                boolean res = deletePackageLI(pkgName, null, false, null, null,
                         PackageManager.DELETE_KEEP_DATA, outInfo, false);
                 if (res) {
                     pkgList.add(pkgName);
