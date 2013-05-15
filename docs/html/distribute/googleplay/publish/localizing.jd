@@ -555,6 +555,10 @@ help you create high-quality marketing materials, use the drag-and-drop <a
 href="{@docRoot}distribute/promote/device-art.html">Device Art Generator</a> to
 quickly frame your screen shot on a Nexus device. </p>
 
+<h4 id="deviceart">Check your Optimization Tips</h4>
+
+<p>As you prepare for launch, make sure to sign into the Developer Console and check
+your app's Optimization Tips. The Optimization Tips let you know when you are missing parts of your localized store listing and provide other helpful reminders for a successful localized launch.</p>
 
 <h2 id="support">Support International Users after Launch</h2>
 
