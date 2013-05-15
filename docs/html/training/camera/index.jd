@@ -1,5 +1,5 @@
 page.title=Capturing Photos
-page.tags="camera","video"
+page.tags="camera","video","picture"
 
 trainingnavtop=true
 startpage=true
@@ -42,7 +42,7 @@ prevalent. Remember Gopher? We don't, either. For your app to become
 part of your users' lives, give them a way to put their lives into it.
 Using the on-board cameras, your application can enable users to augment what
 they see around them, make unique avatars, look for zombies around the corner,
-or simply share their experiences.</p> 
+or simply share their experiences.</p>
 
 <p>This class gets you clicking fast with some super-easy ways of
 leveraging existing camera applications. In later lessons, you dive deeper
@@ -50,7 +50,7 @@ and learn how to control the camera hardware directly.</p>
 
 
 <h2>Lessons</h2>
- 
+
 <dl>
   <dt><b><a href="photobasics.html">Taking Photos Simply</a></b></dt>
   <dd>Leverage other applications and capture photos with just a few lines of code.</dd>
@@ -58,5 +58,5 @@ and learn how to control the camera hardware directly.</p>
   <dd>Leverage other applications and record videos with just a few lines of code.</dd>
   <dt><b><a href="cameradirect.html">Controlling the Camera</a></b></dt>
   <dd>Control the camera hardware directly and implement your own camera application.</dd>
-</dl> 
+</dl>
 

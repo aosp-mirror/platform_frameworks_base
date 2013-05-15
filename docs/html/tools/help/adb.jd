@@ -1,6 +1,7 @@
 page.title=Android Debug Bridge
 parent.title=Tools
 parent.link=index.html
+page.tags="adb"
 @jd:body
 
 <div id="qv-wrapper">
@@ -101,10 +102,10 @@ option to specify the target device to which the command should be directed. </p
 <p class="table-caption"><strong>Table 1.</strong> Available adb commands</p>
 <table>
 <tr>
-	<th>Category</th>
-	<th>Command</th>
-	<th>Description</th>
-	<th>Comments</th>
+  <th>Category</th>
+  <th>Command</th>
+  <th>Description</th>
+  <th>Comments</th>
 </tr>
 
 <tr>
@@ -191,7 +192,7 @@ Commands to a Specific Emulator/Device Instance</a>.</td>
 <td rowspan="2">Ports and Networking</td>
 <td><code>forward&nbsp;&lt;local&gt;&nbsp;&lt;remote&gt;</code></td>
 <td>Forwards socket connections from a specified local port to a specified remote port on the emulator/device instance. </td>
-<td>Port specifications can use these schemes: 
+<td>Port specifications can use these schemes:
 <ul><li><code>tcp:&lt;portnum&gt;</code></li>
 <li><code>local:&lt;UNIX domain socket name&gt;</code></li>
 <li><code>dev:&lt;character device name&gt;</code></li>
@@ -226,10 +227,10 @@ Commands to a Specific Emulator/Device Instance</a>.</td>
 <tr>
 <td><code>wait-for-device</code></td>
 <td>Blocks execution until the device is online &mdash; that is, until the instance state is <code>device</code>.</td>
-<td>You can prepend this command to other adb commands, in which case adb will wait until the emulator/device instance is connected before issuing the other commands. Here's an example: 
+<td>You can prepend this command to other adb commands, in which case adb will wait until the emulator/device instance is connected before issuing the other commands. Here's an example:
 <pre class="no-pretty-print">adb wait-for-device shell getprop</pre>
 
-Note that this command does <em>not</em> cause adb to wait until the entire system is fully booted. For that reason, you should not prepend it to other commands that require a fully booted system. As an example, the <code>install</code> requires the Android package manager, which is available only after the system is fully booted. A command such as 
+Note that this command does <em>not</em> cause adb to wait until the entire system is fully booted. For that reason, you should not prepend it to other commands that require a fully booted system. As an example, the <code>install</code> requires the Android package manager, which is available only after the system is fully booted. A command such as
 
 <pre class="no-pretty-print">adb wait-for-device install &lt;app&gt;.apk</pre>
 
@@ -280,34 +281,34 @@ would issue the <code>install</code> command as soon as the emulator or device i
 
 <p>Before issuing adb commands, it is helpful to know what emulator/device instances are connected to the adb server. You can generate a list of attached emulators/devices using the <code>devices</code> command: </p>
 
-	<pre class="no-pretty-print">adb devices</pre>
+  <pre class="no-pretty-print">adb devices</pre>
 
 <p>In response, adb prints this status information for each instance:</p>
 
 <ul>
-	<li>Serial number &mdash; A string created by adb to uniquely identify an emulator/device instance by its 
-        console port number. The format of the serial number is <code>&lt;type&gt;-&lt;consolePort&gt;</code>. 
-        Here's an example serial number: <code>emulator-5554</code></li>
-	<li>State &mdash; The connection state of the instance may be one of the following:
-		<ul>
-		<li><code>offline</code> &mdash; the instance is not connected to adb or is not responding.</li>
-		<li><code>device</code> &mdash; the instance is now connected to the adb server. Note that this state does not 
-                    imply that the Android system is fully booted and operational, since the instance connects to adb 
-                    while the system is still booting. However, after boot-up, this is the normal operational state of 
-                    an emulator/device instance.</li>
-                <li><code>no device</code> &mdash; there is no emulator/device connected.
-		</ul>
-	</li>
+  <li>Serial number &mdash; A string created by adb to uniquely identify an emulator/device instance by its
+    console port number. The format of the serial number is <code>&lt;type&gt;-&lt;consolePort&gt;</code>.
+    Here's an example serial number: <code>emulator-5554</code></li>
+  <li>State &mdash; The connection state of the instance may be one of the following:
+    <ul>
+      <li><code>offline</code> &mdash; the instance is not connected to adb or is not responding.</li>
+      <li><code>device</code> &mdash; the instance is now connected to the adb server. Note that this state does not
+        imply that the Android system is fully booted and operational, since the instance connects to adb
+        while the system is still booting. However, after boot-up, this is the normal operational state of
+        an emulator/device instance.</li>
+      <li><code>no device</code> &mdash; there is no emulator/device connected.
+    </ul>
+  </li>
 </ul>
 
 <p>The output for each instance is formatted like this: </p>
 
-	<pre class="no-pretty-print">[serialNumber] [state]</pre>
+  <pre class="no-pretty-print">[serialNumber] [state]</pre>
 
 <p>Here's an example showing the <code>devices</code> command and its output:</p>
 
-	<pre class="no-pretty-print">adb devices
-List of devices attached 
+  <pre class="no-pretty-print">adb devices
+List of devices attached
 emulator-5554&nbsp;&nbsp;device
 emulator-5556&nbsp;&nbsp;device
 emulator-5558&nbsp;&nbsp;device</pre>
@@ -323,13 +324,13 @@ emulator-5558&nbsp;&nbsp;device</pre>
 when issuing adb commands. To do so, use the <code>-s</code> option in the commands. The usage
 for the <code>-s</code> option is:</p>
 
-    <pre class="no-pretty-print">adb -s &lt;serialNumber&gt; &lt;command&gt; </pre>
-	
+<pre class="no-pretty-print">adb -s &lt;serialNumber&gt; &lt;command&gt; </pre>
+
 <p>As shown, you specify the target instance for a command using its adb-assigned serial number.
 You can use the <code>devices</code> command to obtain the serial numbers of running
 emulator/device instances. For example: </p>
 
-	<pre class="no-pretty-print">adb -s emulator-5556 install helloWorld.apk</pre>
+<pre class="no-pretty-print">adb -s emulator-5556 install helloWorld.apk</pre>
 
 <p>Note that, if you issue a command without specifying a target emulator/device instance
 while multiple devices are available, adb generates an error.
@@ -377,10 +378,10 @@ commands let you copy arbitrary directories and files to any location in an
 emulator/device instance. </p>
 
 <p>To copy a file or directory (and its sub-directories) <em>from</em> the emulator or device, use</p>
-<pre class="no-pretty-print">adb pull &lt;remote&gt; &lt;local&gt;</pre> 
+<pre class="no-pretty-print">adb pull &lt;remote&gt; &lt;local&gt;</pre>
 
 <p>To copy a file or directory (and its sub-directories) <em>to</em> the emulator or device, use</p>
-    <pre class="no-pretty-print">adb push &lt;local&gt; &lt;remote&gt;</pre> 
+    <pre class="no-pretty-print">adb push &lt;local&gt; &lt;remote&gt;</pre>
 
 <p>In the commands, <code>&lt;local&gt;</code> and <code>&lt;remote&gt;</code> refer to the
 paths to the target files/directory on your development machine (local) and on the
@@ -397,8 +398,8 @@ emulator/device instance (remote). For example: </p>
 
 <h2 id="shellcommands">Issuing Shell Commands</h2>
 
-<p>Adb provides a Unix shell that you can use to run a variety of commands on an emulator 
-or connected device. The command binaries are stored in the file system of the emulator or device, 
+<p>Adb provides a Unix shell that you can use to run a variety of commands on an emulator
+or connected device. The command binaries are stored in the file system of the emulator or device,
 at <code>/system/bin/...</code>
 
 <p>Two of the most common command tools are <a href="#am">activity manager</a> ({@code am}) and
@@ -408,11 +409,11 @@ at <code>/system/bin/...</code>
 the adb remote shell on the emulator/device. To issue a single command without entering a
 remote shell, use the <code>shell</code> command like this: </p>
 
-	<pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell &lt;shell_command&gt;</pre>
-	
+  <pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell &lt;shell_command&gt;</pre>
+
 <p>Or enter a remote shell on an emulator/device like this:</p>
 
-	<pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell</pre>
+  <pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell</pre>
 
 <p>When you are ready to exit the remote shell, press CTRL+D or type
 <code>exit</code>. </p>
@@ -441,8 +442,8 @@ adb shell am start -a android.intent.action.VIEW
 <p class="table-caption"><strong>Table 2.</strong> Available activity manager commands</p>
 <table>
 <tr>
-	<th>Command</th>
-	<th>Description</th>
+  <th>Command</th>
+  <th>Description</th>
 </tr>
 
 <tr>
@@ -641,7 +642,7 @@ screen resolution using a device with a large screen, and vice versa.
 <td><code>
 display-density &lt;dpi>
 </code></td>
-<td>Override emulator/device display density. 
+<td>Override emulator/device display density.
 This command is helpful for testing your app across different screen densities on high-density
 screen environment using a low density screen, and vice versa.
 <p>Example:<br><code>am display-density 480</code>
@@ -662,7 +663,7 @@ to-uri &lt;INTENT>
 to-intent-uri &lt;INTENT>
 </code></td>
 <td>Print the given intent specification as an {@code intent:} URI. <p>See the
-<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>. 
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
 </td>
 </tr>
 </table>
@@ -688,7 +689,7 @@ specify the intent with the following options:</p>
   <dt>{@code -d &lt;DATA_URI>}</dt>
       <dd>Specify the intent data URI, such as "content://contacts/people/1".
       You can declare this only once.
-  
+
   <dt>{@code -t &lt;MIME_TYPE>}</dt>
       <dd>Specify the intent MIME type, such as "image/png".
       You can declare this only once.
@@ -843,8 +844,8 @@ adb shell pm uninstall com.example.MyApp
 <p class="table-caption"><strong>Table 3.</strong> Available package manager commands.</p>
 <table>
 <tr>
-	<th>Command</th>
-	<th>Description</th>
+  <th>Command</th>
+  <th>Description</th>
 </tr>
 
 <tr>
@@ -1097,12 +1098,12 @@ get-max-users
 
 <h3 id="sqlite">Examining sqlite3 databases from a remote shell</h3>
 
-<p>From an adb remote shell, you can use the 
-<a href="http://www.sqlite.org/sqlite.html">sqlite3</a> command-line program to 
-manage SQLite databases created by Android applications. The 
-<code>sqlite3</code> tool includes many useful commands, such as 
-<code>.dump</code> to print out the contents of a table and 
-<code>.schema</code> to print the SQL CREATE statement for an existing table. 
+<p>From an adb remote shell, you can use the
+<a href="http://www.sqlite.org/sqlite.html">sqlite3</a> command-line program to
+manage SQLite databases created by Android applications. The
+<code>sqlite3</code> tool includes many useful commands, such as
+<code>.dump</code> to print out the contents of a table and
+<code>.schema</code> to print the SQL CREATE statement for an existing table.
 The tool also gives you the ability to execute SQLite commands on the fly.</p>
 
 <p>To use <code>sqlite3</code>, enter a remote shell on the emulator instance, as described above, then invoke the tool using the <code>sqlite3</code> command. Optionally, when invoking <code>sqlite3</code> you can specify the full path to the database you want to explore. Emulator/device instances store SQLite3 databases in the folder <code><span chatdir="1"><span chatindex="259474B4B070F261">/data/data/<em>&lt;package_name&gt;</em>/databases</span></span>/</code>. </p>
@@ -1126,7 +1127,7 @@ sqlite&gt; .exit </pre>
 <h3 id="monkey">UI/Application Exerciser Monkey</h3>
 
 <p>The Monkey is a program that runs on your emulator or device and generates pseudo-random
-streams of user events such as clicks, touches, or gestures, as well as a number of system-level 
+streams of user events such as clicks, touches, or gestures, as well as a number of system-level
 events.  You can use the Monkey to stress-test applications that you are developing,
 in a random yet repeatable manner.</p>
 
@@ -1135,7 +1136,7 @@ application and sends 500 pseudo-random events to it.</p>
 
 <pre class="no-pretty-print">adb shell monkey -v -p your.package.name 500</pre>
 
-<p>For more information about command options for Monkey, see the complete 
+<p>For more information about command options for Monkey, see the complete
 <a href="{@docRoot}tools/help/monkey.html" title="monkey">UI/Application Exerciser Monkey</a> documentation page.</p>
 
 
@@ -1155,15 +1156,15 @@ application and sends 500 pseudo-random events to it.</p>
 <p class="table-caption"><strong>Table 4.</strong> Some other adb shell commands</p>
 <table>
 <tr>
-	<th>Shell Command</th>
-	<th>Description</th>
-	<th>Comments</th>
+  <th>Shell Command</th>
+  <th>Description</th>
+  <th>Comments</th>
 </tr>
 
 <tr>
 <td><code>dumpsys</code></td>
 <td>Dumps system data to the screen.</td>
-<td rowspan=4">The <a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor Server</a> 
+<td rowspan=4">The <a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor Server</a>
 (DDMS) tool offers integrated debug environment that you may find easier to use.</td>
 </tr>
 
