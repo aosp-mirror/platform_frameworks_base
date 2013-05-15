@@ -7,8 +7,9 @@ parent.link=index.html
 <div id="qv">
   <h2>In this document</h2>
   <ol>
-    <li><a href="#billing-testing-static">Testing in-app purchases with static responses</a></li>
-    <li><a href="#billing-testing-real">Testing in-app purchases using your own product IDs</a></li>
+    <li><a href="#testing-purchases">Testing In-app Purchases</a></li>
+        <li><a href="#billing-testing-static">Testing with static responses</a></li>
+    <li><a href="#billing-testing-real">Setting Up for Test Purchases</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
@@ -19,8 +20,13 @@ parent.link=index.html
 </div>
 
 <p>The Google Play Developer Console provides several tools that help you test your In-app Billing
-implementation before it is published. You can use these tools to create test accounts and purchase
-special reserved items that send static billing responses to your application.</p>
+implementation:</p>
+
+<ul>
+<li>Test purchases, which let test account users make real purchase your published in-app items,
+but without any actual charges to the user accounts.</li>
+<li>Static billing responses from Google Play, for testing in early development</p>
+</ul>
 
 <p>To test In-app Billing in an application you must install the application on an Android-powered
 device. You cannot use the Android emulator to test In-app Billing.  The device you use for testing
@@ -31,9 +37,119 @@ requests to Google Play. For general information about how to set up a device fo
 developing Android applications, see <a href="{@docRoot}tools/device.html">Using Hardware
 Devices</a>.</p>
 
-<p>The following section shows you how to set up and use the In-app Billing test tools.</p>
+<h2 id="testing-purchases">Testing In-app Purchases</h2>
 
-<h2 id="billing-testing-static">Testing in-app purchases with static responses</h2>
+<p>When your In-app Billing implementation is ready, you can test purchasing of your in-app SKUs in two ways:</p>
+
+<ul>
+<li><strong>Test purchases</strong>, which let your selected license test users
+purchase your in-app products before the app is published, but without any
+resulting charges to the user, and </li>
+<li><strong>Real purchases</strong>, which let regular users make real purchases
+of your in-app products with actual charges to the user’s payment instruments.
+In this case, you can use Google Play’s alpha and beta release groups to manage
+the users who can make “live” purchases using your implementation.  </li>
+</ul>
+
+<p>The sections below provide more detail about how to use these approaches for
+testing and validation. </p>
+
+<h3 id="test-purchases">Test Purchases (In-app Billing Sandbox)</h3>
+
+<p>Test purchases offer a secure, convenient way to enable larger-scale testing
+of your In-app Billing implementation during development or in preparation for
+launch. They let authorized user accounts make purchases of your in-app products
+through Google Play while the app is still unpublished, without incurring any
+actual charges to the user accounts.</p>
+
+<p>Once authorized with testing access, those users can side-load your app and
+test the full merchandising, purchase, and fulfillment flow for your products.
+Test purchases are real orders and Google Play processes them in the same way as
+other orders. When purchases are complete, Google Play prevents the orders from
+going to financial processing, ensuring that there are no actual charges to user
+accounts, and automatically canceling the completed orders after 14 days. </p>
+
+<h4 id="setup">Setting up test purchases</h4>
+
+<p>It’s easy to set up test purchases&mdash;any user account can be chosen to be
+a test account, and any user of a test account can make test purchases with any
+available payment method (even though there’s no charge to the payment
+method).</p>
+
+<p>First, upload and publish in-app products that you want testers to be able to
+purchase. You can upload and publish in-app products in the Developer Console. 
+Note that you can upload and publish your in-app items before you publish the
+APK itself. For example, you can publish your in-app items while your APK is
+still a draft. </p>
+
+<p>Next, create license test accounts for authorized users.  In the Developer
+Console, go to <strong>Settings</strong> &gt; <strong>Account details</strong>,
+then in the License Testing section, add the addresses to <strong>Gmail accounts
+with testing status</strong>. For more information, see <a
+href="#billing-testing-test">Setting Up for Test Purchases</a>.</p>
+
+<p>Once you’ve added the users as license tester accounts and saved the change,
+within 15 minutes those users can begin making test purchases of your in-app
+products. You can then distribute your app to your testers and provide a means
+of getting feedback. </p>
+
+<p class="note"><strong>Note</strong>: To make test purchases, the license test
+account must be on the user’s Android device. If the device has more than one
+account, the purchase will be made with the account that downloaded the app. If
+none of the accounts has downloaded the app, the purchase is made with the first
+account.Users can confirm the account that is making a purchase by expanding the
+purchase dialog.</p>
+
+<h4 id="tp-account">Test purchases and developer account</h4>
+<p>Authorized license test accounts are associated with your developer account
+in Google Play, rather than with a specific APK or package name. Identifying an
+account as a test account enables it to purchase any of your in-app products
+without being charged. </p>
+
+<h4 id="purchase-flow">Details of purchase flow</h4>
+<p>During a test purchase, users can test the actual merchandising, purchase,
+and fulfillment flow in your app.  During purchase, the inapp item is displayed
+as a normal item with an actual price. However, Google Play marks test purchases
+with a notice across the center of the purchase dialog, for easy identification.
+</p>
+
+<h4 id="cancelling">Cancelling completed test purchases</h4>
+<p>Google Play accumulates completed test purchases for each user but does not
+pass them on  to financial processing. Over time, it automatically clears out
+the purchases by cancelling them. </p>
+
+<p>In some cases, you might want to manually cancel a test purchase to continue
+testing. For cancelling purchases, you have these options:</p>
+
+<ul>
+<li>Wait for the transactions to expire&mdash;Google Play clears completed test
+purchases 14 days after their purchase date. </li>
+<li>Cancel purchases manually&mdash;you can go to the Google Wallet Merchant
+Center, look up the transaction, and then cancel it. You can find transactions
+by looking up their order numbers.</li>
+</ul>
+
+<h4 id="requirements">Requirements for using test purchases</h4>
+<p>If you plan to use test purchases, please note the requirements and limitations below: </p>
+<ul>
+<li>Test purchases is only supported for license test accounts when the app is using the In-app Billing v3 API.</li>
+<li>Test purchases are only supported for in-app products, not for in-app subscriptions.</li>
+</ul>
+
+<h3 id="transations">Testing with real transactions</h3>
+<p>As you prepare to launch an app that uses In-app Billing, you can make use of
+Google Play alpha/beta release options to do validation and load testing on your
+implementation before distributing the app to all of your users. </p>
+
+<p>With alpha/beta test groups, real users (chosen by you) can install your app
+from Google Play and test your in-app products. They can make real purchases
+that result in actual charges to their accounts, using any of their normal
+payment methods in Google Play to make purchases. Note that if you include test
+license accounts in your alpha and beta distribution groups, those users will
+only be able to make test purchases. </p>
+
+
+<h2 id="billing-testing-static">Testing with static responses</h2>
 
 <p>We recommend that you first test your In-app Billing implementation using static responses from
 Google Play. This enables you to verify that your application is handling the primary Google
@@ -186,12 +302,12 @@ overrides the usual Google Play production system. When you send an In-app Billi
 reserved product ID, the quality of service will not be comparable to the production
 environment.</p>
 
-<h2 id="billing-testing-real">Testing In-app Purchases Using Your Own Product IDs</h2>
+<h2 id="billing-testing-test">Setting Up for Test Purchases</h2>
 
 <p>After you finish your static response testing, and you verify that signature verification is
 working in your application, you can test your In-app Billing implementation by making actual in-app
 purchases. Testing real in-app purchases enables you to test the end-to-end In-app Billing
-experience, including the actual responses from Google Play and the actual checkout flow that
+experience, including the actual purchases from Google Play and the actual checkout flow that
 users will experience in your application.</p>
 
 <p class="note"><strong>Note</strong>: You do not need to publish your application to do end-to-end
@@ -207,11 +323,6 @@ accounts</a>.</p>
 
 <p>Also, a test account can purchase an item in your product list only if the item is published. The
 application does not need to be published, but the item does need to be published.</p>
-
-<p>When you use a test account to purchase items, the test account is billed through Google Wallet
-and your Google Wallet merchant account receives a payout for the purchase. Therefore, you may
-want to refund purchases that are made with test accounts, otherwise the purchases will show up as
-actual payouts to your merchant account.</p>
 
 <p>To test your In-app Billing implementation with actual purchases, follow these steps:</p>
 
@@ -236,22 +347,6 @@ actual payouts to your merchant account.</p>
     <p>To learn how to install an application on a device, see <a
     href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">Running on a
     device</a>.</p>
-  </li>
- <li><strong>Make one of your test accounts the primary account on your device.</strong>
-    <p>To perform end-to-end testing of In-app Billing, the primary account on your device must be
-    one of the <a
-    href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">test accounts</a>
-    that you registered on the Google Play site. If the primary account on your device is not a
-    test account, you must do a factory reset of the device and then sign in with one of your test
-    accounts. To perform a factory reset, do the following:</p>
-    <ol>
-      <li>Open Settings on your device.</li>
-      <li>Touch <strong>Privacy</strong>.</li>
-      <li>Touch <strong>Factory data reset</strong>.</li>
-      <li>Touch <strong>Reset phone</strong>.</li>
-      <li>After the phone resets, be sure to sign in with one of your test accounts during the
-      device setup process.</li>
-    </ol>
   </li>
   <li><strong>Verify that your device is running a supported version of the Google Play
   application or the MyApps application.</strong>
