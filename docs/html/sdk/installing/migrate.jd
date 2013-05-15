@@ -1,0 +1,51 @@
+page.title=Migrating from Eclipse
+
+@jd:body
+
+
+<p>If you've previously developed for Android using Eclipse and would like to migrate
+to Android Studio, you should export your projects from Eclipse in order to generate
+Gradle build files. You can then import your project into Android Studio.</p>
+
+
+<h2 id="Export">Export from Eclipse</h2>
+<ol>
+<li><a href="{@docRoot}tools/help/adt.html#Updating">Update your Eclipse ADT Plugin</a>
+  (you must have version 22.0 or higher).</li>
+<li>In Eclipse, select <strong>File > Export</strong>.</li>
+<li>In the window that appears, open <strong>Android</strong> and select <strong>Generate Gradle
+build files</strong>.</li>
+<li>Select the projects you want to export for Android Studio and click
+<strong>Finish</strong>.</li>
+</ol>
+
+<p>Your selected projects remain in the same location but now contain a {@code .gradle}
+build file and are ready for Android Studio.</p>
+
+
+<h2 id="Export">Import into Android Studio</h2>
+<ol>
+  <li>In Android Studio, select <strong>File > Import Project</strong>.</li>
+  <li>Locate a project you exported from Eclipse, select the project's root directory and
+    click <strong>OK</strong>.</li>
+  <li>Select <strong>Create project from existing sources</strong> and click
+    <strong>Next</strong>.</li>
+  <li>Follow the walk-through to complete the import process.</li>
+</ol>
+
+
+<p>Now that your projects are imported to Android Studio, 
+read <a href="{@docRoot}sdk/installing/studio-tips.html">Tips and Tricks</a> for some
+help getting started.</p>
+
+
+<p class="note"><strong>Note:</strong>
+It's possible to import an existing Android project to Android Studio even if you
+don't generate a Gradle build file from Eclipse&mdash;Android Studio will successfully build and
+run projects using an existing Ant build file. However, in order to take advantage of build
+variants and other advanced features in the future,
+we strongly suggest that you generate a Gradle build file using
+the ADT plugin or write your own Gradle build file for use with Android Studio.
+For more information about the Gradle build system, see the
+<a href="http://tools.android.com/tech-docs/new-build-system/user-guide">Gradle
+Plugin User Guide</a>.</p>
