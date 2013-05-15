@@ -84,6 +84,15 @@
   </li> 
 
   <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/edu/index.html">Google Play for Education</a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/about.html">About</a></li>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/start.html">Get Started</a></li>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/contact.html">Sign Up</a></li>
+    </ul>  
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>distribute/open.html">Open Distribution</a></div>
   </li>
 </ul>

@@ -1,0 +1,81 @@
+page.title=About Google Play for Education
+page.metaDescription=How Google Play for Education helps you reach a new audience of educators.
+excludeFromSuggestions=true
+@jd:body
+
+<div style="position:absolute;margin-left: 636px;
+            margin-top:-76px;color:#777;">If you're interested<br>
+            <a href="{@docRoot}distribute/googleplay/edu/contact.html"
+            class="go-link"
+            style="display: block;text-align: right;">SIGN UP</a></div>
+
+    <div style="float:right;margin:0px 0px 24px 44px;">
+  <img src="{@docRoot}images/gp-edu-knum-landscape.png" style="width:420px" alt="" />
+</div>
+
+<p>Introducing Google Play for Education, the online destination where schools
+can find the right tablet content and tools for their students and teachers.</p>
+
+<p>With easy bulk ordering for groups, schools will be able to purchase and
+instantly distribute apps, videos, and books right to their students’
+devices.</p>
+
+<p>The Google Play team looks forward to seeing you create first class content
+that will help schools. We want to help you create innovative educational apps,
+without having to knock on school doors to reach teachers and students.</p>
+
+
+<div class="landing-docs">
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">For Developers</h3>
+
+<h4>Get discovered</h4>
+
+<p>With Google Play for Education, teachers and administrators will be able to
+browse content by curriculum, grade, and standard &mdash; discovering the right
+content at the right time for their students. If your app offers an exciting new
+way to learn sixth grade algebra, we'll make it easy for math educators to find,
+purchase, and distribute your app to their classes.</p>
+
+<h4>Reach more schools and students</h4>
+
+<p>Google has built a strong network of K-12 schools who are already using
+Google Apps for Education and other Google services. These schools are excited
+and looking forward to bringing your apps and content into their classrooms with
+Nexus tablets.</p>
+
+<h4>Monetize effectively</h4>
+<p>With the wide launch of Google Play for Education later this year, educators
+will be able to make high-volume purchases using standard institutional payment
+mechanisms and distribute them to the students they want &mdash; whether it is a
+class of 30 or a district of 30,000.</p>
+
+  </div>
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">For Educators</h3>
+    <h4>Android tablets in the classroom</h4>
+    <p>Google Play for Education brings the innovation of Android technology
+into classrooms. Educators can set up and deploy large numbers of devices in
+just minutes or hours rather than days.</p>
+
+    <h4>Curriculum-based discovery</h4>
+    <p>Powerful browsing tools let educators quickly discover apps, books,
+videos, and other content&mdash;with many recommended by teachers and
+categorized according to familiar Core Curriculum standards.  
+
+    <h4>Bulk purchase with institutional payment</h4>
+    <p>Convenient purchasing and delivery tools let educators buy apps in bulk
+using purchase orders and other payment methods that are easy for schools to
+manage.</p>
+
+    <h4>Over-the-air delivery to student devices</h4>
+
+      <p>After finding apps they want to use, educators can push them instantly
+to student devices over the air. They can send the apps to individuals or groups
+of any size, across classrooms, schools, or even districts. </p>
+
+  </div>
+
+
+</div>
