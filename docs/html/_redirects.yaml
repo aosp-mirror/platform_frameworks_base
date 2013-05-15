@@ -339,3 +339,9 @@ redirects:
 
 - from: /deviceart
   to: http://developer.android.com/distribute/promote/device-art.html
+
+- from: /edu
+  to: /distribute/googleplay/edu/index.html
+
+- from: /edu/signup
+  to: https://services.google.com/fb/forms/playedu
