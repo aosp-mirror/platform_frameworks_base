@@ -1,0 +1,45 @@
+page.title=Google Play for Education
+page.tags="Google Play","education","schools", "distribution"
+header.hide=1
+
+@jd:body
+    <div style="position:absolute;margin-left: 636px;
+            margin-top:6px;color:#777;">If you're interested<br>
+            <a href="{@docRoot}distribute/googleplay/edu/contact.html"
+            class="go-link"
+            style="display: block;text-align: right;">SIGN UP</a></div>
+
+   <div class="marquee">
+  <div class="mainimg" style="position:absolute;margin-left:6px;margin-top:96px;">
+    <img src="{@docRoot}images/gp-edu-hero7.png" style="width:590px;">
+  </div>
+  <div class="copy" style="position:relative;left:314px;margin-top:42px;width:420px;">
+    <h1 style="margin-bottom:10px;">Google Play for Education</h1>
+    <p>A destination where schools can find great&nbsp;educational content in Google Play. 
+    Bulk&nbsp;purchase and instant distribution let&nbsp;educators bring your apps directly
+    to&nbsp;classrooms and schools.</p>
+    <p><a class="button" href="{@docRoot}distribute/googleplay/edu/about.html"
+      >Read More</a></p>
+  </div>
+</div>
+
+<div class="distribute-features col-13" style="clear:both;margin-top:253px;">
+  <div class="distribute-link">
+  <ul>
+    <li><a href="{@docRoot}distribute/googleplay/edu/about.html"><h5>About the Initiative</h5>
+    Find out how Google Play for Education helps you reach a new audience of educators and students.</a>
+    <li><a href="{@docRoot}distribute/googleplay/edu/start.html"><h5>Get your Apps Ready</h5> 
+    Follow these guidelines to make sure your app meets requirements and offers a great user experience. </a>
+    </li>
+    <li class="last"><a href="{@docRoot}distribute/googleplay/edu/contact.html"><h5>Sign Up</h5>
+    Sign up here to be notified of the latest information regarding this program.</a>
+    </li>
+  </ul>
+  </div>
+
+</div>
+
+    
+
+
+
