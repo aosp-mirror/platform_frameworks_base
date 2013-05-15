@@ -1,5 +1,6 @@
-page.title=Location and Sensors
+page.title=Location and Sensors APIs
 page.landing=true
+page.tags="location","sensors"
 page.landing.intro=Use sensors on the device to add rich location and motion capabilities to your app, from GPS or network location to accelerometer, gyroscope, temperature, barometer, and more. 
 page.landing.image=
 
@@ -29,7 +30,7 @@ venues - as well as providing a reasonable level of offline support</p>
   <div class="col-6">
     <h3>Training</h3>
     
-    <a href="http://developer.android.com/training/basics/location/index.html">
+    <a href="http://developer.android.com/training/location/index.html">
       <h4>Making Your App Location Aware</h4>
       <p>This class teaches you how to incorporate location based services in your Android
 application. You'll learn a number of methods to receive location updates and related best
