@@ -20,7 +20,7 @@ build files</strong>.</li>
 </ol>
 
 <p>Your selected projects remain in the same location but now contain a {@code build.gradle}
-build file and are ready for Android Studio.</p>
+file and are ready for Android Studio.</p>
 
 
 <h2 id="Export">Import into Android Studio</h2>
