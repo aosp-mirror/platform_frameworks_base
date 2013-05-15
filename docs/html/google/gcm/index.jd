@@ -1,10 +1,11 @@
 page.title=Google Cloud Messaging for Android
+page.tags="gcm"
 header.hide=1
 @jd:body
 
 
 <div class="landing-banner">
-        
+
 <div class="col-5" style="min-height:100px">
   <img src="{@docRoot}images/gcm/gcm-logo.png" />
 </div>
@@ -15,7 +16,7 @@ header.hide=1
   Google Cloud Messaging for Android (GCM) is a service that allows you to send data
 from your server to your users' Android-powered device, and also to receive messages from devices on the same connection. The GCM service handles all aspects of queueing of messages and delivery to the target Android application running on the target device. GCM is completely free no matter how big your messaging needs are, and there are no quotas.
 </p>
- 
+
 </div>
 </div>
 
@@ -27,12 +28,12 @@ from your server to your users' Android-powered device, and also to receive mess
 message telling your app there is new data to be fetched from the
 server (for instance, a movie uploaded by a friend), or it could be a message containing
 up to 4kb of payload data (so apps like instant messaging can consume the message directly). <a href="{@docRoot}google/gcm/gcm.html">GCM Architectural Overview.</a></p>
-    
+
     <h4>Send "send-to-sync" messages</h4>
-    <p>A send-to-sync (collapsible) message is often a "tickle" that tells a mobile application to sync data from the server. For example, suppose you have an email application. When a user receives new email on the server, the server pings the mobile application with a "New mail" message. This tells the application to sync to the server to pick up the new email. 
+    <p>A send-to-sync (collapsible) message is often a "tickle" that tells a mobile application to sync data from the server. For example, suppose you have an email application. When a user receives new email on the server, the server pings the mobile application with a "New mail" message. This tells the application to sync to the server to pick up the new email.
     <a href="{@docRoot}google/gcm/adv.html#s2s">Send-to-sync messages</a>.</p>
     </a>
-    
+
     <h4>Send messages with payload</h4>
     <p>Unlike a send-to-sync message, every "message with payload" (non-collapsible message) is delivered. The payload the message contains can be up to 4kb.
     <a href="{@docRoot}google/gcm/adv.html#payload">Messages with payload</a>.</p>
@@ -45,7 +46,7 @@ up to 4kb of payload data (so apps like instant messaging can consume the messag
     <p>Streamlined registration makes it simple and fast to add GCM support to your Android app. <a href="{@docRoot}google/gcm/gs.html">Learn more &raquo;</a></p>
     <h4>Upstream messaging over XMPP</h4>
     <p>GCM's Cloud Connection Service (CCS) lets you communicate with Android devices over a persistent XMPP connection. The primary advantages of CCS are speed, and the ability to receive upstream messages (that is, messages from a device to the cloud). You can use the service in tandem with existing GCM APIs. Use <a href="https://services.google.com/fb/forms/gcm/">this form</a> to sign up for CCS. <a href="{@docRoot}google/gcm/ccs.html">Learn more &raquo;</a></p>
-    
+
     <h4>Seamless multi-device messaging</h4>
     <p>Maps a single user to a notification key, which you can then use to send a single message to multiple devices owned by the user. Use <a href="https://services.google.com/fb/forms/gcm/">this form</a> to sign up for User Notifications. <a href="{@docRoot}google/gcm/notifications.html">Learn more &raquo;</a></p>
   </div>
