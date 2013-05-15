@@ -5508,6 +5508,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean including = false;
                 appWin = null;
                 final WindowList windows = displayContent.getWindowList();
+                final Rect stackBounds = new Rect();
                 for (int i = windows.size() - 1; i >= 0; i--) {
                     WindowState ws = windows.get(i);
                     if (!ws.mHasSurface) {
@@ -5530,6 +5531,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 continue;
                             }
                             appWin = ws;
+                            stackBounds.set(ws.getStackBounds());
                         }
                     }
 
@@ -5555,6 +5557,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         int right = wf.right - cr.right;
                         int bottom = wf.bottom - cr.bottom;
                         frame.union(left, top, right, bottom);
+                        frame.intersect(stackBounds);
                     }
 
                     if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
@@ -5598,9 +5601,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Constrain thumbnail to smaller of screen width or height. Assumes aspect
                 // of thumbnail is the same as the screen (in landscape) or square.
+                scale = Math.max(width / (float) fw, height / (float) fh);
+                /*
                 float targetWidthScale = width / (float) fw;
                 float targetHeightScale = height / (float) fh;
-                if (dw <= dh) {
+                if (fw <= fh) {
                     scale = targetWidthScale;
                     // If aspect of thumbnail is the same as the screen (in landscape),
                     // select the slightly larger value so we fill the entire bitmap
@@ -5615,6 +5620,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         scale = targetWidthScale;
                     }
                 }
+                */
 
                 // The screen shot will contain the entire screen.
                 dw = (int)(dw*scale);
@@ -5649,9 +5655,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         Bitmap bm = Bitmap.createBitmap(width, height, rawss.getConfig());
+        frame.scale(scale);
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
-        matrix.postTranslate(-FloatMath.ceil(frame.left*scale), -FloatMath.ceil(frame.top*scale));
+        matrix.postTranslate(-FloatMath.ceil(frame.left), -FloatMath.ceil(frame.top));
         Canvas canvas = new Canvas(bm);
         canvas.drawColor(0xFF000000);
         canvas.drawBitmap(rawss, matrix, null);

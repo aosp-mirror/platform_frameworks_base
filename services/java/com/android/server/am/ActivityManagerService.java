@@ -218,7 +218,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
     static final boolean DEBUG_MU = localLOGV || false;
     static final boolean DEBUG_IMMERSIVE = localLOGV || false;
-    static final boolean DEBUG_STACK = localLOGV || false;
+    static final boolean DEBUG_STACK = localLOGV || true;
     static final boolean VALIDATE_TOKENS = true;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
