@@ -2,7 +2,7 @@ page.title=Application Structure
 page.tags="navigation","layout","tablet"
 @jd:body
 
-<p>Apps come in many varieties that address very different needs. For example:</p>
+    <p>Apps come in many varieties that address very different needs. For example:</p>
 <ul>
 <li>Apps such as Calculator or Camera that are built around a single focused activity handled from a
   single screen</li>
@@ -62,42 +62,8 @@ layouts that are visually engaging and appropriate for the data type and screen 
     <img src="{@docRoot}design/media/app_structure_market.png">
     <div class="figure-caption">
       The Play Store app's start screen primarily allows navigation into the stores for Apps, Music, Books,
-      Movies and Games. It is also enriched with tailored recommendations and promotions that
+      Movies, and Games. It is also enriched with tailored recommendations and promotions that
       surface content of interest to the user. Search is readily available from the action bar.
-    </div>
-
-  </div>
-</div>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
-
-<h4>Set up action bars for navigation and actions</h4>
-<p>All screens in your app should display action bars to provide consistent navigation and surface
-important actions.</p>
-<p>At the top level, special considerations apply to the action bar:</p>
-<ul>
-<li>Use the action bar to display your app's icon or title.</li>
-<li>If your top level consists of multiple views, or if switching between data from different user
-  accounts is a significant use case, make sure that it's easy for the user to navigate between them
-  by adding view controls to your action bar.</li>
-<li>If your app allows people to create content, consider making the content accessible right from the
-  top level.</li>
-<li>If your content is searchable, include the Search action in the action bar so people can cut
-  through the navigation hierarchy.</li>
-</ul>
-
-<p>For more discussion, see the <a href="{@docRoot}design/patterns/actionbar.html">Action Bar</a>
-design guide.</p>
-
-  </div>
-  <div class="layout-content-col span-8">
-
-    <img src="{@docRoot}design/media/app_structure_gmail.png">
-    <div class="figure-caption">
-      Email is about productivity, so an efficient, easy-to-skim list with higher data density works
-      well. Navigation supports switching between accounts and recent labels. Icons for creating a
-      new message or searching are prominent in the split action bar at the bottom.
     </div>
 
   </div>
@@ -123,6 +89,109 @@ monotony of simple list views.</p>
 
   </div>
 </div>
+
+<h4>Set up action bars for navigation and actions</h4>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+  <p>All screens in your app should display action bars to provide consistent navigation and surface
+important actions.</p>
+    <p>At the top level, special considerations apply to the action bar:</p>
+  <ul>
+    <li>Use the action bar to display your app's icon or title.</li>
+    <li>If your top level consists of multiple views, make sure that it's easy for the user to navigate between them by adding view controls to your action bar.</li>
+    <li>If your app allows people to create content, consider making the content accessible right from the
+  top level.</li>
+        <li>If your content is searchable, include the Search action in the action bar so people can cut
+  through the navigation hierarchy.</li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/app_structure_gmail.png">
+    <div class="figure-caption">
+      Email is about productivity, so an efficient, easy-to-skim list with higher data density works
+      well. Navigation supports switching between accounts and recent labels. Icons for creating a
+      new message or searching are prominent in the split action bar at the bottom.
+    </div>
+
+  </div>
+</div>
+
+<h2 id="top-level-switching">Top Level Switching With View Controls</h2>
+<p>The top level communicates your app’s capabilities by introducing the user to the major functional areas. In many cases the top level will consist of multiple views, and you need to make sure that the user can navigate between them efficiently. Android supports a number of view controls for this task. Use the control that best matches your app's navigation needs:</p>
+
+<h4>Fixed tabs</h4>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+<p><em>Fixed tabs</em> display top-level views concurrently and make it easy to explore and switch between them. They are always visible on the screen, and can't be moved out of the way like scrollable tabs. <em>Fixed tabs</em> should always allow the user to navigate between the views by swiping left or right on the content area.</p>
+<p><strong>Use tabs if</strong>:</p>
+<ul>
+<li>You expect your app's users to switch views frequently.</li>
+<li>You have a limited number of up to three top-level views.</li>
+<li>You want the user to be highly aware of the alternate views.</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/app_structure_default_tabs.png">
+    <div class="figure-caption">
+      Default fixed tabs shown in Holo Dark &amp; Light.
+    </div>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Spinners</h4>
+<p>A <em>spinner</em> is a drop-down menu that allows users to switch between views of your app. </p>
+<p><strong>Use a spinner in the main action bar if</strong>:</p>
+<ul>
+<li>You don't want to give up the vertical screen real estate for a dedicated tab bar.</li>
+<li>The user is switching between views of the same data set (for example: calendar events viewed by day, week, or month) or data sets of the same type (such as content for two different accounts).</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/app_structure_spinner.png">
+    <div class="figure-caption">
+      Action bar spinner from Calendar application.
+    </div>
+
+  </div>
+</div>
+
+<h4>Navigation drawers</h4>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+<p>A <em>navigation drawer</em> is a slide-out menu that allows users to switch between views of your app. It can hold a large number of items and is accessible from anywhere in your app. Navigation drawers show your app's top-level views, but can also provide navigation to lower-level screens. This makes them particularly suitable for complex apps.</p>
+
+<p><strong>Use navigation drawers if</strong>:</p>
+<ul>
+<li>You don't want to give up the vertical screen real estate for a dedicated tab bar.</li>
+<li>You have a large number of top-level views.</li>
+<li>You want to provide direct access to screens on lower levels.</li>
+<li>You want to provide quick navigation to views which don't have direct relationships between each other.</li>
+<li>You have particularly deep navigation branches.</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-7">
+    <img src="{@docRoot}design/media/app_structure_drawer.png">
+    <div class="figure-caption">
+      Navigation drawer from the Shopper app.
+    </div>
+  </div>
+</div>
+
+<h4>Don't mix and match</h4>
+<p>After choosing the best top-level navigation for your app, don't mix and match patterns. For example, if you decide to use tabs for top-level switching, don't add a drawer, even if your navigation branches are deep. In this case, the navigation drawer would simply duplicate the information on the tabs, confusing your users.</p>
 
 <h2 id="categories">Categories</h2>
 
