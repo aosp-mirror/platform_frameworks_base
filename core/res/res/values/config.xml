@@ -1102,7 +1102,7 @@
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
-    <string name="config_appsAuthorizedForSharedAccounts"></string>
+    <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or master volumes. -->
