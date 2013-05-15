@@ -253,36 +253,36 @@ download (or continue to use) the
     <td>Windows</td>
     <td>
   <a onclick="return onDownload(this)" id="win-studio"
-      href="http://dl.google.com/android/studio/android-studio-bundle-130.676883-windows.exe">
-      android-studio-bundle-130.676883-windows.exe
+      href="http://dl.google.com/android/studio/android-studio-bundle-130.677228-windows.exe">
+      android-studio-bundle-130.677228-windows.exe
       </a>
     </td>
-    <td>381763627 bytes</td>
-    <td>592129b7aee608ad706752369d99a2a1</td>
+    <td>382109250 bytes</td>
+    <td>eb90d50a6ccd975bf19c6930c2006300</td>
   </tr>
 
   <tr>
     <td><nobr>Mac OS X</nobr></td>
     <td>
   <a onclick="return onDownload(this)" id="mac-studio"
-    href="http://dl.google.com/android/studio/android-studio-bundle-130.676883-mac.dmg">
-    android-studio-bundle-130.676883-mac.dmg
+    href="http://dl.google.com/android/studio/android-studio-bundle-130.677228-mac.dmg">
+    android-studio-bundle-130.677228-mac.dmg
     </a>
     </td>
-    <td>371232906 bytes</td>
-    <td>16192870d1a1e99e2d96d5fa9fc3fccb</td>
+    <td>371607412 bytes</td>
+    <td>119e8e7170f451bec82cfa321e53d780</td>
   </tr>
 
   <tr>
     <td>Linux</td>
     <td>
   <a onclick="return onDownload(this)" id="linux-studio"
-    href="http://dl.google.com/android/studio/android-studio-bundle-130.676883-linux.tgz">
-    android-studio-bundle-130.676883-linux.tgz
+    href="http://dl.google.com/android/studio/android-studio-bundle-130.677228-linux.tgz">
+    android-studio-bundle-130.677228-linux.tgz
     </a>
     </td>
-    <td>400151208 bytes</td>
-    <td>2b25f4ee51a2e076b0ede6da94508761</td>
+    <td>400487529 bytes</td>
+    <td>62b9ce75e4b74b7c1236ea2f1f99da34</td>
   </tr>
   </table>
 
@@ -420,16 +420,18 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
   
   
   function onDownload(link, button) {
-  
+    $studioLink;
+
     /* set text for download button */
     if (button) {
+      $studioLink = $("a#"+$(link).attr('href'));
       $("#downloadForRealz").html($(link).text());
     } else {
+      $studioLink = $(link);
       $("#downloadForRealz").html("Download " + $(link).text());
     }
     
-    $studioLink = $("a#"+$(link).attr('href'));
-    $("#downloadForRealz").attr('href',$studioLink.attr('href'));
+    $("#downloadForRealz").attr('href', $studioLink.attr('href'));
 
     $("#tos").fadeIn('fast');
     $("#main").fadeOut('fast');
