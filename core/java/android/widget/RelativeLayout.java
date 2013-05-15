@@ -695,20 +695,6 @@ public class RelativeLayout extends ViewGroup {
                 params.topMargin, params.bottomMargin,
                 mPaddingTop, mPaddingBottom,
                 myHeight);
-        if (params.mPreviousWidthSpec == childWidthMeasureSpec && !child.isLayoutRequested()) {
-            switch (MeasureSpec.getMode(childHeightMeasureSpec)) {
-                case MeasureSpec.EXACTLY:
-                    if (child.getMeasuredHeight() == MeasureSpec.getSize(childHeightMeasureSpec)) {
-                        return;
-                    }
-                    break;
-                case MeasureSpec.AT_MOST:
-                    if (child.getMeasuredHeight() <= MeasureSpec.getSize(childHeightMeasureSpec)) {
-                        return;
-                    }
-                    break;
-            }
-        }
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
@@ -740,7 +726,6 @@ public class RelativeLayout extends ViewGroup {
             childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST);
         }
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-        params.mPreviousWidthSpec = childWidthMeasureSpec;
     }
 
     /**
@@ -915,6 +900,8 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[LEFT_OF] != 0) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
+            } else {
+                // FIXME uh oh...
             }
         }
 
@@ -939,6 +926,8 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ALIGN_RIGHT] != 0) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
+            } else {
+                // FIXME uh oh...
             }
         }
 
@@ -949,6 +938,8 @@ public class RelativeLayout extends ViewGroup {
         if (0 != rules[ALIGN_PARENT_RIGHT]) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
+            } else {
+                // FIXME uh oh...
             }
         }
     }
@@ -967,6 +958,8 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ABOVE] != 0) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
+            } else {
+                // FIXME uh oh...
             }
         }
 
@@ -991,6 +984,8 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ALIGN_BOTTOM] != 0) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
+            } else {
+                // FIXME uh oh...
             }
         }
 
@@ -1001,6 +996,8 @@ public class RelativeLayout extends ViewGroup {
         if (0 != rules[ALIGN_PARENT_BOTTOM]) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
+            } else {
+                // FIXME uh oh...
             }
         }
 
@@ -1244,8 +1241,6 @@ public class RelativeLayout extends ViewGroup {
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public boolean alignWithParent;
-
-        int mPreviousWidthSpec;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
