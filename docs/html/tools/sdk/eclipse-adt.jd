@@ -57,6 +57,49 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.0.0</a> <em>(May 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required for ADT 22.0.0.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 22.0.0.</li>
+      <li>ADT 22.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
+      Tools r22</a>. If you haven't already installed SDK Tools r22 into your SDK, use the
+      Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Updated tools to allow libraries to share the same package name as the applications
+        that use them.</li>
+      <li>Added new Lint checks, including checks for layout consistency,
+        {@link android.widget.RelativeLayout} siblings, {@link android.os.Parcel} creator,
+        JavaScript interfaces, {@link android.app.Service} casting, quantity strings, manifest
+        typos, orientation tags in layouts, overlapping names for 9-patches and images, and class
+        existence checks.</li>
+      <li>Updated build tools to sign applications using the BouncyCastle library instead of
+        relying on Sun JVM specific APIs.</li>
+      <li>Added an experimental Gradle build export feature for moving projects into the
+        <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a> environment or for
+        setting up command-line builds with Gradle.
+        (<a href="http://tools.android.com/tech-docs/new-build-system">more info</a>)</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 21.1.0</a> <em>(February 2013)</em>
   </p>
 
