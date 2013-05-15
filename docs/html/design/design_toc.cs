@@ -31,6 +31,7 @@
       <li><a href="<?cs var:toroot ?>design/patterns/app-structure.html">App Structure</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/navigation.html">Navigation</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/actionbar.html">Action Bar</a></li>
+      <li><a href="<?cs var:toroot ?>design/patterns/navigation-drawer.html">Navigation Drawer</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/swipe-views.html">Swipe Views</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/selection.html">Selection</a></li>

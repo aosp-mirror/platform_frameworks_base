@@ -42,7 +42,7 @@ app, the user touches the app icon in the action bar.</p>
 <p><strong>Navigation Drawer Design</strong></p>
 <p>Before you decide to use a navigation drawer in your app, you should understand the use
 cases and design principles defined in the
-<a href="{@docRoot}design/patterns/navigation-drawers.html">Navigation Drawer</a> design guide.</p>
+<a href="{@docRoot}design/patterns/navigation-drawer.html">Navigation Drawer</a> design guide.</p>
 </div>
 
 
@@ -220,7 +220,7 @@ callbacks, but it also facilitates the proper
 interaction behavior between the action bar icon and the navigation drawer (discussed further in
 the next section).</p>
 
-<p>As discussed in the <a href="{@docRoot}design/patterns/navigation-drawers.html">Navigation
+<p>As discussed in the <a href="{@docRoot}design/patterns/navigation-drawer.html">Navigation
 Drawer</a> design guide, you should modify the contents of the action bar
 when the drawer is visible, such as to change the title and remove action items that are
 contextual to the main content. The following code shows how you can do so by overriding {@link
