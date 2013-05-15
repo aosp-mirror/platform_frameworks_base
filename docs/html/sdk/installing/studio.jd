@@ -1,69 +1,15 @@
-page.title=Android SDK
-page.tags="download"
-page.template=sdk
-header.hide=1
-page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
-
-
-sdk.linux32_bundle_download=adt-bundle-linux-x86-20130514.zip
-sdk.linux32_bundle_bytes=433992720
-sdk.linux32_bundle_checksum=38b29a0721423e59c55c62c0356b1c18
-
-sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20130514.zip
-sdk.linux64_bundle_bytes=434278511
-sdk.linux64_bundle_checksum=f5f7387d209a67fe1638acab7e0037a4
-
-sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20130514.zip
-sdk.mac64_bundle_bytes=403067311
-sdk.mac64_bundle_checksum=5391a1f0284c1fb87048010fbc2808ab
-
-sdk.win32_bundle_download=adt-bundle-windows-x86-20130514.zip
-sdk.win32_bundle_bytes=440739521
-sdk.win32_bundle_checksum=51fb90bc049f66730d7b8da5671a4b93
-
-sdk.win64_bundle_download=adt-bundle-windows-x86_64-20130514.zip
-sdk.win64_bundle_bytes=440868113
-sdk.win64_bundle_checksum=0eb9a91cc0c170a1f1bc9b47d0f4ec81
-
-
-
-sdk.linux_download=android-sdk_r22-linux.tgz
-sdk.linux_bytes=99643077
-sdk.linux_checksum=30fb75bad918c5c3d79f8ec3cc44b3cf
-
-sdk.mac_download=android-sdk_r22-macosx.zip
-sdk.mac_bytes=71244523
-sdk.mac_checksum=fa5193ad41edecac6960023f55569ba3
-
-sdk.win_download=android-sdk_r22-windows.zip
-sdk.win_bytes=107505668
-sdk.win_checksum=71722fe052ae6380444a21bce8ee87c2
-
-sdk.win_installer=installer_r22-windows.exe
-sdk.win_installer_bytes=87498295
-sdk.win_installer_checksum=e0cc167733bf8b51dbc7e0ad0a8c8d4b
-
-
-
-
-
+page.title=Getting Started with Android Studio
 @jd:body
 
-<style type="text/css">
-  .offline {display:none;}
-</style>
 
 
 
+<div style="position:relative;min-height:660px;">
 
-<div style="position:relative;height:660px;">
+<h3 style="color:#f80">EARLY ACCESS PREVIEW</h3>
 
-
-<div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
+<div id="tos" style="position:absolute;display:none;width:inherit;">
 <div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
-
-<h1 id="tos-header" style="margin-top:0">Get the Android SDK</h1>
-
 
 
 <p class="sdk-terms-intro">Before installing the Android SDK, you must agree to the following terms and conditions.</p>
@@ -203,19 +149,6 @@ This is the Android Software Development Kit License Agreement
 
 
 
-
-<div id="next-steps" style="display:none;position:absolute;width:inherit">
-  <p>Now that you've downloaded the Android SDK, you don't need to return here
-  for SDK updates. The SDK tools allow you to
-  install additional packages and future updates from the SDK Manager.</p>
-  <p>For instructions about setting up your Android SDK for the first time,
-  read <a id="next-link" href="{@docRoot}sdk/installing/bundle.html">Setting
-  Up the ADT Bundle</a>.</p>
-
-</div><!-- end next-steps -->
-
-
-
 <div id="sdk-terms-form">
 <p>
 <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
@@ -236,156 +169,303 @@ This is the Android Software Development Kit License Agreement
 
 
 
-<div class="wrap" id="landing">
-
-<div class="col-13">&nbsp;</div><!-- provides top margin for content -->
-
-<div class="col-6" style="margin-left:0">
-
-<h1 style="margin-top:0">Get the Android SDK</h1>
 
 
-<p>The Android SDK provides you the API libraries and developer tools necessary to build, test,
-  and debug apps for Android.</p>
 
-<p>If you're a new Android developer, we recommend you download the ADT Bundle
-to quickly start developing apps. It includes the essential
-Android SDK components and a version of the Eclipse IDE with built-in
-<b>ADT (Android Developer Tools)</b> to
-streamline your Android app development.</p>
 
-<p>With a single download, the ADT Bundle
-includes everything you need to begin developing apps:</p>
+
+
+
+
+
+
+
+
+
+
+
+<div id="main">
+
+<div class="figure" style="width:400px;margin-top:-50px">
+<img src="{@docRoot}images/tools/android-studio.png" height="330" width="400" style="margin-bottom:20px" />
+
+<a class="big button subtitle" id="download-ide-button"
+href="" style="display:none;width:265px;margin:0 auto;display:block;font-size:18px" ></a>
+<div style="width:290px;padding:10px 40px 0 60px;font-size:12px;line-height:16px">
+
+<p style="margin-bottom:8px">This download includes:</p>
 <ul>
-<li>Eclipse + ADT plugin</li>
-<li>Android SDK Tools</li>
-<li>Android Platform-tools</li>
-<li>The latest Android platform</li>
-<li>The latest Android system image for the emulator</li>
+<li>Android Studio <b>early access preview</b></li>
+<li>All the Android SDK Tools to design, test, debug, and profile your app</li>
+<li>The latest Android platform to compile your app</li>
+<li>The latest Android system image to run your app in the emulator</li>
 </ul>
 
-
-<!-- this appears when viewing the offline docs -->
-<p class="offline">
-To get the ADT Bundle or stand-alone SDK Tools, please visit the web site at <a
-href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
-</p>
-
-</div><!-- end col-6 (left column) -->
-
-
-
-<div class="col-7" style="margin-right:0;">
-  <img src="{@docRoot}images/sdk-cube.png" alt="" height=264 />
-
-<!-- this appears when viewing the online docs -->
-<div class="online">
-
-<a class="big button subtitle" id="download-bundle-button"
-href="" style="display:none;width:265px;margin:0 auto;display:block" ></a>
-
-
-
-
-<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
-
 </div>
-<!-- end online -->
-
-</div><!-- end col-7 -->
-
-
-
-
-
-
-<!-- alternative SDK options -->
-<div class="col-13" style="margin:0;">
-
-
-<!-- this appears only when viewing the online docs -->
-<div class="online caution">
-<h3 style="margin:0 0 10px 0;font-size:14px">Android Studio Early Access Preview</h3>
-
-<p>A new Android development environment called Android Studio,
-based on IntelliJ IDEA, is now available as an <strong>early access preview</strong>.
-For more information, see
-<a href="{@docRoot}sdk/installing/studio.html">Getting Started with Android Studio</a>.</p>
-
-</div>
-
-<p>If you prefer to use an existing version of Eclipse or another IDE,
-you can instead take a more customized approach to installing
-the Android SDK. See the following instructions:</p>
-
-
-<h4 id="ExistingIDE"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'.myide');hideExpandable('.pax,.reqs');return false;"
-  >USE AN EXISTING IDE</a></h4>
-
-<div class="col-13 myide" style="margin:0 0 15px;display:none;">
-
-<p>If you already have an IDE you want to use for Android app development,
-setting up a new SDK requires that you download the SDK Tools, then
-select additional Android SDK packages to install (such as the Android platform
-and system image). If you'll be using an existing version of Eclipse, then you can add
-the ADT plugin to it.</p>
-  <p>
-<a class="button subtitle" id="download-tools-button" href="" style="display:none" ></a>
-  </p>
-
-
 </div>
 
 
 
+<p>Android Studio is a new Android development environment based on IntelliJ
+IDEA. Similar to Eclipse with the
+ADT Plugin, Android Studio provides integrated Android developer tools
+for development and debugging. On top of the
+capabilities you expect from IntelliJ, Android Studio offers:</p>
 
-
-<h4 id="Requirements"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'.reqs');hideExpandable('.pax,.myide');return false;"
-  >SYSTEM REQUIREMENTS</a></h4>
-
-<div class="col-6 reqs" style="margin:0 0 15px;display:none;">
-<h5>Operating Systems</h5>
 <ul>
-  <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
-  <li>Mac OS X 10.5.8 or later (x86 only)</li>
-  <li>Linux (tested on Ubuntu Linux, Lucid Lynx)
-    <ul>
-      <li>GNU C Library (glibc) 2.7 or later is required.</li>
-      <li>On Ubuntu Linux, version 8.04 or later is required.</li>
-      <li>64-bit distributions must be capable of running 32-bit applications.</li>
-    </ul>
+  <li>Gradle-based build support.</li>
+  <li>Android-specific refactoring and quick fixes.</li>
+  <li>Lint tools to catch performance, usability, version compatibility and other problems.</li>
+  <li>ProGuard and app-signing capabilities. </li>
+  <li>Template-based wizards to create common Android designs and components.</li>
+  <li>A rich layout editor that allows you to drag-and-drop UI components, preview layouts on
+  multiple screen configurations, and much more.</li>
+</ul>
+
+<p class="caution"><strong>Caution:</strong> Android Studio is currently available as
+an <strong>early access preview</strong>. Several features
+are either incomplete or not yet implemented and you may encounter bugs. If you are not
+comfortable using an unfinished product, you may want to instead
+download (or continue to use) the
+<a href="{@docRoot}sdk/index.html">ADT Bundle</a> (Eclipse with the ADT Plugin).</p>
+
+
+
+
+<h4 style="clear:right;text-align:right;margin-right:50px"><a href='' class="expandable"
+  onclick="toggleExpandable(this,'.pax');return false;"
+  >DOWNLOAD FOR OTHER PLATFORMS</a></h4>
+
+
+<div class="pax col-13 online" style="display:none;margin:0;">
+
+<p class="table-caption">&nbsp;<strong>Android Studio v0.1</strong></p>
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a onclick="return onDownload(this)" id="win-studio"
+      href="http://dl.google.com/android/studio/android-studio-bundle-130.676883-windows.exe">
+      android-studio-bundle-130.676883-windows.exe
+      </a>
+    </td>
+    <td>381763627 bytes</td>
+    <td>592129b7aee608ad706752369d99a2a1</td>
+  </tr>
+
+  <tr>
+    <td><nobr>Mac OS X</nobr></td>
+    <td>
+  <a onclick="return onDownload(this)" id="mac-studio"
+    href="http://dl.google.com/android/studio/android-studio-bundle-130.676883-mac.dmg">
+    android-studio-bundle-130.676883-mac.dmg
+    </a>
+    </td>
+    <td>371232906 bytes</td>
+    <td>16192870d1a1e99e2d96d5fa9fc3fccb</td>
+  </tr>
+
+  <tr>
+    <td>Linux</td>
+    <td>
+  <a onclick="return onDownload(this)" id="linux-studio"
+    href="http://dl.google.com/android/studio/android-studio-bundle-130.676883-linux.tgz">
+    android-studio-bundle-130.676883-linux.tgz
+    </a>
+    </td>
+    <td>400151208 bytes</td>
+    <td>2b25f4ee51a2e076b0ede6da94508761</td>
+  </tr>
+  </table>
+
+</div><!-- end pax -->
+
+
+
+
+
+
+
+
+<h2 id="Installing">Installing Android Studio</h2>
+<ol>
+<li>Download the <strong>Android Studio</strong> package from above.</li>
+<li>Install Android Studio and the SDK tools:
+  <p><b>Windows:</b></p>
+  <ol>
+    <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.
+    <li>Follow the setup wizard to install Android Studio.
+  </ol>
+  <p><b>Mac OS X:</b></p>
+  <ol>
+    <li>Open the downloaded DMG file, {@code android-studio-bundle-&lt;version&gt;.dmg}.
+    <li>Drag and drop Android Studio into the Applications folder.
+  </ol>
+  <p><b>Linux:</b></p>
+  <ol>
+    <li>Unpack the downloaded Tar file, {@code android-studio-bundle-&lt;version&gt;.tgz}, into an appropriate
+    location for your applications.
+    <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
+    in a terminal and execute {@code studio.sh}.
+      <p>You may want to add {@code android-studio/bin/} to your PATH environmental
+      variable so that you can start Android Studio from any directory.</p>
+    </li>
+  </ol>
+</li>
+</ol>
+
+<p>That's it! You're ready to start developing apps with Android Studio.</p>
+
+<div class="note">
+<p><strong>Note:</strong> On Windows and Mac, the individual tools and
+other SDK packages are saved within the Android Studio application directory.
+To access the tools directly, use a terminal to navigate into the application and locate
+the {@code sdk/} directory. For example:</p>
+<p>Windows: <code>\Users\&lt;user&gt;\AppData\Local\Android\android-studio\sdk\</code></p>
+<p>Mac: <code>/Applications/Android\ Studio.app/sdk/</code></p>
+</div>
+
+
+<h2 id="Start">Starting a Project</h2>
+
+<p>When you launch Android Studio for the first time, you'll see a Welcome
+screen that offers several ways to get started:</p>
+
+<ul>
+  <li>To start building a new app, click <strong>New Project</strong>.
+    <p>This starts the New Project wizard, which helps you set up a project using an app template.
+  </li>
+  <li>To import an existing Android app project, click <strong>Import Project</strong>.
+    <p class="note"><strong>Note:</strong> If you previously developed your Android project
+    with Eclipse, you should first use the new export feature in the ADT plugin to prepare
+    your project with the new Gradle build system. For more information, read
+    <a href="{@docRoot}sdk/installing/migrate.html">Migrating from Eclipse</a>.</p>
   </li>
 </ul>
-</div>
 
-<div class="col-6 reqs" style="margin:0 0 15px 20px;display:none;">
-<h5>Eclipse IDE</h5>
-    <ul>
-      <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.6.2 (Helios) or greater
-<p class="note"><strong>Note:</strong> Eclipse 3.5 (Galileo) is no longer
-supported with the latest version of ADT.</p></li>
-      <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
-in most Eclipse IDE packages) </li>
-      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
-        (JRE alone is not sufficient)</li>
-      <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">Android Development Tools plugin</a>
-(recommended)</li>
-      <li><strong>Not</strong> compatible with GNU Compiler for Java (gcj)</li>
-    </ul>
+<p>For additional help using Android Studio, read <a
+href="{@docRoot}sdk/installing/studio-tips.html">Tips and Tricks</a>.</p>
 
 
-<h5>Other development environments</h5>
-    <ul>
-      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
-        (JRE alone is not sufficient)</li>
-      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later</li>
-      <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
-    </ul>
-
-<p class="note"><strong>Note:</strong> Some Linux distributions may include JDK 1.4 or Gnu Compiler
-for Java, both of which are <em>not</em> supported for Android development. </p>
-</div><!-- end col-7 reqs -->
+<p>As you continue developing apps, you may need to install additional versions
+of Android for the emulator and other packages such as the <a
+href="{@docRoot}tools/extras/support-library.html">Android Support Library</a>.
+To install more packages, use
+the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>, which you can
+open from Android Studio by clicking <strong>SDK Manager</strong>
+<img src="{@docRoot}images/tools/sdk-manager-studio.png"
+style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><!-- end main content -->
+
+
+
+
+</div><!-- end relative position wrapper -->
+
+
+
+
+
+
+
+  
+<script>
+  var os;
+  var bundlename;
+  var $toolslink;
+
+  if (navigator.appVersion.indexOf("Win")!=-1) {
+    os = "Windows";
+    bundlename = 'win-studio';
+  } else if (navigator.appVersion.indexOf("Mac")!=-1) {
+    os = "Mac";
+    bundlename = 'mac-studio';
+  } else if (navigator.appVersion.indexOf("Linux")!=-1) {
+    os = "Linux";
+    bundlename = 'linux-studio';
+  }
+
+  if (os) {
+    /* set up primary ACE download button */
+    $('#download-ide-button').show();
+    $('#download-ide-button').append("Download Android Studio v0.1 <br/><span class='small'>for " + os + "</span>");
+    $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
+
+  } else {
+    $('.pax').show();
+  }
+  
+  
+  function onDownload(link, button) {
+  
+    /* set text for download button */
+    if (button) {
+      $("#downloadForRealz").html($(link).text());
+    } else {
+      $("#downloadForRealz").html("Download " + $(link).text());
+    }
+    
+    $studioLink = $("a#"+$(link).attr('href'));
+    $("#downloadForRealz").attr('href',$studioLink.attr('href'));
+
+    $("#tos").fadeIn('fast');
+    $("#main").fadeOut('fast');
+
+    location.hash = "download";
+    return false;
+  }
+
+
+  function onAgreeChecked() {
+    /* verify that the TOS is agreed */
+    if ($("input#agree").is(":checked")) {
+      /* reveal the download button */
+      $("a#downloadForRealz").removeClass('disabled');
+    } else {
+      $("a#downloadForRealz").addClass('disabled');
+    }
+  }
+
+  function onDownloadForRealz(link) {
+    if ($("input#agree").is(':checked')) {
+      $("div.sdk-terms").slideUp();
+      $("#sdk-terms-form,.sdk-terms-intro").fadeOut('slow');
+      $("#main").fadeIn('slow');
+      return true;
+    } else {
+      $("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#258AAF"}, 200,
+        function() {$("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#222"}, 200)}
+      );
+      return false;
+    }
+  }
+
+  $(window).hashchange( function(){
+    if (location.hash == "") {
+      location.reload();
+    }
+  });
+
+</script>
