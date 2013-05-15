@@ -420,7 +420,7 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
   
   
   function onDownload(link, button) {
-    $studioLink;
+    var $studioLink;
 
     /* set text for download button */
     if (button) {
