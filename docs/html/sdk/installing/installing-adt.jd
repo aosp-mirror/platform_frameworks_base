@@ -106,13 +106,13 @@ href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">Purchase
     <li>In Eclipse, select <strong>Help</strong> &gt; <strong>Install New
 Software</strong>.</li>
     <li>Click <strong>Add</strong>, in the top-right corner.</li>
-    <li>In the Add Repository dialog that appears, enter "Translation Manager Plugin" for the <em>Name</em> and the
-following URL for the <em>Location</em>:
+    <li>In the Add Repository dialog that appears, enter a repository name for the <em>Name</em>
+      and the following URL for the <em>Location</em>:
       <pre>https://dl.google.com/alt/</pre>
     </li>
     <li>Click <strong>OK</strong>.
-    <li>In the Available Software dialog, select the checkbox next to Translation Manager Plugin and click
-<strong>Next</strong>.</li>
+    <li>In the Available Software dialog, select the checkbox next to <strong>Android Developer Tools
+       - Translation Manager</strong> and click <strong>Next</strong>.</li>
     <li>In the next window, you'll see a list of the tools to be downloaded. Click
 <strong>Next</strong>. </li>
     <li>Read and accept the license agreements, then click <strong>Finish</strong>.
