@@ -19,7 +19,7 @@ build files</strong>.</li>
 <strong>Finish</strong>.</li>
 </ol>
 
-<p>Your selected projects remain in the same location but now contain a {@code .gradle}
+<p>Your selected projects remain in the same location but now contain a {@code build.gradle}
 build file and are ready for Android Studio.</p>
 
 
