@@ -4,6 +4,14 @@ page.tags="actionbar","navigation"
 
 <img src="{@docRoot}design/media/action_bar_pattern_overview.png">
 
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/actionbar.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Action Bar</p>
+  </div>
+</a>
+
+
 <p>The <em>action bar</em> is a dedicated piece of real estate at the top of each screen that is generally persistent throughout the app.</p>
 <p><strong>It provides several key functions</strong>:</p>
 <ul>
@@ -48,7 +56,7 @@ Up navigation, see the <a href="{@docRoot}design/patterns/navigation.html">Navig
         <p>
 
 If your app displays data in different views, this segment of the action bar allows users to switch
-views. Examples of view-switching controls are drop-down menus or tab controls. 
+views. Examples of view-switching controls are drop-down menus or tab controls. For more information on view-switching, see the <a href="{@docRoot}design/patterns/app-structure.html">App Structure</a> pattern.
 
         </p>
         <p>
@@ -115,132 +123,11 @@ the top bar.</p>
   </div>
 </div>
 
-<h2 id="contextual">Contextual Action Bars</h2>
-
-<p>A <em>contextual action bar (CAB)</em> is a temporary action bar that overlays the app's action bar for the
-duration of a particular sub-task. CABs are most typically used for tasks that involve acting on
-selected data or text.</p>
-
-<img src="{@docRoot}design/media/action_bar_cab.png">
-<div class="figure-caption">
-  Contextual action bar shown in Browser and Gmail
-</div>
-
-<p>The selection CAB appears after a long press on a selectable data item triggers selection mode.</p>
-<p><strong>From here the user can</strong>:</p>
-<ul>
-<li>Select additional elements by touching them.</li>
-<li>Trigger an action from the CAB that applies to all selected data items. The CAB then
-   automatically dismisses itself.</li>
-<li>Dismiss the CAB via the navigation bar's Back button or the CAB's checkmark button. This removes
-   the CAB along with all selection highlights.</li>
-</ul>
-<p>Use CABs whenever you allow the user to select data via long press. You can control the action
-content of a CAB in order to insert the actions you would like the user to be able to perform.</p>
-<p>For more information, refer to the <a href="{@docRoot}design/patterns/selection.html">Selection
-pattern</a>.</p>
-
-<h2 id="elements">View Controls</h2>
-<p>If your app displays data in different views, the action bar has three different controls to allow users to switch between them: tabs, spinners, and drawers.</p>
-
-<h4>Tabs</h4>
-<p><em>Tabs</em> display app views concurrently and make it easy to explore and switch between them. Tabs may be fixed, where all tabs are simultaneously displayed, or may scroll, allowing a larger number of views to be presented.</p>
-
-<img src="{@docRoot}design/media/tabs_youtube.png">
-
-<p><strong>Use tabs if</strong>:</p>
-<ul>
-<li>You expect your app's users to switch views frequently.</li>
-<li>You want the user to be highly aware of the alternate views.</li>
-</ul>
-
-<h4>Fixed tabs</h4>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-<p><em>Fixed tabs</em> are always visible on the screen, and can't be moved out of the way like scrollable
-tabs. Fixed tabs in the main action bar can move to the top bar when the screen orientation changes.</p>
-
-<p>Use fixed tabs to support quick changes between two or three app views. Fixed tabs should always allow the user to navigate between the views by swiping left or right on the content area.</p>
-
-  </div>
-  <div class="layout-content-col span-7">
-
-    <img src="{@docRoot}design/media/action_bar_pattern_default_tabs.png">
-    <div class="figure-caption">
-      Default fixed tabs shown in Holo Dark &amp; Light.
-    </div>
-
-  </div>
-</div>
-
-<h4>Scrollable tabs</h4>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-<p><em>Scrollable tabs</em> always take up the entire width of the bar, with the currently active view item in the center, and therefore need to live in a dedicated bar. Scrollable tabs can themselves be scrolled horizontally to bring more tabs into view.</p>
-<p>Use scrollable tabs if you have a large number of views or if you're unsure how many views will be displayed because your app inserts views dynamically (for example, open chats in a messaging app that the user can navigate between). Scrollable tabs should always allow the user to navigate between the views by swiping left or right on the content area as well as swiping the tabs themselves.</p>
-
-  </div>
-  <div class="layout-content-col span-7">
-
-    <video width="400" class="with-shadow play-on-hover" autoplay>
-      <source src="{@docRoot}design/media/tabs_scrolly.mp4" type="video/mp4">
-      <source src="{@docRoot}design/media/tabs_scrolly.webm" type="video/webm">
-      <source src="{@docRoot}design/media/tabs_scrolly.ogv" type="video/ogg">
-    </video>
-    <div class="figure-caption">
-      Scrolling tabs in the Play Store app.
-      <div class="video-instructions">&nbsp;</div>
-    </div>
-
-  </div>
-</div>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-
-<h4>Spinners</h4>
-<p>A <em>spinner</em> is a drop-down menu that allows users to switch between views of your app. </p>
-<p><strong>Use a spinner in the main action bar if</strong>:</p>
-<ul>
-<li>You don't want to give up the vertical screen real estate for a dedicated tab bar.</li>
-<li>The user is switching between views of the same data set (for example: calendar events viewed by day, week, or month) or data sets of the same type (such as content for two different accounts).</li>
-</ul>
-
-  </div>
-  <div class="layout-content-col span-7">
-
-    <img src="{@docRoot}design/media/action_bar_pattern_spinner.png">
-    <div class="figure-caption">
-      Action bar spinner from Calendar application.
-    </div>
-
-  </div>
-</div>
-
-<h4>Drawers</h4>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-<p>A <em>drawer</em> is a slide-out menu that allows users to switch between views of your app. It can be opened by touching the action bar's app icon (decorated with the Up caret.) Additionally, a drawer can be revealed by an edge swipe from the left of the screen, and dismissed by swiping from the right edge of the drawer. However, because many users will rely on Up navigation to open a drawer, it is only suitable for use at the topmost level of your app's hierarchy.</p>
-
-<p><strong>Open a drawer from the main action bar if</strong>:</p>
-<ul>
-<li>You don't want to give up the vertical screen real estate for a dedicated tab bar.</li>
-<li>You want to provide direct navigation to a number of views within your app which don't have direct relationships between each other.</li>
-</ul>
-
-  </div>
-  <div class="layout-content-col span-7">
-    <img src="{@docRoot}design/media/actionbar_drawer.png">
-  </div>
-</div>
-
-<h2>Action buttons</h2>
+<h2>Action Buttons</h2>
 <p><em>Action buttons</em> on the action bar surface your app's most important activities. Think about which
 buttons will get used most often, and order them accordingly. Depending on available screen real
 estate, the system shows your most important actions as action buttons and moves the rest to the
-action overflow. The action bar and the action overflow should only present actions to the user that
-are available. If an action is unavailable in the current context, hide it. Do not show it as
-disabled.</p>
+action overflow. The action bar should show only those actions that are available to the user. If an action is unavailable in the current context, hide it. Do not show it as disabled.</p>
 
 <img src="{@docRoot}design/media/action_bar_pattern_action_icons.png">
 <div class="figure-caption">
@@ -350,15 +237,31 @@ sharing options.</p>
   The Gallery app's share action provider with extended spinner for additional sharing options.
 </div>
 
+<h2 id="contextual">Contextual Action Bars</h2>
 
-<div class="note develop">
-<p><strong>Developer Guide</strong></p>
-  <p>For information about how to build an action bar
-  see the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API guide.
-  For information about contextual action bars, read
-  <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Creating Contextual Menus</a>.
-  </p>
+<p>A <em>contextual action bar (CAB)</em> is a temporary action bar that overlays the app's action bar for the
+duration of a particular sub-task. CABs are most typically used for tasks that involve acting on
+selected data or text.</p>
+
+<img src="{@docRoot}design/media/action_bar_cab.png">
+<div class="figure-caption">
+  Contextual action bar in Browser and Gmail
 </div>
+
+<p>The selection CAB appears after a long press on a selectable data item triggers selection mode.</p>
+<p><strong>From here the user can</strong>:</p>
+<ul>
+<li>Select additional elements by touching them.</li>
+<li>Trigger an action from the CAB that applies to all selected data items. The CAB then
+   automatically dismisses itself.</li>
+<li>Dismiss the CAB via the navigation bar's Back button or the CAB's checkmark button. This removes
+   the CAB along with all selection highlights.</li>
+</ul>
+<p>Use CABs whenever you allow the user to select data via long press. You can control the action
+content of a CAB in order to insert the actions you would like the user to be able to perform.</p>
+<p>For more information, refer to the <a href="{@docRoot}design/patterns/selection.html">Selection
+pattern</a>.</p>
+
 
 
 <h2 id="checklist">Action Bar Checklist</h2>
