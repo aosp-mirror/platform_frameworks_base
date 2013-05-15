@@ -10614,10 +10614,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             RectF boundingRect = mAttachInfo.mTmpTransformRect;
             boundingRect.set(rect);
             getMatrix().mapRect(boundingRect);
-            rect.set((int) (boundingRect.left - 0.5f),
-                    (int) (boundingRect.top - 0.5f),
-                    (int) (boundingRect.right + 0.5f),
-                    (int) (boundingRect.bottom + 0.5f));
+            rect.set((int) Math.floor(boundingRect.left),
+                    (int) Math.floor(boundingRect.top),
+                    (int) Math.ceil(boundingRect.right),
+                    (int) Math.ceil(boundingRect.bottom));
         }
     }
 
