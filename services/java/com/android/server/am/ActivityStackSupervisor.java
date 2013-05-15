@@ -216,20 +216,17 @@ public class ActivityStackSupervisor {
         }
     }
 
-    boolean isFocusedStack(ActivityStack stack) {
-        return getFocusedStack() == stack;
-    }
-
     boolean isFrontStack(ActivityStack stack) {
-        if (stack.mCurrentUser != mCurrentUser) {
-            return false;
-        }
-        return !(stack.isHomeStack() ^ getFocusedStack().isHomeStack());
+        return (stack.mCurrentUser == mCurrentUser) &&
+                !(stack.isHomeStack() ^ getFocusedStack().isHomeStack());
     }
 
     void moveHomeStack(boolean toFront) {
         final boolean homeInFront = isFrontStack(mHomeStack);
         if (homeInFront ^ toFront) {
+            if (DEBUG_STACK) Slog.d(TAG, "moveHomeTask: mStackState old=" +
+                    stackStateToString(mStackState) + " new=" + stackStateToString(homeInFront ?
+                    STACK_STATE_HOME_TO_BACK : STACK_STATE_HOME_TO_FRONT));
             mStackState = homeInFront ? STACK_STATE_HOME_TO_BACK : STACK_STATE_HOME_TO_FRONT;
         }
     }
@@ -382,9 +379,15 @@ public class ActivityStackSupervisor {
         // TODO: Not sure if this should check if all Paused are complete too.
         switch (mStackState) {
             case STACK_STATE_HOME_TO_BACK:
+                if (DEBUG_STACK) Slog.d(TAG, "allResumedActivitiesComplete: mStackState old=" +
+                        stackStateToString(STACK_STATE_HOME_TO_BACK) + " new=" +
+                        stackStateToString(STACK_STATE_HOME_IN_BACK));
                 mStackState = STACK_STATE_HOME_IN_BACK;
                 break;
             case STACK_STATE_HOME_TO_FRONT:
+                if (DEBUG_STACK) Slog.d(TAG, "allResumedActivitiesComplete: mStackState old=" +
+                        stackStateToString(STACK_STATE_HOME_TO_FRONT) + " new=" +
+                        stackStateToString(STACK_STATE_HOME_IN_FRONT));
                 mStackState = STACK_STATE_HOME_IN_FRONT;
                 break;
         }
@@ -478,7 +481,6 @@ public class ActivityStackSupervisor {
     ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
             PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
         ActivityRecord r = null;
-        final int numStacks = mStacks.size();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             final ActivityRecord ar =
@@ -588,16 +590,14 @@ public class ActivityStackSupervisor {
                     if (mService.mHeavyWeightProcess != null &&
                             (mService.mHeavyWeightProcess.info.uid != aInfo.applicationInfo.uid ||
                             !mService.mHeavyWeightProcess.processName.equals(aInfo.processName))) {
-                        int realCallingPid = callingPid;
                         int realCallingUid = callingUid;
                         if (caller != null) {
                             ProcessRecord callerApp = mService.getRecordForAppLocked(caller);
                             if (callerApp != null) {
-                                realCallingPid = callerApp.pid;
                                 realCallingUid = callerApp.info.uid;
                             } else {
                                 Slog.w(TAG, "Unable to find app for caller " + caller
-                                      + " (pid=" + realCallingPid + ") when starting: "
+                                      + " (pid=" + callingPid + ") when starting: "
                                       + intent.toString());
                                 ActivityOptions.abort(options);
                                 return ActivityManager.START_PERMISSION_DENIED;
@@ -716,7 +716,6 @@ public class ActivityStackSupervisor {
             throw new IllegalArgumentException("intents are length different than resolvedTypes");
         }
 
-        ActivityRecord[] outActivity = new ActivityRecord[1];
 
         int callingPid;
         if (callingUid >= 0) {
@@ -730,7 +729,7 @@ public class ActivityStackSupervisor {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mService) {
-
+                ActivityRecord[] outActivity = new ActivityRecord[1];
                 for (int i=0; i<intents.length; i++) {
                     Intent intent = intents[i];
                     if (intent == null) {
@@ -1184,11 +1183,19 @@ public class ActivityStackSupervisor {
         }
         if (!r.isApplicationActivity() || (r.task != null && !r.task.isApplicationTask())) {
             if (mStackState != STACK_STATE_HOME_IN_FRONT) {
+                if (DEBUG_STACK) Slog.d(TAG, "setFocusedStack: mStackState old=" +
+                        stackStateToString(mStackState) + " new=" +
+                        stackStateToString(STACK_STATE_HOME_TO_FRONT) +
+                        " Callers=" + Debug.getCallers(3));
                 mStackState = STACK_STATE_HOME_TO_FRONT;
             }
         } else {
             mFocusedStack = r.task.stack;
             if (mStackState != STACK_STATE_HOME_IN_BACK) {
+                if (DEBUG_STACK) Slog.d(TAG, "setFocusedStack: mStackState old=" +
+                        stackStateToString(mStackState) + " new=" +
+                        stackStateToString(STACK_STATE_HOME_TO_BACK) +
+                        " Callers=" + Debug.getCallers(3));
                 mStackState = STACK_STATE_HOME_TO_BACK;
             }
         }
@@ -1994,6 +2001,8 @@ public class ActivityStackSupervisor {
             mUserStates.delete(userId);
         } else {
             mFocusedStack = null;
+            if (DEBUG_STACK) Slog.d(TAG, "switchUserLocked: mStackState=" +
+                    stackStateToString(STACK_STATE_HOME_IN_FRONT));
             mStackState = STACK_STATE_HOME_IN_FRONT;
         }
 
@@ -2077,9 +2086,20 @@ public class ActivityStackSupervisor {
         }
     }
 
+    private static String stackStateToString(int stackState) {
+        switch (stackState) {
+            case STACK_STATE_HOME_IN_FRONT: return "STACK_STATE_HOME_IN_FRONT";
+            case STACK_STATE_HOME_TO_BACK: return "STACK_STATE_HOME_TO_BACK";
+            case STACK_STATE_HOME_IN_BACK: return "STACK_STATE_HOME_IN_BACK";
+            case STACK_STATE_HOME_TO_FRONT: return "STACK_STATE_HOME_TO_FRONT";
+            default: return "Unknown stackState=" + stackState;
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mDismissKeyguardOnNextActivity:");
                 pw.println(mDismissKeyguardOnNextActivity);
+        pw.print(prefix); pw.print("mStackState="); pw.println(stackStateToString(mStackState));
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
@@ -2088,6 +2108,7 @@ public class ActivityStackSupervisor {
 
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage) {
+        pw.print("  mStackState="); pw.println(stackStateToString(mStackState));
         final int numStacks = mStacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
@@ -2143,7 +2164,7 @@ public class ActivityStackSupervisor {
         return true;
     }
 
-    static final void dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
+    static void dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
             String prefix, String label, boolean complete, boolean brief, boolean client,
             String dumpPackage) {
         TaskRecord lastTask = null;
@@ -2285,6 +2306,8 @@ public class ActivityStackSupervisor {
         void restore() {
             ActivityStackSupervisor supervisor = ActivityStackSupervisor.this;
             supervisor.mFocusedStack = mSavedFocusedStack;
+            if (DEBUG_STACK) Slog.d(TAG, "UserState.restore: mStackState old=" +
+                    stackStateToString(mSavedStackState));
             supervisor.mStackState = mSavedStackState;
         }
     }
