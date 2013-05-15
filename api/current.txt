@@ -7634,6 +7634,7 @@ package android.database {
     method public abstract float getFloat(int);
     method public abstract int getInt(int);
     method public abstract long getLong(int);
+    method public abstract android.net.Uri getNotificationUri();
     method public abstract int getPosition();
     method public abstract short getShort(int);
     method public abstract java.lang.String getString(int);
@@ -7739,6 +7740,7 @@ package android.database {
     method public float getFloat(int);
     method public int getInt(int);
     method public long getLong(int);
+    method public android.net.Uri getNotificationUri();
     method public int getPosition();
     method public short getShort(int);
     method public java.lang.String getString(int);
@@ -22628,6 +22630,7 @@ package android.test.mock {
     method public float getFloat(int);
     method public int getInt(int);
     method public long getLong(int);
+    method public android.net.Uri getNotificationUri();
     method public int getPosition();
     method public short getShort(int);
     method public java.lang.String getString(int);
