@@ -5,7 +5,7 @@ page.title=Tablet App Quality Checklist
 <h2>Checklist</h2>
 <ol>
 
-<li><a href="#core-app-quality">1. Test for Core Tablet App Quality</a></li>
+<li><a href="#core-app-quality">1. Test for Basic Tablet App Quality</a></li>
 <li><a href="#optimize-layouts">2. Optimize your layouts</a></li>
 <li><a href="#use-extra-space">3. Use the extra screen area</a></li>
 <li><a href="#use-tablet-icons">4. Use assets designed for tablets</a></li>
