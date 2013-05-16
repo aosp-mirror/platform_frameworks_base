@@ -186,6 +186,8 @@ public class MediaRouter {
                     if (sStatic.mBluetoothA2dpRoute == null) {
                         final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
                         info.mName = mCurAudioRoutesInfo.mBluetoothName;
+                        info.mDescription = sStatic.mResources.getText(
+                                com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         sStatic.mBluetoothA2dpRoute = info;
                         addRouteStatic(sStatic.mBluetoothA2dpRoute);
@@ -933,6 +935,8 @@ public class MediaRouter {
         newRoute.mEnabled = available;
 
         newRoute.mName = display.getFriendlyDisplayName();
+        newRoute.mDescription = sStatic.mResources.getText(
+                com.android.internal.R.string.wireless_display_route_description);
 
         newRoute.mPresentationDisplay = choosePresentationDisplayForRoute(newRoute,
                 sStatic.getAllPresentationDisplays());
@@ -1038,6 +1042,7 @@ public class MediaRouter {
     public static class RouteInfo {
         CharSequence mName;
         int mNameResId;
+        CharSequence mDescription;
         private CharSequence mStatus;
         int mSupportedTypes;
         RouteGroup mGroup;
@@ -1097,24 +1102,34 @@ public class MediaRouter {
         }
 
         /**
-         * @return The user-friendly name of a media route. This is the string presented
+         * Gets the user-visible name of the route.
+         * <p>
+         * The route name identifies the destination represented by the route.
+         * It may be a user-supplied name, an alias, or device serial number.
+         * </p>
+         *
+         * @return The user-visible name of a media route.  This is the string presented
          * to users who may select this as the active route.
          */
         public CharSequence getName() {
             return getName(sStatic.mResources);
         }
-        
+
         /**
-         * Return the properly localized/resource selected name of this route.
-         * 
+         * Return the properly localized/resource user-visible name of this route.
+         * <p>
+         * The route name identifies the destination represented by the route.
+         * It may be a user-supplied name, an alias, or device serial number.
+         * </p>
+         *
          * @param context Context used to resolve the correct configuration to load
-         * @return The user-friendly name of the media route. This is the string presented
+         * @return The user-visible name of a media route.  This is the string presented
          * to users who may select this as the active route.
          */
         public CharSequence getName(Context context) {
             return getName(context.getResources());
         }
-        
+
         CharSequence getName(Resources res) {
             if (mNameResId != 0) {
                 return mName = res.getText(mNameResId);
@@ -1123,7 +1138,20 @@ public class MediaRouter {
         }
 
         /**
-         * @return The user-friendly status for a media route. This may include a description
+         * Gets the user-visible description of the route.
+         * <p>
+         * The route description describes the kind of destination represented by the route.
+         * It may be a user-supplied string, a model number or brand of device.
+         * </p>
+         *
+         * @return The description of the route, or null if none.
+         */
+        public CharSequence getDescription() {
+            return mDescription;
+        }
+
+        /**
+         * @return The user-visible status for a media route. This may include a description
          * of the currently playing media, if available.
          */
         public CharSequence getStatus() {
@@ -1407,6 +1435,7 @@ public class MediaRouter {
         public String toString() {
             String supportedTypes = typesToString(getSupportedTypes());
             return getClass().getSimpleName() + "{ name=" + getName() +
+                    ", description=" + getDescription() +
                     ", status=" + getStatus() +
                     ", category=" + getCategory() +
                     ", supportedTypes=" + supportedTypes +
@@ -1442,11 +1471,30 @@ public class MediaRouter {
         
         /**
          * Set the user-visible name of this route.
+         * <p>
+         * The route name identifies the destination represented by the route.
+         * It may be a user-supplied name, an alias, or device serial number.
+         * </p>
+         *
          * @param resId Resource ID of the name to display to the user to describe this route
          */
         public void setName(int resId) {
             mNameResId = resId;
             mName = null;
+            routeUpdated();
+        }
+
+        /**
+         * Set the user-visible description of this route.
+         * <p>
+         * The route description describes the kind of destination represented by the route.
+         * It may be a user-supplied string, a model number or brand of device.
+         * </p>
+         *
+         * @param description The description of the route, or null if none.
+         */
+        public void setDescription(CharSequence description) {
+            mDescription = description;
             routeUpdated();
         }
 

@@ -884,6 +884,7 @@
   <java-symbol type="string" name="error_message_title" />
   <java-symbol type="string" name="action_bar_home_description_format" />
   <java-symbol type="string" name="action_bar_home_subtitle_description_format" />
+  <java-symbol type="string" name="wireless_display_route_description" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />
