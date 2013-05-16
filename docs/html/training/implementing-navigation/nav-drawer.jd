@@ -25,6 +25,12 @@ trainingnavtop=true
 <p class="filename">NavigationDrawer.zip</p>
 </div>
 
+<div class="download-box">
+<a href="http://developer.android.com/downloads/design/Android_Navigation_Drawer_Icon_20130516.zip"
+  class="button">Download the nav drawer icons</a>
+<p class="filename">Android_Navigation_Drawer_Icon_20130516.zip</p>
+</div>
+
 </div>
 </div>
 
@@ -296,6 +302,8 @@ it with its constructor, which requires the following arguments:</p>
   <li>The {@link android.app.Activity} hosting the drawer.
   <li>The {@link android.support.v4.widget.DrawerLayout}.
   <li>A drawable resource to use as the drawer indicator.
+   <p><a href="http://developer.android.com/downloads/design/Android_Navigation_Drawer_Icon_20130516.zip"
+>Download the standard navigation icons</a> (available for both dark and light themes).</p>
   <li>A String resource to describe the "open drawer" action (for accessibility).
   <li>A String resource to describe the "close drawer" action (for accessibility).
 </ul>
@@ -315,8 +323,13 @@ public class MainActivity extends Activity {
         ...
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+                ) {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
