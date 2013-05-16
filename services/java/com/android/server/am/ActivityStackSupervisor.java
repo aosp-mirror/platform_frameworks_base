@@ -22,7 +22,9 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.am.ActivityManagerService.localLOGV;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerService.DEBUG_RESULTS;
+import static com.android.server.am.ActivityManagerService.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerService.DEBUG_USER_LEAVING;
@@ -58,6 +60,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -78,8 +81,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityStackSupervisor {
-    static final boolean DEBUG_STACK = ActivityManagerService.DEBUG_STACK;
-
     static final boolean DEBUG = ActivityManagerService.DEBUG || false;
     static final boolean DEBUG_ADD_REMOVE = DEBUG || false;
     static final boolean DEBUG_APP = DEBUG || false;
@@ -92,9 +93,13 @@ public class ActivityStackSupervisor {
     /** How long we wait until giving up on the last activity telling us it is idle. */
     static final int IDLE_TIMEOUT = 10*1000;
 
+    /** How long we can hold the sleep wake lock before giving up. */
+    static final int SLEEP_TIMEOUT = 5*1000;
+
     static final int IDLE_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG;
     static final int IDLE_NOW_MSG = FIRST_SUPERVISOR_STACK_MSG + 1;
     static final int RESUME_TOP_ACTIVITY_MSG = FIRST_SUPERVISOR_STACK_MSG + 2;
+    static final int SLEEP_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 3;
 
     final ActivityManagerService mService;
     final Context mContext;
@@ -154,6 +159,9 @@ public class ActivityStackSupervisor {
      * settle down before doing so.  It contains ActivityRecord objects. */
     final ArrayList<ActivityRecord> mFinishingActivities = new ArrayList<ActivityRecord>();
 
+    /** List of activities that are in the process of going to sleep. */
+    final ArrayList<ActivityRecord> mGoingToSleepActivities = new ArrayList<ActivityRecord>();
+
     /** List of ActivityRecord objects that have been finished and must still report back to a
      * pending thumbnail receiver. */
     final ArrayList<ActivityRecord> mCancelledThumbnails = new ArrayList<ActivityRecord>();
@@ -168,11 +176,23 @@ public class ActivityStackSupervisor {
     /** Stacks belonging to users other than mCurrentUser. Indexed by userId. */
     final SparseArray<UserState> mUserStates = new SparseArray<UserState>();
 
+    /** Set when we have taken too long waiting to go to sleep. */
+    boolean mSleepTimeout = false;
+
+    /**
+     * Set when the system is going to sleep, until we have
+     * successfully paused the current activity and released our wake lock.
+     * At that point the system is allowed to actually sleep.
+     */
+    final PowerManager.WakeLock mGoingToSleep;
+
     public ActivityStackSupervisor(ActivityManagerService service, Context context,
             Looper looper) {
         mService = service;
         mContext = context;
         mLooper = looper;
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
         mHandler = new ActivityStackSupervisorHandler(looper);
     }
 
@@ -1903,43 +1923,116 @@ public class ActivityStackSupervisor {
     }
 
     void goingToSleepLocked() {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).stopIfSleepingLocked();
+        scheduleSleepTimeout();
+        if (!mGoingToSleep.isHeld()) {
+            mGoingToSleep.acquire();
+            for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = mStacks.get(stackNdx);
+                if (stack.mResumedActivity != null) {
+                    stack.stopIfSleepingLocked();
+                }
+            }
         }
     }
 
     boolean shutdownLocked(int timeout) {
         boolean timedout = false;
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack.mResumedActivity != null) {
-                stack.stopIfSleepingLocked();
-                final long endTime = System.currentTimeMillis() + timeout;
-                while (stack.mResumedActivity != null || stack.mPausingActivity != null) {
-                    long delay = endTime - System.currentTimeMillis();
-                    if (delay <= 0) {
-                        Slog.w(TAG, "Activity manager shutdown timed out");
-                        timedout = true;
-                        break;
-                    }
+        goingToSleepLocked();
+        checkReadyForSleepLocked();
+
+        final long endTime = System.currentTimeMillis() + timeout;
+        while (true) {
+            boolean cantShutdown = false;
+            for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                cantShutdown |= mStacks.get(stackNdx).checkReadyForSleepLocked();
+            }
+            if (cantShutdown) {
+                long timeRemaining = endTime - System.currentTimeMillis();
+                if (timeRemaining > 0) {
                     try {
-                        mService.wait();
+                        mService.wait(timeRemaining);
                     } catch (InterruptedException e) {
                     }
+                } else {
+                    Slog.w(TAG, "Activity manager shutdown timed out");
+                    timedout = true;
+                    break;
                 }
+            } else {
+                break;
             }
         }
+
+        // Force checkReadyForSleep to complete.
+        mSleepTimeout = true;
+        checkReadyForSleepLocked();
+
         return timedout;
     }
 
     void comeOutOfSleepIfNeededLocked() {
+        removeSleepTimeouts();
+        if (mGoingToSleep.isHeld()) {
+            mGoingToSleep.release();
+        }
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             stack.awakeFromSleepingLocked();
             if (isFrontStack(stack)) {
                 resumeTopActivitiesLocked();
             }
+        }
+        mGoingToSleepActivities.clear();
+    }
+
+    void activitySleptLocked(ActivityRecord r) {
+        mGoingToSleepActivities.remove(r);
+        checkReadyForSleepLocked();
+    }
+
+    void checkReadyForSleepLocked() {
+        if (!mService.isSleepingOrShuttingDown()) {
+            // Do not care.
+            return;
+        }
+
+        if (!mSleepTimeout) {
+            boolean dontSleep = false;
+            for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                dontSleep |= mStacks.get(stackNdx).checkReadyForSleepLocked();
+            }
+
+            if (mStoppingActivities.size() > 0) {
+                // Still need to tell some activities to stop; can't sleep yet.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to stop "
+                        + mStoppingActivities.size() + " activities");
+                scheduleIdleLocked();
+                dontSleep = true;
+            }
+
+            if (mGoingToSleepActivities.size() > 0) {
+                // Still need to tell some activities to sleep; can't sleep yet.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to sleep "
+                        + mGoingToSleepActivities.size() + " activities");
+                dontSleep = true;
+            }
+
+            if (dontSleep) {
+                return;
+            }
+        }
+
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            mStacks.get(stackNdx).goToSleep();
+        }
+
+        removeSleepTimeouts();
+
+        if (mGoingToSleep.isHeld()) {
+            mGoingToSleep.release();
+        }
+        if (mService.mShuttingDown) {
+            mService.notifyAll();
         }
     }
 
@@ -2109,6 +2202,14 @@ public class ActivityStackSupervisor {
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage) {
         pw.print("  mStackState="); pw.println(stackStateToString(mStackState));
+        if (mGoingToSleepActivities.size() > 0) {
+            pw.println("  Activities waiting to sleep:");
+            dumpHistoryList(fd, pw, mGoingToSleepActivities, "  ", "Sleep", false, !dumpAll, false,
+                    dumpPackage);
+        }
+        if (dumpAll) {
+            pw.println("  mSleepTimeout: " + mSleepTimeout);
+        }
         final int numStacks = mStacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
@@ -2118,12 +2219,6 @@ public class ActivityStackSupervisor {
             pw.println("  Running activities (most recent first):");
             dumpHistoryList(fd, pw, stack.mLRUActivities, "  ", "Run", false, !dumpAll, false,
                     dumpPackage);
-            if (stack.mGoingToSleepActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting to sleep:");
-                dumpHistoryList(fd, pw, stack.mGoingToSleepActivities, "  ", "Sleep", false,
-                        !dumpAll, false, dumpPackage);
-            }
 
             pw.print("  Stack #"); pw.println(mStacks.indexOf(stack));
             if (stack.mPausingActivity != null) {
@@ -2132,7 +2227,6 @@ public class ActivityStackSupervisor {
             pw.println("  mResumedActivity: " + stack.mResumedActivity);
             if (dumpAll) {
                 pw.println("  mLastPausedActivity: " + stack.mLastPausedActivity);
-                pw.println("  mSleepTimeout: " + stack.mSleepTimeout);
             }
         }
 
@@ -2252,6 +2346,16 @@ public class ActivityStackSupervisor {
         mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
     }
 
+    void removeSleepTimeouts() {
+        mSleepTimeout = false;
+        mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
+    }
+
+    final void scheduleSleepTimeout() {
+        removeSleepTimeouts();
+        mHandler.sendEmptyMessageDelayed(SLEEP_TIMEOUT_MSG, SLEEP_TIMEOUT);
+    }
+
     private final class ActivityStackSupervisorHandler extends Handler {
 
         public ActivityStackSupervisorHandler(Looper looper) {
@@ -2287,6 +2391,15 @@ public class ActivityStackSupervisor {
                 case RESUME_TOP_ACTIVITY_MSG: {
                     synchronized (mService) {
                         resumeTopActivitiesLocked();
+                    }
+                } break;
+                case SLEEP_TIMEOUT_MSG: {
+                    synchronized (mService) {
+                        if (mService.isSleepingOrShuttingDown()) {
+                            Slog.w(TAG, "Sleep timeout!  Sleeping now.");
+                            mSleepTimeout = true;
+                            checkReadyForSleepLocked();
+                        }
                     }
                 } break;
             }

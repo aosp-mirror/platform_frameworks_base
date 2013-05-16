@@ -926,14 +926,12 @@ final class ActivityRecord {
         if (app != null && app.thread != null) {
             try {
                 app.thread.scheduleSleeping(appToken, _sleeping);
-                final ActivityStack stack = task.stack;
-                if (sleeping && !stack.mGoingToSleepActivities.contains(this)) {
-                    stack.mGoingToSleepActivities.add(this);
+                if (_sleeping && !mStackSupervisor.mGoingToSleepActivities.contains(this)) {
+                    mStackSupervisor.mGoingToSleepActivities.add(this);
                 }
                 sleeping = _sleeping;
             } catch (RemoteException e) {
-                Slog.w(ActivityStack.TAG, "Exception thrown when sleeping: "
-                        + intent.getComponent(), e);
+                Slog.w(TAG, "Exception thrown when sleeping: " + intent.getComponent(), e);
             }
         }
     }

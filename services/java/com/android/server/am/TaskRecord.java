@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerService.TAG;
-import static com.android.server.am.ActivityStack.DEBUG_ADD_REMOVE;
+import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
