@@ -6311,8 +6311,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public int createStack(int taskId, int relativeStackId, int position, float weight) {
+        if (DEBUG_STACK) Slog.d(TAG, "createStack: taskId=" + taskId + " relStackId=" +
+                relativeStackId + " position=" + position + " weight=" + weight);
         synchronized (this) {
             if (mStackSupervisor.getStack(relativeStackId) == null) {
+                if (DEBUG_STACK) Slog.d(TAG, "createStack: invalide relativeStackId=" +
+                        relativeStackId);
                 return -1;
             }
             int stackId = mStackSupervisor.createStack();
@@ -7377,17 +7381,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
     
     public final void activitySlept(IBinder token) {
-        if (localLOGV) Slog.v(
-            TAG, "Activity slept: token=" + token);
-
-        ActivityRecord r = null;
+        if (localLOGV) Slog.v(TAG, "Activity slept: token=" + token);
 
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
-            r = ActivityRecord.isInStackLocked(token);
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.task.stack.activitySleptLocked(r);
+                mStackSupervisor.activitySleptLocked(r);
             }
         }
 
@@ -9796,7 +9797,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.print("  mLastPowerCheckUptime=");
                     TimeUtils.formatDuration(mLastPowerCheckUptime, pw);
                     pw.println("");
-            pw.println("  mGoingToSleep=" + getFocusedStack().mGoingToSleep);
+            pw.println("  mGoingToSleep=" + mStackSupervisor.mGoingToSleep);
             pw.println("  mLaunchingActivity=" + getFocusedStack().mLaunchingActivity);
             pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
             pw.println("  mNumNonHiddenProcs=" + mNumNonHiddenProcs

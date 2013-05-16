@@ -16,6 +16,24 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerService.TAG;
+import static com.android.server.am.ActivityManagerService.localLOGV;
+import static com.android.server.am.ActivityManagerService.DEBUG_CLEANUP;
+import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
+import static com.android.server.am.ActivityManagerService.DEBUG_RESULTS;
+import static com.android.server.am.ActivityManagerService.DEBUG_STACK;
+import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
+import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerService.DEBUG_TRANSITION;
+import static com.android.server.am.ActivityManagerService.DEBUG_USER_LEAVING;
+import static com.android.server.am.ActivityManagerService.DEBUG_VISBILITY;
+import static com.android.server.am.ActivityManagerService.VALIDATE_TOKENS;
+
+import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
+import static com.android.server.am.ActivityStackSupervisor.DEBUG_APP;
+import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
+import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import com.android.internal.os.BatteryStatsImpl;
@@ -70,25 +88,6 @@ import java.util.List;
  * State and management of a single stack of activities.
  */
 final class ActivityStack {
-    static final String TAG = ActivityManagerService.TAG;
-    static final boolean localLOGV = ActivityManagerService.localLOGV;
-    static final boolean DEBUG_SWITCH = ActivityManagerService.DEBUG_SWITCH;
-    static final boolean DEBUG_PAUSE = ActivityManagerService.DEBUG_PAUSE;
-    static final boolean DEBUG_VISBILITY = ActivityManagerService.DEBUG_VISBILITY;
-    static final boolean DEBUG_USER_LEAVING = ActivityManagerService.DEBUG_USER_LEAVING;
-    static final boolean DEBUG_TRANSITION = ActivityManagerService.DEBUG_TRANSITION;
-    static final boolean DEBUG_RESULTS = ActivityManagerService.DEBUG_RESULTS;
-    static final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
-    static final boolean DEBUG_TASKS = ActivityManagerService.DEBUG_TASKS;
-    static final boolean DEBUG_CLEANUP = ActivityManagerService.DEBUG_CLEANUP;
-    static final boolean DEBUG_STACK = ActivityManagerService.DEBUG_STACK;
-
-    static final boolean DEBUG_STATES = ActivityStackSupervisor.DEBUG_STATES;
-    static final boolean DEBUG_ADD_REMOVE = ActivityStackSupervisor.DEBUG_ADD_REMOVE;
-    static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
-    static final boolean DEBUG_APP = ActivityStackSupervisor.DEBUG_APP;
-
-    static final boolean VALIDATE_TOKENS = ActivityManagerService.VALIDATE_TOKENS;
 
     // Ticks during which we check progress while waiting for an app to launch.
     static final int LAUNCH_TICK = 500;
@@ -102,9 +101,6 @@ final class ActivityStack {
     // giving up.  This is a good amount of time because we really need this
     // from the application in order to get its saved state.
     static final int STOP_TIMEOUT = 10*1000;
-
-    // How long we can hold the sleep wake lock before giving up.
-    static final int SLEEP_TIMEOUT = 5*1000;
 
     // How long we can hold the launch wake lock before giving up.
     static final int LAUNCH_TIMEOUT = 10*1000;
@@ -161,22 +157,10 @@ final class ActivityStack {
     final ArrayList<ActivityRecord> mLRUActivities = new ArrayList<ActivityRecord>();
 
     /**
-     * List of activities that are in the process of going to sleep.
-     */
-    final ArrayList<ActivityRecord> mGoingToSleepActivities = new ArrayList<ActivityRecord>();
-
-    /**
      * Animations that for the current transition have requested not to
      * be considered for the transition animation.
      */
     final ArrayList<ActivityRecord> mNoAnimActivities = new ArrayList<ActivityRecord>();
-
-    /**
-     * Set when the system is going to sleep, until we have
-     * successfully paused the current activity and released our wake lock.
-     * At that point the system is allowed to actually sleep.
-     */
-    final PowerManager.WakeLock mGoingToSleep;
 
     /**
      * We don't want to allow the device to go to sleep while in the process
@@ -220,11 +204,6 @@ final class ActivityStack {
     long mInitialStartTime = 0;
 
     /**
-     * Set when we have taken too long waiting to go to sleep.
-     */
-    boolean mSleepTimeout = false;
-
-    /**
      * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
      * screenshots, one for the Recents thumbnail and one for the pauseActivity thumbnail.
      */
@@ -241,13 +220,12 @@ final class ActivityStack {
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
 
-    static final int SLEEP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG;
-    static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
-    static final int LAUNCH_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
-    static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
-    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
-    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
-    static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
+    static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG;
+    static final int LAUNCH_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
+    static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
+    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
+    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
+    static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
 
     static class ScheduleDestroyArgs {
         final ProcessRecord mOwner;
@@ -273,15 +251,6 @@ final class ActivityStack {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case SLEEP_TIMEOUT_MSG: {
-                    synchronized (mService) {
-                        if (mService.isSleepingOrShuttingDown()) {
-                            Slog.w(TAG, "Sleep timeout!  Sleeping now.");
-                            mSleepTimeout = true;
-                            checkReadyForSleepLocked();
-                        }
-                    }
-                } break;
                 case PAUSE_TIMEOUT_MSG: {
                     ActivityRecord r = (ActivityRecord)msg.obj;
                     // We don't at this point know if the activity is fullscreen,
@@ -362,9 +331,7 @@ final class ActivityStack {
         mWindowManager = service.mWindowManager;
         mStackSupervisor = service.mStackSupervisor;
         mContext = context;
-        PowerManager pm =
-            (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mLaunchingActivity =
                 pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
         mLaunchingActivity.setReferenceCounted(false);
@@ -615,7 +582,7 @@ final class ActivityStack {
         r.task.touchActiveTime();
         mService.addRecentTaskLocked(r.task);
         completeResumeLocked(r);
-        checkReadyForSleepLocked();
+        mStackSupervisor.checkReadyForSleepLocked();
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
     }
 
@@ -631,100 +598,55 @@ final class ActivityStack {
     }
 
     void stopIfSleepingLocked() {
-        if (mService.isSleepingOrShuttingDown()) {
-            if (!mGoingToSleep.isHeld()) {
-                mGoingToSleep.acquire();
-                if (mLaunchingActivity.isHeld()) {
-                    mLaunchingActivity.release();
-                    mService.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
-                }
-            }
-            mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
-            Message msg = mHandler.obtainMessage(SLEEP_TIMEOUT_MSG);
-            mHandler.sendMessageDelayed(msg, SLEEP_TIMEOUT);
-            checkReadyForSleepLocked();
+        if (mLaunchingActivity.isHeld()) {
+            mLaunchingActivity.release();
+            mService.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
         }
     }
 
     void awakeFromSleepingLocked() {
-        mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
-        mSleepTimeout = false;
-        if (mGoingToSleep.isHeld()) {
-            mGoingToSleep.release();
-        }
         // Ensure activities are no longer sleeping.
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                // TODO: Skip if finishing?
                 activities.get(activityNdx).setSleeping(false);
             }
         }
-        mGoingToSleepActivities.clear();
     }
 
-    void activitySleptLocked(ActivityRecord r) {
-        mGoingToSleepActivities.remove(r);
-        checkReadyForSleepLocked();
-    }
-
-    void checkReadyForSleepLocked() {
-        if (!mService.isSleepingOrShuttingDown()) {
-            // Do not care.
-            return;
+    /**
+     * @return true if something must be done before going to sleep.
+     */
+    boolean checkReadyForSleepLocked() {
+        if (mResumedActivity != null) {
+            // Still have something resumed; can't sleep until it is paused.
+            if (DEBUG_PAUSE) Slog.v(TAG, "Sleep needs to pause " + mResumedActivity);
+            if (DEBUG_USER_LEAVING) Slog.v(TAG, "Sleep => pause with userLeaving=false");
+            startPausingLocked(false, true);
+            return true;
+        }
+        if (mPausingActivity != null) {
+            // Still waiting for something to pause; can't sleep yet.
+            if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still waiting to pause " + mPausingActivity);
+            return true;
         }
 
-        if (!mSleepTimeout) {
-            if (mResumedActivity != null) {
-                // Still have something resumed; can't sleep until it is paused.
-                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep needs to pause " + mResumedActivity);
-                if (DEBUG_USER_LEAVING) Slog.v(TAG, "Sleep => pause with userLeaving=false");
-                startPausingLocked(false, true);
-                return;
-            }
-            if (mPausingActivity != null) {
-                // Still waiting for something to pause; can't sleep yet.
-                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still waiting to pause " + mPausingActivity);
-                return;
-            }
+        return false;
+    }
 
-            if (mStackSupervisor.mStoppingActivities.size() > 0) {
-                // Still need to tell some activities to stop; can't sleep yet.
-                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to stop "
-                        + mStackSupervisor.mStoppingActivities.size() + " activities");
-                mStackSupervisor.scheduleIdleLocked();
-                return;
-            }
+    void goToSleep() {
+        ensureActivitiesVisibleLocked(null, 0);
 
-            ensureActivitiesVisibleLocked(null, 0);
-
-            // Make sure any stopped but visible activities are now sleeping.
-            // This ensures that the activity's onStop() is called.
-            for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-                final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                    final ActivityRecord r = activities.get(activityNdx);
-                    if (r.state == ActivityState.STOPPING || r.state == ActivityState.STOPPED) {
-                        r.setSleeping(true);
-                    }
+        // Make sure any stopped but visible activities are now sleeping.
+        // This ensures that the activity's onStop() is called.
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.state == ActivityState.STOPPING || r.state == ActivityState.STOPPED) {
+                    r.setSleeping(true);
                 }
             }
-
-            if (mGoingToSleepActivities.size() > 0) {
-                // Still need to tell some activities to sleep; can't sleep yet.
-                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to sleep "
-                        + mGoingToSleepActivities.size() + " activities");
-                return;
-            }
-        }
-
-        mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
-
-        if (mGoingToSleep.isHeld()) {
-            mGoingToSleep.release();
-        }
-        if (mService.mShuttingDown) {
-            mService.notifyAll();
         }
     }
 
@@ -943,7 +865,7 @@ final class ActivityStack {
                         if (DEBUG_PAUSE) Slog.v(TAG, "To many pending stops, forcing idle");
                         mStackSupervisor.scheduleIdleLocked();
                     } else {
-                        checkReadyForSleepLocked();
+                        mStackSupervisor.checkReadyForSleepLocked();
                     }
                 }
             } else {
@@ -957,7 +879,7 @@ final class ActivityStack {
         if (!mService.isSleepingOrShuttingDown()) {
             mStackSupervisor.resumeTopActivitiesLocked(topStack, prev, null);
         } else {
-            checkReadyForSleepLocked();
+            mStackSupervisor.checkReadyForSleepLocked();
             ActivityRecord top = topStack.topRunningActivityLocked(null);
             if (top == null || (prev != null && top != prev)) {
                 // If there are no more activities available to run,
@@ -1272,7 +1194,7 @@ final class ActivityStack {
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mStackSupervisor.mStoppingActivities.remove(next);
-        mGoingToSleepActivities.remove(next);
+        mStackSupervisor.mGoingToSleepActivities.remove(next);
         next.sleeping = false;
         mStackSupervisor.mWaitingVisibleActivities.remove(next);
 
@@ -1530,7 +1452,7 @@ final class ActivityStack {
                 next.app.thread.scheduleResumeActivity(next.appToken,
                         mService.isNextTransitionForward());
 
-                checkReadyForSleepLocked();
+                mStackSupervisor.checkReadyForSleepLocked();
 
             } catch (Exception e) {
                 // Whoops, need to restart this activity!
@@ -2395,7 +2317,7 @@ final class ActivityStack {
                     // will be empty and must be cleared immediately.
                     mStackSupervisor.scheduleIdleLocked();
                 } else {
-                    checkReadyForSleepLocked();
+                    mStackSupervisor.checkReadyForSleepLocked();
                 }
             }
             if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPING: " + r
@@ -2409,7 +2331,7 @@ final class ActivityStack {
 
         // make sure the record is cleaned out of other places.
         mStackSupervisor.mStoppingActivities.remove(r);
-        mGoingToSleepActivities.remove(r);
+        mStackSupervisor.mGoingToSleepActivities.remove(r);
         mStackSupervisor.mWaitingVisibleActivities.remove(r);
         if (mResumedActivity == r) {
             mResumedActivity = null;
@@ -2815,7 +2737,8 @@ final class ActivityStack {
         removeHistoryRecordsForAppLocked(mLRUActivities, app, "mLRUActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mStoppingActivities, app,
                 "mStoppingActivities");
-        removeHistoryRecordsForAppLocked(mGoingToSleepActivities, app, "mGoingToSleepActivities");
+        removeHistoryRecordsForAppLocked(mStackSupervisor.mGoingToSleepActivities, app,
+                "mGoingToSleepActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mWaitingVisibleActivities, app,
                 "mWaitingVisibleActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mFinishingActivities, app,
@@ -2850,7 +2773,7 @@ final class ActivityStack {
                         remove = false;
                     }
                     if (remove) {
-                        if (ActivityStack.DEBUG_ADD_REMOVE || DEBUG_CLEANUP) {
+                        if (DEBUG_ADD_REMOVE || DEBUG_CLEANUP) {
                             RuntimeException here = new RuntimeException("here");
                             here.fillInStackTrace();
                             Slog.i(TAG, "Removing activity " + r + " from stack at " + i
@@ -2884,7 +2807,7 @@ final class ActivityStack {
                         r.app = null;
                         r.nowVisible = false;
                         if (!r.haveState) {
-                            if (ActivityStack.DEBUG_SAVED_STATE) Slog.i(TAG,
+                            if (DEBUG_SAVED_STATE) Slog.i(TAG,
                                     "App died, clearing saved state of " + r);
                             r.icicle = null;
                         }
