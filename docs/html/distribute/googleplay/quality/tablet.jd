@@ -822,7 +822,7 @@ the left navigation.</p>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-<h2 style="line-height:1em;">How to Send Feedback</h2>
+<h2 style="line-height:1em;">How to send feedback</h2>
 
 <p>Please use the link below to send
 feedback or request a manual review of your Optimization Tips.</p>
@@ -830,9 +830,8 @@ feedback or request a manual review of your Optimization Tips.</p>
 <p>Make sure to read the relevant sections of the Tablet App Quality
 Guidelines prior to sending feedback.</p>
 
-<p><strong><a href="https://support.google.com/googleplay/android-developer/contact/tabletf"
-target="_googleplay" style="white-space:nowrap">Tablet Optimization
-Tips Feedback Form &raquo;</a></strong></p>
+<p><strong><a href="https://support.google.com/googleplay/android-developer/contact/tabletq"
+target="_googleplay" style="white-space:nowrap">Designed for Tablets Contact Form &raquo;</a></strong></p>
 </div>
 </div>
 
@@ -845,13 +844,12 @@ items in the Optimization Tips page.</p>
 to visit the Optimization Tips page to see how your app is doing
 against the basic checks.  If there are any issues listed, we
 recommend addressing them in your app and uploading a new binary for
-distribution, if needed.</p>
+distribution, if needed. </p>
 
 <p>If the Optimization Tips page lists "To Do" issues that you feel don't
 apply to your app or affect its quality on tablets, please notify us
-using the <a href="https://support.google.com/googleplay/android-developer/contact/tabletf"
-target="_googleplay" style="white-space:nowrap">Tablet Optimization
-Tips Feedback Form</a>. We
+using the <a href="https://support.google.com/googleplay/android-developer/contact/tabletq"
+target="_googleplay" style="white-space:nowrap">Designed for Tablets Contact Form &raquo;</a>. We
 will review your app and update your Optimization Tips page as
 appropriate.</p>
 
