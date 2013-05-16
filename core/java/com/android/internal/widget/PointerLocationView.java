@@ -61,6 +61,13 @@ public class PointerLocationView extends View implements InputDeviceListener {
         private float mAltXVelocity;
         private float mAltYVelocity;
 
+        // Current bounding box, if any
+        private boolean mHasBoundingBox;
+        private float mBoundingLeft;
+        private float mBoundingTop;
+        private float mBoundingRight;
+        private float mBoundingBottom;
+
         // Position estimator.
         private VelocityTracker.Estimator mEstimator = new VelocityTracker.Estimator();
         private VelocityTracker.Estimator mAltEstimator = new VelocityTracker.Estimator();
@@ -388,6 +395,12 @@ public class PointerLocationView extends View implements InputDeviceListener {
                         ps.mCoords.x + orientationVectorX * tiltScale,
                         ps.mCoords.y + orientationVectorY * tiltScale,
                         3.0f, mPaint);
+
+                // Draw the current bounding box
+                if (ps.mHasBoundingBox) {
+                    canvas.drawRect(ps.mBoundingLeft, ps.mBoundingTop,
+                            ps.mBoundingRight, ps.mBoundingBottom, mPaint);
+                }
             }
         }
     }
@@ -400,20 +413,20 @@ public class PointerLocationView extends View implements InputDeviceListener {
             for (int i = 0; i < NI; i++) {
                 final int id = event.getPointerId(i);
                 event.getHistoricalPointerCoords(i, historyPos, mTempCoords);
-                logCoords(type, action, i, mTempCoords, id,
-                        event.getToolType(i), event.getButtonState());
+                logCoords(type, action, i, mTempCoords, id, event);
             }
         }
         for (int i = 0; i < NI; i++) {
             final int id = event.getPointerId(i);
             event.getPointerCoords(i, mTempCoords);
-            logCoords(type, action, i, mTempCoords, id,
-                    event.getToolType(i), event.getButtonState());
+            logCoords(type, action, i, mTempCoords, id, event);
         }
     }
 
     private void logCoords(String type, int action, int index,
-            MotionEvent.PointerCoords coords, int id, int toolType, int buttonState) {
+            MotionEvent.PointerCoords coords, int id, MotionEvent event) {
+        final int toolType = event.getToolType(index);
+        final int buttonState = event.getButtonState();
         final String prefix;
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -483,6 +496,12 @@ public class PointerLocationView extends View implements InputDeviceListener {
                 .append(" Distance=").append(coords.getAxisValue(MotionEvent.AXIS_DISTANCE), 1)
                 .append(" VScroll=").append(coords.getAxisValue(MotionEvent.AXIS_VSCROLL), 1)
                 .append(" HScroll=").append(coords.getAxisValue(MotionEvent.AXIS_HSCROLL), 1)
+                .append(" BoundingBox=[(")
+                .append(event.getAxisValue(MotionEvent.AXIS_GENERIC_1), 3)
+                .append(", ").append(event.getAxisValue(MotionEvent.AXIS_GENERIC_2), 3).append(")")
+                .append(", (").append(event.getAxisValue(MotionEvent.AXIS_GENERIC_3), 3)
+                .append(", ").append(event.getAxisValue(MotionEvent.AXIS_GENERIC_4), 3)
+                .append(")]")
                 .append(" ToolType=").append(MotionEvent.toolTypeToString(toolType))
                 .append(" ButtonState=").append(MotionEvent.buttonStateToString(buttonState))
                 .toString());
@@ -530,6 +549,8 @@ public class PointerLocationView extends View implements InputDeviceListener {
 
             final PointerState ps = mPointers.get(id);
             ps.mCurDown = true;
+            ps.mHasBoundingBox = (InputDevice.getDevice(event.getDeviceId()).
+                    getMotionRange(MotionEvent.AXIS_GENERIC_1) != null);
         }
 
         final int NI = event.getPointerCount();
@@ -549,8 +570,7 @@ public class PointerLocationView extends View implements InputDeviceListener {
                 final PointerCoords coords = ps != null ? ps.mCoords : mTempCoords;
                 event.getHistoricalPointerCoords(i, historyPos, coords);
                 if (mPrintCoords) {
-                    logCoords("Pointer", action, i, coords, id,
-                            event.getToolType(i), event.getButtonState());
+                    logCoords("Pointer", action, i, coords, id, event);
                 }
                 if (ps != null) {
                     ps.addTrace(coords.x, coords.y);
@@ -563,8 +583,7 @@ public class PointerLocationView extends View implements InputDeviceListener {
             final PointerCoords coords = ps != null ? ps.mCoords : mTempCoords;
             event.getPointerCoords(i, coords);
             if (mPrintCoords) {
-                logCoords("Pointer", action, i, coords, id,
-                        event.getToolType(i), event.getButtonState());
+                logCoords("Pointer", action, i, coords, id, event);
             }
             if (ps != null) {
                 ps.addTrace(coords.x, coords.y);
@@ -577,6 +596,13 @@ public class PointerLocationView extends View implements InputDeviceListener {
                     mAltVelocity.getEstimator(id, ps.mAltEstimator);
                 }
                 ps.mToolType = event.getToolType(i);
+
+                if (ps.mHasBoundingBox) {
+                    ps.mBoundingLeft = event.getAxisValue(MotionEvent.AXIS_GENERIC_1, i);
+                    ps.mBoundingTop = event.getAxisValue(MotionEvent.AXIS_GENERIC_2, i);
+                    ps.mBoundingRight = event.getAxisValue(MotionEvent.AXIS_GENERIC_3, i);
+                    ps.mBoundingBottom = event.getAxisValue(MotionEvent.AXIS_GENERIC_4, i);
+                }
             }
         }
 

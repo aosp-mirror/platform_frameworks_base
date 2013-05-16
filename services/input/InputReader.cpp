@@ -2619,6 +2619,18 @@ void TouchInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
             info->addMotionRange(AMOTION_EVENT_AXIS_HSCROLL, mSource, -1.0f, 1.0f, 0.0f, 0.0f,
                     0.0f);
         }
+        if (mCalibration.coverageCalibration == Calibration::COVERAGE_CALIBRATION_BOX) {
+            const InputDeviceInfo::MotionRange& x = mOrientedRanges.x;
+            const InputDeviceInfo::MotionRange& y = mOrientedRanges.y;
+            info->addMotionRange(AMOTION_EVENT_AXIS_GENERIC_1, mSource, x.min, x.max, x.flat,
+                    x.fuzz, x.resolution);
+            info->addMotionRange(AMOTION_EVENT_AXIS_GENERIC_2, mSource, y.min, y.max, y.flat,
+                    y.fuzz, y.resolution);
+            info->addMotionRange(AMOTION_EVENT_AXIS_GENERIC_3, mSource, x.min, x.max, x.flat,
+                    x.fuzz, x.resolution);
+            info->addMotionRange(AMOTION_EVENT_AXIS_GENERIC_4, mSource, y.min, y.max, y.flat,
+                    y.fuzz, y.resolution);
+        }
     }
 }
 
@@ -3448,6 +3460,19 @@ void TouchInputMapper::parseCalibration() {
 
     out.haveDistanceScale = in.tryGetProperty(String8("touch.distance.scale"),
             out.distanceScale);
+
+    out.coverageCalibration = Calibration::COVERAGE_CALIBRATION_DEFAULT;
+    String8 coverageCalibrationString;
+    if (in.tryGetProperty(String8("touch.coverage.calibration"), coverageCalibrationString)) {
+        if (coverageCalibrationString == "none") {
+            out.coverageCalibration = Calibration::COVERAGE_CALIBRATION_NONE;
+        } else if (coverageCalibrationString == "box") {
+            out.coverageCalibration = Calibration::COVERAGE_CALIBRATION_BOX;
+        } else if (coverageCalibrationString != "default") {
+            ALOGW("Invalid value for touch.coverage.calibration: '%s'",
+                    coverageCalibrationString.string());
+        }
+    }
 }
 
 void TouchInputMapper::resolveCalibration() {
@@ -3485,6 +3510,11 @@ void TouchInputMapper::resolveCalibration() {
         }
     } else {
         mCalibration.distanceCalibration = Calibration::DISTANCE_CALIBRATION_NONE;
+    }
+
+    // Coverage
+    if (mCalibration.coverageCalibration == Calibration::COVERAGE_CALIBRATION_DEFAULT) {
+        mCalibration.coverageCalibration = Calibration::COVERAGE_CALIBRATION_NONE;
     }
 }
 
@@ -3577,6 +3607,17 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
     if (mCalibration.haveDistanceScale) {
         dump.appendFormat(INDENT4 "touch.distance.scale: %0.3f\n",
                 mCalibration.distanceScale);
+    }
+
+    switch (mCalibration.coverageCalibration) {
+    case Calibration::COVERAGE_CALIBRATION_NONE:
+        dump.append(INDENT4 "touch.coverage.calibration: none\n");
+        break;
+    case Calibration::COVERAGE_CALIBRATION_BOX:
+        dump.append(INDENT4 "touch.coverage.calibration: box\n");
+        break;
+    default:
+        ALOG_ASSERT(false);
     }
 }
 
@@ -4185,13 +4226,31 @@ void TouchInputMapper::cookPointerData() {
             distance = 0;
         }
 
-        // X and Y
+        // Coverage
+        int32_t rawLeft, rawTop, rawRight, rawBottom;
+        switch (mCalibration.coverageCalibration) {
+        case Calibration::COVERAGE_CALIBRATION_BOX:
+            rawLeft = (in.toolMinor & 0xffff0000) >> 16;
+            rawRight = in.toolMinor & 0x0000ffff;
+            rawBottom = in.toolMajor & 0x0000ffff;
+            rawTop = (in.toolMajor & 0xffff0000) >> 16;
+            break;
+        default:
+            rawLeft = rawTop = rawRight = rawBottom = 0;
+            break;
+        }
+
+        // X, Y, and the bounding box for coverage information
         // Adjust coords for surface orientation.
-        float x, y;
+        float x, y, left, top, right, bottom;
         switch (mSurfaceOrientation) {
         case DISPLAY_ORIENTATION_90:
             x = float(in.y - mRawPointerAxes.y.minValue) * mYScale + mYTranslate;
             y = float(mRawPointerAxes.x.maxValue - in.x) * mXScale + mXTranslate;
+            left = float(rawTop - mRawPointerAxes.y.minValue) * mYScale + mYTranslate;
+            right = float(rawBottom- mRawPointerAxes.y.minValue) * mYScale + mYTranslate;
+            bottom = float(mRawPointerAxes.x.maxValue - rawLeft) * mXScale + mXTranslate;
+            top = float(mRawPointerAxes.x.maxValue - rawRight) * mXScale + mXTranslate;
             orientation -= M_PI_2;
             if (orientation < - M_PI_2) {
                 orientation += M_PI;
@@ -4200,10 +4259,18 @@ void TouchInputMapper::cookPointerData() {
         case DISPLAY_ORIENTATION_180:
             x = float(mRawPointerAxes.x.maxValue - in.x) * mXScale + mXTranslate;
             y = float(mRawPointerAxes.y.maxValue - in.y) * mYScale + mYTranslate;
+            left = float(mRawPointerAxes.x.maxValue - rawRight) * mXScale + mXTranslate;
+            right = float(mRawPointerAxes.x.maxValue - rawLeft) * mXScale + mXTranslate;
+            bottom = float(mRawPointerAxes.y.maxValue - rawTop) * mYScale + mYTranslate;
+            top = float(mRawPointerAxes.y.maxValue - rawBottom) * mYScale + mYTranslate;
             break;
         case DISPLAY_ORIENTATION_270:
             x = float(mRawPointerAxes.y.maxValue - in.y) * mYScale + mYTranslate;
             y = float(in.x - mRawPointerAxes.x.minValue) * mXScale + mXTranslate;
+            left = float(mRawPointerAxes.y.maxValue - rawBottom) * mYScale + mYTranslate;
+            right = float(mRawPointerAxes.y.maxValue - rawTop) * mYScale + mYTranslate;
+            bottom = float(rawRight - mRawPointerAxes.x.minValue) * mXScale + mXTranslate;
+            top = float(rawLeft - mRawPointerAxes.x.minValue) * mXScale + mXTranslate;
             orientation += M_PI_2;
             if (orientation > M_PI_2) {
                 orientation -= M_PI;
@@ -4212,6 +4279,10 @@ void TouchInputMapper::cookPointerData() {
         default:
             x = float(in.x - mRawPointerAxes.x.minValue) * mXScale + mXTranslate;
             y = float(in.y - mRawPointerAxes.y.minValue) * mYScale + mYTranslate;
+            left = float(rawLeft - mRawPointerAxes.x.minValue) * mXScale + mXTranslate;
+            right = float(rawRight - mRawPointerAxes.x.minValue) * mXScale + mXTranslate;
+            bottom = float(rawBottom - mRawPointerAxes.y.minValue) * mYScale + mYTranslate;
+            top = float(rawTop - mRawPointerAxes.y.minValue) * mYScale + mYTranslate;
             break;
         }
 
@@ -4224,11 +4295,18 @@ void TouchInputMapper::cookPointerData() {
         out.setAxisValue(AMOTION_EVENT_AXIS_SIZE, size);
         out.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR, touchMajor);
         out.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR, touchMinor);
-        out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR, toolMajor);
-        out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR, toolMinor);
         out.setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, orientation);
         out.setAxisValue(AMOTION_EVENT_AXIS_TILT, tilt);
         out.setAxisValue(AMOTION_EVENT_AXIS_DISTANCE, distance);
+        if (mCalibration.coverageCalibration == Calibration::COVERAGE_CALIBRATION_BOX) {
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_1, left);
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_2, top);
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_3, right);
+            out.setAxisValue(AMOTION_EVENT_AXIS_GENERIC_4, bottom);
+        } else {
+            out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR, toolMajor);
+            out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR, toolMinor);
+        }
 
         // Write output properties.
         PointerProperties& properties = mCurrentCookedPointerData.pointerProperties[i];
