@@ -960,11 +960,38 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
         env->ReleaseStringChars(text, text_);
     }
 
+
+    // This function is a mirror of SkCanvas::getClipBounds except that it does
+    // not outset the edge of the clip to account for anti-aliasing. There is
+    // a skia bug to investigate pushing this logic into back into skia.
+    // (see https://code.google.com/p/skia/issues/detail?id=1303)
+    static bool getHardClipBounds(SkCanvas* canvas, SkRect* bounds) {
+        SkIRect ibounds;
+        if (!canvas->getClipDeviceBounds(&ibounds)) {
+            return false;
+        }
+
+        SkMatrix inverse;
+        // if we can't invert the CTM, we can't return local clip bounds
+        if (!canvas->getTotalMatrix().invert(&inverse)) {
+            if (bounds) {
+                bounds->setEmpty();
+            }
+            return false;
+        }
+
+        if (NULL != bounds) {
+            SkRect r = SkRect::Make(ibounds);
+            inverse.mapRect(bounds, r);
+        }
+        return true;
+    }
+
     static bool getClipBounds(JNIEnv* env, jobject, SkCanvas* canvas,
                               jobject bounds) {
         SkRect   r;
         SkIRect ir;
-        bool result = canvas->getClipBounds(&r);
+        bool result = getHardClipBounds(canvas, &r);
 
         if (!result) {
             r.setEmpty();
