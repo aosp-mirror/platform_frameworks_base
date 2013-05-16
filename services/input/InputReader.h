@@ -1267,6 +1267,14 @@ protected:
         bool haveDistanceScale;
         float distanceScale;
 
+        enum CoverageCalibration {
+            COVERAGE_CALIBRATION_DEFAULT,
+            COVERAGE_CALIBRATION_NONE,
+            COVERAGE_CALIBRATION_BOX,
+        };
+
+        CoverageCalibration coverageCalibration;
+
         inline void applySizeScaleAndBias(float* outSize) const {
             if (haveSizeScale) {
                 *outSize *= sizeScale;
