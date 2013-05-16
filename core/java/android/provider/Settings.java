@@ -4916,6 +4916,12 @@ public final class Settings {
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
 
        /**
+        * The min time between wifi disable and wifi enable
+        * @hide
+        */
+       public static final String WIFI_REENABLE_DELAY_MS = "wifi_reenable_delay";
+
+       /**
         * The number of milliseconds to delay when checking for data stalls during
         * non-aggressive detection. (screen is turned off.)
         * @hide

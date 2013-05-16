@@ -34,6 +34,7 @@ import android.net.wifi.WifiStateMachine;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.Slog;
@@ -70,6 +71,13 @@ class WifiController extends StateMachine {
      */
     private static final long DEFAULT_IDLE_MS = 15 * 60 * 1000; /* 15 minutes */
 
+    /**
+     * See {@link Settings.Global#WIFI_REENABLE_DELAY_MS}.  This is the default value if a
+     * Settings.Global value is not present.  This is the minimum time after wifi is disabled
+     * we'll act on an enable.  Enable requests received before this delay will be deferred.
+     */
+    private static final long DEFAULT_REENABLE_DELAY_MS = 500;
+
     NetworkInfo mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, "WIFI", "");
 
     private static final String ACTION_DEVICE_IDLE =
@@ -86,6 +94,8 @@ class WifiController extends StateMachine {
      */
     private final WorkSource mTmpWorkSource = new WorkSource();
 
+    private long mReEnableDelayMillis;
+
     private static final int BASE = Protocol.BASE_WIFI_CONTROLLER;
 
     static final int CMD_EMERGENCY_MODE_CHANGED     = BASE + 1;
@@ -98,6 +108,7 @@ class WifiController extends StateMachine {
     static final int CMD_WIFI_TOGGLED               = BASE + 8;
     static final int CMD_AIRPLANE_TOGGLED           = BASE + 9;
     static final int CMD_SET_AP                     = BASE + 10;
+    static final int CMD_DEFERRED_TOGGLE            = BASE + 11;
 
     private DefaultState mDefaultState = new DefaultState();
     private StaEnabledState mStaEnabledState = new StaEnabledState();
@@ -168,6 +179,7 @@ class WifiController extends StateMachine {
         registerForWifiIdleTimeChange(handler);
         readWifiSleepPolicy();
         registerForWifiSleepPolicyChange(handler);
+        readWifiReEnableDelay();
     }
 
     private void readStayAwakeConditions() {
@@ -184,6 +196,11 @@ class WifiController extends StateMachine {
         mSleepPolicy = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.WIFI_SLEEP_POLICY,
                 Settings.Global.WIFI_SLEEP_POLICY_NEVER);
+    }
+
+    private void readWifiReEnableDelay() {
+        mReEnableDelayMillis = Settings.Global.getLong(mContext.getContentResolver(),
+                Settings.Global.WIFI_REENABLE_DELAY_MS, DEFAULT_REENABLE_DELAY_MS);
     }
 
     /**
@@ -335,6 +352,7 @@ class WifiController extends StateMachine {
                 case CMD_WIFI_TOGGLED:
                 case CMD_AIRPLANE_TOGGLED:
                 case CMD_EMERGENCY_MODE_CHANGED:
+                case CMD_DEFERRED_TOGGLE:
                     break;
                 default:
                     throw new RuntimeException("WifiController.handleMessage " + msg.what);
@@ -345,9 +363,17 @@ class WifiController extends StateMachine {
     }
 
     class ApStaDisabledState extends State {
+        private int mDeferredEnableSerialNumber = 0;
+        private boolean mHaveDeferredEnable = false;
+        private long mDisabledTimestamp;
+
         @Override
         public void enter() {
             mWifiStateMachine.setSupplicantRunning(false);
+            // Supplicant can't restart right away, so not the time we switched off
+            mDisabledTimestamp = SystemClock.elapsedRealtime();
+            mDeferredEnableSerialNumber++;
+            mHaveDeferredEnable = false;
         }
         @Override
         public boolean processMessage(Message msg) {
@@ -355,6 +381,14 @@ class WifiController extends StateMachine {
                 case CMD_WIFI_TOGGLED:
                 case CMD_AIRPLANE_TOGGLED:
                     if (mSettingsStore.isWifiToggleEnabled()) {
+                        if (doDeferEnable(msg)) {
+                            if (mHaveDeferredEnable) {
+                                //  have 2 toggles now, inc serial number an ignore both
+                                mDeferredEnableSerialNumber++;
+                            }
+                            mHaveDeferredEnable = !mHaveDeferredEnable;
+                            break;
+                        }
                         if (mDeviceIdle == false) {
                             transitionTo(mDeviceActiveState);
                         } else {
@@ -374,10 +408,28 @@ class WifiController extends StateMachine {
                         transitionTo(mApEnabledState);
                     }
                     break;
+                case CMD_DEFERRED_TOGGLE:
+                    if (msg.arg1 != mDeferredEnableSerialNumber) break;
+                    sendMessage((Message)(msg.obj));
+                    break;
                 default:
                     return NOT_HANDLED;
             }
             return HANDLED;
+        }
+
+        private boolean doDeferEnable(Message msg) {
+            long delaySoFar = SystemClock.elapsedRealtime() - mDisabledTimestamp;
+            if (delaySoFar > mReEnableDelayMillis) {
+                return false;
+            }
+
+            // need to defer this action.
+            Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
+            deferredMsg.obj = Message.obtain(msg);
+            deferredMsg.arg1 = ++mDeferredEnableSerialNumber;
+            sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar);
+            return true;
         }
 
     }
@@ -421,11 +473,19 @@ class WifiController extends StateMachine {
     }
 
     class StaDisabledWithScanState extends State {
+        private int mDeferredEnableSerialNumber = 0;
+        private boolean mHaveDeferredEnable = false;
+        private long mDisabledTimestamp;
+
         @Override
         public void enter() {
             mWifiStateMachine.setSupplicantRunning(true);
             mWifiStateMachine.setOperationalMode(WifiStateMachine.SCAN_ONLY_WITH_WIFI_OFF_MODE);
             mWifiStateMachine.setDriverStart(true);
+            // Supplicant can't restart right away, so not the time we switched off
+            mDisabledTimestamp = SystemClock.elapsedRealtime();
+            mDeferredEnableSerialNumber++;
+            mHaveDeferredEnable = false;
         }
 
         @Override
@@ -433,6 +493,14 @@ class WifiController extends StateMachine {
             switch (msg.what) {
                 case CMD_WIFI_TOGGLED:
                     if (mSettingsStore.isWifiToggleEnabled()) {
+                        if (doDeferEnable(msg)) {
+                            if (mHaveDeferredEnable) {
+                                // have 2 toggles now, inc serial number and ignore both
+                                mDeferredEnableSerialNumber++;
+                            }
+                            mHaveDeferredEnable = !mHaveDeferredEnable;
+                            break;
+                        }
                         if (mDeviceIdle == false) {
                             transitionTo(mDeviceActiveState);
                         } else {
@@ -457,11 +525,29 @@ class WifiController extends StateMachine {
                         transitionTo(mApStaDisabledState);
                     }
                     break;
+                case CMD_DEFERRED_TOGGLE:
+                    if (msg.arg1 != mDeferredEnableSerialNumber) break;
+                    sendMessage((Message)(msg.obj));
+                    break;
                 default:
                     return NOT_HANDLED;
             }
             return HANDLED;
         }
+
+        private boolean doDeferEnable(Message msg) {
+            long delaySoFar = SystemClock.elapsedRealtime() - mDisabledTimestamp;
+            if (delaySoFar > mReEnableDelayMillis) {
+                return false;
+            }
+            // need to defer this action.
+            Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
+            deferredMsg.obj = Message.obtain(msg);
+            deferredMsg.arg1 = ++mDeferredEnableSerialNumber;
+            sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar);
+            return true;
+        }
+
     }
 
     class ApEnabledState extends State {
