@@ -537,13 +537,14 @@ public class NotificationManagerService extends INotificationManager.Stub
      * is altered. (For example in response to USER_SWITCHED in our broadcast receiver)
      */
     void rebindListenerServices() {
-        String flat = Settings.Secure.getString(
+        final int currentUser = ActivityManager.getCurrentUser();
+        String flat = Settings.Secure.getStringForUser(
                 mContext.getContentResolver(),
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                currentUser);
 
         NotificationListenerInfo[] toRemove = new NotificationListenerInfo[mListeners.size()];
         final ArrayList<ComponentName> toAdd;
-        final int currentUser = ActivityManager.getCurrentUser();
 
         synchronized (mNotificationList) {
             // unbind and remove all existing listeners
