@@ -2701,12 +2701,6 @@ void TouchInputMapper::dump(String8& dump) {
                 mPointerYZoomScale);
         dump.appendFormat(INDENT4 "MaxSwipeWidth: %f\n",
                 mPointerGestureMaxSwipeWidth);
-    } else if (mDeviceMode == DEVICE_MODE_NAVIGATION) {
-        dump.appendFormat(INDENT3 "Navigation Gesture Detector:\n");
-        dump.appendFormat(INDENT4 "AssistStartY: %0.3f\n",
-                mNavigationAssistStartY);
-        dump.appendFormat(INDENT4 "AssistEndY: %0.3f\n",
-                mNavigationAssistEndY);
     }
 }
 
@@ -3278,10 +3272,6 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
 
             // Abort current pointer usages because the state has changed.
             abortPointerUsage(when, 0 /*policyFlags*/);
-        } else if (mDeviceMode == DEVICE_MODE_NAVIGATION) {
-            // Compute navigation parameters.
-            mNavigationAssistStartY = mSurfaceHeight * 0.9f;
-            mNavigationAssistEndY = mSurfaceHeight * 0.5f;
         }
 
         // Inform the dispatcher about the changes.
@@ -3621,7 +3611,6 @@ void TouchInputMapper::reset(nsecs_t when) {
 
     mPointerGesture.reset();
     mPointerSimple.reset();
-    mNavigation.reset();
 
     if (mPointerController != NULL) {
         mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
@@ -3772,8 +3761,6 @@ void TouchInputMapper::sync(nsecs_t when) {
                 mPointerController->setSpots(mCurrentCookedPointerData.pointerCoords,
                         mCurrentCookedPointerData.idToIndex,
                         mCurrentCookedPointerData.touchingIdBits);
-            } else if (mDeviceMode == DEVICE_MODE_NAVIGATION) {
-                dispatchNavigationAssist(when, policyFlags);
             }
 
             dispatchHoverExit(when, policyFlags);
@@ -5493,44 +5480,6 @@ void TouchInputMapper::abortPointerSimple(nsecs_t when, uint32_t policyFlags) {
     mPointerSimple.currentProperties.clear();
 
     dispatchPointerSimple(when, policyFlags, false, false);
-}
-
-void TouchInputMapper::dispatchNavigationAssist(nsecs_t when, uint32_t policyFlags) {
-    if (mCurrentCookedPointerData.touchingIdBits.count() == 1) {
-        if (mLastCookedPointerData.touchingIdBits.isEmpty()) {
-            // First pointer down.
-            uint32_t id = mCurrentCookedPointerData.touchingIdBits.firstMarkedBit();
-            const PointerCoords& coords = mCurrentCookedPointerData.pointerCoordsForId(id);
-            if (coords.getY() >= mNavigationAssistStartY) {
-                // Start tracking the possible assist swipe.
-                mNavigation.activeAssistId = id;
-                return;
-            }
-        } else if (mNavigation.activeAssistId >= 0
-                && mCurrentCookedPointerData.touchingIdBits.hasBit(mNavigation.activeAssistId)) {
-            const PointerCoords& coords = mCurrentCookedPointerData.pointerCoordsForId(
-                    mNavigation.activeAssistId);
-            if (coords.getY() > mNavigationAssistEndY) {
-                // Swipe is still in progress.
-                return;
-            }
-
-            // Detected assist swipe.
-            int32_t metaState = mContext->getGlobalMetaState();
-            NotifyKeyArgs downArgs(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD,
-                    policyFlags | POLICY_FLAG_VIRTUAL,
-                    AKEY_EVENT_ACTION_DOWN, 0, AKEYCODE_ASSIST, 0, metaState, when);
-            getListener()->notifyKey(&downArgs);
-
-            NotifyKeyArgs upArgs(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD,
-                    policyFlags | POLICY_FLAG_VIRTUAL,
-                    AKEY_EVENT_ACTION_UP, 0, AKEYCODE_ASSIST, 0, metaState, when);
-            getListener()->notifyKey(&upArgs);
-        }
-    }
-
-    // Cancel the assist swipe.
-    mNavigation.activeAssistId = -1;
 }
 
 void TouchInputMapper::dispatchMotion(nsecs_t when, uint32_t policyFlags, uint32_t source,
