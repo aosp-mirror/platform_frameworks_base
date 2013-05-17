@@ -458,10 +458,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"للسماح للتطبيق باستخدام ميزات SurfaceFlinger ذات المستوى المنخفض."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"قراءة المخزن المؤقت للإطارات"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"للسماح للتطبيق بقراءة محتوى المخزن المؤقت للإطارات."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"تهيئة شاشات Wifi"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"للسماح للتطبيق بتهيئة شاشات Wifi والاتصال بها."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"التحكم في شاشات Wifi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"للسماح للتطبيق بالتحكم في الميزات ذات المستوى المنخفض في شاشات Wifi."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"تهيئة شاشات Wi-Fi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"للسماح للتطبيق بتهيئة شاشات Wi-Fi والاتصال بها."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"التحكم في شاشات Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"للسماح للتطبيق بالتحكم في الميزات ذات المستوى المنخفض في شاشات Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغيير إعداداتك الصوتية"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"للسماح للتطبيق بتعديل إعدادات الصوت العامة مثل مستوى الصوت وأي السماعات يتم استخدامها للاستماع."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"تسجيل الصوت"</string>
