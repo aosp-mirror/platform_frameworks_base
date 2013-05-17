@@ -12258,6 +12258,7 @@ package android.media {
 
   public static class MediaRouter.RouteInfo {
     method public android.media.MediaRouter.RouteCategory getCategory();
+    method public java.lang.CharSequence getDescription();
     method public android.media.MediaRouter.RouteGroup getGroup();
     method public android.graphics.drawable.Drawable getIconDrawable();
     method public java.lang.CharSequence getName();
@@ -12296,6 +12297,7 @@ package android.media {
 
   public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
     method public android.media.RemoteControlClient getRemoteControlClient();
+    method public void setDescription(java.lang.CharSequence);
     method public void setIconDrawable(android.graphics.drawable.Drawable);
     method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
