@@ -40,7 +40,7 @@
     <string name="invalid_charger" msgid="4549105996740522523">"USB-latausta ei tueta."\n"Käytä laitteen mukana tullutta laturia."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Akun käyttö"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Asetukset"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WiFi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Lentokonetila"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Kierrä näyttöä automaattisesti"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ÄÄNET."</string>
