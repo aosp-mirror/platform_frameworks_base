@@ -1130,12 +1130,12 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváněcí tóny"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámý vyzváněcí tón"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"K dispozici je síť WiFi."</item>
-    <item quantity="other" msgid="4192424489168397386">"Jsou k dispozici sítě WiFi."</item>
+    <item quantity="one" msgid="6654123987418168693">"K dispozici je síť Wi-Fi."</item>
+    <item quantity="other" msgid="4192424489168397386">"Jsou k dispozici sítě Wi-Fi."</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"K dispozici je veřejná síť WiFi"</item>
-    <item quantity="other" msgid="7915895323644292768">"Jsou k dispozici veřejné sítě WiFi"</item>
+    <item quantity="one" msgid="1634101450343277345">"K dispozici je veřejná síť Wi-Fi"</item>
+    <item quantity="other" msgid="7915895323644292768">"Jsou k dispozici veřejné sítě Wi-Fi"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Přihlásit se k síti Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Přihlášení k síti"</string>
