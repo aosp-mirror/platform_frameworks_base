@@ -451,17 +451,17 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"准許安裝位置提供者"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"建立虛構的位置資訊來源以供測試，或安裝新的位置資訊提供者。這項設定可讓應用程式覆寫 GPS 或位置資訊提供者等其他位置資訊來源所傳回的位置資訊和/或狀態。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精確位置 (以 GPS 和網路為基準)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允許應用程式使用全球衛星定位系統 (GPS) 或網路位置來源 (例如無線通信基地台和 WiFi) 取得您的精確位置。您必須在裝置上開啟這些定位服務，才能供應用程式使用。應用程式可能藉此判別您的位置，也可能增加額外耗電。"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允許應用程式使用全球衛星定位系統 (GPS) 或網路位置來源 (例如無線通信基地台和 Wi-Fi) 取得您的精確位置。您必須在裝置上開啟這些定位服務，才能供應用程式使用。應用程式可能藉此判別您的位置，也可能增加額外耗電。"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"概略位置 (以網路為基準)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允許應用程式取得您的概略位置。這類位置資訊取自使用網路位置來源 (例如無線通信基地台和 WiFi) 的定位服務。您必須在裝置上開啟這些定位服務，才能供應用程式使用。應用程式可能藉此判別您的概略位置。"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允許應用程式取得您的概略位置。這類位置資訊取自使用網路位置來源 (例如無線通信基地台和 Wi-Fi) 的定位服務。您必須在裝置上開啟這些定位服務，才能供應用程式使用。應用程式可能藉此判別您的概略位置。"</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"存取 SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允許應用程式使用 SurfaceFlinger 的低階功能。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"讀取框架緩衝"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"允許應用程式讀取畫面緩衝區的內容。"</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"設定 WiFi 顯示裝置"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 WiFi 顯示裝置。"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 WiFi 顯示裝置"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 WiFi 顯示裝置的低階功能。"</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"設定 Wi-Fi 顯示裝置"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 Wi-Fi 顯示裝置。"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 Wi-Fi 顯示裝置"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音訊設定，例如音量和用來輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
@@ -567,9 +567,9 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"允許應用程式變更共用網路的連線狀態。"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"變更背景資料使用設定"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"允許應用程式變更背景資料使用設定。"</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看 WiFi 連線"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看 Wi-Fi 連線"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"允許應用程式查看 Wi-Fi 網路相關資訊，例如是否已啟用 Wi-Fi，以及所連上 Wi-Fi 裝置的名稱。"</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"建立及中斷 WiFi 連線"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"建立及中斷 Wi-Fi 連線"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"允許應用程式與 Wi-Fi 存取點連線或中斷連線，並可變更 Wi-Fi 網路的裝置設定。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允許接收 Wi-Fi 多點傳播封包"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允許應用程式接收透過多點傳播位址傳送給 Wi-Fi 網路上所有裝置 (而不只是傳送給您的平板電腦) 的封包。這項設定會比非多點傳播模式耗用更多電力。"</string>
@@ -1135,15 +1135,15 @@
     <item quantity="one" msgid="1634101450343277345">"開啟可用 Wi-Fi 網路"</item>
     <item quantity="other" msgid="7915895323644292768">"開啟可用 Wi-Fi 網路"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登入 WiFi 網路"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登入 Wi-Fi 網路"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"登入網路"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"無法連線至 Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 的網際網路連線狀況不佳。"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"啟動 WiFi Direct 作業，這會關閉 WiFi 用戶端/無線基地台作業。"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"無法啟動 WiFi Direct。"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"啟動 Wi-Fi Direct 作業，這會關閉 Wi-Fi 用戶端/無線基地台作業。"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"無法啟動 Wi-Fi Direct。"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct 已開啟"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"輕觸即可設定"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
@@ -1155,7 +1155,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"請輸入必要的 PIN："</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板電腦與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 Wi-Fi 連線"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手機與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 WiFi 連線"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手機與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 Wi-Fi 連線"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字元"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"傳送 SMS 簡訊"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在傳送大量簡訊。您要允許這個應用程式繼續傳送簡訊嗎？"</string>

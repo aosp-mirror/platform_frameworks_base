@@ -438,10 +438,10 @@
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Ivumela uhlelo lokusebenza ukufinyelela nokuvumelanisa izibuyekezo zomphakathi ezivela kuwe nakubangani bakho. Qaphela uma waba ulwazi -- lokhu kuvumela uhlelo lokusebenza ukufunda ukuxhumana phakathi kwakho nabangani bakho kumanethiwekhi omphakathi, ngaphandle kokugcinwa kuyimfihlo. Qaphela: le mvume ingaphoqelelwa kuwo onke amanethiwekhi omphakathi."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"bhala indlela yakho yokuxhumana nabantu"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Ivumela uhlelo lokusebenza ukubonisa izibuyekezo zomphakathi ezivela kubangani bakho. Qaphela uma wabelana ngolwazi -- lokhu kuvumela uhlelo lokusebenza ukukhiqiza imilayezo engabonakala sengathi ivela kumngani. Qaphela: le mvume kungenzeka ingaphoqelelwa kuwo onke amanethiwekhi omphakathi."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"funda izenzakalo zekhalenda kanye nokwaziswa okuyimfihlo"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"funda imicimbi yekhalenda kanye nokwaziswa okuyimfihlo"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Ivumela uhlelo lokusebenza ukufunda zonke izehlakalo zekhalenda ezilondolozwe kuthebhulethi yakho, kufaka phakathi lezo zabangani noma osebenza nabo. Lokhu kungavumela uhlelo lokusebenza ukwabelana noma ukulondoloza idatha yakho yekhalenda, ngaphandle kokugcinwa kuyimfihlo noma ukuzwela."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Ivumela uhlelo lokusebenza ukufunda zonke izehlakalo zekhalenda ezilondolozwe efonini yakho, kufaka phakathi lezo zabangani noma osebenza nabo. Lokhu kungavumela uhlelo lokusebenza ukwabelana noma ukulondoloza idatha yakho yekhalenda, ngaphandle kokugcinwa kuyimfihlo noma ukuzwela."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"ngeza noma guqula izenzakalo zekhalenda bese uthumela ama-imeyili kuzivakashi ngaphandle kolwazi lomnikazi"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"ngeza noma guqula imicimbi yekhalenda bese uthumela ama-imeyili kuzivakashi ngaphandle kolwazi lomnikazi"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Ivumela uhlelo lokusebenza ukungeza, ukususa, ukushintsha izehlakalo ongazishintsha kuthebhulethi yakho, kufaka phakathi nalezo zabangani noma labo osebenza nabo. Lokhu kungavumela uhlelo lokusebenza ukuthumela imilayezo ebonakala ngathi ivela kubanikazi bekhalenda, noma lishintshe izehlakalo ngaphandle kolwazi labanikazi."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Ivumela uhlelo lokusebenza ukungeza, ukususa, ukushintsha izehlakalo ongazishintsha efonini yakho, kufaka phakathi nalezo zabangani noma labo osebenza nabo. Lokhu kungavumela uhlelo lokusebenza ukuthumela imilayezo ebonakala ngathi ivela kubanikazi bekhalenda, noma lishintshe izehlakalo ngaphandle kolwazi labanikazi."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"lungisela imithombo yendawo ukuhlolwa"</string>
@@ -458,10 +458,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Ivumela insiza ukuthi isebenzise okuqukethwe i-SurfaceFlinger okusezingeni eliphansi."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"funda isikhumbuli sesikhashana sendikimba"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Ivumela insiza ukuthi ifunde okuqukethwe ifreyimu yebhafa."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"lungisa ukubukwa kwe-Wifi"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ivumela uhlelo lokusebenza ukulungisa nokuxhuma ekubukisweni kwe-Wifi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"lawula ukubukwa kwe-Wifi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uvumela uhlelo lokusebenza ukulawula izici zeleveli ephansi zokuboniswa kwe-Wifi."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"lungisa ukubukwa kwe-Wi-Fi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ivumela uhlelo lokusebenza ukulungisa nokuxhuma ekubukisweni kwe-Wi-Fi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"lawula ukubukwa kwe-Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uvumela uhlelo lokusebenza ukulawula izici zeleveli ephansi zokuboniswa kwe-Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"shintsha izilungiselelo zakho zomsindo"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ivumela uhlelo lokusebenza ukushintsha izilungiselelo zomsindo we-global njengevolomu nokuthi isiphi isipika esisetshenziselwa okukhiphayo."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"qopha umsindo"</string>
@@ -1141,8 +1141,8 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ayikwazanga ukuxhuma kwi-Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" inoxhumano oluphansi lwe-inthanethi."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"I-WiFi Eqondile"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Qala ukusebenza kwe-WiFi Okuqondile. Lokhu kuzocima ikhasimende le-WiFi/Ukusebenza okwe-hotspot"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"I-Wi-Fi Eqondile"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Qala ukusebenza kwe-Wi-Fi Okuqondile. Lokhu kuzocima ikhasimende le-Wi-Fi/Ukusebenza okwe-hotspot"</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Yehlulekile ukuqala i-Wi-Fi Ngqo"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"I-Wi-Fi Direct ivulekile"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Thinta ukuze uthole izilungiselelo"</string>

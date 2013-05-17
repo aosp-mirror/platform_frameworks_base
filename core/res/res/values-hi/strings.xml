@@ -85,7 +85,7 @@
     <string name="serviceClassFAX" msgid="5566624998840486475">"फ़ैक्स"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Async"</string>
-    <string name="serviceClassDataSync" msgid="7530000519646054776">"सिंक"</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"समन्वयन"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"पैकेट"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
     <string name="roamingText0" msgid="7170335472198694945">"रोमिंग संकेतक चालू"</string>
@@ -126,8 +126,8 @@
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"अनुरोधित फ़ाइल नहीं मिल सकी."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"बहुत सारे अनुरोधों का संसाधन हो रहा है. बाद में पुन: प्रयास करें."</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> के लिए साइन इन त्रुटि"</string>
-    <string name="contentServiceSync" msgid="8353523060269335667">"सिंक"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"सिंक"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"समन्वयन"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"समन्वयन"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"बहुत से <xliff:g id="CONTENT_TYPE">%s</xliff:g> हटाए जाते हैं."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"टेबलेट संग्रहण भर गया है. स्‍थान रिक्त करने के लिए कुछ फ़ाइलें हटाएं."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"फ़ोन संग्रहण भर गया है. स्‍थान रिक्त करने के लिए कुछ फ़ाइलें हटाएं."</string>
@@ -589,11 +589,11 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"एप्लिकेशन को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"एप्‍लिकेशन को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा अक्षम करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल प्राप्त करते समय फ़ोन, कीलॉक को अक्षम कर देता है, फिर कॉल समाप्त होने पर कीलॉक को पुन: सक्षम कर देता है."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"सिंक सेटिंग पढ़ें"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समन्वयन सेटिंग पढ़ें"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"एप्लिकेशन को किसी खाते की समन्वयन सेटिंग पढ़ने देता है. उदाहरण के लिए, इससे यह निर्धारित किया जा सकता है कि लोग एप्लिकेशन किसी खाते के साथ समन्‍वयित है या नहीं."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"समन्‍वयन बंद या चालू टॉगल करें"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"एप्लिकेशन को किसी खाते की समन्वयन सेटिंग संशोधित करने देता है. उदाहरण के लिए, इसका उपयोग लोग एप्लिकेशन का समन्‍वयन किसी खाते से सक्षम करने में हो सकता है."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"सिंक आंकड़े पढ़ें"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"समन्वयन आंकड़े पढ़ें"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"एप्लिकेशन को किसी खाते के समन्वयन आंकड़े, साथ ही समन्‍वयित ईवेंट का इतिहास और समन्‍वयित डेटा की मात्रा पढ़ने देता है."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ग्राहकी-प्राप्त फ़ीड पढ़ें"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"एप्‍लिकेशन को वर्तमान में समन्वयित फ़ीड के बारे में विवरण प्राप्त करने देता है."</string>
@@ -1274,7 +1274,7 @@
     <string name="permission_request_notification_title" msgid="6486759795926237907">"अनुमति अनुरोधित"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> खाते के लिए अनुमति"\n"का अनुरोध किया गया."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
-    <string name="sync_binding_label" msgid="3687969138375092423">"सिंक"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"समन्वयन"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"पहुंच-योग्यता"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदलें"</string>
