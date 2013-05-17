@@ -40,6 +40,8 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -88,7 +90,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import libcore.io.IoUtils;
 
@@ -530,6 +534,60 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
         }
         return tmp;
+    }
+
+    /**
+     * Remove notification access for any services that no longer exist.
+     */
+    void disableNonexistentListeners() {
+        int currentUser = ActivityManager.getCurrentUser();
+        String flatIn = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                currentUser);
+        if (!TextUtils.isEmpty(flatIn)) {
+            if (DBG) Slog.v(TAG, "flat before: " + flatIn);
+            PackageManager pm = mContext.getPackageManager();
+            List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
+                    new Intent(NotificationListenerService.SERVICE_INTERFACE),
+                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
+                    currentUser);
+
+            Set<ComponentName> installed = new HashSet<ComponentName>();
+            for (int i = 0, count = installedServices.size(); i < count; i++) {
+                ResolveInfo resolveInfo = installedServices.get(i);
+                ServiceInfo info = resolveInfo.serviceInfo;
+
+                if (!android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE.equals(
+                                info.permission)) {
+                    Slog.w(TAG, "Skipping notification listener service "
+                            + info.packageName + "/" + info.name
+                            + ": it does not require the permission "
+                            + android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE);
+                    continue;
+                }
+                installed.add(new ComponentName(info.packageName, info.name));
+            }
+
+            String flatOut = "";
+            if (!installed.isEmpty()) {
+                String[] enabled = flatIn.split(ENABLED_NOTIFICATION_LISTENERS_SEPARATOR);
+                ArrayList<String> remaining = new ArrayList<String>(enabled.length);
+                for (int i = 0; i < enabled.length; i++) {
+                    ComponentName enabledComponent = ComponentName.unflattenFromString(enabled[i]);
+                    if (installed.contains(enabledComponent)) {
+                        remaining.add(enabled[i]);
+                    }
+                }
+                flatOut = TextUtils.join(ENABLED_NOTIFICATION_LISTENERS_SEPARATOR, remaining);
+            }
+            if (DBG) Slog.v(TAG, "flat after: " + flatOut);
+            if (!flatIn.equals(flatOut)) {
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                        flatOut, currentUser);
+            }
+        }
     }
 
     /**
@@ -1073,15 +1131,19 @@ public class NotificationManagerService extends INotificationManager.Stub
             String action = intent.getAction();
 
             boolean queryRestart = false;
+            boolean queryRemove = false;
             boolean packageChanged = false;
             
             if (action.equals(Intent.ACTION_PACKAGE_ADDED)
-                    || action.equals(Intent.ACTION_PACKAGE_REMOVED)
+                    || (queryRemove=action.equals(Intent.ACTION_PACKAGE_REMOVED))
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || (packageChanged=action.equals(Intent.ACTION_PACKAGE_CHANGED))
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                 String pkgList[] = null;
+                boolean queryReplace = queryRemove &&
+                        intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                if (DBG) Slog.i(TAG, "queryReplace=" + queryReplace);
                 if (action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 } else if (queryRestart) {
@@ -1119,6 +1181,10 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
 
                 if (anyListenersInvolved) {
+                    // if we're not replacing a package, clean up orphaned bits
+                    if (!queryReplace) {
+                        disableNonexistentListeners();
+                    }
                     // make sure we're still bound to any of our
                     // listeners who may have just upgraded
                     rebindListenerServices();
