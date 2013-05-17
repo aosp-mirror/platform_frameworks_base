@@ -25,7 +25,7 @@ interface IPowerManager
 {
     // WARNING: The first two methods must remain the first two methods because their
     // transaction numbers must not change unless IPowerManager.cpp is also updated.
-    void acquireWakeLock(IBinder lock, int flags, String tag, in WorkSource ws);
+    void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws);
     void releaseWakeLock(IBinder lock, int flags);
 
     void updateWakeLockWorkSource(IBinder lock, in WorkSource ws);

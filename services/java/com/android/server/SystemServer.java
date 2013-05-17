@@ -286,7 +286,8 @@ class ServerThread {
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
             power.init(context, lights, ActivityManagerService.self(), battery,
-                    BatteryStatsService.getService(), display);
+                    BatteryStatsService.getService(),
+                    ActivityManagerService.self().getAppOpsService(), display);
 
             Slog.i(TAG, "Alarm Manager");
             alarm = new AlarmManagerService(context);
