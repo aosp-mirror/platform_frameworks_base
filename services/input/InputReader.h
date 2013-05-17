@@ -1437,10 +1437,6 @@ private:
     // The maximum swipe width.
     float mPointerGestureMaxSwipeWidth;
 
-    // The start and end Y thresholds for invoking the assist navigation swipe.
-    float mNavigationAssistStartY;
-    float mNavigationAssistEndY;
-
     struct PointerDistanceHeapElement {
         uint32_t currentPointerIndex : 8;
         uint32_t lastPointerIndex : 8;
@@ -1615,15 +1611,6 @@ private:
         }
     } mPointerSimple;
 
-    struct Navigation {
-        // The id of a pointer that is tracking a possible assist swipe.
-        int32_t activeAssistId; // -1 if none
-
-        void reset() {
-            activeAssistId = -1;
-        }
-    } mNavigation;
-
     // The pointer and scroll velocity controls.
     VelocityControl mPointerVelocityControl;
     VelocityControl mWheelXVelocityControl;
@@ -1658,8 +1645,6 @@ private:
     void dispatchPointerSimple(nsecs_t when, uint32_t policyFlags,
             bool down, bool hovering);
     void abortPointerSimple(nsecs_t when, uint32_t policyFlags);
-
-    void dispatchNavigationAssist(nsecs_t when, uint32_t policyFlags);
 
     // Dispatches a motion event.
     // If the changedId is >= 0 and the action is POINTER_DOWN or POINTER_UP, the
