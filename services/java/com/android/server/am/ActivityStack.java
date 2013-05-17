@@ -50,7 +50,6 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.IThumbnailReceiver;
-import android.app.IApplicationThread;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
@@ -258,8 +257,7 @@ final class ActivityStack {
                     Slog.w(TAG, "Activity pause timeout for " + r);
                     synchronized (mService) {
                         if (r.app != null) {
-                            mService.logAppTooSlow(r.app, r.pauseTime,
-                                    "pausing " + r);
+                            mService.logAppTooSlow(r.app, r.pauseTime, "pausing " + r);
                         }
                         activityPausedLocked(r.appToken, true);
                     }
@@ -268,8 +266,7 @@ final class ActivityStack {
                     ActivityRecord r = (ActivityRecord)msg.obj;
                     synchronized (mService) {
                         if (r.continueLaunchTickingLocked()) {
-                            mService.logAppTooSlow(r.app, r.launchTickTime,
-                                    "launching " + r);
+                            mService.logAppTooSlow(r.app, r.launchTickTime, "launching " + r);
                         }
                     }
                 } break;
@@ -285,8 +282,7 @@ final class ActivityStack {
                 case LAUNCH_TIMEOUT_MSG: {
                     if (mService.mDidDexOpt) {
                         mService.mDidDexOpt = false;
-                        Message nmsg = mHandler.obtainMessage(LAUNCH_TIMEOUT_MSG);
-                        mHandler.sendMessageDelayed(nmsg, LAUNCH_TIMEOUT);
+                        mHandler.sendEmptyMessageDelayed(LAUNCH_TIMEOUT_MSG, LAUNCH_TIMEOUT);
                         return;
                     }
                     synchronized (mService) {
@@ -729,8 +725,7 @@ final class ActivityStack {
             mLaunchingActivity.acquire();
             if (!mHandler.hasMessages(LAUNCH_TIMEOUT_MSG)) {
                 // To be safe, don't allow the wake lock to be held for too long.
-                Message msg = mHandler.obtainMessage(LAUNCH_TIMEOUT_MSG);
-                mHandler.sendMessageDelayed(msg, LAUNCH_TIMEOUT);
+                mHandler.sendEmptyMessageDelayed(LAUNCH_TIMEOUT_MSG, LAUNCH_TIMEOUT);
             }
         }
 
@@ -2070,8 +2065,7 @@ final class ActivityStack {
                 if (mService.isSleepingOrShuttingDown()) {
                     r.setSleeping(true);
                 }
-                Message msg = mHandler.obtainMessage(STOP_TIMEOUT_MSG);
-                msg.obj = r;
+                Message msg = mHandler.obtainMessage(STOP_TIMEOUT_MSG, r);
                 mHandler.sendMessageDelayed(msg, STOP_TIMEOUT);
             } catch (Exception e) {
                 // Maybe just ignore exceptions here...  if the process
@@ -2662,12 +2656,10 @@ final class ActivityStack {
                 if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYING: " + r
                         + " (destroy requested)");
                 r.state = ActivityState.DESTROYING;
-                Message msg = mHandler.obtainMessage(DESTROY_TIMEOUT_MSG);
-                msg.obj = r;
+                Message msg = mHandler.obtainMessage(DESTROY_TIMEOUT_MSG, r);
                 mHandler.sendMessageDelayed(msg, DESTROY_TIMEOUT);
             } else {
-                if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
-                        + " (destroy skipped)");
+                if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r + " (destroy skipped)");
                 r.state = ActivityState.DESTROYED;
                 if (DEBUG_APP) Slog.v(TAG, "Clearing app during destroy for activity " + r);
                 r.app = null;
@@ -2678,8 +2670,7 @@ final class ActivityStack {
                 removeActivityFromHistoryLocked(r);
                 removedFromHistory = true;
             } else {
-                if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
-                        + " (no app)");
+                if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r + " (no app)");
                 r.state = ActivityState.DESTROYED;
                 if (DEBUG_APP) Slog.v(TAG, "Clearing app during destroy for activity " + r);
                 r.app = null;

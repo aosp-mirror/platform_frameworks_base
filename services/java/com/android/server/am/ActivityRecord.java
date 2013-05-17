@@ -754,8 +754,7 @@ final class ActivityRecord {
     boolean continueLaunchTickingLocked() {
         if (launchTickTime != 0) {
             final ActivityStack stack = task.stack;
-            Message msg = stack.mHandler.obtainMessage(ActivityStack.LAUNCH_TICK_MSG);
-            msg.obj = this;
+            Message msg = stack.mHandler.obtainMessage(ActivityStack.LAUNCH_TICK_MSG, this);
             stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
             stack.mHandler.sendMessageDelayed(msg, ActivityStack.LAUNCH_TICK);
             return true;
