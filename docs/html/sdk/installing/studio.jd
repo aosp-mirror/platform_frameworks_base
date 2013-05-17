@@ -303,6 +303,19 @@ download (or continue to use) the
   <ol>
     <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.
     <li>Follow the setup wizard to install Android Studio.
+
+
+    <div class="caution"><p><strong>Known issue:</strong>
+      On some Windows systems, the launcher script does not find where Java is installed.
+      If you encounter this problem,
+      you need to set an environment variable indicating the correct location.</p>
+      <p>Select <strong>Start menu > Computer > System Properties >
+      Advanced System Properties</strong>. Then open <strong>Advanced tab > Environment
+      Variables</strong> and add a new system variable <code>JAVA_HOME</code> that points to
+      your JDK folder, for example <code>C:\Program Files\Java\jdk1.7.0_21</code>.</p>
+    </div>
+
+
   </ol>
   <p><b>Mac OS X:</b></p>
   <ol>
@@ -332,6 +345,9 @@ the {@code sdk/} directory. For example:</p>
 <p>Windows: <code>\Users\&lt;user&gt;\AppData\Local\Android\android-studio\sdk\</code></p>
 <p>Mac: <code>/Applications/Android\ Studio.app/sdk/</code></p>
 </div>
+
+<p>For a list of some known issues, see <a
+href="http://tools.android.com/knownissues">tools.android.com/knownissues</a>.</p>
 
 
 <h2 id="Start">Starting a Project</h2>
