@@ -927,7 +927,6 @@ private:
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
     void setupDrawAA();
-    void setupDrawPoint(float pointSize);
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);
@@ -945,7 +944,6 @@ private:
             bool ignoreTransform = false, bool ignoreModelView = false);
     void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
             bool ignoreTransform = false);
-    void setupDrawPointUniforms();
     void setupDrawColorUniforms();
     void setupDrawPureColorUniforms();
     void setupDrawShaderIdentityUniforms();

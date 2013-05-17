@@ -1703,11 +1703,6 @@ void OpenGLRenderer::setupDrawAA() {
     mDescription.isAA = true;
 }
 
-void OpenGLRenderer::setupDrawPoint(float pointSize) {
-    mDescription.isPoint = true;
-    mDescription.pointSize = pointSize;
-}
-
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
     mColorA = alpha / 255.0f;
     mColorR = mColorA * ((color >> 16) & 0xFF) / 255.0f;
@@ -1820,11 +1815,6 @@ void OpenGLRenderer::setupDrawModelView(float left, float top, float right, floa
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity());
         if (mTrackDirtyRegions && dirty) dirtyLayer(left, top, right, bottom);
     }
-}
-
-void OpenGLRenderer::setupDrawPointUniforms() {
-    int slot = mCaches.currentProgram->getUniform("pointSize");
-    glUniform1f(slot, mDescription.pointSize);
 }
 
 void OpenGLRenderer::setupDrawColorUniforms() {
@@ -2409,7 +2399,7 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 
 status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPaint* paint,
         bool useOffset) {
-    if (!vertexBuffer.getSize()) {
+    if (!vertexBuffer.getVertexCount()) {
         // no vertices to draw
         return DrawGlInfo::kStatusDone;
     }
@@ -2447,7 +2437,7 @@ status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPa
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
     }
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getSize());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getVertexCount());
 
     if (isAA) {
         glDisableVertexAttribArray(alphaSlot);
@@ -2510,65 +2500,22 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
 }
 
 status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+    if (mSnapshot->isIgnored() || count < 2) return DrawGlInfo::kStatusDone;
 
-    // TODO: The paint's cap style defines whether the points are square or circular
-    // TODO: Handle AA for round points
+    count &= ~0x1; // round down to nearest two
 
-    // A stroke width of 0 has a special meaning in Skia:
-    // it draws an unscaled 1px point
-    float strokeWidth = paint->getStrokeWidth();
-    const bool isHairLine = paint->getStrokeWidth() == 0.0f;
-    if (isHairLine) {
-        // Now that we know it's hairline, we can set the effective width, to be used later
-        strokeWidth = 1.0f;
-    }
-    const float halfWidth = strokeWidth / 2;
+    VertexBuffer buffer;
+    SkRect bounds;
+    PathTessellator::tessellatePoints(points, count, paint, mSnapshot->transform, bounds, buffer);
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    int verticesCount = count >> 1;
-    int generatedVerticesCount = 0;
-
-    TextureVertex pointsData[verticesCount];
-    TextureVertex* vertex = &pointsData[0];
-
-    // TODO: We should optimize this method to not generate vertices for points
-    // that lie outside of the clip.
-    mCaches.enableScissor();
-
-    setupDraw();
-    setupDrawNoTexture();
-    setupDrawPoint(strokeWidth);
-    setupDrawColor(paint->getColor(), alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(mode);
-    setupDrawProgram();
-    setupDrawModelViewIdentity(true);
-    setupDrawColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawPointUniforms();
-    setupDrawShaderIdentityUniforms();
-    setupDrawMesh(vertex);
-
-    for (int i = 0; i < count; i += 2) {
-        TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
-        generatedVerticesCount++;
-
-        float left = points[i] - halfWidth;
-        float right = points[i] + halfWidth;
-        float top = points[i + 1] - halfWidth;
-        float bottom = points [i + 1] + halfWidth;
-
-        dirtyLayer(left, top, right, bottom, currentTransform());
+    if (quickReject(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
+        return DrawGlInfo::kStatusDone;
     }
 
-    glDrawArrays(GL_POINTS, 0, generatedVerticesCount);
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
 
-    return DrawGlInfo::kStatusDrew;
+    bool useOffset = !paint->isAntiAlias();
+    return drawVertexBuffer(buffer, paint, useOffset);
 }
 
 status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {

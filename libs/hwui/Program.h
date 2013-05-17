@@ -68,24 +68,22 @@ namespace uirenderer {
 #define PROGRAM_BITMAP_WRAPS_SHIFT 9
 #define PROGRAM_BITMAP_WRAPT_SHIFT 11
 
-#define PROGRAM_GRADIENT_TYPE_SHIFT 33
+#define PROGRAM_GRADIENT_TYPE_SHIFT 33 // 2 bits for gradient type
 #define PROGRAM_MODULATE_SHIFT 35
 
-#define PROGRAM_IS_POINT_SHIFT 36
+#define PROGRAM_HAS_AA_SHIFT 36
 
-#define PROGRAM_HAS_AA_SHIFT 37
+#define PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT 37
+#define PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT 38
 
-#define PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT 38
-#define PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT 39
+#define PROGRAM_HAS_GAMMA_CORRECTION 39
 
-#define PROGRAM_HAS_GAMMA_CORRECTION 40
+#define PROGRAM_IS_SIMPLE_GRADIENT 40
 
-#define PROGRAM_IS_SIMPLE_GRADIENT 41
+#define PROGRAM_HAS_COLORS 41
 
-#define PROGRAM_HAS_COLORS 42
-
-#define PROGRAM_HAS_DEBUG_HIGHLIGHT 43
-#define PROGRAM_EMULATE_STENCIL 44
+#define PROGRAM_HAS_DEBUG_HIGHLIGHT 42
+#define PROGRAM_EMULATE_STENCIL 43
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -157,9 +155,6 @@ struct ProgramDescription {
     SkXfermode::Mode framebufferMode;
     bool swapSrcDst;
 
-    bool isPoint;
-    float pointSize;
-
     bool hasGammaCorrection;
     float gamma;
 
@@ -200,9 +195,6 @@ struct ProgramDescription {
 
         framebufferMode = SkXfermode::kClear_Mode;
         swapSrcDst = false;
-
-        isPoint = false;
-        pointSize = 0.0f;
 
         hasGammaCorrection = false;
         gamma = 2.2f;
@@ -269,7 +261,6 @@ struct ProgramDescription {
         key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
         if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
-        if (isPoint) key |= programid(0x1) << PROGRAM_IS_POINT_SHIFT;
         if (isAA) key |= programid(0x1) << PROGRAM_HAS_AA_SHIFT;
         if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
         if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
