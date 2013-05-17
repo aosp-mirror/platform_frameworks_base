@@ -458,10 +458,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"اجازه می‎دهد برنامه از ویژگی‌های سطح پایین SurfaceFlinger استفاده کند."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"خواندن بافر قاب"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"به برنامه اجازه می‎دهد تا محتوای بافر کادر را بخواند."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"پیکربندی صفحه نمایش‌های Wifi"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"به برنامه اجازه می‌دهد تا اتصال به صفحات نمایش Wifi را پیکربندی کند."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"کنترل صفحه نمایش‌های Wifi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"به برنامه اجازه می‌دهد که ویژگی‌های سطح پایین صفحه‌های نمایش Wifi را کنترل کند."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"پیکربندی صفحه نمایش‌های Wi‑Fi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"به برنامه اجازه می‌دهد تا اتصال به صفحات نمایش Wi‑Fi را پیکربندی کند."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"کنترل صفحه نمایش‌های Wi‑Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"به برنامه اجازه می‌دهد که ویژگی‌های سطح پایین صفحه‌های نمایش Wi‑Fi را کنترل کند."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را اصلاح کند."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ضبط صدا"</string>
