@@ -23,7 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очистить"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Не беспокоить"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показать уведомления"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удаление из списка"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удалить из списка"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Список недавно использованных приложений пуст."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>

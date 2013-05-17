@@ -100,12 +100,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"إشارة البيانات تتكون من شريطين."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"إشارة البيانات تتكون من ثلاثة أشرطة."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"إشارة البيانات كاملة."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"تم إيقاف Wifi."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"تم قطع اتصال Wifi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"إشارة WiFi تتكون من شريط واحد."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"إشارة WiFi تتكون من شريطين."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"إشارة WiFi تتكون من ثلاثة أشرطة."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"إشارة WiFi كاملة."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"تم إيقاف Wi-Fi."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"تم قطع اتصال Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"إشارة Wi-Fi تتكون من شريط واحد."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"إشارة Wi-Fi تتكون من شريطين."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"إشارة Wi-Fi تتكون من ثلاثة أشرطة."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"إشارة Wi-Fi كاملة."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ليس هناك WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"شريط WiMAX واحد."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"شريطا WiMAX."</string>
