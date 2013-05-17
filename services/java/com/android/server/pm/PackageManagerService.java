@@ -8120,7 +8120,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             allUsers = sUserManager.getUserIds();
             perUserInstalled = new boolean[allUsers.length];
             for (int i = 0; i < allUsers.length; i++) {
-                perUserInstalled[i] = ps.getInstalled(allUsers[i]);
+                perUserInstalled[i] = ps != null ? ps.getInstalled(allUsers[i]) : false;
             }
         }
         boolean sysPkg = (isSystemApp(oldPackage));
@@ -8689,7 +8689,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             allUsers = sUserManager.getUserIds();
             perUserInstalled = new boolean[allUsers.length];
             for (int i = 0; i < allUsers.length; i++) {
-                perUserInstalled[i] = ps.getInstalled(allUsers[i]);
+                perUserInstalled[i] = ps != null ? ps.getInstalled(allUsers[i]) : false;
             }
         }
 
