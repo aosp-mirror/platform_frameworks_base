@@ -3931,8 +3931,11 @@
     <!-- Name of the default audio route category. [CHAR LIMIT=50] -->
     <string name="default_audio_route_category_name">System</string>
 
-    <!-- Default name of the bluetooth a2dp audio route. [CHAR LIMIT=50] -->
+    <!-- Description of the bluetooth a2dp audio route. [CHAR LIMIT=50] -->
     <string name="bluetooth_a2dp_audio_route_name">Bluetooth audio</string>
+
+    <!-- Description of a wireless display route. [CHAR LIMIT=50] -->
+    <string name="wireless_display_route_description">Wireless display</string>
 
     <!-- "Done" button for MediaRouter chooser dialog when grouping routes. [CHAR LIMIT=NONE] -->
     <string name="media_route_chooser_grouping_done">Done</string>
