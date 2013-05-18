@@ -8581,7 +8581,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        if ((flags & VISIBILITY_MASK) == VISIBLE) {
+        final int newVisibility = flags & VISIBILITY_MASK;
+        if (newVisibility == VISIBLE) {
             if ((changed & VISIBILITY_MASK) != 0) {
                 /*
                  * If this view is becoming visible, invalidate it in case it changed while
@@ -8647,14 +8648,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if ((changed & VISIBILITY_MASK) != 0) {
+            // If the view is invisible, cleanup its display list to free up resources
+            if (newVisibility != VISIBLE) {
+                cleanupDraw();
+            }
+
             if (mParent instanceof ViewGroup) {
                 ((ViewGroup) mParent).onChildVisibilityChanged(this,
-                        (changed & VISIBILITY_MASK), (flags & VISIBILITY_MASK));
+                        (changed & VISIBILITY_MASK), newVisibility);
                 ((View) mParent).invalidate(true);
             } else if (mParent != null) {
                 mParent.invalidateChild(this, null);
             }
-            dispatchVisibilityChanged(this, (flags & VISIBILITY_MASK));
+            dispatchVisibilityChanged(this, newVisibility);
         }
 
         if ((changed & WILL_NOT_CACHE_DRAWING) != 0) {
@@ -12034,6 +12040,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         destroyLayer(false);
 
+        cleanupDraw();
+
+        mCurrentAnimation = null;
+        mCurrentScene = null;
+
+        resetAccessibilityStateChanged();
+    }
+
+    private void cleanupDraw() {
         if (mAttachInfo != null) {
             if (mDisplayList != null) {
                 mDisplayList.markDirty();
@@ -12044,12 +12059,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Should never happen
             clearDisplayList();
         }
-
-        mCurrentAnimation = null;
-
-        mCurrentScene = null;
-
-        resetAccessibilityStateChanged();
     }
 
     void invalidateInheritedLayoutMode(int layoutModeOfRoot) {
