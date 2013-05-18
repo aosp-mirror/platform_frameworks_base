@@ -95,6 +95,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -405,7 +406,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         synchronized (mLock) {
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
-            return getUserStateLocked(resolvedUserId).mInstalledServices;
+            // The automation service is a fake one and should not be reported
+            // to clients as being installed - it really is not.
+            UserState userState = getUserStateLocked(resolvedUserId);
+            if (userState.mUiAutomationService != null) {
+                List<AccessibilityServiceInfo> installedServices =
+                        new ArrayList<AccessibilityServiceInfo>();
+                installedServices.addAll(userState.mInstalledServices);
+                installedServices.remove(userState.mUiAutomationService);
+                return installedServices;
+            }
+            return userState.mInstalledServices;
         }
     }
 
@@ -415,9 +426,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         synchronized (mLock) {
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
+
+            // The automation service is a fake one and should not be reported
+            // to clients as being enabled. The automation service is always the
+            // only active one, if it exists.
+            UserState userState = getUserStateLocked(resolvedUserId);
+            if (userState.mUiAutomationService != null) {
+                return Collections.emptyList();
+            }
+
             result = mEnabledServicesForFeedbackTempList;
             result.clear();
-            List<Service> services = getUserStateLocked(resolvedUserId).mBoundServices;
+            List<Service> services = userState.mBoundServices;
             while (feedbackType != 0) {
                 final int feedbackTypeBit = (1 << Integer.numberOfTrailingZeros(feedbackType));
                 feedbackType &= ~feedbackTypeBit;
