@@ -673,8 +673,8 @@ public class WifiStateMachine extends StateMachine {
 
         setInitialState(mInitialState);
 
-        setLogRecSize(100);
-        setLogOnlyTransitions(true);
+        setLogRecSize(300);
+        setLogOnlyTransitions(false);
         if (DBG) setDbg(true);
 
         //start the state machine
