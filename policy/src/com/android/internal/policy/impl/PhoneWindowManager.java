@@ -4526,8 +4526,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public int getUserRotationMode() {
         return Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.USER_ROTATION, WindowManagerPolicy.USER_ROTATION_FREE,
-                UserHandle.USER_CURRENT);
+                Settings.System.ACCELEROMETER_ROTATION, 0, UserHandle.USER_CURRENT) != 0 ?
+                        WindowManagerPolicy.USER_ROTATION_FREE :
+                                WindowManagerPolicy.USER_ROTATION_LOCKED;
     }
 
     // User rotation: to be used when all else fails in assigning an orientation to the device
