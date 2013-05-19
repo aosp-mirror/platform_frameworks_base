@@ -147,8 +147,8 @@ class WifiController extends StateMachine {
             addState(mApEnabledState, mDefaultState);
             addState(mEcmState, mDefaultState);
         setInitialState(mApStaDisabledState);
-        setLogRecSize(25);
-        setLogOnlyTransitions(true);
+        setLogRecSize(100);
+        setLogOnlyTransitions(false);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_DEVICE_IDLE);
@@ -352,7 +352,9 @@ class WifiController extends StateMachine {
                 case CMD_WIFI_TOGGLED:
                 case CMD_AIRPLANE_TOGGLED:
                 case CMD_EMERGENCY_MODE_CHANGED:
+                    break;
                 case CMD_DEFERRED_TOGGLE:
+                    log("DEFERRED_TOGGLE ignored due to state change");
                     break;
                 default:
                     throw new RuntimeException("WifiController.handleMessage " + msg.what);
@@ -409,7 +411,11 @@ class WifiController extends StateMachine {
                     }
                     break;
                 case CMD_DEFERRED_TOGGLE:
-                    if (msg.arg1 != mDeferredEnableSerialNumber) break;
+                    if (msg.arg1 != mDeferredEnableSerialNumber) {
+                        log("DEFERRED_TOGGLE ignored due to serial mismatch");
+                        break;
+                    }
+                    log("DEFERRED_TOGGLE handled");
                     sendMessage((Message)(msg.obj));
                     break;
                 default:
@@ -423,6 +429,9 @@ class WifiController extends StateMachine {
             if (delaySoFar > mReEnableDelayMillis) {
                 return false;
             }
+
+            log("WifiController msg " + msg + " deferred for " +
+                    (mReEnableDelayMillis - delaySoFar) + "ms");
 
             // need to defer this action.
             Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
@@ -526,7 +535,11 @@ class WifiController extends StateMachine {
                     }
                     break;
                 case CMD_DEFERRED_TOGGLE:
-                    if (msg.arg1 != mDeferredEnableSerialNumber) break;
+                    if (msg.arg1 != mDeferredEnableSerialNumber) {
+                        log("DEFERRED_TOGGLE ignored due to serial mismatch");
+                        break;
+                    }
+                    logd("DEFERRED_TOGGLE handled");
                     sendMessage((Message)(msg.obj));
                     break;
                 default:
@@ -540,6 +553,10 @@ class WifiController extends StateMachine {
             if (delaySoFar > mReEnableDelayMillis) {
                 return false;
             }
+
+            log("WifiController msg " + msg + " deferred for " +
+                    (mReEnableDelayMillis - delaySoFar) + "ms");
+
             // need to defer this action.
             Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
             deferredMsg.obj = Message.obtain(msg);
