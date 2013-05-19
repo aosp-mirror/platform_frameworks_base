@@ -1133,6 +1133,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             boolean queryRestart = false;
             boolean queryRemove = false;
             boolean packageChanged = false;
+            boolean cancelNotifications = true;
             
             if (action.equals(Intent.ACTION_PACKAGE_ADDED)
                     || (queryRemove=action.equals(Intent.ACTION_PACKAGE_REMOVED))
@@ -1163,7 +1164,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                                 .getApplicationEnabledSetting(pkgName);
                         if (enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                                 || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
-                            return;
+                            cancelNotifications = false;
                         }
                     }
                     pkgList = new String[]{pkgName};
@@ -1172,8 +1173,10 @@ public class NotificationManagerService extends INotificationManager.Stub
                 boolean anyListenersInvolved = false;
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkgName : pkgList) {
-                        cancelAllNotificationsInt(pkgName, 0, 0, !queryRestart,
-                                UserHandle.USER_ALL);
+                        if (cancelNotifications) {
+                            cancelAllNotificationsInt(pkgName, 0, 0, !queryRestart,
+                                    UserHandle.USER_ALL);
+                        }
                         if (mEnabledListenerPackageNames.contains(pkgName)) {
                             anyListenersInvolved = true;
                         }
