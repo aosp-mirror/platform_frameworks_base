@@ -12679,6 +12679,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected void destroyHardwareResources() {
+        clearDisplayList();
         destroyLayer(true);
     }
 
