@@ -107,6 +107,21 @@ redirects:
 - from: /guide/topics/connectivity/usb/adk.html
   to: /tools/adk/index.html
 
+- from: /tools/workflow/publishing/versioning.html
+  to: /tools/publishing/versioning.html
+
+- from: /tools/workflow/publishing/publishing.html
+  to: /tools/publishing/publishing_overview.html
+
+- from: /tools/workflow/publishing_overview.html
+  to: /tools/publishing/publishing_overview.html
+
+- from: /tools/workflow/publishing/publishing_overview.html
+  to: /tools/publishing/publishing_overview.html
+
+- from: /tools/workflow/app-signing.html
+  to: /tools/publishing/app-signing.html
+
 - from: /tools/adk/aoa.html
   to: http://source.android.com/tech/accessories/aoap/aoa.html
 
@@ -340,8 +355,8 @@ redirects:
 - from: /deviceart
   to: http://developer.android.com/distribute/promote/device-art.html
 
-- from: /edu
-  to: /distribute/googleplay/edu/index.html
-
 - from: /edu/signup
   to: https://services.google.com/fb/forms/playedu
+
+- from: /edu
+  to: /distribute/googleplay/edu/index.html
