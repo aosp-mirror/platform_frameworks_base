@@ -57,7 +57,7 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
             gInputDeviceClassInfo.ctor, deviceInfo.getId(), deviceInfo.getGeneration(),
             nameObj.get(), descriptorObj.get(), deviceInfo.isExternal(),
             deviceInfo.getSources(), deviceInfo.getKeyboardType(),
-            kcmObj.get(), deviceInfo.hasVibrator()));
+            kcmObj.get(), deviceInfo.hasVibrator(), deviceInfo.hasButtonUnderPad()));
 
     const Vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (size_t i = 0; i < ranges.size(); i++) {
@@ -86,8 +86,8 @@ int register_android_view_InputDevice(JNIEnv* env)
     FIND_CLASS(gInputDeviceClassInfo.clazz, "android/view/InputDevice");
     gInputDeviceClassInfo.clazz = jclass(env->NewGlobalRef(gInputDeviceClassInfo.clazz));
 
-    GET_METHOD_ID(gInputDeviceClassInfo.ctor, gInputDeviceClassInfo.clazz,
-            "<init>", "(IILjava/lang/String;Ljava/lang/String;ZIILandroid/view/KeyCharacterMap;Z)V");
+    GET_METHOD_ID(gInputDeviceClassInfo.ctor, gInputDeviceClassInfo.clazz, "<init>",
+            "(IILjava/lang/String;Ljava/lang/String;ZIILandroid/view/KeyCharacterMap;ZZ)V");
 
     GET_METHOD_ID(gInputDeviceClassInfo.addMotionRange, gInputDeviceClassInfo.clazz,
             "addMotionRange", "(IIFFFFF)V");
