@@ -466,7 +466,7 @@ the keystore containing your private key.</td>
 </tr>
 <tr>
 <td><code>-sigalg</code></td><td>The name of the signature algorithim to use in signing the APK.
-Use the value {@code MD5withRSA}.</td>
+Use the value {@code SHA1withRSA}.</td>
 </tr>
 <tr>
 <td><code>-digestalg</code></td><td>The message digest algorithim to use in processing the entries
@@ -492,7 +492,7 @@ way, your password is not stored in your shell history.</p></td>
 <code>my_application.apk</code>, using the example keystore created above.
 </p>
 
-<pre>$ jarsigner -verbose -sigalg MD5withRSA -digestalg SHA1 -keystore my-release-key.keystore
+<pre>$ jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore
 my_application.apk alias_name</pre>
 
 <p>Running the example command above, Jarsigner prompts you to provide
