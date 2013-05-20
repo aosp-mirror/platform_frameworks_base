@@ -4964,6 +4964,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see AccessibilityNodeInfo
      */
     public AccessibilityNodeInfo createAccessibilityNodeInfo() {
+        if (mAccessibilityDelegate != null) {
+            return mAccessibilityDelegate.createAccessibilityNodeInfo(this);
+        } else {
+            return createAccessibilityNodeInfoInternal();
+        }
+    }
+
+    /**
+     * @see #createAccessibilityNodeInfo()
+     */
+    AccessibilityNodeInfo createAccessibilityNodeInfoInternal() {
         AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
             return provider.createAccessibilityNodeInfo(View.NO_ID);
@@ -18765,6 +18776,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public AccessibilityNodeProvider getAccessibilityNodeProvider(View host) {
             return null;
+        }
+
+        /**
+         * Returns an {@link AccessibilityNodeInfo} representing the host view from the
+         * point of view of an {@link android.accessibilityservice.AccessibilityService}.
+         * This method is responsible for obtaining an accessibility node info from a
+         * pool of reusable instances and calling
+         * {@link #onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} on the host
+         * view to initialize the former.
+         * <p>
+         * <strong>Note:</strong> The client is responsible for recycling the obtained
+         * instance by calling {@link AccessibilityNodeInfo#recycle()} to minimize object
+         * creation.
+         * </p>
+         * <p>
+         * The default implementation behaves as
+         * {@link View#createAccessibilityNodeInfo() View#createAccessibilityNodeInfo()} for
+         * the case of no accessibility delegate been set.
+         * </p>
+         * @return A populated {@link AccessibilityNodeInfo}.
+         *
+         * @see AccessibilityNodeInfo
+         *
+         * @hide
+         */
+        public AccessibilityNodeInfo createAccessibilityNodeInfo(View host) {
+            return host.createAccessibilityNodeInfoInternal();
         }
     }
 
