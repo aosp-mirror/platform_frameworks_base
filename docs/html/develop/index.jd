@@ -33,19 +33,35 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
 
               <li class="item carousel-home">
                  <div class="col-8">
+                   <img src="{@docRoot}images/google/gps-location.png"
+class="play no-shadow no-transform" style="margin:0 0 0 70px;height:230px;width:340px" />
+                 </div>
+                <div class="content-right col-6" style="width:350px">
+                  <h2>New Location APIs from Google</h2>
+                  <p>The latest version of Google Play services includes new APIs that provide more
+                  efficient and immediate user location data on devices running Android 2.2
+                  and higher. Features include geofencing APIs, user activity recognition, and
+                  power-efficient location updates.</p>
+                  <p><a
+href="{@docRoot}google/play-services/location.html" class="button">Read more</a></p>
+                </div>
+              </li>
+
+              <li class="item carousel-home">
+                 <div class="col-8">
                    <img src="{@docRoot}images/google/gps-plus-signin-hero.jpg"
 class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;height:250px;
                                            max-width:409px;width:409px" />
                  </div>
                 <div class="content-right col-6" style="width:350px">
-                  <h2>Google+ Sign-in for your Android Apps</h2>
-                  <p>Google+ Sign-In is an easy, trusted way to sign a user into your app,
-                  and get more Android installs when people visit your website.
-                  When users sign in with Google on the web, they have the option to instantly
-                  install your Android app without ever leaving your website.</p>
+                  <h2>New Cross-Platform Single Sign On</h2>
+                  <p>Google+ Sign-In is an easy, trusted way to sign a user into your app.
+                  Now it's even more seamless. A user can sign in to your app on one device and
+                  pick it up on another&mdash;without signing in again. Best of all, it's built
+                  into Google+ Sign-in, so there's no change needed in your app.</p>
                   <p><a
 href="{@docRoot}google/play-services/plus.html" class="button">Read more</a></p>
-                </div>            
+                </div>
               </li>
 
               <li class="item carousel-home">
@@ -92,19 +108,6 @@ href="{@docRoot}google/play/billing/v2/billing_subscriptions.html#trials">Read
 more</a></p>
                    </div>                
                 </li>
-               <li class="item carousel-home">
-                   <div class="col-8">
-                     <img
-src="//lh4.ggpht.com/-MgN5DnoO5XU/UHYGYzTcAOI/AAAAAAAABs4/jTS7sKkfBcM/s1600/pubsites.png" class="play"></div>
-                   <div class="content-right col-6">
-                   <p class="title-intro">From the blog:</p>
-                   <h2>New Google Play Developer Console</h2>
-                   <p>All developers can now try the <strong>new Google Play Developer Console</strong>. With a streamlined publishing flow, new language options, and new user ratings statistics, you’ll have better tools for delivering great Android apps that delight users.</p>
-                  <p><a
-href="http://android-developers.blogspot.com/2012/10/new-google-play-developer-console.html" class="button">Read
-more</a></p>
-                   </div>                
-                </li>
            </ul>
        </div>
    </div>
@@ -121,6 +124,16 @@ more</a></p>
 			<div class="feed-frame">
                                 <!-- DEVELOPER NEWS -->
           <ul>
+            <li><a href="//android-developers.blogspot.com/2013/05/new-ways-to-optimize-your-business-in.html">
+              <div class="feed-image" style="background:url('//4.bp.blogspot.com/-VmHMT66JjxU/UZZdfPUaJsI/AAAAAAAACQc/kDx5-Ep5YRo/s1600/framed_designed-tablets.png') no-repeat 0 0;background-size:180px"></div>
+              <h4>New Ways to Optimize Your Business in Google Play</h4>
+              <p>Many of you have invested in making great tablet experiences for your users, and we want to ensure that that work pays off...</p>
+              </a></li>
+            <li><a href="//android-developers.blogspot.com/2013/05/android-studio-ide-built-for-android.html">
+              <div class="feed-image" style="background:url('//1.bp.blogspot.com/-u5dfSsMOMC0/UZO_5DC_W9I/AAAAAAAACM8/YCMn15HPzpE/s320/Studio_table.png') no-repeat 0 0;background-size:180px"></div>
+              <h4>Android Studio: An IDE built for Android</h4>
+              <p>To develop Android Studio, we cooperated with JetBrains, creators of one of the most advanced Java IDEs available today...</p>
+              </a></li>
             <li><a href="//android-developers.blogspot.com/2013/01/verifying-back-end-calls-from-android.html">
               <div class="feed-image" style="background:url('//lh4.ggpht.com/7z4NItEg-X21zvFGAarKonk-VaysBYthJ30u1JjaQ0-5fjyHNawnmoNeG--4FCACog=w124') no-repeat 0 0"></div>
               <h4>Verifying Back-End Calls from Android Apps</h4>
@@ -130,16 +143,6 @@ more</a></p>
               <div class="feed-image" style="background:url('//lh4.ggpht.com/-wVsUOo4xGE0/UNy9mZ1nmMI/AAAAAAAAB4w/f6rhyLn5KbI/s1600/daydream-example.jpg') no-repeat 0 0;background-position:right top;"></div>
               <h4>Daydream: Interactive Screen Savers</h4>
               <p>Daydream is an interactive screen-saver mode introduced in Android 4.2. Learn how to add Daydreams to your apps...</p>
-              </a></li>
-            <li><a href="//android-developers.blogspot.com/2012/11/designing-for-tablets-were-here-to-help.html">
-              <div class="feed-image" style="background:url('//developer.android.com/design/media/multipane_expand.png') no-repeat 0 0; background-position:right top;"></div>
-              <h4>Designing for Tablets?</h4>
-              <p>Essential resources for everyone in the app development pipeline—from product managers, to designers, to developers, and QA engineers...</p>
-              </a></li>
-            <li><a href="//android-developers.blogspot.com/2012/12/in-app-billing-version-3.html">
-              <div class="feed-image" style="background:url('//developer.android.com/images/iab-thumb.png') no-repeat 0 0;background-position:center right;"></div>
-              <h4>In-app Billing Version 3 Now Available</h4>
-              <p>A new version of In-app Billing is available that lets you sell digital goods in your app with just a few lines of code...</p>
               </a></li>
           </ul>
                                 <!-- FEATURED DOCS -->
@@ -265,7 +268,7 @@ function renderVideoPlaylists(data) {
   
   if (feed.entry.length > MAX_LIST_LENGTH) {
     // add item to go to youtube for playlist
-    $ulVideos.append('<li class="more"><a href="//www.youtube.com/playlist?list=PL' + playlistId + '">More &raquo;</a></li>');
+    $ulVideos.append('<li class="more"><a href="//www.youtube.com/playlist?list=' + playlistId + '">More &raquo;</a></li>');
   }
 
   $liPlaylist.append($ulVideos);
@@ -315,14 +318,14 @@ var playlists = {
   'designinaction' : {
     'ids': ["PLWz5rJ2EKKc8j2B95zGMb8muZvrIy-wcF"]
   },
-  'about' : {
-    'ids': ["PL611F8C5DBF49CEC6"]
+  'bizdevbytes' : {
+    'ids': ["PLWz5rJ2EKKc8-Osr0TuHyTMEhKV0xJ6ql"]
   },
   'developersstrikeback' : {
     'ids': ["PLWz5rJ2EKKc8nhhIOieejm1PxYHmPkIPh"]
   },
   'googleio' : {
-    'ids': ["PL4C6BCDE45E05F49E"]
+    'ids': ["PLWz5rJ2EKKc9WGUwq2gQ-coU3fSyexgOx"]
   }
 };
 
@@ -333,7 +336,7 @@ function showVideosPlaylists() {
     for (var i in ids) {
       var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
                     + ids[i] +
-                    "?v=2&alt=json-in-script&max-results=50&callback=renderVideoPlaylists&orderby=published'><\/script>";
+                    "?v=2&alt=json-in-script&max-results=50&callback=renderVideoPlaylists&orderby=position'><\/script>";
       $("body").append(script);
     }
   }
@@ -345,7 +348,7 @@ function showDevelopersLivePlaylist() {
   var playlistId = "PLWz5rJ2EKKc_XOgcRukSoKKjewFJZrKV0"; /* DevBytes */
   var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
                 + playlistId +
-                "?v=2&alt=json-in-script&max-results=10&callback=renderDevelopersLivePlaylist&orderby=reversedPosition'><\/script > ";
+                "?v=2&alt=json-in-script&max-results=10&callback=renderDevelopersLivePlaylist&orderby=position'><\/script > ";
   $("body").append(script);
 }
 
