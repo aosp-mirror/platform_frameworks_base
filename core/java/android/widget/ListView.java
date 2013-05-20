@@ -2425,24 +2425,37 @@ public class ListView extends AbsListView {
 
     /**
      * Used by {@link #arrowScrollImpl(int)} to help determine the next selected position
-     * to move to. This can return a position currently not represented by a view on screen
-     * but only in the direction given.
+     * to move to. This return a position in the direction given if the selected item
+     * is fully visible.
      *
+     * @param selectedView Current selected view to move from
      * @param selectedPos Current selected position to move from
      * @param direction Direction to move in
      * @return Desired selected position after moving in the given direction
      */
-    private final int nextSelectedPositionForDirection(int selectedPos, int direction) {
+    private final int nextSelectedPositionForDirection(
+            View selectedView, int selectedPos, int direction) {
         int nextSelected;
+
         if (direction == View.FOCUS_DOWN) {
-            nextSelected = selectedPos != INVALID_POSITION && selectedPos >= mFirstPosition ?
-                    selectedPos + 1 :
-                    mFirstPosition;
+            final int listBottom = getHeight() - mListPadding.bottom;
+            if (selectedView != null && selectedView.getBottom() <= listBottom) {
+                nextSelected = selectedPos != INVALID_POSITION && selectedPos >= mFirstPosition ?
+                        selectedPos + 1 :
+                        mFirstPosition;
+            } else {
+                return INVALID_POSITION;
+            }
         } else {
-            final int lastPos = mFirstPosition + getChildCount() - 1;
-            nextSelected = selectedPos != INVALID_POSITION && selectedPos <= lastPos ?
-                    selectedPos - 1 :
-                    lastPos;
+            final int listTop = mListPadding.top;
+            if (selectedView != null && selectedView.getTop() >= listTop) {
+                final int lastPos = mFirstPosition + getChildCount() - 1;
+                nextSelected = selectedPos != INVALID_POSITION && selectedPos <= lastPos ?
+                        selectedPos - 1 :
+                        lastPos;
+            } else {
+                return INVALID_POSITION;
+            }
         }
 
         if (nextSelected < 0 || nextSelected >= mAdapter.getCount()) {
@@ -2466,7 +2479,7 @@ public class ListView extends AbsListView {
         View selectedView = getSelectedView();
         int selectedPos = mSelectedPosition;
 
-        int nextSelectedPosition = nextSelectedPositionForDirection(selectedPos, direction);
+        int nextSelectedPosition = nextSelectedPositionForDirection(selectedView, selectedPos, direction);
         int amountToScroll = amountToScroll(direction, nextSelectedPosition);
 
         // if we are moving focus, we may OVERRIDE the default behavior
