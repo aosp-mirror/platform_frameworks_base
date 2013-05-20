@@ -179,7 +179,9 @@ public class ViewOverlay {
 
         public void clear() {
             removeAllViews();
-            mDrawables.clear();
+            if (mDrawables != null) {
+                mDrawables.clear();
+            }
         }
 
         boolean isEmpty() {
