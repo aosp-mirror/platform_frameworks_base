@@ -14,17 +14,18 @@ page.metaDescription=The official site for Android developers. Provides the Andr
             <ul>
                 <li class="item carousel-home">
                     <div class="content-left col-10">
-                    <a href="http://goo.gl/9lM2d">
+                    <a href="https://developers.google.com/live/android/browse">
                       <img src="{@docRoot}images/home/io-gdl-2013.png" style="margin:60px 0 0">
                     </a>
                     </div>
                     <div class="content-right col-5">
-                    <h1>Google I/O Live Stream</h1>
-                    <p>Watch Android sessions live from Google I/O 2013. Hear about the latest in
-                    Android straight from the source.</p>
-                    <p>Brought to you by
+                    <h1>Watch the Android talks from Google I/O</h1>
+                    <p>If you weren't able to attend Google I/O in person or couldn't make it
+                    to all the talks, you can catch up on the action
+                    with all the recordings, brought to you by
                     <a href="http://developers.google.com/live">Google Developers Live</a>.</p>
-                    <p><a href="http://goo.gl/9lM2d" class="button">Tune in now</a></p>
+                    <p><a href="https://developers.google.com/live/android/browse" class="button"
+                    >See the Android talks</a></p>
                     </div>
                 </li>
                 <li class="item carousel-home">
