@@ -9648,8 +9648,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mLosingFocus.remove(newFocus);
             int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
 
-            final WindowState imWindow = mInputMethodWindow;
-            if (imWindowChanged && oldFocus != imWindow) {
+            if (imWindowChanged && oldFocus != mInputMethodWindow) {
                 // Focus of the input method window changed. Perform layout if needed.
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     performLayoutLockedInner(displayContent, true /*initial*/, updateInputWindows);
