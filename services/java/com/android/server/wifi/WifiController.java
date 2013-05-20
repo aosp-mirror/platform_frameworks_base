@@ -78,6 +78,10 @@ class WifiController extends StateMachine {
      */
     private static final long DEFAULT_REENABLE_DELAY_MS = 500;
 
+    // finding that delayed messages can sometimes be delivered earlier than expected
+    // probably rounding errors..  add a margin to prevent problems
+    private static final long DEFER_MARGIN_MS = 5;
+
     NetworkInfo mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, "WIFI", "");
 
     private static final String ACTION_DEVICE_IDLE =
@@ -437,7 +441,7 @@ class WifiController extends StateMachine {
             Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
             deferredMsg.obj = Message.obtain(msg);
             deferredMsg.arg1 = ++mDeferredEnableSerialNumber;
-            sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar);
+            sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar + DEFER_MARGIN_MS);
             return true;
         }
 
@@ -561,7 +565,7 @@ class WifiController extends StateMachine {
             Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
             deferredMsg.obj = Message.obtain(msg);
             deferredMsg.arg1 = ++mDeferredEnableSerialNumber;
-            sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar);
+            sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar + DEFER_MARGIN_MS);
             return true;
         }
 
