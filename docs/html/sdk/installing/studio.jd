@@ -301,9 +301,8 @@ download (or continue to use) the
 <li>Install Android Studio and the SDK tools:
   <p><b>Windows:</b></p>
   <ol>
-    <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.
+    <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.</li>
     <li>Follow the setup wizard to install Android Studio.
-
 
     <div class="caution"><p><strong>Known issue:</strong>
       On some Windows systems, the launcher script does not find where Java is installed.
@@ -314,13 +313,23 @@ download (or continue to use) the
       Variables</strong> and add a new system variable <code>JAVA_HOME</code> that points to
       your JDK folder, for example <code>C:\Program Files\Java\jdk1.7.0_21</code>.</p>
     </div>
-
+    </li>
 
   </ol>
   <p><b>Mac OS X:</b></p>
   <ol>
-    <li>Open the downloaded DMG file, {@code android-studio-bundle-&lt;version&gt;.dmg}.
+    <li>Open the downloaded DMG file, {@code android-studio-bundle-&lt;version&gt;.dmg}.</li>
     <li>Drag and drop Android Studio into the Applications folder.
+
+    <div class="caution"><p><strong>Known issue:</strong>
+      Depending on your security settings, when you attempt to open Android Studio, you might
+      see a warning that says the package is damaged and should be moved to the trash. If this
+      happens, go to <strong>System Preferences > Security &amp; Privacy</strong> and under
+      <strong>Allow applications downloaded from</strong>, select <strong>Anywhere</strong>.
+      Then open Android Studio again.</p>
+    </div>
+    </li>
+
   </ol>
   <p><b>Linux:</b></p>
   <ol>
