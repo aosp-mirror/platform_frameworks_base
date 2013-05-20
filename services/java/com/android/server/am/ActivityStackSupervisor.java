@@ -314,7 +314,12 @@ public class ActivityStackSupervisor {
     }
 
     void removeTask(TaskRecord task) {
+        mWindowManager.removeTask(task.taskId);
         final ActivityStack stack = task.stack;
+        final ActivityRecord r = stack.mResumedActivity;
+        if (r != null && r.task == task) {
+            stack.mResumedActivity = null;
+        }
         if (stack.removeTask(task) && !stack.isHomeStack()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing stack " + stack);
             mStacks.remove(stack);
@@ -1893,12 +1898,22 @@ public class ActivityStackSupervisor {
     }
 
     void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+        final TaskRecord task = anyTaskForIdLocked(taskId);
+        if (task == null) {
+            return;
+        }
         final ActivityStack stack = getStack(stackId);
         if (stack == null) {
             Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
             return;
         }
-        stack.moveTask(taskId, toTop);
+        removeTask(task);
+        stack.addTask(task, toTop);
+        if (toTop) {
+            moveHomeStack(stack.isHomeStack());
+            setFocusedStack(task.getTopActivity());
+        }
+        mWindowManager.addTask(taskId, stackId, toTop);
         resumeTopActivitiesLocked();
     }
 

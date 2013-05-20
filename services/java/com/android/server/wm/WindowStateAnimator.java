@@ -3,6 +3,16 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
+import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerService.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_TURN_ON_SCREEN;
 
@@ -34,30 +44,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class WinAnimatorList extends ArrayList<WindowStateAnimator> {
-    public WinAnimatorList() {
-        super();
-    }
-
-    public WinAnimatorList(WinAnimatorList other) {
-        super(other);
-    }
 }
 
 /**
  * Keep track of animations and surface operations for a single WindowState.
  **/
 class WindowStateAnimator {
-    static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
-    static final boolean DEBUG_ANIM = WindowManagerService.DEBUG_ANIM;
-    static final boolean DEBUG_LAYERS = WindowManagerService.DEBUG_LAYERS;
-    static final boolean DEBUG_STARTING_WINDOW = WindowManagerService.DEBUG_STARTING_WINDOW;
-    static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
-    static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
-    static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
-    static final boolean localLOGV = WindowManagerService.localLOGV;
-    static final boolean DEBUG_ORIENTATION = WindowManagerService.DEBUG_ORIENTATION;
-    static final boolean DEBUG_SURFACE_TRACE = WindowManagerService.DEBUG_SURFACE_TRACE;
-
     static final String TAG = "WindowStateAnimator";
 
     // Unchanging local convenience fields.
@@ -339,7 +331,7 @@ class WindowStateAnimator {
         mHasTransformation = false;
         mHasLocalTransformation = false;
         if (mWin.mPolicyVisibility != mWin.mPolicyVisibilityAfterAnim) {
-            if (WindowState.DEBUG_VISIBILITY) {
+            if (DEBUG_VISIBILITY) {
                 Slog.v(TAG, "Policy visibility changing after anim in " + this + ": "
                         + mWin.mPolicyVisibilityAfterAnim);
             }
@@ -406,7 +398,7 @@ class WindowStateAnimator {
         if (mSurfaceControl != null) {
             mService.mDestroySurface.add(mWin);
             mWin.mDestroying = true;
-            if (WindowState.SHOW_TRANSACTIONS) WindowManagerService.logSurface(
+            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(
                 mWin, "HIDE (finishExit)", null);
             hide();
         }
@@ -647,7 +639,7 @@ class WindowStateAnimator {
             if ((attrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 flags |= SurfaceControl.SECURE;
             }
-            if (WindowState.DEBUG_VISIBILITY) Slog.v(
+            if (DEBUG_VISIBILITY) Slog.v(
                 TAG, "Creating surface in session "
                 + mSession.mSurfaceSession + " window " + this
                 + " w=" + mWin.mCompatFrame.width()

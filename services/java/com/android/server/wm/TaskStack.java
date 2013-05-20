@@ -225,6 +225,20 @@ public class TaskStack {
     void setBounds(Rect bounds) {
         mDimLayer.setBounds(bounds);
         mAnimationBackgroundSurface.setBounds(bounds);
+
+        final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
+                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                    final WindowState win = windows.get(winNdx);
+                    if (!resizingWindows.contains(win)) {
+                        resizingWindows.add(win);
+                    }
+                }
+            }
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {

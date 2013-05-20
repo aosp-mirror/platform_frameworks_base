@@ -6336,7 +6336,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     new RuntimeException("here").fillInStackTrace());
         }
         synchronized (this) {
-            mWindowManager.moveTaskToStack(taskId, stackId, toTop);
             mStackSupervisor.moveTaskToStack(taskId, stackId, toTop);
         }
     }

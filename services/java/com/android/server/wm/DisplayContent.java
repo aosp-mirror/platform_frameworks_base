@@ -309,10 +309,12 @@ class DisplayContent {
      * Propagate the new bounds to all child stack boxes, applying weights as we move down.
      * @param contentRect The bounds to apply at the top level.
      */
-    void setStackBoxSize(Rect contentRect) {
+    boolean setStackBoxSize(Rect contentRect) {
+        boolean change = false;
         for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            mStackBoxes.get(stackBoxNdx).setStackBoxSizes(contentRect);
+            change |= mStackBoxes.get(stackBoxNdx).setStackBoxSizes(contentRect);
         }
+        return change;
     }
 
     Rect getStackBounds(int stackId) {

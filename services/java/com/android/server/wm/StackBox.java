@@ -274,8 +274,10 @@ public class StackBox {
         boolean change;
         if (mStack != null) {
             change = !mBounds.equals(bounds);
-            mBounds.set(bounds);
-            mStack.setBounds(bounds);
+            if (change) {
+                mBounds.set(bounds);
+                mStack.setBounds(bounds);
+            }
         } else {
             mTmpRect.set(bounds);
             if (mVertical) {

@@ -3416,12 +3416,7 @@ final class ActivityStack {
         return new ArrayList<TaskRecord>(mTaskHistory);
     }
 
-    void moveTask(int taskId, boolean toTop) {
-        final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-        if (task == null) {
-            return;
-        }
-        task.stack.mTaskHistory.remove(task);
+    void addTask(final TaskRecord task, final boolean toTop) {
         task.stack = this;
         if (toTop) {
             mTaskHistory.add(task);

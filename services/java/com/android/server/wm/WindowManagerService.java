@@ -579,22 +579,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     final LayoutFields mInnerFields = new LayoutFields();
 
-    static class AppWindowAnimParams {
-        AppWindowAnimator mAppAnimator;
-        ArrayList<WindowStateAnimator> mWinAnimators;
-
-        public AppWindowAnimParams(final AppWindowAnimator appAnimator) {
-            mAppAnimator = appAnimator;
-
-            final AppWindowToken atoken = appAnimator.mAppToken;
-            mWinAnimators = new ArrayList<WindowStateAnimator>();
-            final int N = atoken.allAppWindows.size();
-            for (int i = 0; i < N; i++) {
-                mWinAnimators.add(atoken.allAppWindows.get(i).mWinAnimator);
-            }
-        }
-    }
-
     boolean mAnimationScheduled;
 
     /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
@@ -4831,6 +4815,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.createStack(this, stackId, relativeStackId, position, weight);
             mStackIdToStack.put(stackId, stack);
             displayContent.moveStack(stack, true);
+            performLayoutAndPlaceSurfacesLocked();
         }
     }
 
@@ -4841,7 +4826,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mStackIdToStack.delete(stackId);
                 int nextStackId = stack.remove();
                 stack.getDisplayContent().layoutNeeded = true;
-                performLayoutAndPlaceSurfacesLocked();
+                requestTraversalLocked();
                 return nextStackId;
             }
             if (DEBUG_STACK) Slog.i(TAG, "removeStack: could not find stackId=" + stackId);
@@ -4849,18 +4834,31 @@ public class WindowManagerService extends IWindowManager.Stub
         return HOME_STACK_ID;
     }
 
-    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+    public void removeTask(int taskId) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
                 return;
             }
-            task.mStack.removeTask(task);
+            final TaskStack stack = task.mStack;
+            stack.removeTask(task);
+            stack.getDisplayContent().layoutNeeded = true;
+        }
+    }
 
+    public void addTask(int taskId, int stackId, boolean toTop) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                return;
+            }
             TaskStack stack = mStackIdToStack.get(stackId);
             stack.addTask(task, toTop);
-            stack.getDisplayContent().layoutNeeded = true;
-
+            final DisplayContent displayContent = stack.getDisplayContent();
+            if (toTop) {
+                displayContent.moveHomeStackBox(stack.isHomeStack());
+            }
+            displayContent.layoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
         }
     }
@@ -4872,7 +4870,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     STACK_WEIGHT_MAX + ", weight=" + weight);
         }
         synchronized (mWindowMap) {
-            Task task = null;
             DisplayContentsIterator iterator = new DisplayContentsIterator();
             while (iterator.hasNext()) {
                 if (iterator.next().resizeStack(stackId, weight)) {
@@ -5658,6 +5655,7 @@ public class WindowManagerService extends IWindowManager.Stub
         frame.scale(scale);
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
+        // TODO: Test for RTL vs. LTR and use frame.right-width instead of -frame.left
         matrix.postTranslate(-FloatMath.ceil(frame.left), -FloatMath.ceil(frame.top));
         Canvas canvas = new Canvas(bm);
         canvas.drawColor(0xFF000000);

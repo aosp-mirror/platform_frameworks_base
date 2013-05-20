@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
+
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
@@ -57,12 +60,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class WindowList extends ArrayList<WindowState> {
-    WindowList() {
-        super();
-    }
-    WindowList(WindowList windows) {
-        super(windows);
-    }
 }
 
 /**
@@ -70,11 +67,6 @@ class WindowList extends ArrayList<WindowState> {
  */
 final class WindowState implements WindowManagerPolicy.WindowState {
     static final String TAG = "WindowState";
-
-    static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
-    static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
-    static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
-    static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
 
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
@@ -440,7 +432,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf) {
         mHaveFrame = true;
 
-        final int type = mAttrs.type;
         if (mAppToken != null) {
             mContainingFrame.set(getStackBounds());
         } else {
@@ -572,17 +563,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     false);
         }
 
-        if (WindowManagerService.localLOGV) {
-            //if ("com.google.android.youtube".equals(mAttrs.packageName)
-            //        && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                Slog.v(TAG, "Resolving (mRequestedWidth="
-                        + mRequestedWidth + ", mRequestedheight="
-                        + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
-                        + "): frame=" + mFrame.toShortString()
-                        + " ci=" + mContentInsets.toShortString()
-                        + " vi=" + mVisibleInsets.toShortString());
-            //}
-        }
+        if (DEBUG_LAYOUT || WindowManagerService.localLOGV) Slog.v(TAG,
+                "Resolving (mRequestedWidth="
+                + mRequestedWidth + ", mRequestedheight="
+                + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
+                + "): frame=" + mFrame.toShortString()
+                + " ci=" + mContentInsets.toShortString()
+                + " vi=" + mVisibleInsets.toShortString());
     }
 
     @Override
@@ -964,12 +951,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return configChanged;
     }
 
-    boolean isConfigDiff(int mask) {
-        return mConfiguration != mService.mCurConfiguration
-                && mConfiguration != null
-                && (mConfiguration.diff(mService.mCurConfiguration) & mask) != 0;
-    }
-
     void removeLocked() {
         disposeInputChannel();
 
@@ -1022,7 +1003,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
                         mService.removeWindowLocked(mSession, win);
-                    } else if (WindowState.this.mHasSurface) {
+                    } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         mService.removeWindowLocked(mSession, WindowState.this);
                     }
