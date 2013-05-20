@@ -1433,6 +1433,8 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Dźwięk Bluetooth"</string>
+    <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
+    <skip />
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Gotowe"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Wyjście multimediów"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Skanuję..."</string>
