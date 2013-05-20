@@ -426,7 +426,7 @@ class WifiController extends StateMachine {
 
         private boolean doDeferEnable(Message msg) {
             long delaySoFar = SystemClock.elapsedRealtime() - mDisabledTimestamp;
-            if (delaySoFar > mReEnableDelayMillis) {
+            if (delaySoFar >= mReEnableDelayMillis) {
                 return false;
             }
 
@@ -550,7 +550,7 @@ class WifiController extends StateMachine {
 
         private boolean doDeferEnable(Message msg) {
             long delaySoFar = SystemClock.elapsedRealtime() - mDisabledTimestamp;
-            if (delaySoFar > mReEnableDelayMillis) {
+            if (delaySoFar >= mReEnableDelayMillis) {
                 return false;
             }
 
