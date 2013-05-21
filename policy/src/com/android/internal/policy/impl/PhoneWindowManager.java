@@ -1345,7 +1345,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (attrs.type) {
             case TYPE_SYSTEM_OVERLAY:
             case TYPE_SECURE_SYSTEM_OVERLAY:
-            case TYPE_TOAST:
                 // These types of windows can't receive input events.
                 attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;

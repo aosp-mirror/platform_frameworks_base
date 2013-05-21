@@ -382,6 +382,10 @@ public class NavigationBarView extends LinearLayout {
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
     }
 
+    public boolean isVertical() {
+        return mVertical;
+    }
+
     public void reorient() {
         final int rot = mDisplay.getRotation();
         for (int i=0; i<4; i++) {

@@ -61,6 +61,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
@@ -75,6 +76,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.EventLogTags;
@@ -309,6 +311,37 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    private Toast mHideybarConfirmation;
+    private boolean mHideybarConfirmationDismissed;
+
+    private final View.OnTouchListener mDismissHideybarConfirmationOnTouchOutside =
+            new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
+                        dismissHideybarConfirmation();
+                    }
+                    return false;
+                }
+            };
+
+    private final Runnable mHideybarConfirmationAction = new Runnable() {
+        @Override
+        public void run() {
+            if (mHideybarConfirmation != null) {
+                final boolean isGloballyConfirmed = Prefs.read(mContext)
+                        .getBoolean(Prefs.HIDEYBAR_CONFIRMED, false);
+                if (!isGloballyConfirmed) {
+                    // user pressed button, consider this a confirmation
+                    Prefs.edit(mContext)
+                            .putBoolean(Prefs.HIDEYBAR_CONFIRMED, true)
+                            .apply();
+                }
+                dismissHideybarConfirmation();
+            }
+        }
+    };
+
     private boolean mAutohideSuspended;
 
     private final Runnable mAutohide = new Runnable() {
@@ -322,6 +355,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
+        mDisplay.getSize(mCurrentDisplaySize);
 
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
@@ -1855,7 +1889,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         final int oldVal = mSystemUiVisibility;
         final int newVal = (oldVal&~mask) | (vis&mask);
         final int diff = newVal ^ oldVal;
-
+        if (DEBUG) Slog.d(TAG, String.format(
+                "setSystemUiVisibility vis=%s mask=%s oldVal=%s newVal=%s diff=%s",
+                Integer.toHexString(vis), Integer.toHexString(mask),
+                Integer.toHexString(oldVal), Integer.toHexString(newVal),
+                Integer.toHexString(diff)));
         if (diff != 0) {
             mSystemUiVisibility = newVal;
 
@@ -1892,7 +1930,57 @@ public class PhoneStatusBar extends BaseStatusBar {
                     cancelAutohide();
                 }
             }
+            if (mNavigationBarView != null) {
+                int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_ALLOW_OVERLAY;
+                boolean oldVisible =  (oldVal & flags) == flags;
+                boolean newVisible = (newVal & flags) == flags;
+                if (!oldVisible && newVisible) {
+                    mHideybarConfirmationDismissed = false;
+                }
+                setHideybarConfirmationVisible(newVisible);
+            }
             notifyUiVisibilityChanged(mSystemUiVisibility);
+        }
+    }
+
+    private void dismissHideybarConfirmation() {
+        if (mHideybarConfirmation != null) {
+            mHideybarConfirmationDismissed = true;
+            mHideybarConfirmation.cancel();
+            mHideybarConfirmation = null;
+        }
+    }
+
+    private void setHideybarConfirmationVisible(boolean visible) {
+        if (DEBUG) Slog.d(TAG, "setHideybarConfirmationVisible " + visible);
+        if (visible && mHideybarConfirmation == null && !mHideybarConfirmationDismissed) {
+            // create the confirmation toast bar with the correct message for this config
+            float widthDp = mCurrentDisplaySize.x /
+                    (mDisplayMetrics.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT);
+            int msg = mNavigationBarView.isVertical() ?
+                    R.string.hideybar_confirmation_message_right :
+                    widthDp < 600 ? R.string.hideybar_confirmation_message_bottom_short :
+                    R.string.hideybar_confirmation_message_bottom;
+            mHideybarConfirmation = Toast.makeBar(mContext, msg, Toast.LENGTH_INFINITE)
+                    .setAction(com.android.internal.R.string.ok, mHideybarConfirmationAction);
+            View v = mHideybarConfirmation.getView();
+            boolean isGloballyConfirmed = Prefs.read(mContext)
+                    .getBoolean(Prefs.HIDEYBAR_CONFIRMED, false);
+            if (isGloballyConfirmed) {
+                // dismiss on outside touch if globally confirmed
+                v.setOnTouchListener(mDismissHideybarConfirmationOnTouchOutside);
+            }
+            // position at the bottom like normal toasts, but use top gravity
+            // to avoid jumping around when showing/hiding the nav bar
+            v.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            int offsetY = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.toast_y_offset);
+            mHideybarConfirmation.setGravity(Gravity.TOP, 0,
+                    mCurrentDisplaySize.y - v.getMeasuredHeight() / 2 - offsetY);
+            // show the confirmation
+            mHideybarConfirmation.show();
+        } else if (!visible) {
+            dismissHideybarConfirmation();
         }
     }
 

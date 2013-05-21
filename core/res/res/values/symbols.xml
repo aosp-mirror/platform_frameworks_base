@@ -991,6 +991,7 @@
   <java-symbol type="drawable" name="text_select_handle_left" />
   <java-symbol type="drawable" name="text_select_handle_middle" />
   <java-symbol type="drawable" name="text_select_handle_right" />
+  <java-symbol type="drawable" name="toast_bar_bg" />
   <java-symbol type="drawable" name="unknown_image" />
   <java-symbol type="drawable" name="unlock_default" />
   <java-symbol type="drawable" name="unlock_halo" />
@@ -1079,6 +1080,7 @@
   <java-symbol type="layout" name="textview_hint" />
   <java-symbol type="layout" name="time_picker" />
   <java-symbol type="layout" name="time_picker_dialog" />
+  <java-symbol type="layout" name="toast_bar" />
   <java-symbol type="layout" name="transient_notification" />
   <java-symbol type="layout" name="volume_adjust" />
   <java-symbol type="layout" name="volume_adjust_item" />
@@ -1132,6 +1134,7 @@
   <java-symbol type="style" name="Animation.DropDownUp" />
   <java-symbol type="style" name="Animation.DropDownDown" />
   <java-symbol type="style" name="Animation.PopupWindow" />
+  <java-symbol type="style" name="Animation.ToastBar" />
   <java-symbol type="style" name="Animation.TypingFilter" />
   <java-symbol type="style" name="Animation.TypingFilterRestore" />
   <java-symbol type="style" name="Animation.Dream" />

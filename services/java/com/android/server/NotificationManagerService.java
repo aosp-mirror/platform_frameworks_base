@@ -1476,7 +1476,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             if (DBG) Slog.d(TAG, "Show pkg=" + record.pkg + " callback=" + record.callback);
             try {
                 record.callback.show();
-                scheduleTimeoutLocked(record, false);
+                scheduleTimeoutLocked(record);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Object died trying to show notification " + record.callback
@@ -1516,12 +1516,14 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
-    private void scheduleTimeoutLocked(ToastRecord r, boolean immediate)
+    private void scheduleTimeoutLocked(ToastRecord r)
     {
-        Message m = Message.obtain(mHandler, MESSAGE_TIMEOUT, r);
-        long delay = immediate ? 0 : (r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY);
         mHandler.removeCallbacksAndMessages(r);
-        mHandler.sendMessageDelayed(m, delay);
+        if (r.duration != Toast.LENGTH_INFINITE) {
+            Message m = Message.obtain(mHandler, MESSAGE_TIMEOUT, r);
+            long delay = r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
+            mHandler.sendMessageDelayed(m, delay);
+        }
     }
 
     private void handleTimeout(ToastRecord record)
