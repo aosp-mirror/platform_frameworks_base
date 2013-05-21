@@ -64,6 +64,9 @@
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
 
+    <!-- Alarm clocks -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+
     <application
         android:persistent="true"
         android:allowClearUserData="false"
