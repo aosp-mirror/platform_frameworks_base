@@ -1970,7 +1970,7 @@
 
     <!-- Allows an application to call any phone number, including emergency
          numbers, without going through the Dialer user interface for the user
-         to confirm the call being placed. -->
+         to confirm the call being placed. Not for use by third party apps. -->
     <permission android:name="android.permission.CALL_PRIVILEGED"
         android:label="@string/permlab_callPrivileged"
         android:description="@string/permdesc_callPrivileged"
