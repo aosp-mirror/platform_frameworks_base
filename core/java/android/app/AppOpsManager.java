@@ -104,8 +104,9 @@ public class AppOpsManager {
     public static final int OP_AUDIO_ALARM_VOLUME = 37;
     public static final int OP_AUDIO_NOTIFICATION_VOLUME = 38;
     public static final int OP_AUDIO_BLUETOOTH_VOLUME = 39;
+    public static final int OP_WAKE_LOCK = 40;
     /** @hide */
-    public static final int _NUM_OP = 40;
+    public static final int _NUM_OP = 41;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -156,6 +157,7 @@ public class AppOpsManager {
             OP_AUDIO_ALARM_VOLUME,
             OP_AUDIO_NOTIFICATION_VOLUME,
             OP_AUDIO_BLUETOOTH_VOLUME,
+            OP_WAKE_LOCK,
     };
 
     /**
@@ -203,6 +205,7 @@ public class AppOpsManager {
             "AUDIO_ALARM_VOLUME",
             "AUDIO_NOTIFICATION_VOLUME",
             "AUDIO_BLUETOOTH_VOLUME",
+            "WAKE_LOCK",
     };
 
     /**
@@ -250,6 +253,7 @@ public class AppOpsManager {
             null, // no permission for changing alarm volume
             null, // no permission for changing notification volume
             null, // no permission for changing bluetooth volume
+            android.Manifest.permission.WAKE_LOCK,
     };
 
     /**

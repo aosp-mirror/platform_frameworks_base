@@ -551,6 +551,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         pkgUid = mContext.getPackageManager().getPackageUid(packageName,
                                 UserHandle.getUserId(uid));
                     } catch (NameNotFoundException e) {
+                        if ("media".equals(packageName)) {
+                            pkgUid = Process.MEDIA_UID;
+                        }
                     }
                     if (pkgUid != uid) {
                         // Oops!  The package name is not valid for the uid they are calling
