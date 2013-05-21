@@ -85,26 +85,20 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * @noinspection UnusedDeclaration
+     * Private constructor that must received an already allocated native
+     * bitmap int (pointer).
      */
-    /*  Private constructor that must received an already allocated native
-        bitmap int (pointer).
-
-        This can be called from JNI code.
-    */
+    @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
     Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
             int density) {
         this(nativeBitmap, buffer, isMutable, ninePatchChunk, null, density);
     }
 
     /**
-     * @noinspection UnusedDeclaration
+     * Private constructor that must received an already allocated native bitmap
+     * int (pointer).
      */
-    /*  Private constructor that must received an already allocated native
-        bitmap int (pointer).
-
-        This can be called from JNI code.
-    */
+    @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
     Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
             int[] layoutBounds, int density) {
         if (nativeBitmap == 0) {
@@ -122,6 +116,14 @@ public final class Bitmap implements Parcelable {
         if (density >= 0) {
             mDensity = density;
         }
+    }
+
+    /**
+     * Native bitmap has been reconfigured, so discard cached width/height
+     */
+    @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
+    void reinit() {
+        mWidth = mHeight = -1;
     }
 
     /**
@@ -454,7 +456,7 @@ public final class Bitmap implements Parcelable {
     /**
      * Creates a new bitmap, scaled from an existing bitmap, when possible. If the
      * specified width and height are the same as the current width and height of 
-     * the source btimap, the source bitmap is returned and now new bitmap is
+     * the source bitmap, the source bitmap is returned and no new bitmap is
      * created.
      *
      * @param src       The source bitmap.
@@ -989,6 +991,10 @@ public final class Bitmap implements Parcelable {
      * getPixels() or setPixels(), then the pixels are uniformly treated as
      * 32bit values, packed according to the Color class.
      *
+     * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method
+     * should not be used to calculate the memory usage of the bitmap. Instead,
+     * see {@link #getAllocationByteCount()}.
+     *
      * @return number of bytes between rows of the native bitmap pixels.
      */
     public final int getRowBytes() {
@@ -996,11 +1002,29 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Returns the number of bytes used to store this bitmap's pixels.
+     * Returns the minimum number of bytes that can be used to store this bitmap's pixels.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, the result of this method can
+     * no longer be used to determine memory usage of a bitmap. See {@link
+     * #getAllocationByteCount()}.
      */
     public final int getByteCount() {
         // int result permits bitmaps up to 46,340 x 46,340
         return getRowBytes() * getHeight();
+    }
+
+    /**
+     * Returns the size of the allocated memory used to store this bitmap's pixels.
+     *
+     * <p>This can be larger than the result of {@link #getByteCount()} if a bitmap is reused to
+     * decode other bitmaps of smaller size. See {@link BitmapFactory.Options#inBitmap inBitmap in
+     * BitmapFactory.Options}. If a bitmap is not reused in this way, this value will be the same as
+     * that returned by {@link #getByteCount()}.
+     *
+     * <p>This value will not change over the lifetime of a Bitmap.
+     */
+    public final int getAllocationByteCount() {
+        return mBuffer.length;
     }
 
     /**
