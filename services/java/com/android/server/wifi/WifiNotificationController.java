@@ -91,10 +91,12 @@ final class WifiNotificationController {
     private final Context mContext;
     private final WifiStateMachine mWifiStateMachine;
     private NetworkInfo mNetworkInfo;
+    private volatile int mWifiState;
 
     WifiNotificationController(Context context, WifiStateMachine wsm) {
         mContext = context;
         mWifiStateMachine = wsm;
+        mWifiState = WifiManager.WIFI_STATE_UNKNOWN;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -106,6 +108,8 @@ final class WifiNotificationController {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+                            mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                                    WifiManager.WIFI_STATE_UNKNOWN);
                             resetNotification();
                         } else if (intent.getAction().equals(
                                 WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
@@ -141,6 +145,7 @@ final class WifiNotificationController {
         // don't bother doing any of the following
         if (!mNotificationEnabled) return;
         if (networkInfo == null) return;
+        if (mWifiState != WifiManager.WIFI_STATE_ENABLED) return;
 
         NetworkInfo.State state = networkInfo.getState();
         if ((state == NetworkInfo.State.DISCONNECTED)
