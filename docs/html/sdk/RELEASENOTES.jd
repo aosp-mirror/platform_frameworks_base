@@ -731,11 +731,11 @@ to this release.</p>
 
 <h3>ADT Plugin Compatibility</h3>
 
-<p>For this version of the SDK &mdash; Android 1.0 SDK, Release 1 &mdash; the compatible version of the Android Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a previous version of ADT, you should update to the latest version for use with this SDK. For information about how to update your ADT plugin, see <a href="{@docRoot}sdk/1.0_r1/upgrading.html">Upgrading the SDK</a>.</p>
+<p>For this version of the SDK &mdash; Android 1.0 SDK, Release 1 &mdash; the compatible version of the Android Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a previous version of ADT, you should update to the latest version for use with this SDK.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
-<p>If you've been developing an application using a previous SDK version and you want the application to run on Android-powered mobile devices, you must port the application to the Android 1.0 SDK. Please see <a href="{@docRoot}sdk/1.0_r1/upgrading.html">Upgrading the SDK</a> for detailed instructions on how to make the transition to this release.  Be sure to wipe application user data (emulator option <code>-wipe-data</code>) when running your application on the Android 1.0 SDK emulator.</p>
+<p>If you've been developing an application using a previous SDK version and you want the application to run on Android-powered mobile devices, you must port the application to the Android 1.0 SDK. Be sure to wipe application user data (emulator option <code>-wipe-data</code>) when running your application on the Android 1.0 SDK emulator.</p>
 
 <h3>Other Notes</h3>
 
