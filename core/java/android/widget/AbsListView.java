@@ -1151,10 +1151,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         if (mChoiceMode != CHOICE_MODE_NONE) {
             if (mCheckStates == null) {
-                mCheckStates = new SparseBooleanArray();
+                mCheckStates = new SparseBooleanArray(0);
             }
             if (mCheckedIdStates == null && mAdapter != null && mAdapter.hasStableIds()) {
-                mCheckedIdStates = new LongSparseArray<Integer>();
+                mCheckedIdStates = new LongSparseArray<Integer>(0);
             }
             // Modal multi-choice mode only has choices when the mode is active. Clear them.
             if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {

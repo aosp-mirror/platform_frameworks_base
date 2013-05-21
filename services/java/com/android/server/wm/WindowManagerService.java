@@ -424,7 +424,7 @@ public class WindowManagerService extends IWindowManager.Stub
     String mLastANRState;
 
     /** All DisplayContents in the world, kept here */
-    private SparseArray<DisplayContent> mDisplayContents = new SparseArray<DisplayContent>();
+    private SparseArray<DisplayContent> mDisplayContents = new SparseArray<DisplayContent>(2);
 
     private final AllWindowsIterator mTmpWindowsIterator = new AllWindowsIterator();
 

@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,12 +28,12 @@ import java.util.Set;
 
 import android.net.Uri;
 import android.util.FastImmutableArraySet;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.LogPrinter;
 import android.util.Printer;
-import android.util.StringBuilderPrinter;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,7 +45,6 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     final private static String TAG = "IntentResolver";
     final private static boolean DEBUG = false;
     final private static boolean localLOGV = DEBUG || false;
-    final private static boolean VALIDATE = false;
 
     public void addFilter(F f) {
         if (localLOGV) {
@@ -67,21 +65,11 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             register_intent_filter(f, f.actionsIterator(),
                     mTypedActionToFilter, "      TypedAction: ");
         }
-
-        if (VALIDATE) {
-            mOldResolver.addFilter(f);
-            verifyDataStructures(f);
-        }
     }
 
     public void removeFilter(F f) {
         removeFilterInternal(f);
         mFilters.remove(f);
-
-        if (VALIDATE) {
-            mOldResolver.removeFilter(f);
-            verifyDataStructures(f);
-        }
     }
 
     void removeFilterInternal(F f) {
@@ -319,16 +307,6 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         }
         sortResults(finalList);
 
-        if (VALIDATE) {
-            List<R> oldList = mOldResolver.queryIntent(intent, resolvedType, defaultOnly, userId);
-            if (oldList.size() != finalList.size()) {
-                ValidationFailure here = new ValidationFailure();
-                here.fillInStackTrace();
-                Log.wtf(TAG, "Query result " + intent + " size is " + finalList.size()
-                        + "; old implementation is " + oldList.size(), here);
-            }
-        }
-
         if (debug) {
             Slog.v(TAG, "Final result list:");
             for (R r : finalList) {
@@ -379,7 +357,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         out.print(prefix); out.println(filter);
     }
 
-    private final void addFilter(HashMap<String, F[]> map, String name, F filter) {
+    private final void addFilter(ArrayMap<String, F[]> map, String name, F filter) {
         F[] array = map.get(name);
         if (array == null) {
             array = newArray(2);
@@ -464,7 +442,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     }
 
     private final int register_intent_filter(F filter, Iterator<String> i,
-            HashMap<String, F[]> dest, String prefix) {
+            ArrayMap<String, F[]> dest, String prefix) {
         if (i == null) {
             return 0;
         }
@@ -480,7 +458,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     }
 
     private final int unregister_intent_filter(F filter, Iterator<String> i,
-            HashMap<String, F[]> dest, String prefix) {
+            ArrayMap<String, F[]> dest, String prefix) {
         if (i == null) {
             return 0;
         }
@@ -495,7 +473,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         return num;
     }
 
-    private final void remove_all_objects(HashMap<String, F[]> map, String name,
+    private final void remove_all_objects(ArrayMap<String, F[]> map, String name,
             Object object) {
         F[] array = map.get(name);
         if (array != null) {
@@ -613,120 +591,6 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     };
 
-    static class ValidationFailure extends RuntimeException {
-    }
-
-    private void verifyDataStructures(IntentFilter src) {
-        compareMaps(src, "mTypeToFilter", mTypeToFilter, mOldResolver.mTypeToFilter);
-        compareMaps(src, "mBaseTypeToFilter", mBaseTypeToFilter, mOldResolver.mBaseTypeToFilter);
-        compareMaps(src, "mWildTypeToFilter", mWildTypeToFilter, mOldResolver.mWildTypeToFilter);
-        compareMaps(src, "mSchemeToFilter", mSchemeToFilter, mOldResolver.mSchemeToFilter);
-        compareMaps(src, "mActionToFilter", mActionToFilter, mOldResolver.mActionToFilter);
-        compareMaps(src, "mTypedActionToFilter", mTypedActionToFilter, mOldResolver.mTypedActionToFilter);
-    }
-
-    private void compareMaps(IntentFilter src, String name, HashMap<String, F[]> cur,
-            HashMap<String, ArrayList<F>> old) {
-        if (cur.size() != old.size()) {
-            StringBuilder missing = new StringBuilder(128);
-            for (Map.Entry<String, ArrayList<F>> e : old.entrySet()) {
-                final F[] curArray = cur.get(e.getKey());
-                if (curArray == null) {
-                    if (missing.length() > 0) {
-                        missing.append(' ');
-                    }
-                    missing.append(e.getKey());
-                }
-            }
-            StringBuilder extra = new StringBuilder(128);
-            for (Map.Entry<String, F[]> e : cur.entrySet()) {
-                if (old.get(e.getKey()) == null) {
-                    if (extra.length() > 0) {
-                        extra.append(' ');
-                    }
-                    extra.append(e.getKey());
-                }
-            }
-            StringBuilder srcStr = new StringBuilder(1024);
-            StringBuilderPrinter printer = new StringBuilderPrinter(srcStr);
-            src.dump(printer, "");
-            ValidationFailure here = new ValidationFailure();
-            here.fillInStackTrace();
-            Log.wtf(TAG, "New map " + name + " size is " + cur.size()
-                    + "; old implementation is " + old.size()
-                    + "; missing: " + missing.toString()
-                    + "; extra: " + extra.toString()
-                    + "; src: " + srcStr.toString(), here);
-            return;
-        }
-        for (Map.Entry<String, ArrayList<F>> e : old.entrySet()) {
-            final F[] curArray = cur.get(e.getKey());
-            int curLen = curArray != null ? curArray.length : 0;
-            if (curLen == 0) {
-                ValidationFailure here = new ValidationFailure();
-                here.fillInStackTrace();
-                Log.wtf(TAG, "New map " + name + " doesn't contain expected key "
-                        + e.getKey() + " (array=" + curArray + ")");
-                return;
-            }
-            while (curLen > 0 && curArray[curLen-1] == null) {
-                curLen--;
-            }
-            final ArrayList<F> oldArray = e.getValue();
-            final int oldLen = oldArray.size();
-            if (curLen != oldLen) {
-                ValidationFailure here = new ValidationFailure();
-                here.fillInStackTrace();
-                Log.wtf(TAG, "New map " + name + " entry " + e.getKey() + " size is "
-                        + curLen + "; old implementation is " + oldLen, here);
-                return;
-            }
-            for (int i=0; i<oldLen; i++) {
-                F f = oldArray.get(i);
-                boolean found = false;
-                for (int j=0; j<curLen; j++) {
-                    if (curArray[j] == f) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    ValidationFailure here = new ValidationFailure();
-                    here.fillInStackTrace();
-                    Log.wtf(TAG, "New map " + name + " entry + " + e.getKey()
-                            + " doesn't contain expected filter " + f, here);
-                }
-            }
-            for (int i=0; i<curLen; i++) {
-                if (curArray[i] == null) {
-                    ValidationFailure here = new ValidationFailure();
-                    here.fillInStackTrace();
-                    Log.wtf(TAG, "New map " + name + " entry + " + e.getKey()
-                            + " has unexpected null at " + i + "; array: " + curArray, here);
-                    break;
-                }
-            }
-        }
-    }
-
-    private final IntentResolverOld<F, R> mOldResolver = new IntentResolverOld<F, R>() {
-        @Override protected boolean isPackageForFilter(String packageName, F filter) {
-            return IntentResolver.this.isPackageForFilter(packageName, filter);
-        }
-        @Override protected boolean allowFilterResult(F filter, List<R> dest) {
-            return IntentResolver.this.allowFilterResult(filter, dest);
-        }
-        @Override protected boolean isFilterStopped(F filter, int userId) {
-            return IntentResolver.this.isFilterStopped(filter, userId);
-        }
-        @Override protected R newResult(F filter, int match, int userId) {
-            return IntentResolver.this.newResult(filter, match, userId);
-        }
-        @Override protected void sortResults(List<R> results) {
-            IntentResolver.this.sortResults(results);
-        }
-    };
-
     /**
      * All filters that have been registered.
      */
@@ -736,14 +600,14 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
      * All of the MIME types that have been registered, such as "image/jpeg",
      * "image/*", or "{@literal *}/*".
      */
-    private final HashMap<String, F[]> mTypeToFilter = new HashMap<String, F[]>();
+    private final ArrayMap<String, F[]> mTypeToFilter = new ArrayMap<String, F[]>();
 
     /**
      * The base names of all of all fully qualified MIME types that have been
      * registered, such as "image" or "*".  Wild card MIME types such as
      * "image/*" will not be here.
      */
-    private final HashMap<String, F[]> mBaseTypeToFilter = new HashMap<String, F[]>();
+    private final ArrayMap<String, F[]> mBaseTypeToFilter = new ArrayMap<String, F[]>();
 
     /**
      * The base names of all of the MIME types with a sub-type wildcard that
@@ -752,21 +616,21 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
      * included here.  This also includes the "*" for the "{@literal *}/*"
      * MIME type.
      */
-    private final HashMap<String, F[]> mWildTypeToFilter = new HashMap<String, F[]>();
+    private final ArrayMap<String, F[]> mWildTypeToFilter = new ArrayMap<String, F[]>();
 
     /**
      * All of the URI schemes (such as http) that have been registered.
      */
-    private final HashMap<String, F[]> mSchemeToFilter = new HashMap<String, F[]>();
+    private final ArrayMap<String, F[]> mSchemeToFilter = new ArrayMap<String, F[]>();
 
     /**
      * All of the actions that have been registered, but only those that did
      * not specify data.
      */
-    private final HashMap<String, F[]> mActionToFilter = new HashMap<String, F[]>();
+    private final ArrayMap<String, F[]> mActionToFilter = new ArrayMap<String, F[]>();
 
     /**
      * All of the actions that have been registered and specified a MIME type.
      */
-    private final HashMap<String, F[]> mTypedActionToFilter = new HashMap<String, F[]>();
+    private final ArrayMap<String, F[]> mTypedActionToFilter = new ArrayMap<String, F[]>();
 }

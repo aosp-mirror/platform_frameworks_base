@@ -182,7 +182,7 @@ public class ActivityTestMain extends Activity {
         menu.add("Send!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(ActivityTestMain.this, SingleUserReceiver.class);
-                sendOrderedBroadcast(intent, null, new BroadcastResultReceiver(), 
+                sendOrderedBroadcast(intent, null, new BroadcastResultReceiver(),
                         null, Activity.RESULT_OK, null, null);
                 return true;
             }
@@ -282,6 +282,12 @@ public class ActivityTestMain extends Activity {
                     mOverrideConfig.densityDpi = Configuration.DENSITY_DPI_UNDEFINED;
                 }
                 recreate();
+                return true;
+            }
+        });
+        menu.add("HashArray").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                ArrayMapTests.run();
                 return true;
             }
         });

@@ -42,13 +42,19 @@ public class LongSparseLongArray implements Cloneable {
     /**
      * Creates a new SparseLongArray containing no mappings that will not
      * require any additional memory allocation to store the specified
-     * number of mappings.
+     * number of mappings.  If you supply an initial capacity of 0, the
+     * sparse array will be initialized with a light-weight representation
+     * not requiring any additional array allocations.
      */
     public LongSparseLongArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
-
-        mKeys = new long[initialCapacity];
-        mValues = new long[initialCapacity];
+        if (initialCapacity == 0) {
+            mKeys = SparseLongArray.EMPTY_LONGS;
+            mValues = SparseLongArray.EMPTY_LONGS;
+        } else {
+            initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
+            mKeys = new long[initialCapacity];
+            mValues = new long[initialCapacity];
+        }
         mSize = 0;
     }
 

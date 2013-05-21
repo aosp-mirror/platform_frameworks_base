@@ -431,7 +431,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final SparseArray<HashMap<String, ArrayList<String>>> mUidMap;
 
         public PendingPackageBroadcasts() {
-            mUidMap = new SparseArray<HashMap<String, ArrayList<String>>>();
+            mUidMap = new SparseArray<HashMap<String, ArrayList<String>>>(2);
         }
 
         public ArrayList<String> get(int userId, String packageName) {

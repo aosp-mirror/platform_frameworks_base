@@ -21,7 +21,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.String;
+import java.util.HashMap;
+import java.util.Random;
 
+import android.util.ArrayMap;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -142,6 +146,18 @@ public class TestService extends Service {
             new LoadRecycleLargeBitmapOp(),
             new LoadSmallScaledBitmapOp(),
             new LoadLargeScaledBitmapOp(),
+            new GrowTinyHashMapOp(),
+            new GrowTinyArrayMapOp(),
+            new GrowSmallHashMapOp(),
+            new GrowSmallArrayMapOp(),
+            new GrowLargeHashMapOp(),
+            new GrowLargeArrayMapOp(),
+            new LookupTinyHashMapOp(),
+            new LookupTinyArrayMapOp(),
+            new LookupSmallHashMapOp(),
+            new LookupSmallArrayMapOp(),
+            new LookupLargeHashMapOp(),
+            new LookupLargeArrayMapOp(),
     };
 
     static final int CMD_START_TEST = 1;
@@ -1109,6 +1125,198 @@ public class TestService extends Service {
                 Log.w(TAG, "Failure closing " + mFile, e);
             }
             mFile.delete();
+        }
+    }
+
+    static abstract class GenericMapOp extends Op {
+        final int mSize;
+        String[] mKeys;
+        String[] mValues;
+
+        GenericMapOp(String name, String longName, int size) {
+            super(name, longName);
+            mSize = size;
+        }
+
+        void onInit(Context context, boolean foreground) {
+            mKeys = new String[mSize];
+            mValues = new String[mSize];
+            Random random = new Random(0);
+            for (int i=0; i<mSize; i++) {
+                int chars = random.nextInt(10);
+                StringBuilder builder = new StringBuilder(chars);
+                for (int j=0; j<chars; j++) {
+                    builder.append('a' + random.nextInt(100));
+                }
+                mKeys[i] = builder.toString();
+                mValues[i] = Integer.toString(i);
+            }
+        }
+
+        int getOpsPerRun() {
+            return mSize;
+        }
+    }
+
+    static class GrowTinyHashMapOp extends GenericMapOp {
+        GrowTinyHashMapOp() {
+            super("GrowTinyHashMap", "Add 5 items to a HashMap", 5);
+        }
+
+        boolean onRun() {
+            HashMap<String, String> map = new HashMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                map.put(mKeys[i], mValues[i]);
+            }
+            return true;
+        }
+    }
+
+    static class GrowTinyArrayMapOp extends GenericMapOp {
+        GrowTinyArrayMapOp() {
+            super("GrowTinyArrayMap", "Add 5 items to a ArrayMap", 5);
+        }
+
+        boolean onRun() {
+            ArrayMap<String, String> map = new ArrayMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                map.put(mKeys[i], mValues[i]);
+            }
+            return true;
+        }
+    }
+
+    static class GrowSmallHashMapOp extends GenericMapOp {
+        GrowSmallHashMapOp() {
+            super("GrowSmallHashMap", "Add 100 items to a HashMap", 100);
+        }
+
+        boolean onRun() {
+            HashMap<String, String> map = new HashMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                map.put(mKeys[i], mValues[i]);
+            }
+            return true;
+        }
+    }
+
+    static class GrowSmallArrayMapOp extends GenericMapOp {
+        GrowSmallArrayMapOp() {
+            super("GrowSmallArrayMap", "Add 100 items to a ArrayMap", 100);
+        }
+
+        boolean onRun() {
+            ArrayMap<String, String> map = new ArrayMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                map.put(mKeys[i], mValues[i]);
+            }
+            return true;
+        }
+    }
+
+    static class GrowLargeHashMapOp extends GenericMapOp {
+        GrowLargeHashMapOp() {
+            super("GrowLargeHashMap", "Add 10000 items to a HashMap", 10000);
+        }
+
+        boolean onRun() {
+            HashMap<String, String> map = new HashMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                map.put(mKeys[i], mValues[i]);
+            }
+            return true;
+        }
+    }
+
+    static class GrowLargeArrayMapOp extends GenericMapOp {
+        GrowLargeArrayMapOp() {
+            super("GrowLargeArrayMap", "Add 10000 items to a ArrayMap", 10000);
+        }
+
+        boolean onRun() {
+            ArrayMap<String, String> map = new ArrayMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                map.put(mKeys[i], mValues[i]);
+            }
+            return true;
+        }
+    }
+
+    static class LookupTinyHashMapOp extends LookupSmallHashMapOp {
+        LookupTinyHashMapOp() {
+            super("LookupTinyHashMap", "Lookup items in 5 entry HashMap", 5);
+        }
+    }
+
+    static class LookupTinyArrayMapOp extends LookupSmallArrayMapOp {
+        LookupTinyArrayMapOp() {
+            super("LookupTinyArrayMap", "Lookup items in 5 entry ArrayMap", 5);
+        }
+    }
+
+    static class LookupSmallHashMapOp extends GenericMapOp {
+        HashMap<String, String> mHashMap;
+
+        LookupSmallHashMapOp() {
+            super("LookupSmallHashMap", "Lookup items in 100 entry HashMap", 100);
+        }
+
+        LookupSmallHashMapOp(String name, String longname, int size) {
+            super(name, longname, size);
+        }
+
+        void onInit(Context context, boolean foreground) {
+            super.onInit(context, foreground);
+            mHashMap = new HashMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                mHashMap.put(mKeys[i], mValues[i]);
+            }
+        }
+
+        boolean onRun() {
+            for (int i=0; i<mSize; i++) {
+                mHashMap.get(mKeys[i]);
+            }
+            return true;
+        }
+    }
+
+    static class LookupSmallArrayMapOp extends GenericMapOp {
+        ArrayMap<String, String> mArrayMap;
+
+        LookupSmallArrayMapOp() {
+            super("LookupSmallArrayMap", "Lookup items in 100 entry ArrayMap", 100);
+        }
+
+        LookupSmallArrayMapOp(String name, String longname, int size) {
+            super(name, longname, size);
+        }
+
+        void onInit(Context context, boolean foreground) {
+            super.onInit(context, foreground);
+            mArrayMap = new ArrayMap<String, String>();
+            for (int i=0; i<mSize; i++) {
+                mArrayMap.put(mKeys[i], mValues[i]);
+            }
+        }
+
+        boolean onRun() {
+            for (int i=0; i<mSize; i++) {
+                mArrayMap.get(mKeys[i]);
+            }
+            return true;
+        }
+    }
+
+    static class LookupLargeHashMapOp extends LookupSmallHashMapOp {
+        LookupLargeHashMapOp() {
+            super("LookupLargeHashMap", "Lookup items in 10000 entry HashMap", 10000);
+        }
+    }
+
+    static class LookupLargeArrayMapOp extends LookupSmallArrayMapOp {
+        LookupLargeArrayMapOp() {
+            super("LookupLargeArrayMap", "Lookup items in 10000 entry ArrayMap", 10000);
         }
     }
 }

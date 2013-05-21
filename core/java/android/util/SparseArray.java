@@ -25,6 +25,8 @@ import com.android.internal.util.ArrayUtils;
  */
 public class SparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
+    static final int[] EMPTY_INTS = new int[0];
+    static final Object[] EMPTY_OBJECTS = new Object[0];
     private boolean mGarbage = false;
 
     private int[] mKeys;
@@ -41,13 +43,19 @@ public class SparseArray<E> implements Cloneable {
     /**
      * Creates a new SparseArray containing no mappings that will not
      * require any additional memory allocation to store the specified
-     * number of mappings.
+     * number of mappings.  If you supply an initial capacity of 0, the
+     * sparse array will be initialized with a light-weight representation
+     * not requiring any additional array allocations.
      */
     public SparseArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
-
-        mKeys = new int[initialCapacity];
-        mValues = new Object[initialCapacity];
+        if (initialCapacity == 0) {
+            mKeys = EMPTY_INTS;
+            mValues = EMPTY_OBJECTS;
+        } else {
+            initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
+            mKeys = new int[initialCapacity];
+            mValues = new Object[initialCapacity];
+        }
         mSize = 0;
     }
 
@@ -79,7 +87,7 @@ public class SparseArray<E> implements Cloneable {
      */
     @SuppressWarnings("unchecked")
     public E get(int key, E valueIfKeyNotFound) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = binarySearch(mKeys, mSize, key);
 
         if (i < 0 || mValues[i] == DELETED) {
             return valueIfKeyNotFound;
@@ -92,7 +100,7 @@ public class SparseArray<E> implements Cloneable {
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(int key) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             if (mValues[i] != DELETED) {
@@ -153,7 +161,7 @@ public class SparseArray<E> implements Cloneable {
      * was one.
      */
     public void put(int key, E value) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             mValues[i] = value;
@@ -170,7 +178,7 @@ public class SparseArray<E> implements Cloneable {
                 gc();
 
                 // Search again because indices may have changed.
-                i = ~binarySearch(mKeys, 0, mSize, key);
+                i = ~binarySearch(mKeys, mSize, key);
             }
 
             if (mSize >= mKeys.length) {
@@ -261,7 +269,7 @@ public class SparseArray<E> implements Cloneable {
             gc();
         }
 
-        return binarySearch(mKeys, 0, mSize, key);
+        return binarySearch(mKeys, mSize, key);
     }
 
     /**
@@ -335,23 +343,23 @@ public class SparseArray<E> implements Cloneable {
         mSize = pos + 1;
     }
 
-    private static int binarySearch(int[] a, int start, int len, int key) {
-        int high = start + len, low = start - 1, guess;
+    // This is Arrays.binarySearch(), but doesn't do any argument validation.
+    static int binarySearch(int[] array, int size, int value) {
+        int lo = 0;
+        int hi = size - 1;
 
-        while (high - low > 1) {
-            guess = (high + low) / 2;
+        while (lo <= hi) {
+            int mid = (lo + hi) >>> 1;
+            int midVal = array[mid];
 
-            if (a[guess] < key)
-                low = guess;
-            else
-                high = guess;
+            if (midVal < value) {
+                lo = mid + 1;
+            } else if (midVal > value) {
+                hi = mid - 1;
+            } else {
+                return mid;  // value found
+            }
         }
-
-        if (high == start + len)
-            return ~(start + len);
-        else if (a[high] == key)
-            return high;
-        else
-            return ~high;
+        return ~lo;  // value not present
     }
 }

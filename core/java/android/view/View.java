@@ -15688,7 +15688,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void setKeyedTag(int key, Object tag) {
         if (mKeyedTags == null) {
-            mKeyedTags = new SparseArray<Object>();
+            mKeyedTags = new SparseArray<Object>(2);
         }
 
         mKeyedTags.put(key, tag);
