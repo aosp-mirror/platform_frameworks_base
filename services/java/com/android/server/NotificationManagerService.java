@@ -287,13 +287,14 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         public void record(StatusBarNotification nr) {
-            // Nuke heavy parts of notification before storing in archive
-            nr.getNotification().lightenPayload();
-
             if (mBuffer.size() == BUFFER_SIZE) {
                 mBuffer.removeFirst();
             }
-            mBuffer.addLast(nr);
+
+            // We don't want to store the heavy bits of the notification in the archive,
+            // but other clients in the system process might be using the object, so we
+            // store a (lightened) copy.
+            mBuffer.addLast(nr.cloneLight());
         }
 
 
