@@ -27,7 +27,6 @@
 #include <androidfw/InputDevice.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
-#include <cutils/properties.h>
 
 namespace android {
 

@@ -38,7 +38,6 @@ commonUiSources:= \
     KeyCharacterMap.cpp \
     KeyLayoutMap.cpp \
     VelocityControl.cpp \
-    VelocityTracker.cpp \
     VirtualKeyMap.cpp
 
 commonSources:= \
@@ -74,7 +73,8 @@ LOCAL_SRC_FILES:= \
 	BackupData.cpp \
 	BackupHelpers.cpp \
     CursorWindow.cpp \
-	InputTransport.cpp
+	InputTransport.cpp \
+	VelocityTracker.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	liblog \
