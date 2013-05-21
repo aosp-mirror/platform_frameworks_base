@@ -22,7 +22,5 @@
     <item android:drawable="@drawable/ic_media_route_on_0_holo_dark" android:duration="500" />
     <item android:drawable="@drawable/ic_media_route_on_1_holo_dark" android:duration="500" />
     <item android:drawable="@drawable/ic_media_route_on_2_holo_dark" android:duration="500" />
-    <item android:drawable="@drawable/ic_media_route_on_holo_dark" android:duration="500" />
-    <item android:drawable="@drawable/ic_media_route_on_2_holo_dark" android:duration="500" />
     <item android:drawable="@drawable/ic_media_route_on_1_holo_dark" android:duration="500" />
 </animation-list>
