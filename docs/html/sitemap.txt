@@ -4214,7 +4214,6 @@ http://developer.android.com/reference/org/w3c/dom/Text.html
 http://developer.android.com/reference/org/w3c/dom/TypeInfo.html
 http://developer.android.com/reference/org/w3c/dom/UserDataHandler.html
 http://developer.android.com/reference/android/support/v4/content/pm/ActivityInfoCompat.html
-http://developer.android.com/guide/developing/debug-tasks.html
 http://developer.android.com/reference/renderscript/rs__math_8rsh.html
 http://developer.android.com/reference/renderscript/structrs__matrix4x4.html
 http://developer.android.com/reference/renderscript/rs__cl_8rsh.html
@@ -6473,7 +6472,6 @@ http://developer.android.com/sdk/api_diff/10/changes/packages_index_changes.html
 http://developer.android.com/sdk/api_diff/3/changes/constructors_index_removals.html
 http://developer.android.com/sdk/api_diff/3/changes/constructors_index_additions.html
 http://developer.android.com/sdk/api_diff/3/changes/constructors_index_changes.html
-http://developer.android.com/tools/debug-tasks.html
 http://developer.android.com/sdk/api_diff/5/changes/classes_index_additions.html
 http://developer.android.com/sdk/api_diff/5/changes/classes_index_changes.html
 http://developer.android.com/sdk/api_diff/16/changes/classes_index_additions.html
