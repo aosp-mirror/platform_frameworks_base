@@ -2326,7 +2326,7 @@ public final class ContactsContract {
      * parameters.  The latter approach is preferable, especially when you can reuse the
      * URI:
      * <pre>
-     * Uri rawContactUri = RawContacts.URI.buildUpon()
+     * Uri rawContactUri = RawContacts.CONTENT_URI.buildUpon()
      *          .appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName)
      *          .appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType)
      *          .build();
