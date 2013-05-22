@@ -87,6 +87,7 @@ struct DeferredDisplayState {
     // the below are set and used by the OpenGLRenderer at record and deferred playback
     bool mClipValid;
     Rect mClip;
+    bool mClipped;
     mat4 mMatrix;
     DrawModifiers mDrawModifiers;
     float mAlpha;
@@ -255,7 +256,7 @@ public:
     virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     status_t drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
-            const Rect& bounds, SkPaint* paint);
+            bool transformed, const Rect& bounds, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,

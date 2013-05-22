@@ -1359,11 +1359,15 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
         // state has bounds initialized in local coordinates
         if (!state.mBounds.isEmpty()) {
             currentMatrix.mapRect(state.mBounds);
+            state.mClipped = !currentClip.contains(state.mBounds);
             if (!state.mBounds.intersect(currentClip)) {
                 // quick rejected
                 return true;
             }
         } else {
+            // If we don't have bounds, let's assume we're clipped
+            // to prevent merging
+            state.mClipped = true;
             state.mBounds.set(currentClip);
         }
     }
@@ -2010,7 +2014,7 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
 }
 
 status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
-        const Rect& bounds, SkPaint* paint) {
+        bool transformed, const Rect& bounds, SkPaint* paint) {
 
     // merged draw operations don't need scissor, but clip should still be valid
     mCaches.setScissorEnabled(mScissorOptimizationDisabled);
@@ -2026,7 +2030,7 @@ status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureV
     getAlphaAndMode(paint, &alpha, &mode);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(GL_NEAREST, true); // merged ops are always pure-translation for now
+    texture->setFilter(transformed ? FILTER(paint) : GL_NEAREST, true);
 
     const float x = (int) floorf(bounds.left + 0.5f);
     const float y = (int) floorf(bounds.top + 0.5f);

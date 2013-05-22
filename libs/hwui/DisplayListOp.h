@@ -760,10 +760,16 @@ public:
         TextureVertex vertices[6 * ops.size()];
         TextureVertex* vertex = &vertices[0];
 
+        bool transformed = false;
+
         // TODO: manually handle rect clip for bitmaps by adjusting texCoords per op,
         // and allowing them to be merged in getBatchId()
         for (unsigned int i = 0; i < ops.size(); i++) {
             const Rect& opBounds = ops[i]->state.mBounds;
+            // When we reach multiDraw(), the matrix can be either
+            // pureTranslate or simple (translate and/or scale).
+            // If the matrix is not pureTranslate, then we have a scale
+            if (!ops[i]->state.mMatrix.isPureTranslate()) transformed = true;
 
             Rect texCoords(0, 0, 1, 1);
             ((DrawBitmapOp*) ops[i])->mUvMapper.map(texCoords);
@@ -777,7 +783,8 @@ public:
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, bottom);
         }
 
-        return renderer.drawBitmaps(mBitmap, ops.size(), &vertices[0], bounds, mPaint);
+        return renderer.drawBitmaps(mBitmap, ops.size(), &vertices[0],
+                transformed, bounds, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) {
@@ -786,13 +793,18 @@ public:
 
     virtual const char* name() { return "DrawBitmap"; }
 
+    bool bitmapMergeAllowed() {
+        return state.mMatrix.isSimple() && !state.mClipped &&
+                OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
+    }
+
     virtual bool onDefer(OpenGLRenderer& renderer, int* batchId, mergeid_t* mergeId) {
         *batchId = DeferredDisplayList::kOpBatch_Bitmap;
         *mergeId = mAtlasEntry ? (mergeid_t) &mAtlasEntry->atlas : (mergeid_t) mBitmap;
 
         // don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
         // MergingDrawBatch::canMergeWith
-        return mergeAllowed() && (mBitmap->getConfig() != SkBitmap::kA8_Config);
+        return bitmapMergeAllowed() && (mBitmap->getConfig() != SkBitmap::kA8_Config);
     }
 
     const SkBitmap* bitmap() { return mBitmap; }

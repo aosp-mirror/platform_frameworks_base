@@ -145,7 +145,10 @@ public:
      * dropped, so we make simplifying qualifications on the ops that can merge, per op type.
      */
     bool canMergeWith(DrawOp* op) {
-        if (!op->state.mMatrix.isPureTranslate()) return false;
+        if (getBatchId() == DeferredDisplayList::kOpBatch_Bitmap) {
+            // Bitmap batches can handle translate and scaling
+            if (!op->state.mMatrix.isSimple()) return false;
+        } else if (!op->state.mMatrix.isPureTranslate()) return false;
 
         bool isTextBatch = getBatchId() == DeferredDisplayList::kOpBatch_Text ||
                 getBatchId() == DeferredDisplayList::kOpBatch_ColorText;
