@@ -452,21 +452,14 @@ public class ActivityManager {
          * Description of the task's last state.
          */
         public CharSequence description;
-
-        /**
-         * The id of the ActivityStack this Task was on most recently.
-         */
-        public int stackId;
-
+        
         public RecentTaskInfo() {
         }
 
-        @Override
         public int describeContents() {
             return 0;
         }
 
-        @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(persistentId);
@@ -479,7 +472,6 @@ public class ActivityManager {
             ComponentName.writeToParcel(origActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            dest.writeInt(stackId);
         }
 
         public void readFromParcel(Parcel source) {
@@ -492,9 +484,8 @@ public class ActivityManager {
             }
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            stackId = source.readInt();
         }
-
+        
         public static final Creator<RecentTaskInfo> CREATOR
                 = new Creator<RecentTaskInfo>() {
             public RecentTaskInfo createFromParcel(Parcel source) {
