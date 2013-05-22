@@ -114,6 +114,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/TextLayout.cpp \
 	android/graphics/TextLayoutCache.cpp \
 	android/graphics/Typeface.cpp \
+	android/graphics/TypefaceImpl.cpp \
 	android/graphics/Utils.cpp \
 	android/graphics/Xfermode.cpp \
 	android/graphics/YuvToJpegEncoder.cpp \
@@ -214,6 +215,16 @@ LOCAL_SHARED_LIBRARIES := \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
+endif
+
+ifeq ($(USE_MINIKIN), true)
+	LOCAL_CFLAGS += -DUSE_MINIKIN
+	LOCAL_C_INCLUDES += frameworks/minikin/include \
+		external/freetype/include
+	LOCAL_SRC_FILES += 	android/graphics/MinikinSkia.cpp
+# note: the freetype include is spurious; minikin itself probably
+# shouldn't depend on it
+	LOCAL_SHARED_LIBRARIES += libminikin libstlport
 endif
 
 LOCAL_SHARED_LIBRARIES += \

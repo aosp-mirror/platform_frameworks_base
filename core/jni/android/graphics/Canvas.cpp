@@ -27,8 +27,14 @@
 #include "SkShader.h"
 #include "SkTemplates.h"
 
+#ifdef USE_MINIKIN
+#include <minikin/Layout.h>
+#include "MinikinSkia.h"
+#endif
+
 #include "TextLayout.h"
 #include "TextLayoutCache.h"
+#include "TypefaceImpl.h"
 
 #include "unicode/ubidi.h"
 #include "unicode/ushape.h"
@@ -742,35 +748,83 @@ public:
     }
 
 
-    static void drawText___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
+    static void drawText___CIIFFIPaintTypeface(JNIEnv* env, jobject, SkCanvas* canvas,
                                       jcharArray text, int index, int count,
-                                      jfloat x, jfloat y, int flags, SkPaint* paint) {
+                                      jfloat x, jfloat y, int flags, SkPaint* paint,
+                                      TypefaceImpl *typeface) {
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        drawTextWithGlyphs(canvas, textArray + index, 0, count, x, y, flags, paint);
+        drawTextWithGlyphs(canvas, textArray + index, 0, count, x, y, flags, paint, typeface);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     }
 
-    static void drawText__StringIIFFIPaint(JNIEnv* env, jobject,
+    static void drawText__StringIIFFIPaintTypeface(JNIEnv* env, jobject,
                                           SkCanvas* canvas, jstring text,
                                           int start, int end,
-                                          jfloat x, jfloat y, int flags, SkPaint* paint) {
+                                          jfloat x, jfloat y, int flags, SkPaint* paint,
+                                          TypefaceImpl *typeface) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-        drawTextWithGlyphs(canvas, textArray, start, end, x, y, flags, paint);
+        drawTextWithGlyphs(canvas, textArray, start, end, x, y, flags, paint, typeface);
         env->ReleaseStringChars(text, textArray);
     }
 
+#ifdef USE_MINIKIN
+    static void drawGlyphsToSkia(SkCanvas *canvas, SkPaint *paint, Layout *layout, float x, float y) {
+        size_t nGlyphs = layout->nGlyphs();
+        uint16_t *glyphs = new uint16_t[nGlyphs];
+        SkPoint *pos = new SkPoint[nGlyphs];
+        SkTypeface *lastFace = NULL;
+        SkTypeface *skFace = NULL;
+        size_t start = 0;
+
+        paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        for (size_t i = 0; i < nGlyphs; i++) {
+            MinikinFontSkia *mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
+            skFace = mfs->GetSkTypeface();
+            glyphs[i] = layout->getGlyphId(i);
+            pos[i].fX = SkFloatToScalar(x + layout->getX(i));
+            pos[i].fY = SkFloatToScalar(y + layout->getY(i));
+            if (i > 0 && skFace != lastFace) {
+                paint->setTypeface(lastFace);
+                canvas->drawPosText(glyphs + start, (i - start) << 1, pos + start, *paint);
+                start = i;
+            }
+            lastFace = skFace;
+        }
+        if (skFace != NULL) {
+            paint->setTypeface(skFace);
+            canvas->drawPosText(glyphs + start, (nGlyphs - start) << 1, pos + start, *paint);
+        }
+        delete[] glyphs;
+        delete[] pos;
+    }
+#endif
+
     static void drawTextWithGlyphs(SkCanvas* canvas, const jchar* textArray,
             int start, int end,
-            jfloat x, jfloat y, int flags, SkPaint* paint) {
+            jfloat x, jfloat y, int flags, SkPaint* paint, TypefaceImpl* typeface) {
 
         jint count = end - start;
-        drawTextWithGlyphs(canvas, textArray + start, 0, count, count, x, y, flags, paint);
+        drawTextWithGlyphs(canvas, textArray + start, 0, count, count, x, y, flags, paint, typeface);
     }
 
     static void drawTextWithGlyphs(SkCanvas* canvas, const jchar* textArray,
             int start, int count, int contextCount,
-            jfloat x, jfloat y, int flags, SkPaint* paint) {
+            jfloat x, jfloat y, int flags, SkPaint* paint, TypefaceImpl* typeface) {
 
+#ifdef USE_MINIKIN
+        Layout layout;
+        TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
+        layout.setFontCollection(resolvedFace->fFontCollection);
+        FontStyle style = resolvedFace->fStyle;
+        char css[256];
+        sprintf(css, "font-size: %d; font-weight: %d; font-style: %s",
+            (int)paint->getTextSize(),
+            style.getWeight() * 100,
+            style.getItalic() ? "italic" : "normal");
+        layout.setProperties(css);
+        layout.doLayout(textArray + start, count);
+        drawGlyphsToSkia(canvas, paint, &layout, x, y);
+#else
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
                 textArray, start, count, contextCount, flags);
         if (value == NULL) {
@@ -786,6 +840,7 @@ public:
         doDrawGlyphsPos(canvas, value->getGlyphs(), value->getPos(), 0, value->getGlyphsCount(), x, y, flags, paint);
         doDrawTextDecorations(canvas, x, y, value->getTotalAdvance(), paint);
         paint->setTextAlign(align);
+#endif
     }
 
 // Same values used by Skia
@@ -842,27 +897,29 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
         delete[] posPtr;
     }
 
-    static void drawTextRun___CIIIIFFIPaint(
+    static void drawTextRun___CIIIIFFIPaintTypeface(
         JNIEnv* env, jobject, SkCanvas* canvas, jcharArray text, int index,
         int count, int contextIndex, int contextCount,
-        jfloat x, jfloat y, int dirFlags, SkPaint* paint) {
+        jfloat x, jfloat y, int dirFlags, SkPaint* paint,
+        TypefaceImpl* typeface) {
 
         jchar* chars = env->GetCharArrayElements(text, NULL);
         drawTextWithGlyphs(canvas, chars + contextIndex, index - contextIndex,
-                count, contextCount, x, y, dirFlags, paint);
+                count, contextCount, x, y, dirFlags, paint, typeface);
         env->ReleaseCharArrayElements(text, chars, JNI_ABORT);
     }
 
-    static void drawTextRun__StringIIIIFFIPaint(
+    static void drawTextRun__StringIIIIFFIPaintTypeface(
         JNIEnv* env, jobject obj, SkCanvas* canvas, jstring text, jint start,
         jint end, jint contextStart, jint contextEnd,
-        jfloat x, jfloat y, jint dirFlags, SkPaint* paint) {
+        jfloat x, jfloat y, jint dirFlags, SkPaint* paint,
+        TypefaceImpl* typeface) {
 
         jint count = end - start;
         jint contextCount = contextEnd - contextStart;
         const jchar* chars = env->GetStringChars(text, NULL);
         drawTextWithGlyphs(canvas, chars + contextStart, start - contextStart,
-                count, contextCount, x, y, dirFlags, paint);
+                count, contextCount, x, y, dirFlags, paint, typeface);
         env->ReleaseStringChars(text, chars);
     }
 
@@ -1070,14 +1127,14 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*)SkCanvasGlue::drawBitmapMesh},
     {"nativeDrawVertices", "(III[FI[FI[II[SIII)V",
         (void*)SkCanvasGlue::drawVertices},
-    {"native_drawText","(I[CIIFFII)V",
-        (void*) SkCanvasGlue::drawText___CIIFFIPaint},
-    {"native_drawText","(ILjava/lang/String;IIFFII)V",
-        (void*) SkCanvasGlue::drawText__StringIIFFIPaint},
-    {"native_drawTextRun","(I[CIIIIFFII)V",
-        (void*) SkCanvasGlue::drawTextRun___CIIIIFFIPaint},
-    {"native_drawTextRun","(ILjava/lang/String;IIIIFFII)V",
-        (void*) SkCanvasGlue::drawTextRun__StringIIIIFFIPaint},
+    {"native_drawText","(I[CIIFFIII)V",
+        (void*) SkCanvasGlue::drawText___CIIFFIPaintTypeface},
+    {"native_drawText","(ILjava/lang/String;IIFFIII)V",
+        (void*) SkCanvasGlue::drawText__StringIIFFIPaintTypeface},
+    {"native_drawTextRun","(I[CIIIIFFIII)V",
+        (void*) SkCanvasGlue::drawTextRun___CIIIIFFIPaintTypeface},
+    {"native_drawTextRun","(ILjava/lang/String;IIIIFFIII)V",
+        (void*) SkCanvasGlue::drawTextRun__StringIIIIFFIPaintTypeface},
     {"native_drawPosText","(I[CII[FI)V",
         (void*) SkCanvasGlue::drawPosText___CII_FPaint},
     {"native_drawPosText","(ILjava/lang/String;[FI)V",
