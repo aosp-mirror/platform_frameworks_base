@@ -134,7 +134,8 @@ JNIDrmListener::JNIDrmListener(JNIEnv* env, jobject thiz, jobject weak_thiz)
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
         ALOGE("Can't find android/media/MediaDrm");
-        jniThrowException(env, "java/lang/Exception", NULL);
+        jniThrowException(env, "java/lang/Exception",
+                          "Can't find android/media/MediaDrm");
         return;
     }
     mClass = (jclass)env->NewGlobalRef(clazz);
@@ -414,13 +415,15 @@ static KeyedVector<String8, String8> HashMapToKeyedVector(JNIEnv *env, jobject &
                 if (entry) {
                     jobject obj = env->CallObjectMethod(entry, gFields.entry.getKey);
                     if (!env->IsInstanceOf(obj, clazz)) {
-                        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+                        jniThrowException(env, "java/lang/IllegalArgumentException",
+                                          "HashMap key is not a String");
                     }
                     jstring jkey = static_cast<jstring>(obj);
 
                     obj = env->CallObjectMethod(entry, gFields.entry.getValue);
                     if (!env->IsInstanceOf(obj, clazz)) {
-                        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+                        jniThrowException(env, "java/lang/IllegalArgumentException",
+                                          "HashMap value is not a String");
                     }
                     jstring jvalue = static_cast<jstring>(obj);
 
@@ -492,12 +495,12 @@ static sp<JDrm> setDrm(
 static bool CheckSession(JNIEnv *env, const sp<IDrm> &drm, jbyteArray const &jsessionId)
 {
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException", "MediaDrm obj is null");
         return false;
     }
 
     if (jsessionId == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException", "sessionId is null");
         return false;
     }
     return true;
@@ -570,14 +573,15 @@ static void android_media_MediaDrm_native_setup(
         jobject weak_this, jbyteArray uuidObj) {
 
     if (uuidObj == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException", "uuid is null");
         return;
     }
 
     Vector<uint8_t> uuid = JByteArrayToVector(env, uuidObj);
 
     if (uuid.size() != 16) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "invalid UUID size, expected 16 bytes");
         return;
     }
 
@@ -617,7 +621,7 @@ static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
         jniThrowException(
                 env,
                 "java/lang/IllegalArgumentException",
-                NULL);
+                "invalid UUID size, expected 16 bytes");
         return false;
     }
 
@@ -629,7 +633,8 @@ static jbyteArray android_media_MediaDrm_openSession(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return NULL;
     }
 
@@ -736,7 +741,8 @@ static jbyteArray android_media_MediaDrm_provideKeyResponse(
     Vector<uint8_t> sessionId(JByteArrayToVector(env, jsessionId));
 
     if (jresponse == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "key response is null");
         return NULL;
     }
     Vector<uint8_t> response(JByteArrayToVector(env, jresponse));
@@ -753,7 +759,8 @@ static void android_media_MediaDrm_removeKeys(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (jkeysetId == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "keySetId is null");
         return;
     }
 
@@ -812,7 +819,8 @@ static jobject android_media_MediaDrm_getProvisionRequest(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return NULL;
     }
 
@@ -848,12 +856,14 @@ static void android_media_MediaDrm_provideProvisionResponse(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return;
     }
 
     if (jresponse == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "provision response is null");
         return;
     }
 
@@ -869,7 +879,8 @@ static jobject android_media_MediaDrm_getSecureStops(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return NULL;
     }
 
@@ -889,7 +900,8 @@ static void android_media_MediaDrm_releaseSecureStops(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return;
     }
 
@@ -905,12 +917,14 @@ static jstring android_media_MediaDrm_getPropertyString(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return NULL;
     }
 
     if (jname == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "property name String is null");
         return NULL;
     }
 
@@ -931,12 +945,14 @@ static jbyteArray android_media_MediaDrm_getPropertyByteArray(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return NULL;
     }
 
     if (jname == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "property name String is null");
         return NULL;
     }
 
@@ -957,12 +973,20 @@ static void android_media_MediaDrm_setPropertyString(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return;
     }
 
-    if (jname == NULL || jvalue == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+    if (jname == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "property name String is null");
+        return;
+    }
+
+    if (jvalue == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "property value String is null");
         return;
     }
 
@@ -979,12 +1003,20 @@ static void android_media_MediaDrm_setPropertyByteArray(
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
         return;
     }
 
-    if (jname == NULL || jvalue == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+    if (jname == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "property name String is null");
+        return;
+    }
+
+    if (jvalue == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "property value byte array is null");
         return;
     }
 
@@ -1007,7 +1039,8 @@ static void android_media_MediaDrm_setCipherAlgorithmNative(
     }
 
     if (jalgorithm == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "algorithm String is null");
         return;
     }
 
@@ -1030,7 +1063,8 @@ static void android_media_MediaDrm_setMacAlgorithmNative(
     }
 
     if (jalgorithm == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "algorithm String is null");
         return;
     }
 
@@ -1054,7 +1088,8 @@ static jbyteArray android_media_MediaDrm_encryptNative(
     }
 
     if (jkeyId == NULL || jinput == NULL || jiv == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "required argument is null");
         return NULL;
     }
 
@@ -1082,7 +1117,8 @@ static jbyteArray android_media_MediaDrm_decryptNative(
     }
 
     if (jkeyId == NULL || jinput == NULL || jiv == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "required argument is null");
         return NULL;
     }
 
@@ -1109,7 +1145,8 @@ static jbyteArray android_media_MediaDrm_signNative(
     }
 
     if (jkeyId == NULL || jmessage == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "required argument is null");
         return NULL;
     }
 
@@ -1136,7 +1173,8 @@ static jboolean android_media_MediaDrm_verifyNative(
     }
 
     if (jkeyId == NULL || jmessage == NULL || jsignature == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "required argument is null");
         return false;
     }
 
