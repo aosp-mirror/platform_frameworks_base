@@ -87,11 +87,17 @@ struct EntryFields {
 };
 
 struct EventTypes {
-    int kEventProvisionRequired;
-    int kEventKeyRequired;
-    int kEventKeyExpired;
-    int kEventVendorDefined;
+    jint kEventProvisionRequired;
+    jint kEventKeyRequired;
+    jint kEventKeyExpired;
+    jint kEventVendorDefined;
 } gEventTypes;
+
+struct KeyTypes {
+    jint kKeyTypeStreaming;
+    jint kKeyTypeOffline;
+    jint kKeyTypeRelease;
+} gKeyTypes;
 
 struct fields_t {
     jfieldID context;
@@ -521,6 +527,13 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_STATIC_FIELD_ID(field, clazz, "EVENT_VENDOR_DEFINED", "I");
     gEventTypes.kEventVendorDefined = env->GetStaticIntField(clazz, field);
 
+    GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_STREAMING", "I");
+    gKeyTypes.kKeyTypeStreaming = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_OFFLINE", "I");
+    gKeyTypes.kKeyTypeOffline = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_RELEASE", "I");
+    gKeyTypes.kKeyTypeRelease = env->GetStaticIntField(clazz, field);
+
     FIND_CLASS(clazz, "android/media/MediaDrm$KeyRequest");
     GET_FIELD_ID(gFields.keyRequest.data, clazz, "mData", "[B");
     GET_FIELD_ID(gFields.keyRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
@@ -666,7 +679,18 @@ static jobject android_media_MediaDrm_getKeyRequest(
         mimeType = JStringToString8(env, jmimeType);
     }
 
-    DrmPlugin::KeyType keyType = (DrmPlugin::KeyType)jkeyType;
+    DrmPlugin::KeyType keyType;
+    if (jkeyType == gKeyTypes.kKeyTypeStreaming) {
+        keyType = DrmPlugin::kKeyType_Streaming;
+    } else if (jkeyType == gKeyTypes.kKeyTypeOffline) {
+        keyType = DrmPlugin::kKeyType_Offline;
+    } else if (jkeyType == gKeyTypes.kKeyTypeRelease) {
+        keyType = DrmPlugin::kKeyType_Release;
+    } else {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "invalid keyType");
+        return NULL;
+    }
 
     KeyedVector<String8, String8> optParams;
     if (joptParams != NULL) {
