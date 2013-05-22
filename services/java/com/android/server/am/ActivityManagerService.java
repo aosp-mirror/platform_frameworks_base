@@ -6062,7 +6062,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     rti.origActivity = tr.origActivity;
                     rti.description = tr.lastDescription;
-                    
+                    rti.stackId = tr.stack.mStackId;
+
                     if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
                         // Check whether this activity is currently available.
                         try {
