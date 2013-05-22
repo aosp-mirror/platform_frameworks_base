@@ -2185,7 +2185,10 @@ public class NumberPicker extends LinearLayout {
                             mScrollX + (mRight - mLeft),
                             mTopSelectionDividerTop + mSelectionDividerHeight);
                 case VIRTUAL_VIEW_ID_INPUT:
-                    return createAccessibiltyNodeInfoForInputText();
+                    return createAccessibiltyNodeInfoForInputText(mScrollX,
+                            mTopSelectionDividerTop + mSelectionDividerHeight,
+                            mScrollX + (mRight - mLeft),
+                            mBottomSelectionDividerBottom - mSelectionDividerHeight);
                 case VIRTUAL_VIEW_ID_INCREMENT:
                     return createAccessibilityNodeInfoForVirtualButton(VIRTUAL_VIEW_ID_INCREMENT,
                             getVirtualIncrementButtonText(), mScrollX,
@@ -2446,7 +2449,8 @@ public class NumberPicker extends LinearLayout {
             }
         }
 
-        private AccessibilityNodeInfo createAccessibiltyNodeInfoForInputText() {
+        private AccessibilityNodeInfo createAccessibiltyNodeInfoForInputText(
+                int left, int top, int right, int bottom) {
             AccessibilityNodeInfo info = mInputText.createAccessibilityNodeInfo();
             info.setSource(NumberPicker.this, VIRTUAL_VIEW_ID_INPUT);
             if (mAccessibilityFocusedView != VIRTUAL_VIEW_ID_INPUT) {
@@ -2455,6 +2459,15 @@ public class NumberPicker extends LinearLayout {
             if (mAccessibilityFocusedView == VIRTUAL_VIEW_ID_INPUT) {
                 info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
             }
+            Rect boundsInParent = mTempRect;
+            boundsInParent.set(left, top, right, bottom);
+            info.setVisibleToUser(isVisibleToUser(boundsInParent));
+            info.setBoundsInParent(boundsInParent);
+            Rect boundsInScreen = boundsInParent;
+            int[] locationOnScreen = mTempArray;
+            getLocationOnScreen(locationOnScreen);
+            boundsInScreen.offset(locationOnScreen[0], locationOnScreen[1]);
+            info.setBoundsInScreen(boundsInScreen);
             return info;
         }
 
