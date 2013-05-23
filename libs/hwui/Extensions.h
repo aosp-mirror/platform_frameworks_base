@@ -17,12 +17,11 @@
 #ifndef ANDROID_HWUI_EXTENSIONS_H
 #define ANDROID_HWUI_EXTENSIONS_H
 
+#include <cutils/compiler.h>
+
 #include <utils/Singleton.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
-
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 
 namespace android {
 namespace uirenderer {
@@ -31,7 +30,7 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-class Extensions: public Singleton<Extensions> {
+class ANDROID_API Extensions: public Singleton<Extensions> {
 public:
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
@@ -41,11 +40,13 @@ public:
     inline bool hasTiledRendering() const { return mHasTiledRendering; }
     inline bool has1BitStencil() const { return mHas1BitStencil; }
     inline bool has4BitStencil() const { return mHas4BitStencil; }
+    inline bool hasNvSystemTime() const { return mHasNvSystemTime; }
 
     inline int getMajorGlVersion() const { return mVersionMajor; }
     inline int getMinorGlVersion() const { return mVersionMinor; }
 
-    bool hasExtension(const char* extension) const;
+    bool hasGlExtension(const char* extension) const;
+    bool hasEglExtension(const char* extension) const;
 
     void dump() const;
 
@@ -53,12 +54,12 @@ private:
     Extensions();
     ~Extensions();
 
+    void findExtensions(const char* extensions, SortedVector<String8>& list) const;
+
     friend class Singleton<Extensions>;
 
-    SortedVector<String8> mExtensionList;
-
-    char* mExtensions;
-    char* mVersion;
+    SortedVector<String8> mGlExtensionList;
+    SortedVector<String8> mEglExtensionList;
 
     bool mHasNPot;
     bool mHasFramebufferFetch;
@@ -68,6 +69,7 @@ private:
     bool mHasTiledRendering;
     bool mHas1BitStencil;
     bool mHas4BitStencil;
+    bool mHasNvSystemTime;
 
     int mVersionMajor;
     int mVersionMinor;

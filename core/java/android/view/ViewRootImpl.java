@@ -111,7 +111,7 @@ public final class ViewRootImpl implements ViewParent,
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
-    private static final String PROPERTY_PROFILE_RENDERING = "viewancestor.profile_rendering";
+    private static final String PROPERTY_PROFILE_RENDERING = "viewroot.profile_rendering";
     private static final String PROPERTY_MEDIA_DISABLED = "config.disable_media";
 
     /**

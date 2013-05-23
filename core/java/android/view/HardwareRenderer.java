@@ -406,6 +406,17 @@ public abstract class HardwareRenderer {
     private static native void nBeginFrame(int[] size);
 
     /**
+     * Returns the current system time according to the renderer.
+     * This method is used for debugging only and should not be used
+     * as a clock.
+     */
+    static long getSystemTime() {
+        return nGetSystemTime();
+    }
+
+    private static native long nGetSystemTime();
+
+    /**
      * Preserves the back buffer of the current surface after a buffer swap.
      * Calling this method sets the EGL_SWAP_BEHAVIOR attribute of the current
      * surface to EGL_BUFFER_PRESERVED. Calling this method requires an EGL
@@ -851,6 +862,8 @@ public abstract class HardwareRenderer {
 
         private final int[] mSurfaceSize = new int[2];
         private final FunctorsRunnable mFunctorsRunnable = new FunctorsRunnable();
+
+        private long mDrawDelta = Long.MAX_VALUE;
 
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
@@ -1413,6 +1426,7 @@ public abstract class HardwareRenderer {
                     int saveCount = 0;
                     int status = DisplayList.STATUS_DONE;
 
+                    long start = getSystemTime();
                     try {
                         status = prepareFrame(dirty);
 
@@ -1432,12 +1446,15 @@ public abstract class HardwareRenderer {
                         canvas.restoreToCount(saveCount);
                         view.mRecreateDisplayList = false;
 
-                        debugOverdraw(attachInfo, dirty, canvas, displayList);
+                        mDrawDelta = getSystemTime() - start;
 
-                        mFrameCount++;
+                        if (mDrawDelta > 0) {
+                            mFrameCount++;
 
-                        debugDirtyRegions(dirty, canvas);
-                        drawProfileData(attachInfo);
+                            debugOverdraw(attachInfo, dirty, canvas, displayList);
+                            debugDirtyRegions(dirty, canvas);
+                            drawProfileData(attachInfo);
+                        }
                     }
 
                     onPostDraw();
@@ -1509,6 +1526,10 @@ public abstract class HardwareRenderer {
         }
 
         private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {
+            if (mDrawDelta <= 0) {
+                return view.mDisplayList;
+            }
+
             view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
                     == View.PFLAG_INVALIDATED;
             view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
