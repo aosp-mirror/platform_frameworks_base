@@ -398,9 +398,9 @@ public class WifiNative {
 
     public boolean startWpsPbc(String iface, String bssid) {
         if (TextUtils.isEmpty(bssid)) {
-            return doBooleanCommand("WPS_PBC interface=" + iface);
+            return doBooleanCommand("IFNAME=" + iface + " WPS_PBC");
         } else {
-            return doBooleanCommand("WPS_PBC interface=" + iface + " " + bssid);
+            return doBooleanCommand("IFNAME=" + iface + " WPS_PBC " + bssid);
         }
     }
 
@@ -411,7 +411,7 @@ public class WifiNative {
 
     public boolean startWpsPinKeypad(String iface, String pin) {
         if (TextUtils.isEmpty(pin)) return false;
-        return doBooleanCommand("WPS_PIN interface=" + iface + " any " + pin);
+        return doBooleanCommand("IFNAME=" + iface + " WPS_PIN any " + pin);
     }
 
 
@@ -425,9 +425,9 @@ public class WifiNative {
 
     public String startWpsPinDisplay(String iface, String bssid) {
         if (TextUtils.isEmpty(bssid)) {
-            return doStringCommand("WPS_PIN interface=" + iface + " any");
+            return doStringCommand("IFNAME=" + iface + " WPS_PIN any");
         } else {
-            return doStringCommand("WPS_PIN interface=" + iface + " " + bssid);
+            return doStringCommand("IFNAME=" + iface + " WPS_PIN " + bssid);
         }
     }
 
@@ -479,7 +479,7 @@ public class WifiNative {
     }
 
     public boolean setP2pGroupIdle(String iface, int time) {
-        return doBooleanCommand("SET interface=" + iface + " p2p_group_idle " + time);
+        return doBooleanCommand("IFNAME=" + iface + " SET p2p_group_idle " + time);
     }
 
     public void setPowerSave(boolean enabled) {
@@ -492,9 +492,9 @@ public class WifiNative {
 
     public boolean setP2pPowerSave(String iface, boolean enabled) {
         if (enabled) {
-            return doBooleanCommand("P2P_SET interface=" + iface + " ps 1");
+            return doBooleanCommand("IFNAME=" + iface + " P2P_SET ps 1");
         } else {
-            return doBooleanCommand("P2P_SET interface=" + iface + " ps 0");
+            return doBooleanCommand("IFNAME=" + iface + " P2P_SET ps 0");
         }
     }
 
