@@ -2805,12 +2805,19 @@ public class AccountManagerService
             if (sharedAccounts == null || sharedAccounts.length == 0) return unfiltered;
             String requiredAccountType = "";
             try {
-                for (String packageName : packages) {
-                    PackageInfo pi = mPackageManager.getPackageInfo(packageName, 0);
+                // If there's an explicit callingPackage specified, check if that package
+                // opted in to see restricted accounts.
+                if (callingPackage != null) {
+                    PackageInfo pi = mPackageManager.getPackageInfo(callingPackage, 0);
                     if (pi != null && pi.restrictedAccountType != null) {
                         requiredAccountType = pi.restrictedAccountType;
-                        // If it matches the package name of the original caller, use this choice.
-                        if (callingPackage != null && packageName.equals(callingPackage)) {
+                    }
+                } else {
+                    // Otherwise check if the callingUid has a package that has opted in
+                    for (String packageName : packages) {
+                        PackageInfo pi = mPackageManager.getPackageInfo(packageName, 0);
+                        if (pi != null && pi.restrictedAccountType != null) {
+                            requiredAccountType = pi.restrictedAccountType;
                             break;
                         }
                     }
