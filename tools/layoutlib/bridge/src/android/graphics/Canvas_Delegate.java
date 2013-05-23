@@ -330,20 +330,12 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setBitmap(int nativeCanvas, int bitmap) {
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            return;
+    /*package*/ static void native_setBitmap(int nativeCanvas, int nativeBitmap) {
+        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nativeBitmap);
+        Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(nativeCanvas);
+        if (canvasDelegate != null && bitmapDelegate != null) {
+            canvasDelegate.setBitmap(bitmapDelegate);
         }
-
-        // get the delegate from the native int.
-        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
-        if (bitmapDelegate == null) {
-            return;
-        }
-
-        canvasDelegate.setBitmap(bitmapDelegate);
     }
 
     @LayoutlibDelegate
@@ -571,17 +563,15 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_quickReject(int nativeCanvas,
-                                                     RectF rect,
-                                                     int native_edgeType) {
+    /*package*/ static boolean native_quickReject(int nativeCanvas, RectF rect,
+            int native_edgeType) {
         // FIXME properly implement quickReject
         return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_quickReject(int nativeCanvas,
-                                                     int path,
-                                                     int native_edgeType) {
+    /*package*/ static boolean native_quickReject(int nativeCanvas, int path,
+            int native_edgeType) {
         // FIXME properly implement quickReject
         return false;
     }
@@ -994,6 +984,7 @@ public final class Canvas_Delegate {
                 float x = startX;
                 float y = startY;
                 if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
+                    // TODO: check the value of bidiFlags.
                     float m = paintDelegate.measureText(text, index, count);
                     if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
                         x -= m / 2;
