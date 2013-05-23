@@ -1216,7 +1216,7 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formata"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Selecciona un mètodes d\'entrada"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Selecciona un mètode d\'entrada"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Configura els mètodes d\'entrada"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Teclat físic"</string>
     <string name="hardware" msgid="7517821086888990278">"Maquinari"</string>
@@ -1433,8 +1433,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Àudio per Bluetooth"</string>
-    <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
-    <skip />
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla sense fil"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fet"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortida de contingut multimèdia"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"S\'està explorant..."</string>

@@ -1084,7 +1084,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> svarer ikke. Vil du lukke den?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> svarer ikke."\n\n"Vil du lukke den?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Rapporter"</string>
+    <string name="report" msgid="4060218260984795706">"Rapportér"</string>
     <string name="wait" msgid="7147118217226317732">"Vent"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Siden svarer ikke."\n\n"Vil du lukke den?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Appen er omdirigeret"</string>
@@ -1433,8 +1433,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
-    <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
-    <skip />
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skærm"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Udfør"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieudgang"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Søger..."</string>
