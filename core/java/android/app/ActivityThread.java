@@ -543,7 +543,7 @@ public final class ActivityThread {
     private native void dumpGraphicsInfo(FileDescriptor fd);
 
     private class ApplicationThread extends ApplicationThreadNative {
-        private static final String HEAP_COLUMN = "%13s %8s %8s %8s %8s %8s %8s";
+        private static final String HEAP_COLUMN = "%13s %8s %8s %8s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%21s %8d";
         private static final String TWO_COUNT_COLUMNS = "%21s %8d %21s %8d";
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
