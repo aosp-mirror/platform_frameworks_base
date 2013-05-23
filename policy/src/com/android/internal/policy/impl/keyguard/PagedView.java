@@ -86,7 +86,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private static final int MIN_SNAP_VELOCITY = 1500;
     private static final int MIN_FLING_VELOCITY = 250;
 
-    // We are disabling touch interaction of the widget region for factory ROM. 
+    // We are disabling touch interaction of the widget region for factory ROM.
     private static final boolean DISABLE_TOUCH_INTERACTION = false;
     private static final boolean DISABLE_TOUCH_SIDE_PAGES = true;
     private static final boolean DISABLE_FLING_TO_DELETE = false;
@@ -1350,6 +1350,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             if (mTouchState == TOUCH_STATE_SCROLLING) {
                 // Scroll to follow the motion event
                 final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+
+                if (pointerIndex == -1) return true;
+
                 final float x = ev.getX(pointerIndex);
                 final float deltaX = mLastMotionX + mLastMotionXRemainder - x;
 
