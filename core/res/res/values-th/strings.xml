@@ -571,7 +571,7 @@
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"อนุญาตให้แอปพลิเคชันดูข้อมูลเกี่ยวกับเครือข่าย WiFi เช่น เปิดใช้งาน WiFi อยู่หรือไม่ และชื่อของอุปกรณ์ WiFi ที่เชื่อมต่อ"</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"เชื่อมต่อและหยุดเชื่อมต่อ WiFi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและหยุดเชื่อมต่อจากจุดเข้าใช้งาน WiFi และเปลี่ยนแปลงการกำหนดค่าอุปกรณ์ำสำหรับเครือข่าย WiFi"</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"อนุญาตให้รับมัลติแคสต์ผ่าน Wi-Fi"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"อนุญาตให้รับมัลติแคสต์ผ่าน WiFi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"อนุญาตให้แอปพลิเคชันรับแพ็คเก็ตที่ส่งไปยังทุกอุปกรณ์บนเครือข่าย WiFi โดยใช้ที่อยู่มัลติแคสต์ ไม่ใช่เพียงแท็บเล็ตของคุณเท่านั้น ซึ่งจะใช้พลังงานมากกว่าในโหมดที่ไม่ใช่มัลติแคสต์"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"อนุญาตให้แอปพลิเคชันรับแพ็คเก็ตที่ส่งไปยังทุกอุปกรณ์บนเครือข่าย WiFi โดยใช้ที่อยู่มัลติแคสต์ ไม่ใช่เพียงโทรศัพท์ของคุณเท่านั้น ซึ่งจะใช้พลังงานมากกว่าในโหมดที่ไม่ใช่มัลติแคสต์"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"เข้าถึงการตั้งค่าบลูทูธ"</string>
@@ -1128,23 +1128,23 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"เสียงเรียกเข้า"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"ไม่ทราบเสียงเรียกเข้า"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"เครือข่าย Wi-Fi ที่ใช้งานได้"</item>
-    <item quantity="other" msgid="4192424489168397386">"เครือข่าย Wi-Fi ใช้งานได้"</item>
+    <item quantity="one" msgid="6654123987418168693">"เครือข่าย WiFi ที่ใช้งานได้"</item>
+    <item quantity="other" msgid="4192424489168397386">"เครือข่าย WiFi ใช้งานได้"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
-    <item quantity="other" msgid="7915895323644292768">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
+    <item quantity="one" msgid="1634101450343277345">"เปิดเครือข่าย WiFi ที่ใช้งานได้"</item>
+    <item quantity="other" msgid="7915895323644292768">"เปิดเครือข่าย WiFi ที่ใช้งานได้"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"ลงชื่อเข้าใช้เครือข่าย WiFi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"ลงชื่อเข้าใช้เครือข่าย"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ไม่สามารถเชื่อมต่อ Wi-Fi"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ไม่สามารถเชื่อมต่อ WiFi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" มีสัญญาณอินเทอร์เน็ตไม่ดี"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WiFi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"เริ่มการทำงาน WiFi Direct ซึ่งจะเป็นการปิดการทำงาน WiFi ไคลเอ็นต์/ฮอตสปอต"</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ไม่สามารถเริ่ม WiFi Direct ได้"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"เปิด Wi-Fi Direct อยู่"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"เปิด WiFi Direct อยู่"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"แตะเพื่อตั้งค่า"</string>
     <string name="accept" msgid="1645267259272829559">"ยอมรับ"</string>
     <string name="decline" msgid="2112225451706137894">"ปฏิเสธ"</string>
@@ -1154,8 +1154,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ถึง:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"พิมพ์ PIN ที่ต้องการ:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"แท็บเล็ตนี้จะยกเลิกการเชื่อมต่อกับ Wi-Fi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"โทรศัพท์จะยกเลิกการเชื่อมต่อกับ Wi-Fi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"แท็บเล็ตนี้จะยกเลิกการเชื่อมต่อกับ WiFi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"โทรศัพท์จะยกเลิกการเชื่อมต่อกับ WiFi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"ใส่อักขระ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"กำลังส่งข้อความ SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; กำลังส่งข้อความ SMS จำนวนมาก คุณต้องการอนุญาตให้แอปพลิเคชันนี้ส่งข้อความต่อหรือไม่"</string>
@@ -1393,12 +1393,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"ปิดใช้งานข้อมูล 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"ปิดใช้งานข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"ปิดใช้งานข้อมูลมือถือ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"ปิดใช้งานข้อมูล Wi-Fi แล้ว"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"ปิดใช้งานข้อมูล WiFi แล้ว"</string>
     <string name="data_usage_limit_body" msgid="3317964706973601386">"แตะเพื่อเปิดใช้งาน"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"เกินขีดจำกัดข้อมูล 2G - 3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"เกินขีดจำกัดของข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"เกินขีดจำกัดข้อมูลมือถือ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"เกินขีดจำกัดข้อมูล Wi-Fi แล้ว"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"เกินขีดจำกัดข้อมูล WiFi แล้ว"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> เกินขีดจำกัดที่ระบุไว้"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดข้อมูลแบ็กกราวด์"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"แตะเพื่อนำข้อจำกัดออก"</string>
@@ -1433,8 +1433,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ระบบ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"เสียงบลูทูธ"</string>
-    <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
-    <skip />
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"การแสดงผลแบบไร้สาย"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"เสร็จสิ้น"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"เอาต์พุตสื่อ"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"กำลังสแกน..."</string>

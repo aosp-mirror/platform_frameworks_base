@@ -600,7 +600,7 @@
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"登録したフィードの書き込み"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"現在同期されているフィードの変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、同期されたフィードが変更される恐れがあります。"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"辞書に追加された語句の読み取り"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"ユーザー辞書に登録されているすべての語句や名前を読み取ることをアプリに許可します。"</string>
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"単語リストに登録されているすべての語句や名前を読み取ることをアプリに許可します。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"単語リストへの語句の追加"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"単語リストに新しい語句を書き込むことをアプリに許可します。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"保護されたストレージへのテストアクセス"</string>
@@ -1433,8 +1433,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"システム"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth音声"</string>
-    <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
-    <skip />
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"ワイヤレスディスプレイ"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完了"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"メディア出力"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"スキャン中..."</string>
