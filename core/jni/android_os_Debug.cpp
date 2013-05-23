@@ -53,6 +53,7 @@ enum {
     HEAP_TTF,
     HEAP_DEX,
     HEAP_OAT,
+    HEAP_ART,
     HEAP_UNKNOWN_MAP,
 
     _NUM_HEAP,
@@ -187,6 +188,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 whichHeap = HEAP_DEX;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".oat") == 0) {
                 whichHeap = HEAP_OAT;
+            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
+                whichHeap = HEAP_ART;
             } else if (nameLen > 0) {
                 whichHeap = HEAP_UNKNOWN_MAP;
             } else if (start == prevEnd && prevHeap == HEAP_SO) {
