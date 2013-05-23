@@ -182,7 +182,7 @@
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Auf Geräte und Netzwerke über Bluetooth zugreifen"</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Audioeinstellungen"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Audioeinstellungen ändern"</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Wirkt sich auf den Akku aus"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Auswirkungen auf den Akku"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Funktionen nutzen, die den Akku schnell entladen"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Direkter Zugriff auf Kalender und Termine"</string>
@@ -326,7 +326,7 @@
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"Apps im Hintergrund schließen"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Überlässt der App die Entscheidung, ob Aktivitäten immer beendet werden, sobald sie in den Hintergrund rücken. Wird nie für normale Apps benötigt."</string>
     <string name="permlab_batteryStats" msgid="2789610673514103364">"Akkudaten lesen"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Ermöglicht einer Anwendung, den momentan niedrigen Akkustand zu erkennen. Unter Umständen erhält die App detaillierte Informationen darüber, welche Apps Sie verwenden."</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Ermöglicht der App, den momentan niedrigen Akkustand zu erkennen. Unter Umständen erhält die App detaillierte Informationen darüber, welche Apps Sie verwenden."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"Akkudaten ändern"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Ermöglicht der App, erfasste Akkudaten zu ändern. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"App-Vorgangsstatistiken abrufen"</string>
@@ -421,7 +421,7 @@
     <string name="permlab_readContacts" msgid="8348481131899886131">"Kontakte lesen"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Ermöglicht der App, Daten zu den auf Ihrem Tablet gespeicherten Kontakten zu lesen, einschließlich der Häufigkeit, mit der Sie bestimmte Personen angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Ihre Kontaktdaten zu speichern, und schädliche Apps können Kontaktdaten ohne Ihr Wissen weiterleiten."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Ermöglicht der App, Daten zu den auf Ihrem Telefon gespeicherten Kontakten zu lesen, einschließlich der Häufigkeit, mit der Sie bestimmte Personen angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Ihre Kontaktdaten zu speichern, und schädliche Apps können Kontaktdaten ohne Ihr Wissen weiterleiten."</string>
-    <string name="permlab_writeContacts" msgid="5107492086416793544">"Meine Kontakte ändern"</string>
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"Kontakte ändern"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Ermöglicht der App, Daten zu Kontakten, die auf Ihrem Tablet gespeichert sind, zu ändern, einschließlich der Häufigkeit, mit der Sie bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Ermöglicht der App, Daten zu Kontakten, die auf Ihrem Telefon gespeichert sind, zu ändern, einschließlich der Häufigkeit, mit der Sie bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Anrufliste lesen"</string>
@@ -1439,8 +1439,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-Audio"</string>
-    <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
-    <skip />
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"Kabellose Übertragung"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fertig"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medienausgabe"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Wird gescannt..."</string>

@@ -352,7 +352,7 @@
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"ለሌሎች መተግበሪያዎች የራሱን የግቤት ክስተቶችን( ቁልፍ መጫኖችን፣ የመሳሰሉት) ለማቅረብ ለመተግበሪያው ይፈቅዳሉ፡፡ ስልኩን ለመቆጣጠር ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"የሚተይቡትን እና የሚወስዱትን እርምጃ ይመዝግቡ"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"ከሌላ መተግበሪያ( ልክ እንደ የይለፍ ቃል መጫን) ጋር በምትገናኝበት ጊዜ እንኳን የተጫንካቸውን ቁልፎች ለማየት ለመተግበሪያው ይፈቅዳሉ፡፡ ለመደበኛ መተግበሪያዎች መቼም ቢሆን አያስፈልግም፡፡"</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"በግቤት ሜተድ ጠርዝ"</string>
+    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"በግቤት ስልት ጠርዝ"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ያዡ ግቤት ስልቱን ወደ ከፍተኛ-ደረጃ በይነገጽ ለመጠረዝ ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ከአንድ የተደራሽነት አገልግሎት ጋር እሰር"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ያዢው ወደ የአንድ ተደራሽነት አገልግሎት ከፍተኛ-ደረጃ በይነገጽ እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች መቼም ቢሆን ሊያስፈልግ አይገባም።"</string>
@@ -1057,7 +1057,7 @@
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"የፅሁፍ ምርጫ"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"ወደ መዝገበ ቃላት አክል"</string>
     <string name="deleteText" msgid="6979668428458199034">"ሰርዝ"</string>
-    <string name="inputMethod" msgid="1653630062304567879">"ግቤት ሜተድ"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"ግቤት ስልት"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"የፅሁፍ እርምጃዎች"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"የማከማቻ ቦታ እያለቀ ነው"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"አንዳንድ የስርዓት ተግባራት ላይሰሩ ይችላሉ"</string>
@@ -1279,7 +1279,7 @@
     <string name="deny" msgid="2081879885755434506">"ያስተባብሉ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ፈቃድ ተጠይቋል"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n" ለ<xliff:g id="ACCOUNT">%s</xliff:g> መለያ ፈቃድ ተጠይቋል"</string>
-    <string name="input_method_binding_label" msgid="1283557179944992649">"ግቤት ሜተድ"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"ግቤት ስልት"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"አስምር"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ተደራሽነት"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"ልጣፍ"</string>
@@ -1439,8 +1439,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ስርዓት"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"የብሉቱዝ ድምጽ"</string>
-    <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
-    <skip />
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"ገመድ አልባ ማሳያ"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"ተከናውኗል"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"የሚዲያ ውጽዓት"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"በመቃኘት ላይ..."</string>
