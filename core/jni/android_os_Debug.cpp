@@ -64,20 +64,22 @@ struct stat_fields {
     jfieldID pss_field;
     jfieldID privateDirty_field;
     jfieldID sharedDirty_field;
+    jfieldID sharedClean_field;
 };
 
 struct stat_field_names {
     const char* pss_name;
     const char* privateDirty_name;
     const char* sharedDirty_name;
+    const char* sharedClean_name;
 };
 
 static stat_fields stat_fields[_NUM_CORE_HEAP];
 
 static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
-    { "otherPss", "otherPrivateDirty", "otherSharedDirty" },
-    { "dalvikPss", "dalvikPrivateDirty", "dalvikSharedDirty" },
-    { "nativePss", "nativePrivateDirty", "nativeSharedDirty" }
+    { "otherPss", "otherPrivateDirty", "otherSharedDirty", "otherSharedClean" },
+    { "dalvikPss", "dalvikPrivateDirty", "dalvikSharedDirty", "dalvikSharedClean" },
+    { "nativePss", "nativePrivateDirty", "nativeSharedDirty", "nativeSharedClean" }
 };
 
 jfieldID otherStats_field;
@@ -86,6 +88,7 @@ struct stats_t {
     int pss;
     int privateDirty;
     int sharedDirty;
+    int sharedClean;
 };
 
 #define BINDER_STATS "/proc/binder/stats"
@@ -234,6 +237,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             stats[whichHeap].pss += pss;
             stats[whichHeap].privateDirty += private_dirty;
             stats[whichHeap].sharedDirty += shared_dirty;
+            stats[whichHeap].sharedClean += shared_clean;
         }
     }
 }
@@ -263,12 +267,14 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         stats[HEAP_UNKNOWN].pss += stats[i].pss;
         stats[HEAP_UNKNOWN].privateDirty += stats[i].privateDirty;
         stats[HEAP_UNKNOWN].sharedDirty += stats[i].sharedDirty;
+        stats[HEAP_UNKNOWN].sharedClean += stats[i].sharedClean;
     }
 
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         env->SetIntField(object, stat_fields[i].pss_field, stats[i].pss);
         env->SetIntField(object, stat_fields[i].privateDirty_field, stats[i].privateDirty);
         env->SetIntField(object, stat_fields[i].sharedDirty_field, stats[i].sharedDirty);
+        env->SetIntField(object, stat_fields[i].sharedClean_field, stats[i].sharedClean);
     }
 
     jintArray otherIntArray = (jintArray)env->GetObjectField(object, otherStats_field);
@@ -283,6 +289,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         otherArray[j++] = stats[i].pss;
         otherArray[j++] = stats[i].privateDirty;
         otherArray[j++] = stats[i].sharedDirty;
+        otherArray[j++] = stats[i].sharedClean;
     }
 
     env->ReleasePrimitiveArrayCritical(otherIntArray, otherArray, 0);
@@ -640,6 +647,8 @@ int register_android_os_Debug(JNIEnv *env)
                 env->GetFieldID(clazz, stat_field_names[i].privateDirty_name, "I");
         stat_fields[i].sharedDirty_field =
                 env->GetFieldID(clazz, stat_field_names[i].sharedDirty_name, "I");
+        stat_fields[i].sharedClean_field =
+                env->GetFieldID(clazz, stat_field_names[i].sharedClean_name, "I");
     }
 
     return jniRegisterNativeMethods(env, "android/os/Debug", gMethods, NELEM(gMethods));
