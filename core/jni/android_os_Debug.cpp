@@ -55,39 +55,51 @@ enum {
     HEAP_OAT,
     HEAP_ART,
     HEAP_UNKNOWN_MAP,
+    HEAP_DALVIK_NORMAL,
+    HEAP_DALVIK_LARGE,
+    HEAP_DALVIK_LINEARALLOC,
+    HEAP_DALVIK_ACCOUNTING,
+    HEAP_DALVIK_CODE_CACHE,
 
     _NUM_HEAP,
+    _NUM_EXCLUSIVE_HEAP = HEAP_UNKNOWN_MAP+1,
     _NUM_CORE_HEAP = HEAP_NATIVE+1
 };
 
 struct stat_fields {
     jfieldID pss_field;
+    jfieldID pssSwappable_field;
     jfieldID privateDirty_field;
     jfieldID sharedDirty_field;
+    jfieldID privateClean_field;
     jfieldID sharedClean_field;
 };
 
 struct stat_field_names {
     const char* pss_name;
+    const char* pssSwappable_name;
     const char* privateDirty_name;
     const char* sharedDirty_name;
+    const char* privateClean_name;
     const char* sharedClean_name;
 };
 
 static stat_fields stat_fields[_NUM_CORE_HEAP];
 
 static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
-    { "otherPss", "otherPrivateDirty", "otherSharedDirty", "otherSharedClean" },
-    { "dalvikPss", "dalvikPrivateDirty", "dalvikSharedDirty", "dalvikSharedClean" },
-    { "nativePss", "nativePrivateDirty", "nativeSharedDirty", "nativeSharedClean" }
+    { "otherPss", "otherSwappablePss", "otherPrivateDirty", "otherSharedDirty", "otherPrivateClean", "otherSharedClean" },
+    { "dalvikPss", "dalvikSwappablePss", "dalvikPrivateDirty", "dalvikSharedDirty", "dalvikPrivateClean", "dalvikSharedClean" },
+    { "nativePss", "nativeSwappablePss", "nativePrivateDirty", "nativeSharedDirty", "nativePrivateClean", "nativeSharedClean" }
 };
 
 jfieldID otherStats_field;
 
 struct stats_t {
     int pss;
+    int swappablePss;
     int privateDirty;
     int sharedDirty;
+    int privateClean;
     int sharedClean;
 };
 
@@ -129,9 +141,11 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     int len, nameLen;
     bool skip, done = false;
 
-    unsigned size = 0, resident = 0, pss = 0;
+    unsigned size = 0, resident = 0, pss = 0, swappable_pss = 0;
+    float sharing_proportion = 0.0;
     unsigned shared_clean = 0, shared_dirty = 0;
     unsigned private_clean = 0, private_dirty = 0;
+    bool is_swappable = false;
     unsigned referenced = 0;
     unsigned temp;
 
@@ -142,6 +156,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     int name_pos;
 
     int whichHeap = HEAP_UNKNOWN;
+    int subHeap = HEAP_UNKNOWN;
     int prevHeap = HEAP_UNKNOWN;
 
     if(fgets(line, sizeof(line), fp) == 0) return;
@@ -150,7 +165,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         prevHeap = whichHeap;
         prevEnd = end;
         whichHeap = HEAP_UNKNOWN;
+        subHeap = HEAP_UNKNOWN;
         skip = false;
+        is_swappable = false;
 
         len = strlen(line);
         if (len < 1) return;
@@ -170,6 +187,26 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 whichHeap = HEAP_NATIVE;
             } else if (strstr(name, "/dev/ashmem/dalvik-") == name) {
                 whichHeap = HEAP_DALVIK;
+                if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
+                    subHeap = HEAP_DALVIK_LINEARALLOC;
+                } else if ((strstr(name, "/dev/ashmem/dalvik-mark") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space live-bitmap") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space mark-bitmap") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-card table") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-allocation stack") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-live stack") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-imagespace") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-bitmap") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-card-table") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-mark-stack") == name) ||
+                           (strstr(name, "/dev/ashmem/dalvik-aux-structure") == name)) {
+                    subHeap = HEAP_DALVIK_ACCOUNTING;
+                } else if (strstr(name, "/dev/ashmem/dalvik-large") == name) {
+                    subHeap = HEAP_DALVIK_LARGE;
+                } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
+                    subHeap = HEAP_DALVIK_CODE_CACHE;
+                } else
+                    subHeap = HEAP_DALVIK_NORMAL;
             } else if (strstr(name, "[stack") == name) {
                 whichHeap = HEAP_STACK;
             } else if (strstr(name, "/dev/ashmem/CursorWindow") == name) {
@@ -180,19 +217,26 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 whichHeap = HEAP_UNKNOWN_DEV;
             } else if (nameLen > 3 && strcmp(name+nameLen-3, ".so") == 0) {
                 whichHeap = HEAP_SO;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".jar") == 0) {
                 whichHeap = HEAP_JAR;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".apk") == 0) {
                 whichHeap = HEAP_APK;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".ttf") == 0) {
                 whichHeap = HEAP_TTF;
+                is_swappable = true;
             } else if ((nameLen > 4 && strcmp(name+nameLen-4, ".dex") == 0) ||
                        (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
                 whichHeap = HEAP_DEX;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".oat") == 0) {
                 whichHeap = HEAP_OAT;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
                 whichHeap = HEAP_ART;
+                is_swappable = true;
             } else if (nameLen > 0) {
                 whichHeap = HEAP_UNKNOWN_MAP;
             } else if (start == prevEnd && prevHeap == HEAP_SO) {
@@ -234,10 +278,29 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         }
 
         if (!skip) {
+            if (is_swappable && (pss > 0)) {
+                sharing_proportion = 0.0;
+                if ((shared_clean > 0) || (shared_dirty > 0)) {
+                    sharing_proportion = (pss - private_clean - private_dirty)/(shared_clean+shared_dirty);
+                }
+                swappable_pss = (sharing_proportion*shared_clean) + private_clean;
+            } else
+                swappable_pss = 0;
+
             stats[whichHeap].pss += pss;
+            stats[whichHeap].swappablePss += swappable_pss;
             stats[whichHeap].privateDirty += private_dirty;
             stats[whichHeap].sharedDirty += shared_dirty;
+            stats[whichHeap].privateClean += private_clean;
             stats[whichHeap].sharedClean += shared_clean;
+            if (whichHeap == HEAP_DALVIK) {
+                stats[subHeap].pss += pss;
+                stats[subHeap].swappablePss += swappable_pss;
+                stats[subHeap].privateDirty += private_dirty;
+                stats[subHeap].sharedDirty += shared_dirty;
+                stats[subHeap].privateClean += private_clean;
+                stats[subHeap].sharedClean += shared_clean;
+            }
         }
     }
 }
@@ -261,21 +324,27 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     stats_t stats[_NUM_HEAP];
     memset(&stats, 0, sizeof(stats));
 
+
     load_maps(pid, stats);
 
-    for (int i=_NUM_CORE_HEAP; i<_NUM_HEAP; i++) {
+    for (int i=_NUM_CORE_HEAP; i<_NUM_EXCLUSIVE_HEAP; i++) {
         stats[HEAP_UNKNOWN].pss += stats[i].pss;
+        stats[HEAP_UNKNOWN].swappablePss += stats[i].swappablePss;
         stats[HEAP_UNKNOWN].privateDirty += stats[i].privateDirty;
         stats[HEAP_UNKNOWN].sharedDirty += stats[i].sharedDirty;
+        stats[HEAP_UNKNOWN].privateClean += stats[i].privateClean;
         stats[HEAP_UNKNOWN].sharedClean += stats[i].sharedClean;
     }
 
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         env->SetIntField(object, stat_fields[i].pss_field, stats[i].pss);
+        env->SetIntField(object, stat_fields[i].pssSwappable_field, stats[i].swappablePss);
         env->SetIntField(object, stat_fields[i].privateDirty_field, stats[i].privateDirty);
         env->SetIntField(object, stat_fields[i].sharedDirty_field, stats[i].sharedDirty);
+        env->SetIntField(object, stat_fields[i].privateClean_field, stats[i].privateClean);
         env->SetIntField(object, stat_fields[i].sharedClean_field, stats[i].sharedClean);
     }
+
 
     jintArray otherIntArray = (jintArray)env->GetObjectField(object, otherStats_field);
 
@@ -287,8 +356,10 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     int j=0;
     for (int i=_NUM_CORE_HEAP; i<_NUM_HEAP; i++) {
         otherArray[j++] = stats[i].pss;
+        otherArray[j++] = stats[i].swappablePss;
         otherArray[j++] = stats[i].privateDirty;
         otherArray[j++] = stats[i].sharedDirty;
+        otherArray[j++] = stats[i].privateClean;
         otherArray[j++] = stats[i].sharedClean;
     }
 
@@ -630,11 +701,13 @@ int register_android_os_Debug(JNIEnv *env)
     // Sanity check the number of other statistics expected in Java matches here.
     jfieldID numOtherStats_field = env->GetStaticFieldID(clazz, "NUM_OTHER_STATS", "I");
     jint numOtherStats = env->GetStaticIntField(clazz, numOtherStats_field);
+    jfieldID numDvkStats_field = env->GetStaticFieldID(clazz, "NUM_DVK_STATS", "I");
+    jint numDvkStats = env->GetStaticIntField(clazz, numDvkStats_field);
     int expectedNumOtherStats = _NUM_HEAP - _NUM_CORE_HEAP;
-    if (numOtherStats != expectedNumOtherStats) {
+    if ((numOtherStats + numDvkStats) != expectedNumOtherStats) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
-                             "android.os.Debug.Meminfo.NUM_OTHER_STATS=%d expected %d",
-                             numOtherStats, expectedNumOtherStats);
+                             "android.os.Debug.Meminfo.NUM_OTHER_STATS+android.os.Debug.Meminfo.NUM_DVK_STATS=%d expected %d",
+                             numOtherStats+numDvkStats, expectedNumOtherStats);
         return JNI_ERR;
     }
 
@@ -643,10 +716,14 @@ int register_android_os_Debug(JNIEnv *env)
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         stat_fields[i].pss_field =
                 env->GetFieldID(clazz, stat_field_names[i].pss_name, "I");
+        stat_fields[i].pssSwappable_field =
+                env->GetFieldID(clazz, stat_field_names[i].pssSwappable_name, "I");
         stat_fields[i].privateDirty_field =
                 env->GetFieldID(clazz, stat_field_names[i].privateDirty_name, "I");
         stat_fields[i].sharedDirty_field =
                 env->GetFieldID(clazz, stat_field_names[i].sharedDirty_name, "I");
+        stat_fields[i].privateClean_field =
+                env->GetFieldID(clazz, stat_field_names[i].privateClean_name, "I");
         stat_fields[i].sharedClean_field =
                 env->GetFieldID(clazz, stat_field_names[i].sharedClean_name, "I");
     }
