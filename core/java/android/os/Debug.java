@@ -130,7 +130,7 @@ public final class Debug
         public int otherSharedDirty;
 
         /** @hide */
-        public static final int NUM_OTHER_STATS = 10;
+        public static final int NUM_OTHER_STATS = 11;
 
         private int[] otherStats = new int[NUM_OTHER_STATS*3];
 
@@ -186,7 +186,8 @@ public final class Debug
                 case 6: return ".apk mmap";
                 case 7: return ".ttf mmap";
                 case 8: return ".dex mmap";
-                case 9: return "Other mmap";
+                case 9: return ".oat mmap";
+                case 10: return "Other mmap";
                 default: return "????";
             }
         }
