@@ -501,8 +501,10 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
     setViewProperties<T>(renderer, handler, level + 1);
 
     if (mClipToBounds && renderer.quickRejectNoScissor(0, 0, mWidth, mHeight)) {
-        DISPLAY_LIST_LOGD("%*sRestoreToCount %d", level * 2, "", restoreTo);
+        DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
         handler(mRestoreToCountOp->reinit(restoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
+        renderer.restoreToCount(restoreTo);
+        renderer.setOverrideLayerAlpha(1.0f);
         return;
     }
 
