@@ -69,6 +69,8 @@ the Support Package, as denoted by revision number.</p>
           <li>Added {@link android.support.v4.widget.ScrollerCompat} to provide {@link
             android.widget.Scroller} and {@link android.widget.OverScroller} compatibility support.
             </li>
+          <li>Added {@link android.support.v4.content.FileProvider} to allow sharing of private
+            files between applications.</li>
           <li>Updated {@link android.support.v4.view.ViewPager} to throw an exception if the
             associated {@link android.support.v4.view.PagerAdapter} class is modified without a call
             to {@link android.support.v4.view.PagerAdapter#notifyDataSetChanged notifyDataSetChanged()}.
