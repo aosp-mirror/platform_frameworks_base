@@ -15,6 +15,8 @@
  */
 package android.os;
 
+import java.lang.reflect.Field;
+
 /**
  * Class allowing access to package-protected methods/fields.
  */
@@ -23,5 +25,23 @@ public class Looper_Accessor {
     public static void cleanupThread() {
         // clean up the looper
         Looper.sThreadLocal.remove();
+        try {
+            Field sMainLooper = Looper.class.getDeclaredField("sMainLooper");
+            sMainLooper.setAccessible(true);
+            sMainLooper.set(null, null);
+        } catch (SecurityException e) {
+            catchReflectionException();
+        } catch (IllegalArgumentException e) {
+            catchReflectionException();
+        } catch (NoSuchFieldException e) {
+            catchReflectionException();
+        } catch (IllegalAccessException e) {
+            catchReflectionException();
+        }
+
+    }
+
+    private static void catchReflectionException() {
+        assert(false);
     }
 }

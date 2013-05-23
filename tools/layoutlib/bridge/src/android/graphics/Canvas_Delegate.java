@@ -330,20 +330,19 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setBitmap(int nativeCanvas, int bitmap) {
+    /*package*/ static void copyNativeCanvasState(int srcCanvas, int dstCanvas) {
         // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
+        Canvas_Delegate srcCanvasDelegate = sManager.getDelegate(srcCanvas);
+        if (srcCanvasDelegate == null) {
             return;
         }
 
         // get the delegate from the native int.
-        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
-        if (bitmapDelegate == null) {
+        Canvas_Delegate dstCanvasDelegate = sManager.getDelegate(dstCanvas);
+        if (dstCanvasDelegate == null) {
             return;
         }
-
-        canvasDelegate.setBitmap(bitmapDelegate);
+        // TODO: actually copy the canvas state.
     }
 
     @LayoutlibDelegate
@@ -572,16 +571,14 @@ public final class Canvas_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static boolean native_quickReject(int nativeCanvas,
-                                                     RectF rect,
-                                                     int native_edgeType) {
+                                                     RectF rect) {
         // FIXME properly implement quickReject
         return false;
     }
 
     @LayoutlibDelegate
     /*package*/ static boolean native_quickReject(int nativeCanvas,
-                                                     int path,
-                                                     int native_edgeType) {
+                                                     int path) {
         // FIXME properly implement quickReject
         return false;
     }
@@ -589,8 +586,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean native_quickReject(int nativeCanvas,
                                                      float left, float top,
-                                                     float right, float bottom,
-                                                     int native_edgeType) {
+                                                     float right, float bottom) {
         // FIXME properly implement quickReject
         return false;
     }
@@ -994,7 +990,8 @@ public final class Canvas_Delegate {
                 float x = startX;
                 float y = startY;
                 if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
-                    float m = paintDelegate.measureText(text, index, count);
+                    // TODO: check the value of bidiFlags.
+                    float m = paintDelegate.measureText(text, index, count, 0);
                     if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
                         x -= m / 2;
                     } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {

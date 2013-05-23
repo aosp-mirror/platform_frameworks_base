@@ -61,6 +61,7 @@ public final class Bitmap_Delegate {
     private final Config mConfig;
     private BufferedImage mImage;
     private boolean mHasAlpha = true;
+    private boolean mHasMipMap = false;      // TODO: check the default.
     private int mGenerationId = 0;
 
 
@@ -185,6 +186,10 @@ public final class Bitmap_Delegate {
         return mHasAlpha && mConfig != Config.RGB_565;
     }
 
+    public boolean hasMipMap() {
+        // TODO: check if more checks are required as in hasAlpha.
+        return mHasMipMap;
+    }
     /**
      * Update the generationId.
      *
@@ -336,6 +341,17 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static boolean nativeHasMipMap(int nativeBitmap) {
+        // get the delegate from the native int.
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            return true;
+        }
+
+        return delegate.mHasMipMap;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static int nativeGetPixel(int nativeBitmap, int x, int y) {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
@@ -469,6 +485,17 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static void nativeSetHasMipMap(int nativeBitmap, boolean hasMipMap) {
+        // get the delegate from the native int.
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            return;
+        }
+
+        delegate.mHasMipMap = hasMipMap;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static boolean nativeSameAs(int nb0, int nb1) {
         Bitmap_Delegate delegate1 = sManager.getDelegate(nb0);
         if (delegate1 == null) {
@@ -524,7 +551,7 @@ public final class Bitmap_Delegate {
         int nativeInt = sManager.addNewDelegate(delegate);
 
         // and create/return a new Bitmap with it
-        return new Bitmap(nativeInt, null /* buffer */, isMutable, null /*ninePatchChunk*/, 
+        return new Bitmap(nativeInt, null /* buffer */, isMutable, null /*ninePatchChunk*/,
                 density);
     }
 
