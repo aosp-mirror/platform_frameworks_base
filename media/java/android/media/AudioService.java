@@ -70,7 +70,9 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.VolumePanel;
+import android.view.WindowManager;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
@@ -412,6 +414,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private volatile IRingtonePlayer mRingtonePlayer;
 
     private int mDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private int mDeviceRotation = Surface.ROTATION_0;
 
     // Request to override default use of A2DP for media.
     private boolean mBluetoothA2dpEnabled;
@@ -433,7 +436,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ALL_USB;
 
+    // TODO merge orientation and rotation
     private final boolean mMonitorOrientation;
+    private final boolean mMonitorRotation;
 
     private boolean mDockAudioMediaEnabled = true;
 
@@ -525,13 +530,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        // Register a configuration change listener only if requested by system properties
-        // to monitor orientation changes (off by default)
+        // TODO merge orientation and rotation
         mMonitorOrientation = SystemProperties.getBoolean("ro.audio.monitorOrientation", false);
         if (mMonitorOrientation) {
             Log.v(TAG, "monitoring device orientation");
             // initialize orientation in AudioSystem
             setOrientationForAudioSystem();
+        }
+        mMonitorRotation = SystemProperties.getBoolean("ro.audio.monitorRotation", false);
+        if (mMonitorRotation) {
+            mDeviceRotation = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE))
+                    .getDefaultDisplay().getRotation();
+            Log.v(TAG, "monitoring device rotation, initial=" + mDeviceRotation);
+            // initialize rotation in AudioSystem
+            setRotationForAudioSystem();
         }
 
         context.registerReceiver(mReceiver, intentFilter);
@@ -3457,6 +3469,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     if (mMonitorOrientation) {
                         setOrientationForAudioSystem();
                     }
+                    if (mMonitorRotation) {
+                        setRotationForAudioSystem();
+                    }
 
                     synchronized (mBluetoothA2dpEnabledLock) {
                         AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
@@ -6326,20 +6341,30 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // Device orientation
     //==========================================================================================
     /**
-     * Handles device configuration changes that may map to a change in the orientation.
-     * This feature is optional, and is defined by the definition and value of the
-     * "ro.audio.monitorOrientation" system property.
+     * Handles device configuration changes that may map to a change in the orientation
+     * or orientation.
+     * Monitoring orientation and rotation is optional, and is defined by the definition and value
+     * of the "ro.audio.monitorOrientation" and "ro.audio.monitorRotation" system properties.
      */
     private void handleConfigurationChanged(Context context) {
         try {
             // reading new orientation "safely" (i.e. under try catch) in case anything
             // goes wrong when obtaining resources and configuration
             Configuration config = context.getResources().getConfiguration();
+            // TODO merge rotation and orientation
             if (mMonitorOrientation) {
                 int newOrientation = config.orientation;
                 if (newOrientation != mDeviceOrientation) {
                     mDeviceOrientation = newOrientation;
                     setOrientationForAudioSystem();
+                }
+            }
+            if (mMonitorRotation) {
+                int newRotation = ((WindowManager) context.getSystemService(
+                        Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+                if (newRotation != mDeviceRotation) {
+                    mDeviceRotation = newRotation;
+                    setRotationForAudioSystem();
                 }
             }
             sendMsg(mAudioHandler,
@@ -6390,7 +6415,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
             mVolumePanel.setLayoutDirection(config.getLayoutDirection());
         } catch (Exception e) {
-            Log.e(TAG, "Error retrieving device orientation: " + e);
+            Log.e(TAG, "Error handling configuration change: ", e);
         }
     }
 
@@ -6414,6 +6439,25 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 break;
             default:
                 Log.e(TAG, "Unknown orientation");
+        }
+    }
+
+    private void setRotationForAudioSystem() {
+        switch (mDeviceRotation) {
+            case Surface.ROTATION_0:
+                AudioSystem.setParameters("rotation=0");
+                break;
+            case Surface.ROTATION_90:
+                AudioSystem.setParameters("rotation=90");
+                break;
+            case Surface.ROTATION_180:
+                AudioSystem.setParameters("rotation=180");
+                break;
+            case Surface.ROTATION_270:
+                AudioSystem.setParameters("rotation=270");
+                break;
+            default:
+                Log.e(TAG, "Unknown device rotation");
         }
     }
 
