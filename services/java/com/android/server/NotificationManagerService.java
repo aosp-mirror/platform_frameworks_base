@@ -763,7 +763,8 @@ public class NotificationManagerService extends INotificationManager.Stub
             final int N = mListeners.size();
             for (int i=N-1; i>=0; i--) {
                 final NotificationListenerInfo info = mListeners.get(i);
-                if (info.listener == listener && info.userid == userid) {
+                if (info.listener.asBinder() == listener.asBinder()
+                        && info.userid == userid) {
                     mListeners.remove(i);
                     if (info.connection != null) {
                         mContext.unbindService(info.connection);
