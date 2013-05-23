@@ -126,8 +126,17 @@
         <li><a href="<?cs var:toroot?>google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
+         <li><a href="<?cs var:toroot?>google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="<?cs var:toroot?>google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
         <li><a href="<?cs var:toroot?>google/gcm/demo.html">
             <span class="en">Demo App Tutorial</span></a>
+        </li>
+        <li><a href="<?cs var:toroot?>google/gcm/helper.html">
+            <span class="en">Using the Helper Libraries</span></a>
         </li>
         <li><a href="<?cs var:toroot?>google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
