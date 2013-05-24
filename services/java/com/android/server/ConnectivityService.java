@@ -2261,9 +2261,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean resetDns = updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault());
 
         if (resetMask != 0 || resetDns) {
-            LinkProperties linkProperties = mNetTrackers[netType].getLinkProperties();
-            if (linkProperties != null) {
-                for (String iface : linkProperties.getAllInterfaceNames()) {
+            if (curLp != null) {
+                for (String iface : curLp.getAllInterfaceNames()) {
                     if (TextUtils.isEmpty(iface) == false) {
                         if (resetMask != 0) {
                             if (DBG) log("resetConnections(" + iface + ", " + resetMask + ")");
@@ -2285,6 +2284,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 if (DBG) loge("Exception resetting dns cache: " + e);
                             }
                         }
+                    } else {
+                        loge("Can't reset connection for type "+netType);
                     }
                 }
             }
