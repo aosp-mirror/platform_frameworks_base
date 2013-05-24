@@ -58,6 +58,8 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -6352,7 +6354,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public List<ActivityManager.StackInfo> getStacks() {
+    public List<StackInfo> getStacks() {
         synchronized (this) {
             ArrayList<ActivityManager.StackInfo> list = new ArrayList<ActivityManager.StackInfo>();
             ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
@@ -6379,6 +6381,34 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             return list;
         }
+    }
+
+    private void addStackInfoToStackBoxInfo(StackBoxInfo stackBoxInfo, List<StackInfo> stackInfos) {
+        final int stackId = stackBoxInfo.stackId;
+        if (stackId >= 0) {
+            for (StackInfo stackInfo : stackInfos) {
+                if (stackId == stackInfo.stackId) {
+                    stackBoxInfo.stack = stackInfo;
+                    stackInfos.remove(stackInfo);
+                    return;
+                }
+            }
+        } else {
+            addStackInfoToStackBoxInfo(stackBoxInfo.children[0], stackInfos);
+            addStackInfoToStackBoxInfo(stackBoxInfo.children[1], stackInfos);
+        }
+    }
+
+    @Override
+    public List<StackBoxInfo> getStackBoxes() {
+        List<StackBoxInfo> stackBoxInfos = mWindowManager.getStackBoxInfos();
+        synchronized (this) {
+            List<StackInfo> stackInfos = getStacks();
+            for (StackBoxInfo stackBoxInfo : stackBoxInfos) {
+                addStackInfoToStackBoxInfo(stackBoxInfo, stackInfos);
+            }
+        }
+        return stackBoxInfos;
     }
 
     @Override

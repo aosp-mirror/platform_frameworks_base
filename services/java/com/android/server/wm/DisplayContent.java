@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 
+import android.app.ActivityManager.StackBoxInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.Slog;
@@ -282,6 +283,32 @@ class DisplayContent {
             return;
         }
         mStackBoxes.remove(box);
+    }
+
+    StackBoxInfo getStackBoxInfo(StackBox box) {
+        StackBoxInfo info = new StackBoxInfo();
+        info.stackBoxId = box.mStackBoxId;
+        info.weight = box.mWeight;
+        info.vertical = box.mVertical;
+        info.bounds = new Rect(box.mBounds);
+        if (box.mStack != null) {
+            info.stackId = box.mStack.mStackId;
+            // ActivityManagerService will fill in the StackInfo.
+        } else {
+            info.stackId = -1;
+            info.children = new StackBoxInfo[2];
+            info.children[0] = getStackBoxInfo(box.mFirst);
+            info.children[1] = getStackBoxInfo(box.mSecond);
+        }
+        return info;
+    }
+
+    ArrayList<StackBoxInfo> getStackBoxInfos() {
+        ArrayList<StackBoxInfo> list = new ArrayList<StackBoxInfo>();
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            list.add(getStackBoxInfo(mStackBoxes.get(stackBoxNdx)));
+        }
+        return list;
     }
 
     /**

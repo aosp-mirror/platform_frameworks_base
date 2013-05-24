@@ -19,6 +19,7 @@
 package com.android.commands.am;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackBoxInfo;
 import android.app.ActivityManagerNative;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -105,7 +106,7 @@ public class Am extends BaseCommand {
                 "       am stack create <TASK_ID> <RELATIVE_STACK_ID> <POSITION> <WEIGHT>\n" +
                 "       am stack movetask <STACK_ID> <TASK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <WEIGHT>\n" +
-                "       am stack dump\n" +
+                "       am stack boxes\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -202,7 +203,7 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stack resize: change <STACK_ID> relative size to new <WEIGHT>.\n" +
                 "\n" +
-                "am stack dump: list the hierarchy of stacks.\n" +
+                "am stack boxes: list the hierarchy of stack boxes and their contents.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -1120,8 +1121,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public int systemNotResponding(String message)
-                throws RemoteException {
+        public int systemNotResponding(String message) {
             synchronized (this) {
                 System.out.println("** ERROR: PROCESS NOT RESPONDING");
                 System.out.println("message: " + message);
@@ -1486,8 +1486,8 @@ public class Am extends BaseCommand {
             runStackMoveTask();
         } else if (op.equals("resize")) {
             runStackResize();
-        } else if (op.equals("dump")) {
-            runStackDump();
+        } else if (op.equals("boxes")) {
+            runStackBoxes();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -1545,11 +1545,11 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runStackDump() throws Exception {
+    private void runStackBoxes() throws Exception {
         try {
-            List<ActivityManager.StackInfo> stacks = mAm.getStacks();
-            for (ActivityManager.StackInfo stack : stacks) {
-                System.out.println(stack);
+            List<StackBoxInfo> stackBoxes = mAm.getStackBoxes();
+            for (StackBoxInfo info : stackBoxes) {
+                System.out.println(info);
             }
         } catch (RemoteException e) {
         }

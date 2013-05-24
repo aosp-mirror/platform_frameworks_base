@@ -43,6 +43,7 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
+import android.app.ActivityManager.StackBoxInfo;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -4879,6 +4880,12 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " not found.");
                 }
             }
+        }
+    }
+
+    public ArrayList<StackBoxInfo> getStackBoxInfos() {
+        synchronized(mWindowMap) {
+            return getDefaultDisplayContentLocked().getStackBoxInfos();
         }
     }
 
