@@ -190,13 +190,13 @@ public class StatusBarNotification implements Parcelable {
         return pkg;
     }
 
-    /** The id supplied to {@link android.app.NotificationManager#notify}. */
+    /** The id supplied to {@link android.app.NotificationManager#notify(int,Notification)}. */
     public int getId() {
         return id;
     }
 
-    /** The tag supplied to {@link android.app.NotificationManager#notify}, or null if no tag
-     * was specified. */
+    /** The tag supplied to {@link android.app.NotificationManager#notify(int,Notification)},
+     * or null if no tag was specified. */
     public String getTag() {
         return tag;
     }
@@ -217,7 +217,7 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /** The {@link android.app.Notification} supplied to
-     * {@link android.app.NotificationManager#notify}. */
+     * {@link android.app.NotificationManager#notify(int,Notification)}. */
     public Notification getNotification() {
         return notification;
     }
