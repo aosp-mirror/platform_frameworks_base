@@ -24,7 +24,6 @@ import com.android.internal.util.ArrayUtils;
  * than using a HashMap to map Integers to Integers.
  */
 public class SparseIntArray implements Cloneable {
-
     private int[] mKeys;
     private int[] mValues;
     private int mSize;
@@ -39,13 +38,19 @@ public class SparseIntArray implements Cloneable {
     /**
      * Creates a new SparseIntArray containing no mappings that will not
      * require any additional memory allocation to store the specified
-     * number of mappings.
+     * number of mappings.  If you supply an initial capacity of 0, the
+     * sparse array will be initialized with a light-weight representation
+     * not requiring any additional array allocations.
      */
     public SparseIntArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
-
-        mKeys = new int[initialCapacity];
-        mValues = new int[initialCapacity];
+        if (initialCapacity == 0) {
+            mKeys = SparseArray.EMPTY_INTS;
+            mValues = SparseArray.EMPTY_INTS;
+        } else {
+            initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
+            mKeys = new int[initialCapacity];
+            mValues = new int[initialCapacity];
+        }
         mSize = 0;
     }
 
@@ -75,7 +80,7 @@ public class SparseIntArray implements Cloneable {
      * if no such mapping has been made.
      */
     public int get(int key, int valueIfKeyNotFound) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = SparseArray.binarySearch(mKeys, mSize, key);
 
         if (i < 0) {
             return valueIfKeyNotFound;
@@ -88,7 +93,7 @@ public class SparseIntArray implements Cloneable {
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(int key) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = SparseArray.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             removeAt(i);
@@ -110,7 +115,7 @@ public class SparseIntArray implements Cloneable {
      * was one.
      */
     public void put(int key, int value) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = SparseArray.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             mValues[i] = value;
@@ -175,7 +180,7 @@ public class SparseIntArray implements Cloneable {
      * key is not mapped.
      */
     public int indexOfKey(int key) {
-        return binarySearch(mKeys, 0, mSize, key);
+        return SparseArray.binarySearch(mKeys, mSize, key);
     }
 
     /**
@@ -229,25 +234,5 @@ public class SparseIntArray implements Cloneable {
         mKeys[pos] = key;
         mValues[pos] = value;
         mSize = pos + 1;
-    }
-    
-    private static int binarySearch(int[] a, int start, int len, int key) {
-        int high = start + len, low = start - 1, guess;
-
-        while (high - low > 1) {
-            guess = (high + low) / 2;
-
-            if (a[guess] < key)
-                low = guess;
-            else
-                high = guess;
-        }
-
-        if (high == start + len)
-            return ~(start + len);
-        else if (a[high] == key)
-            return high;
-        else
-            return ~high;
     }
 }

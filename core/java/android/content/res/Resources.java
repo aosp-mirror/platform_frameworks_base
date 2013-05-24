@@ -99,11 +99,11 @@ public class Resources {
     /*package*/ final Configuration mTmpConfig = new Configuration();
     /*package*/ TypedValue mTmpValue = new TypedValue();
     /*package*/ final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
-            = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
+            = new LongSparseArray<WeakReference<Drawable.ConstantState> >(0);
     /*package*/ final LongSparseArray<WeakReference<ColorStateList> > mColorStateListCache
-            = new LongSparseArray<WeakReference<ColorStateList> >();
+            = new LongSparseArray<WeakReference<ColorStateList> >(0);
     /*package*/ final LongSparseArray<WeakReference<Drawable.ConstantState> > mColorDrawableCache
-            = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
+            = new LongSparseArray<WeakReference<Drawable.ConstantState> >(0);
     /*package*/ boolean mPreloading;
 
     /*package*/ TypedArray mCachedStyledAttributes = null;

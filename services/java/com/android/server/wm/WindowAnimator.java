@@ -65,7 +65,7 @@ public class WindowAnimator {
     Object mLastWindowFreezeSource;
 
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators =
-            new SparseArray<WindowAnimator.DisplayContentsAnimator>();
+            new SparseArray<WindowAnimator.DisplayContentsAnimator>(2);
 
     boolean mInitialized = false;
 
@@ -654,7 +654,7 @@ public class WindowAnimator {
 
     void setAppLayoutChanges(final AppWindowAnimator appAnimator, final int changes, String s) {
         // Used to track which displays layout changes have been done.
-        SparseIntArray displays = new SparseIntArray();
+        SparseIntArray displays = new SparseIntArray(2);
         WindowList windows = appAnimator.mAppToken.allAppWindows;
         for (int i = windows.size() - 1; i >= 0; i--) {
             final int displayId = windows.get(i).getDisplayId();
