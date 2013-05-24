@@ -30,8 +30,7 @@ import android.os.Process;
 import android.util.Log;
 import android.view.Surface;
 import android.os.SystemProperties;
-
-
+import android.os.Trace;
 
 /**
  * Renderscript base master class.  An instance of this class creates native
@@ -46,6 +45,8 @@ import android.os.SystemProperties;
  * </div>
  **/
 public class RenderScript {
+    static final long TRACE_TAG = Trace.TRACE_TAG_RS;
+
     static final String LOG_TAG = "RenderScript_jni";
     static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
