@@ -18,6 +18,7 @@ package android.app;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.ActivityManager.StackBoxInfo;
 import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
 import android.content.ContentProviderNative;
@@ -119,6 +120,7 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
     public void resizeStack(int stackId, float weight) throws RemoteException;
+    public List<StackBoxInfo> getStackBoxes() throws RemoteException;
     public List<StackInfo> getStacks() throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
@@ -663,4 +665,5 @@ public interface IActivityManager extends IInterface {
     int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+169;
     int GET_STACKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
     int SET_FOCUSED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+171;
+    int GET_STACK_BOXES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+172;
 }

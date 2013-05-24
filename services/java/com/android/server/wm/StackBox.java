@@ -39,6 +39,11 @@ public class StackBox {
     /** Used with {@link WindowManagerService#createStack}. Put on a lower layer on display. */
     public static final int TASK_STACK_GOES_UNDER = 5;
 
+    static int sCurrentBoxId = 0;
+
+    /** Unique id for this box */
+    final int mStackBoxId;
+
     /** The service */
     final WindowManagerService mService;
 
@@ -74,6 +79,10 @@ public class StackBox {
     Rect mTmpRect = new Rect();
 
     StackBox(WindowManagerService service, DisplayContent displayContent, StackBox parent) {
+        synchronized (StackBox.class) {
+            mStackBoxId = sCurrentBoxId++;
+        }
+
         mService = service;
         mDisplayContent = displayContent;
         mParent = parent;

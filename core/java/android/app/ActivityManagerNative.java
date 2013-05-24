@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -642,6 +644,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case GET_STACKS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             List<ActivityManager.StackInfo> list = getStacks();
+            reply.writeNoException();
+            reply.writeTypedList(list);
+            return true;
+        }
+
+        case GET_STACK_BOXES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            List<StackBoxInfo> list = getStackBoxes();
             reply.writeNoException();
             reply.writeTypedList(list);
             return true;
@@ -2657,15 +2667,27 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     @Override
-    public List<ActivityManager.StackInfo> getStacks() throws RemoteException
+    public List<StackInfo> getStacks() throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         mRemote.transact(GET_STACKS_TRANSACTION, data, reply, 0);
         reply.readException();
-        ArrayList<ActivityManager.StackInfo> list
-                = reply.createTypedArrayList(ActivityManager.StackInfo.CREATOR);
+        ArrayList<StackInfo> list = reply.createTypedArrayList(StackInfo.CREATOR);
+        data.recycle();
+        reply.recycle();
+        return list;
+    }
+    @Override
+    public List<StackBoxInfo> getStackBoxes() throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_STACK_BOXES_TRANSACTION, data, reply, 0);
+        reply.readException();
+        ArrayList<StackBoxInfo> list = reply.createTypedArrayList(StackBoxInfo.CREATOR);
         data.recycle();
         reply.recycle();
         return list;
