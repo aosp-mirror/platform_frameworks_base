@@ -428,7 +428,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         // we need to make sure the Looper has been initialized for this thread.
         // this is required for View that creates Handler objects.
         if (Looper.myLooper() == null) {
-            Looper.prepare();
+            Looper.prepareMainLooper();
         }
     }
 
