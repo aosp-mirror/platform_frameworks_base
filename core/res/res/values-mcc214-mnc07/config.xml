@@ -34,5 +34,6 @@
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata">Conexión compartida,movistar.es,,,,,,MOVISTAR,MOVISTAR,,214,07,,DUN</string>
+    <string translatable="false" name="config_tether_apndata">Conexión Compartida,movistar.es,,,MOVISTAR,MOVISTAR,,,,,214,07,1,DUN</string>
+
 </resources>

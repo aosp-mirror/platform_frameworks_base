@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-** Copyright 2009, The Android Open Source Project
+** Copyright 2013, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@
     <integer-array translatable="false" name="config_tether_upstream_types">
       <item>1</item>
       <item>4</item>
+      <item>7</item>
+      <item>9</item>
     </integer-array>
 
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata">SFR option modem,websfr,,,,,,,,,208,10,,DUN</string>
+    <string translatable="false" name="config_tether_apndata">1O1O tethering,lte.internet,,,,,,,,,454,00,3,DUN</string>
 
 </resources>
