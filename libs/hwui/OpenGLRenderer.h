@@ -1083,7 +1083,6 @@ private:
     // No-ops start/endTiling when set
     bool mSuppressTiling;
 
-
     // If true, this renderer will setup drawing to emulate
     // an increment stencil buffer in the color buffer
     bool mCountOverdraw;
