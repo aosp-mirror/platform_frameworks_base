@@ -17,7 +17,6 @@
 package android.app;
 
 import android.app.ActivityManager.StackBoxInfo;
-import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -634,18 +633,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case RESIZE_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            int stackId = data.readInt();
+            int stackBoxId = data.readInt();
             float weight = data.readFloat();
-            resizeStack(stackId, weight);
+            resizeStackBox(stackBoxId, weight);
             reply.writeNoException();
-            return true;
-        }
-
-        case GET_STACKS_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            List<ActivityManager.StackInfo> list = getStacks();
-            reply.writeNoException();
-            reply.writeTypedList(list);
             return true;
         }
 
@@ -2622,14 +2613,14 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     @Override
-    public int createStack(int taskId, int relativeStackId, int position, float weight)
+    public int createStack(int taskId, int relativeStackBoxId, int position, float weight)
             throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(taskId);
-        data.writeInt(relativeStackId);
+        data.writeInt(relativeStackBoxId);
         data.writeInt(position);
         data.writeFloat(weight);
         mRemote.transact(CREATE_STACK_TRANSACTION, data, reply, 0);
@@ -2654,30 +2645,17 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     @Override
-    public void resizeStack(int stackId, float weight) throws RemoteException
+    public void resizeStackBox(int stackBoxId, float weight) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(stackId);
+        data.writeInt(stackBoxId);
         data.writeFloat(weight);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();
-    }
-    @Override
-    public List<StackInfo> getStacks() throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(GET_STACKS_TRANSACTION, data, reply, 0);
-        reply.readException();
-        ArrayList<StackInfo> list = reply.createTypedArrayList(StackInfo.CREATOR);
-        data.recycle();
-        reply.recycle();
-        return list;
     }
     @Override
     public List<StackBoxInfo> getStackBoxes() throws RemoteException

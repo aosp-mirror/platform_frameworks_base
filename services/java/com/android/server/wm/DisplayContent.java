@@ -203,11 +203,11 @@ class DisplayContent {
     }
 
     /** Refer to {@link WindowManagerService#createStack(int, int, int, float)} */
-    TaskStack createStack(WindowManagerService service, int stackId, int relativeStackId,
+    TaskStack createStack(WindowManagerService service, int stackId, int relativeStackBoxId,
             int position, float weight) {
         TaskStack newStack = null;
-        if (DEBUG_STACK) Slog.d(TAG, "createStack: stackId=" + stackId + " relativeStackId="
-                + relativeStackId + " position=" + position + " weight=" + weight);
+        if (DEBUG_STACK) Slog.d(TAG, "createStack: stackId=" + stackId + " relativeStackBoxId="
+                + relativeStackBoxId + " position=" + position + " weight=" + weight);
         if (mStackBoxes.isEmpty()) {
             if (stackId != HOME_STACK_ID) {
                 throw new IllegalArgumentException("createStack: First stackId not "
@@ -226,7 +226,7 @@ class DisplayContent {
                 if (position == StackBox.TASK_STACK_GOES_OVER
                         || position == StackBox.TASK_STACK_GOES_UNDER) {
                     // Position indicates a new box is added at top level only.
-                    if (box.contains(relativeStackId)) {
+                    if (box.contains(relativeStackBoxId)) {
                         StackBox newBox = new StackBox(service, this, null);
                         newStack = new TaskStack(service, stackId, this);
                         newStack.mStackBox = newBox;
@@ -239,14 +239,14 @@ class DisplayContent {
                     }
                 } else {
                     // Remaining position values indicate a box must be split.
-                    newStack = box.split(stackId, relativeStackId, position, weight);
+                    newStack = box.split(stackId, relativeStackBoxId, position, weight);
                     if (newStack != null) {
                         break;
                     }
                 }
             }
             if (stackBoxNdx < 0) {
-                throw new IllegalArgumentException("createStack: stackId " + relativeStackId
+                throw new IllegalArgumentException("createStack: stackBoxId " + relativeStackBoxId
                         + " not found.");
             }
         }
@@ -256,11 +256,12 @@ class DisplayContent {
         return newStack;
     }
 
-    /** Refer to {@link WindowManagerService#resizeStack(int, float)} */
-    boolean resizeStack(int stackId, float weight) {
+    /** Refer to {@link WindowManagerService#resizeStackBox(int, float)} */
+    boolean resizeStack(int stackBoxId, float weight) {
         for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
             final StackBox box = mStackBoxes.get(stackBoxNdx);
-            if (box.resize(stackId, weight)) {
+            if (box.resize(stackBoxId, weight)) {
+                layoutNeeded = true;
                 return true;
             }
         }

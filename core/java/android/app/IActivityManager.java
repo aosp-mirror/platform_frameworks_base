@@ -19,7 +19,6 @@ package android.app;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.ActivityManager.StackBoxInfo;
-import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
@@ -116,12 +115,11 @@ public interface IActivityManager extends IInterface {
     public void moveTaskToBack(int task) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
-    public int createStack(int taskId, int relativeStackId, int position, float weight)
+    public int createStack(int taskId, int relativeStackBoxId, int position, float weight)
             throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
-    public void resizeStack(int stackId, float weight) throws RemoteException;
+    public void resizeStackBox(int stackBoxId, float weight) throws RemoteException;
     public List<StackBoxInfo> getStackBoxes() throws RemoteException;
-    public List<StackInfo> getStacks() throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     /* oneway */
@@ -663,7 +661,6 @@ public interface IActivityManager extends IInterface {
     int CREATE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
     int MOVE_TASK_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+168;
     int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+169;
-    int GET_STACKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
+    int GET_STACK_BOXES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
     int SET_FOCUSED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+171;
-    int GET_STACK_BOXES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+172;
 }
