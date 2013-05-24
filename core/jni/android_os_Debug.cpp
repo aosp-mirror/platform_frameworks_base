@@ -43,6 +43,7 @@ enum {
     HEAP_UNKNOWN,
     HEAP_DALVIK,
     HEAP_NATIVE,
+    HEAP_DALVIK_OTHER,
     HEAP_STACK,
     HEAP_CURSOR,
     HEAP_ASHMEM,
@@ -55,6 +56,7 @@ enum {
     HEAP_OAT,
     HEAP_ART,
     HEAP_UNKNOWN_MAP,
+
     HEAP_DALVIK_NORMAL,
     HEAP_DALVIK_LARGE,
     HEAP_DALVIK_LINEARALLOC,
@@ -182,38 +184,45 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             name = line + name_pos;
             nameLen = strlen(name);
 
-            if ((strstr(name, "[heap]") == name) ||
-                (strstr(name, "/dev/ashmem/libc malloc") == name)) {
+            if ((strstr(name, "[heap]") == name)) {
                 whichHeap = HEAP_NATIVE;
-            } else if (strstr(name, "/dev/ashmem/dalvik-") == name) {
-                whichHeap = HEAP_DALVIK;
-                if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
-                    subHeap = HEAP_DALVIK_LINEARALLOC;
-                } else if ((strstr(name, "/dev/ashmem/dalvik-mark") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space live-bitmap") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space mark-bitmap") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-card table") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-allocation stack") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-live stack") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-imagespace") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-bitmap") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-card-table") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-mark-stack") == name) ||
-                           (strstr(name, "/dev/ashmem/dalvik-aux-structure") == name)) {
-                    subHeap = HEAP_DALVIK_ACCOUNTING;
-                } else if (strstr(name, "/dev/ashmem/dalvik-large") == name) {
-                    subHeap = HEAP_DALVIK_LARGE;
-                } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
-                    subHeap = HEAP_DALVIK_CODE_CACHE;
-                } else
-                    subHeap = HEAP_DALVIK_NORMAL;
-            } else if (strstr(name, "[stack") == name) {
+            } else if (strncmp(name, "/dev/ashmem", 11) == 0) {
+                if (strncmp(name, "/dev/ashmem/dalvik-", 19) == 0) {
+                    whichHeap = HEAP_DALVIK_OTHER;
+                    if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
+                        subHeap = HEAP_DALVIK_LINEARALLOC;
+                    } else if ((strstr(name, "/dev/ashmem/dalvik-mark") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space live-bitmap") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space mark-bitmap") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-card table") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-allocation stack") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-live stack") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-imagespace") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-bitmap") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-card-table") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-mark-stack") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-aux-structure") == name)) {
+                        subHeap = HEAP_DALVIK_ACCOUNTING;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-large") == name) {
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_LARGE;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
+                        subHeap = HEAP_DALVIK_CODE_CACHE;
+                    } else {
+                        // This is the regular Dalvik heap.
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_NORMAL;
+                    }
+                } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
+                    whichHeap = HEAP_CURSOR;
+                } else if (strncmp(name, "/dev/ashmem/libc malloc", 23) == 0) {
+                    whichHeap = HEAP_NATIVE;
+                } else {
+                    whichHeap = HEAP_ASHMEM;
+                }
+            } else if (strncmp(name, "[stack", 6) == 0) {
                 whichHeap = HEAP_STACK;
-            } else if (strstr(name, "/dev/ashmem/CursorWindow") == name) {
-                whichHeap = HEAP_CURSOR;
-            } else if (strstr(name, "/dev/ashmem/") == name) {
-                whichHeap = HEAP_ASHMEM;
-            } else if (strstr(name, "/dev/") == name) {
+            } else if (strncmp(name, "/dev/", 5) == 0) {
                 whichHeap = HEAP_UNKNOWN_DEV;
             } else if (nameLen > 3 && strcmp(name+nameLen-3, ".so") == 0) {
                 whichHeap = HEAP_SO;
@@ -293,7 +302,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             stats[whichHeap].sharedDirty += shared_dirty;
             stats[whichHeap].privateClean += private_clean;
             stats[whichHeap].sharedClean += shared_clean;
-            if (whichHeap == HEAP_DALVIK) {
+            if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER) {
                 stats[subHeap].pss += pss;
                 stats[subHeap].swappablePss += swappable_pss;
                 stats[subHeap].privateDirty += private_dirty;

@@ -108,19 +108,19 @@ public final class Debug
      * process. The returns info broken down by dalvik, native, and other. All results are in kB.
      */
     public static class MemoryInfo implements Parcelable {
-        /** The proportional set size for dalvik. */
+        /** The proportional set size for dalvik heap.  (Doesn't include other Dalvik overhead.) */
         public int dalvikPss;
-        /** The proportional set size that is swappable for dalvik. */
+        /** The proportional set size that is swappable for dalvik heap. */
         /** @hide We may want to expose this, eventually. */
         public int dalvikSwappablePss;
-        /** The private dirty pages used by dalvik. */
+        /** The private dirty pages used by dalvik heap. */
         public int dalvikPrivateDirty;
-        /** The shared dirty pages used by dalvik. */
+        /** The shared dirty pages used by dalvik heap. */
         public int dalvikSharedDirty;
-        /** The private clean pages used by dalvik. */
+        /** The private clean pages used by dalvik heap. */
         /** @hide We may want to expose this, eventually. */
         public int dalvikPrivateClean;
-        /** The shared clean pages used by dalvik. */
+        /** The shared clean pages used by dalvik heap. */
         /** @hide We may want to expose this, eventually. */
         public int dalvikSharedClean;
 
@@ -157,7 +157,7 @@ public final class Debug
         public int otherSharedClean;
 
         /** @hide */
-        public static final int NUM_OTHER_STATS = 12;
+        public static final int NUM_OTHER_STATS = 13;
 
         /** @hide */
         public static final int NUM_DVK_STATS = 5;
@@ -263,23 +263,24 @@ public final class Debug
         /* @hide */
         public static String getOtherLabel(int which) {
             switch (which) {
-                case 0: return "Stack";
-                case 1: return "Cursor";
-                case 2: return "Ashmem";
-                case 3: return "Other dev";
-                case 4: return ".so mmap";
-                case 5: return ".jar mmap";
-                case 6: return ".apk mmap";
-                case 7: return ".ttf mmap";
-                case 8: return ".dex mmap";
-                case 9: return "code mmap";
-                case 10: return "image mmap";
-                case 11: return "Other mmap";
-                case 12: return ".Heap";
-                case 13: return ".LOS";
-                case 14: return ".LinearAlloc";
-                case 15: return ".GC";
-                case 16: return ".JITCache";
+                case 0: return "Dalvik Other";
+                case 1: return "Stack";
+                case 2: return "Cursor";
+                case 3: return "Ashmem";
+                case 4: return "Other dev";
+                case 5: return ".so mmap";
+                case 6: return ".jar mmap";
+                case 7: return ".apk mmap";
+                case 8: return ".ttf mmap";
+                case 9: return ".dex mmap";
+                case 10: return "code mmap";
+                case 11: return "image mmap";
+                case 12: return "Other mmap";
+                case 13: return ".Heap";
+                case 14: return ".LOS";
+                case 15: return ".LinearAlloc";
+                case 16: return ".GC";
+                case 17: return ".JITCache";
                 default: return "????";
             }
         }

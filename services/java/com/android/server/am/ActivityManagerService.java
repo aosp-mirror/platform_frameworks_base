@@ -10626,7 +10626,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief,
             PrintWriter categoryPw, StringBuilder outTag, StringBuilder outStack) {
-        boolean dumpAll = false;
+        boolean dumpDetails = false;
+        boolean dumpDalvik = false;
         boolean oomOnly = false;
         
         int opti = 0;
@@ -10637,12 +10638,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             opti++;
             if ("-a".equals(opt)) {
-                dumpAll = true;
+                dumpDetails = true;
+                dumpDalvik = true;
+            } else if ("-d".equals(opt)) {
+                dumpDalvik = true;
             } else if ("--oom".equals(opt)) {
                 oomOnly = true;
             } else if ("-h".equals(opt)) {
                 pw.println("meminfo dump options: [-a] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
+                pw.println("  -d: include dalvik details when dumping process details.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
@@ -10662,7 +10667,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long realtime = SystemClock.elapsedRealtime();
 
         if (procs.size() == 1 || isCheckinRequest) {
-            dumpAll = true;
+            dumpDetails = true;
         }
 
         if (isCheckinRequest) {
@@ -10690,14 +10695,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int i = procs.size() - 1 ; i >= 0 ; i--) {
             ProcessRecord r = procs.get(i);
             if (r.thread != null) {
-                if (!isCheckinRequest && dumpAll) {
+                if (!isCheckinRequest && dumpDetails) {
                     pw.println("\n** MEMINFO in pid " + r.pid + " [" + r.processName + "] **");
                     pw.flush();
                 }
                 Debug.MemoryInfo mi = null;
-                if (dumpAll) {
+                if (dumpDetails) {
                     try {
-                        mi = r.thread.dumpMemInfo(fd, isCheckinRequest, dumpAll, innerArgs);
+                        mi = r.thread.dumpMemInfo(fd, isCheckinRequest, true, dumpDalvik, innerArgs);
                     } catch (RemoteException e) {
                         if (!isCheckinRequest) {
                             pw.println("Got RemoteException!");
