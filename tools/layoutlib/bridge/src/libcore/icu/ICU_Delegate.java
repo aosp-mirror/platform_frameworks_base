@@ -44,6 +44,16 @@ public class ICU_Delegate {
     // --- Native methods accessing ICU's database.
 
     @LayoutlibDelegate
+    /*package*/ static String getBestDateTimePattern(String skeleton, String localeName) {
+        return "";            // TODO: check what the right value should be.
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static String getCldrVersion() {
+        return "22.1.1";      // TODO: check what the right value should be.
+    }
+
+    @LayoutlibDelegate
     /*package*/ static String getIcuVersion() {
         return "unknown_layoutlib";
     }

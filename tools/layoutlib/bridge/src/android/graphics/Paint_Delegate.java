@@ -569,29 +569,30 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static float native_measureText(Paint thisPaint, char[] text, int index,
-            int count) {
+            int count, int bidiFlags) {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
             return 0;
         }
 
-        return delegate.measureText(text, index, count);
+        return delegate.measureText(text, index, count, bidiFlags);
     }
 
     @LayoutlibDelegate
-    /*package*/ static float native_measureText(Paint thisPaint, String text, int start, int end) {
-        return native_measureText(thisPaint, text.toCharArray(), start, end - start);
+    /*package*/ static float native_measureText(Paint thisPaint, String text, int start, int end,
+        int bidiFlags) {
+        return native_measureText(thisPaint, text.toCharArray(), start, end - start, bidiFlags);
     }
 
     @LayoutlibDelegate
-    /*package*/ static float native_measureText(Paint thisPaint, String text) {
-        return native_measureText(thisPaint, text.toCharArray(), 0, text.length());
+    /*package*/ static float native_measureText(Paint thisPaint, String text, int bidiFlags) {
+        return native_measureText(thisPaint, text.toCharArray(), 0, text.length(), bidiFlags);
     }
 
     @LayoutlibDelegate
     /*package*/ static int native_breakText(Paint thisPaint, char[] text, int index, int count,
-            float maxWidth, float[] measuredWidth) {
+            float maxWidth, int bidiFlags, float[] measuredWidth) {
 
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
@@ -614,7 +615,7 @@ public class Paint_Delegate {
             }
 
             // measure from start to end
-            float res = delegate.measureText(text, start, end - start + 1);
+            float res = delegate.measureText(text, start, end - start + 1, bidiFlags);
 
             if (measuredWidth != null) {
                 measuredWidth[measureIndex] = res;
@@ -634,9 +635,9 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static int native_breakText(Paint thisPaint, String text, boolean measureForwards,
-            float maxWidth, float[] measuredWidth) {
+            float maxWidth, int bidiFlags, float[] measuredWidth) {
         return native_breakText(thisPaint, text.toCharArray(), 0, text.length(), maxWidth,
-                measuredWidth);
+                bidiFlags, measuredWidth);
     }
 
     @LayoutlibDelegate
@@ -921,7 +922,7 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, char[] text, int index,
-            int count, float[] widths) {
+            int count, int bidiFlags, float[] widths) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
@@ -963,8 +964,9 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, String text, int start,
-            int end, float[] widths) {
-        return native_getTextWidths(native_object, text.toCharArray(), start, end - start, widths);
+            int end, int bidiFlags, float[] widths) {
+        return native_getTextWidths(native_object, text.toCharArray(), start, end - start,
+                bidiFlags, widths);
     }
 
     @LayoutlibDelegate
@@ -977,7 +979,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float native_getTextRunAdvances(int native_object,
             char[] text, int index, int count, int contextIndex, int contextCount,
-            int flags, float[] advances, int advancesIndex, int reserved) {
+            int flags, float[] advances, int advancesIndex) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
@@ -1021,14 +1023,14 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float native_getTextRunAdvances(int native_object,
             String text, int start, int end, int contextStart, int contextEnd,
-            int flags, float[] advances, int advancesIndex, int reserved) {
+            int flags, float[] advances, int advancesIndex) {
         // FIXME: support contextStart, contextEnd and direction flag
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
         return native_getTextRunAdvances(native_object, buffer, 0, count, contextStart,
-                contextEnd - contextStart, flags, advances, advancesIndex, reserved);
+                contextEnd - contextStart, flags, advances, advancesIndex);
     }
 
     @LayoutlibDelegate
@@ -1067,13 +1069,14 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeGetStringBounds(int nativePaint, String text, int start,
-            int end, Rect bounds) {
-        nativeGetCharArrayBounds(nativePaint, text.toCharArray(), start, end - start, bounds);
+            int end, int bidiFlags, Rect bounds) {
+        nativeGetCharArrayBounds(nativePaint, text.toCharArray(), start, end - start, bidiFlags,
+                bounds);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeGetCharArrayBounds(int nativePaint, char[] text, int index,
-            int count, Rect bounds) {
+            int count, int bidiFlags, Rect bounds) {
 
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
@@ -1182,7 +1185,8 @@ public class Paint_Delegate {
         }
     }
 
-    /*package*/ float measureText(char[] text, int index, int count) {
+    /*package*/ float measureText(char[] text, int index, int count, int bidiFlags) {
+        // TODO: find out what bidiFlags actually does.
 
         // WARNING: the logic in this method is similar to Canvas_Delegate.native_drawText
         // Any change to this method should be reflected there as well
