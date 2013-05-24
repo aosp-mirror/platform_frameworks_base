@@ -26,18 +26,22 @@ import static com.android.server.wm.WindowManagerService.TAG;
 import java.io.PrintWriter;
 
 public class StackBox {
-    /** Used with {@link WindowManagerService#createStack}. To left of, lower l/r Rect values. */
+    /** Used with {@link WindowManagerService#createStack}. Dependent on Configuration LTR/RTL. */
     public static final int TASK_STACK_GOES_BEFORE = 0;
-    /** Used with {@link WindowManagerService#createStack}. To right of, higher l/r Rect values. */
+    /** Used with {@link WindowManagerService#createStack}. Dependent on Configuration LTR/RTL. */
     public static final int TASK_STACK_GOES_AFTER = 1;
+    /** Used with {@link WindowManagerService#createStack}. Horizontal to left of. */
+    public static final int TASK_STACK_TO_LEFT_OF = 2;
+    /** Used with {@link WindowManagerService#createStack}. Horizontal to right of. */
+    public static final int TASK_STACK_TO_RIGHT_OF = 3;
     /** Used with {@link WindowManagerService#createStack}. Vertical: lower t/b Rect values. */
-    public static final int TASK_STACK_GOES_ABOVE = 2;
+    public static final int TASK_STACK_GOES_ABOVE = 4;
     /** Used with {@link WindowManagerService#createStack}. Vertical: higher t/b Rect values. */
-    public static final int TASK_STACK_GOES_BELOW = 3;
+    public static final int TASK_STACK_GOES_BELOW = 5;
     /** Used with {@link WindowManagerService#createStack}. Put on a higher layer on display. */
-    public static final int TASK_STACK_GOES_OVER = 4;
+    public static final int TASK_STACK_GOES_OVER = 6;
     /** Used with {@link WindowManagerService#createStack}. Put on a lower layer on display. */
-    public static final int TASK_STACK_GOES_UNDER = 5;
+    public static final int TASK_STACK_GOES_UNDER = 7;
 
     static int sCurrentBoxId = 0;
 
@@ -97,15 +101,13 @@ public class StackBox {
     }
 
     /**
-     * Determine if a particular TaskStack is in this StackBox or any of its descendants.
-     * @param stackId The TaskStack being considered.
-     * @return true if the specified TaskStack is in this box or its descendants. False otherwise.
+     * Determine if a particular StackBox is this one or a descendant of this one.
+     * @param stackBoxId The StackBox being searched for.
+     * @return true if the specified StackBox matches this or one of its descendants.
      */
-    boolean contains(int stackId) {
-        if (mStack != null) {
-            return mStack.mStackId == stackId;
-        }
-        return mFirst.contains(stackId) || mSecond.contains(stackId);
+    boolean contains(int stackBoxId) {
+        return mStackBoxId == stackBoxId || mFirst.contains(stackBoxId)
+                || mSecond.contains(stackBoxId);
     }
 
     /**
@@ -155,37 +157,42 @@ public class StackBox {
      * the specified TaskStack into two children. The size and position each of the new StackBoxes
      * is determined by the passed parameters.
      * @param stackId The id of the new TaskStack to create.
-     * @param relativeStackId The id of the TaskStack to place the new one next to.
+     * @param relativeStackBoxId The id of the StackBox to place the new TaskStack next to.
      * @param position One of the static TASK_STACK_GOES_xxx positions defined in this class.
      * @param weight The percentage size of the parent StackBox to devote to the new TaskStack.
      * @return The new TaskStack.
      */
-    TaskStack split(int stackId, int relativeStackId, int position, float weight) {
-        if (mStack == null) {
-            // Propagate the split to see if the target task stack is in either sub box.
-            TaskStack stack = mFirst.split(stackId, relativeStackId, position, weight);
+    TaskStack split(int stackId, int relativeStackBoxId, int position, float weight) {
+        if (mStackBoxId != relativeStackBoxId) {
+            // This is not the targeted StackBox.
+            if (mStack != null) {
+                return null;
+            }
+            // Propagate the split to see if the targeted StackBox is in either sub box.
+            TaskStack stack = mFirst.split(stackId, relativeStackBoxId, position, weight);
             if (stack != null) {
                 return stack;
             }
-            return mSecond.split(stackId, relativeStackId, position, weight);
-        }
-
-        // This StackBox contains just a TaskStack.
-        if (mStack.mStackId != relativeStackId) {
-            // Barking down the wrong stack.
-            return null;
+            return mSecond.split(stackId, relativeStackBoxId, position, weight);
         }
 
         // Found it!
         TaskStack stack = new TaskStack(mService, stackId, mDisplayContent);
         TaskStack firstStack;
         TaskStack secondStack;
+        if (position == TASK_STACK_GOES_BEFORE) {
+            // TODO: Test Configuration here for LTR/RTL.
+            position = TASK_STACK_TO_LEFT_OF;
+        } else if (position == TASK_STACK_GOES_AFTER) {
+            // TODO: Test Configuration here for LTR/RTL.
+            position = TASK_STACK_TO_RIGHT_OF;
+        }
         switch (position) {
             default:
-            case TASK_STACK_GOES_AFTER:
-            case TASK_STACK_GOES_BEFORE:
+            case TASK_STACK_TO_LEFT_OF:
+            case TASK_STACK_TO_RIGHT_OF:
                 mVertical = false;
-                if (position == TASK_STACK_GOES_BEFORE) {
+                if (position == TASK_STACK_TO_LEFT_OF) {
                     mWeight = weight;
                     firstStack = stack;
                     secondStack = mStack;
@@ -265,15 +272,16 @@ public class StackBox {
         return sibling.getStackId();
     }
 
-    boolean resize(int stackId, float weight) {
-        if (mStack == null) {
-            return mFirst.resize(stackId, weight) || mSecond.resize(stackId, weight);
+    boolean resize(int stackBoxId, float weight) {
+        if (mStackBoxId != stackBoxId) {
+            return mStack == null &&
+                    (mFirst.resize(stackBoxId, weight) || mSecond.resize(stackBoxId, weight));
         }
-        if (mStack.mStackId == stackId) {
+        // Don't change weight on topmost stack.
+        if (mParent != null) {
             mParent.mWeight = isFirstChild() ? weight : 1.0f - weight;
-            return true;
         }
-        return false;
+        return true;
     }
 
     /** If this is a terminal StackBox (contains a TaskStack) set the bounds.

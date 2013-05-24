@@ -4205,7 +4205,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (knownApp != null && knownApp.thread == null) {
                 mPidsSelfLocked.remove(pid);
                 gone = true;
-            }        
+            }
         }
 
         if (gone) {
@@ -4300,7 +4300,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
-        
+
         app.thread = thread;
         app.curAdj = app.setAdj = -100;
         app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
@@ -4318,7 +4318,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!normalMode) {
             Slog.i(TAG, "Launching preboot mode app: " + app);
         }
-        
+
         if (localLOGV) Slog.v(
             TAG, "New app record " + app
             + " thread=" + thread.asBinder() + " pid=" + pid);
@@ -4356,7 +4356,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         || (mBackupTarget.backupMode == BackupRecord.RESTORE_FULL)
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
-            
+
             ensurePackageDexOpt(app.instrumentationInfo != null
                     ? app.instrumentationInfo.packageName
                     : app.info.packageName);
@@ -5687,6 +5687,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void revokeUriPermission(IApplicationThread caller, Uri uri,
             int modeFlags) {
         enforceNotIsolatedCaller("revokeUriPermission");
@@ -5919,6 +5920,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting) {
         synchronized (this) {
             ProcessRecord app =
@@ -5933,6 +5935,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void getMemoryInfo(ActivityManager.MemoryInfo outInfo) {
         final long homeAppMem = mProcessList.getMemLevel(ProcessList.HOME_APP_ADJ);
         final long hiddenAppMem = mProcessList.getMemLevel(ProcessList.HIDDEN_APP_MIN_ADJ);
@@ -6319,17 +6322,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public int createStack(int taskId, int relativeStackId, int position, float weight) {
-        if (DEBUG_STACK) Slog.d(TAG, "createStack: taskId=" + taskId + " relStackId=" +
-                relativeStackId + " position=" + position + " weight=" + weight);
+    public int createStack(int taskId, int relativeStackBoxId, int position, float weight) {
+        if (DEBUG_STACK) Slog.d(TAG, "createStack: taskId=" + taskId + " relStackBoxId=" +
+                relativeStackBoxId + " position=" + position + " weight=" + weight);
         synchronized (this) {
-            if (mStackSupervisor.getStack(relativeStackId) == null) {
-                if (DEBUG_STACK) Slog.d(TAG, "createStack: invalide relativeStackId=" +
-                        relativeStackId);
-                return -1;
-            }
             int stackId = mStackSupervisor.createStack();
-            mWindowManager.createStack(stackId, relativeStackId, position, weight);
+            mWindowManager.createStack(stackId, relativeStackBoxId, position, weight);
             if (taskId > 0) {
                 moveTaskToStack(taskId, stackId, true);
             }
@@ -6349,12 +6347,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void resizeStack(int stackId, float weight) {
-        mWindowManager.resizeStack(stackId, weight);
+    public void resizeStackBox(int stackBoxId, float weight) {
+        mWindowManager.resizeStackBox(stackBoxId, weight);
     }
 
-    @Override
-    public List<StackInfo> getStacks() {
+    private ArrayList<StackInfo> getStacks() {
         synchronized (this) {
             ArrayList<ActivityManager.StackInfo> list = new ArrayList<ActivityManager.StackInfo>();
             ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();

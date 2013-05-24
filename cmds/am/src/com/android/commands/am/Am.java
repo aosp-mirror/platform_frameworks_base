@@ -1485,7 +1485,7 @@ public class Am extends BaseCommand {
         } else if (op.equals("movetask")) {
             runStackMoveTask();
         } else if (op.equals("resize")) {
-            runStackResize();
+            runStackBoxResize();
         } else if (op.equals("boxes")) {
             runStackBoxes();
         } else {
@@ -1533,14 +1533,14 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runStackResize() throws Exception {
-        String stackIdStr = nextArgRequired();
-        int stackId = Integer.valueOf(stackIdStr);
+    private void runStackBoxResize() throws Exception {
+        String stackBoxIdStr = nextArgRequired();
+        int stackBoxId = Integer.valueOf(stackBoxIdStr);
         String weightStr = nextArgRequired();
         float weight = Float.valueOf(weightStr);
 
         try {
-            mAm.resizeStack(stackId, weight);
+            mAm.resizeStackBox(stackBoxId, weight);
         } catch (RemoteException e) {
         }
     }

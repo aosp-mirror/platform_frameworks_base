@@ -4782,7 +4782,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Create a new TaskStack and place it next to an existing stack.
      * @param stackId The unique identifier of the new stack.
-     * @param relativeStackId The existing stack that this stack goes before or after.
+     * @param relativeStackBoxId The existing stack that this stack goes before or after.
      * @param position One of:
      *      {@link StackBox#TASK_STACK_GOES_BEFORE}
      *      {@link StackBox#TASK_STACK_GOES_AFTER}
@@ -4792,7 +4792,7 @@ public class WindowManagerService extends IWindowManager.Stub
      *      {@link StackBox#TASK_STACK_GOES_OVER}
      * @param weight Relative weight for determining how big to make the new TaskStack.
      */
-    public void createStack(int stackId, int relativeStackId, int position, float weight) {
+    public void createStack(int stackId, int relativeStackBoxId, int position, float weight) {
         synchronized (mWindowMap) {
             if (position <= StackBox.TASK_STACK_GOES_BELOW &&
                     (weight < STACK_WEIGHT_MIN || weight > STACK_WEIGHT_MAX)) {
@@ -4800,23 +4800,19 @@ public class WindowManagerService extends IWindowManager.Stub
                         "createStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
                         STACK_WEIGHT_MAX + ", weight=" + weight);
             }
-            final DisplayContent displayContent;
-            if (stackId != HOME_STACK_ID) {
-                // TODO: What to do for the first stack on a non-default display?
-                final TaskStack relativeStack = mStackIdToStack.get(relativeStackId);
-                if (relativeStack == null) {
-                    throw new IllegalArgumentException("createStack: Invalid relativeStackId=" +
-                            relativeStackId);
+            DisplayContentsIterator iterator = new DisplayContentsIterator();
+            while (iterator.hasNext()) {
+                final DisplayContent displayContent = iterator.next();
+                TaskStack stack = displayContent.createStack(this, stackId, relativeStackBoxId,
+                        position, weight);
+                if (stack != null) {
+                    mStackIdToStack.put(stackId, stack);
+                    displayContent.moveStack(stack, true);
+                    performLayoutAndPlaceSurfacesLocked();
+                    return;
                 }
-                displayContent = relativeStack.getDisplayContent();
-            } else {
-                displayContent = getDefaultDisplayContentLocked();
             }
-            TaskStack stack =
-                    displayContent.createStack(this, stackId, relativeStackId, position, weight);
-            mStackIdToStack.put(stackId, stack);
-            displayContent.moveStack(stack, true);
-            performLayoutAndPlaceSurfacesLocked();
+            Slog.e(TAG, "createStack: Unable to find relativeStackBoxId=" + relativeStackBoxId);
         }
     }
 
@@ -4864,7 +4860,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void resizeStack(int stackId, float weight) {
+    public void resizeStackBox(int stackBoxId, float weight) {
         if (weight < STACK_WEIGHT_MIN || weight > STACK_WEIGHT_MAX) {
             throw new IllegalArgumentException(
                     "resizeStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
@@ -4873,14 +4869,14 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             DisplayContentsIterator iterator = new DisplayContentsIterator();
             while (iterator.hasNext()) {
-                if (iterator.next().resizeStack(stackId, weight)) {
-                    break;
-                } else if (!iterator.hasNext()) {
-                    throw new IllegalArgumentException("resizeStack: stackId " + stackId
-                            + " not found.");
+                if (iterator.next().resizeStack(stackBoxId, weight)) {
+                    performLayoutAndPlaceSurfacesLocked();
+                    return;
                 }
             }
         }
+        throw new IllegalArgumentException("resizeStack: stackBoxId " + stackBoxId
+                + " not found.");
     }
 
     public ArrayList<StackBoxInfo> getStackBoxInfos() {
