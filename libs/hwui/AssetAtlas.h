@@ -64,6 +64,13 @@ public:
          */
         bool rotated;
 
+        /*
+         * A "virtual texture" object that represents the texture
+         * this entry belongs to. This texture should never be
+         * modified.
+         */
+        Texture* texture;
+
         /**
          * Maps texture coordinates in the [0..1] range into the
          * correct range to sample this entry from the atlas.
@@ -75,22 +82,20 @@ public:
          */
         const AssetAtlas& atlas;
 
-        /*
-         * A "virtual texture" object that represents the texture
-         * this entry belongs to. This texture should never be
-         * modified.
-         */
-        Texture texture;
-
     private:
         Entry(SkBitmap* bitmap, int x, int y, bool rotated,
-                const UvMapper& mapper, const AssetAtlas& atlas):
-                bitmap(bitmap), x(x), y(y), rotated(rotated), uvMapper(mapper), atlas(atlas) { }
+                Texture* texture, const UvMapper& mapper, const AssetAtlas& atlas):
+                bitmap(bitmap), x(x), y(y), rotated(rotated),
+                texture(texture), uvMapper(mapper), atlas(atlas) { }
+
+        ~Entry() {
+            delete texture;
+        }
 
         friend class AssetAtlas;
     };
 
-    AssetAtlas(): mWidth(0), mHeight(0), mTexture(0), mImage(NULL) { }
+    AssetAtlas(): mTexture(NULL), mImage(NULL) { }
     ~AssetAtlas() { terminate(); }
 
     /**
@@ -120,7 +125,7 @@ public:
      * Can return 0 if the atlas is not initialized.
      */
     uint32_t getWidth() const {
-        return mWidth;
+        return mTexture ? mTexture->width : 0;
     }
 
     /**
@@ -128,7 +133,7 @@ public:
      * Can return 0 if the atlas is not initialized.
      */
     uint32_t getHeight() const {
-        return mHeight;
+        return mTexture ? mTexture->height : 0;
     }
 
     /**
@@ -136,7 +141,7 @@ public:
      * Can return 0 if the atlas is not initialized.
      */
     GLuint getTexture() const {
-        return mTexture;
+        return mTexture ? mTexture->id : 0;
     }
 
     /**
@@ -154,10 +159,7 @@ public:
 private:
     void createEntries(int* map, int count);
 
-    uint32_t mWidth;
-    uint32_t mHeight;
-
-    GLuint mTexture;
+    Texture* mTexture;
     Image* mImage;
 
     KeyedVector<SkBitmap*, Entry*> mEntries;

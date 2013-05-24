@@ -2352,7 +2352,7 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 
     if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
         mCaches.activeTexture(0);
-        Texture* texture = entry ? &entry->texture : mCaches.textureCache.get(bitmap);
+        Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
         if (!texture) return DrawGlInfo::kStatusDone;
         const AutoTexture autoCleanup(texture);
 

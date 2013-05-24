@@ -31,11 +31,12 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int* map, int count) {
     }
 
     mImage = new Image(buffer);
-    mTexture = mImage->getTexture();
 
-    if (mTexture) {
-        mWidth = buffer->getWidth();
-        mHeight = buffer->getHeight();
+    if (mImage->getTexture()) {
+        mTexture = new Texture();
+        mTexture->id = mImage->getTexture();
+        mTexture->width = buffer->getWidth();
+        mTexture->height = buffer->getHeight();
 
         createEntries(map, count);
     } else {
@@ -43,6 +44,7 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int* map, int count) {
 
         delete mImage;
         mImage = NULL;
+        mTexture = NULL;
     }
 }
 
@@ -51,12 +53,13 @@ void AssetAtlas::terminate() {
         delete mImage;
         mImage = NULL;
 
+        delete mTexture;
+        mTexture = NULL;
+
         for (size_t i = 0; i < mEntries.size(); i++) {
             delete mEntries.valueAt(i);
         }
         mEntries.clear();
-
-        mWidth = mHeight = 0;
     }
 }
 
@@ -71,13 +74,36 @@ AssetAtlas::Entry* AssetAtlas::getEntry(SkBitmap* const bitmap) const {
 
 Texture* AssetAtlas::getEntryTexture(SkBitmap* const bitmap) const {
     ssize_t index = mEntries.indexOfKey(bitmap);
-    return index >= 0 ? &mEntries.valueAt(index)->texture : NULL;
+    return index >= 0 ? mEntries.valueAt(index)->texture : NULL;
 }
+
+/**
+ * Delegates changes to wrapping and filtering to the base atlas texture
+ * instead of applying the changes to the virtual textures.
+ */
+struct DelegateTexture: public Texture {
+    DelegateTexture(Texture* delegate): Texture(), mDelegate(delegate) { }
+
+    virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
+        mDelegate->setWrapST(wrapS, wrapT, bindTexture, force, renderTarget);
+    }
+
+    virtual void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false,
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
+        mDelegate->setFilterMinMag(min, mag, bindTexture, force, renderTarget);
+    }
+private:
+    Texture* const mDelegate;
+}; // struct DelegateTexture
 
 /**
  * TODO: This method does not take the rotation flag into account
  */
 void AssetAtlas::createEntries(int* map, int count) {
+    const float width = float(mTexture->width);
+    const float height = float(mTexture->height);
+
     for (int i = 0; i < count; ) {
         SkBitmap* bitmap = (SkBitmap*) map[i++];
         int x = map[i++];
@@ -88,15 +114,17 @@ void AssetAtlas::createEntries(int* map, int count) {
         if (!bitmap) continue;
 
         const UvMapper mapper(
-                x / (float) mWidth, (x + bitmap->width()) / (float) mWidth,
-                y / (float) mHeight, (y + bitmap->height()) / (float) mHeight);
+                x / width, (x + bitmap->width()) / width,
+                y / height, (y + bitmap->height()) / height);
 
-        Entry* entry = new Entry(bitmap, x, y, rotated, mapper, *this);
-        entry->texture.id = mTexture;
-        entry->texture.blend = !bitmap->isOpaque();
-        entry->texture.width = bitmap->width();
-        entry->texture.height = bitmap->height();
-        entry->texture.uvMapper = &entry->uvMapper;
+        Texture* texture = new DelegateTexture(mTexture);
+        Entry* entry = new Entry(bitmap, x, y, rotated, texture, mapper, *this);
+
+        texture->id = mTexture->id;
+        texture->blend = !bitmap->isOpaque();
+        texture->width = bitmap->width();
+        texture->height = bitmap->height();
+        texture->uvMapper = &entry->uvMapper;
 
         mEntries.add(entry->bitmap, entry);
     }

@@ -48,13 +48,15 @@ struct Texture {
         uvMapper = NULL;
     }
 
+    virtual ~Texture() { }
+
     void setWrap(GLenum wrap, bool bindTexture = false, bool force = false,
                 GLenum renderTarget = GL_TEXTURE_2D) {
         setWrapST(wrap, wrap, bindTexture, force, renderTarget);
     }
 
-    void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false, bool force = false,
-            GLenum renderTarget = GL_TEXTURE_2D) {
+    virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
 
         if (firstWrap || force || wrapS != this->wrapS || wrapT != this->wrapT) {
             firstWrap = false;
@@ -76,8 +78,8 @@ struct Texture {
         setFilterMinMag(filter, filter, bindTexture, force, renderTarget);
     }
 
-    void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false, bool force = false,
-            GLenum renderTarget = GL_TEXTURE_2D) {
+    virtual void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false,
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
 
         if (firstFilter || force || min != minFilter || mag != magFilter) {
             firstFilter = false;
