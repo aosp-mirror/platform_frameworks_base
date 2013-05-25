@@ -575,7 +575,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mLayerState = new LayerState(mLayerState, this, null);
+            mLayerState = createConstantState(mLayerState, null);
             final ChildDrawable[] array = mLayerState.mChildren;
             final int N = mLayerState.mNum;
             for (int i = 0; i < N; i++) {
