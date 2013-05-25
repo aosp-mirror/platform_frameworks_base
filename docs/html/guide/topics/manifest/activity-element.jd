@@ -27,11 +27,13 @@ parent.link=manifest-intro.html
           android:<a href="#parent">parentActivityName</a>="<i>string</i>" <!-- api level 16 -->
           android:<a href="#prmsn">permission</a>="<i>string</i>"
           android:<a href="#proc">process</a>="<i>string</i>"
-          android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
+          android:<a href="#screen">screenOrientation</a>=["unspecified" | "behind" |
                                      "landscape" | "portrait" |
                                      "reverseLandscape" | "reversePortrait" |
                                      "sensorLandscape" | "sensorPortrait" |
-                                     "sensor" | "fullSensor" | "nosensor"]
+                                     "userLandscape" | "userPortrait" |
+                                     "sensor" | "fullSensor" | "nosensor" |
+                                     "user" | "fullUser" | "locked"]
           android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
           android:<a href="#aff">taskAffinity</a>="<i>string</i>"
           android:<a href="#theme">theme</a>="<i>resource or theme</i>"
@@ -644,9 +646,6 @@ resource usage.
        uses, and therefore the choices made in specific contexts, may differ 
        from device to device.</td>
 </tr><tr>
-   <td>"{@code user}"</td>
-   <td>The user's current preferred orientation.</td>
-</tr><tr>
    <td>"{@code behind}"</td>
    <td>The same orientation as the activity that's immediately beneath it in 
        the activity stack.</td>
@@ -675,6 +674,18 @@ sensor.
 sensor.
 <em>Added in API level 9.</em></td>
 </tr><tr>
+   <td>"{@code userLandscape}"</td>
+   <td>Landscape orientation, but can be either normal or reverse landscape based on the device
+sensor and the user's sensor preference. If the user has locked sensor-based rotation, this behaves
+the same as {@code landscape}, otherwise it behaves the same as {@code sensorLandscape}.
+<em>Added in API level 18.</em></td>
+</tr><tr>
+   <td>"{@code userPortrait}"</td>
+   <td>Portrait orientation, but can be either normal or reverse portrait based on the device
+sensor and the user's sensor preference. If the user has locked sensor-based rotation, this behaves
+the same as {@code portrait}, otherwise it behaves the same as {@code sensorPortrait}.
+<em>Added in API level 18.</em></td>
+</tr><tr>
    <td>"{@code sensor}"</td>
    <td>The orientation is determined by the device orientation sensor.  The orientation of the
 display depends on how the user is holding the device; it changes when the user rotates the
@@ -692,6 +703,19 @@ portrait or reverse landscape, but this enables those). <em>Added in API level 9
 is ignored, so the display will not rotate based on how the user moves the device.  Except for this
 distinction, the system chooses the orientation using the same policy as for the "{@code
 unspecified}" setting.</td>
+</tr><tr>
+   <td>"{@code user}"</td>
+   <td>The user's current preferred orientation.</td>
+</tr><tr>
+   <td>"{@code fullUser}"</td>
+   <td>If the user has locked sensor-based rotation, this behaves the same as {@code user},
+   otherwise it behaves the same as {@code fullSensor} and allows any of the 4 possible
+   screen orientations.
+    <em>Added in API level 18.</em></td>
+</tr><tr>
+   <td>"{@code locked}"</td>
+   <td>Locks the orientation to its current rotation, whatever that is.
+<em>Added in API level 18.</em></td>
 </tr>
 </table>
 
