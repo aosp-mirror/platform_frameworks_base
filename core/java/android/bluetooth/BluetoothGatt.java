@@ -70,6 +70,9 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     private List<BluetoothGattService> mServices;
 
+    /** A GATT operation failed */
+    public static final int GATT_FAILURE = 0;
+
     /** A GATT operation completed successfully */
     public static final int GATT_SUCCESS = 0;
 
@@ -93,9 +96,6 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /** A write operation exceeds the maximum length of the attribute */
     public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 0xd;
-
-    /** A GATT operation failed, errors other than the above */
-    public static final int GATT_FAILURE = 0x101;
 
     /**
      * No authentication required.
