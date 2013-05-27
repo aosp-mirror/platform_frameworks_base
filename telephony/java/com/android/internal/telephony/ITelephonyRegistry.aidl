@@ -41,4 +41,9 @@ interface ITelephonyRegistry {
     void notifyCellLocation(in Bundle cellLocation);
     void notifyOtaspChanged(in int otaspMode);
     void notifyCellInfo(in List<CellInfo> cellInfo);
+    void notifyPreciseCallState(int ringingCallState, int foregroundCallState,
+            int backgroundCallState);
+    void notifyDisconnectCause(int disconnectCause, int preciseDisconnectCause);
+    void notifyPreciseDataConnectionFailed(String reason, String apnType, String apn,
+            String failCause);
 }
