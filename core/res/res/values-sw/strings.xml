@@ -537,7 +537,7 @@
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"rekebisha ukubwa wa mandhari yako"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Inaruhusu programu kuweka vidokezo vya ukubwa wa mandhari ya mfumo."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"weka upya mfumo kwa chaguo-msingi za kiwanda"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Inaruhusu programu kuweka upya kabisa mfumo kwa mipangilio yake ya kiwanda, huku ikifuta data yote, usanidi, na programu zilizosanikishwa."</string>
+    <string name="permdesc_masterClear" msgid="3665380492633910226">"Huruhusu programu kurudisha mfumo kwenye mipangilio yake ya mwanzo, hatua ambayo hufuta data, usanidi, na programu zote zilizosanikishwa."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"weka muda"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Inaruhusu programu kubadilisha wakati wa saa ya kompyuta kibao."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Inaruhusu programu kubadilisha wakati wa saa ya simu."</string>
@@ -1439,7 +1439,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Mfumo"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Sauti ya Bluetooth"</string>
-    <string name="wireless_display_route_description" msgid="9070346425023979651">"Uonyeshaji pasiwaya"</string>
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"Uonyeshaji usiotumia waya"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Kwisha"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Towe la midia"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Inatambaza..."</string>
