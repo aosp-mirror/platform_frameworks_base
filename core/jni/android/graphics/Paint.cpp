@@ -58,6 +58,10 @@ static JMetricsID gFontMetricsInt_fieldID;
 static void defaultSettingsForAndroid(SkPaint* paint) {
     // GlyphID encoding is required because we are using Harfbuzz shaping
     paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+
+    SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
+    paintOpts.setUseFontFallbacks(true);
+    paint->setPaintOptionsAndroid(paintOpts);
 }
 
 class SkPaintGlue {
@@ -300,7 +304,10 @@ public:
         ScopedUtfChars localeChars(env, locale);
         char langTag[ULOC_FULLNAME_CAPACITY];
         toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, localeChars.c_str());
-        obj->setLanguage(SkLanguage(langTag));
+
+        SkPaintOptionsAndroid paintOpts = obj->getPaintOptionsAndroid();
+        paintOpts.setLanguage(langTag);
+        obj->setPaintOptionsAndroid(paintOpts);
     }
 
     static jfloat getTextSize(JNIEnv* env, jobject paint) {

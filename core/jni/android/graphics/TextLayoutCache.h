@@ -28,7 +28,6 @@
 #include <utils/Singleton.h>
 
 #include <SkAutoKern.h>
-#include <SkLanguage.h>
 #include <SkPaint.h>
 #include <SkTemplates.h>
 #include <SkTypeface.h>
@@ -104,8 +103,7 @@ private:
     SkScalar textScaleX;
     uint32_t flags;
     SkPaint::Hinting hinting;
-    SkPaint::FontVariant variant;
-    SkLanguage language;
+    SkPaintOptionsAndroid paintOpts;
 
 }; // TextLayoutCacheKey
 

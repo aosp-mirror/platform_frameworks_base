@@ -17,6 +17,10 @@ endif
 
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
+# When built as part of the system image we can enable certian non-NDK compliant
+# Skia optimizations.
+LOCAL_CFLAGS += -DSK_BUILD_FOR_ANDROID_FRAMEWORK
+
 LOCAL_SRC_FILES:= \
 	AndroidRuntime.cpp \
 	Time.cpp \
@@ -159,10 +163,6 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(TOP)/frameworks/av/include \
-	external/skia/include/core \
-	external/skia/include/effects \
-	external/skia/include/images \
-	external/skia/include/ports \
 	external/skia/src/core \
 	external/skia/src/images \
 	external/skia/include/utils \
