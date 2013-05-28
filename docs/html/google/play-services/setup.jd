@@ -1,26 +1,25 @@
 page.title=Setup Google Play Services SDK
 @jd:body
 
-
-<p>
-    The Google Play services SDK is an extension to the Android SDK and is available to you as a
-    downloadable package from the <a href="{@docRoot}tools/help/sdk-manager.html">SDK
-    Manager</a>. The download includes the client library and code samples.
-</p>
     
-<p>
-    To develop using the <a href="{@docRoot}reference/gms-packages.html">Google
-    Play services APIs</a>, you must download the Google Play services SDK.
-    Additionally, you must provide a physical <strong>development device</strong> on
-    which you can run and debug your app. You can develop on any compatible Android
-    device that runs Android 2.2 or higher and includes the Google Play Store.
-    Ideally, you would develop and test the app on a variety of devices, including
-    both phones and tablets. 
-</p>
+<p>To develop an app using the <a href="{@docRoot}reference/gms-packages.html">Google
+Play services APIs</a>, you must download the Google Play services SDK
+from the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.
+The download includes the client library and code samples.</p>
 
-<p class="note"><strong>Note</strong>: Google Play services is not supported on the
-Android emulator &mdash; to develop using the APIs, you need to provide a development
-device such as an Android phone or tablet.</p>
+<p>To test your app when using the Google Play services SDK, you must use either:</p>
+<ul>
+  <li>A compatible Android
+    device that runs Android 2.2 or higher and includes Google Play Store.</li>
+  <li>The Android emulator with an <a href="{@docRoot}tools/devices/index.html">AVD</a>
+  that runs the Google APIs platform based on Android 4.2.2 or higher.</li>
+</ul>
+
+<p>Ideally, you should develop and test your app on a variety of devices, including
+both phones and tablets.</p>
+
+
+<h2 id="Install">Install the Google Play Services SDK</h2>
 
 <p>To install the Google Play services SDK for development:</p>
 
@@ -35,19 +34,33 @@ device such as an Android phone or tablet.</p>
   Android SDK, then execute <code>android sdk</code>.</li>
     </ul>
   </li>
-  <li>
-      Scroll to the bottom of the package list, select <b>Extras &gt; Google Play services</b>,
-      and install it.
+  <li>Install the Google Play services SDK.
+    <p>Scroll to the bottom of the package list, expand <b>Extras</b>, select
+    <b>Google Play services</b>, and install it.</p>
       <p>The Google Play services SDK is saved in your Android SDK environment at
-      <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/</code>.</p>
+      <code>&lt;android-sdk&gt;/extras/google/google_play_services/</code>.</p>
   </li>
-  <li>Copy the <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/libproject/google-play-services_lib</code>        
-      library project into the source tree where you maintain your Android app projects.
-  <p>If you are using Eclipse, import the library project into your workspace. Click <b>File > Import</b>, select <b>Android > Existing
+  <li>Install a compatible version of the Google APIs platform.
+    <p>If you want to test your app on the emulator, expand the directory for <b>Android 4.2.2
+    (API 17)</b> or a higher version, select <b>Google APIs</b>, and install it. Then create a
+    new <a href="{@docRoot}tools/devices/index.html">AVD</a> with Google APIs as
+    the platform target.</p>
+    <p class="note"><strong>Note:</strong> Only Android 4.2.2 and higher versions of the
+    Google APIs platform include Google Play services.</p>
+  </li>
+  <li>Make a copy of the Google Play services library project.
+    <p>Copy the library project at
+  <code>&lt;android-sdk&gt;/extras/google/google_play_services/libproject/google-play-services_lib/</code>        
+  to the location where you maintain your Android app projects.
+  <p>If you are using Eclipse, import the library project into your workspace.
+  Click <b>File > Import</b>, select <b>Android > Existing
   Android Code into Workspace</b>, and browse to the copy of the library project to import it.</p>
   </li>
 </ol>
 
+
+
+<h2 id="Setup">Set Up a Project with the Library</h2>
 
 <p>To set up a project to use the Google Play services SDK:</p>
 
@@ -58,8 +71,8 @@ device such as an Android phone or tablet.</p>
       or <a href="{@docRoot}tools/projects/projects-cmdline.html#ReferencingLibraryProject">Referencing a Library Project on the Command Line</a>
       for more information on how to do this.</p>
       <p class="note"><strong>Note:</strong>
-      You should be referencing a copy of the library that you copied to your
-      source tree&mdash;you should not reference the library from the Android SDK directory.</p>
+      You should be referencing a copy of the library that you copied to your development
+      workspace&mdash;you should not reference the library directly from the Android SDK directory.</p>
   </li>
   <li>If you are using <a href="{@docRoot}tools/help/proguard.html">ProGuard</a>, add the following
       lines in the <code>&lt;project_directory&gt;/proguard-project.txt</code> file
@@ -71,7 +84,14 @@ device such as an Android phone or tablet.</p>
 </pre>
 </ol>
 
-<h2 id="ensure">Ensuring Devices Have the Google Play services APK</h2>
+<p>Once you have the Google Play services library project added to your app project,
+you can begin developing features with the
+<a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>.</p>
+
+
+
+<h2 id="ensure">Ensure Devices Have the Google Play services APK</h2>
+
 <p>As described in the <a href="{@docRoot}google/play-services/index.html">Google Play services
 introduction</a>, Google Play delivers service updates for users on
 Android 2.2 through the Google Play Store app. However, updates might not reach
@@ -80,7 +100,7 @@ all users immediately.</p>
 <p class="caution">
 <strong>Important:</strong>
     Because it is hard to anticipate the state of each device, you must <em>always</em> check for a
-    compatible Google Play services APK in your app before you access Google Play services
+    compatible Google Play services APK before you access Google Play services
     features.  For many apps, the best time to check is during the
     {@link android.app.Activity#onResume onResume()} method of the main activity.
 </p>
@@ -119,11 +139,9 @@ a user's device:</p>
 
 <p class="note">
 <b>Note:</b>
-<span>
     The Google Play services APK is not visible by searching the Google Play Store. The client
     library provides a deep link into the Google Play Store when it detects that the device has a
     missing or incompatible Google Play services APK.
-</span>
 </p>
 
 <p>
