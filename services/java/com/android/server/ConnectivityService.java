@@ -3134,6 +3134,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 Settings.Global.HTTP_PROXY);
         if (!TextUtils.isEmpty(proxy)) {
             String data[] = proxy.split(":");
+            if (data.length == 0) {
+                return;
+            }
+
             String proxyHost =  data[0];
             int proxyPort = 8080;
             if (data.length > 1) {
@@ -3145,6 +3149,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             ProxyProperties p = new ProxyProperties(data[0], proxyPort, "");
             setGlobalProxy(p);
+        } else {
+            setGlobalProxy(null);
         }
     }
 
