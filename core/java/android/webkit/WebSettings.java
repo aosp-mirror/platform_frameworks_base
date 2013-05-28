@@ -500,6 +500,12 @@ public abstract class WebSettings {
      * Sets the default zoom density of the page. This must be called from the UI
      * thread. The default is {@link ZoomDensity#MEDIUM}.
      *
+     * This setting is not recommended for use in new applications.  If the WebView
+     * is utilized to display mobile-oriented pages, the desired effect can be achieved by
+     * adjusting 'width' and 'initial-scale' attributes of page's 'meta viewport'
+     * tag. For pages lacking the tag, {@link android.webkit.WebView#setInitialScale}
+     * and {@link #setUseWideViewPort} can be used.
+     *
      * @param zoom the zoom density
      */
     public void setDefaultZoom(ZoomDensity zoom) {
@@ -509,6 +515,8 @@ public abstract class WebSettings {
     /**
      * Gets the default zoom density of the page. This should be called from
      * the UI thread.
+     *
+     * This setting is not recommended for use in new applications.
      *
      * @return the zoom density
      * @see #setDefaultZoom
