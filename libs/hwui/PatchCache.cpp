@@ -40,6 +40,7 @@ PatchCache::PatchCache(): mCache(LruCache<PatchDescription, Patch*>::kUnlimitedC
         mMaxSize = KB(DEFAULT_PATCH_CACHE_SIZE);
     }
     mSize = 0;
+    mMeshBuffer = 0;
 }
 
 PatchCache::~PatchCache() {
@@ -47,11 +48,18 @@ PatchCache::~PatchCache() {
 }
 
 void PatchCache::init(Caches& caches) {
-    glGenBuffers(1, &mMeshBuffer);
+    bool created = false;
+    if (!mMeshBuffer) {
+        glGenBuffers(1, &mMeshBuffer);
+        created = true;
+    }
+
     caches.bindMeshBuffer(mMeshBuffer);
     caches.resetVertexPointers();
 
-    glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
+    if (created) {
+        glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,9 +81,14 @@ int PatchCache::PatchDescription::compare(const PatchCache::PatchDescription& lh
 }
 
 void PatchCache::clear() {
-    glDeleteBuffers(1, &mMeshBuffer);
     clearCache();
-    mSize = 0;
+
+    if (mMeshBuffer) {
+        Caches::getInstance().unbindMeshBuffer();
+        glDeleteBuffers(1, &mMeshBuffer);
+        mMeshBuffer = 0;
+        mSize = 0;
+    }
 }
 
 void PatchCache::clearCache() {
@@ -106,9 +119,8 @@ const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
         }
 
         if (vertices) {
-            Caches& caches = Caches::getInstance();
-            caches.bindMeshBuffer(mMeshBuffer);
-            caches.resetVertexPointers();
+            // This call ensures the VBO exists and that it is bound
+            init(Caches::getInstance());
 
             // TODO: Simply remove the oldest items until we have enough room
             // This will require to keep a list of free blocks in the VBO

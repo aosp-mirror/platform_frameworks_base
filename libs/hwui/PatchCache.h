@@ -121,9 +121,10 @@ private:
 
     uint32_t mMaxSize;
     uint32_t mSize;
-    LruCache<PatchDescription, Patch*> mCache;
 
     GLuint mMeshBuffer;
+
+    LruCache<PatchDescription, Patch*> mCache;
 }; // class PatchCache
 
 }; // namespace uirenderer
