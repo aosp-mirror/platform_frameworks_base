@@ -1472,9 +1472,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (lastHoverTarget != null) {
                         lastHoverTarget.next = hoverTarget;
                     } else {
-                        lastHoverTarget = hoverTarget;
                         mFirstHoverTarget = hoverTarget;
                     }
+                    lastHoverTarget = hoverTarget;
 
                     // Dispatch the event to the child.
                     if (action == MotionEvent.ACTION_HOVER_ENTER) {
