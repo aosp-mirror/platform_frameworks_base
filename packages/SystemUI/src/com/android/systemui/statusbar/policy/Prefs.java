@@ -29,6 +29,8 @@ public class Prefs {
     public static final String SHOWN_COMPAT_MODE_HELP = "shown_compat_mode_help";
     public static final String SHOWN_QUICK_SETTINGS_HELP = "shown_quick_settings_help";
 
+    public static final String HIDEYBAR_CONFIRMED = "hideybar_confirmed";
+
     public static SharedPreferences read(Context context) {
         return context.getSharedPreferences(Prefs.SHARED_PREFS_NAME, Context.MODE_PRIVATE);
     }
