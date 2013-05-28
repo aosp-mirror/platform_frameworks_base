@@ -53,10 +53,45 @@ the ADT Plugin, as denoted by revision number. </p>
 <p>For a summary of all known issues in ADT, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.0.1</a> <em>(May 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required for ADT 22.0.1.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 22.0.1.</li>
+      <li>ADT 22.0.1 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
+      Tools r22.0.1</a>. If you haven't already installed SDK Tools r22 into your SDK, use the
+      Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed issue with Lint ServiceCast check and fully qualified class names.
+        (<a href="http://code.google.com/p/android/issues/detail?id=55403">Issue 55403</a>)</li>
+      <li>Fixed crash issue with Lint ArraySizeDetector check.
+        (<a href="http://code.google.com/p/android/issues/detail?id=54887">Issue 54887</a>)</li>
+      <li>Fixed problem with the Gradle export feature.</li>
+      <li>Fixed version check issue for the ADT Plugin.</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.0.0</a> <em>(May 2013)</em>
   </p>
 
@@ -131,7 +166,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
         &gt; Rename</strong>.</li>
       <li>Updated XML Editor to improve double click handling.</li>
       <li>Added code completion improvements for custom views, theme references and class
-        references. For example, code completion in a {@code &lt;fragment android:name=””&gt;} tag
+        references. For example, code completion in a {@code &lt;fragment android:name="" &gt;} tag
         now suggests completion with a list of fragment classes. Similarly, code completion in the
         manifest now offers implementations suitable for the given tag.</li>
       <li>Updated the <strong>Project Import</strong> dialog so that it shows a table for all
