@@ -1224,9 +1224,9 @@ class MountService extends IMountService.Stub
                             " allowMassStorage: " + allowMassStorage +
                             " maxFileSize: " + maxFileSize);
 
-                    if (emulated) {
-                        // For devices with emulated storage, we create separate
-                        // volumes for each known user.
+                    if (emulated && primary) {
+                        // For devices with emulated primary storage,
+                        // we create separate volumes for each known user.
                         mEmulatedTemplate = new StorageVolume(null, descriptionId, true, false,
                                 true, mtpReserve, false, maxFileSize, null);
 
@@ -1257,11 +1257,11 @@ class MountService extends IMountService.Stub
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            // Compute storage ID for each physical volume; emulated storage is
-            // always 0 when defined.
+            // Compute storage ID for each physical volume;
+            // Primary emulated storage is always 0 when defined.
             int index = isExternalStorageEmulated() ? 1 : 0;
             for (StorageVolume volume : mVolumes) {
-                if (!volume.isEmulated()) {
+                if (!(volume.isEmulated() && volume.isPrimary())) {
                     volume.setStorageId(index++);
                 }
             }
