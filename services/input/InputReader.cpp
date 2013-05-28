@@ -4170,20 +4170,24 @@ void TouchInputMapper::cookPointerData() {
             x = float(in.y - mRawPointerAxes.y.minValue) * mYScale + mYTranslate;
             y = float(mRawPointerAxes.x.maxValue - in.x) * mXScale + mXTranslate;
             orientation -= M_PI_2;
-            if (orientation < - M_PI_2) {
-                orientation += M_PI;
+            if (orientation < mOrientedRanges.orientation.min) {
+                orientation += (mOrientedRanges.orientation.max - mOrientedRanges.orientation.min);
             }
             break;
         case DISPLAY_ORIENTATION_180:
             x = float(mRawPointerAxes.x.maxValue - in.x) * mXScale + mXTranslate;
             y = float(mRawPointerAxes.y.maxValue - in.y) * mYScale + mYTranslate;
+            orientation -= M_PI;
+            if (orientation < mOrientedRanges.orientation.min) {
+                orientation += (mOrientedRanges.orientation.max - mOrientedRanges.orientation.min);
+            }
             break;
         case DISPLAY_ORIENTATION_270:
             x = float(mRawPointerAxes.y.maxValue - in.y) * mYScale + mYTranslate;
             y = float(in.x - mRawPointerAxes.x.minValue) * mXScale + mXTranslate;
             orientation += M_PI_2;
-            if (orientation > M_PI_2) {
-                orientation -= M_PI;
+            if (orientation > mOrientedRanges.orientation.max) {
+                orientation -= (mOrientedRanges.orientation.max - mOrientedRanges.orientation.min);
             }
             break;
         default:
