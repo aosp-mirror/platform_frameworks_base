@@ -127,7 +127,8 @@ public class ActivityStackSupervisor {
     private ActivityStack mHomeStack;
 
     /** The non-home stack currently receiving input or launching the next activity. If home is
-     * in front then mHomeStack overrides mFocusedStack. */
+     * in front then mHomeStack overrides mFocusedStack.
+     * DO NOT ACCESS DIRECTLY - It may be null, use getFocusedStack() */
     private ActivityStack mFocusedStack;
 
     /** All the non-launcher stacks */
@@ -326,7 +327,7 @@ public class ActivityStackSupervisor {
             final int stackId = stack.mStackId;
             final int nextStackId = mWindowManager.removeStack(stackId);
             // TODO: Perhaps we need to let the ActivityManager determine the next focus...
-            if (mFocusedStack.mStackId == stackId) {
+            if (getFocusedStack().mStackId == stackId) {
                 // If this is the last app stack, set mFocusedStack to null.
                 mFocusedStack = nextStackId == HOME_STACK_ID ? null : getStack(nextStackId);
             }
