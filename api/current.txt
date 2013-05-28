@@ -8633,6 +8633,7 @@ package android.graphics {
     method public void eraseColor(int);
     method public android.graphics.Bitmap extractAlpha();
     method public android.graphics.Bitmap extractAlpha(android.graphics.Paint, int[]);
+    method public final int getAllocationByteCount();
     method public final int getByteCount();
     method public final android.graphics.Bitmap.Config getConfig();
     method public int getDensity();

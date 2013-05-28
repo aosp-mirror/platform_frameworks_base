@@ -211,19 +211,17 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
     SkBitmap* bitmap;
     bool useExistingBitmap = false;
+    unsigned int existingBufferSize = 0;
     if (javaBitmap == NULL) {
         bitmap = new SkBitmap;
     } else {
-        if (sampleSize != 1) {
-            return nullObjectReturn("SkImageDecoder: Cannot reuse bitmap with sampleSize != 1");
-        }
-
         bitmap = (SkBitmap*) env->GetIntField(javaBitmap, gBitmap_nativeBitmapFieldID);
-        // only reuse the provided bitmap if it is immutable
+        // only reuse the provided bitmap if it is mutable
         if (!bitmap->isImmutable()) {
             useExistingBitmap = true;
             // config of supplied bitmap overrules config set in options
             prefConfig = bitmap->getConfig();
+            existingBufferSize = GraphicsJNI::getBitmapAllocationByteCount(env, javaBitmap);
         } else {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             bitmap = new SkBitmap;
@@ -250,6 +248,26 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     SkImageDecoder::Mode decodeMode = mode;
     if (isPurgeable) {
         decodeMode = SkImageDecoder::kDecodeBounds_Mode;
+    }
+
+    if (javaBitmap != NULL) {
+        // If we're reusing the pixelref from an existing bitmap, decode the bounds and
+        // reinitialize the native object for the new content, keeping the pixelRef
+        SkPixelRef* pixelRef = bitmap->pixelRef();
+        SkSafeRef(pixelRef);
+
+        SkBitmap boundsBitmap;
+        decoder->decode(stream, &boundsBitmap, prefConfig, SkImageDecoder::kDecodeBounds_Mode);
+        stream->rewind();
+
+        if (boundsBitmap.getSize() > existingBufferSize) {
+            return nullObjectReturn("bitmap marked for reuse too small to contain decoded data");
+        }
+
+        bitmap->setConfig(boundsBitmap.config(), boundsBitmap.width(), boundsBitmap.height(), 0);
+        bitmap->setPixelRef(pixelRef);
+        SkSafeUnref(pixelRef);
+        GraphicsJNI::reinitBitmap(env, javaBitmap);
     }
 
     SkBitmap* decoded;

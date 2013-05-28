@@ -59,6 +59,10 @@ public:
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
                                 jbyteArray ninepatch, int density = -1);
 
+    static void reinitBitmap(JNIEnv* env, jobject javaBitmap);
+
+    static int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
+
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);

@@ -152,6 +152,8 @@ static jfieldID gPointF_yFieldID;
 static jclass   gBitmap_class;
 static jfieldID gBitmap_nativeInstanceID;
 static jmethodID gBitmap_constructorMethodID;
+static jmethodID gBitmap_reinitMethodID;
+static jmethodID gBitmap_getAllocationByteCountMethodID;
 
 static jclass   gBitmapConfig_class;
 static jfieldID gBitmapConfig_nativeInstanceID;
@@ -363,6 +365,15 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
     return createBitmap(env, bitmap, NULL, isMutable, ninepatch, NULL, density);
 }
 
+void GraphicsJNI::reinitBitmap(JNIEnv* env, jobject javaBitmap)
+{
+    env->CallVoidMethod(javaBitmap, gBitmap_reinitMethodID);
+}
+
+int GraphicsJNI::getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
+{
+    return env->CallIntMethod(javaBitmap, gBitmap_getAllocationByteCountMethodID);
+}
 
 jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
 {
@@ -584,6 +595,8 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
                                             "(I[BZ[B[II)V");
+    gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "()V");
+    gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");
     gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
     gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(I)V");
 
