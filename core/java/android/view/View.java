@@ -15914,7 +15914,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>This mehod must be called by {@link #onMeasure(int, int)} to store the
+     * <p>This method must be called by {@link #onMeasure(int, int)} to store the
      * measured width and measured height. Failing to do so will trigger an
      * exception at measurement time.</p>
      *
