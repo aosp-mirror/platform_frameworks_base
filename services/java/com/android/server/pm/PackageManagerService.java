@@ -4545,7 +4545,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // version of the application while the new one gets installed.
         if ((parseFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
             killApplication(pkg.applicationInfo.packageName,
-                        pkg.applicationInfo.uid);
+                        pkg.applicationInfo.uid, "update pkg");
         }
 
         // Also need to kill any apps that are dependent on the library.
@@ -4553,7 +4553,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (int i=0; i<clientLibPkgs.size(); i++) {
                 PackageParser.Package clientPkg = clientLibPkgs.get(i);
                 killApplication(clientPkg.applicationInfo.packageName,
-                        clientPkg.applicationInfo.uid);
+                        clientPkg.applicationInfo.uid, "update lib");
             }
         }
 
@@ -4903,14 +4903,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         return NativeLibraryHelper.copyNativeBinariesIfNeededLI(scanFile, nativeLibraryDir);
     }
 
-    private void killApplication(String pkgName, int appId) {
+    private void killApplication(String pkgName, int appId, String reason) {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
         IActivityManager am = ActivityManagerNative.getDefault();
         if (am != null) {
             try {
-                am.killApplicationWithAppId(pkgName, appId);
+                am.killApplicationWithAppId(pkgName, appId, reason);
             } catch (RemoteException e) {
             }
         }
@@ -8273,7 +8273,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        killApplication(packageName, oldPkg.applicationInfo.uid);
+        killApplication(packageName, oldPkg.applicationInfo.uid, "replace sys pkg");
 
         res.removedInfo.uid = oldPkg.applicationInfo.uid;
         res.removedInfo.removedPackage = packageName;
@@ -9078,7 +9078,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package:" + ps.name);
             // Kill application pre-emptively especially for apps on sd.
-            killApplication(packageName, ps.appId);
+            killApplication(packageName, ps.appId, "uninstall pkg");
             ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags,
                     allUserHandles, perUserInstalled,
                     outInfo, writeSettings);

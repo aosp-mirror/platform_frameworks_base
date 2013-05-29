@@ -283,7 +283,8 @@ public interface IActivityManager extends IInterface {
     public void stopAppSwitches() throws RemoteException;
     public void resumeAppSwitches() throws RemoteException;
     
-    public void killApplicationWithAppId(String pkg, int appid) throws RemoteException;
+    public void killApplicationWithAppId(String pkg, int appid, String reason)
+            throws RemoteException;
     
     public void closeSystemDialogs(String reason) throws RemoteException;
     

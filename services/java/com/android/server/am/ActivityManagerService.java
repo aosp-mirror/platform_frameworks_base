@@ -1226,9 +1226,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (ActivityManagerService.this) {
                     int appid = msg.arg1;
                     boolean restart = (msg.arg2 == 1);
-                    String pkg = (String) msg.obj;
+                    Bundle bundle = (Bundle)msg.obj;
+                    String pkg = bundle.getString("pkg");
+                    String reason = bundle.getString("reason");
                     forceStopPackageLocked(pkg, appid, restart, false, true, false,
-                            UserHandle.USER_ALL);
+                            UserHandle.USER_ALL, reason);
                 }
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
@@ -3620,7 +3622,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         android.Manifest.permission.CLEAR_APP_USER_DATA,
                         pid, uid, -1, true)
                         == PackageManager.PERMISSION_GRANTED) {
-                    forceStopPackageLocked(packageName, pkgUid);
+                    forceStopPackageLocked(packageName, pkgUid, "clear data");
                 } else {
                     throw new SecurityException(pid+" does not have permission:"+
                             android.Manifest.permission.CLEAR_APP_USER_DATA+" to clear data" +
@@ -3739,7 +3741,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+        final int callingPid = Binder.getCallingPid();
+        userId = handleIncomingUser(callingPid, Binder.getCallingUid(),
                 userId, true, true, "forceStopPackage", null);
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -3765,7 +3768,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 + packageName + ": " + e);
                     }
                     if (isUserRunningLocked(user, false)) {
-                        forceStopPackageLocked(packageName, pkgUid);
+                        forceStopPackageLocked(packageName, pkgUid, "from pid " + callingPid);
                     }
                 }
             }
@@ -3778,7 +3781,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * The pkg name and app id have to be specified.
      */
     @Override
-    public void killApplicationWithAppId(String pkg, int appid) {
+    public void killApplicationWithAppId(String pkg, int appid, String reason) {
         if (pkg == null) {
             return;
         }
@@ -3794,7 +3797,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             Message msg = mHandler.obtainMessage(KILL_APPLICATION_MSG);
             msg.arg1 = appid;
             msg.arg2 = 0;
-            msg.obj = pkg;
+            Bundle bundle = new Bundle();
+            bundle.putString("pkg", pkg);
+            bundle.putString("reason", reason);
+            msg.obj = bundle;
             mHandler.sendMessage(msg);
         } else {
             throw new SecurityException(callerUid + " cannot kill pkg: " +
@@ -3896,9 +3902,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private void forceStopPackageLocked(final String packageName, int uid) {
+    private void forceStopPackageLocked(final String packageName, int uid, String reason) {
         forceStopPackageLocked(packageName, UserHandle.getAppId(uid), false,
-                false, true, false, UserHandle.getUserId(uid));
+                false, true, false, UserHandle.getUserId(uid), reason);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
@@ -3913,8 +3919,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 MY_PID, Process.SYSTEM_UID, UserHandle.getUserId(uid));
     }
 
-    private void forceStopUserLocked(int userId) {
-        forceStopPackageLocked(null, -1, false, false, true, false, userId);
+    private void forceStopUserLocked(int userId, String reason) {
+        forceStopPackageLocked(null, -1, false, false, true, false, userId, reason);
         Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                 | Intent.FLAG_RECEIVER_FOREGROUND);
@@ -3996,7 +4002,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final boolean forceStopPackageLocked(String name, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
-            boolean evenPersistent, int userId) {
+            boolean evenPersistent, int userId, String reason) {
         int i;
         int N;
 
@@ -4014,10 +4020,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (doit) {
             if (name != null) {
-                Slog.i(TAG, "Force stopping package " + name + " appid=" + appId
-                        + " user=" + userId);
+                Slog.i(TAG, "Force stopping " + name + " appid=" + appId
+                        + " user=" + userId + ": " + reason);
             } else {
-                Slog.i(TAG, "Force stopping user " + userId);
+                Slog.i(TAG, "Force stopping u" + userId + ": " + reason);
             }
 
             Iterator<SparseArray<Long>> badApps = mProcessCrashTimes.getMap().values().iterator();
@@ -4051,7 +4057,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean didSomething = killPackageProcessesLocked(name, appId, userId,
                 -100, callerWillRestart, true, doit, evenPersistent,
-                name == null ? ("force stop user " + userId) : ("force stop " + name));
+                name == null ? ("stop user " + userId) : ("stop " + name));
 
         if (mStackSupervisor.forceStopPackageLocked(name, doit, evenPersistent, userId)) {
             if (!doit) {
@@ -4535,7 +4541,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (pkgs != null) {
                     for (String pkg : pkgs) {
                         synchronized (ActivityManagerService.this) {
-                            if (forceStopPackageLocked(pkg, -1, false, false, false, false, 0)) {
+                            if (forceStopPackageLocked(pkg, -1, false, false, false, false, 0,
+                                    "finished booting")) {
                                 setResultCode(Activity.RESULT_OK);
                                 return;
                             }
@@ -7546,7 +7553,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (packageName != null) {
                 final long origId = Binder.clearCallingIdentity();
                 forceStopPackageLocked(packageName, -1, false, false, true, true,
-                        UserHandle.USER_ALL);
+                        UserHandle.USER_ALL, "set debug app");
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -11976,7 +11983,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                         if (list != null && (list.length > 0)) {
                             for (String pkg : list) {
-                                forceStopPackageLocked(pkg, -1, false, true, true, false, userId);
+                                forceStopPackageLocked(pkg, -1, false, true, true, false, userId,
+                                        "storage unmount");
                             }
                             sendPackageBroadcastLocked(
                                     IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list, userId);
@@ -11985,12 +11993,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Uri data = intent.getData();
                         String ssp;
                         if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
+                            boolean removed = Intent.ACTION_PACKAGE_REMOVED.equals(
+                                    intent.getAction());
                             if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                                 forceStopPackageLocked(ssp,
                                         intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true,
-                                        false, userId);
+                                        false, userId, removed ? "pkg removed" : "pkg changed");
                             }
-                            if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+                            if (removed) {
                                 sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
                                         new String[] {ssp}, userId);
                                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -12462,7 +12472,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
-            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, userId);
+            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, userId,
+                    "start instr");
             ProcessRecord app = addAppLocked(ai, false);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
@@ -12529,7 +12540,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, app.userId);
+        forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, app.userId,
+                "finished inst");
     }
 
     public void finishInstrumentation(IApplicationThread target,
@@ -14808,7 +14820,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 // Clean up all state and processes associated with the user.
                 // Kill all the processes for the user.
-                forceStopUserLocked(userId);
+                forceStopUserLocked(userId, "finish user");
             }
         }
 
