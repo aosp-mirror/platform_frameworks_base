@@ -1,6 +1,5 @@
 page.title=Android Open Source Licensing FAQ
-parent.title=FAQs, Tips, and How-to
-parent.link=index.html
+excludeFromSuggestions=true
 @jd:body
 
 <ul>
