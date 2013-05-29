@@ -5116,6 +5116,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // show status hideybar
                 tmpVisibility |= View.STATUS_BAR_OVERLAY;
                 if ((mLastSystemUiFlags & View.STATUS_BAR_OVERLAY) == 0) {
+                    tmpVisibility &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
                     mStatusBar.showLw(true);
                 }
             }
@@ -5132,6 +5133,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // show navigation hideybar
                 tmpVisibility |= View.NAVIGATION_BAR_OVERLAY;
                 if ((mLastSystemUiFlags & View.NAVIGATION_BAR_OVERLAY) == 0) {
+                    tmpVisibility &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
                     mNavigationBar.showLw(true);
                 }
             }
