@@ -370,6 +370,11 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
     private static native boolean nUploadAtlas(GraphicBuffer buffer, int bitmap);
 
     @Override
+    public boolean isCompatible(int ppid) {
+        return ppid == android.os.Process.myPpid();
+    }
+
+    @Override
     public GraphicBuffer getBuffer() throws RemoteException {
         return mAtlasReady.get() ? mBuffer : null;
     }

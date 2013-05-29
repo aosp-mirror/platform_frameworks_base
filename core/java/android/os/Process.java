@@ -650,6 +650,12 @@ public class Process {
     public static final native int myPid();
 
     /**
+     * Returns the identifier of this process' parent.
+     * @hide
+     */
+    public static native int myPpid();
+
+    /**
      * Returns the identifier of the calling thread, which be used with
      * {@link #setThreadPriority(int, int)}.
      */
