@@ -263,6 +263,10 @@ public class NetworkController extends BroadcastReceiver {
         return mHasMobileDataFeature;
     }
 
+    public boolean hasVoiceCallingFeature() {
+        return mPhone.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE;
+    }
+
     public boolean isEmergencyOnly() {
         return (mServiceState != null && mServiceState.isEmergencyOnly());
     }
@@ -1377,6 +1381,8 @@ public class NetworkController extends BroadcastReceiver {
                 mConnected?"CONNECTED":"DISCONNECTED",
                 mConnectedNetworkType, mConnectedNetworkTypeName));
         pw.println("  - telephony ------");
+        pw.print("  hasVoiceCallingFeature()=");
+        pw.println(hasVoiceCallingFeature());
         pw.print("  hasService()=");
         pw.println(hasService());
         pw.print("  mHspaDataDistinguishable=");
