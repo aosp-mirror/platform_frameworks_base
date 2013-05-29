@@ -12057,7 +12057,6 @@ package android.media {
     method public void start();
     method public void stop();
     method public void writeSampleData(int, java.nio.ByteBuffer, android.media.MediaCodec.BufferInfo);
-    field public static final int SAMPLE_FLAG_SYNC = 1; // 0x1
   }
 
   public static final class MediaMuxer.OutputFormat {

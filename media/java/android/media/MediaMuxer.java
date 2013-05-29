@@ -74,16 +74,6 @@ final public class MediaMuxer {
         public static final int MUXER_OUTPUT_MPEG_4 = 0;
     };
 
-    /**
-     * The sample is a sync sample, which does not require other video samples
-     * to decode. This flag is used in {@link #writeSampleData} to indicate
-     * which sample is a sync sample.
-     */
-    /* Keep this flag in sync with its equivalent in
-     * include/media/stagefright/MediaMuxer.h.
-     */
-    public static final int SAMPLE_FLAG_SYNC = 1;
-
     // All the native functions are listed here.
     private static native int nativeSetup(FileDescriptor fd, int format);
     private static native void nativeRelease(int nativeObject);
@@ -260,10 +250,13 @@ final public class MediaMuxer {
      * Writes an encoded sample into the muxer.
      * <p>The application needs to make sure that the samples are written into
      * the right tracks. Also, it needs to make sure the samples for each track
-     * are written in chronological order.</p>
+     * are written in chronological order (e.g. in the order they are provided
+     * by the encoder.)</p>
      * @param byteBuf The encoded sample.
      * @param trackIndex The track index for this sample.
      * @param bufferInfo The buffer information related to this sample.
+     * MediaMuxer uses the flags provided in {@link MediaCodec.BufferInfo},
+     * to signal sync frames.
      */
     public void writeSampleData(int trackIndex, ByteBuffer byteBuf,
             BufferInfo bufferInfo) {
