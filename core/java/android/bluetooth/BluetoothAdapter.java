@@ -47,17 +47,22 @@ import java.util.UUID;
  * device discovery, query a list of bonded (paired) devices,
  * instantiate a {@link BluetoothDevice} using a known MAC address, and create
  * a {@link BluetoothServerSocket} to listen for connection requests from other
- * devices.
+ * devices, and start a scan for Bluetooth LE devices.
  *
  * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
- * adapter, call the static {@link #getDefaultAdapter} method.
+ * adapter, when running on JELLY_BEAN_MR1 and below, call the 
+ * static {@link #getDefaultAdapter} method; when running on JELLY_BEAN_MR2 and
+ * higher, retrieve it through
+ * {@link android.content.Context#getSystemService} with
+ * {@link android.content.Context#BLUETOOTH_SERVICE}.
  * Fundamentally, this is your starting point for all
  * Bluetooth actions. Once you have the local adapter, you can get a set of
  * {@link BluetoothDevice} objects representing all paired devices with
  * {@link #getBondedDevices()}; start device discovery with
  * {@link #startDiscovery()}; or create a {@link BluetoothServerSocket} to
  * listen for incoming connection requests with
- * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}.
+ * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}; or start a scan for
+ * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
  *
  * <p class="note"><strong>Note:</strong>
  * Most methods require the {@link android.Manifest.permission#BLUETOOTH}

@@ -565,6 +565,9 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /**
      * Close this Bluetooth GATT client.
+     *
+     * Application should call this method as early as possible after it is done with
+     * this GATT client.
      */
     public void close() {
         if (DBG) Log.d(TAG, "close()");
