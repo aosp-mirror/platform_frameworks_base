@@ -28,6 +28,13 @@ import android.view.GraphicBuffer;
  */
 interface IAssetAtlas {
     /**
+     * Indicates whether the atlas is compatible with the specified
+     * parent process id. If the atlas' ppid does not match, this
+     * method will return false.
+     */
+    boolean isCompatible(int ppid);
+
+    /**
      * Returns the atlas buffer (texture) or null if the atlas is
      * not available yet.
      */

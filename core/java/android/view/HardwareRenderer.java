@@ -1931,11 +1931,13 @@ public abstract class HardwareRenderer {
 
             IAssetAtlas atlas = IAssetAtlas.Stub.asInterface(binder);
             try {
-                GraphicBuffer buffer = atlas.getBuffer();
-                if (buffer != null) {
-                    int[] map = atlas.getMap();
-                    if (map != null) {
-                        GLES20Canvas.initAtlas(buffer, map);
+                if (atlas.isCompatible(android.os.Process.myPpid())) {
+                    GraphicBuffer buffer = atlas.getBuffer();
+                    if (buffer != null) {
+                        int[] map = atlas.getMap();
+                        if (map != null) {
+                            GLES20Canvas.initAtlas(buffer, map);
+                        }
                     }
                 }
             } catch (RemoteException e) {

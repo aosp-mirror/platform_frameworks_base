@@ -99,6 +99,11 @@ jint android_os_Process_myPid(JNIEnv* env, jobject clazz)
     return getpid();
 }
 
+jint android_os_Process_myPpid(JNIEnv* env, jobject clazz)
+{
+    return getppid();
+}
+
 jint android_os_Process_myUid(JNIEnv* env, jobject clazz)
 {
     return getuid();
@@ -990,6 +995,7 @@ jintArray android_os_Process_getPidsForCommands(JNIEnv* env, jobject clazz,
 
 static const JNINativeMethod methods[] = {
     {"myPid",       "()I", (void*)android_os_Process_myPid},
+    {"myPpid",      "()I", (void*)android_os_Process_myPpid},
     {"myTid",       "()I", (void*)android_os_Process_myTid},
     {"myUid",       "()I", (void*)android_os_Process_myUid},
     {"getUidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
