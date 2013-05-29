@@ -22,26 +22,23 @@ import android.content.Intent;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.Slog;
-import android.widget.LinearLayout;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.policy.AirplaneModeController;
-import com.android.systemui.statusbar.policy.AutoRotateController;
 import com.android.systemui.statusbar.policy.DoNotDisturbController;
-import com.android.systemui.statusbar.policy.VolumeController;
+import com.android.systemui.statusbar.policy.RotationLockController;
 
 public class SettingsView extends LinearLayout implements View.OnClickListener {
     static final String TAG = "SettingsView";
 
     AirplaneModeController mAirplane;
-    AutoRotateController mRotate;
+    RotationLockController mRotationController;
     BrightnessController mBrightness;
     DoNotDisturbController mDoNotDisturb;
     View mRotationLockContainer;
@@ -67,15 +64,25 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
 
         mRotationLockContainer = findViewById(R.id.rotate);
         mRotationLockSeparator = findViewById(R.id.rotate_separator);
-        mRotate = new AutoRotateController(context,
-                (CompoundButton)findViewById(R.id.rotate_checkbox),
-                new AutoRotateController.RotationLockCallbacks() {
+        mRotationController = new RotationLockController(context);
+        mRotationController.addRotationLockControllerCallback(
+                new RotationLockController.RotationLockControllerCallback() {
                     @Override
-                    public void setRotationLockControlVisibility(boolean show) {
-                        mRotationLockContainer.setVisibility(show ? View.VISIBLE : View.GONE);
-                        mRotationLockSeparator.setVisibility(show ? View.VISIBLE : View.GONE);
+                    public void onRotationLockStateChanged(boolean locked, boolean visible) {
+                        mRotationLockContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+                        mRotationLockSeparator.setVisibility(visible ? View.VISIBLE : View.GONE);
                     }
                 });
+        CompoundButton rotateCheckbox = (CompoundButton) findViewById(R.id.rotate_checkbox);
+        rotateCheckbox.setChecked(!mRotationController.isRotationLocked());
+        rotateCheckbox.setVisibility(mRotationController.isRotationLockAffordanceVisible()
+                ? View.VISIBLE : View.GONE);
+        rotateCheckbox.setOnCheckedChangeListener(new CompoundButton. OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mRotationController.setRotationLocked(!buttonView.isChecked());
+            }
+        });
 
         mBrightness = new BrightnessController(context,
                 (ImageView)findViewById(R.id.brightness_icon),
@@ -90,7 +97,7 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         super.onDetachedFromWindow();
         mAirplane.release();
         mDoNotDisturb.release();
-        mRotate.release();
+        mRotationController.release();
     }
 
     public void onClick(View v) {

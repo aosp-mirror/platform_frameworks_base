@@ -39,22 +39,23 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
+import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
 import java.util.List;
 
-
 class QuickSettingsModel implements BluetoothStateChangeCallback,
         NetworkSignalChangedCallback,
         BatteryStateChangeCallback,
         LocationGpsStateChangeCallback,
-        BrightnessStateChangeCallback {
+        BrightnessStateChangeCallback,
+        RotationLockControllerCallback {
 
     // Sett InputMethoManagerService
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
@@ -88,6 +89,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     public static class BluetoothState extends State {
         boolean connected = false;
         String stateContentDescription;
+    }
+    public static class RotationLockState extends State {
+        boolean visible = false;
     }
 
     /** The callback to update a given tile. */
@@ -245,7 +249,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private QuickSettingsTileView mRotationLockTile;
     private RefreshCallback mRotationLockCallback;
-    private State mRotationLockState = new State();
+    private RotationLockState mRotationLockState = new RotationLockState();
 
     private QuickSettingsTileView mBrightnessTile;
     private RefreshCallback mBrightnessCallback;
@@ -258,6 +262,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mSettingsTile;
     private RefreshCallback mSettingsCallback;
     private State mSettingsState = new State();
+
+    private RotationLockController mRotationLockController;
 
     public QuickSettingsModel(Context context) {
         mContext = context;
@@ -681,25 +687,29 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     // Rotation lock
-    void addRotationLockTile(QuickSettingsTileView view, RefreshCallback cb) {
+    void addRotationLockTile(QuickSettingsTileView view,
+            RotationLockController rotationLockController,
+            RefreshCallback cb) {
         mRotationLockTile = view;
         mRotationLockCallback = cb;
+        mRotationLockController = rotationLockController;
         onRotationLockChanged();
     }
     void onRotationLockChanged() {
-        boolean locked = RotationPolicy.isRotationLocked(mContext);
-        mRotationLockState.enabled = locked;
-        mRotationLockState.iconId = locked
+        onRotationLockStateChanged(mRotationLockController.isRotationLocked(),
+                mRotationLockController.isRotationLockAffordanceVisible());
+    }
+    @Override
+    public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {
+        mRotationLockState.visible = affordanceVisible;
+        mRotationLockState.enabled = rotationLocked;
+        mRotationLockState.iconId = rotationLocked
                 ? R.drawable.ic_qs_rotation_locked
                 : R.drawable.ic_qs_auto_rotate;
-        mRotationLockState.label = locked
+        mRotationLockState.label = rotationLocked
                 ? mContext.getString(R.string.quick_settings_rotation_locked_label)
                 : mContext.getString(R.string.quick_settings_rotation_unlocked_label);
-
-        // may be called before addRotationLockTile due to RotationPolicyListener in QuickSettings
-        if (mRotationLockTile != null && mRotationLockCallback != null) {
-            mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
-        }
+        mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
     }
     void refreshRotationLockTile() {
         if (mRotationLockTile != null) {

@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
 
 import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
@@ -28,6 +27,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RotationLockController;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
@@ -73,7 +73,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-
 /**
  *
  */
@@ -97,6 +96,7 @@ class QuickSettings {
     private WifiManager mWifiManager;
 
     private BluetoothController mBluetoothController;
+    private RotationLockController mRotationLockController;
 
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
 
@@ -112,14 +112,6 @@ class QuickSettings {
     // configuration change)
     private final ArrayList<QuickSettingsTileView> mDynamicSpannedTiles =
             new ArrayList<QuickSettingsTileView>();
-
-    private final RotationPolicy.RotationPolicyListener mRotationPolicyListener =
-            new RotationPolicy.RotationPolicyListener() {
-        @Override
-        public void onChange() {
-            mModel.onRotationLockChanged();
-        }
-    };
 
     public QuickSettings(Context context, QuickSettingsContainerView container) {
         mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
@@ -170,8 +162,10 @@ class QuickSettings {
     }
 
     void setup(NetworkController networkController, BluetoothController bluetoothController,
-            BatteryController batteryController, LocationController locationController) {
+            BatteryController batteryController, LocationController locationController,
+            RotationLockController rotationLockController) {
         mBluetoothController = bluetoothController;
+        mRotationLockController = rotationLockController;
 
         setupQuickSettings();
         updateWifiDisplayStatus();
@@ -181,8 +175,7 @@ class QuickSettings {
         bluetoothController.addStateChangedCallback(mModel);
         batteryController.addStateChangedCallback(mModel);
         locationController.addStateChangedCallback(mModel);
-        RotationPolicy.registerRotationPolicyListener(mContext, mRotationPolicyListener,
-                UserHandle.USER_ALL);
+        rotationLockController.addRotationLockControllerCallback(mModel);
     }
 
     private void queryForUserInformation() {
@@ -471,13 +464,29 @@ class QuickSettings {
                     = new QuickSettingsBasicTile(mContext);
             rotationLockTile.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    boolean locked = RotationPolicy.isRotationLocked(mContext);
-                    RotationPolicy.setRotationLock(mContext, !locked);
+                public void onClick(View view) {
+                    final boolean locked = mRotationLockController.isRotationLocked();
+                    mRotationLockController.setRotationLocked(!locked);
                 }
             });
-            mModel.addRotationLockTile(rotationLockTile,
-                    new QuickSettingsModel.BasicRefreshCallback(rotationLockTile));
+            mModel.addRotationLockTile(rotationLockTile, mRotationLockController,
+                    new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView view, State state) {
+                            QuickSettingsModel.RotationLockState rotationLockState =
+                                    (QuickSettingsModel.RotationLockState) state;
+                            view.setVisibility(rotationLockState.visible
+                                    ? View.VISIBLE : View.GONE);
+                            if (state.iconId != 0) {
+                                // needed to flush any cached IDs
+                                rotationLockTile.setImageDrawable(null);
+                                rotationLockTile.setImageResource(state.iconId);
+                            }
+                            if (state.label != null) {
+                                rotationLockTile.setText(state.label);
+                            }
+                        }
+                    });
             parent.addView(rotationLockTile);
         }
 

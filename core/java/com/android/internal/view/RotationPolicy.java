@@ -17,12 +17,13 @@
 package com.android.internal.view;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -40,6 +41,21 @@ public final class RotationPolicy {
     }
 
     /**
+     * Gets whether the device supports rotation. In general such a
+     * device has an accelerometer and has the portrait and landscape
+     * features.
+     *
+     * @param context Context for accessing system resources.
+     * @return Whether the device supports rotation.
+     */
+    public static boolean isRotationSupported(Context context) {
+        PackageManager pm = context.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)
+                && pm.hasSystemFeature(PackageManager.FEATURE_SCREEN_PORTRAIT)
+                && pm.hasSystemFeature(PackageManager.FEATURE_SCREEN_LANDSCAPE);
+    }
+
+    /**
      * Returns true if the device supports the rotation-lock toggle feature
      * in the system UI or system bar.
      *
@@ -48,7 +64,8 @@ public final class RotationPolicy {
      * settings.
      */
     public static boolean isRotationLockToggleSupported(Context context) {
-        return context.getResources().getConfiguration().smallestScreenWidthDp >= 600;
+        return isRotationSupported(context)
+                && context.getResources().getConfiguration().smallestScreenWidthDp >= 600;
     }
 
     /**
