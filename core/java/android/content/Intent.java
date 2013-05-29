@@ -2231,7 +2231,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: An outgoing call is about to be placed.
      *
-     * <p>The Intent will have the following extra value:
+     * <p>The Intent will have the following extra value:</p>
      * <ul>
      *   <li><em>{@link android.content.Intent#EXTRA_PHONE_NUMBER}</em> -
      *       the phone number originally intended to be dialed.</li>
@@ -2250,8 +2250,6 @@ public class Intent implements Parcelable, Cloneable {
      * should have a positive priority.
      * Negative priorities are reserved for the system for this broadcast;
      * using them may cause problems.</p>
-     * <p>Any BroadcastReceiver receiving this Intent <em>must not</em>
-     * abort the broadcast.</p>
      * <p>Emergency calls cannot be intercepted using this mechanism, and
      * other calls cannot be modified to call emergency numbers using this
      * mechanism.
