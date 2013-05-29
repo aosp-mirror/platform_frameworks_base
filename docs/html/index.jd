@@ -13,21 +13,25 @@ page.metaDescription=The official site for Android developers. Provides the Andr
         <div class="frame">
             <ul>
                 <li class="item carousel-home">
-                    <div class="content-left col-10">
-                    <a href="https://developers.google.com/live/android/browse">
-                      <img src="{@docRoot}images/home/io-gdl-2013.png" style="margin:60px 0 0">
-                    </a>
+                    <div class="content-left col-11" style="padding-top:10px;">
+                        <a href="{@docRoot}channels/io2013.html">
+                          <img src="{@docRoot}images/home/io-videos-2013.png" style="margin:60px 0 0;
+                          box-shadow: 3px 10px 18px 1px #999;">
+                        </a>
                     </div>
-                    <div class="content-right col-5">
+                    <div class="content-right col-4">
                     <h1>Watch the Android talks from Google I/O</h1>
                     <p>If you weren't able to attend Google I/O in person or couldn't make it
                     to all the talks, you can catch up on the action
                     with all the recordings, brought to you by
                     <a href="http://developers.google.com/live">Google Developers Live</a>.</p>
-                    <p><a href="https://developers.google.com/live/android/browse" class="button"
+                    <p><a href="{@docRoot}channels/io2013.html" class="button"
                     >See the Android talks</a></p>
                     </div>
                 </li>
+
+
+
                 <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:65px;">
                       <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
