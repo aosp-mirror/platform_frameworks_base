@@ -229,9 +229,8 @@ ul.videos span.tag.distribute {
 function loadVideo(id, title, autoplay) {
   var url = '//www.youtube.com/v/' + id + '&rel=1&border=0&fs=1' + (autoplay?'&autoplay=1':'');
   swfobject.embedSWF(url, 'player', '704', '397', '9.0.0', false, false, {allowfullscreen: 'true'});
-  $("#videoPlayerTitle").html("<h2>" + unescape(title) + "</h2>");
+  $('body,html').animate({ scrollTop: 0 }, "slow");
   setTimeout(function(){$('#noplayer-message').show()}, 2000);
-  $("body").animate({ scrollTop: 0 }, "slow");
 }
 
 
