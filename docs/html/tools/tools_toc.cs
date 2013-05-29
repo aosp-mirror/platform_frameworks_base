@@ -53,7 +53,7 @@
         <ul>
           <li><a href="<?cs var:toroot ?>tools/devices/managing-avds.html"><span class="en">With AVD Manager</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/devices/managing-avds-cmdline.html"><span class="en">From the Command Line</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/devices/emulator.html"><span class="en">Using the Android Emulator</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/devices/emulator.html"><span class="en">Using the Emulator</span></a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>tools/device.html"><span class="en">Using Hardware Devices</span></a></li>
