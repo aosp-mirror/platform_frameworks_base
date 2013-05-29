@@ -567,7 +567,12 @@ public class MainActivity extends FragmentActivity implements
     protected void onStop() {
         // If the client is connected
         if (mLocationClient.isConnected()) {
-            stopPeriodicUpdates();
+            /*
+             * Remove location updates for a listener.
+             * The current Activity is the listener, so
+             * the argument is "this".
+             */
+            removeLocationUpdates(this);
         }
         /*
          * After disconnect() is called, the client is
