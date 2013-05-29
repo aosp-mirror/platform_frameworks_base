@@ -2357,6 +2357,7 @@ public class WifiStateMachine extends StateMachine {
         public void enter() {
             mIsRunning = true;
             mInDelayedStop = false;
+            mDelayedStopCounter++;
             updateBatteryWorkSource(null);
 
             /**
