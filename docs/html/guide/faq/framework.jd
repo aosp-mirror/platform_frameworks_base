@@ -1,6 +1,5 @@
 page.title=Android Application Framework FAQ
-parent.title=FAQs, Tips, and How-to
-parent.link=index.html
+excludeFromSuggestions=true
 @jd:body
 
 <ul>

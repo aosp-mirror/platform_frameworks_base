@@ -1,6 +1,5 @@
 page.title=Common Tasks and How to Do Them in Android
-parent.title=FAQs, Tips, and How-to
-parent.link=index.html
+excludeFromSuggestions=true
 @jd:body
 
 <ul>
