@@ -2255,6 +2255,10 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Emergency calls cannot be intercepted using this mechanism, and
      * other calls cannot be modified to call emergency numbers using this
      * mechanism.
+     * <p>Some apps (such as VoIP apps) may want to redirect the outgoing
+     * call to use their own service instead. Those apps should first prevent
+     * the call from being placed by setting resultData to <code>null</code>
+     * and then start their own app to make the call.
      * <p>You must hold the
      * {@link android.Manifest.permission#PROCESS_OUTGOING_CALLS}
      * permission to receive this Intent.</p>
