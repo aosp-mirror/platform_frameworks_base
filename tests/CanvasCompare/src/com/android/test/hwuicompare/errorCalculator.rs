@@ -49,8 +49,8 @@ void displayDifference(const uchar4 *v_in, uchar4 *v_out, uint32_t x, uint32_t y
     float4 diff = idealPixel - givenPixel;
     float totalDiff = diff.x + diff.y + diff.z + diff.w;
     if (totalDiff < 0) {
-        v_out[0] = rsPackColorTo8888(0, 0, clamp(-totalDiff/2, 0, 1));
+        v_out[0] = rsPackColorTo8888(0, 0, clamp(-totalDiff/2.f, 0.f, 1.f));
     } else {
-        v_out[0] = rsPackColorTo8888(clamp(totalDiff/2, 0, 1), 0, 0);
+        v_out[0] = rsPackColorTo8888(clamp(totalDiff/2.f, 0.f, 1.f), 0, 0);
     }
 }
