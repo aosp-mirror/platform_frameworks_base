@@ -1,6 +1,5 @@
 page.title=Troubleshooting
-parent.title=FAQs, Tips, and How-to
-parent.link=index.html
+excludeFromSuggestions=true
 @jd:body
 
 
