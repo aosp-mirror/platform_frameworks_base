@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.os.AsyncTask;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 
@@ -621,9 +622,11 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
                 view = mInflater.inflate(
                         com.android.internal.R.layout.resolve_list_item, parent, false);
 
+                final ViewHolder holder = new ViewHolder(view);
+                view.setTag(holder);
+
                 // Fix the icon size even if we have different sized resources
-                ImageView icon = (ImageView)view.findViewById(R.id.icon);
-                ViewGroup.LayoutParams lp = (ViewGroup.LayoutParams) icon.getLayoutParams();
+                ViewGroup.LayoutParams lp = holder.icon.getLayoutParams();
                 lp.width = lp.height = mIconSize;
             } else {
                 view = convertView;
@@ -633,20 +636,30 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         }
 
         private final void bindView(View view, DisplayResolveInfo info) {
-            TextView text = (TextView)view.findViewById(com.android.internal.R.id.text1);
-            TextView text2 = (TextView)view.findViewById(com.android.internal.R.id.text2);
-            ImageView icon = (ImageView)view.findViewById(R.id.icon);
-            text.setText(info.displayLabel);
+            final ViewHolder holder = (ViewHolder) view.getTag();
+            holder.text.setText(info.displayLabel);
             if (mShowExtended) {
-                text2.setVisibility(View.VISIBLE);
-                text2.setText(info.extendedInfo);
+                holder.text2.setVisibility(View.VISIBLE);
+                holder.text2.setText(info.extendedInfo);
             } else {
-                text2.setVisibility(View.GONE);
+                holder.text2.setVisibility(View.GONE);
             }
             if (info.displayIcon == null) {
-                info.displayIcon = loadIconForResolveInfo(info.ri);
+                new LoadIconTask().execute(info);
             }
-            icon.setImageDrawable(info.displayIcon);
+            holder.icon.setImageDrawable(info.displayIcon);
+        }
+    }
+
+    static class ViewHolder {
+        public TextView text;
+        public TextView text2;
+        public ImageView icon;
+
+        public ViewHolder(View view) {
+            text = (TextView) view.findViewById(com.android.internal.R.id.text1);
+            text2 = (TextView) view.findViewById(com.android.internal.R.id.text2);
+            icon = (ImageView) view.findViewById(R.id.icon);
         }
     }
 
@@ -659,6 +672,22 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             return true;
         }
 
+    }
+
+    class LoadIconTask extends AsyncTask<DisplayResolveInfo, Void, DisplayResolveInfo> {
+        @Override
+        protected DisplayResolveInfo doInBackground(DisplayResolveInfo... params) {
+            final DisplayResolveInfo info = params[0];
+            if (info.displayIcon == null) {
+                info.displayIcon = loadIconForResolveInfo(info.ri);
+            }
+            return info;
+        }
+
+        @Override
+        protected void onPostExecute(DisplayResolveInfo info) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 }
 

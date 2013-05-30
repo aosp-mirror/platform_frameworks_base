@@ -328,6 +328,7 @@ public class ResolveInfo implements Parcelable {
             implements Comparator<ResolveInfo> {
         public DisplayNameComparator(PackageManager pm) {
             mPM = pm;
+            mCollator.setStrength(Collator.PRIMARY);
         }
 
         public final int compare(ResolveInfo a, ResolveInfo b) {
@@ -336,10 +337,10 @@ public class ResolveInfo implements Parcelable {
             CharSequence  sb = b.loadLabel(mPM);
             if (sb == null) sb = b.activityInfo.name;
             
-            return sCollator.compare(sa.toString(), sb.toString());
+            return mCollator.compare(sa.toString(), sb.toString());
         }
 
-        private final Collator   sCollator = Collator.getInstance();
+        private final Collator   mCollator = Collator.getInstance();
         private PackageManager   mPM;
     }
 }
