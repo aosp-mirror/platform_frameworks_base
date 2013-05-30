@@ -218,7 +218,8 @@ void TextLayoutCache::dumpCacheStats() {
  */
 TextLayoutCacheKey::TextLayoutCacheKey(): start(0), count(0), contextCount(0),
         dirFlags(0), typeface(NULL), textSize(0), textSkewX(0), textScaleX(0), flags(0),
-        hinting(SkPaint::kNo_Hinting), variant(SkPaint::kDefault_Variant), language()  {
+        hinting(SkPaint::kNo_Hinting) {
+    paintOpts.setUseFontFallbacks(true);
 }
 
 TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint, const UChar* text,
@@ -232,8 +233,7 @@ TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint, const UChar* text,
     textScaleX = paint->getTextScaleX();
     flags = paint->getFlags();
     hinting = paint->getHinting();
-    variant = paint->getFontVariant();
-    language = paint->getLanguage();
+    paintOpts = paint->getPaintOptionsAndroid();
 }
 
 TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
@@ -248,8 +248,7 @@ TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
         textScaleX(other.textScaleX),
         flags(other.flags),
         hinting(other.hinting),
-        variant(other.variant),
-        language(other.language) {
+        paintOpts(other.paintOpts) {
 }
 
 int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs) {
@@ -283,11 +282,8 @@ int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutC
     deltaInt = lhs.dirFlags - rhs.dirFlags;
     if (deltaInt) return (deltaInt);
 
-    deltaInt = lhs.variant - rhs.variant;
-    if (deltaInt) return (deltaInt);
-
-    if (lhs.language < rhs.language) return -1;
-    if (lhs.language > rhs.language) return +1;
+    if (lhs.paintOpts != rhs.paintOpts)
+        return memcmp(&lhs.paintOpts, &rhs.paintOpts, sizeof(SkPaintOptionsAndroid));
 
     return memcmp(lhs.getText(), rhs.getText(), lhs.contextCount * sizeof(UChar));
 }
@@ -306,7 +302,7 @@ hash_t TextLayoutCacheKey::hash() const {
     hash = JenkinsHashMix(hash, hash_type(textScaleX));
     hash = JenkinsHashMix(hash, flags);
     hash = JenkinsHashMix(hash, hinting);
-    hash = JenkinsHashMix(hash, variant);
+    hash = JenkinsHashMix(hash, paintOpts.getFontVariant());
     // Note: leaving out language is not problematic, as equality comparisons
     // are still valid - the only bad thing that could happen is collisions.
     hash = JenkinsHashMixShorts(hash, getText(), contextCount);
@@ -698,8 +694,7 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* conte
     mShapingPaint.setTextScaleX(paint->getTextScaleX());
     mShapingPaint.setFlags(paint->getFlags());
     mShapingPaint.setHinting(paint->getHinting());
-    mShapingPaint.setFontVariant(paint->getFontVariant());
-    mShapingPaint.setLanguage(paint->getLanguage());
+    mShapingPaint.setPaintOptionsAndroid(paint->getPaintOptionsAndroid());
 
     // Split the BiDi run into Script runs. Harfbuzz will populate the pos, length and script
     // into the shaperItem
