@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import android.annotation.ArrayRes;
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
@@ -106,7 +109,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
      * @param resource The resource ID for a layout file containing a TextView to use when
      *                 instantiating views.
      */
-    public ArrayAdapter(Context context, int resource) {
+    public ArrayAdapter(Context context, @LayoutRes int resource) {
         this(context, resource, 0, new ArrayList<T>());
     }
 
@@ -118,7 +121,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
      *                 instantiating views.
      * @param textViewResourceId The id of the TextView within the layout resource to be populated
      */
-    public ArrayAdapter(Context context, int resource, int textViewResourceId) {
+    public ArrayAdapter(Context context, @LayoutRes int resource, @IdRes int textViewResourceId) {
         this(context, resource, textViewResourceId, new ArrayList<T>());
     }
 
@@ -130,7 +133,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
      *                 instantiating views.
      * @param objects The objects to represent in the ListView.
      */
-    public ArrayAdapter(Context context, int resource, T[] objects) {
+    public ArrayAdapter(Context context, @LayoutRes int resource, T[] objects) {
         this(context, resource, 0, Arrays.asList(objects));
     }
 
@@ -143,7 +146,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
      * @param textViewResourceId The id of the TextView within the layout resource to be populated
      * @param objects The objects to represent in the ListView.
      */
-    public ArrayAdapter(Context context, int resource, int textViewResourceId, T[] objects) {
+    public ArrayAdapter(Context context, @LayoutRes int resource, @IdRes int textViewResourceId, T[] objects) {
         this(context, resource, textViewResourceId, Arrays.asList(objects));
     }
 
@@ -155,7 +158,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
      *                 instantiating views.
      * @param objects The objects to represent in the ListView.
      */
-    public ArrayAdapter(Context context, int resource, List<T> objects) {
+    public ArrayAdapter(Context context, @LayoutRes int resource, List<T> objects) {
         this(context, resource, 0, objects);
     }
 
@@ -405,7 +408,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
      * @param resource the layout resource defining the drop down views
      * @see #getDropDownView(int, android.view.View, android.view.ViewGroup)
      */
-    public void setDropDownViewResource(int resource) {
+    public void setDropDownViewResource(@LayoutRes int resource) {
         this.mDropDownResource = resource;
     }
 
@@ -457,7 +460,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable,
      * @return An ArrayAdapter<CharSequence>.
      */
     public static ArrayAdapter<CharSequence> createFromResource(Context context,
-            int textArrayResId, int textViewResId) {
+            @ArrayRes int textArrayResId, @LayoutRes int textViewResId) {
         CharSequence[] strings = context.getResources().getTextArray(textArrayResId);
         return new ArrayAdapter<CharSequence>(context, textViewResId, strings);
     }

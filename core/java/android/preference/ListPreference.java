@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.ArrayRes;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -91,7 +92,7 @@ public class ListPreference extends DialogPreference {
      * @see #setEntries(CharSequence[])
      * @param entriesResId The entries array as a resource.
      */
-    public void setEntries(int entriesResId) {
+    public void setEntries(@ArrayRes int entriesResId) {
         setEntries(getContext().getResources().getTextArray(entriesResId));
     }
     
@@ -119,7 +120,7 @@ public class ListPreference extends DialogPreference {
      * @see #setEntryValues(CharSequence[])
      * @param entryValuesResId The entry values array as a resource.
      */
-    public void setEntryValues(int entryValuesResId) {
+    public void setEntryValues(@ArrayRes int entryValuesResId) {
         setEntryValues(getContext().getResources().getTextArray(entryValuesResId));
     }
     

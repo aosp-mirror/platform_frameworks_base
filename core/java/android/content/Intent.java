@@ -23,6 +23,7 @@ import android.util.ArraySet;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.AnyRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -762,11 +763,11 @@ public class Intent implements Parcelable, Cloneable {
          * identifier.
          *
          * @param context The context of the application.
-         * @param resourceId The resource idenfitier for the icon.
+         * @param resourceId The resource identifier for the icon.
          * @return A new ShortcutIconResource with the specified's context package name
-         *         and icon resource idenfitier.
+         *         and icon resource identifier.``
          */
-        public static ShortcutIconResource fromContext(Context context, int resourceId) {
+        public static ShortcutIconResource fromContext(Context context, @AnyRes int resourceId) {
             ShortcutIconResource icon = new ShortcutIconResource();
             icon.packageName = context.getPackageName();
             icon.resourceName = context.getResources().getResourceName(resourceId);

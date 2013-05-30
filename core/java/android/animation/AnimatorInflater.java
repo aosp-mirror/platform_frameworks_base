@@ -15,6 +15,7 @@
  */
 package android.animation;
 
+import android.annotation.AnimatorRes;
 import android.content.Context;
 import android.content.res.ConfigurationBoundResourceCache;
 import android.content.res.ConstantState;
@@ -82,7 +83,7 @@ public class AnimatorInflater {
      * @return The animator object reference by the specified id
      * @throws android.content.res.Resources.NotFoundException when the animation cannot be loaded
      */
-    public static Animator loadAnimator(Context context, int id)
+    public static Animator loadAnimator(Context context, @AnimatorRes int id)
             throws NotFoundException {
         return loadAnimator(context.getResources(), context.getTheme(), id);
     }

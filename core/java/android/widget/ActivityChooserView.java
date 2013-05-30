@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -334,7 +335,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      *
      * @param resourceId The content description resource id.
      */
-    public void setExpandActivityOverflowButtonContentDescription(int resourceId) {
+    public void setExpandActivityOverflowButtonContentDescription(@StringRes int resourceId) {
         CharSequence contentDescription = mContext.getString(resourceId);
         mExpandActivityOverflowButtonImage.setContentDescription(contentDescription);
     }
@@ -514,7 +515,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      *
      * @param resourceId The resource id.
      */
-    public void setDefaultActionButtonContentDescription(int resourceId) {
+    public void setDefaultActionButtonContentDescription(@StringRes int resourceId) {
         mDefaultActionButtonContentDescription = resourceId;
     }
 

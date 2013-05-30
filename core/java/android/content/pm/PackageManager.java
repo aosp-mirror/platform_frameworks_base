@@ -16,11 +16,14 @@
 
 package android.content.pm;
 
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringRes;
 import android.annotation.SystemApi;
+import android.annotation.XmlRes;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManager;
@@ -2710,7 +2713,7 @@ public abstract class PackageManager {
      * @return Returns a Drawable holding the requested image.  Returns null if
      * an image could not be found for any reason.
      */
-    public abstract Drawable getDrawable(String packageName, int resid,
+    public abstract Drawable getDrawable(String packageName, @DrawableRes int resid,
             ApplicationInfo appInfo);
 
     /**
@@ -3012,7 +3015,7 @@ public abstract class PackageManager {
      * @return Returns a CharSequence holding the requested text.  Returns null
      * if the text could not be found for any reason.
      */
-    public abstract CharSequence getText(String packageName, int resid,
+    public abstract CharSequence getText(String packageName, @StringRes int resid,
             ApplicationInfo appInfo);
 
     /**
@@ -3031,7 +3034,7 @@ public abstract class PackageManager {
      * data.  Returns null if the xml resource could not be found for any
      * reason.
      */
-    public abstract XmlResourceParser getXml(String packageName, int resid,
+    public abstract XmlResourceParser getXml(String packageName, @XmlRes int resid,
             ApplicationInfo appInfo);
 
     /**

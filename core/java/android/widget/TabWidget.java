@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.R;
+import android.annotation.DrawableRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -244,7 +245,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param resId the resource identifier of the drawable to use as a
      * divider.
      */
-    public void setDividerDrawable(int resId) {
+    public void setDividerDrawable(@DrawableRes int resId) {
         setDividerDrawable(mContext.getDrawable(resId));
     }
     
@@ -265,7 +266,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param resId the resource identifier of the drawable to use as the
      * left strip drawable
      */
-    public void setLeftStripDrawable(int resId) {
+    public void setLeftStripDrawable(@DrawableRes int resId) {
         setLeftStripDrawable(mContext.getDrawable(resId));
     }
 
@@ -286,7 +287,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param resId the resource identifier of the drawable to use as the
      * right strip drawable
      */
-    public void setRightStripDrawable(int resId) {
+    public void setRightStripDrawable(@DrawableRes int resId) {
         setRightStripDrawable(mContext.getDrawable(resId));
     }
 

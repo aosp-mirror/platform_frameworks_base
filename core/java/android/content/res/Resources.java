@@ -23,8 +23,22 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.animation.Animator;
 import android.animation.StateListAnimator;
+import android.annotation.AnimRes;
+import android.annotation.AnyRes;
+import android.annotation.ArrayRes;
+import android.annotation.BoolRes;
+import android.annotation.ColorRes;
+import android.annotation.DimenRes;
+import android.annotation.DrawableRes;
+import android.annotation.FractionRes;
+import android.annotation.IntegerRes;
+import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PluralsRes;
+import android.annotation.RawRes;
+import android.annotation.StringRes;
+import android.annotation.XmlRes;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList.ColorStateListFactory;
 import android.graphics.Movie;
@@ -287,7 +301,7 @@ public class Resources {
      * @return CharSequence The string data associated with the resource, plus
      *         possibly styled text information.
      */
-    public CharSequence getText(int id) throws NotFoundException {
+    public CharSequence getText(@StringRes int id) throws NotFoundException {
         CharSequence res = mAssets.getResourceText(id);
         if (res != null) {
             return res;
@@ -316,7 +330,8 @@ public class Resources {
      * @return CharSequence The string data associated with the resource, plus
      *         possibly styled text information.
      */
-    public CharSequence getQuantityText(int id, int quantity) throws NotFoundException {
+    public CharSequence getQuantityText(@PluralsRes int id, int quantity)
+            throws NotFoundException {
         NativePluralRules rule = getPluralRule();
         CharSequence res = mAssets.getResourceBagText(id,
                 attrForQuantityCode(rule.quantityForInt(quantity)));
@@ -377,7 +392,7 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    public String getString(int id) throws NotFoundException {
+    public String getString(@StringRes int id) throws NotFoundException {
         CharSequence res = getText(id);
         if (res != null) {
             return res.toString();
@@ -405,7 +420,8 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    public String getString(int id, Object... formatArgs) throws NotFoundException {
+    public String getString(@StringRes int id, Object... formatArgs)
+            throws NotFoundException {
         String raw = getString(id);
         return String.format(mConfiguration.locale, raw, formatArgs);
     }
@@ -435,7 +451,7 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    public String getQuantityString(int id, int quantity, Object... formatArgs)
+    public String getQuantityString(@PluralsRes int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
         return String.format(mConfiguration.locale, raw, formatArgs);
@@ -461,7 +477,8 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    public String getQuantityString(int id, int quantity) throws NotFoundException {
+    public String getQuantityString(@PluralsRes int id, int quantity)
+            throws NotFoundException {
         return getQuantityText(id, quantity).toString();
     }
 
@@ -479,7 +496,7 @@ public class Resources {
      * @return CharSequence The string data associated with the resource, plus
      *         possibly styled text information, or def if id is 0 or not found.
      */
-    public CharSequence getText(int id, CharSequence def) {
+    public CharSequence getText(@StringRes int id, CharSequence def) {
         CharSequence res = id != 0 ? mAssets.getResourceText(id) : null;
         return res != null ? res : def;
     }
@@ -495,7 +512,7 @@ public class Resources {
      *
      * @return The styled text array associated with the resource.
      */
-    public CharSequence[] getTextArray(int id) throws NotFoundException {
+    public CharSequence[] getTextArray(@ArrayRes int id) throws NotFoundException {
         CharSequence[] res = mAssets.getResourceTextArray(id);
         if (res != null) {
             return res;
@@ -515,7 +532,8 @@ public class Resources {
      *
      * @return The string array associated with the resource.
      */
-    public String[] getStringArray(int id) throws NotFoundException {
+    public String[] getStringArray(@ArrayRes int id)
+            throws NotFoundException {
         String[] res = mAssets.getResourceStringArray(id);
         if (res != null) {
             return res;
@@ -535,7 +553,7 @@ public class Resources {
      *
      * @return The int array associated with the resource.
      */
-    public int[] getIntArray(int id) throws NotFoundException {
+    public int[] getIntArray(@ArrayRes int id) throws NotFoundException {
         int[] res = mAssets.getArrayIntResource(id);
         if (res != null) {
             return res;
@@ -557,7 +575,8 @@ public class Resources {
      * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
      * when done with it.
      */
-    public TypedArray obtainTypedArray(int id) throws NotFoundException {
+    public TypedArray obtainTypedArray(@ArrayRes int id)
+            throws NotFoundException {
         int len = mAssets.getArraySize(id);
         if (len < 0) {
             throw new NotFoundException("Array resource ID #0x"
@@ -588,7 +607,7 @@ public class Resources {
      * @see #getDimensionPixelOffset
      * @see #getDimensionPixelSize
      */
-    public float getDimension(int id) throws NotFoundException {
+    public float getDimension(@DimenRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -623,7 +642,7 @@ public class Resources {
      * @see #getDimension
      * @see #getDimensionPixelSize
      */
-    public int getDimensionPixelOffset(int id) throws NotFoundException {
+    public int getDimensionPixelOffset(@DimenRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -660,7 +679,7 @@ public class Resources {
      * @see #getDimension
      * @see #getDimensionPixelOffset
      */
-    public int getDimensionPixelSize(int id) throws NotFoundException {
+    public int getDimensionPixelSize(@DimenRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -694,7 +713,7 @@ public class Resources {
      *  
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
-    public float getFraction(int id, int base, int pbase) {
+    public float getFraction(@FractionRes int id, int base, int pbase) {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -744,7 +763,7 @@ public class Resources {
      */
     @Deprecated
     @Nullable
-    public Drawable getDrawable(int id) throws NotFoundException {
+    public Drawable getDrawable(@DrawableRes int id) throws NotFoundException {
         final Drawable d = getDrawable(id, null);
         if (d != null && d.canApplyTheme()) {
             Log.w(TAG, "Drawable " + getResourceName(id) + " has unresolved theme "
@@ -769,7 +788,7 @@ public class Resources {
      *         not exist.
      */
     @Nullable
-    public Drawable getDrawable(int id, @Nullable Theme theme) throws NotFoundException {
+    public Drawable getDrawable(@DrawableRes int id, @Nullable Theme theme) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -817,7 +836,7 @@ public class Resources {
      */
     @Deprecated
     @Nullable
-    public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
+    public Drawable getDrawableForDensity(@DrawableRes int id, int density) throws NotFoundException {
         return getDrawableForDensity(id, density, null);
     }
 
@@ -836,7 +855,7 @@ public class Resources {
      *             not exist.
      */
     @Nullable
-    public Drawable getDrawableForDensity(int id, int density, @Nullable Theme theme) {
+    public Drawable getDrawableForDensity(@DrawableRes int id, int density, @Nullable Theme theme) {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -880,7 +899,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public Movie getMovie(int id) throws NotFoundException {
+    public Movie getMovie(@RawRes int id) throws NotFoundException {
         InputStream is = openRawResource(id);
         Movie movie = Movie.decodeStream(is);
         try {
@@ -907,7 +926,7 @@ public class Resources {
      * @return A single color value in the form 0xAARRGGBB.
      * @deprecated Use {@link #getColor(int, Theme)} instead.
      */
-    public int getColor(int id) throws NotFoundException {
+    public int getColor(@ColorRes int id) throws NotFoundException {
         return getColor(id, null);
     }
 
@@ -927,7 +946,7 @@ public class Resources {
      *
      * @return A single color value in the form 0xAARRGGBB.
      */
-    public int getColor(int id, @Nullable Theme theme) throws NotFoundException {
+    public int getColor(@ColorRes int id, @Nullable Theme theme) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -975,7 +994,7 @@ public class Resources {
      * @deprecated Use {@link #getColorStateList(int, Theme)} instead.
      */
     @Nullable
-    public ColorStateList getColorStateList(int id) throws NotFoundException {
+    public ColorStateList getColorStateList(@ColorRes int id) throws NotFoundException {
         final ColorStateList csl = getColorStateList(id, null);
         if (csl != null && csl.canApplyTheme()) {
             Log.w(TAG, "ColorStateList " + getResourceName(id) + " has "
@@ -1005,7 +1024,7 @@ public class Resources {
      *         color or multiple colors that can be selected based on a state.
      */
     @Nullable
-    public ColorStateList getColorStateList(int id, @Nullable Theme theme)
+    public ColorStateList getColorStateList(@ColorRes int id, @Nullable Theme theme)
             throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
@@ -1043,7 +1062,7 @@ public class Resources {
      *
      * @return Returns the boolean value contained in the resource.
      */
-    public boolean getBoolean(int id) throws NotFoundException {
+    public boolean getBoolean(@BoolRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -1071,7 +1090,7 @@ public class Resources {
      *
      * @return Returns the integer value contained in the resource.
      */
-    public int getInteger(int id) throws NotFoundException {
+    public int getInteger(@IntegerRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -1136,7 +1155,7 @@ public class Resources {
      *         
      * @see #getXml
      */
-    public XmlResourceParser getLayout(int id) throws NotFoundException {
+    public XmlResourceParser getLayout(@LayoutRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "layout");
     }
 
@@ -1160,7 +1179,7 @@ public class Resources {
      *         
      * @see #getXml
      */
-    public XmlResourceParser getAnimation(int id) throws NotFoundException {
+    public XmlResourceParser getAnimation(@AnimRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "anim");
     }
 
@@ -1185,7 +1204,7 @@ public class Resources {
      *         
      * @see android.util.AttributeSet
      */
-    public XmlResourceParser getXml(int id) throws NotFoundException {
+    public XmlResourceParser getXml(@XmlRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "xml");
     }
 
@@ -1203,7 +1222,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public InputStream openRawResource(int id) throws NotFoundException {
+    public InputStream openRawResource(@RawRes int id) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -1235,7 +1254,8 @@ public class Resources {
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
-    public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
+    public InputStream openRawResource(@RawRes int id, TypedValue value)
+            throws NotFoundException {
         getValue(id, value, true);
 
         try {
@@ -1270,7 +1290,8 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
+    public AssetFileDescriptor openRawResourceFd(@RawRes int id)
+            throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -1315,7 +1336,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
      */
-    public void getValue(int id, TypedValue outValue, boolean resolveRefs)
+    public void getValue(@AnyRes int id, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, 0, outValue, resolveRefs);
         if (found) {
@@ -1338,8 +1359,8 @@ public class Resources {
      *             not exist.
      * @see #getValue(String, TypedValue, boolean)
      */
-    public void getValueForDensity(int id, int density, TypedValue outValue, boolean resolveRefs)
-            throws NotFoundException {
+    public void getValueForDensity(@AnyRes int id, int density, TypedValue outValue,
+            boolean resolveRefs) throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, density, outValue, resolveRefs);
         if (found) {
             return;
@@ -1698,7 +1719,7 @@ public class Resources {
          * @throws NotFoundException Throws NotFoundException if the given ID
          *         does not exist.
          */
-        public Drawable getDrawable(int id) throws NotFoundException {
+        public Drawable getDrawable(@DrawableRes int id) throws NotFoundException {
             return Resources.this.getDrawable(id, this);
         }
 
@@ -2103,7 +2124,7 @@ public class Resources {
      *
      * @hide
      */
-    public static boolean resourceHasPackage(int resid) {
+    public static boolean resourceHasPackage(@AnyRes int resid) {
         return (resid >>> 24) != 0;
     }
 
@@ -2121,7 +2142,7 @@ public class Resources {
      * @see #getResourceTypeName
      * @see #getResourceEntryName
      */
-    public String getResourceName(int resid) throws NotFoundException {
+    public String getResourceName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourceName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
@@ -2140,7 +2161,7 @@ public class Resources {
      * 
      * @see #getResourceName
      */
-    public String getResourcePackageName(int resid) throws NotFoundException {
+    public String getResourcePackageName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourcePackageName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
@@ -2159,7 +2180,7 @@ public class Resources {
      * 
      * @see #getResourceName
      */
-    public String getResourceTypeName(int resid) throws NotFoundException {
+    public String getResourceTypeName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourceTypeName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
@@ -2178,7 +2199,7 @@ public class Resources {
      * 
      * @see #getResourceName
      */
-    public String getResourceEntryName(int resid) throws NotFoundException {
+    public String getResourceEntryName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourceEntryName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"

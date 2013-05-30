@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -387,7 +388,7 @@ public class ImageView extends View {
      * @attr ref android.R.styleable#ImageView_src
      */
     @android.view.RemotableViewMethod
-    public void setImageResource(int resId) {
+    public void setImageResource(@DrawableRes int resId) {
         // The resource configuration may have changed, so we should always
         // try to load the resource even if the resId hasn't changed.
         final int oldWidth = mDrawableWidth;

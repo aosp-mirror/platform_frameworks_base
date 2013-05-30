@@ -18,6 +18,7 @@ package android.app;
 
 import android.animation.Animator;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
@@ -795,7 +796,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      *
      * @param resId Resource id for the CharSequence text
      */
-    public final CharSequence getText(int resId) {
+    public final CharSequence getText(@StringRes int resId) {
         return getResources().getText(resId);
     }
 
@@ -805,7 +806,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      *
      * @param resId Resource id for the string
      */
-    public final String getString(int resId) {
+    public final String getString(@StringRes int resId) {
         return getResources().getString(resId);
     }
 
@@ -818,7 +819,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @param formatArgs The format arguments that will be used for substitution.
      */
 
-    public final String getString(int resId, Object... formatArgs) {
+    public final String getString(@StringRes int resId, Object... formatArgs) {
         return getResources().getString(resId, formatArgs);
     }
 

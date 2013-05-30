@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.RawRes;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -707,7 +708,7 @@ public class WallpaperManager {
      * @throws IOException If an error occurs reverting to the built-in
      * wallpaper.
      */
-    public void setResource(int resid) throws IOException {
+    public void setResource(@RawRes int resid) throws IOException {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return;
@@ -823,7 +824,7 @@ public class WallpaperManager {
      * with the given resource ID.  That is, their wallpaper has been
      * set through {@link #setResource(int)} with the same resource id.
      */
-    public boolean hasResourceWallpaper(int resid) {
+    public boolean hasResourceWallpaper(@RawRes int resid) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return false;
