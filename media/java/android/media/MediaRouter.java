@@ -230,7 +230,7 @@ public class MediaRouter {
             final int count = mCallbacks.size();
             for (int i = 0; i < count; i++) {
                 CallbackInfo cbi = mCallbacks.get(i);
-                if ((cbi.flags & CALLBACK_FLAG_ACTIVE_SCAN) != 0
+                if ((cbi.flags & CALLBACK_FLAG_PERFORM_ACTIVE_SCAN) != 0
                         && (cbi.type & type) != 0) {
                     return true;
                 }
@@ -329,7 +329,7 @@ public class MediaRouter {
      * discover and select a new route.
      * </p>
      */
-    public static final int CALLBACK_FLAG_ACTIVE_SCAN = 1 << 0;
+    public static final int CALLBACK_FLAG_PERFORM_ACTIVE_SCAN = 1 << 0;
 
     /**
      * Flag for {@link #addCallback}: Do not filter route events.
@@ -438,7 +438,7 @@ public class MediaRouter {
      * @param types Types of routes this callback is interested in
      * @param cb Callback to add
      * @param flags Flags to control the behavior of the callback.
-     * May be zero or a combination of {@link #CALLBACK_FLAG_ACTIVE_SCAN} and
+     * May be zero or a combination of {@link #CALLBACK_FLAG_PERFORM_ACTIVE_SCAN} and
      * {@link #CALLBACK_FLAG_UNFILTERED_EVENTS}.
      */
     public void addCallback(int types, Callback cb, int flags) {
@@ -452,7 +452,7 @@ public class MediaRouter {
             info = new CallbackInfo(cb, types, flags, this);
             sStatic.mCallbacks.add(info);
         }
-        if ((info.flags & CALLBACK_FLAG_ACTIVE_SCAN) != 0) {
+        if ((info.flags & CALLBACK_FLAG_PERFORM_ACTIVE_SCAN) != 0) {
             sStatic.updateActiveScan();
         }
     }
@@ -466,7 +466,7 @@ public class MediaRouter {
         int index = findCallbackInfo(cb);
         if (index >= 0) {
             CallbackInfo info = sStatic.mCallbacks.remove(index);
-            if ((info.flags & CALLBACK_FLAG_ACTIVE_SCAN) != 0) {
+            if ((info.flags & CALLBACK_FLAG_PERFORM_ACTIVE_SCAN) != 0) {
                 sStatic.updateActiveScan();
             }
         } else {
