@@ -135,8 +135,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     // --- fields below are final after systemReady() ---
     private LocationFudger mLocationFudger;
     private GeofenceManager mGeofenceManager;
-    private PowerManager.WakeLock mWakeLock;
     private PackageManager mPackageManager;
+    private PowerManager mPowerManager;
     private GeocoderProxy mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
@@ -144,9 +144,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
     private LocationBlacklist mBlacklist;
     private HandlerThread mHandlerThread;
-
-    // --- fields below are protected by mWakeLock ---
-    private int mPendingBroadcasts;
 
     // --- fields below are protected by mLock ---
     // Set of providers that are explicitly enabled
@@ -210,10 +207,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             // fetch package manager
             mPackageManager = mContext.getPackageManager();
 
-            // prepare wake lock
-            PowerManager powerManager =
-                    (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-            mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+            // fetch power manager
+            mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
             // prepare worker thread
             mHandlerThread = new HandlerThread(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
@@ -469,6 +464,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         final HashMap<String,UpdateRecord> mUpdateRecords = new HashMap<String,UpdateRecord>();
 
         int mPendingBroadcasts;
+        PowerManager.WakeLock mWakeLock;
 
         Receiver(ILocationListener listener, PendingIntent intent, int pid, int uid,
                 String packageName) {
@@ -483,6 +479,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             mUid = uid;
             mPid = pid;
             mPackageName = packageName;
+
+            // construct/configure wakelock
+            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+            mWakeLock.setWorkSource(new WorkSource(mUid, mPackageName));
         }
 
         @Override
@@ -645,10 +645,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 removeUpdatesLocked(this);
             }
             synchronized (this) {
-                if (mPendingBroadcasts > 0) {
-                    LocationManagerService.this.decrementPendingBroadcasts();
-                    mPendingBroadcasts = 0;
-                }
+                clearPendingBroadcastsLocked();
             }
         }
 
@@ -664,13 +661,24 @@ public class LocationManagerService extends ILocationManager.Stub {
         // containing the sending of the broadcaset
         private void incrementPendingBroadcastsLocked() {
             if (mPendingBroadcasts++ == 0) {
-                LocationManagerService.this.incrementPendingBroadcasts();
+                mWakeLock.acquire();
             }
         }
 
         private void decrementPendingBroadcastsLocked() {
             if (--mPendingBroadcasts == 0) {
-                LocationManagerService.this.decrementPendingBroadcasts();
+                if (mWakeLock.isHeld()) {
+                    mWakeLock.release();
+                }
+            }
+        }
+
+        public void clearPendingBroadcastsLocked() {
+            if (mPendingBroadcasts > 0) {
+                mPendingBroadcasts = 0;
+                if (mWakeLock.isHeld()) {
+                    mWakeLock.release();
+                }
             }
         }
     }
@@ -1352,10 +1360,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mReceivers.remove(receiver.mKey) != null && receiver.isListener()) {
             receiver.getListener().asBinder().unlinkToDeath(receiver, 0);
             synchronized (receiver) {
-                if (receiver.mPendingBroadcasts > 0) {
-                    decrementPendingBroadcasts();
-                    receiver.mPendingBroadcasts = 0;
-                }
+                receiver.clearPendingBroadcastsLocked();
             }
         }
 
@@ -1956,43 +1961,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
     };
-
-    // Wake locks
-
-    private void incrementPendingBroadcasts() {
-        synchronized (mWakeLock) {
-            if (mPendingBroadcasts++ == 0) {
-                try {
-                    mWakeLock.acquire();
-                    log("Acquired wakelock");
-                } catch (Exception e) {
-                    // This is to catch a runtime exception thrown when we try to release an
-                    // already released lock.
-                    Slog.e(TAG, "exception in acquireWakeLock()", e);
-                }
-            }
-        }
-    }
-
-    private void decrementPendingBroadcasts() {
-        synchronized (mWakeLock) {
-            if (--mPendingBroadcasts == 0) {
-                try {
-                    // Release wake lock
-                    if (mWakeLock.isHeld()) {
-                        mWakeLock.release();
-                        log("Released wakelock");
-                    } else {
-                        log("Can't release wakelock again!");
-                    }
-                } catch (Exception e) {
-                    // This is to catch a runtime exception thrown when we try to release an
-                    // already released lock.
-                    Slog.e(TAG, "exception in releaseWakeLock()", e);
-                }
-            }
-        }
-    }
 
     // Geocoder
 
