@@ -19,6 +19,8 @@ package com.android.mediaframeworktest;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 import com.android.mediaframeworktest.stress.CameraStressTest;
+import com.android.mediaframeworktest.functional.camera.CameraFunctionalTest;
+import com.android.mediaframeworktest.functional.camera.CameraPairwiseTest;
 
 import junit.framework.TestSuite;
 
@@ -28,6 +30,8 @@ public class CameraStressTestRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(CameraStressTest.class);
+        suite.addTestSuite(CameraFunctionalTest.class);
+        suite.addTestSuite(CameraPairwiseTest.class);
         return suite;
     }
 
