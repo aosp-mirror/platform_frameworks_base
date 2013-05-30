@@ -3,7 +3,6 @@ page.title=Google I/O 13
 @jd:body
     
 <style>
-
 #ioplayer-frame {
   z-index:10;
   width:703px;
@@ -56,6 +55,7 @@ ul.videos li {
   background-repeat:no-repeat !important;
   background-size:320px auto;
   background-position:10% 50%;
+  z-index:1; /* IE: the description is 2 */
 }
 ul.videos li a {
   color:#fff !important;
@@ -70,6 +70,7 @@ ul.videos li a {
   background-image: -moz-linear-gradient(top, rgba(0,0,0,0.8), transparent);
   background-image: -o-linear-gradient(top, rgba(0,0,0,0.8), transparent);
   background-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc000000', endColorstr='#00ffffff',GradientType=0 ); /* IE6-9 */
 }
 ul.videos.featured li {
   margin:0 0 2px;
@@ -85,12 +86,14 @@ ul.videos li h4 {
   text-shadow:1px 1px 0 rgba(0,0,0,0.8);
   font-size:18px;
   line-height:22px;
-  color:inherit;
+  color:#fff;
   margin:0;
+  height:100%; /* IE: to fill clickable area */
 }
 
 ul.videos li .description-frame {
   display:none;
+  z-index:2; /* IE: the li is 1 */
 }
 ul.videos li a:hover .description-frame {
   display:block;
@@ -150,12 +153,15 @@ ul.videos span.tag {
 }
 ul.videos span.tag.design {
   background-color:rgba(51, 181, 229, .7);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc33b5e5', endColorstr='#cc33b5e5',GradientType=0 ); /* IE6-9 */
 }
 ul.videos span.tag.develop {
   background-color:rgba(255, 136, 0, .7);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ccff8800', endColorstr='#ccff8800',GradientType=0 ); /* IE6-9 */
 }
 ul.videos span.tag.distribute {
   background-color:rgba(153, 204, 0, .7);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc99cc00', endColorstr='#cc99cc00',GradientType=0 ); /* IE6-9 */
 }
 
 </style>
@@ -285,11 +291,11 @@ function buildPlaylist(data, ul, tag) {
     shortDescription += shortDescription.length == MAX_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
 
     var a = $('<a href="#" id="' + id + '" '
-          + 'onclick="loadVideo(\'' + id + '\',\'' + escape(title) + '\',true); return false;" >');
+          + 'onclick="loadVideo(\'' + id + '\',\'' + escape(title) + '\',true); return false;" />');
     var pShortDescription = $('<div class="description-frame"><div class="arrow-up"></div>'
           + '<div class="description">' + shortDescription + '</div></div>');
     var h4Title = "<h4>" + title + "</h4>";
-    var li = $('<li style="background-image:url(\'' + thumbUrl +'\')">');
+    var li = $('<li style="background-image:url(\'' + thumbUrl +'\')" />');
 
     li.append(a);
     a.append(h4Title).append(pShortDescription);
