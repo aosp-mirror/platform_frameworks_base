@@ -1248,17 +1248,14 @@ public class CalendarView extends FrameLayout {
      * @param calendar A day in the new focus month.
      */
     private void setMonthDisplayed(Calendar calendar) {
-        final int newMonthDisplayed = calendar.get(Calendar.MONTH);
-        if (mCurrentMonthDisplayed != newMonthDisplayed) {
-            mCurrentMonthDisplayed = newMonthDisplayed;
-            mAdapter.setFocusMonth(mCurrentMonthDisplayed);
-            final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
-                    | DateUtils.FORMAT_SHOW_YEAR;
-            final long millis = calendar.getTimeInMillis();
-            String newMonthName = DateUtils.formatDateRange(mContext, millis, millis, flags);
-            mMonthName.setText(newMonthName);
-            mMonthName.invalidate();
-        }
+        mCurrentMonthDisplayed = calendar.get(Calendar.MONTH);
+        mAdapter.setFocusMonth(mCurrentMonthDisplayed);
+        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
+                | DateUtils.FORMAT_SHOW_YEAR;
+        final long millis = calendar.getTimeInMillis();
+        String newMonthName = DateUtils.formatDateRange(mContext, millis, millis, flags);
+        mMonthName.setText(newMonthName);
+        mMonthName.invalidate();
     }
 
     /**
