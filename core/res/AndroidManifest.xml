@@ -2298,8 +2298,7 @@
         <activity android:name="android.accounts.CantAddAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
-                android:label="@string/error_message_title"
+                android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"
                 android:process=":ui">
         </activity>
 
