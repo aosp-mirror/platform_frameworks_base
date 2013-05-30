@@ -33,11 +33,11 @@ namespace android {
 
 static jint DBG = false;
 
-static int doCommand(const char *ifname, const char *cmd, char *replybuf, int replybuflen)
+static int doCommand(const char *ifname, char *cmd, char *replybuf, int replybuflen)
 {
     size_t reply_len = replybuflen - 1;
 
-    if (::wifi_command(ifname, cmd, replybuf, &reply_len) != 0)
+    if (::wifi_command(ifname, cmd, BUF_SIZE, replybuf, &reply_len) != 0)
         return -1;
     else {
         // Strip off trailing newline
