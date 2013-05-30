@@ -27,6 +27,7 @@ public abstract class BluetoothGattCallback {
      *
      * @param gatt GATT client
      * @param status Status of the connect or disconnect operation.
+     *               {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
      * @param newState Returns the new connection state. Can be one of
      *                  {@link BluetoothProfile#STATE_DISCONNECTED} or
      *                  {@link BluetoothProfile#STATE_CONNECTED}
@@ -72,6 +73,7 @@ public abstract class BluetoothGattCallback {
      * @param characteristic Characteristic that was written to the associated
      *                       remote device.
      * @param status The result of the write operation
+     *               {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
      */
     public void onCharacteristicWrite(BluetoothGatt gatt,
                                       BluetoothGattCharacteristic characteristic, int status) {
@@ -108,6 +110,7 @@ public abstract class BluetoothGattCallback {
      * @param descriptor Descriptor that was writte to the associated
      *                   remote device.
      * @param status The result of the write operation
+     *               {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
      */
     public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor,
                                   int status) {
