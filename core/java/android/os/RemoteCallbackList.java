@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.util.ArrayMap;
+
 import java.util.HashMap;
 
 /**
@@ -47,8 +49,8 @@ import java.util.HashMap;
  * implements the {@link #onCallbackDied} method.
  */
 public class RemoteCallbackList<E extends IInterface> {
-    /*package*/ HashMap<IBinder, Callback> mCallbacks
-            = new HashMap<IBinder, Callback>();
+    /*package*/ ArrayMap<IBinder, Callback> mCallbacks
+            = new ArrayMap<IBinder, Callback>();
     private Object[] mActiveBroadcast;
     private int mBroadcastCount = -1;
     private boolean mKilled = false;
@@ -159,7 +161,8 @@ public class RemoteCallbackList<E extends IInterface> {
      */
     public void kill() {
         synchronized (mCallbacks) {
-            for (Callback cb : mCallbacks.values()) {
+            for (int cbi=mCallbacks.size()-1; cbi>=0; cbi--) {
+                Callback cb = mCallbacks.valueAt(cbi);
                 cb.mCallback.asBinder().unlinkToDeath(cb, 0);
             }
             mCallbacks.clear();
@@ -238,11 +241,10 @@ public class RemoteCallbackList<E extends IInterface> {
             if (active == null || active.length < N) {
                 mActiveBroadcast = active = new Object[N];
             }
-            int i=0;
-            for (Callback cb : mCallbacks.values()) {
-                active[i++] = cb;
+            for (int i=0; i<N; i++) {
+                active[i] = mCallbacks.valueAt(i);
             }
-            return i;
+            return N;
         }
     }
 

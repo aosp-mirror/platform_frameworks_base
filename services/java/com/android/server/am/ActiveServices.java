@@ -574,30 +574,26 @@ public class ActiveServices {
                     b.binder = service;
                     b.requested = true;
                     b.received = true;
-                    if (r.connections.size() > 0) {
-                        Iterator<ArrayList<ConnectionRecord>> it
-                                = r.connections.values().iterator();
-                        while (it.hasNext()) {
-                            ArrayList<ConnectionRecord> clist = it.next();
-                            for (int i=0; i<clist.size(); i++) {
-                                ConnectionRecord c = clist.get(i);
-                                if (!filter.equals(c.binding.intent.intent)) {
-                                    if (DEBUG_SERVICE) Slog.v(
-                                            TAG, "Not publishing to: " + c);
-                                    if (DEBUG_SERVICE) Slog.v(
-                                            TAG, "Bound intent: " + c.binding.intent.intent);
-                                    if (DEBUG_SERVICE) Slog.v(
-                                            TAG, "Published intent: " + intent);
-                                    continue;
-                                }
-                                if (DEBUG_SERVICE) Slog.v(TAG, "Publishing to: " + c);
-                                try {
-                                    c.conn.connected(r.name, service);
-                                } catch (Exception e) {
-                                    Slog.w(TAG, "Failure sending service " + r.name +
-                                          " to connection " + c.conn.asBinder() +
-                                          " (in " + c.binding.client.processName + ")", e);
-                                }
+                    for (int conni=r.connections.size()-1; conni>=0; conni--) {
+                        ArrayList<ConnectionRecord> clist = r.connections.valueAt(conni);
+                        for (int i=0; i<clist.size(); i++) {
+                            ConnectionRecord c = clist.get(i);
+                            if (!filter.equals(c.binding.intent.intent)) {
+                                if (DEBUG_SERVICE) Slog.v(
+                                        TAG, "Not publishing to: " + c);
+                                if (DEBUG_SERVICE) Slog.v(
+                                        TAG, "Bound intent: " + c.binding.intent.intent);
+                                if (DEBUG_SERVICE) Slog.v(
+                                        TAG, "Published intent: " + intent);
+                                continue;
+                            }
+                            if (DEBUG_SERVICE) Slog.v(TAG, "Publishing to: " + c);
+                            try {
+                                c.conn.connected(r.name, service);
+                            } catch (Exception e) {
+                                Slog.w(TAG, "Failure sending service " + r.name +
+                                      " to connection " + c.conn.asBinder() +
+                                      " (in " + c.binding.client.processName + ")", e);
                             }
                         }
                     }
@@ -1064,10 +1060,9 @@ public class ActiveServices {
     }
 
     private final void requestServiceBindingsLocked(ServiceRecord r) {
-        Iterator<IntentBindRecord> bindings = r.bindings.values().iterator();
-        while (bindings.hasNext()) {
-            IntentBindRecord i = bindings.next();
-            if (!requestServiceBindingLocked(r, i, false)) {
+        for (int i=r.bindings.size()-1; i>=0; i--) {
+            IntentBindRecord ibr = r.bindings.valueAt(i);
+            if (!requestServiceBindingLocked(r, ibr, false)) {
                 break;
             }
         }
@@ -1179,50 +1174,45 @@ public class ActiveServices {
         if (!force && r.startRequested) {
             return;
         }
-        if (r.connections.size() > 0) {
-            if (!force) {
-                // XXX should probably keep a count of the number of auto-create
-                // connections directly in the service.
-                Iterator<ArrayList<ConnectionRecord>> it = r.connections.values().iterator();
-                while (it.hasNext()) {
-                    ArrayList<ConnectionRecord> cr = it.next();
-                    for (int i=0; i<cr.size(); i++) {
-                        if ((cr.get(i).flags&Context.BIND_AUTO_CREATE) != 0) {
-                            return;
-                        }
-                    }
-                }
-            }
-
-            // Report to all of the connections that the service is no longer
-            // available.
-            Iterator<ArrayList<ConnectionRecord>> it = r.connections.values().iterator();
-            while (it.hasNext()) {
-                ArrayList<ConnectionRecord> c = it.next();
-                for (int i=0; i<c.size(); i++) {
-                    ConnectionRecord cr = c.get(i);
-                    // There is still a connection to the service that is
-                    // being brought down.  Mark it as dead.
-                    cr.serviceDead = true;
-                    try {
-                        cr.conn.connected(r.name, null);
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Failure disconnecting service " + r.name +
-                              " to connection " + c.get(i).conn.asBinder() +
-                              " (in " + c.get(i).binding.client.processName + ")", e);
+        if (!force) {
+            // XXX should probably keep a count of the number of auto-create
+            // connections directly in the service.
+            for (int conni=r.connections.size()-1; conni>=0; conni--) {
+                ArrayList<ConnectionRecord> cr = r.connections.valueAt(conni);
+                for (int i=0; i<cr.size(); i++) {
+                    if ((cr.get(i).flags&Context.BIND_AUTO_CREATE) != 0) {
+                        return;
                     }
                 }
             }
         }
 
+        // Report to all of the connections that the service is no longer
+        // available.
+        for (int conni=r.connections.size()-1; conni>=0; conni--) {
+            ArrayList<ConnectionRecord> c = r.connections.valueAt(conni);
+            for (int i=0; i<c.size(); i++) {
+                ConnectionRecord cr = c.get(i);
+                // There is still a connection to the service that is
+                // being brought down.  Mark it as dead.
+                cr.serviceDead = true;
+                try {
+                    cr.conn.connected(r.name, null);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failure disconnecting service " + r.name +
+                          " to connection " + c.get(i).conn.asBinder() +
+                          " (in " + c.get(i).binding.client.processName + ")", e);
+                }
+            }
+        }
+
         // Tell the service that it has been unbound.
-        if (r.bindings.size() > 0 && r.app != null && r.app.thread != null) {
-            Iterator<IntentBindRecord> it = r.bindings.values().iterator();
-            while (it.hasNext()) {
-                IntentBindRecord ibr = it.next();
+        if (r.app != null && r.app.thread != null) {
+            for (int i=r.bindings.size()-1; i>=0; i--) {
+                IntentBindRecord ibr = r.bindings.valueAt(i);
                 if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down binding " + ibr
                         + ": hasBound=" + ibr.hasBound);
-                if (r.app != null && r.app.thread != null && ibr.hasBound) {
+                if (ibr.hasBound) {
                     try {
                         bumpServiceExecutingLocked(r, "bring down unbind");
                         mAm.updateOomAdjLocked(r.app);
@@ -1595,22 +1585,18 @@ public class ActiveServices {
                 Iterator<ServiceRecord> it = app.services.iterator();
                 while (it.hasNext()) {
                     ServiceRecord r = it.next();
-                    if (r.connections.size() > 0) {
-                        Iterator<ArrayList<ConnectionRecord>> jt
-                                = r.connections.values().iterator();
-                        while (jt.hasNext()) {
-                            ArrayList<ConnectionRecord> cl = jt.next();
-                            for (int i=0; i<cl.size(); i++) {
-                                ConnectionRecord c = cl.get(i);
-                                if (c.binding.client != app) {
-                                    try {
-                                        //c.conn.connected(r.className, null);
-                                    } catch (Exception e) {
-                                        // todo: this should be asynchronous!
-                                        Slog.w(TAG, "Exception thrown disconnected servce "
-                                              + r.shortName
-                                              + " from app " + app.processName, e);
-                                    }
+                    for (int conni=r.connections.size()-1; conni>=0; conni--) {
+                        ArrayList<ConnectionRecord> cl = r.connections.valueAt(conni);
+                        for (int i=0; i<cl.size(); i++) {
+                            ConnectionRecord c = cl.get(i);
+                            if (c.binding.client != app) {
+                                try {
+                                    //c.conn.connected(r.className, null);
+                                } catch (Exception e) {
+                                    // todo: this should be asynchronous!
+                                    Slog.w(TAG, "Exception thrown disconnected servce "
+                                          + r.shortName
+                                          + " from app " + app.processName, e);
                                 }
                             }
                         }
@@ -1645,17 +1631,13 @@ public class ActiveServices {
                     if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
                 }
 
-                boolean hasClients = sr.bindings.size() > 0;
-                if (hasClients) {
-                    Iterator<IntentBindRecord> bindings
-                            = sr.bindings.values().iterator();
-                    while (bindings.hasNext()) {
-                        IntentBindRecord b = bindings.next();
-                        if (DEBUG_SERVICE) Slog.v(TAG, "Killing binding " + b
-                                + ": shouldUnbind=" + b.hasBound);
-                        b.binder = null;
-                        b.requested = b.received = b.hasBound = false;
-                    }
+                final int numClients = sr.bindings.size();
+                for (int bindingi=numClients-1; bindingi>=0; bindingi--) {
+                    IntentBindRecord b = sr.bindings.valueAt(bindingi);
+                    if (DEBUG_SERVICE) Slog.v(TAG, "Killing binding " + b
+                            + ": shouldUnbind=" + b.hasBound);
+                    b.binder = null;
+                    b.requested = b.received = b.hasBound = false;
                 }
 
                 if (sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
@@ -1676,7 +1658,7 @@ public class ActiveServices {
                     if (sr.startRequested && (sr.stopIfKilled || canceled)) {
                         if (sr.pendingStarts.size() == 0) {
                             sr.startRequested = false;
-                            if (!hasClients) {
+                            if (numClients > 0) {
                                 // Whoops, no reason to restart!
                                 bringDownServiceLocked(sr, true);
                             }
@@ -1732,7 +1714,8 @@ public class ActiveServices {
             info.flags |= ActivityManager.RunningServiceInfo.FLAG_PERSISTENT_PROCESS;
         }
 
-        for (ArrayList<ConnectionRecord> connl : r.connections.values()) {
+        for (int conni=r.connections.size()-1; conni>=0; conni--) {
+            ArrayList<ConnectionRecord> connl = r.connections.valueAt(conni);
             for (int i=0; i<connl.size(); i++) {
                 ConnectionRecord conn = connl.get(i);
                 if (conn.clientLabel != 0) {
@@ -1805,7 +1788,8 @@ public class ActiveServices {
         int userId = UserHandle.getUserId(Binder.getCallingUid());
         ServiceRecord r = mServiceMap.getServiceByName(name, userId);
         if (r != null) {
-            for (ArrayList<ConnectionRecord> conn : r.connections.values()) {
+            for (int conni=r.connections.size()-1; conni>=0; conni--) {
+                ArrayList<ConnectionRecord> conn = r.connections.valueAt(conni);
                 for (int i=0; i<conn.size(); i++) {
                     if (conn.get(i).clientIntent != null) {
                         return conn.get(i).clientIntent;
@@ -1859,6 +1843,7 @@ public class ActiveServices {
     boolean dumpServicesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
         boolean needSep = false;
+        boolean needSepResult = false;
 
         ItemMatcher matcher = new ItemMatcher();
         matcher.build(args, opti);
@@ -1881,6 +1866,7 @@ public class ActiveServices {
                         if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                             continue;
                         }
+                        needSepResult = true;
                         if (!printed) {
                             if (user != 0) {
                                 pw.println();
@@ -1907,7 +1893,8 @@ public class ActiveServices {
                             pw.println(r.connections.size());
                             if (r.connections.size() > 0) {
                                 pw.println("    Connections:");
-                                for (ArrayList<ConnectionRecord> clist : r.connections.values()) {
+                                for (int conni=0; conni<=r.connections.size(); conni++) {
+                                    ArrayList<ConnectionRecord> clist = r.connections.valueAt(conni);
                                     for (int i = 0; i < clist.size(); i++) {
                                         ConnectionRecord conn = clist.get(i);
                                         pw.print("      ");
@@ -1960,6 +1947,7 @@ public class ActiveServices {
                 if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                     continue;
                 }
+                needSepResult = true;
                 if (!printed) {
                     if (needSep) pw.println(" ");
                     needSep = true;
@@ -1982,6 +1970,7 @@ public class ActiveServices {
                 if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                     continue;
                 }
+                needSepResult = true;
                 if (!printed) {
                     if (needSep) pw.println(" ");
                     needSep = true;
@@ -2004,6 +1993,7 @@ public class ActiveServices {
                 if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                     continue;
                 }
+                needSepResult = true;
                 if (!printed) {
                     if (needSep) pw.println(" ");
                     needSep = true;
@@ -2032,6 +2022,7 @@ public class ActiveServices {
                                 || !dumpPackage.equals(cr.binding.client.info.packageName))) {
                             continue;
                         }
+                        needSepResult = true;
                         if (!printed) {
                             if (needSep) pw.println(" ");
                             needSep = true;
@@ -2042,11 +2033,10 @@ public class ActiveServices {
                         cr.dump(pw, "    ");
                     }
                 }
-                needSep = true;
             }
         }
 
-        return needSep;
+        return needSepResult;
     }
 
     /**

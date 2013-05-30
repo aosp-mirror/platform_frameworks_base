@@ -16,34 +16,32 @@
 
 package com.android.server.am;
 
-import android.app.PendingIntent;
-import android.net.Uri;
-import android.provider.Settings;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.NotificationManagerService;
 
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -76,11 +74,11 @@ class ServiceRecord extends Binder {
     final boolean exported; // from ServiceInfo.exported
     final Runnable restarter; // used to schedule retries of starting the service
     final long createTime;  // when this service was created
-    final HashMap<Intent.FilterComparison, IntentBindRecord> bindings
-            = new HashMap<Intent.FilterComparison, IntentBindRecord>();
+    final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
+            = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
-    final HashMap<IBinder, ArrayList<ConnectionRecord>> connections
-            = new HashMap<IBinder, ArrayList<ConnectionRecord>>();
+    final ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections
+            = new ArrayMap<IBinder, ArrayList<ConnectionRecord>>();
                             // IBinder -> ConnectionRecord of all bound clients
 
     ProcessRecord app;      // where this service is running or null.
@@ -258,10 +256,9 @@ class ServiceRecord extends Binder {
             dumpStartList(pw, prefix, pendingStarts, 0);
         }
         if (bindings.size() > 0) {
-            Iterator<IntentBindRecord> it = bindings.values().iterator();
             pw.print(prefix); pw.println("Bindings:");
-            while (it.hasNext()) {
-                IntentBindRecord b = it.next();
+            for (int i=0; i<bindings.size(); i++) {
+                IntentBindRecord b = bindings.valueAt(i);
                 pw.print(prefix); pw.print("* IntentBindRecord{");
                         pw.print(Integer.toHexString(System.identityHashCode(b)));
                         if ((b.collectFlags()&Context.BIND_AUTO_CREATE) != 0) {
@@ -273,9 +270,8 @@ class ServiceRecord extends Binder {
         }
         if (connections.size() > 0) {
             pw.print(prefix); pw.println("All Connections:");
-            Iterator<ArrayList<ConnectionRecord>> it = connections.values().iterator();
-            while (it.hasNext()) {
-                ArrayList<ConnectionRecord> c = it.next();
+            for (int conni=0; conni<connections.size(); conni++) {
+                ArrayList<ConnectionRecord> c = connections.valueAt(conni);
                 for (int i=0; i<c.size(); i++) {
                     pw.print(prefix); pw.print("  "); pw.println(c.get(i));
                 }

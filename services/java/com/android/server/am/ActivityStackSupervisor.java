@@ -2215,81 +2215,94 @@ public class ActivityStackSupervisor {
         return getFocusedStack().getDumpActivitiesLocked(name);
     }
 
+    static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
+            boolean needSep, String prefix) {
+        if (activity != null) {
+            if (dumpPackage == null || dumpPackage.equals(activity.packageName)) {
+                if (needSep) {
+                    pw.println();
+                    needSep = false;
+                }
+                pw.print(prefix);
+                pw.println(activity);
+            }
+        }
+        return needSep;
+    }
+
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage) {
-        pw.print("  mStackState="); pw.println(stackStateToString(mStackState));
-        if (mGoingToSleepActivities.size() > 0) {
-            pw.println("  Activities waiting to sleep:");
-            dumpHistoryList(fd, pw, mGoingToSleepActivities, "  ", "Sleep", false, !dumpAll, false,
-                    dumpPackage);
-        }
-        if (dumpAll) {
-            pw.println("  mSleepTimeout: " + mSleepTimeout);
-        }
         final int numStacks = mStacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
+            if (stackNdx != 0) {
+                pw.println();
+            }
             pw.print("  Stack #"); pw.print(mStacks.indexOf(stack)); pw.println(":");
-            stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage);
-            pw.println(" ");
-            pw.println("  Running activities (most recent first):");
-            dumpHistoryList(fd, pw, stack.mLRUActivities, "  ", "Run", false, !dumpAll, false,
-                    dumpPackage);
+            stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage, false);
+            dumpHistoryList(fd, pw, stack.mLRUActivities, "    ", "Run", false, !dumpAll, false,
+                    dumpPackage, true, "    Running activities (most recent first):");
 
-            pw.print("  Stack #"); pw.println(mStacks.indexOf(stack));
-            if (stack.mPausingActivity != null) {
-                pw.println("  mPausingActivity: " + stack.mPausingActivity);
-            }
-            pw.println("  mResumedActivity: " + stack.mResumedActivity);
+            boolean needSep = true;
+            needSep = printThisActivity(pw, stack.mPausingActivity, dumpPackage, needSep,
+                    "    mPausingActivity: ");
+            needSep = printThisActivity(pw, stack.mResumedActivity, dumpPackage, needSep,
+                    "    mResumedActivity: ");
             if (dumpAll) {
-                pw.println("  mLastPausedActivity: " + stack.mLastPausedActivity);
+                printThisActivity(pw, stack.mLastPausedActivity, dumpPackage, needSep,
+                        "    mLastPausedActivity: ");
             }
         }
 
-        if (mFinishingActivities.size() > 0) {
-            pw.println(" ");
-            pw.println("  Activities waiting to finish:");
-            dumpHistoryList(fd, pw, mFinishingActivities, "  ", "Fin", false, !dumpAll, false,
-                    dumpPackage);
-        }
+        dumpHistoryList(fd, pw, mFinishingActivities, "  ", "Fin", false, !dumpAll, false,
+                dumpPackage, true, "  Activities waiting to finish:");
+        dumpHistoryList(fd, pw, mStoppingActivities, "  ", "Stop", false, !dumpAll, false,
+                dumpPackage, true, "  Activities waiting to stop:");
+        dumpHistoryList(fd, pw, mWaitingVisibleActivities, "  ", "Wait", false, !dumpAll,
+                false, dumpPackage, true, "  Activities waiting for another to become visible:");
+        dumpHistoryList(fd, pw, mGoingToSleepActivities, "  ", "Sleep", false, !dumpAll, false,
+                dumpPackage, true, "  Activities waiting to sleep:");
+        dumpHistoryList(fd, pw, mGoingToSleepActivities, "  ", "Sleep", false, !dumpAll, false,
+                dumpPackage, true, "  Activities waiting to sleep:");
 
-        if (mStoppingActivities.size() > 0) {
-            pw.println(" ");
-            pw.println("  Activities waiting to stop:");
-            dumpHistoryList(fd, pw, mStoppingActivities, "  ", "Stop", false, !dumpAll, false,
-                    dumpPackage);
-        }
-
-        if (mWaitingVisibleActivities.size() > 0) {
-            pw.println(" ");
-            pw.println("  Activities waiting for another to become visible:");
-            dumpHistoryList(fd, pw, mWaitingVisibleActivities, "  ", "Wait", false, !dumpAll,
-                    false, dumpPackage);
-        }
-
-        if (dumpAll) {
-            pw.println(" ");
-            pw.println("  mCurTaskId: " + mCurTaskId);
+        if (dumpPackage == null) {
+            pw.println();
+            pw.print("  mStackState="); pw.println(stackStateToString(mStackState));
+            if (dumpAll) {
+                pw.println("  mSleepTimeout: " + mSleepTimeout);
+            }
+            if (dumpAll) {
+                pw.println("  mCurTaskId: " + mCurTaskId);
+            }
         }
         return true;
     }
 
-    static void dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
+    static boolean dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
             String prefix, String label, boolean complete, boolean brief, boolean client,
-            String dumpPackage) {
+            String dumpPackage, boolean needNL, String header) {
         TaskRecord lastTask = null;
-        boolean needNL = false;
-        final String innerPrefix = prefix + "      ";
-        final String[] args = new String[0];
+        String innerPrefix = null;
+        String[] args = null;
+        boolean printed = false;
         for (int i=list.size()-1; i>=0; i--) {
             final ActivityRecord r = list.get(i);
             if (dumpPackage != null && !dumpPackage.equals(r.packageName)) {
                 continue;
             }
+            if (innerPrefix == null) {
+                innerPrefix = prefix + "      ";
+                args = new String[0];
+            }
+            printed = true;
             final boolean full = !brief && (complete || !r.isInHistory());
             if (needNL) {
-                pw.println(" ");
+                pw.println("");
                 needNL = false;
+            }
+            if (header != null) {
+                pw.println(header);
+                header = null;
             }
             if (lastTask != r.task) {
                 lastTask = r.task;
@@ -2341,6 +2354,7 @@ public class ActivityStackSupervisor {
                 needNL = true;
             }
         }
+        return printed;
     }
 
     void scheduleIdleTimeoutLocked(ActivityRecord next) {

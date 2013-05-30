@@ -32,12 +32,12 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -129,8 +129,8 @@ class ProcessRecord {
     // all IIntentReceivers that are registered from this process.
     final HashSet<ReceiverList> receivers = new HashSet<ReceiverList>();
     // class (String) -> ContentProviderRecord
-    final HashMap<String, ContentProviderRecord> pubProviders
-            = new HashMap<String, ContentProviderRecord>(); 
+    final ArrayMap<String, ContentProviderRecord> pubProviders
+            = new ArrayMap<String, ContentProviderRecord>();
     // All ContentProviderRecord process is using
     final ArrayList<ContentProviderConnection> conProviders
             = new ArrayList<ContentProviderConnection>();
@@ -302,9 +302,9 @@ class ProcessRecord {
         }
         if (pubProviders.size() > 0) {
             pw.print(prefix); pw.println("Published Providers:");
-            for (HashMap.Entry<String, ContentProviderRecord> ent : pubProviders.entrySet()) {
-                pw.print(prefix); pw.print("  - "); pw.println(ent.getKey());
-                pw.print(prefix); pw.print("    -> "); pw.println(ent.getValue());
+            for (int i=0; i<pubProviders.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(pubProviders.keyAt(i));
+                pw.print(prefix); pw.print("    -> "); pw.println(pubProviders.valueAt(i));
             }
         }
         if (conProviders.size() > 0) {

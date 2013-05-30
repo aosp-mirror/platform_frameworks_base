@@ -212,10 +212,12 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public void clear() {
-        freeArrays(mHashes, mArray, mSize);
-        mHashes = SparseArray.EMPTY_INTS;
-        mArray = SparseArray.EMPTY_OBJECTS;
-        mSize = 0;
+        if (mSize != 0) {
+            freeArrays(mHashes, mArray, mSize);
+            mHashes = SparseArray.EMPTY_INTS;
+            mArray = SparseArray.EMPTY_OBJECTS;
+            mSize = 0;
+        }
     }
 
     /**
@@ -227,9 +229,9 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             int[] ohashes = mHashes;
             Object[] oarray = mArray;
             allocArrays(minimumCapacity);
-            if (mHashes.length > 0) {
-                System.arraycopy(ohashes, 0, mHashes, 0, mHashes.length);
-                System.arraycopy(oarray, 0, mArray, 0, mArray.length);
+            if (mSize > 0) {
+                System.arraycopy(ohashes, 0, mHashes, 0, mSize);
+                System.arraycopy(oarray, 0, mArray, 0, mSize<<1);
             }
             freeArrays(ohashes, oarray, mSize);
         }
