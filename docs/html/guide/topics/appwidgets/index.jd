@@ -22,15 +22,16 @@ Activity</a>
         <ol>
           <li><a href="#UpdatingFromTheConfiguration">Updating the App Widget
 from 
-            the configuration Activity</a></li>
+            the Configuration Activity</a></li>
         </ol>
       </li>
       <li><a href="#preview">Setting a Preview Image</a></li>
-      <li><a href="#lockscreen">Enabling App Widgets on the Lockscreen
+      <li><a href="#lockscreen">Enabling App Widgets on the Lockscreen</a>
         <ol>
-          <li><a href="#lockscreen-sizing">Sizing guidelines</li>
+          <li><a href="#lockscreen-sizing">Sizing guidelines</a></li>
         </ol>
       </li>
+
       <li><a href="#collections">Using App Widgets with Collections</a>
         <ol>
           <li><a href="#collection_sample">Sample application</a></li>
@@ -66,7 +67,9 @@ the Music App Widget.</p>
 <img src="{@docRoot}images/appwidgets/appwidget.png" alt="" />
 
 <p>This document describes how to publish an App Widget using an App Widget
-provider.</p>
+provider. For a discussion of creating your own {@link android.appwidget.AppWidgetHost}
+to host app widgets, see <a href="{@docRoot}guide/topics/appwidgets/host.html">
+Implementing a Custom App Widget Host</a>.</p>
 
 <div class="note design">
 <p><strong>Widget Design</strong></p>
@@ -100,7 +103,7 @@ an optional
 and allows him or her
 to modify App Widget settings at create-time.</p>
 
-<p>The following sections describe how to setup each of these components.</p>
+<p>The following sections describe how to set up each of these components.</p>
 
 
 <h2 id="Manifest">Declaring an App Widget in the Manifest</h2>
@@ -165,8 +168,8 @@ folder.</p>
 
 <pre>
 &lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="294dp"
-    android:minHeight="72dp"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
     android:updatePeriodMillis="86400000"
     android:previewImage="@drawable/preview"
     android:initialLayout="@layout/example_appwidget"
@@ -269,6 +272,14 @@ handles to change the size on the layout grid. Values for the
 <code>resizeMode</code> attribute include "horizontal", "vertical", and "none".
 To declare a widget as resizeable horizontally and vertically, supply the value
 "horizontal|vertical". Introduced in Android 3.1.</li> 
+
+<li>The <code>minResizeHeight</code> attribute specifies the minimum height (in dps) to which
+the widget can be resized. This field has no effect if it is greater than {@code minHeight} or if
+vertical resizing isn't enabled (see <code>resizeMode</code>). Introduced in Android 4.0.</li>
+
+<li>The <code> minResizeWidth </code> attribute specifies the minimum width (in dps) to which
+the widget can be resized. This field has no effect if it is greater than {@code minWidth} or if
+horizontal resizing isn't enabled (see <code>resizeMode</code>). Introduced in Android 4.0.</li>
 
 <li>The <code>widgetCategory</code> attribute declares whether your App Widget can be displayed on the home screen, 
 the lock screen (keyguard), or both. Values for this attribute include "home_screen" and "keyguard".  A widget that 
@@ -788,12 +799,12 @@ int baseLayout = isKeyguard ? R.layout.keyguard_widget_layout : R.layout.widget_
 
 <h2 id="collections">Using App Widgets with Collections</h2>
 
-<p>Android 3.0 introduces App Widgets with collections. These kinds of App
+<p>Android 3.0 introduces app widgets with collections. These kinds of App
 Widgets use the {@link android.widget.RemoteViewsService} to display collections
 that are backed by remote data, such as from a <a
 href="{@docRoot}guide/topics/providers/content-providers.html">content
 provider</a>. The data provided by the {@link android.widget.RemoteViewsService}
-is presented in the App Widget using one of the following view types, which
+is presented in the app widget using one of the following view types, which
 we’ll refer to as “collection views:”</p>
 
 <dl>
@@ -900,15 +911,15 @@ how this is implemented, see
 </ul>
 <h3 id="implementing_collections">Implementing app widgets with collections</h3>
 
-<p>To implement an App Widget with collections, you follow the same basic steps 
+<p>To implement an app widget with collections, you follow the same basic steps 
 you would use to implement any app widget. The following sections  describe the
-additional steps you need to perform to implement an App Widget with
+additional steps you need to perform to implement an app widget with
 collections.</p>
 
 <h4>Manifest for app widgets with collections</h4>
 
 <p> In addition to the requirements listed in <a href="#Manifest">Declaring an
-App Widget in the Manifest</a>, to make it possible for App Widgets with
+app widget in the Manifest</a>, to make it possible for app widgets with
 collections to bind to your {@link android.widget.RemoteViewsService}, you must
 declare the service in your manifest file with the permission {@link
 android.Manifest.permission#BIND_REMOTEVIEWS}. This prevents other applications
@@ -987,7 +998,7 @@ android.widget.RemoteViewsService} can then return your implementation of {@link
 android.widget.RemoteViewsService.RemoteViewsFactory RemoteViewsFactory}, and
 the widget can serve up the appropriate data. When you call this method, you
 must pass an intent that  points to your implementation of {@link
-android.widget.RemoteViewsService} and the App Widget ID that specifies the app
+android.widget.RemoteViewsService} and the app widget ID that specifies the app
 widget to update.</p>
 
 
@@ -1009,7 +1020,7 @@ int[] appWidgetIds) {
         // Add the app widget ID to the intent extras.
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[i]);
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-        // Instantiate the RemoteViews object for the App Widget layout.
+        // Instantiate the RemoteViews object for the app widget layout.
         RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
         // Set up the RemoteViews object to use a RemoteViews adapter. 
         // This adapter connects
@@ -1367,15 +1378,15 @@ class StackRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
 <h3 id="fresh">Keeping Collection Data Fresh</h3>
 
-<p>The following figure illustrates the flow that occurs in an App Widget that
+<p>The following figure illustrates the flow that occurs in an app widget that
 uses
-collections when updates occur. It shows how the App Widget code interacts with
+collections when updates occur. It shows how the app widget code interacts with
 the  {@link android.widget.RemoteViewsService.RemoteViewsFactory
 RemoteViewsFactory}, and how you can trigger updates:</p>
 
 <img src="{@docRoot}images/appwidgets/appwidget_collections.png" alt="" />
 
-<p>One feature of App Widgets that use collections is the ability to provide
+<p>One feature of app widgets that use collections is the ability to provide
 users with up-to-date content. For example, consider the Android 3.0 Gmail
 app widget, which provides users with a snapshot of their inbox. To make this
 possible, you need to be able to trigger your {@link

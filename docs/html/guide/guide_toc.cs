@@ -76,9 +76,16 @@
           <span class="en">Permissions</span>
         </a>
       </li>
-      <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">
             <span class="en">App Widgets</span>
-          </a></li>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/host.html">
+              <span class="en">App Widget Host</span>
+            </a></li>
+        </ul>
+      </li>
       <li class="nav-section">
       <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-intro.html">
           <span class="en">Android Manifest</span>
