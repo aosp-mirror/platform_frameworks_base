@@ -205,4 +205,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Zde se zobrazují oznámení"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Můžete je kdykoli zobrazit tím, že přejedete prstem dolů."\n"Přejedete-li prstem dolů ještě jednou, zobrazí se ovládací prvky systému."</string>
+    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
+    <skip />
 </resources>
