@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -36,6 +37,9 @@ import android.view.animation.GridLayoutAnimationController;
 import android.widget.AbsListView.LayoutParams;
 import android.widget.RemoteViews.RemoteView;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 
 /**
  * A view that shows items in two-dimensional scrolling grid. The items in the
@@ -53,6 +57,11 @@ import android.widget.RemoteViews.RemoteView;
  */
 @RemoteView
 public class GridView extends AbsListView {
+    /** @hide */
+    @IntDef({NO_STRETCH, STRETCH_SPACING, STRETCH_COLUMN_WIDTH, STRETCH_SPACING_UNIFORM})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StretchMode {}
+
     /**
      * Disables stretching.
      * 
@@ -2060,13 +2069,14 @@ public class GridView extends AbsListView {
      *
      * @attr ref android.R.styleable#GridView_stretchMode
      */
-    public void setStretchMode(int stretchMode) {
+    public void setStretchMode(@StretchMode int stretchMode) {
         if (stretchMode != mStretchMode) {
             mStretchMode = stretchMode;
             requestLayoutIfNecessary();
         }
     }
 
+    @StretchMode
     public int getStretchMode() {
         return mStretchMode;
     }

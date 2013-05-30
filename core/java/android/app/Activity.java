@@ -16,11 +16,14 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -83,6 +86,8 @@ import android.widget.AdapterView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -851,6 +856,7 @@ public class Activity extends ContextThemeWrapper
      * @see #getWindow
      * @see android.view.Window#getCurrentFocus
      */
+    @Nullable
     public View getCurrentFocus() {
         return mWindow != null ? mWindow.getCurrentFocus() : null;
     }
@@ -881,7 +887,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onRestoreInstanceState
      * @see #onPostCreate
      */
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
         if (mLastNonConfigurationInstances != null) {
             mAllLoaderManagers = mLastNonConfigurationInstances.loaders;
@@ -1009,7 +1015,7 @@ public class Activity extends ContextThemeWrapper
      *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
      * @see #onCreate
      */
-    protected void onPostCreate(Bundle savedInstanceState) {
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         if (!isChild()) {
             mTitleReady = true;
             onTitleChanged(getTitle(), getTitleColor());
@@ -1346,6 +1352,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onSaveInstanceState
      * @see #onPause
      */
+    @Nullable
     public CharSequence onCreateDescription() {
         return null;
     }
@@ -1548,6 +1555,7 @@ public class Activity extends ContextThemeWrapper
      * {@link Fragment#setRetainInstance(boolean)} instead; this is also
      * available on older platforms through the Android compatibility package.
      */
+    @Nullable
     @Deprecated
     public Object getLastNonConfigurationInstance() {
         return mLastNonConfigurationInstances != null
@@ -1627,6 +1635,7 @@ public class Activity extends ContextThemeWrapper
      * @return Returns the object previously returned by
      * {@link #onRetainNonConfigurationChildInstances()}
      */
+    @Nullable
     HashMap<String, Object> getLastNonConfigurationChildInstances() {
         return mLastNonConfigurationInstances != null
                 ? mLastNonConfigurationInstances.children : null;
@@ -1639,6 +1648,7 @@ public class Activity extends ContextThemeWrapper
      * set of child activities, such as ActivityGroup.  The same guarantees and restrictions apply
      * as for {@link #onRetainNonConfigurationInstance()}.  The default implementation returns null.
      */
+    @Nullable
     HashMap<String,Object> onRetainNonConfigurationChildInstances() {
         return null;
     }
@@ -1886,6 +1896,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @return The Activity's ActionBar, or null if it does not have one.
      */
+    @Nullable
     public ActionBar getActionBar() {
         initActionBar();
         return mActionBar;
@@ -1982,7 +1993,17 @@ public class Activity extends ContextThemeWrapper
     public void setFinishOnTouchOutside(boolean finish) {
         mWindow.setCloseOnTouchOutside(finish);
     }
-    
+
+    /** @hide */
+    @IntDef({
+            DEFAULT_KEYS_DISABLE,
+            DEFAULT_KEYS_DIALER,
+            DEFAULT_KEYS_SHORTCUT,
+            DEFAULT_KEYS_SEARCH_LOCAL,
+            DEFAULT_KEYS_SEARCH_GLOBAL})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DefaultKeyMode {}
+
     /**
      * Use with {@link #setDefaultKeyMode} to turn off default handling of
      * keys.
@@ -2052,7 +2073,7 @@ public class Activity extends ContextThemeWrapper
      * @see #DEFAULT_KEYS_SEARCH_GLOBAL
      * @see #onKeyDown
      */
-    public final void setDefaultKeyMode(int mode) {
+    public final void setDefaultKeyMode(@DefaultKeyMode int mode) {
         mDefaultKeyMode = mode;
         
         // Some modes use a SpannableStringBuilder to track & dispatch input events
@@ -2518,6 +2539,7 @@ public class Activity extends ContextThemeWrapper
      * simply returns null so that all panel sub-windows will have the default
      * menu behavior.
      */
+    @Nullable
     public View onCreatePanelView(int featureId) {
         return null;
     }
@@ -3015,6 +3037,7 @@ public class Activity extends ContextThemeWrapper
      * {@link FragmentManager} instead; this is also
      * available on older platforms through the Android compatibility package.
      */
+    @Nullable
     @Deprecated
     protected Dialog onCreateDialog(int id, Bundle args) {
         return onCreateDialog(id);
@@ -3102,6 +3125,7 @@ public class Activity extends ContextThemeWrapper
      * {@link FragmentManager} instead; this is also
      * available on older platforms through the Android compatibility package.
      */
+    @Nullable
     @Deprecated
     public final boolean showDialog(int id, Bundle args) {
         if (mManagedDialogs == null) {
@@ -3223,13 +3247,13 @@ public class Activity extends ContextThemeWrapper
      * <p>It is typically called from onSearchRequested(), either directly from 
      * Activity.onSearchRequested() or from an overridden version in any given 
      * Activity.  If your goal is simply to activate search, it is preferred to call
-     * onSearchRequested(), which may have been overriden elsewhere in your Activity.  If your goal
+     * onSearchRequested(), which may have been overridden elsewhere in your Activity.  If your goal
      * is to inject specific data such as context data, it is preferred to <i>override</i>
      * onSearchRequested(), so that any callers to it will benefit from the override.
      * 
      * @param initialQuery Any non-null non-empty string will be inserted as 
      * pre-entered text in the search query box.
-     * @param selectInitialQuery If true, the intial query will be preselected, which means that
+     * @param selectInitialQuery If true, the initial query will be preselected, which means that
      * any further typing will replace it.  This is useful for cases where an entire pre-formed
      * query is being inserted.  If false, the selection point will be placed at the end of the
      * inserted query.  This is useful when the inserted query is text that the user entered,
@@ -3247,8 +3271,8 @@ public class Activity extends ContextThemeWrapper
      * @see android.app.SearchManager
      * @see #onSearchRequested
      */
-    public void startSearch(String initialQuery, boolean selectInitialQuery, 
-            Bundle appSearchData, boolean globalSearch) {
+    public void startSearch(@Nullable String initialQuery, boolean selectInitialQuery,
+            @Nullable Bundle appSearchData, boolean globalSearch) {
         ensureSearchManager();
         mSearchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
                         appSearchData, globalSearch); 
@@ -3264,7 +3288,7 @@ public class Activity extends ContextThemeWrapper
      * searches.  This data will be returned with SEARCH intent(s).  Null if
      * no extra data is required.
      */
-    public void triggerSearch(String query, Bundle appSearchData) {
+    public void triggerSearch(String query, @Nullable Bundle appSearchData) {
         ensureSearchManager();
         mSearchManager.triggerSearch(query, getComponentName(), appSearchData);
     }
@@ -3331,6 +3355,7 @@ public class Activity extends ContextThemeWrapper
      * Convenience for calling
      * {@link android.view.Window#getLayoutInflater}.
      */
+    @NonNull
     public LayoutInflater getLayoutInflater() {
         return getWindow().getLayoutInflater();
     }
@@ -3338,6 +3363,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Returns a {@link MenuInflater} with this context.
      */
+    @NonNull
     public MenuInflater getMenuInflater() {
         // Make sure that action views can get an appropriate theme.
         if (mMenuInflater == null) {
@@ -3416,7 +3442,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #startActivity 
      */
-    public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
+    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
@@ -3495,7 +3521,7 @@ public class Activity extends ContextThemeWrapper
      * @param extraFlags Always set to 0.
      */
     public void startIntentSenderForResult(IntentSender intent, int requestCode,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws IntentSender.SendIntentException {
         startIntentSenderForResult(intent, requestCode, fillInIntent, flagsMask,
                 flagsValues, extraFlags, null);
@@ -3527,7 +3553,7 @@ public class Activity extends ContextThemeWrapper
      * override any that conflict with those given by the IntentSender.
      */
     public void startIntentSenderForResult(IntentSender intent, int requestCode,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
             Bundle options) throws IntentSender.SendIntentException {
         if (mParent == null) {
             startIntentSenderForResultInner(intent, requestCode, fillInIntent,
@@ -3615,7 +3641,7 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivityForResult 
      */
     @Override
-    public void startActivity(Intent intent, Bundle options) {
+    public void startActivity(Intent intent, @Nullable Bundle options) {
         if (options != null) {
             startActivityForResult(intent, -1, options);
         } else {
@@ -3664,7 +3690,7 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivityForResult
      */
     @Override
-    public void startActivities(Intent[] intents, Bundle options) {
+    public void startActivities(Intent[] intents, @Nullable Bundle options) {
         mInstrumentation.execStartActivities(this, mMainThread.getApplicationThread(),
                 mToken, this, intents, options);
     }
@@ -3683,7 +3709,7 @@ public class Activity extends ContextThemeWrapper
      * @param extraFlags Always set to 0.
      */
     public void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws IntentSender.SendIntentException {
         startIntentSender(intent, fillInIntent, flagsMask, flagsValues,
                 extraFlags, null);
@@ -3710,7 +3736,7 @@ public class Activity extends ContextThemeWrapper
      * override any that conflict with those given by the IntentSender.
      */
     public void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
             Bundle options) throws IntentSender.SendIntentException {
         if (options != null) {
             startIntentSenderForResult(intent, -1, fillInIntent, flagsMask,
@@ -3738,7 +3764,7 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public boolean startActivityIfNeeded(Intent intent, int requestCode) {
+    public boolean startActivityIfNeeded(@NonNull Intent intent, int requestCode) {
         return startActivityIfNeeded(intent, requestCode, null);
     }
 
@@ -3772,7 +3798,8 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public boolean startActivityIfNeeded(Intent intent, int requestCode, Bundle options) {
+    public boolean startActivityIfNeeded(@NonNull Intent intent, int requestCode,
+            @Nullable Bundle options) {
         if (mParent == null) {
             int result = ActivityManager.START_RETURN_INTENT_TO_CALLER;
             try {
@@ -3821,7 +3848,7 @@ public class Activity extends ContextThemeWrapper
      * wasn't.  In general, if true is returned you will then want to call
      * finish() on yourself.
      */
-    public boolean startNextMatchingActivity(Intent intent) {
+    public boolean startNextMatchingActivity(@NonNull Intent intent) {
         return startNextMatchingActivity(intent, null);
     }
 
@@ -3844,7 +3871,7 @@ public class Activity extends ContextThemeWrapper
      * wasn't.  In general, if true is returned you will then want to call
      * finish() on yourself.
      */
-    public boolean startNextMatchingActivity(Intent intent, Bundle options) {
+    public boolean startNextMatchingActivity(@NonNull Intent intent, @Nullable Bundle options) {
         if (mParent == null) {
             try {
                 intent.migrateExtraStreamToClipData();
@@ -3874,7 +3901,7 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public void startActivityFromChild(Activity child, Intent intent,
+    public void startActivityFromChild(@NonNull Activity child, Intent intent,
             int requestCode) {
         startActivityFromChild(child, intent, requestCode, null);
     }
@@ -3898,8 +3925,8 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity 
      * @see #startActivityForResult 
      */
-    public void startActivityFromChild(Activity child, Intent intent, 
-            int requestCode, Bundle options) {
+    public void startActivityFromChild(@NonNull Activity child, Intent intent,
+            int requestCode, @Nullable Bundle options) {
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, child,
@@ -3924,7 +3951,7 @@ public class Activity extends ContextThemeWrapper
      * @see Fragment#startActivity
      * @see Fragment#startActivityForResult
      */
-    public void startActivityFromFragment(Fragment fragment, Intent intent, 
+    public void startActivityFromFragment(@NonNull Fragment fragment, Intent intent,
             int requestCode) {
         startActivityFromFragment(fragment, intent, requestCode, null);
     }
@@ -3949,8 +3976,8 @@ public class Activity extends ContextThemeWrapper
      * @see Fragment#startActivity 
      * @see Fragment#startActivityForResult 
      */
-    public void startActivityFromFragment(Fragment fragment, Intent intent, 
-            int requestCode, Bundle options) {
+    public void startActivityFromFragment(@NonNull Fragment fragment, Intent intent,
+            int requestCode, @Nullable Bundle options) {
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, fragment,
@@ -3982,7 +4009,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startIntentSenderFromChild(Activity child, IntentSender intent,
             int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
-            int extraFlags, Bundle options)
+            int extraFlags, @Nullable Bundle options)
             throws IntentSender.SendIntentException {
         startIntentSenderForResultInner(intent, requestCode, fillInIntent,
                 flagsMask, flagsValues, child, options);
@@ -4081,6 +4108,7 @@ public class Activity extends ContextThemeWrapper
      * @return The package of the activity that will receive your
      *         reply, or null if none.
      */
+    @Nullable
     public String getCallingPackage() {
         try {
             return ActivityManagerNative.getDefault().getCallingPackage(mToken);
@@ -4103,6 +4131,7 @@ public class Activity extends ContextThemeWrapper
      * @return The ComponentName of the activity that will receive your
      *         reply, or null if none.
      */
+    @Nullable
     public ComponentName getCallingActivity() {
         try {
             return ActivityManagerNative.getDefault().getCallingActivity(mToken);
@@ -4295,7 +4324,7 @@ public class Activity extends ContextThemeWrapper
      * @param requestCode Request code that had been used to start the
      *                    activity.
      */
-    public void finishActivityFromChild(Activity child, int requestCode) {
+    public void finishActivityFromChild(@NonNull Activity child, int requestCode) {
         try {
             ActivityManagerNative.getDefault()
                 .finishSubActivity(mToken, child.mEmbeddedID, requestCode);
@@ -4356,8 +4385,8 @@ public class Activity extends ContextThemeWrapper
      * 
      * @see PendingIntent
      */
-    public PendingIntent createPendingResult(int requestCode, Intent data,
-            int flags) {
+    public PendingIntent createPendingResult(int requestCode, @NonNull Intent data,
+            @PendingIntent.Flags int flags) {
         String packageName = getPackageName();
         try {
             data.prepareToLeaveProcess();
@@ -4384,7 +4413,7 @@ public class Activity extends ContextThemeWrapper
      * @param requestedOrientation An orientation constant as used in
      * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
      */
-    public void setRequestedOrientation(int requestedOrientation) {
+    public void setRequestedOrientation(@ActivityInfo.ScreenOrientation int requestedOrientation) {
         if (mParent == null) {
             try {
                 ActivityManagerNative.getDefault().setRequestedOrientation(
@@ -4406,6 +4435,7 @@ public class Activity extends ContextThemeWrapper
      * @return Returns an orientation constant as used in
      * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
      */
+    @ActivityInfo.ScreenOrientation
     public int getRequestedOrientation() {
         if (mParent == null) {
             try {
@@ -4477,6 +4507,7 @@ public class Activity extends ContextThemeWrapper
      * 
      * @return The local class name.
      */
+    @NonNull
     public String getLocalClassName() {
         final String pkg = getPackageName();
         final String cls = mComponent.getClassName();
@@ -4522,9 +4553,9 @@ public class Activity extends ContextThemeWrapper
         
         mSearchManager = new SearchManager(this, null);
     }
-    
+
     @Override
-    public Object getSystemService(String name) {
+    public Object getSystemService(@ServiceName @NonNull String name) {
         if (getBaseContext() == null) {
             throw new IllegalStateException(
                     "System services not available to Activities before onCreate()");
@@ -4686,7 +4717,7 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Gets the suggested audio stream whose volume should be changed by the
-     * harwdare volume controls.
+     * hardware volume controls.
      * 
      * @return The suggested audio stream type whose volume should be changed by
      *         the hardware volume controls.
@@ -4722,6 +4753,7 @@ public class Activity extends ContextThemeWrapper
      * @see android.view.LayoutInflater#createView
      * @see android.view.Window#getLayoutInflater
      */
+    @Nullable
     public View onCreateView(String name, Context context, AttributeSet attrs) {
         return null;
     }
@@ -4989,6 +5021,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see ActionMode
      */
+    @Nullable
     public ActionMode startActionMode(ActionMode.Callback callback) {
         return mWindow.getDecorView().startActionMode(callback);
     }
@@ -5004,6 +5037,7 @@ public class Activity extends ContextThemeWrapper
      * @return The new action mode, or <code>null</code> if the activity does not want to
      *         provide special handling for this action mode. (It will be handled by the system.)
      */
+    @Nullable
     @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
         initActionBar();
@@ -5147,6 +5181,7 @@ public class Activity extends ContextThemeWrapper
      * @return a new Intent targeting the defined parent of this activity or null if
      *         there is no valid parent.
      */
+    @Nullable
     public Intent getParentActivityIntent() {
         final String parentName = mActivityInfo.parentActivityName;
         if (TextUtils.isEmpty(parentName)) {

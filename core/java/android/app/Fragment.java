@@ -17,6 +17,7 @@
 package android.app;
 
 import android.animation.Animator;
+import android.annotation.Nullable;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
@@ -575,7 +576,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * the given fragment class.  This is a runtime exception; it is not
      * normally expected to happen.
      */
-    public static Fragment instantiate(Context context, String fname, Bundle args) {
+    public static Fragment instantiate(Context context, String fname, @Nullable Bundle args) {
         try {
             Class<?> clazz = sClassMap.get(fname);
             if (clazz == null) {
@@ -1213,7 +1214,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * 
      * @return Return the View for the fragment's UI, or null.
      */
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @Nullable
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
         return null;
     }
@@ -1228,7 +1230,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
      */
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     }
     
     /**
@@ -1237,6 +1239,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * 
      * @return The fragment's root view, or null if it has no layout.
      */
+    @Nullable
     public View getView() {
         return mView;
     }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.IntDef;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -24,6 +25,10 @@ import android.graphics.SurfaceTexture;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import dalvik.system.CloseGuard;
 
 /**
@@ -79,6 +84,11 @@ public class Surface implements Parcelable {
     // A matrix to scale the matrix set by application. This is set to null for
     // non compatibility mode.
     private Matrix mCompatibleMatrix;
+
+    /** @hide */
+    @IntDef({ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Rotation {}
 
     /**
      * Rotation constant: 0 degree rotation (natural orientation)

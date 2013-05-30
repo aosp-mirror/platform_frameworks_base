@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.IntDef;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -53,6 +54,8 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 import libcore.icu.LocaleData;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -493,6 +496,10 @@ public class NumberPicker extends LinearLayout {
      * Interface to listen for the picker scroll state.
      */
     public interface OnScrollListener {
+        /** @hide */
+        @IntDef({SCROLL_STATE_IDLE, SCROLL_STATE_TOUCH_SCROLL, SCROLL_STATE_FLING})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ScrollState {}
 
         /**
          * The view is not scrolling.
@@ -518,7 +525,7 @@ public class NumberPicker extends LinearLayout {
          *            {@link #SCROLL_STATE_TOUCH_SCROLL} or
          *            {@link #SCROLL_STATE_IDLE}.
          */
-        public void onScrollStateChange(NumberPicker view, int scrollState);
+        public void onScrollStateChange(NumberPicker view, @ScrollState int scrollState);
     }
 
     /**

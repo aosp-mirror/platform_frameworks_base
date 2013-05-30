@@ -16,6 +16,9 @@
 
 package android.view;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -86,6 +89,8 @@ import com.android.internal.view.menu.MenuBuilder;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -715,6 +720,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final int FITS_SYSTEM_WINDOWS = 0x00000002;
 
+    /** @hide */
+    @IntDef({VISIBLE, INVISIBLE, GONE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Visibility {}
+
     /**
      * This view is visible.
      * Use with {@link #setVisibility} and <a href="#attr_android:visibility">{@code
@@ -882,6 +892,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int FOCUSABLE_IN_TOUCH_MODE = 0x00040000;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({DRAWING_CACHE_QUALITY_LOW, DRAWING_CACHE_QUALITY_HIGH, DRAWING_CACHE_QUALITY_AUTO})
+    public @interface DrawingCacheQuality {}
+
     /**
      * <p>Enables low quality mode for the drawing cache.</p>
      */
@@ -925,6 +940,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     static final int DUPLICATE_PARENT_STATE = 0x00400000;
+
+    /** @hide */
+    @IntDef({
+        SCROLLBARS_INSIDE_OVERLAY,
+        SCROLLBARS_INSIDE_INSET,
+        SCROLLBARS_OUTSIDE_OVERLAY,
+        SCROLLBARS_OUTSIDE_INSET
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScrollBarStyle {}
 
     /**
      * The scrollbar style to display the scrollbars inside the content area,
@@ -1006,6 +1031,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PARENT_SAVE_DISABLED_MASK = 0x20000000;
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                FOCUSABLES_ALL,
+                FOCUSABLES_TOUCH_MODE,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FocusableMode {}
+
     /**
      * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
      * should add all focusable Views regardless if they are focusable in touch mode.
@@ -1017,6 +1051,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * should add only Views focusable in touch mode.
      */
     public static final int FOCUSABLES_TOUCH_MODE = 0x00000001;
+
+    /** @hide */
+    @IntDef({
+            FOCUS_BACKWARD,
+            FOCUS_FORWARD,
+            FOCUS_LEFT,
+            FOCUS_UP,
+            FOCUS_RIGHT,
+            FOCUS_DOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FocusDirection {}
+
+    /** @hide */
+    @IntDef({
+            FOCUS_LEFT,
+            FOCUS_UP,
+            FOCUS_RIGHT,
+            FOCUS_DOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FocusRealDirection {} // Like @FocusDirection, but without forward/backward
 
     /**
      * Use with {@link #focusSearch(int)}. Move focus to the previous selectable
@@ -1796,6 +1852,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG2_DRAG_HOVERED               = 0x00000002;
 
+    /** @hide */
+    @IntDef({
+        LAYOUT_DIRECTION_LTR,
+        LAYOUT_DIRECTION_RTL,
+        LAYOUT_DIRECTION_INHERIT,
+        LAYOUT_DIRECTION_LOCALE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    // Not called LayoutDirection to avoid conflict with android.util.LayoutDirection
+    public @interface LayoutDir {}
+
+    /** @hide */
+    @IntDef({
+        LAYOUT_DIRECTION_LTR,
+        LAYOUT_DIRECTION_RTL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResolvedLayoutDir {}
+
     /**
      * Horizontal layout direction of this view is from Left to Right.
      * Use with {@link #setLayoutDirection}.
@@ -1983,7 +2058,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT =
             TEXT_DIRECTION_RESOLVED_DEFAULT << PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
 
-    /*
+    /** @hide */
+    @IntDef({
+        TEXT_ALIGNMENT_INHERIT,
+        TEXT_ALIGNMENT_GRAVITY,
+        TEXT_ALIGNMENT_CENTER,
+        TEXT_ALIGNMENT_TEXT_START,
+        TEXT_ALIGNMENT_TEXT_END,
+        TEXT_ALIGNMENT_VIEW_START,
+        TEXT_ALIGNMENT_VIEW_END
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TextAlignment {}
+
+    /**
      * Default text alignment. The text alignment of this View is inherited from its parent.
      * Use with {@link #setTextAlignment(int)}
      */
@@ -2595,6 +2683,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = { FIND_VIEWS_WITH_TEXT, FIND_VIEWS_WITH_CONTENT_DESCRIPTION })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FindViewFlags {}
+
     /**
      * Find views that render the specified text.
      *
@@ -2616,7 +2710,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * added and it is a responsibility of the client to call the APIs of
      * the provider to determine whether the virtual tree rooted at this View
      * contains the text, i.e. getting the list of {@link AccessibilityNodeInfo}s
-     * represeting the virtual views with this text.
+     * representing the virtual views with this text.
      *
      * @see #findViewsWithText(ArrayList, CharSequence, int)
      *
@@ -4532,7 +4626,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param previouslyFocusedRect The rectangle of the view that had focus
      *        prior in this View's coordinate system.
      */
-    void handleFocusGainInternal(int direction, Rect previouslyFocusedRect) {
+    void handleFocusGainInternal(@FocusRealDirection int direction, Rect previouslyFocusedRect) {
         if (DBG) {
             System.out.println(this + " requestFocus()");
         }
@@ -4743,7 +4837,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        passed in as finer grained information about where the focus is coming
      *        from (in addition to direction).  Will be <code>null</code> otherwise.
      */
-    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
+    protected void onFocusChanged(boolean gainFocus, @FocusDirection int direction,
+            @Nullable Rect previouslyFocusedRect) {
         if (gainFocus) {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         } else {
@@ -5599,6 +5694,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_drawingCacheQuality
      */
+    @DrawingCacheQuality
     public int getDrawingCacheQuality() {
         return mViewFlags & DRAWING_CACHE_QUALITY_MASK;
     }
@@ -5616,7 +5712,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_drawingCacheQuality
      */
-    public void setDrawingCacheQuality(int quality) {
+    public void setDrawingCacheQuality(@DrawingCacheQuality int quality) {
         setFlags(quality, DRAWING_CACHE_QUALITY_MASK);
     }
 
@@ -5951,6 +6047,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = INVISIBLE, to = "INVISIBLE"),
         @ViewDebug.IntToString(from = GONE,      to = "GONE")
     })
+    @Visibility
     public int getVisibility() {
         return mViewFlags & VISIBILITY_MASK;
     }
@@ -5962,7 +6059,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_visibility
      */
     @RemotableViewMethod
-    public void setVisibility(int visibility) {
+    public void setVisibility(@Visibility int visibility) {
         setFlags(visibility, VISIBILITY_MASK);
         if (mBackground != null) mBackground.setVisible(visibility == VISIBLE, false);
     }
@@ -6121,6 +6218,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_INHERIT, to = "INHERIT"),
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LOCALE,  to = "LOCALE")
     })
+    @LayoutDir
     public int getRawLayoutDirection() {
         return (mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_MASK) >> PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT;
     }
@@ -6143,7 +6241,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_layoutDirection
      */
     @RemotableViewMethod
-    public void setLayoutDirection(int layoutDirection) {
+    public void setLayoutDirection(@LayoutDir int layoutDirection) {
         if (getRawLayoutDirection() != layoutDirection) {
             // Reset the current layout direction and the resolved one
             mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_MASK;
@@ -6173,6 +6271,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR, to = "RESOLVED_DIRECTION_LTR"),
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL, to = "RESOLVED_DIRECTION_RTL")
     })
+    @ResolvedLayoutDir
     public int getLayoutDirection() {
         final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
         if (targetSdkVersion < JELLY_BEAN_MR1) {
@@ -6542,7 +6641,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The nearest focusable in the specified direction, or null if none
      *         can be found.
      */
-    public View focusSearch(int direction) {
+    public View focusSearch(@FocusRealDirection int direction) {
         if (mParent != null) {
             return mParent.focusSearch(this, direction);
         } else {
@@ -6561,7 +6660,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        FOCUS_DOWN, FOCUS_LEFT, and FOCUS_RIGHT.
      * @return True if the this view consumed this unhandled move.
      */
-    public boolean dispatchUnhandledMove(View focused, int direction) {
+    public boolean dispatchUnhandledMove(View focused, @FocusRealDirection int direction) {
         return false;
     }
 
@@ -6573,7 +6672,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * or FOCUS_BACKWARD.
      * @return The user specified next view, or null if there is none.
      */
-    View findUserSetNextFocus(View root, int direction) {
+    View findUserSetNextFocus(View root, @FocusDirection int direction) {
         switch (direction) {
             case FOCUS_LEFT:
                 if (mNextFocusLeftId == View.NO_ID) return null;
@@ -6623,7 +6722,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param direction The direction of the focus
      * @return A list of focusable views
      */
-    public ArrayList<View> getFocusables(int direction) {
+    public ArrayList<View> getFocusables(@FocusDirection int direction) {
         ArrayList<View> result = new ArrayList<View>(24);
         addFocusables(result, direction);
         return result;
@@ -6637,7 +6736,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param views Focusable views found so far
      * @param direction The direction of the focus
      */
-    public void addFocusables(ArrayList<View> views, int direction) {
+    public void addFocusables(ArrayList<View> views, @FocusDirection int direction) {
         addFocusables(views, direction, FOCUSABLES_TOUCH_MODE);
     }
 
@@ -6657,7 +6756,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #FOCUSABLES_ALL
      * @see #FOCUSABLES_TOUCH_MODE
      */
-    public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
+    public void addFocusables(ArrayList<View> views, @FocusDirection int direction,
+            @FocusableMode int focusableMode) {
         if (views == null) {
             return;
         }
@@ -6686,7 +6786,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #FIND_VIEWS_WITH_CONTENT_DESCRIPTION
      * @see #setContentDescription(CharSequence)
      */
-    public void findViewsWithText(ArrayList<View> outViews, CharSequence searched, int flags) {
+    public void findViewsWithText(ArrayList<View> outViews, CharSequence searched,
+            @FindViewFlags int flags) {
         if (getAccessibilityNodeProvider() != null) {
             if ((flags & FIND_VIEWS_WITH_ACCESSIBILITY_NODE_PROVIDERS) != 0) {
                 outViews.add(this);
@@ -7036,7 +7137,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return isActionableForAccessibility() || hasListenersForAccessibility()
                         || getAccessibilityNodeProvider() != null;
             default:
-                throw new IllegalArgumentException("Unknow important for accessibility mode: "
+                throw new IllegalArgumentException("Unknown important for accessibility mode: "
                         + mode);
         }
     }
@@ -7108,7 +7209,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns whether the View has registered callbacks wich makes it
+     * Returns whether the View has registered callbacks which makes it
      * important for accessibility.
      *
      * @return True if the view is actionable for accessibility.
@@ -7127,7 +7228,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * notification is at at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}
      * to avoid unnecessary load to the system. Also once a view has a pending
-     * notifucation this method is a NOP until the notification has been sent.
+     * notification this method is a NOP until the notification has been sent.
      *
      * @hide
      */
@@ -7805,7 +7906,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param visibility The new visibility of changedView: {@link #VISIBLE},
      * {@link #INVISIBLE} or {@link #GONE}.
      */
-    protected void dispatchVisibilityChanged(View changedView, int visibility) {
+    protected void dispatchVisibilityChanged(@NonNull View changedView,
+            @Visibility int visibility) {
         onVisibilityChanged(changedView, visibility);
     }
 
@@ -7816,7 +7918,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param visibility The new visibility of changedView: {@link #VISIBLE},
      * {@link #INVISIBLE} or {@link #GONE}.
      */
-    protected void onVisibilityChanged(View changedView, int visibility) {
+    protected void onVisibilityChanged(@NonNull View changedView, @Visibility int visibility) {
         if (visibility == VISIBLE) {
             if (mAttachInfo != null) {
                 initialAwakenScrollBars();
@@ -7835,7 +7937,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param hint A hint about whether or not this view is displayed:
      * {@link #VISIBLE} or {@link #INVISIBLE}.
      */
-    public void dispatchDisplayHint(int hint) {
+    public void dispatchDisplayHint(@Visibility int hint) {
         onDisplayHint(hint);
     }
 
@@ -7848,7 +7950,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param hint A hint about whether or not this view is displayed:
      * {@link #VISIBLE} or {@link #INVISIBLE}.
      */
-    protected void onDisplayHint(int hint) {
+    protected void onDisplayHint(@Visibility int hint) {
     }
 
     /**
@@ -7859,7 +7961,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #onWindowVisibilityChanged(int)
      */
-    public void dispatchWindowVisibilityChanged(int visibility) {
+    public void dispatchWindowVisibilityChanged(@Visibility int visibility) {
         onWindowVisibilityChanged(visibility);
     }
 
@@ -7873,7 +7975,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param visibility The new visibility of the window.
      */
-    protected void onWindowVisibilityChanged(int visibility) {
+    protected void onWindowVisibilityChanged(@Visibility int visibility) {
         if (visibility == VISIBLE) {
             initialAwakenScrollBars();
         }
@@ -7885,6 +7987,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return Returns the current visibility of the view's window.
      */
+    @Visibility
     public int getWindowVisibility() {
         return mAttachInfo != null ? mAttachInfo.mWindowVisibility : GONE;
     }
@@ -11521,7 +11624,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_scrollbarStyle
      */
-    public void setScrollBarStyle(int style) {
+    public void setScrollBarStyle(@ScrollBarStyle int style) {
         if (style != (mViewFlags & SCROLLBARS_STYLE_MASK)) {
             mViewFlags = (mViewFlags & ~SCROLLBARS_STYLE_MASK) | (style & SCROLLBARS_STYLE_MASK);
             computeOpaqueFlags();
@@ -11545,6 +11648,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = SCROLLBARS_OUTSIDE_OVERLAY, to = "OUTSIDE_OVERLAY"),
             @ViewDebug.IntToString(from = SCROLLBARS_OUTSIDE_INSET, to = "OUTSIDE_INSET")
     })
+    @ScrollBarStyle
     public int getScrollBarStyle() {
         return mViewFlags & SCROLLBARS_STYLE_MASK;
     }
@@ -12044,7 +12148,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #LAYOUT_DIRECTION_LTR
      * @see #LAYOUT_DIRECTION_RTL
      */
-    public void onRtlPropertiesChanged(int layoutDirection) {
+    public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
     }
 
     /**
@@ -14840,7 +14944,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void onResolveDrawables(int layoutDirection) {
+    public void onResolveDrawables(@ResolvedLayoutDir int layoutDirection) {
     }
 
     /**
@@ -17636,6 +17740,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_START, to = "VIEW_START"),
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
     })
+    @TextAlignment
     public int getRawTextAlignment() {
         return (mPrivateFlags2 & PFLAG2_TEXT_ALIGNMENT_MASK) >> PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT;
     }
@@ -17659,7 +17764,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_textAlignment
      */
-    public void setTextAlignment(int textAlignment) {
+    public void setTextAlignment(@TextAlignment int textAlignment) {
         if (textAlignment != getRawTextAlignment()) {
             // Reset the current and resolved text alignment
             mPrivateFlags2 &= ~PFLAG2_TEXT_ALIGNMENT_MASK;
@@ -17700,6 +17805,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_START, to = "VIEW_START"),
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
     })
+    @TextAlignment
     public int getTextAlignment() {
         return (mPrivateFlags2 & PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK) >>
                 PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT;

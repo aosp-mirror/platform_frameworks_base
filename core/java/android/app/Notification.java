@@ -18,6 +18,7 @@ package android.app;
 
 import com.android.internal.R;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -37,6 +38,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
@@ -350,6 +353,11 @@ public class Notification implements Parcelable
 
     public int flags;
 
+    /** @hide */
+    @IntDef({PRIORITY_DEFAULT,PRIORITY_LOW,PRIORITY_MIN,PRIORITY_HIGH,PRIORITY_MAX})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Priority {}
+
     /**
      * Default notification {@link #priority}. If your application does not prioritize its own
      * notifications, use this value for all notifications.
@@ -391,6 +399,7 @@ public class Notification implements Parcelable
      * system will make a determination about how to interpret this priority when presenting
      * the notification.
      */
+    @Priority
     public int priority;
 
     /**
@@ -1434,7 +1443,7 @@ public class Notification implements Parcelable
          *
          * @see Notification#priority
          */
-        public Builder setPriority(int pri) {
+        public Builder setPriority(@Priority int pri) {
             mPriority = pri;
             return this;
         }

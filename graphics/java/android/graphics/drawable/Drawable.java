@@ -38,6 +38,7 @@ import android.util.DisplayMetrics;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -398,7 +399,7 @@ public abstract class Drawable {
      *
      * @hide
      */
-    public void setLayoutDirection(int layoutDirection) {
+    public void setLayoutDirection(@View.ResolvedLayoutDir int layoutDirection) {
         if (getLayoutDirection() != layoutDirection) {
             mLayoutDirection = layoutDirection;
         }

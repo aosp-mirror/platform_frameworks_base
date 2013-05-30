@@ -21,6 +21,7 @@ import android.util.ArraySet;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.pm.ActivityInfo;
@@ -43,6 +44,8 @@ import com.android.internal.util.XmlUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -3315,6 +3318,12 @@ public class Intent implements Parcelable, Cloneable {
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {FLAG_GRANT_READ_URI_PERMISSION, FLAG_GRANT_WRITE_URI_PERMISSION})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GrantUriMode {}
+
     /**
      * If set, the recipient of this Intent will be granted permission to
      * perform read operations on the Uri in the Intent's data and any URIs
@@ -6341,6 +6350,21 @@ public class Intent implements Parcelable, Cloneable {
         }
     }
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                    FILL_IN_ACTION,
+                    FILL_IN_DATA,
+                    FILL_IN_CATEGORIES,
+                    FILL_IN_COMPONENT,
+                    FILL_IN_PACKAGE,
+                    FILL_IN_SOURCE_BOUNDS,
+                    FILL_IN_SELECTOR,
+                    FILL_IN_CLIP_DATA
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FillInFlags {}
+
     /**
      * Use with {@link #fillIn} to allow the current action value to be
      * overwritten, even if it is already set.
@@ -6434,10 +6458,12 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @return Returns a bit mask of {@link #FILL_IN_ACTION},
      * {@link #FILL_IN_DATA}, {@link #FILL_IN_CATEGORIES}, {@link #FILL_IN_PACKAGE},
-     * {@link #FILL_IN_COMPONENT}, {@link #FILL_IN_SOURCE_BOUNDS}, and
-     * {@link #FILL_IN_SELECTOR} indicating which fields were changed.
+     * {@link #FILL_IN_COMPONENT}, {@link #FILL_IN_SOURCE_BOUNDS},
+     * {@link #FILL_IN_SELECTOR} and {@link #FILL_IN_CLIP_DATA indicating which fields were
+     * changed.
      */
-    public int fillIn(Intent other, int flags) {
+    @FillInFlags
+    public int fillIn(Intent other, @FillInFlags int flags) {
         int changes = 0;
         if (other.mAction != null
                 && (mAction == null || (flags&FILL_IN_ACTION) != 0)) {
