@@ -107,7 +107,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
      * #EXTRA_CLASS}.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
-     * @see {@link BluetoothClass}
+     * {@see BluetoothClass}
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CLASS_CHANGED =
