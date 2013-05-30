@@ -326,11 +326,11 @@
             </a></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
-                    <span class="en">Renderscript</span></a>
+                    <span class="en">RenderScript</span></a>
                   </li>
 
               <li><a href="<?cs var:toroot ?>guide/topics/renderscript/advanced.html">
-                    <span class="en">Advanced Renderscript</span></a>
+                    <span class="en">Advanced RenderScript</span></a>
                   </li>
               <li><a href="<?cs var:toroot ?>guide/topics/renderscript/reference.html">
                     <span class="en">Runtime API Reference</span></a>
