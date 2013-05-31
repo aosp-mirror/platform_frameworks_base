@@ -538,7 +538,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    "fancy_rotation_anim"), false, this,
+                    OverlayTesting.ENABLED_SETTING), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -949,7 +949,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     @Override
                     public void onDebug() {
-                        if (OverlayTesting.ENABLED) {
+                        if (OverlayTesting.enabled) {
                             OverlayTesting.toggleForceOverlay(mFocusedWindow, mContext);
                         }
                     }
@@ -1179,6 +1179,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHasSoftInput = hasSoftInput;
                 updateRotation = true;
             }
+            OverlayTesting.enabled = Settings.System.getIntForUser(resolver,
+                    OverlayTesting.ENABLED_SETTING, 0, UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
             updateRotation(true);
@@ -5088,7 +5090,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int updateHideybarsLw(int tmpVisibility) {
-        if (OverlayTesting.ENABLED) {
+        if (OverlayTesting.enabled) {
             tmpVisibility = OverlayTesting.applyForced(mFocusedWindow, tmpVisibility);
         }
         boolean statusBarHasFocus =
@@ -5155,7 +5157,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // TODO temporary helper that allows testing overlay bars on existing apps
     private static final class OverlayTesting {
-        static final boolean ENABLED = true;
+        static String ENABLED_SETTING = "overlay_testing_enabled";
+        static boolean enabled = false;
         private static final HashSet<String> sForced = new HashSet<String>();
 
         private static String parseActivity(WindowState win) {
