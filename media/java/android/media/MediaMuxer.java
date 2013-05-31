@@ -35,20 +35,29 @@ import java.util.Map;
  * It is generally used like this:
  *
  * <pre>
- * MediaMuxer muxer = new MediaMuxer(...);
+ * MediaMuxer muxer = new MediaMuxer("temp.mp4", OutputFormat.MUXER_OUTPUT_MPEG_4);
+ * // More often, the MediaFormat will be retrieved from MediaCodec.getOutputFormat()
+ * // or MediaExtractor.getTrackFormat().
  * MediaFormat audioFormat = new MediaFormat(...);
  * MediaFormat videoFormat = new MediaFormat(...);
  * int audioTrackIndex = muxer.addTrack(audioFormat);
  * int videoTrackIndex = muxer.addTrack(videoFormat);
- * ByteBuffer inputBuffer = ByteBuffer.allocate(...);
+ * ByteBuffer inputBuffer = ByteBuffer.allocate(bufferSize);
+ * boolean finished = false;
+ * BufferInfo bufferInfo = new BufferInfo();
+ *
  * muxer.start();
- * while(inputBuffer has new data) {
- *   if (new data is audio sample) {
- *     muxer.writeSampleData(audioTrackIndex, inputBuffer, ...);
- *   } else if (new data is video sample) {
- *     muxer.writeSampleData(videoTrackIndex, inputBuffer, ...);
+ * while(!finished) {
+ *   // getInputBuffer() will fill the inputBuffer with one frame of encoded
+ *   // sample from either MediaCodec or MediaExtractor, set isAudioSample to
+ *   // true when the sample is audio data, set up all the fields of bufferInfo,
+ *   // and return true if there are no more samples.
+ *   finished = getInputBuffer(inputBuffer, isAudioSample, bufferInfo);
+ *   if (!finished) {
+ *     int currentTrackIndex = isAudioSample ? audioTrackIndex : videoTrackIndex;
+ *     muxer.writeSampleData(currentTrackIndex, inputBuffer, bufferInfo);
  *   }
- * }
+ * };
  * muxer.stop();
  * muxer.release();
  * </pre>
