@@ -381,7 +381,6 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "unbindInput(): binding=" + mInputBinding
                     + " ic=" + mInputConnection);
             onUnbindInput();
-            mInputStarted = false;
             mInputBinding = null;
             mInputConnection = null;
         }
@@ -719,7 +718,7 @@ public class InputMethodService extends AbstractInputMethodService {
         super.onDestroy();
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
-        finishViews();
+        doFinishInput();
         if (mWindowAdded) {
             // Disable exit animation for the current IME window
             // to avoid the race condition between the exit and enter animations
