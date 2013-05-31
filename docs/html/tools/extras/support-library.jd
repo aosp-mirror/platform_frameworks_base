@@ -524,7 +524,7 @@ and click <strong>Install selected</strong>.</li>
   <li>Proceed to install the package.</li>
 </ol>
 
-<p>When done, all files (including source code, samples, and the {@code .jar} files) are saved
+<p>When done, all files (including source code, samples, and the JAR files) are saved
 into the <code>&lt;sdk&gt;/extras/android/support/</code> directory. This directory contains
 each of the different support libraries, such as the library for API level 4 and up and the library
 for API level 13 and up, each named with the respective version (such as {@code v4/}).</p>
@@ -533,20 +533,57 @@ for API level 13 and up, each named with the respective version (such as {@code 
 <h2 id="SettingUp">Setting Up a Project to Use a Library</h2>
 
 <p>To add one of the libraries to your Android project:</p>
+<dl>
+    <dt>
+        Add the JAR file to your project.
+    </dt>
+    <dd>
+        Copy the JAR file for the library you want to use into your Android project. To do this:
+        <ul>
+            <li>
+                Create the directory {@code libs/} at the root of your project
+                (next to {@code src/}, {@code res/}, and so forth).
+            </li>
+            <li>
+                Locate the JAR file for the library you want to use and copy it into the
+                {@code libs/} directory.
+                <p>
+                    For example, the library that supports API level 4 and up is located at
+                    {@code &lt;sdk&gt;/extras/android/support/v4/android-support-v4.jar}.
+                </p>
+            </li>
+        </ul>
+        <p>
+            Your build system may expect to find the JAR file in a directory other than
+            {@code libs}. Read the documentation for your build system to learn where to put the
+            JAR file.
+        </p>
+    </dd>
+    <dt>
+        If necessary, add the {@code libs/} directory to your build path.
+    </dt>
+    <dd>
+        Read the documentation for your build system to learn how to add the JAR file to the
+        build path.
+    </dd>
+</dl>
+<p>
+    To confirm that you've added the JAR file to the correct directory and added it to the build
+    path:
+</p>
 <ol>
-  <li>In your Android project, create a directory named {@code libs} at the root of your
-project (next to {@code src/}, {@code res/}, etc.)</li>
-  <li>Locate the JAR file for the library you want to use and copy it into the {@code
-libs/} directory.
-    <p>For example, the library that supports API level 4 and up is located at {@code
-&lt;sdk&gt;/extras/android/support/v4/android-support-v4.jar}.</p>
-  </li>
-  <li>Add the JAR to your project build path.
-    <p>In Eclipse, right-click the JAR file in the Package Explorer, select <strong>Build
-Path</strong> &gt; <strong>Add to Build Path</strong>.</p>
-  </li>
+    <li>
+        Edit one of your source files to add an {@code import} statement that imports a
+        class from the {@code android.support.*} package.
+    </li>
+    <li>
+        Build your app. The code should compile cleanly.
+    </li>
+    <li>
+        As a double-check, run your app. It should run correctly, without any runtime exceptions
+        indicating that the class in {@code android.support.*} can't be found.
+    </li>
 </ol>
-
 <p>Your application is now ready to use the library APIs. All the
 provided APIs are available in the {@code android.support} package (for
 example, {@code android.support.v4}).</p>
