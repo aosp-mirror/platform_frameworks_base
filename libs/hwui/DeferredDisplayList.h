@@ -44,8 +44,12 @@ typedef void* mergeid_t;
 
 class DeferredDisplayList {
 public:
-    DeferredDisplayList() { clear(); }
+    DeferredDisplayList(const Rect& bounds, bool avoidOverdraw = true) :
+            mBounds(bounds), mAvoidOverdraw(avoidOverdraw) {
+        clear();
+    }
     ~DeferredDisplayList() { clear(); }
+    void reset(const Rect& bounds) { mBounds.set(bounds); }
 
     enum OpBatchId {
         kOpBatch_None = 0, // Don't batch
@@ -96,6 +100,12 @@ private:
     int getStateOpDeferFlags() const;
     int getDrawOpDeferFlags() const;
 
+    void discardDrawingBatches(unsigned int maxIndex);
+
+    // layer space bounds of rendering
+    Rect mBounds;
+    const bool mAvoidOverdraw;
+
     /**
      * At defer time, stores the *defer time* savecount of save/saveLayer ops that were deferred, so
      * that when an associated restoreToCount is deferred, it can be recorded as a
@@ -112,12 +122,33 @@ private:
     // Points to the index after the most recent barrier
     int mEarliestBatchIndex;
 
+    // Points to the first index that may contain a pure drawing batch
+    int mEarliestUnclearedIndex;
+
     /**
      * Maps the mergeid_t returned by an op's getMergeId() to the most recently seen
      * MergingDrawBatch of that id. These ids are unique per draw type and guaranteed to not
      * collide, which avoids the need to resolve mergeid collisions.
      */
     TinyHashMap<mergeid_t, DrawBatch*> mMergingBatches[kOpBatch_Count];
+};
+
+/**
+ * Struct containing information that instructs the defer
+ */
+struct DeferInfo {
+public:
+    DeferInfo() :
+            batchId(DeferredDisplayList::kOpBatch_None),
+            mergeId((mergeid_t) -1),
+            mergeable(false),
+            opaqueOverBounds(false) {
+    };
+
+    int batchId;
+    mergeid_t mergeId;
+    bool mergeable;
+    bool opaqueOverBounds; // opaque over bounds in DeferredDisplayState - can skip ops below
 };
 
 }; // namespace uirenderer
