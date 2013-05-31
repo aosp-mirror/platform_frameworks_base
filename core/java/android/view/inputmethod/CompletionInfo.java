@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2007-2008 The Android Open Source Project
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -23,6 +23,30 @@ import android.text.TextUtils;
 /**
  * Information about a single text completion that an editor has reported to
  * an input method.
+ *
+ * <p>This class encapsulates a completion offered by an application
+ * that wants it to be presented to the user by the IME. Usually, apps
+ * present their completions directly in a scrolling list for example
+ * (UI developers will usually use or extend
+ * {@see android.widget.AutoCompleteTextView} to implement this).
+ * However, in some cases, the editor may not be visible, as in the
+ * case in extract mode where the IME has taken over the full
+ * screen. In this case, the editor can choose to send their
+ * completions to the IME for display.
+ *
+ * <p>Most applications who want to send completions to an IME should use
+ * {@link android.widget.AutoCompleteTextView} as this class makes this
+ * process easy. In this case, the application would not have to deal directly
+ * with this class.
+ *
+ * <p>An application who implements its own editor and wants direct control
+ * over this would create an array of CompletionInfo objects, and send it to the IME using
+ * {@link InputMethodManager#displayCompletions(View, CompletionInfo[])}.
+ * The IME would present the completions however they see fit, and
+ * call back to the editor through
+ * {@link InputConnection#commitCompletion(CompletionInfo)}.
+ * The application can then pick up the commit event by overriding
+ * {@link android.widget.TextView#onCommitCompletion(CompletionInfo)}.
  */
 public final class CompletionInfo implements Parcelable {
     private final long mId;
@@ -32,6 +56,12 @@ public final class CompletionInfo implements Parcelable {
 
     /**
      * Create a simple completion with just text, no label.
+     *
+     * @param id An id that get passed as is (to the editor's discretion)
+     * @param index An index that get passed as is. Typically this is the
+     * index in the list of completions inside the editor.
+     * @param text The text that should be inserted into the editor when
+     * this completion is chosen.
      */
     public CompletionInfo(long id, int index, CharSequence text) {
         mId = id;
@@ -41,7 +71,18 @@ public final class CompletionInfo implements Parcelable {
     }
 
     /**
-     * Create a full completion with both text and label.
+     * Create a full completion with both text and label. The text is
+     * what will get inserted into the editor, while the label is what
+     * the IME should display. If they are the same, use the version
+     * of the constructor without a `label' argument.
+     *
+     * @param id An id that get passed as is (to the editor's discretion)
+     * @param index An index that get passed as is. Typically this is the
+     * index in the list of completions inside the editor.
+     * @param text The text that should be inserted into the editor when
+     * this completion is chosen.
+     * @param label The text that the IME should be showing among the
+     * completions list.
      */
     public CompletionInfo(long id, int index, CharSequence text, CharSequence label) {
         mId = id;
@@ -56,7 +97,7 @@ public final class CompletionInfo implements Parcelable {
         mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
     }
-    
+
     /**
      * Return the abstract identifier for this completion, typically
      * corresponding to the id associated with it in the original adapter.
@@ -64,7 +105,7 @@ public final class CompletionInfo implements Parcelable {
     public long getId() {
         return mId;
     }
-    
+
     /**
      * Return the original position of this completion, typically
      * corresponding to its position in the original adapter.
@@ -72,7 +113,7 @@ public final class CompletionInfo implements Parcelable {
     public int getPosition() {
         return mPosition;
     }
-    
+
     /**
      * Return the actual text associated with this completion.  This is the
      * real text that will be inserted into the editor if the user selects it.
@@ -80,7 +121,7 @@ public final class CompletionInfo implements Parcelable {
     public CharSequence getText() {
         return mText;
     }
-    
+
     /**
      * Return the user-visible label for the completion, or null if the plain
      * text should be shown.  If non-null, this will be what the user sees as
@@ -89,7 +130,7 @@ public final class CompletionInfo implements Parcelable {
     public CharSequence getLabel() {
         return mLabel;
     }
-    
+
     @Override
     public String toString() {
         return "CompletionInfo{#" + mPosition + " \"" + mText
