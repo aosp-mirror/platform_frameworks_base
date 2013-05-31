@@ -6515,6 +6515,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int userId = app.userId;
         if (providers != null) {
             int N = providers.size();
+            app.pubProviders.ensureCapacity(N + app.pubProviders.size());
             for (int i=0; i<N; i++) {
                 ProviderInfo cpi =
                     (ProviderInfo)providers.get(i);
@@ -10099,6 +10100,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     boolean dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
+        boolean dumpedHeader = false;
         boolean needSep = false;
         boolean onlyHistory = false;
 
@@ -10194,14 +10196,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     boolean dumpProvidersLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
-        boolean needSep = true;
+        boolean needSep;
 
         ItemMatcher matcher = new ItemMatcher();
         matcher.build(args, opti);
 
         pw.println("ACTIVITY MANAGER CONTENT PROVIDERS (dumpsys activity providers)");
 
-        mProviderMap.dumpProvidersLocked(pw, dumpAll);
+        needSep = mProviderMap.dumpProvidersLocked(pw, dumpAll, dumpPackage);
 
         if (mLaunchingProviders.size() > 0) {
             boolean printed = false;
@@ -10222,13 +10224,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (mGrantedUriPermissions.size() > 0) {
-            if (needSep) pw.println();
-            needSep = true;
-            pw.println("Granted Uri Permissions:");
+            boolean printed = false;
+            int dumpUid = -1;
+            if (dumpPackage != null) {
+                try {
+                    dumpUid = mContext.getPackageManager().getPackageUid(dumpPackage, 0);
+                } catch (NameNotFoundException e) {
+                    dumpUid = -1;
+                }
+            }
             for (int i=0; i<mGrantedUriPermissions.size(); i++) {
                 int uid = mGrantedUriPermissions.keyAt(i);
+                if (dumpUid >= 0 && UserHandle.getAppId(uid) != dumpUid) {
+                    continue;
+                }
                 HashMap<Uri, UriPermission> perms
                         = mGrantedUriPermissions.valueAt(i);
+                if (!printed) {
+                    if (needSep) pw.println();
+                    needSep = true;
+                    pw.println("  Granted Uri Permissions:");
+                    printed = true;
+                }
                 pw.print("  * UID "); pw.print(uid);
                         pw.println(" holds:");
                 for (UriPermission perm : perms.values()) {
@@ -10238,7 +10255,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             }
-            needSep = true;
         }
         
         return needSep;
@@ -11025,24 +11041,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean restart = false;
 
         // Remove published content providers.
-        if (!app.pubProviders.isEmpty()) {
-            Iterator<ContentProviderRecord> it = app.pubProviders.values().iterator();
-            while (it.hasNext()) {
-                ContentProviderRecord cpr = it.next();
-
-                final boolean always = app.bad || !allowRestart;
-                if (removeDyingProviderLocked(app, cpr, always) || always) {
-                    // We left the provider in the launching list, need to
-                    // restart it.
-                    restart = true;
-                }
-
-                cpr.provider = null;
-                cpr.proc = null;
+        for (int i=app.pubProviders.size()-1; i>=0; i--) {
+            ContentProviderRecord cpr = app.pubProviders.valueAt(i);
+            final boolean always = app.bad || !allowRestart;
+            if (removeDyingProviderLocked(app, cpr, always) || always) {
+                // We left the provider in the launching list, need to
+                // restart it.
+                restart = true;
             }
-            app.pubProviders.clear();
+
+            cpr.provider = null;
+            cpr.proc = null;
         }
-        
+        app.pubProviders.clear();
+
         // Take care of any launching providers waiting for this process.
         if (checkAppInLaunchingProvidersLocked(app, false)) {
             restart = true;
@@ -13119,158 +13131,159 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // has said it is doing work.
                     app.keeping = true;
                 }
-                if (s.connections.size() > 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
-                        || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
-                    Iterator<ArrayList<ConnectionRecord>> kt
-                            = s.connections.values().iterator();
-                    while (kt.hasNext() && adj > ProcessList.FOREGROUND_APP_ADJ) {
-                        ArrayList<ConnectionRecord> clist = kt.next();
-                        for (int i=0; i<clist.size() && adj > ProcessList.FOREGROUND_APP_ADJ; i++) {
-                            // XXX should compute this based on the max of
-                            // all connected clients.
-                            ConnectionRecord cr = clist.get(i);
-                            if (cr.binding.client == app) {
-                                // Binding to ourself is not interesting.
-                                continue;
+                for (int conni = s.connections.size()-1;
+                        conni >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
+                                || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                        conni--) {
+                    ArrayList<ConnectionRecord> clist = s.connections.valueAt(conni);
+                    for (int i = 0;
+                            i < clist.size() && (adj > ProcessList.FOREGROUND_APP_ADJ
+                                    || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                            i++) {
+                        // XXX should compute this based on the max of
+                        // all connected clients.
+                        ConnectionRecord cr = clist.get(i);
+                        if (cr.binding.client == app) {
+                            // Binding to ourself is not interesting.
+                            continue;
+                        }
+                        if ((cr.flags&Context.BIND_WAIVE_PRIORITY) == 0) {
+                            ProcessRecord client = cr.binding.client;
+                            int clientAdj = adj;
+                            int myHiddenAdj = hiddenAdj;
+                            if (myHiddenAdj > client.hiddenAdj) {
+                                if (client.hiddenAdj >= ProcessList.VISIBLE_APP_ADJ) {
+                                    myHiddenAdj = client.hiddenAdj;
+                                } else {
+                                    myHiddenAdj = ProcessList.VISIBLE_APP_ADJ;
+                                }
                             }
-                            if ((cr.flags&Context.BIND_WAIVE_PRIORITY) == 0) {
-                                ProcessRecord client = cr.binding.client;
-                                int clientAdj = adj;
-                                int myHiddenAdj = hiddenAdj;
-                                if (myHiddenAdj > client.hiddenAdj) {
-                                    if (client.hiddenAdj >= ProcessList.VISIBLE_APP_ADJ) {
-                                        myHiddenAdj = client.hiddenAdj;
-                                    } else {
-                                        myHiddenAdj = ProcessList.VISIBLE_APP_ADJ;
-                                    }
+                            int myClientHiddenAdj = clientHiddenAdj;
+                            if (myClientHiddenAdj > client.clientHiddenAdj) {
+                                if (client.clientHiddenAdj >= ProcessList.VISIBLE_APP_ADJ) {
+                                    myClientHiddenAdj = client.clientHiddenAdj;
+                                } else {
+                                    myClientHiddenAdj = ProcessList.VISIBLE_APP_ADJ;
                                 }
-                                int myClientHiddenAdj = clientHiddenAdj;
-                                if (myClientHiddenAdj > client.clientHiddenAdj) {
-                                    if (client.clientHiddenAdj >= ProcessList.VISIBLE_APP_ADJ) {
-                                        myClientHiddenAdj = client.clientHiddenAdj;
-                                    } else {
-                                        myClientHiddenAdj = ProcessList.VISIBLE_APP_ADJ;
-                                    }
+                            }
+                            int myEmptyAdj = emptyAdj;
+                            if (myEmptyAdj > client.emptyAdj) {
+                                if (client.emptyAdj >= ProcessList.VISIBLE_APP_ADJ) {
+                                    myEmptyAdj = client.emptyAdj;
+                                } else {
+                                    myEmptyAdj = ProcessList.VISIBLE_APP_ADJ;
                                 }
-                                int myEmptyAdj = emptyAdj;
-                                if (myEmptyAdj > client.emptyAdj) {
-                                    if (client.emptyAdj >= ProcessList.VISIBLE_APP_ADJ) {
-                                        myEmptyAdj = client.emptyAdj;
-                                    } else {
-                                        myEmptyAdj = ProcessList.VISIBLE_APP_ADJ;
-                                    }
-                                }
-                                clientAdj = computeOomAdjLocked(client, myHiddenAdj,
-                                        myClientHiddenAdj, myEmptyAdj, TOP_APP, true, doingAll);
-                                String adjType = null;
-                                if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
-                                    // Not doing bind OOM management, so treat
-                                    // this guy more like a started service.
-                                    if (app.hasShownUi && app != mHomeProcess) {
-                                        // If this process has shown some UI, let it immediately
-                                        // go to the LRU list because it may be pretty heavy with
-                                        // UI stuff.  We'll tag it with a label just to help
-                                        // debug and understand what is going on.
-                                        if (adj > clientAdj) {
-                                            adjType = "bound-bg-ui-services";
-                                        }
-                                        app.hidden = false;
-                                        clientAdj = adj;
-                                    } else {
-                                        if (now >= (s.lastActivity
-                                                + ActiveServices.MAX_SERVICE_INACTIVITY)) {
-                                            // This service has not seen activity within
-                                            // recent memory, so allow it to drop to the
-                                            // LRU list if there is no other reason to keep
-                                            // it around.  We'll also tag it with a label just
-                                            // to help debug and undertand what is going on.
-                                            if (adj > clientAdj) {
-                                                adjType = "bound-bg-services";
-                                            }
-                                            clientAdj = adj;
-                                        }
-                                    }
-                                } else if ((cr.flags&Context.BIND_AUTO_CREATE) != 0) {
-                                    if ((cr.flags&Context.BIND_NOT_VISIBLE) == 0) {
-                                        // If this connection is keeping the service
-                                        // created, then we want to try to better follow
-                                        // its memory management semantics for activities.
-                                        // That is, if it is sitting in the background
-                                        // LRU list as a hidden process (with activities),
-                                        // we don't want the service it is connected to
-                                        // to go into the empty LRU and quickly get killed,
-                                        // because I'll we'll do is just end up restarting
-                                        // the service.
-                                        app.hasClientActivities |= client.hasActivities;
-                                    }
-                                }
-                                if (adj > clientAdj) {
-                                    // If this process has recently shown UI, and
-                                    // the process that is binding to it is less
-                                    // important than being visible, then we don't
-                                    // care about the binding as much as we care
-                                    // about letting this process get into the LRU
-                                    // list to be killed and restarted if needed for
-                                    // memory.
-                                    if (app.hasShownUi && app != mHomeProcess
-                                            && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                            }
+                            clientAdj = computeOomAdjLocked(client, myHiddenAdj,
+                                    myClientHiddenAdj, myEmptyAdj, TOP_APP, true, doingAll);
+                            String adjType = null;
+                            if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
+                                // Not doing bind OOM management, so treat
+                                // this guy more like a started service.
+                                if (app.hasShownUi && app != mHomeProcess) {
+                                    // If this process has shown some UI, let it immediately
+                                    // go to the LRU list because it may be pretty heavy with
+                                    // UI stuff.  We'll tag it with a label just to help
+                                    // debug and understand what is going on.
+                                    if (adj > clientAdj) {
                                         adjType = "bound-bg-ui-services";
-                                    } else {
-                                        if ((cr.flags&(Context.BIND_ABOVE_CLIENT
-                                                |Context.BIND_IMPORTANT)) != 0) {
-                                            adj = clientAdj;
-                                        } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
-                                                && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
-                                                && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                                            adj = ProcessList.PERCEPTIBLE_APP_ADJ;
-                                        } else if (clientAdj > ProcessList.VISIBLE_APP_ADJ) {
-                                            adj = clientAdj;
-                                        } else {
-                                            app.pendingUiClean = true;
-                                            if (adj > ProcessList.VISIBLE_APP_ADJ) {
-                                                adj = ProcessList.VISIBLE_APP_ADJ;
-                                            }
-                                        }
-                                        if (!client.hidden) {
-                                            app.hidden = false;
-                                        }
-                                        if (client.keeping) {
-                                            app.keeping = true;
-                                        }
-                                        adjType = "service";
-                                    }
-                                }
-                                if (adjType != null) {
-                                    app.adjType = adjType;
-                                    app.adjTypeCode = ActivityManager.RunningAppProcessInfo
-                                            .REASON_SERVICE_IN_USE;
-                                    app.adjSource = cr.binding.client;
-                                    app.adjSourceOom = clientAdj;
-                                    app.adjTarget = s.name;
-                                }
-                                if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
-                                    if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
-                                        schedGroup = Process.THREAD_GROUP_DEFAULT;
-                                    }
-                                }
-                            }
-                            final ActivityRecord a = cr.activity;
-                            if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
-                                if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ &&
-                                        (a.visible || a.state == ActivityState.RESUMED
-                                         || a.state == ActivityState.PAUSING)) {
-                                    adj = ProcessList.FOREGROUND_APP_ADJ;
-                                    if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
-                                        schedGroup = Process.THREAD_GROUP_DEFAULT;
                                     }
                                     app.hidden = false;
-                                    app.adjType = "service";
-                                    app.adjTypeCode = ActivityManager.RunningAppProcessInfo
-                                            .REASON_SERVICE_IN_USE;
-                                    app.adjSource = a;
-                                    app.adjSourceOom = adj;
-                                    app.adjTarget = s.name;
+                                    clientAdj = adj;
+                                } else {
+                                    if (now >= (s.lastActivity
+                                            + ActiveServices.MAX_SERVICE_INACTIVITY)) {
+                                        // This service has not seen activity within
+                                        // recent memory, so allow it to drop to the
+                                        // LRU list if there is no other reason to keep
+                                        // it around.  We'll also tag it with a label just
+                                        // to help debug and undertand what is going on.
+                                        if (adj > clientAdj) {
+                                            adjType = "bound-bg-services";
+                                        }
+                                        clientAdj = adj;
+                                    }
                                 }
+                            } else if ((cr.flags&Context.BIND_AUTO_CREATE) != 0) {
+                                if ((cr.flags&Context.BIND_NOT_VISIBLE) == 0) {
+                                    // If this connection is keeping the service
+                                    // created, then we want to try to better follow
+                                    // its memory management semantics for activities.
+                                    // That is, if it is sitting in the background
+                                    // LRU list as a hidden process (with activities),
+                                    // we don't want the service it is connected to
+                                    // to go into the empty LRU and quickly get killed,
+                                    // because I'll we'll do is just end up restarting
+                                    // the service.
+                                    app.hasClientActivities |= client.hasActivities;
+                                }
+                            }
+                            if (adj > clientAdj) {
+                                // If this process has recently shown UI, and
+                                // the process that is binding to it is less
+                                // important than being visible, then we don't
+                                // care about the binding as much as we care
+                                // about letting this process get into the LRU
+                                // list to be killed and restarted if needed for
+                                // memory.
+                                if (app.hasShownUi && app != mHomeProcess
+                                        && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                                    adjType = "bound-bg-ui-services";
+                                } else {
+                                    if ((cr.flags&(Context.BIND_ABOVE_CLIENT
+                                            |Context.BIND_IMPORTANT)) != 0) {
+                                        adj = clientAdj;
+                                    } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
+                                            && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
+                                            && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                                        adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                                    } else if (clientAdj > ProcessList.VISIBLE_APP_ADJ) {
+                                        adj = clientAdj;
+                                    } else {
+                                        app.pendingUiClean = true;
+                                        if (adj > ProcessList.VISIBLE_APP_ADJ) {
+                                            adj = ProcessList.VISIBLE_APP_ADJ;
+                                        }
+                                    }
+                                    if (!client.hidden) {
+                                        app.hidden = false;
+                                    }
+                                    if (client.keeping) {
+                                        app.keeping = true;
+                                    }
+                                    adjType = "service";
+                                }
+                            }
+                            if (adjType != null) {
+                                app.adjType = adjType;
+                                app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                                        .REASON_SERVICE_IN_USE;
+                                app.adjSource = cr.binding.client;
+                                app.adjSourceOom = clientAdj;
+                                app.adjTarget = s.name;
+                            }
+                            if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
+                                if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                }
+                            }
+                        }
+                        final ActivityRecord a = cr.activity;
+                        if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
+                            if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ &&
+                                    (a.visible || a.state == ActivityState.RESUMED
+                                     || a.state == ActivityState.PAUSING)) {
+                                adj = ProcessList.FOREGROUND_APP_ADJ;
+                                if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
+                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                }
+                                app.hidden = false;
+                                app.adjType = "service";
+                                app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                                        .REASON_SERVICE_IN_USE;
+                                app.adjSource = a;
+                                app.adjSourceOom = adj;
+                                app.adjTarget = s.name;
                             }
                         }
                     }
@@ -13289,85 +13302,83 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        if (app.pubProviders.size() != 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
-                || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
-            Iterator<ContentProviderRecord> jt = app.pubProviders.values().iterator();
-            while (jt.hasNext() && (adj > ProcessList.FOREGROUND_APP_ADJ
-                    || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
-                ContentProviderRecord cpr = jt.next();
-                for (int i = cpr.connections.size()-1;
-                        i >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
-                                || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE);
-                        i--) {
-                    ContentProviderConnection conn = cpr.connections.get(i);
-                    ProcessRecord client = conn.client;
-                    if (client == app) {
-                        // Being our own client is not interesting.
-                        continue;
-                    }
-                    int myHiddenAdj = hiddenAdj;
-                    if (myHiddenAdj > client.hiddenAdj) {
-                        if (client.hiddenAdj > ProcessList.FOREGROUND_APP_ADJ) {
-                            myHiddenAdj = client.hiddenAdj;
-                        } else {
-                            myHiddenAdj = ProcessList.FOREGROUND_APP_ADJ;
-                        }
-                    }
-                    int myClientHiddenAdj = clientHiddenAdj;
-                    if (myClientHiddenAdj > client.clientHiddenAdj) {
-                        if (client.clientHiddenAdj >= ProcessList.FOREGROUND_APP_ADJ) {
-                            myClientHiddenAdj = client.clientHiddenAdj;
-                        } else {
-                            myClientHiddenAdj = ProcessList.FOREGROUND_APP_ADJ;
-                        }
-                    }
-                    int myEmptyAdj = emptyAdj;
-                    if (myEmptyAdj > client.emptyAdj) {
-                        if (client.emptyAdj > ProcessList.FOREGROUND_APP_ADJ) {
-                            myEmptyAdj = client.emptyAdj;
-                        } else {
-                            myEmptyAdj = ProcessList.FOREGROUND_APP_ADJ;
-                        }
-                    }
-                    int clientAdj = computeOomAdjLocked(client, myHiddenAdj,
-                            myClientHiddenAdj, myEmptyAdj, TOP_APP, true, doingAll);
-                    if (adj > clientAdj) {
-                        if (app.hasShownUi && app != mHomeProcess
-                                && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                            app.adjType = "bg-ui-provider";
-                        } else {
-                            adj = clientAdj > ProcessList.FOREGROUND_APP_ADJ
-                                    ? clientAdj : ProcessList.FOREGROUND_APP_ADJ;
-                            app.adjType = "provider";
-                        }
-                        if (!client.hidden) {
-                            app.hidden = false;
-                        }
-                        if (client.keeping) {
-                            app.keeping = true;
-                        }
-                        app.adjTypeCode = ActivityManager.RunningAppProcessInfo
-                                .REASON_PROVIDER_IN_USE;
-                        app.adjSource = client;
-                        app.adjSourceOom = clientAdj;
-                        app.adjTarget = cpr.name;
-                    }
-                    if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
-                        schedGroup = Process.THREAD_GROUP_DEFAULT;
+        for (int provi = app.pubProviders.size()-1;
+                provi >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
+                        || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                provi--) {
+            ContentProviderRecord cpr = app.pubProviders.valueAt(provi);
+            for (int i = cpr.connections.size()-1;
+                    i >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
+                            || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                    i--) {
+                ContentProviderConnection conn = cpr.connections.get(i);
+                ProcessRecord client = conn.client;
+                if (client == app) {
+                    // Being our own client is not interesting.
+                    continue;
+                }
+                int myHiddenAdj = hiddenAdj;
+                if (myHiddenAdj > client.hiddenAdj) {
+                    if (client.hiddenAdj > ProcessList.FOREGROUND_APP_ADJ) {
+                        myHiddenAdj = client.hiddenAdj;
+                    } else {
+                        myHiddenAdj = ProcessList.FOREGROUND_APP_ADJ;
                     }
                 }
-                // If the provider has external (non-framework) process
-                // dependencies, ensure that its adjustment is at least
-                // FOREGROUND_APP_ADJ.
-                if (cpr.hasExternalProcessHandles()) {
-                    if (adj > ProcessList.FOREGROUND_APP_ADJ) {
-                        adj = ProcessList.FOREGROUND_APP_ADJ;
-                        schedGroup = Process.THREAD_GROUP_DEFAULT;
-                        app.hidden = false;
-                        app.keeping = true;
-                        app.adjType = "provider";
-                        app.adjTarget = cpr.name;
+                int myClientHiddenAdj = clientHiddenAdj;
+                if (myClientHiddenAdj > client.clientHiddenAdj) {
+                    if (client.clientHiddenAdj >= ProcessList.FOREGROUND_APP_ADJ) {
+                        myClientHiddenAdj = client.clientHiddenAdj;
+                    } else {
+                        myClientHiddenAdj = ProcessList.FOREGROUND_APP_ADJ;
                     }
+                }
+                int myEmptyAdj = emptyAdj;
+                if (myEmptyAdj > client.emptyAdj) {
+                    if (client.emptyAdj > ProcessList.FOREGROUND_APP_ADJ) {
+                        myEmptyAdj = client.emptyAdj;
+                    } else {
+                        myEmptyAdj = ProcessList.FOREGROUND_APP_ADJ;
+                    }
+                }
+                int clientAdj = computeOomAdjLocked(client, myHiddenAdj,
+                        myClientHiddenAdj, myEmptyAdj, TOP_APP, true, doingAll);
+                if (adj > clientAdj) {
+                    if (app.hasShownUi && app != mHomeProcess
+                            && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                        app.adjType = "bg-ui-provider";
+                    } else {
+                        adj = clientAdj > ProcessList.FOREGROUND_APP_ADJ
+                                ? clientAdj : ProcessList.FOREGROUND_APP_ADJ;
+                        app.adjType = "provider";
+                    }
+                    if (!client.hidden) {
+                        app.hidden = false;
+                    }
+                    if (client.keeping) {
+                        app.keeping = true;
+                    }
+                    app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                            .REASON_PROVIDER_IN_USE;
+                    app.adjSource = client;
+                    app.adjSourceOom = clientAdj;
+                    app.adjTarget = cpr.name;
+                }
+                if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                }
+            }
+            // If the provider has external (non-framework) process
+            // dependencies, ensure that its adjustment is at least
+            // FOREGROUND_APP_ADJ.
+            if (cpr.hasExternalProcessHandles()) {
+                if (adj > ProcessList.FOREGROUND_APP_ADJ) {
+                    adj = ProcessList.FOREGROUND_APP_ADJ;
+                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                    app.hidden = false;
+                    app.keeping = true;
+                    app.adjType = "provider";
+                    app.adjTarget = cpr.name;
                 }
             }
         }

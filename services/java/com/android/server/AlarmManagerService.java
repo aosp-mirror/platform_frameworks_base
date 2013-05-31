@@ -351,12 +351,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
 
         // iterator over the list removing any it where the intent match
-        Iterator<Alarm> it = alarmList.iterator();
-        
-        while (it.hasNext()) {
-            Alarm alarm = it.next();
+        for (int i=0; i<alarmList.size(); i++) {
+            Alarm alarm = alarmList.get(i);
             if (alarm.operation.equals(operation)) {
-                it.remove();
+                alarmList.remove(i);
+                i--;
             }
         }
     }
@@ -375,12 +374,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
 
         // iterator over the list removing any it where the intent match
-        Iterator<Alarm> it = alarmList.iterator();
-        
-        while (it.hasNext()) {
-            Alarm alarm = it.next();
+        for (int i=0; i<alarmList.size(); i++) {
+            Alarm alarm = alarmList.get(i);
             if (alarm.operation.getTargetPackage().equals(packageName)) {
-                it.remove();
+                alarmList.remove(i);
+                i--;
             }
         }
     }
@@ -398,12 +396,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
 
         // iterator over the list removing any it where the intent match
-        Iterator<Alarm> it = alarmList.iterator();
-
-        while (it.hasNext()) {
-            Alarm alarm = it.next();
+        for (int i=0; i<alarmList.size(); i++) {
+            Alarm alarm = alarmList.get(i);
             if (UserHandle.getUserId(alarm.operation.getCreatorUid()) == userHandle) {
-                it.remove();
+                alarmList.remove(i);
+                i--;
             }
         }
     }
@@ -666,12 +663,10 @@ class AlarmManagerService extends IAlarmManager.Stub {
                                      ArrayList<Alarm> triggerList,
                                      long now)
     {
-        Iterator<Alarm> it = alarmList.iterator();
-        ArrayList<Alarm> repeats = new ArrayList<Alarm>();
-        
-        while (it.hasNext())
-        {
-            Alarm alarm = it.next();
+        ArrayList<Alarm> repeats = null;
+
+        for (int i=0; i<alarmList.size(); i++) {
+            Alarm alarm = alarmList.get(i);
 
             if (localLOGV) Slog.v(TAG, "Checking active alarm when=" + alarm.when + " " + alarm);
 
@@ -702,20 +697,25 @@ class AlarmManagerService extends IAlarmManager.Stub {
             triggerList.add(alarm);
             
             // remove the alarm from the list
-            it.remove();
-            
+            alarmList.remove(i);
+            i--;
+
             // if it repeats queue it up to be read-added to the list
             if (alarm.repeatInterval > 0) {
+                if (repeats == null) {
+                    repeats = new ArrayList<Alarm>();
+                }
                 repeats.add(alarm);
             }
         }
 
         // reset any repeating alarms.
-        it = repeats.iterator();
-        while (it.hasNext()) {
-            Alarm alarm = it.next();
-            alarm.when += alarm.count * alarm.repeatInterval;
-            addAlarmLocked(alarm);
+        if (repeats != null) {
+            for (int i=0; i<repeats.size(); i++) {
+                Alarm alarm = repeats.get(i);
+                alarm.when += alarm.count * alarm.repeatInterval;
+                addAlarmLocked(alarm);
+            }
         }
         
         if (alarmList.size() > 0) {
@@ -785,12 +785,14 @@ class AlarmManagerService extends IAlarmManager.Stub {
         
         public void run()
         {
+            ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
+
             while (true)
             {
                 int result = waitForAlarm(mDescriptor);
-                
-                ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
-                
+
+                triggerList.clear();
+
                 if ((result & TIME_CHANGED_MASK) != 0) {
                     remove(mTimeTickSender);
                     mClockReceiver.scheduleTimeTickEvent();
@@ -820,9 +822,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         triggerAlarmsLocked(mElapsedRealtimeAlarms, triggerList, nowELAPSED);
                     
                     // now trigger the alarms
-                    Iterator<Alarm> it = triggerList.iterator();
-                    while (it.hasNext()) {
-                        Alarm alarm = it.next();
+                    for (int i=0; i<triggerList.size(); i++) {
+                        Alarm alarm = triggerList.get(i);
                         try {
                             if (localLOGV) Slog.v(TAG, "sending alarm " + alarm);
                             alarm.operation.send(mContext, 0,
@@ -913,10 +914,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 }
                 
                 // now trigger the alarms without the lock held
-                Iterator<Alarm> it = triggerList.iterator();
-                while (it.hasNext())
-                {
-                    Alarm alarm = it.next();
+                for (int i=0; i<triggerList.size(); i++) {
+                    Alarm alarm = triggerList.get(i);
                     try {
                         alarm.operation.send();
                     } catch (PendingIntent.CanceledException e) {

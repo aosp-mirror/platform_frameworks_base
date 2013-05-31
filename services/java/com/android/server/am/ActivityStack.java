@@ -3333,14 +3333,16 @@ final class ActivityStack {
         }
     }
 
-    void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
-            boolean dumpClient, String dumpPackage) {
+    boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
+            boolean dumpClient, String dumpPackage, boolean needSep) {
+        boolean printed = false;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            pw.print("  Task "); pw.print(taskNdx); pw.print(": id #"); pw.println(task.taskId);
-            ActivityStackSupervisor.dumpHistoryList(fd, pw, mTaskHistory.get(taskNdx).mActivities,
-                "    ", "Hist", true, !dumpAll, dumpClient, dumpPackage);
+            printed |= ActivityStackSupervisor.dumpHistoryList(fd, pw,
+                    mTaskHistory.get(taskNdx).mActivities, "    ", "Hist", true, !dumpAll,
+                    dumpClient, dumpPackage, needSep, "    Task " + taskNdx + ": id #" + task.taskId);
         }
+        return printed;
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {

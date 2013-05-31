@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Singleton;
@@ -1069,7 +1070,7 @@ public final class StrictMode {
         // Map from violation stacktrace hashcode -> uptimeMillis of
         // last violation.  No locking needed, as this is only
         // accessed by the same thread.
-        private final HashMap<Integer, Long> mLastViolationTime = new HashMap<Integer, Long>();
+        private ArrayMap<Integer, Long> mLastViolationTime;
 
         public AndroidBlockGuardPolicy(final int policyMask) {
             mPolicyMask = policyMask;
@@ -1279,8 +1280,13 @@ public final class StrictMode {
             // Not perfect, but fast and good enough for dup suppression.
             Integer crashFingerprint = info.hashCode();
             long lastViolationTime = 0;
-            if (mLastViolationTime.containsKey(crashFingerprint)) {
-                lastViolationTime = mLastViolationTime.get(crashFingerprint);
+            if (mLastViolationTime != null) {
+                Long vtime = mLastViolationTime.get(crashFingerprint);
+                if (vtime != null) {
+                    lastViolationTime = vtime;
+                }
+            } else {
+                mLastViolationTime = new ArrayMap<Integer, Long>(1);
             }
             long now = SystemClock.uptimeMillis();
             mLastViolationTime.put(crashFingerprint, now);
