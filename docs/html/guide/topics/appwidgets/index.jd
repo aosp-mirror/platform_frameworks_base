@@ -69,7 +69,7 @@ the Music App Widget.</p>
 <p>This document describes how to publish an App Widget using an App Widget
 provider. For a discussion of creating your own {@link android.appwidget.AppWidgetHost}
 to host app widgets, see <a href="{@docRoot}guide/topics/appwidgets/host.html">
-Implementing a Custom App Widget Host</a>.</p>
+App Widget Host</a>.</p>
 
 <div class="note design">
 <p><strong>Widget Design</strong></p>
