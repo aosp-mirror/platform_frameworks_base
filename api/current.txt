@@ -21551,6 +21551,7 @@ package android.speech.tts {
 
   public final class SynthesisRequest {
     ctor public SynthesisRequest(java.lang.String, android.os.Bundle);
+    method public int getCallerUid();
     method public java.lang.String getCountry();
     method public java.lang.String getLanguage();
     method public android.os.Bundle getParams();

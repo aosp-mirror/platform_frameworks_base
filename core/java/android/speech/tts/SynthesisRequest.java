@@ -41,6 +41,7 @@ public final class SynthesisRequest {
     private String mVariant;
     private int mSpeechRate;
     private int mPitch;
+    private int mCallerUid;
 
     public SynthesisRequest(String text, Bundle params) {
         mText = text;
@@ -98,6 +99,13 @@ public final class SynthesisRequest {
     }
 
     /**
+     * Gets the request caller Uid.
+     */
+    public int getCallerUid() {
+        return mCallerUid;
+    }
+
+    /**
      * Sets the locale for the request.
      */
     void setLanguage(String language, String country, String variant) {
@@ -118,5 +126,12 @@ public final class SynthesisRequest {
      */
     void setPitch(int pitch) {
         mPitch = pitch;
+    }
+
+    /**
+     * Sets Caller Uid
+     */
+    void setCallerUid(int uid) {
+        mCallerUid = uid;
     }
 }
