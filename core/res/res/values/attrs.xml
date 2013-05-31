@@ -4057,10 +4057,6 @@
         <attr name="drawable" />
     </declare-styleable>
 
-    <declare-styleable name="MipmapDrawableItem">
-        <attr name="drawable" />
-    </declare-styleable>
-
     <!-- Drawable used to rotate another drawable. -->
     <declare-styleable name="RotateDrawable">
         <attr name="visible" />
