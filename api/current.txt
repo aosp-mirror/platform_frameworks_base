@@ -12284,7 +12284,7 @@ package android.media {
     method public void removeCallback(android.media.MediaRouter.Callback);
     method public void removeUserRoute(android.media.MediaRouter.UserRouteInfo);
     method public void selectRoute(int, android.media.MediaRouter.RouteInfo);
-    field public static final int CALLBACK_FLAG_ACTIVE_SCAN = 1; // 0x1
+    field public static final int CALLBACK_FLAG_PERFORM_ACTIVE_SCAN = 1; // 0x1
     field public static final int CALLBACK_FLAG_UNFILTERED_EVENTS = 2; // 0x2
     field public static final int ROUTE_TYPE_LIVE_AUDIO = 1; // 0x1
     field public static final int ROUTE_TYPE_LIVE_VIDEO = 2; // 0x2

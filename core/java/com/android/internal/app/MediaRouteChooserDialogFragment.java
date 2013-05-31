@@ -97,7 +97,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mRouter = (MediaRouter) activity.getSystemService(Context.MEDIA_ROUTER_SERVICE);
-        mRouter.addCallback(mRouteTypes, mCallback, MediaRouter.CALLBACK_FLAG_ACTIVE_SCAN);
+        mRouter.addCallback(mRouteTypes, mCallback, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
     }
 
     @Override
