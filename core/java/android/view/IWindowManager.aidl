@@ -97,7 +97,7 @@ interface IWindowManager
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
+            int icon, int logo, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
     void setAppWillBeHidden(IBinder token);
     void setAppVisibility(IBinder token, boolean visible);
     void startAppFreezingScreen(IBinder token, int configChanges);

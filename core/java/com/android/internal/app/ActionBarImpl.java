@@ -1210,6 +1210,10 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setIcon(icon);
     }
 
+    public boolean hasIcon() {
+        return mActionView.hasIcon();
+    }
+
     @Override
     public void setLogo(int resId) {
         mActionView.setLogo(resId);
@@ -1218,6 +1222,10 @@ public class ActionBarImpl extends ActionBar {
     @Override
     public void setLogo(Drawable logo) {
         mActionView.setLogo(logo);
+    }
+
+    public boolean hasLogo() {
+        return mActionView.hasLogo();
     }
 
     public void setDefaultDisplayHomeAsUpEnabled(boolean enable) {

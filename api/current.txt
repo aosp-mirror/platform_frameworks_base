@@ -6808,6 +6808,7 @@ package android.content.pm {
     ctor public ComponentInfo(android.content.pm.ComponentInfo);
     ctor protected ComponentInfo(android.os.Parcel);
     method public final int getIconResource();
+    method public final int getLogoResource();
     method public boolean isEnabled();
     field public android.content.pm.ApplicationInfo applicationInfo;
     field public int descriptionRes;
@@ -27040,7 +27041,9 @@ package android.view {
     method public void setFlags(int, int);
     method public void setFormat(int);
     method public void setGravity(int);
+    method public void setIcon(int);
     method public void setLayout(int, int);
+    method public void setLogo(int);
     method public void setSoftInputMode(int);
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract void setTitleColor(int);

@@ -139,6 +139,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ActionMenuPresenterCallback mActionMenuPresenterCallback;
     private PanelMenuPresenterCallback mPanelMenuPresenterCallback;
 
+    static final int FLAG_RESOURCE_SET_ICON = 1 << 0;
+    static final int FLAG_RESOURCE_SET_LOGO = 1 << 1;
+    int mResourcesSetFlags;
+    int mIconRes;
+    int mLogoRes;
+
     private DrawableFeatureState[] mDrawables;
 
     private PanelFeatureState[] mPanels;
@@ -1390,6 +1396,46 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 horizontalProgressBar.getVisibility() == View.VISIBLE) {
             horizontalProgressBar.startAnimation(anim);
             horizontalProgressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void setIcon(int resId) {
+        mIconRes = resId;
+        mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON;
+        if (mActionBar != null) {
+            mActionBar.setIcon(resId);
+        }
+    }
+
+    @Override
+    public void setDefaultIcon(int resId) {
+        if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) != 0) {
+            return;
+        }
+        mIconRes = resId;
+        if (mActionBar != null && !mActionBar.hasIcon()) {
+            mActionBar.setIcon(resId);
+        }
+    }
+
+    @Override
+    public void setLogo(int resId) {
+        mLogoRes = resId;
+        mResourcesSetFlags |= FLAG_RESOURCE_SET_LOGO;
+        if (mActionBar != null) {
+            mActionBar.setLogo(resId);
+        }
+    }
+
+    @Override
+    public void setDefaultLogo(int resId) {
+        if ((mResourcesSetFlags & FLAG_RESOURCE_SET_LOGO) != 0) {
+            return;
+        }
+        mLogoRes = resId;
+        if (mActionBar != null && !mActionBar.hasLogo()) {
+            mActionBar.setLogo(resId);
         }
     }
 
@@ -2944,6 +2990,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     } else if (splitActionBar) {
                         Log.e(TAG, "Requested split action bar with " +
                                 "incompatible window decor! Ignoring request.");
+                    }
+
+                    if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) != 0 ||
+                            (mIconRes != 0 && !mActionBar.hasIcon())) {
+                        mActionBar.setIcon(mIconRes);
+                    }
+                    if ((mResourcesSetFlags & FLAG_RESOURCE_SET_LOGO) != 0 ||
+                            (mLogoRes != 0 && !mActionBar.hasLogo())) {
+                        mActionBar.setLogo(mLogoRes);
                     }
 
                     // Post the panel invalidate for later; avoid application onCreateOptionsMenu

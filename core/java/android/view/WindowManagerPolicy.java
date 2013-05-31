@@ -642,7 +642,7 @@ public interface WindowManagerPolicy {
      */
     public View addStartingWindow(IBinder appToken, String packageName,
             int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel,
-            int labelRes, int icon, int windowFlags);
+            int labelRes, int icon, int logo, int windowFlags);
 
     /**
      * Called when the first window of an application has been displayed, while

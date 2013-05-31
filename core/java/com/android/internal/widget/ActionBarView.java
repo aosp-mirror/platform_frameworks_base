@@ -16,24 +16,12 @@
 
 package com.android.internal.widget;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.ActionMenuItem;
-import com.android.internal.view.menu.ActionMenuPresenter;
-import com.android.internal.view.menu.ActionMenuView;
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuItemImpl;
-import com.android.internal.view.menu.MenuPresenter;
-import com.android.internal.view.menu.MenuView;
-import com.android.internal.view.menu.SubMenuBuilder;
-
 import android.animation.LayoutTransition;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -42,7 +30,6 @@ import android.os.Parcelable;
 import android.text.Layout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.CollapsibleActionView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -62,6 +49,15 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import com.android.internal.R;
+import com.android.internal.view.menu.ActionMenuItem;
+import com.android.internal.view.menu.ActionMenuPresenter;
+import com.android.internal.view.menu.ActionMenuView;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuItemImpl;
+import com.android.internal.view.menu.MenuPresenter;
+import com.android.internal.view.menu.MenuView;
+import com.android.internal.view.menu.SubMenuBuilder;
 
 /**
  * @hide
@@ -188,34 +184,8 @@ public class ActionBarView extends AbsActionBarView {
                 ActionBar.NAVIGATION_MODE_STANDARD);
         mTitle = a.getText(R.styleable.ActionBar_title);
         mSubtitle = a.getText(R.styleable.ActionBar_subtitle);
-
         mLogo = a.getDrawable(R.styleable.ActionBar_logo);
-        if (mLogo == null) {
-            if (context instanceof Activity) {
-                try {
-                    mLogo = pm.getActivityLogo(((Activity) context).getComponentName());
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "Activity component name not found!", e);
-                }
-            }
-            if (mLogo == null) {
-                mLogo = appInfo.loadLogo(pm);
-            }
-        }
-
         mIcon = a.getDrawable(R.styleable.ActionBar_icon);
-        if (mIcon == null) {
-            if (context instanceof Activity) {
-                try {
-                    mIcon = pm.getActivityIcon(((Activity) context).getComponentName());
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "Activity component name not found!", e);
-                }
-            }
-            if (mIcon == null) {
-                mIcon = appInfo.loadIcon(pm);
-            }
-        }
 
         final LayoutInflater inflater = LayoutInflater.from(context);
 
@@ -729,7 +699,11 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setIcon(int resId) {
-        setIcon(mContext.getResources().getDrawable(resId));
+        setIcon(resId != 0 ? mContext.getResources().getDrawable(resId) : null);
+    }
+
+    public boolean hasIcon() {
+        return mIcon != null;
     }
 
     public void setLogo(Drawable logo) {
@@ -740,7 +714,11 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setLogo(int resId) {
-        setLogo(mContext.getResources().getDrawable(resId));
+        setLogo(resId != 0 ? mContext.getResources().getDrawable(resId) : null);
+    }
+
+    public boolean hasLogo() {
+        return mLogo != null;
     }
 
     public void setNavigationMode(int mode) {

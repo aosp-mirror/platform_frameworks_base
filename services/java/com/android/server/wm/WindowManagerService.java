@@ -3878,7 +3878,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void setAppStartingWindow(IBinder token, String pkg,
             int theme, CompatibilityInfo compatInfo,
-            CharSequence nonLocalizedLabel, int labelRes, int icon,
+            CharSequence nonLocalizedLabel, int labelRes, int icon, int logo,
             int windowFlags, IBinder transferFrom, boolean createIfNeeded) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppStartingWindow()")) {
@@ -4079,7 +4079,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Creating StartingData");
             mStartingIconInTransition = true;
             wtoken.startingData = new StartingData(pkg, theme, compatInfo, nonLocalizedLabel,
-                    labelRes, icon, windowFlags);
+                    labelRes, icon, logo, windowFlags);
             Message m = mH.obtainMessage(H.ADD_STARTING, wtoken);
             // Note: we really want to do sendMessageAtFrontOfQueue() because we
             // want to process the message ASAP, before any other queued
@@ -7083,7 +7083,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     try {
                         view = mPolicy.addStartingWindow(
                             wtoken.token, sd.pkg, sd.theme, sd.compatInfo,
-                            sd.nonLocalizedLabel, sd.labelRes, sd.icon, sd.windowFlags);
+                            sd.nonLocalizedLabel, sd.labelRes, sd.icon, sd.logo, sd.windowFlags);
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when adding starting window", e);
                     }
