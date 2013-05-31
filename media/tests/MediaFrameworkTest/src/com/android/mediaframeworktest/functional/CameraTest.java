@@ -36,7 +36,12 @@ import java.io.*;
 
 /**
  * Junit / Instrumentation test case for the camera api
- 
+ *
+ * To run only tests in this class:
+ *
+ * adb shell am instrument \
+ *   -e class com.android.mediaframeworktest.functional.CameraTest \
+ *   -w  com.android.mediaframeworktest/.MediaFrameworkTestRunner
  */  
 public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTest> {    
     private String TAG = "CameraTest";
