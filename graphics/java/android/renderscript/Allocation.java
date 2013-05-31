@@ -1650,6 +1650,9 @@ public class Allocation extends BaseObj {
                                                       int usage) {
 
         rs.validate();
+        if ((usage & (USAGE_SHARED | USAGE_IO_INPUT | USAGE_IO_OUTPUT)) != 0) {
+            throw new RSIllegalArgumentException("Unsupported usage specified.");
+        }
         Bitmap b = BitmapFactory.decodeResource(res, id);
         Allocation alloc = createFromBitmap(rs, b, mips, usage);
         b.recycle();
@@ -1677,7 +1680,7 @@ public class Allocation extends BaseObj {
         if (rs.getApplicationContext().getApplicationInfo().targetSdkVersion >= 18) {
             return createFromBitmapResource(rs, res, id,
                                             MipmapControl.MIPMAP_NONE,
-                                            USAGE_SHARED | USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE);
+                                            USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE);
         }
         return createFromBitmapResource(rs, res, id,
                                         MipmapControl.MIPMAP_NONE,
