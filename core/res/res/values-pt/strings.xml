@@ -205,7 +205,7 @@
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informações sobre seus aplicativos"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Capacidade de afetar o comportamento de outros aplicativos no dispositivo."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Plano de fundo"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Alterar as configurações de papel de parede do dispositivo."</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Alterar as configurações de plano de fundo do dispositivo."</string>
     <string name="permgrouplab_systemClock" msgid="406535759236612992">"Relógio"</string>
     <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Alterar a hora ou fuso horário no dispositivo."</string>
     <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Barra de status"</string>
@@ -533,7 +533,7 @@
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Executa como um teste do fabricante de nível inferior, permitindo o acesso completo ao hardware do tablet. Disponível apenas quando um tablet está em execução no modo de teste do fabricante."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Executa como um teste do fabricante de nível inferior, permitindo o acesso completo ao hardware do telefone. Disponível apenas quando um telefone está em execução no modo de teste do fabricante."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"definir plano de fundo"</string>
-    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Permite que o aplicativo defina o papel de parede do sistema."</string>
+    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Permite que o aplicativo defina o plano de fundo do sistema."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ajustar tamanho do plano de fundo"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Permite que o aplicativo defina as dicas de tamanho do plano de fundo do sistema."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"redefinir o sistema para os padrões de fábrica"</string>
