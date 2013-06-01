@@ -1465,8 +1465,8 @@ final class ActivityStack {
                     mWindowManager.setAppStartingWindow(
                             next.appToken, next.packageName, next.theme,
                             mService.compatibilityInfoForPackageLocked(next.info.applicationInfo),
-                            next.nonLocalizedLabel, next.labelRes, next.icon, next.windowFlags,
-                            null, true);
+                            next.nonLocalizedLabel, next.labelRes, next.icon, next.logo,
+                            next.windowFlags, null, true);
                 }
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -1500,7 +1500,7 @@ final class ActivityStack {
                             mService.compatibilityInfoForPackageLocked(
                                     next.info.applicationInfo),
                             next.nonLocalizedLabel,
-                            next.labelRes, next.icon, next.windowFlags,
+                            next.labelRes, next.icon, next.logo, next.windowFlags,
                             null, true);
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG, "Restarting: " + next);
@@ -1639,7 +1639,7 @@ final class ActivityStack {
                         r.appToken, r.packageName, r.theme,
                         mService.compatibilityInfoForPackageLocked(
                                 r.info.applicationInfo), r.nonLocalizedLabel,
-                        r.labelRes, r.icon, r.windowFlags,
+                        r.labelRes, r.icon, r.logo, r.windowFlags,
                         prev != null ? prev.appToken : null, showStartingIcon);
             }
         } else {

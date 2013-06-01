@@ -86,6 +86,7 @@ final class ActivityRecord {
     CharSequence nonLocalizedLabel;  // the label information from the package mgr.
     int labelRes;           // the label information from the package mgr.
     int icon;               // resource identifier of activity's icon.
+    int logo;               // resource identifier of activity's logo.
     int theme;              // resource identifier of activity's theme.
     int realTheme;          // actual theme resource we will use, never 0.
     int windowFlags;        // custom window flags for preview window.
@@ -399,6 +400,7 @@ final class ActivityRecord {
                 labelRes = app.labelRes;
             }
             icon = aInfo.getIconResource();
+            logo = aInfo.getLogoResource();
             theme = aInfo.getThemeResource();
             realTheme = theme;
             if (realTheme == 0) {

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
@@ -264,6 +266,9 @@ public class Dialog implements DialogInterface, Window.Callback,
         mDecor = mWindow.getDecorView();
 
         if (mActionBar == null && mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
+            final ApplicationInfo info = mContext.getApplicationInfo();
+            mWindow.setDefaultIcon(info.icon);
+            mWindow.setDefaultLogo(info.logo);
             mActionBar = new ActionBarImpl(this);
         }
 

@@ -1256,4 +1256,38 @@ public abstract class Window {
      * @param mask Flags specifying which options should be modified. Others will remain unchanged.
      */
     public void setUiOptions(int uiOptions, int mask) { }
+
+    /**
+     * Set the primary icon for this window.
+     *
+     * @param resId resource ID of a drawable to set
+     */
+    public void setIcon(int resId) { }
+
+    /**
+     * Set the default icon for this window.
+     * This will be overridden by any other icon set operation which could come from the
+     * theme or another explicit set.
+     *
+     * @hide
+     */
+    public void setDefaultIcon(int resId) { }
+
+    /**
+     * Set the logo for this window. A logo is often shown in place of an
+     * {@link #setIcon(int) icon} but is generally wider and communicates window title information
+     * as well.
+     *
+     * @param resId resource ID of a drawable to set
+     */
+    public void setLogo(int resId) { }
+
+    /**
+     * Set the default logo for this window.
+     * This will be overridden by any other logo set operation which could come from the
+     * theme or another explicit set.
+     *
+     * @hide
+     */
+    public void setDefaultLogo(int resId) { }
 }
