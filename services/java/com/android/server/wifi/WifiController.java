@@ -150,7 +150,11 @@ class WifiController extends StateMachine {
             addState(mStaDisabledWithScanState, mDefaultState);
             addState(mApEnabledState, mDefaultState);
             addState(mEcmState, mDefaultState);
-        setInitialState(mApStaDisabledState);
+        if (mSettingsStore.isScanAlwaysAvailable()) {
+            setInitialState(mStaDisabledWithScanState);
+        } else {
+            setInitialState(mApStaDisabledState);
+        }
         setLogRecSize(100);
         setLogOnlyTransitions(false);
 
