@@ -164,7 +164,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
         
         try {
-            mWm.setAppStartingWindow(null, "foo", 0, null, null, 0, 0, 0, null, false);
+            mWm.setAppStartingWindow(null, "foo", 0, null, null, 0, 0, 0, 0, null, false);
             fail("IWindowManager.setAppStartingWindow did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
