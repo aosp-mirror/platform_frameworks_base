@@ -347,6 +347,8 @@ public class WifiStateMachine extends StateMachine {
     public static final int CMD_DISABLE_P2P_REQ           = BASE + 132;
     public static final int CMD_DISABLE_P2P_RSP           = BASE + 133;
 
+    public static final int CMD_BOOT_COMPLETED            = BASE + 134;
+
     public static final int CONNECT_MODE                   = 1;
     public static final int SCAN_ONLY_MODE                 = 2;
     public static final int SCAN_ONLY_WITH_WIFI_OFF_MODE   = 3;
@@ -409,6 +411,10 @@ public class WifiStateMachine extends StateMachine {
     private final int mDriverStopDelayMs;
     private int mDelayedStopCounter;
     private boolean mInDelayedStop = false;
+
+    // sometimes telephony gives us this data before boot is complete and we can't store it
+    // until after, so the write is deferred
+    private volatile String mPersistedCountryCode;
 
     private static final int MIN_RSSI = -200;
     private static final int MAX_RSSI = 256;
@@ -636,6 +642,15 @@ public class WifiStateMachine extends StateMachine {
                                 Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
                     }
                 });
+
+        mContext.registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        sendMessage(CMD_BOOT_COMPLETED);
+                    }
+                },
+                new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
 
         mScanResultCache = new LruCache<String, ScanResult>(SCAN_RESULT_CACHE_SIZE);
 
@@ -1004,6 +1019,7 @@ public class WifiStateMachine extends StateMachine {
      */
     public void setCountryCode(String countryCode, boolean persist) {
         if (persist) {
+            mPersistedCountryCode = countryCode;
             Settings.Global.putString(mContext.getContentResolver(),
                     Settings.Global.WIFI_COUNTRY_CODE,
                     countryCode);
@@ -1889,6 +1905,19 @@ public class WifiStateMachine extends StateMachine {
                         setSuspendOptimizations(SUSPEND_DUE_TO_HIGH_PERF, true);
                     }
                     break;
+                case CMD_BOOT_COMPLETED:
+                    String countryCode = mPersistedCountryCode;
+                    if (TextUtils.isEmpty(countryCode) == false) {
+                        Settings.Global.putString(mContext.getContentResolver(),
+                                Settings.Global.WIFI_COUNTRY_CODE,
+                                countryCode);
+                        // it may be that the state transition that should send this info
+                        // to the driver happened between mPersistedCountryCode getting set
+                        // and now, so simply persisting it here would mean we have sent
+                        // nothing to the driver.  Send the cmd so it might be set now.
+                        sendMessageAtFrontOfQueue(CMD_SET_COUNTRY_CODE, countryCode);
+                    }
+                    break;
                     /* Discard */
                 case CMD_START_SUPPLICANT:
                 case CMD_STOP_SUPPLICANT:
@@ -2357,7 +2386,6 @@ public class WifiStateMachine extends StateMachine {
             mInDelayedStop = false;
             mDelayedStopCounter++;
             updateBatteryWorkSource(null);
-
             /**
              * Enable bluetooth coexistence scan mode when bluetooth connection is active.
              * When this mode is on, some of the low-level scan parameters used by the
