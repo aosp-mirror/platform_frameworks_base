@@ -1615,10 +1615,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         public static final Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
+            @Override
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
             }
 
+            @Override
             public SavedState[] newArray(int size) {
                 return new SavedState[size];
             }
@@ -1943,8 +1945,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             final int top = getChildAt(0).getTop();
-            final float fadeLength = (float) getVerticalFadingEdgeLength();
-            return top < mPaddingTop ? (float) -(top - mPaddingTop) / fadeLength : fadeEdge;
+            final float fadeLength = getVerticalFadingEdgeLength();
+            return top < mPaddingTop ? -(top - mPaddingTop) / fadeLength : fadeEdge;
         }
     }
 
@@ -1961,9 +1963,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             final int bottom = getChildAt(count - 1).getBottom();
             final int height = getHeight();
-            final float fadeLength = (float) getVerticalFadingEdgeLength();
+            final float fadeLength = getVerticalFadingEdgeLength();
             return bottom > height - mPaddingBottom ?
-                    (float) (bottom - height + mPaddingBottom) / fadeLength : fadeEdge;
+                    (bottom - height + mPaddingBottom) / fadeLength : fadeEdge;
         }
     }
 
@@ -2771,6 +2773,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private class PerformClick extends WindowRunnnable implements Runnable {
         int mClickMotionPosition;
 
+        @Override
         public void run() {
             // The data has changed since we posted this action in the event queue,
             // bail out before bad things happen
@@ -2792,6 +2795,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private class CheckForLongPress extends WindowRunnnable implements Runnable {
+        @Override
         public void run() {
             final int motionPosition = mMotionPosition;
             final View child = getChildAt(motionPosition - mFirstPosition);
@@ -2815,6 +2819,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private class CheckForKeyLongPress extends WindowRunnnable implements Runnable {
+        @Override
         public void run() {
             if (isPressed() && mSelectedPosition >= 0) {
                 int index = mSelectedPosition - mFirstPosition;
@@ -2989,6 +2994,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     final class CheckForTap implements Runnable {
+        @Override
         public void run() {
             if (mTouchMode == TOUCH_MODE_DOWN) {
                 mTouchMode = TOUCH_MODE_TAP;
@@ -3239,6 +3245,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    @Override
     public void onTouchModeChanged(boolean isInTouchMode) {
         if (isInTouchMode) {
             // Get rid of the selection when we enter touch mode
@@ -3299,69 +3306,66 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
 
-        final int action = ev.getAction();
-
-        View v;
-
         initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(ev);
 
-        switch (action & MotionEvent.ACTION_MASK) {
-        case MotionEvent.ACTION_DOWN: {
-            onTouchDown(ev);
-            break;
-        }
-
-        case MotionEvent.ACTION_MOVE: {
-            onTouchMove(ev);
-            break;
-        }
-
-        case MotionEvent.ACTION_UP: {
-            onTouchUp(ev);
-            break;
-        }
-
-        case MotionEvent.ACTION_CANCEL: {
-            onTouchCancel();
-            break;
-        }
-
-        case MotionEvent.ACTION_POINTER_UP: {
-            onSecondaryPointerUp(ev);
-            final int x = mMotionX;
-            final int y = mMotionY;
-            final int motionPosition = pointToPosition(x, y);
-            if (motionPosition >= 0) {
-                // Remember where the motion event started
-                v = getChildAt(motionPosition - mFirstPosition);
-                mMotionViewOriginalTop = v.getTop();
-                mMotionPosition = motionPosition;
+        final int actionMasked = ev.getActionMasked();
+        switch (actionMasked) {
+            case MotionEvent.ACTION_DOWN: {
+                onTouchDown(ev);
+                break;
             }
-            mLastY = y;
-            break;
-        }
 
-        case MotionEvent.ACTION_POINTER_DOWN: {
-            // New pointers take over dragging duties
-            final int index = ev.getActionIndex();
-            final int id = ev.getPointerId(index);
-            final int x = (int) ev.getX(index);
-            final int y = (int) ev.getY(index);
-            mMotionCorrection = 0;
-            mActivePointerId = id;
-            mMotionX = x;
-            mMotionY = y;
-            final int motionPosition = pointToPosition(x, y);
-            if (motionPosition >= 0) {
-                // Remember where the motion event started
-                v = getChildAt(motionPosition - mFirstPosition);
-                mMotionViewOriginalTop = v.getTop();
-                mMotionPosition = motionPosition;
+            case MotionEvent.ACTION_MOVE: {
+                onTouchMove(ev);
+                break;
             }
-            mLastY = y;
-            break;
-        }
+
+            case MotionEvent.ACTION_UP: {
+                onTouchUp(ev);
+                break;
+            }
+
+            case MotionEvent.ACTION_CANCEL: {
+                onTouchCancel();
+                break;
+            }
+
+            case MotionEvent.ACTION_POINTER_UP: {
+                onSecondaryPointerUp(ev);
+                final int x = mMotionX;
+                final int y = mMotionY;
+                final int motionPosition = pointToPosition(x, y);
+                if (motionPosition >= 0) {
+                    // Remember where the motion event started
+                    final View child = getChildAt(motionPosition - mFirstPosition);
+                    mMotionViewOriginalTop = child.getTop();
+                    mMotionPosition = motionPosition;
+                }
+                mLastY = y;
+                break;
+            }
+
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                // New pointers take over dragging duties
+                final int index = ev.getActionIndex();
+                final int id = ev.getPointerId(index);
+                final int x = (int) ev.getX(index);
+                final int y = (int) ev.getY(index);
+                mMotionCorrection = 0;
+                mActivePointerId = id;
+                mMotionX = x;
+                mMotionY = y;
+                final int motionPosition = pointToPosition(x, y);
+                if (motionPosition >= 0) {
+                    // Remember where the motion event started
+                    final View child = getChildAt(motionPosition - mFirstPosition);
+                    mMotionViewOriginalTop = child.getTop();
+                    mMotionPosition = motionPosition;
+                }
+                mLastY = y;
+                break;
+            }
         }
 
         return true;
@@ -3439,7 +3443,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             pointerIndex = 0;
             mActivePointerId = ev.getPointerId(pointerIndex);
         }
-        final int y = (int) ev.getY(pointerIndex);
 
         if (mDataChanged) {
             // Re-sync everything if data has been changed
@@ -3447,18 +3450,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             layoutChildren();
         }
 
+        final int y = (int) ev.getY(pointerIndex);
+
         switch (mTouchMode) {
-        case TOUCH_MODE_DOWN:
-        case TOUCH_MODE_TAP:
-        case TOUCH_MODE_DONE_WAITING:
-            // Check if we have moved far enough that it looks more like a
-            // scroll than a tap
-            startScrollIfNeeded(y);
-            break;
-        case TOUCH_MODE_SCROLL:
-        case TOUCH_MODE_OVERSCROLL:
-            scrollIfNeeded(y);
-            break;
+            case TOUCH_MODE_DOWN:
+            case TOUCH_MODE_TAP:
+            case TOUCH_MODE_DONE_WAITING:
+                // Check if we have moved far enough that it looks more like a
+                // scroll than a tap
+                startScrollIfNeeded(y);
+                break;
+            case TOUCH_MODE_SCROLL:
+            case TOUCH_MODE_OVERSCROLL:
+                scrollIfNeeded(y);
+                break;
         }
     }
 
@@ -3750,7 +3755,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (scrollY != 0) {
                 // Pin to the top/bottom during overscroll
                 int restoreCount = canvas.save();
-                canvas.translate(0, (float) scrollY);
+                canvas.translate(0, scrollY);
                 mFastScroller.draw(canvas);
                 canvas.restoreToCount(restoreCount);
             } else {
@@ -3962,6 +3967,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private int mLastFlingY;
 
         private final Runnable mCheckFlywheel = new Runnable() {
+            @Override
             public void run() {
                 final int activeId = mActivePointerId;
                 final VelocityTracker vt = mVelocityTracker;
@@ -4083,6 +4089,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             postDelayed(mCheckFlywheel, FLYWHEEL_TIMEOUT);
         }
 
+        @Override
         public void run() {
             switch (mTouchMode) {
             default:
@@ -4472,6 +4479,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             removeCallbacks(this);
         }
 
+        @Override
         public void run() {
             final int listHeight = getHeight();
             final int firstPos = mFirstPosition;
@@ -4654,9 +4662,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * The amount of friction applied to flings. The default value
      * is {@link ViewConfiguration#getScrollFriction}.
-     *
-     * @return A scalar dimensionless value representing the coefficient of
-     *         friction.
      */
     public void setFriction(float friction) {
         if (mFlingRunnable == null) {
@@ -4823,6 +4828,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (!isHardwareAccelerated()) {
             if (mClearScrollingCache == null) {
                 mClearScrollingCache = new Runnable() {
+                    @Override
                     public void run() {
                         if (mCachingStarted) {
                             mCachingStarted = mCachingActive = false;
@@ -5100,7 +5106,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         requestLayout();
         invalidate();
     }
-    
+
     /**
      * If there is a selection returns false.
      * Otherwise resurrects the selection and returns true if resurrected.
@@ -5723,6 +5729,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return mFiltered;
     }
 
+    @Override
     public void onGlobalLayout() {
         if (isShown()) {
             // Show the popup if we are filtered
@@ -5742,6 +5749,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * For our text watcher that is associated with the text filter.  Does
      * nothing.
      */
+    @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
     }
 
@@ -5750,6 +5758,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * the actual filtering as the text changes, and takes care of hiding and
      * showing the popup displaying the currently entered filter text.
      */
+    @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (mPopup != null && isTextFilterEnabled()) {
             int length = s.length();
@@ -5780,9 +5789,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * For our text watcher that is associated with the text filter.  Does
      * nothing.
      */
+    @Override
     public void afterTextChanged(Editable s) {
     }
 
+    @Override
     public void onFilterComplete(int count) {
         if (mSelectedPosition < 0 && count > 0) {
             mResurrectToPosition = INVALID_POSITION;
@@ -5951,6 +5962,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * This defers a notifyDataSetChanged on the pending RemoteViewsAdapter if it has not
      * connected yet.
      */
+    @Override
     public void deferNotifyDataSetChanged() {
         mDeferNotifyDataSetChanged = true;
     }
@@ -5958,6 +5970,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Called back when the adapter connects to the RemoteViewsService.
      */
+    @Override
     public boolean onRemoteAdapterConnected() {
         if (mRemoteAdapter != mAdapter) {
             setAdapter(mRemoteAdapter);
@@ -5976,6 +5989,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Called back when the adapter disconnects from the RemoteViewsService.
      */
+    @Override
     public void onRemoteAdapterDisconnected() {
         // If the remote adapter disconnects, we keep it around
         // since the currently displayed items are still cached.
@@ -6058,6 +6072,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return mWrapped != null;
         }
 
+        @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             if (mWrapped.onCreateActionMode(mode, menu)) {
                 // Initialize checked graphic state?
@@ -6067,14 +6082,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return false;
         }
 
+        @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             return mWrapped.onPrepareActionMode(mode, menu);
         }
 
+        @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             return mWrapped.onActionItemClicked(mode, item);
         }
 
+        @Override
         public void onDestroyActionMode(ActionMode mode) {
             mWrapped.onDestroyActionMode(mode);
             mChoiceActionMode = null;
@@ -6089,6 +6107,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             setLongClickable(true);
         }
 
+        @Override
         public void onItemCheckedStateChanged(ActionMode mode,
                 int position, long id, boolean checked) {
             mWrapped.onItemCheckedStateChanged(mode, position, id, checked);
