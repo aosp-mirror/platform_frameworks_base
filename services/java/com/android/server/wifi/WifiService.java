@@ -651,7 +651,12 @@ public final class WifiService extends IWifiManager.Stub {
         Slog.i(TAG, "WifiService trying to set country code to " + countryCode +
                 " with persist set to " + persist);
         enforceChangePermission();
-        mWifiStateMachine.setCountryCode(countryCode, persist);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mWifiStateMachine.setCountryCode(countryCode, persist);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -668,7 +673,12 @@ public final class WifiService extends IWifiManager.Stub {
         if (!isDualBandSupported()) return;
         Slog.i(TAG, "WifiService trying to set frequency band to " + band +
                 " with persist set to " + persist);
-        mWifiStateMachine.setFrequencyBand(band, persist);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mWifiStateMachine.setFrequencyBand(band, persist);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
 
