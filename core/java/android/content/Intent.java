@@ -2289,6 +2289,8 @@ public class Intent implements Parcelable, Cloneable {
      * should have a positive priority.
      * Negative priorities are reserved for the system for this broadcast;
      * using them may cause problems.</p>
+     * <p>Any BroadcastReceiver receiving this Intent <em>must not</em>
+     * abort the broadcast.</p>
      * <p>Emergency calls cannot be intercepted using this mechanism, and
      * other calls cannot be modified to call emergency numbers using this
      * mechanism.
