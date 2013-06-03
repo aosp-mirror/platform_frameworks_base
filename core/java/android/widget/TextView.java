@@ -548,7 +548,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private InputFilter[] mFilters = NO_FILTERS;
 
     private volatile Locale mCurrentSpellCheckerLocaleCache;
-    private final ReentrantLock mCurrentTextServicesLocaleLock = new ReentrantLock();
 
     // It is possible to have a selection even when mEditor is null (programmatically set, like when
     // a link is pressed). These highlight-related fields do not go in mEditor.
@@ -8023,16 +8022,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void updateTextServicesLocaleAsync() {
+        // AsyncTask.execute() uses a serial executor which means we don't have
+        // to lock around updateTextServicesLocaleLocked() to prevent it from
+        // being executed n times in parallel.
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                if (mCurrentTextServicesLocaleLock.tryLock()) {
-                    try {
-                        updateTextServicesLocaleLocked();
-                    } finally {
-                        mCurrentTextServicesLocaleLock.unlock();
-                    }
-                }
+                updateTextServicesLocaleLocked();
             }
         });
     }
