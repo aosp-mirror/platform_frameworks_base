@@ -203,10 +203,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OTOMATİK"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Bildirimler burada görünür"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Aşağıya hızlıca kaydırarak bunlara istediğiniz zaman erişebilirsiniz."\n"Sistem denetimleri için tekrar hızlıca aşağı kaydırın."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Sistem çubuğunu görüntülemek için ekranın altında yukarı doğru hızlıca kaydırın"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Çubuğu görüntülemek için ekranın altından hızlıca kaydırın"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Sistem çubuğunu görüntülemek için ekranın sağından hızlıca kaydırın"</string>
 </resources>

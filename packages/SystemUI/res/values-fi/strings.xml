@@ -203,10 +203,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Ilmoitukset näkyvät tässä"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Näet ilmoitukset liu\'uttamalla sormea alas ruudulla."\n"Voit palauttaa järjestelmän ohjaimet näkyviin liu\'uttamalla sormea alas uudelleen."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Tuo järjestelmäpalkki näkyviin liu\'uttamalla ruudun alalaidasta ylöspäin"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Tuo palkki näkyviin liu\'uttamalla ruudun alaosasta"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Tuo järjestelmäpalkki näkyviin liu\'uttamalla ruudun oikeasta laidasta vasemmalle"</string>
 </resources>
