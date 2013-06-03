@@ -565,8 +565,8 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet que l\'aplicació pugui canviar l\'estat de connectivitat de la xarxa."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat d\'ancoratge a xarxa"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet que l\'aplicació canviï l\'estat de la connectivitat de la xarxa d\'ancoratge."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"canviar la configuració d\'ús de dades de referència"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permet que l\'aplicació canviï la configuració d\'ús de les dades de fons."</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"canviar la configuració d\'ús de dades en segon pla"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permet que l\'aplicació canviï la configuració d\'ús de les dades en segon pla."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"veure connexions Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Permet que l\'aplicació visualitzi informació sobre les xarxes Wi-Fi, com ara si la Wi-Fi està activada i el nom dels dispositius Wi-Fi connectats."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"connectar-se a xarxes Wi-Fi i desconnectar-se"</string>
@@ -1400,7 +1400,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"S\'ha superat el límit de dades mòbils"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"S\'ha superat el límit de dades Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> per sobre del límit especif."</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dades de referència restringides"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dades en segon pla restringides"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Toca per eliminar la restricció."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de seguretat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Aquest certificat és vàlid."</string>
