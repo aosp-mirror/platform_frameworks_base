@@ -1498,7 +1498,8 @@
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"May-ari"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Hindi sinusuportahan ng application na ito ang mga account para sa mga pinaghihigpitang profile"</string>
+    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"Walang nakitang application na mangangasiwa sa pagkilos na ito"</string>
     <string name="revoke" msgid="5404479185228271586">"Bawiin"</string>
 </resources>

@@ -1498,7 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Бягучы карыстальнік <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Уладальнік"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Памылка"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Гэтае прыкладанне не падтрымлівае уліковыя запісы для карыстальнікаў з абмежаваннямi"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Гэта прыкладанне не падтрымлівае ўліковыя запісы для профiляў з абмежаваннямі"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Прыкладанне для гэтага дзеяння не знойдзенае"</string>
     <string name="revoke" msgid="5404479185228271586">"Ануляваць"</string>
 </resources>

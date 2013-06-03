@@ -1498,7 +1498,8 @@
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"이 애플리케이션은 제한된 프로필의 계정을 지원하지 않습니다."</string>
+    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"이 작업을 처리하는 애플리케이션을 찾을 수 없습니다."</string>
     <string name="revoke" msgid="5404479185228271586">"취소"</string>
 </resources>
