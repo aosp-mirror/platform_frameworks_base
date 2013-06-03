@@ -534,10 +534,14 @@ public abstract class Transition {
                         captureValues(values, start);
                         if (start) {
                             mStartValues.put(view, values);
-                            mStartIdValues.put(id, values);
+                            if (id >= 0) {
+                                mStartIdValues.put(id, values);
+                            }
                         } else {
                             mEndValues.put(view, values);
-                            mEndIdValues.put(id, values);
+                            if (id >= 0) {
+                                mEndIdValues.put(id, values);
+                            }
                         }
                     }
                 }
@@ -599,14 +603,18 @@ public abstract class Transition {
         if (start) {
             if (!isListViewItem) {
                 mStartValues.put(view, values);
-                mStartIdValues.put((int) id, values);
+                if (id >= 0) {
+                    mStartIdValues.put((int) id, values);
+                }
             } else {
                 mStartItemIdValues.put(id, values);
             }
         } else {
             if (!isListViewItem) {
                 mEndValues.put(view, values);
-                mEndIdValues.put((int) id, values);
+                if (id >= 0) {
+                    mEndIdValues.put((int) id, values);
+                }
             } else {
                 mEndItemIdValues.put(id, values);
             }

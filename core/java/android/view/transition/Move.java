@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -42,6 +43,7 @@ public class Move extends Transition {
     int[] tempLocation = new int[2];
     boolean mResizeClip = false;
     boolean mReparent = false;
+    private static final String LOG_TAG = "Move";
 
     private static RectEvaluator sRectEvaluator = new RectEvaluator();
 
@@ -114,6 +116,13 @@ public class Move extends Transition {
             int endHeight = endBottom - endTop;
             int numChanges = 0;
             if (startWidth != 0 && startHeight != 0 && endWidth != 0 && endHeight != 0) {
+                if (Transition.DBG) {
+                    Log.v(LOG_TAG, "Target = " + endValues.view);
+                    Log.v(LOG_TAG, "    start bounds: " + startLeft + ", " + startTop + ", " +
+                            startRight + ", " + startBottom);
+                    Log.v(LOG_TAG, "    end bounds: " + endLeft + ", " + endTop + ", " +
+                            endRight + ", " + endBottom);
+                }
                 if (startLeft != endLeft) ++numChanges;
                 if (startTop != endTop) ++numChanges;
                 if (startRight != endRight) ++numChanges;

@@ -106,8 +106,30 @@ public class TransitionGroup extends Transition {
             int numTransitions = transitions.length;
             for (int i = 0; i < numTransitions; ++i) {
                 mTransitions.add(transitions[i]);
+                if (mDuration >= 0) {
+                    transitions[0].setDuration(mDuration);
+                }
             }
         }
+    }
+
+    /**
+     * Setting a non-negative duration on a TransitionGroup causes all of the child
+     * transitions (current and future) to inherit this duration.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @return This transitionGroup object.
+     */
+    @Override
+    public Transition setDuration(long duration) {
+        super.setDuration(duration);
+        if (mDuration >= 0) {
+            int numTransitions = mTransitions.size();
+            for (int i = 0; i < numTransitions; ++i) {
+                mTransitions.get(i).setDuration(duration);
+            }
+        }
+        return this;
     }
 
     /**

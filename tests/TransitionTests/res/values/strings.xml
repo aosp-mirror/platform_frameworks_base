@@ -39,4 +39,8 @@
     <string name="shortText2">Not much text here</string>
     <string name="longText1">This is the beginning of the Spring of my discontent. In the event of a real emergency, you would be notified by email. Fear not, for death comes swiftly.</string>
     <string name="longText2">When do we get to eat? I like all things, especially following strong leaders, and mangy cats. Break glass in emergency. The purpose of a framework is to provide the facilities and functionality of a powerful toolkit with the simplicity of a refrigerator.</string>
+    <string name="state1">State 1</string>
+    <string name="state2">State 2</string>
+    <string name="state3">State 3</string>
+    <string name="state4">State 4</string>
 </resources>

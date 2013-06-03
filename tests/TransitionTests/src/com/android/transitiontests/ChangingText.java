@@ -29,10 +29,8 @@ import android.view.transition.TransitionManager;
 
 public class ChangingText extends Activity {
 
-    Button mRemovingButton, mInvisibleButton, mGoneButton;
     Scene mScene1, mScene2;
     ViewGroup mSceneRoot;
-    Fade fader;
     TransitionGroup mChanger;
 
     @Override
