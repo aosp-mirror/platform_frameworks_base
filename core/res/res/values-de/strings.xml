@@ -938,7 +938,7 @@
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Vor 1 Monat"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Vor mehr als 1 Monat"</string>
   <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"Vor 1 Sekunde"</item>
+    <item quantity="one" msgid="4869870056547896011">"vor 1 Sekunde"</item>
     <item quantity="other" msgid="3903706804349556379">"vor <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
   </plurals>
   <plurals name="num_minutes_ago">
