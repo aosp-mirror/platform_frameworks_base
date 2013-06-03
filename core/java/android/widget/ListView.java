@@ -3208,7 +3208,7 @@ public class ListView extends AbsListView {
             final int count = getChildCount();
             final int headerCount = mHeaderViewInfos.size();
             final int itemCount = mItemCount;
-            final int footerLimit = itemCount - mFooterViewInfos.size() - 1;
+            final int footerLimit = (itemCount - mFooterViewInfos.size());
             final boolean headerDividers = mHeaderDividersEnabled;
             final boolean footerDividers = mFooterDividersEnabled;
             final int first = mFirstPosition;
@@ -3252,17 +3252,25 @@ public class ListView extends AbsListView {
                 }
 
                 for (int i = 0; i < count; i++) {
-                    if ((headerDividers || first + i >= headerCount) &&
-                            (footerDividers || first + i < footerLimit)) {
-                        View child = getChildAt(i);
+                    final int itemIndex = (first + i);
+                    final boolean isHeader = (itemIndex < headerCount);
+                    final boolean isFooter = (itemIndex >= footerLimit);
+                    if ((headerDividers || !isHeader) && (footerDividers || !isFooter)) {
+                        final View child = getChildAt(i);
                         bottom = child.getBottom();
-                        // Don't draw dividers next to items that are not enabled
+                        final boolean isLastItem = (i == (count - 1));
 
-                        if (drawDividers &&
-                                (bottom < listBottom && !(drawOverscrollFooter && i == count - 1))) {
-                            if ((areAllItemsSelectable ||
-                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                            adapter.isEnabled(first + i + 1))))) {
+                        if (drawDividers && (bottom < listBottom)
+                                && !(drawOverscrollFooter && isLastItem)) {
+                            final int nextIndex = (itemIndex + 1);
+                            // Draw dividers between enabled items, headers and/or
+                            // footers when enabled, and the end of the list.
+                            if (areAllItemsSelectable || ((adapter.isEnabled(itemIndex)
+                                    || (headerDividers && isHeader)
+                                    || (footerDividers && isFooter)) && (isLastItem
+                                    || adapter.isEnabled(nextIndex)
+                                    || (headerDividers && (nextIndex < headerCount))
+                                    || (footerDividers && (nextIndex >= footerLimit))))) {
                                 bounds.top = bottom;
                                 bounds.bottom = bottom + dividerHeight;
                                 drawDivider(canvas, bounds, i);
@@ -3295,20 +3303,28 @@ public class ListView extends AbsListView {
 
                 final int start = drawOverscrollHeader ? 1 : 0;
                 for (int i = start; i < count; i++) {
-                    if ((headerDividers || first + i >= headerCount) &&
-                            (footerDividers || first + i < footerLimit)) {
-                        View child = getChildAt(i);
+                    final int itemIndex = (first + i);
+                    final boolean isHeader = (itemIndex < headerCount);
+                    final boolean isFooter = (itemIndex >= footerLimit);
+                    if ((headerDividers || !isHeader) && (footerDividers || !isFooter)) {
+                        final View child = getChildAt(i);
                         top = child.getTop();
-                        // Don't draw dividers next to items that are not enabled
-                        if (top > effectivePaddingTop) {
-                            if ((areAllItemsSelectable ||
-                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                            adapter.isEnabled(first + i + 1))))) {
+                        if (drawDividers && (top > effectivePaddingTop)) {
+                            final boolean isFirstItem = (i == start);
+                            final int previousIndex = (itemIndex - 1);
+                            // Draw dividers between enabled items, headers and/or
+                            // footers when enabled, and the end of the list.
+                            if (areAllItemsSelectable || ((adapter.isEnabled(itemIndex)
+                                    || (headerDividers && isHeader)
+                                    || (footerDividers && isFooter)) && (isFirstItem
+                                    || adapter.isEnabled(previousIndex)
+                                    || (headerDividers && (previousIndex < headerCount))
+                                    || (footerDividers && (previousIndex >= footerLimit))))) {
                                 bounds.top = top - dividerHeight;
                                 bounds.bottom = top;
-                                // Give the method the child ABOVE the divider, so we
-                                // subtract one from our child
-                                // position. Give -1 when there is no child above the
+                                // Give the method the child ABOVE the divider,
+                                // so we subtract one from our child position.
+                                // Give -1 when there is no child above the
                                 // divider.
                                 drawDivider(canvas, bounds, i - 1);
                             } else if (fillForMissingDividers) {
