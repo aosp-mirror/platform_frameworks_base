@@ -203,10 +203,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"اعلان‌ها در اینجا نمایش داده می‌شوند"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"با کشیدن انگشت به طرف پایین به آنها دسترسی پیدا کنید."\n"برای کنترل‌های سیستم دوباره انگشت خود را به سمت پایین بکشید."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"برای آشکارسازی نوار سیستم انگشت خود را از پایین صفحه به بالا بکشید"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"برای آشکارسازی نوار انگشت خود را روی پایین صفحه بکشید"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"برای آشکارسازی نوار سیستم انگشت خود را از سمت راست صفحه بکشید"</string>
 </resources>

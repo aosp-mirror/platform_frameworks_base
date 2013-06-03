@@ -203,10 +203,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Notifications appear here"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Access them any time by swiping down."\n"Swipe down again for system controls."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Swipe up from bottom of screen to reveal system bar"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Swipe bottom of screen to reveal bar"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Swipe from right of screen to reveal system bar"</string>
 </resources>

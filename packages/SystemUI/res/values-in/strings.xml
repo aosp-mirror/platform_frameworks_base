@@ -203,10 +203,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OTOMATIS"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Pemberitahuan muncul di sini"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Akses kapan saja dengan menggesek ke bawah."\n"Gesek ke bawah sekali lagi untuk kontrol sistem."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Gesek ke atas dari bagian bawah layar untuk membuka bilah sistem"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Gesek bagian bawah layar untuk membuka bilah"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Gesek dari bagian kanan layar untuk membuka bilah sistem"</string>
 </resources>

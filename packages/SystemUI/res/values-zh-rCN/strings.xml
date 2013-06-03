@@ -40,7 +40,7 @@
     <string name="invalid_charger" msgid="4549105996740522523">"不支持 USB 充电功能。"\n"只能使用随附的充电器充电。"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飞行模式"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"自动旋转屏幕"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"静音"</string>
@@ -100,12 +100,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"数据信号强度为两格。"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"数据信号强度为三格。"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"数据信号满格。"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"已关闭 Wi-Fi。"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi 连接已断开。"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi 信号强度为一格。"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi 信号强度为两格。"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi 信号强度为三格。"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi 信号满格。"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"已关闭 WLAN。"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"WLAN 连接已断开。"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"WLAN 信号强度为一格。"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"WLAN 信号强度为两格。"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WLAN 信号强度为三格。"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"WLAN 信号满格。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"无 WiMAX 信号。"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX 信号强度为一格。"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX 信号强度为两格。"</string>
@@ -130,7 +130,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"漫游中"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙共享网络。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
@@ -164,7 +164,7 @@
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"您已达到指定的数据流量上限。"\n\n"如果您重新启用数据，运营商可能会收取相应的费用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据连接"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已连接"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN 已连接"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜索 GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"已通过 GPS 确定位置"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
@@ -195,20 +195,17 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"设置"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"时间"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"我"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"WLAN"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未连接"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"无网络"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 已关闭"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi 显示"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN 已关闭"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"WLAN 显示"</string>
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"无线显示"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"通知会显示在这里"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑动可随时查看通知。"\n"再次向下滑动可使用系统控制功能。"</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"从屏幕底部向上滑动即可显示系统栏"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"从底部向上滑可显示系统栏"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"从屏幕右侧向左滑动即可显示系统栏"</string>
 </resources>

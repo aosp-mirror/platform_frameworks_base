@@ -205,10 +205,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Le notifiche vengono visualizzate qui"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Puoi accedervi in qualsiasi momento scorrendo verso il basso."\n"Fai scorrere di nuovo verso il basso per visualizzare i controlli del sistema."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Fai scorrere il dito verso l\'alto dalla parte inferiore dello schermo per visualizzare la barra di sistema"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Fai scorrere parte inferiore dello schermo per visualizzare la barra"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Fai scorrere il dito dalla parte destra dello schermo per visualizzare la barra di sistema"</string>
 </resources>

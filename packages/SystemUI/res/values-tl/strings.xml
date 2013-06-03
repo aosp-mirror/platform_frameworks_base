@@ -203,10 +203,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Dito lumalabas ang mga notification"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"I-access ang mga ito anumang oras sa pamamagitan ng pag-swipe pababa."\n"Muling mag-swipe pababa para sa mga kontrol ng system."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Mag-swipe pataas mula sa ibaba ng screen upang ipakita ang system bar"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Mag-swipe sa ibaba ng screen upang ipakita ang bar"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Mag-swipe mula sa kanan ng screen upang ipakita ang system bar"</string>
 </resources>

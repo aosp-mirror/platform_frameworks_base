@@ -203,10 +203,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТО"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Сповіщення з’являються тут"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Отримуйте до них доступ будь-коли, провівши пальцем униз."\n"Знову проведіть униз, щоб відкрити елементи керування системи."</string>
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
-    <skip />
+    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Проведіть пальцем угору від низу екрана, щоб з’явився системний рядок"</string>
+    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Проведіть від низу екрана, щоб з’явився рядок"</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Проведіть пальцем справа наліво на екрані, щоб з’явився системний рядок"</string>
 </resources>
