@@ -2428,7 +2428,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return True if the selector should be shown
      */
     boolean shouldShowSelector() {
-        return (!isInTouchMode()) || touchModeDrawsInPressedState();
+        return (!isInTouchMode()) || (touchModeDrawsInPressedState() && isPressed());
     }
 
     private void drawSelector(Canvas canvas) {
@@ -3055,15 +3055,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mTouchMode = TOUCH_MODE_SCROLL;
                 mMotionCorrection = deltaY > 0 ? mTouchSlop : -mTouchSlop;
             }
-            final Handler handler = getHandler();
-            // Handler should not be null unless the AbsListView is not attached to a
-            // window, which would make it very hard to scroll it... but the monkeys
-            // say it's possible.
-            if (handler != null) {
-                handler.removeCallbacks(mPendingCheckForLongPress);
-            }
+            removeCallbacks(mPendingCheckForLongPress);
             setPressed(false);
-            View motionView = getChildAt(mMotionPosition - mFirstPosition);
+            final View motionView = getChildAt(mMotionPosition - mFirstPosition);
             if (motionView != null) {
                 motionView.setPressed(false);
             }
@@ -3457,8 +3451,26 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             case TOUCH_MODE_TAP:
             case TOUCH_MODE_DONE_WAITING:
                 // Check if we have moved far enough that it looks more like a
-                // scroll than a tap
-                startScrollIfNeeded(y);
+                // scroll than a tap. If so, we'll enter scrolling mode.
+                if (startScrollIfNeeded(y)) {
+                    break;
+                }
+                // Otherwise, check containment within list bounds. If we're
+                // outside bounds, cancel any active presses.
+                final float x = ev.getX();
+                final boolean inList = (x > mListPadding.left)
+                        && (x < getWidth() - mListPadding.right);
+                if (!inList) {
+                    setPressed(false);
+                    final View motionView = getChildAt(mMotionPosition - mFirstPosition);
+                    if (motionView != null) {
+                        motionView.setPressed(false);
+                    }
+                    removeCallbacks(mTouchMode == TOUCH_MODE_DOWN ?
+                            mPendingCheckForTap : mPendingCheckForLongPress);
+                    mTouchMode = TOUCH_MODE_DONE_WAITING;
+                    updateSelectorState();
+                }
                 break;
             case TOUCH_MODE_SCROLL:
             case TOUCH_MODE_OVERSCROLL:
@@ -3474,69 +3486,66 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         case TOUCH_MODE_DONE_WAITING:
             final int motionPosition = mMotionPosition;
             final View child = getChildAt(motionPosition - mFirstPosition);
-
-            final float x = ev.getX();
-            final boolean inList = x > mListPadding.left && x < getWidth() - mListPadding.right;
-
-            if (child != null && !child.hasFocusable() && inList) {
+            if (child != null) {
                 if (mTouchMode != TOUCH_MODE_DOWN) {
                     child.setPressed(false);
                 }
 
-                if (mPerformClick == null) {
-                    mPerformClick = new PerformClick();
-                }
-
-                final AbsListView.PerformClick performClick = mPerformClick;
-                performClick.mClickMotionPosition = motionPosition;
-                performClick.rememberWindowAttachCount();
-
-                mResurrectToPosition = motionPosition;
-
-                if (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_TAP) {
-                    final Handler handler = getHandler();
-                    if (handler != null) {
-                        handler.removeCallbacks(mTouchMode == TOUCH_MODE_DOWN ?
-                                mPendingCheckForTap : mPendingCheckForLongPress);
+                final float x = ev.getX();
+                final boolean inList = x > mListPadding.left && x < getWidth() - mListPadding.right;
+                if (inList && !child.hasFocusable()) {
+                    if (mPerformClick == null) {
+                        mPerformClick = new PerformClick();
                     }
-                    mLayoutMode = LAYOUT_NORMAL;
-                    if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
-                        mTouchMode = TOUCH_MODE_TAP;
-                        setSelectedPositionInt(mMotionPosition);
-                        layoutChildren();
-                        child.setPressed(true);
-                        positionSelector(mMotionPosition, child);
-                        setPressed(true);
-                        if (mSelector != null) {
-                            Drawable d = mSelector.getCurrent();
-                            if (d != null && d instanceof TransitionDrawable) {
-                                ((TransitionDrawable) d).resetTransition();
-                            }
-                        }
-                        if (mTouchModeReset != null) {
-                            removeCallbacks(mTouchModeReset);
-                        }
-                        mTouchModeReset = new Runnable() {
-                            @Override
-                            public void run() {
-                                mTouchModeReset = null;
-                                mTouchMode = TOUCH_MODE_REST;
-                                child.setPressed(false);
-                                setPressed(false);
-                                if (!mDataChanged) {
-                                    performClick.run();
+
+                    final AbsListView.PerformClick performClick = mPerformClick;
+                    performClick.mClickMotionPosition = motionPosition;
+                    performClick.rememberWindowAttachCount();
+
+                    mResurrectToPosition = motionPosition;
+
+                    if (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_TAP) {
+                        removeCallbacks(mTouchMode == TOUCH_MODE_DOWN ?
+                                mPendingCheckForTap : mPendingCheckForLongPress);
+                        mLayoutMode = LAYOUT_NORMAL;
+                        if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
+                            mTouchMode = TOUCH_MODE_TAP;
+                            setSelectedPositionInt(mMotionPosition);
+                            layoutChildren();
+                            child.setPressed(true);
+                            positionSelector(mMotionPosition, child);
+                            setPressed(true);
+                            if (mSelector != null) {
+                                Drawable d = mSelector.getCurrent();
+                                if (d != null && d instanceof TransitionDrawable) {
+                                    ((TransitionDrawable) d).resetTransition();
                                 }
                             }
-                        };
-                        postDelayed(mTouchModeReset,
-                                ViewConfiguration.getPressedStateDuration());
-                    } else {
-                        mTouchMode = TOUCH_MODE_REST;
-                        updateSelectorState();
+                            if (mTouchModeReset != null) {
+                                removeCallbacks(mTouchModeReset);
+                            }
+                            mTouchModeReset = new Runnable() {
+                                @Override
+                                public void run() {
+                                    mTouchModeReset = null;
+                                    mTouchMode = TOUCH_MODE_REST;
+                                    child.setPressed(false);
+                                    setPressed(false);
+                                    if (!mDataChanged) {
+                                        performClick.run();
+                                    }
+                                }
+                            };
+                            postDelayed(mTouchModeReset,
+                                    ViewConfiguration.getPressedStateDuration());
+                        } else {
+                            mTouchMode = TOUCH_MODE_REST;
+                            updateSelectorState();
+                        }
+                        return;
+                    } else if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
+                        performClick.run();
                     }
-                    return;
-                } else if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
-                    performClick.run();
                 }
             }
             mTouchMode = TOUCH_MODE_REST;
@@ -3619,12 +3628,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         // Need to redraw since we probably aren't drawing the selector anymore
         invalidate();
-
-        final Handler handler = getHandler();
-        if (handler != null) {
-            handler.removeCallbacks(mPendingCheckForLongPress);
-        }
-
+        removeCallbacks(mPendingCheckForLongPress);
         recycleVelocityTracker();
 
         mActivePointerId = INVALID_POINTER;
@@ -3658,17 +3662,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         default:
             mTouchMode = TOUCH_MODE_REST;
             setPressed(false);
-            View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
+            final View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
             if (motionView != null) {
                 motionView.setPressed(false);
             }
             clearScrollingCache();
-
-            final Handler handler = getHandler();
-            if (handler != null) {
-                handler.removeCallbacks(mPendingCheckForLongPress);
-            }
-
+            removeCallbacks(mPendingCheckForLongPress);
             recycleVelocityTracker();
         }
 
