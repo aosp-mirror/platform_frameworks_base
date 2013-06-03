@@ -1498,7 +1498,8 @@
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"यह एप्लिकेशन प्रतिबंधित प्रोफ़ाइल के खातों का समर्थन नहीं करता है"</string>
+    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
+    <skip />
     <string name="app_not_found" msgid="3429141853498927379">"इस कार्यवाही को प्रबंधित करने के लिए कोई एप्लिकेशन नहीं मिला"</string>
     <string name="revoke" msgid="5404479185228271586">"निरस्‍त करें"</string>
 </resources>

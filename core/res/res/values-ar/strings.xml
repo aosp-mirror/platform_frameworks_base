@@ -1498,7 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"المستخدم الحالي <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"المالك"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خطأ"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"هذا التطبيق لا يتوافق مع حسابات الملفات الشخصية المقيدة"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"لا يتوافق هذا التطبيق مع حسابات الملفات الشخصية المقيدة"</string>
     <string name="app_not_found" msgid="3429141853498927379">"لم يتم العثور على تطبيق يمكنه التعامل مع هذا الإجراء."</string>
     <string name="revoke" msgid="5404479185228271586">"إلغاء"</string>
 </resources>

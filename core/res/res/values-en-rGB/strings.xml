@@ -1498,7 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Current user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Owner"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"This application does not support accounts for restricted profiles"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"This app doesn\'t support accounts for restricted profiles"</string>
     <string name="app_not_found" msgid="3429141853498927379">"No application found to handle this action"</string>
     <string name="revoke" msgid="5404479185228271586">"Revoke"</string>
 </resources>
