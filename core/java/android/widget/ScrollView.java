@@ -631,12 +631,13 @@ public class ScrollView extends FrameLayout {
                     final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
                             (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
 
+                    // Calling overScrollBy will call onOverScrolled, which
+                    // calls onScrollChanged if applicable.
                     if (overScrollBy(0, deltaY, 0, mScrollY,
                             0, range, 0, mOverscrollDistance, true)) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
                     }
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
                     if (canOverscroll) {
                         final int pulledToY = oldY + deltaY;
@@ -753,9 +754,12 @@ public class ScrollView extends FrameLayout {
             boolean clampedX, boolean clampedY) {
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
+            final int oldX = mScrollX;
+            final int oldY = mScrollY;
             mScrollX = scrollX;
             mScrollY = scrollY;
             invalidateParentIfNeeded();
+            onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             if (clampedY) {
                 mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange());
             }
