@@ -42,7 +42,7 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                         <script type="text/javascript">
                             var params = { allowScriptAccess: "always" };
                             var atts = { id: "ytapiplayer" };
-                            swfobject.embedSWF("//www.youtube.com/v/RRelFvc6Czo?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+                            swfobject.embedSWF("//www.youtube.com/v/O8i4HUw7JYA?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
                               "ytapiplayer", "600", "338", "8", null, null, params, atts);
 
                             // Callback used to pause/resume carousel based on video state
@@ -71,9 +71,8 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                       </div>
                     </div>
                     <div class="content-right col-4">
-                    <h1 style="white-space:nowrap;line-height:1em;">Developer Story: Smule</h1>
-                    <p>The creators of AutoRap, Magic Piano, and Songify talk about launching on
-                       Android and the explosive global growth they’ve seen on Google Play.</p>
+                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />redBus.in</h1>
+                    <p>Bangalore-based developers redBus.in talk about how Android is helping them deliver a superior booking and travel experience to millions of daily bus riders in India.</p>
                     </div>
                 </li>
                 <li class="item carousel-home">
