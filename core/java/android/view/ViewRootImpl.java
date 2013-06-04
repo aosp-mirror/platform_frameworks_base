@@ -5153,6 +5153,7 @@ public final class ViewRootImpl implements ViewParent,
 
             mAdded = false;
         }
+        WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
     public void requestUpdateConfiguration(Configuration config) {
