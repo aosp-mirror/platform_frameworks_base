@@ -130,7 +130,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Bump the version on this if the checkin format changes.
      */
-    private static final int BATTERY_STATS_CHECKIN_VERSION = 6;
+    private static final int BATTERY_STATS_CHECKIN_VERSION = 7;
     
     private static final long BYTES_PER_KB = 1024;
     private static final long BYTES_PER_MB = 1048576; // 1024^2
@@ -259,17 +259,7 @@ public abstract class BatteryStats implements Parcelable {
          * {@hide}
          */
         public abstract int getUid();
-        
-        /**
-         * {@hide}
-         */
-        public abstract long getTcpBytesReceived(int which);
-        
-        /**
-         * {@hide}
-         */
-        public abstract long getTcpBytesSent(int which);
-        
+
         public abstract void noteWifiRunningLocked();
         public abstract void noteWifiStoppedLocked();
         public abstract void noteFullWifiLockAcquiredLocked();
@@ -304,11 +294,14 @@ public abstract class BatteryStats implements Parcelable {
         };
         
         public static final int NUM_USER_ACTIVITY_TYPES = 3;
-        
+
         public abstract void noteUserActivityLocked(int type);
         public abstract boolean hasUserActivity();
         public abstract int getUserActivityCount(int type, int which);
-        
+
+        public abstract boolean hasNetworkActivity();
+        public abstract long getNetworkActivityCount(int type, int which);
+
         public static abstract class Sensor {
             /*
              * FIXME: it's not correct to use this magic value because it
@@ -929,6 +922,15 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract long getBluetoothOnTime(long batteryRealtime, int which);
     
+    public static final int NETWORK_MOBILE_RX_BYTES = 0;
+    public static final int NETWORK_MOBILE_TX_BYTES = 1;
+    public static final int NETWORK_WIFI_RX_BYTES = 2;
+    public static final int NETWORK_WIFI_TX_BYTES = 3;
+
+    public static final int NUM_NETWORK_ACTIVITY_TYPES = NETWORK_WIFI_TX_BYTES + 1;
+
+    public abstract long getNetworkActivityCount(int type, int which);
+
     /**
      * Return whether we are currently running on battery.
      */
@@ -1246,16 +1248,20 @@ public abstract class BatteryStats implements Parcelable {
                 totalRealtime / 1000, totalUptime / 1000); 
         
         // Calculate total network and wakelock times across all uids.
-        long rxTotal = 0;
-        long txTotal = 0;
+        long mobileRxTotal = 0;
+        long mobileTxTotal = 0;
+        long wifiRxTotal = 0;
+        long wifiTxTotal = 0;
         long fullWakeLockTimeTotal = 0;
         long partialWakeLockTimeTotal = 0;
         
         for (int iu = 0; iu < NU; iu++) {
             Uid u = uidStats.valueAt(iu);
-            rxTotal += u.getTcpBytesReceived(which);
-            txTotal += u.getTcpBytesSent(which);
-            
+            mobileRxTotal += u.getNetworkActivityCount(NETWORK_MOBILE_RX_BYTES, which);
+            mobileTxTotal += u.getNetworkActivityCount(NETWORK_MOBILE_TX_BYTES, which);
+            wifiRxTotal += u.getNetworkActivityCount(NETWORK_WIFI_RX_BYTES, which);
+            wifiTxTotal += u.getNetworkActivityCount(NETWORK_WIFI_TX_BYTES, which);
+
             Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
             if (wakelocks.size() > 0) {
                 for (Map.Entry<String, ? extends BatteryStats.Uid.Wakelock> ent 
@@ -1279,7 +1285,8 @@ public abstract class BatteryStats implements Parcelable {
         // Dump misc stats
         dumpLine(pw, 0 /* uid */, category, MISC_DATA,
                 screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000,
-                wifiRunningTime / 1000, bluetoothOnTime / 1000, rxTotal, txTotal, 
+                wifiRunningTime / 1000, bluetoothOnTime / 1000,
+                mobileRxTotal, mobileTxTotal, wifiRxTotal, wifiTxTotal,
                 fullWakeLockTimeTotal, partialWakeLockTimeTotal,
                 getInputEventCount(which));
         
@@ -1350,14 +1357,18 @@ public abstract class BatteryStats implements Parcelable {
             }
             Uid u = uidStats.valueAt(iu);
             // Dump Network stats per uid, if any
-            long rx = u.getTcpBytesReceived(which);
-            long tx = u.getTcpBytesSent(which);
+            long mobileRx = u.getNetworkActivityCount(NETWORK_MOBILE_RX_BYTES, which);
+            long mobileTx = u.getNetworkActivityCount(NETWORK_MOBILE_TX_BYTES, which);
+            long wifiRx = u.getNetworkActivityCount(NETWORK_WIFI_RX_BYTES, which);
+            long wifiTx = u.getNetworkActivityCount(NETWORK_WIFI_TX_BYTES, which);
             long fullWifiLockOnTime = u.getFullWifiLockTime(batteryRealtime, which);
             long wifiScanTime = u.getWifiScanTime(batteryRealtime, which);
             long uidWifiRunningTime = u.getWifiRunningTime(batteryRealtime, which);
-            
-            if (rx > 0 || tx > 0) dumpLine(pw, uid, category, NETWORK_DATA, rx, tx);
-            
+
+            if (mobileRx > 0 || mobileTx > 0 || wifiRx > 0 || wifiTx > 0) {
+                dumpLine(pw, uid, category, NETWORK_DATA, mobileRx, mobileTx, wifiRx, wifiTx);
+            }
+
             if (fullWifiLockOnTime != 0 || wifiScanTime != 0
                     || uidWifiRunningTime != 0) {
                 dumpLine(pw, uid, category, WIFI_DATA,
@@ -1569,8 +1580,10 @@ public abstract class BatteryStats implements Parcelable {
         pw.println(sb.toString());
         
         // Calculate total network and wakelock times across all uids.
-        long rxTotal = 0;
-        long txTotal = 0;
+        long mobileRxTotal = 0;
+        long mobileTxTotal = 0;
+        long wifiRxTotal = 0;
+        long wifiTxTotal = 0;
         long fullWakeLockTimeTotalMicros = 0;
         long partialWakeLockTimeTotalMicros = 0;
 
@@ -1623,9 +1636,11 @@ public abstract class BatteryStats implements Parcelable {
 
         for (int iu = 0; iu < NU; iu++) {
             Uid u = uidStats.valueAt(iu);
-            rxTotal += u.getTcpBytesReceived(which);
-            txTotal += u.getTcpBytesSent(which);
-            
+            mobileRxTotal += u.getNetworkActivityCount(NETWORK_MOBILE_RX_BYTES, which);
+            mobileTxTotal += u.getNetworkActivityCount(NETWORK_MOBILE_TX_BYTES, which);
+            wifiRxTotal += u.getNetworkActivityCount(NETWORK_WIFI_RX_BYTES, which);
+            wifiTxTotal += u.getNetworkActivityCount(NETWORK_WIFI_TX_BYTES, which);
+
             Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
             if (wakelocks.size() > 0) {
                 for (Map.Entry<String, ? extends BatteryStats.Uid.Wakelock> ent 
@@ -1658,8 +1673,11 @@ public abstract class BatteryStats implements Parcelable {
         }
         
         pw.print(prefix);
-                pw.print("  Total received: "); pw.print(formatBytesLocked(rxTotal));
-                pw.print(", Total sent: "); pw.println(formatBytesLocked(txTotal));
+                pw.print("  Mobile total received: "); pw.print(formatBytesLocked(mobileRxTotal));
+                pw.print(", Total sent: "); pw.println(formatBytesLocked(mobileTxTotal));
+        pw.print(prefix);
+                pw.print("  Wi-Fi total received: "); pw.print(formatBytesLocked(wifiRxTotal));
+                pw.print(", Total sent: "); pw.println(formatBytesLocked(wifiTxTotal));
         sb.setLength(0);
         sb.append(prefix);
                 sb.append("  Total full wakelock time: "); formatTimeMs(sb,
@@ -1801,18 +1819,25 @@ public abstract class BatteryStats implements Parcelable {
             pw.println(prefix + "  #" + uid + ":");
             boolean uidActivity = false;
             
-            long tcpReceived = u.getTcpBytesReceived(which);
-            long tcpSent = u.getTcpBytesSent(which);
+            long mobileRxBytes = u.getNetworkActivityCount(NETWORK_MOBILE_RX_BYTES, which);
+            long mobileTxBytes = u.getNetworkActivityCount(NETWORK_MOBILE_TX_BYTES, which);
+            long wifiRxBytes = u.getNetworkActivityCount(NETWORK_WIFI_RX_BYTES, which);
+            long wifiTxBytes = u.getNetworkActivityCount(NETWORK_WIFI_TX_BYTES, which);
             long fullWifiLockOnTime = u.getFullWifiLockTime(batteryRealtime, which);
             long wifiScanTime = u.getWifiScanTime(batteryRealtime, which);
             long uidWifiRunningTime = u.getWifiRunningTime(batteryRealtime, which);
-            
-            if (tcpReceived != 0 || tcpSent != 0) {
-                pw.print(prefix); pw.print("    Network: ");
-                        pw.print(formatBytesLocked(tcpReceived)); pw.print(" received, ");
-                        pw.print(formatBytesLocked(tcpSent)); pw.println(" sent");
+
+            if (mobileRxBytes > 0 || mobileTxBytes > 0) {
+                pw.print(prefix); pw.print("    Mobile network: ");
+                        pw.print(formatBytesLocked(mobileRxBytes)); pw.print(" received, ");
+                        pw.print(formatBytesLocked(mobileTxBytes)); pw.println(" sent");
             }
-            
+            if (wifiRxBytes > 0 || wifiTxBytes > 0) {
+                pw.print(prefix); pw.print("    Wi-Fi network: ");
+                        pw.print(formatBytesLocked(wifiRxBytes)); pw.print(" received, ");
+                        pw.print(formatBytesLocked(wifiTxBytes)); pw.println(" sent");
+            }
+
             if (u.hasUserActivity()) {
                 boolean hasData = false;
                 for (int i=0; i<Uid.NUM_USER_ACTIVITY_TYPES; i++) {

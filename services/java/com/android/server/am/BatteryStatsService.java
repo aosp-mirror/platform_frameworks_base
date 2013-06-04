@@ -431,10 +431,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    @Override
     public void noteNetworkInterfaceType(String iface, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteNetworkInterfaceTypeLocked(iface, type);
+        }
+    }
+
+    @Override
+    public void noteNetworkStatsEnabled() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteNetworkStatsEnabledLocked();
         }
     }
 

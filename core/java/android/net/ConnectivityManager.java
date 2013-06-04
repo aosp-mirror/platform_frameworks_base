@@ -464,6 +464,21 @@ public class ConnectivityManager {
     }
 
     /**
+     * Checks if the given network type is backed by a Wi-Fi radio.
+     *
+     * @hide
+     */
+    public static boolean isNetworkTypeWifi(int networkType) {
+        switch (networkType) {
+            case TYPE_WIFI:
+            case TYPE_WIFI_P2P:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Specifies the preferred network type.  When the device has more
      * than one type available the preferred network type will be used.
      * Note that this made sense when we only had 2 network types,

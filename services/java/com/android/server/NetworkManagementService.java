@@ -50,12 +50,14 @@ import android.os.INetworkManagementService;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.Preconditions;
 import com.android.server.NativeDaemonConnector.Command;
@@ -342,6 +344,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
+
+        if (mBandwidthControlEnabled) {
+            try {
+                IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"))
+                        .noteNetworkStatsEnabled();
+            } catch (RemoteException e) {
+            }
+        }
 
         // push any existing quota or UID rules
         synchronized (mQuotaLock) {
