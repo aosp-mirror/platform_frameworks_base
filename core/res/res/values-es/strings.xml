@@ -925,7 +925,7 @@
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"MENU+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"espacio"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"intro"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"suprimir"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"eliminar"</string>
     <string name="search_go" msgid="8298016669822141719">"Buscar"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Buscar"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Consulta"</string>
