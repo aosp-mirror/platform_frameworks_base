@@ -302,6 +302,8 @@ public:
 
     AssetAtlas assetAtlas;
 
+    bool gpuPixelBuffersEnabled;
+
     // Debug methods
     PFNGLINSERTEVENTMARKEREXTPROC eventMark;
     PFNGLPUSHGROUPMARKEREXTPROC startMark;
@@ -314,6 +316,7 @@ private:
     void initFont();
     void initExtensions();
     void initConstraints();
+    void initStaticProperties();
 
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }

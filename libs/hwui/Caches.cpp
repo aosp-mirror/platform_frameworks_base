@@ -52,6 +52,7 @@ Caches::Caches(): Singleton<Caches>(), mExtensions(Extensions::getInstance()), m
     initFont();
     initConstraints();
     initProperties();
+    initStaticProperties();
     initExtensions();
 
     mDebugLevel = readDebugLevel();
@@ -135,6 +136,18 @@ void Caches::initConstraints() {
     }
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+}
+
+void Caches::initStaticProperties() {
+    gpuPixelBuffersEnabled = false;
+
+    // OpenGL ES 3.0+ specific features
+    if (mExtensions.getMajorGlVersion() >= 3) {
+        char property[PROPERTY_VALUE_MAX];
+        if (property_get(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, property, "true") > 0) {
+            gpuPixelBuffersEnabled = !strcmp(property, "true");
+        }
+    }
 }
 
 bool Caches::initProperties() {
