@@ -78,6 +78,10 @@ public abstract class Transition {
     private ArrayList<TransitionValues> mPlayStartValuesList = new ArrayList<TransitionValues>();
     private ArrayList<TransitionValues> mPlayEndValuesList = new ArrayList<TransitionValues>();
 
+    // Track all animators in use in case the transition gets canceled and needs to
+    // cancel running animators
+    private ArrayList<Animator> mCurrentAnimators = new ArrayList<Animator>();
+
     // Number of per-target instances of this Transition currently running. This count is
     // determined by calls to startTransition() and endTransition()
     int mNumInstances = 0;
@@ -401,11 +405,28 @@ public abstract class Transition {
             TransitionValues start = mPlayStartValuesList.get(i);
             TransitionValues end = mPlayEndValuesList.get(i);
             startTransition();
-            animate(play(sceneRoot, start, end));
+            runAnimator(play(sceneRoot, start, end));
         }
         mPlayStartValuesList.clear();
         mPlayEndValuesList.clear();
         endTransition();
+    }
+
+    private void runAnimator(Animator animator) {
+        if (animator != null) {
+            // TODO: could be a single listener instance for all of them since it uses the param
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mCurrentAnimators.add(animation);
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mCurrentAnimators.remove(animation);
+                }
+            });
+            animate(animator);
+        }
     }
 
     /**
@@ -668,11 +689,6 @@ public abstract class Transition {
             }
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
-                public void onAnimationCancel(Animator animation) {
-                    cancelTransition();
-                }
-
-                @Override
                 public void onAnimationEnd(Animator animation) {
                     endTransition();
                     animation.removeListener(this);
@@ -771,6 +787,7 @@ public abstract class Transition {
             mEndValues.clear();
             mEndIdValues.clear();
             mEndItemIdValues.clear();
+            mCurrentAnimators.clear();
         }
     }
 
@@ -781,6 +798,11 @@ public abstract class Transition {
     protected void cancelTransition() {
         // TODO: how does this work with instances?
         // TODO: this doesn't actually do *anything* yet
+        int numAnimators = mCurrentAnimators.size();
+        for (int i = 0; i < numAnimators; ++i) {
+            Animator animator = mCurrentAnimators.get(i);
+            animator.cancel();
+        }
         onTransitionCancel();
         if (mListeners != null && mListeners.size() > 0) {
             ArrayList<TransitionListener> tmpListeners =
