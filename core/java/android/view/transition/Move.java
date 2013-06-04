@@ -24,11 +24,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This transition captures the layout bounds of target views before and after
@@ -216,8 +217,8 @@ public class Move extends Transition {
         if (startValues == null || endValues == null) {
             return false;
         }
-        HashMap<String, Object> startParentVals = startValues.values;
-        HashMap<String, Object> endParentVals = endValues.values;
+        Map<String, Object> startParentVals = startValues.values;
+        Map<String, Object> endParentVals = endValues.values;
         ViewGroup startParent = (ViewGroup) startParentVals.get(PROPNAME_PARENT);
         ViewGroup endParent = (ViewGroup) endParentVals.get(PROPNAME_PARENT);
         if (startParent == null || endParent == null) {

@@ -18,6 +18,7 @@ package android.view.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.util.ArrayMap;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.view.SurfaceView;
@@ -28,7 +29,6 @@ import android.view.ViewOverlay;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * A Transition holds information about animations that will be run on its
@@ -62,14 +62,13 @@ public abstract class Transition {
     TimeInterpolator mInterpolator = null;
     int[] mTargetIds;
     View[] mTargets;
-    // TODO: sparse arrays instead of hashmaps?
-    private HashMap<View, TransitionValues> mStartValues =
-            new HashMap<View, TransitionValues>();
+    private ArrayMap<View, TransitionValues> mStartValues =
+            new ArrayMap<View, TransitionValues>();
     private SparseArray<TransitionValues> mStartIdValues = new SparseArray<TransitionValues>();
     private LongSparseArray<TransitionValues> mStartItemIdValues =
             new LongSparseArray<TransitionValues>();
-    private HashMap<View, TransitionValues> mEndValues =
-            new HashMap<View, TransitionValues>();
+    private ArrayMap<View, TransitionValues> mEndValues =
+            new ArrayMap<View, TransitionValues>();
     private SparseArray<TransitionValues> mEndIdValues = new SparseArray<TransitionValues>();
     private LongSparseArray<TransitionValues> mEndItemIdValues =
             new LongSparseArray<TransitionValues>();
@@ -227,15 +226,15 @@ public abstract class Transition {
      *
      * @hide
      */
-    protected void prePlay(ViewGroup sceneRoot, HashMap<View, TransitionValues> startValues,
+    protected void prePlay(ViewGroup sceneRoot, ArrayMap<View, TransitionValues> startValues,
             SparseArray<TransitionValues> startIdValues,
             LongSparseArray<TransitionValues> startItemIdValues,
-            HashMap<View, TransitionValues> endValues,
+            ArrayMap<View, TransitionValues> endValues,
             SparseArray<TransitionValues> endIdValues,
             LongSparseArray<TransitionValues> endItemIdValues) {
         mPlayStartValuesList.clear();
         mPlayEndValuesList.clear();
-        HashMap<View, TransitionValues> endCopy = new HashMap<View, TransitionValues>(endValues);
+        ArrayMap<View, TransitionValues> endCopy = new ArrayMap<View, TransitionValues>(endValues);
         SparseArray<TransitionValues> endIdCopy =
                 new SparseArray<TransitionValues>(endIdValues.size());
         for (int i = 0; i < endIdValues.size(); ++i) {
@@ -392,10 +391,10 @@ public abstract class Transition {
      * @hide
      */
     protected void play(ViewGroup sceneRoot,
-            final HashMap<View, TransitionValues> startValues,
+            final ArrayMap<View, TransitionValues> startValues,
             final SparseArray<TransitionValues> startIdValues,
             final LongSparseArray<TransitionValues> startItemIdValues,
-            final HashMap<View, TransitionValues> endValues,
+            final ArrayMap<View, TransitionValues> endValues,
             final SparseArray<TransitionValues> endIdValues,
             final LongSparseArray<TransitionValues> endItemIdValues) {
 

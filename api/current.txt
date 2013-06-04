@@ -28310,7 +28310,7 @@ package android.view.transition {
 
   public class TransitionValues {
     ctor public TransitionValues();
-    field public final java.util.HashMap values;
+    field public final java.util.Map values;
     field public android.view.View view;
   }
 

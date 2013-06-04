@@ -18,10 +18,11 @@ package android.view.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.util.ArrayMap;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This transition tracks changes to the text in TextView targets. If the text
@@ -51,8 +52,8 @@ public class TextChange extends Transition {
             return false;
         }
         final TextView view = (TextView) endValues.view;
-        HashMap<String, Object> startVals = startValues.values;
-        HashMap<String, Object> endVals = endValues.values;
+        Map<String, Object> startVals = startValues.values;
+        Map<String, Object> endVals = endValues.values;
         String startText = (String) startVals.get(PROPNAME_TEXT);
         String endText = (String) endVals.get(PROPNAME_TEXT);
         if (!startText.equals(endText)) {
@@ -69,8 +70,8 @@ public class TextChange extends Transition {
             return null;
         }
         final TextView view = (TextView) endValues.view;
-        HashMap<String, Object> startVals = startValues.values;
-        HashMap<String, Object> endVals = endValues.values;
+        Map<String, Object> startVals = startValues.values;
+        Map<String, Object> endVals = endValues.values;
         final String startText = (String) startVals.get(PROPNAME_TEXT);
         final String endText = (String) endVals.get(PROPNAME_TEXT);
         if (!startText.equals(endText)) {
