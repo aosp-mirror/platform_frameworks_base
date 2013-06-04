@@ -32,11 +32,7 @@
             </intent-filter>
         </activity>
     </application>
-    <!-- default test runner -->
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.android.connectivitymanagertest"
-        android:label="default instrumentation test runner"
-    />
+
     <!--
     This declares that this app uses the instrumentation test runner targeting
     the package of connectivitymanagertest. To run the tests use the command:
@@ -66,6 +62,16 @@
     <instrumentation android:name=".ConnectivityManagerStressTestRunner"
         android:targetPackage="com.android.connectivitymanagertest"
         android:label="Test runner for Connectivity Manager Stress Tests"
+    />
+
+    <!-- run associate test:
+      "adb shell am instrument -e ssid <ssid> -e password <password>
+       -e ecurity-type [OPEN|WEP64|WEP128|WPA_TKIP|WPA2_AES] -e frequency-band [2.4|5.0|auto]
+       -w com.android.connectivitymanagertest/.WifiAssociationTestRunner"
+    -->
+    <instrumentation android:name=".WifiAssociationTestRunner"
+        android:targetPackage="com.android.connectivitymanagertest"
+        android:label="Test runner for Wifi association test"
     />
 
     <uses-permission android:name="android.permission.INTERNET" />
