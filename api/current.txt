@@ -10548,6 +10548,7 @@ package android.hardware {
 package android.hardware.display {
 
   public final class DisplayManager {
+    method public android.hardware.display.VirtualDisplay createPrivateVirtualDisplay(java.lang.String, int, int, int, android.view.Surface);
     method public android.view.Display getDisplay(int);
     method public android.view.Display[] getDisplays();
     method public android.view.Display[] getDisplays(java.lang.String);
@@ -10560,6 +10561,11 @@ package android.hardware.display {
     method public abstract void onDisplayAdded(int);
     method public abstract void onDisplayChanged(int);
     method public abstract void onDisplayRemoved(int);
+  }
+
+  public final class VirtualDisplay {
+    method public android.view.Display getDisplay();
+    method public void release();
   }
 
 }
@@ -25050,6 +25056,7 @@ package android.view {
     method public deprecated int getWidth();
     method public boolean isValid();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
+    field public static final int FLAG_PRIVATE = 4; // 0x4
     field public static final int FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1
   }

@@ -20,6 +20,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -57,6 +58,8 @@ public final class Display {
     private final int mFlags;
     private final int mType;
     private final String mAddress;
+    private final int mOwnerUid;
+    private final String mOwnerPackageName;
     private final CompatibilityInfoHolder mCompatibilityInfo;
 
     private DisplayInfo mDisplayInfo; // never null
@@ -143,6 +146,18 @@ public final class Display {
     public static final int FLAG_SECURE = 1 << 1;
 
     /**
+     * Display flag: Indicates that the display is private.  Only the application that
+     * owns the display can create windows on it.
+     * <p>
+     * This flag is associated with displays that were created using
+     * {@link android.hardware.display.DisplayManager#createPrivateVirtualDisplay}.
+     * </p>
+     *
+     * @see #getFlags
+     */
+    public static final int FLAG_PRIVATE = 1 << 2;
+
+    /**
      * Display type: Unknown display type.
      * @hide
      */
@@ -173,6 +188,12 @@ public final class Display {
     public static final int TYPE_OVERLAY = 4;
 
     /**
+     * Display type: Virtual display.
+     * @hide
+     */
+    public static final int TYPE_VIRTUAL = 5;
+
+    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * or {@link android.hardware.display.DisplayManager#getDisplay}
@@ -194,6 +215,8 @@ public final class Display {
         mFlags = displayInfo.flags;
         mType = displayInfo.type;
         mAddress = displayInfo.address;
+        mOwnerUid = displayInfo.ownerUid;
+        mOwnerPackageName = displayInfo.ownerPackageName;
     }
 
     /**
@@ -262,6 +285,7 @@ public final class Display {
      *
      * @see #FLAG_SUPPORTS_PROTECTED_BUFFERS
      * @see #FLAG_SECURE
+     * @see #FLAG_PRIVATE
      */
     public int getFlags() {
         return mFlags;
@@ -277,6 +301,7 @@ public final class Display {
      * @see #TYPE_HDMI
      * @see #TYPE_WIFI
      * @see #TYPE_OVERLAY
+     * @see #TYPE_VIRTUAL
      * @hide
      */
     public int getType() {
@@ -292,6 +317,32 @@ public final class Display {
      */
     public String getAddress() {
         return mAddress;
+    }
+
+    /**
+     * Gets the UID of the application that owns this display, or zero if it is
+     * owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
+     *
+     * @hide
+     */
+    public int getOwnerUid() {
+        return mOwnerUid;
+    }
+
+    /**
+     * Gets the package name of the application that owns this display, or null if it is
+     * owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
+     *
+     * @hide
+     */
+    public String getOwnerPackageName() {
+        return mOwnerPackageName;
     }
 
     /**
@@ -564,6 +615,22 @@ public final class Display {
         }
     }
 
+    /**
+     * Returns true if the specified UID has access to this display.
+     * @hide
+     */
+    public boolean hasAccess(int uid) {
+        return Display.hasAccess(uid, mFlags, mOwnerUid);
+    }
+
+    /** @hide */
+    public static boolean hasAccess(int uid, int flags, int ownerUid) {
+        return (flags & Display.FLAG_PRIVATE) == 0
+                || uid == ownerUid
+                || uid == Process.SYSTEM_UID
+                || uid == 0;
+    }
+
     private void updateDisplayInfoLocked() {
         // Note: The display manager caches display info objects on our behalf.
         DisplayInfo newInfo = mGlobal.getDisplayInfo(mDisplayId);
@@ -624,6 +691,8 @@ public final class Display {
                 return "WIFI";
             case TYPE_OVERLAY:
                 return "OVERLAY";
+            case TYPE_VIRTUAL:
+                return "VIRTUAL";
             default:
                 return Integer.toString(type);
         }

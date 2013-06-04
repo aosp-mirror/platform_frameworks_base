@@ -19,6 +19,7 @@ package android.view;
 import android.content.res.CompatibilityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.util.DisplayMetrics;
 
 import libcore.util.Objects;
@@ -177,6 +178,23 @@ public final class DisplayInfo implements Parcelable {
      */
     public float physicalYDpi;
 
+    /**
+     * The UID of the application that owns this display, or zero if it is owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
+     */
+    public int ownerUid;
+
+    /**
+     * The package name of the application that owns this display, or null if it is
+     * owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
+     */
+    public String ownerPackageName;
+
     public static final Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -228,7 +246,9 @@ public final class DisplayInfo implements Parcelable {
                 && refreshRate == other.refreshRate
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
-                && physicalYDpi == other.physicalYDpi;
+                && physicalYDpi == other.physicalYDpi
+                && ownerUid == other.ownerUid
+                && Objects.equal(ownerPackageName, other.ownerPackageName);
     }
 
     @Override
@@ -259,6 +279,8 @@ public final class DisplayInfo implements Parcelable {
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
+        ownerUid = other.ownerUid;
+        ownerPackageName = other.ownerPackageName;
     }
 
     public void readFromParcel(Parcel source) {
@@ -284,6 +306,8 @@ public final class DisplayInfo implements Parcelable {
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
+        ownerUid = source.readInt();
+        ownerPackageName = source.readString();
     }
 
     @Override
@@ -310,6 +334,8 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
+        dest.writeInt(ownerUid);
+        dest.writeString(ownerPackageName);
     }
 
     @Override
@@ -333,6 +359,13 @@ public final class DisplayInfo implements Parcelable {
     public int getNaturalHeight() {
         return rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180 ?
                 logicalHeight : logicalWidth;
+    }
+
+    /**
+     * Returns true if the specified UID has access to this display.
+     */
+    public boolean hasAccess(int uid) {
+        return Display.hasAccess(uid, flags, ownerUid);
     }
 
     private void getMetricsWithSize(DisplayMetrics outMetrics, CompatibilityInfoHolder cih,
@@ -402,8 +435,13 @@ public final class DisplayInfo implements Parcelable {
         sb.append(layerStack);
         sb.append(", type ");
         sb.append(Display.typeToString(type));
-        sb.append(", address ");
-        sb.append(address);
+        if (address != null) {
+            sb.append(", address ").append(address);
+        }
+        if (ownerUid != 0 || ownerPackageName != null) {
+            sb.append(", owner ").append(ownerPackageName);
+            sb.append(" (uid ").append(ownerUid).append(")");
+        }
         sb.append(flagsToString(flags));
         sb.append("}");
         return sb.toString();
@@ -416,6 +454,9 @@ public final class DisplayInfo implements Parcelable {
         }
         if ((flags & Display.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
             result.append(", FLAG_SUPPORTS_PROTECTED_BUFFERS");
+        }
+        if ((flags & Display.FLAG_PRIVATE) != 0) {
+            result.append(", FLAG_PRIVATE");
         }
         return result.toString();
     }

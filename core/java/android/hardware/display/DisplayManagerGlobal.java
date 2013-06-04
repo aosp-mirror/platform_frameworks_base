@@ -18,17 +18,20 @@ package android.hardware.display;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.CompatibilityInfoHolder;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 
 import java.util.ArrayList;
 
@@ -312,6 +315,53 @@ public final class DisplayManagerGlobal {
         } catch (RemoteException ex) {
             Log.e(TAG, "Failed to get Wifi display status.", ex);
             return new WifiDisplayStatus();
+        }
+    }
+
+    public VirtualDisplay createPrivateVirtualDisplay(Context context, String name,
+            int width, int height, int densityDpi, Surface surface) {
+        if (TextUtils.isEmpty(name)) {
+            throw new IllegalArgumentException("name must be non-null and non-empty");
+        }
+        if (width <= 0 || height <= 0 || densityDpi <= 0) {
+            throw new IllegalArgumentException("width, height, and densityDpi must be "
+                    + "greater than 0");
+        }
+        if (surface == null) {
+            throw new IllegalArgumentException("surface must not be null");
+        }
+
+        Binder token = new Binder();
+        int displayId;
+        try {
+            displayId = mDm.createPrivateVirtualDisplay(token, context.getPackageName(),
+                    name, width, height, densityDpi, surface);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Could not create private virtual display: " + name, ex);
+            return null;
+        }
+        if (displayId < 0) {
+            Log.e(TAG, "Could not create private virtual display: " + name);
+            return null;
+        }
+        Display display = getRealDisplay(displayId);
+        if (display == null) {
+            Log.wtf(TAG, "Could not obtain display info for newly created "
+                    + "private virtual display: " + name);
+            try {
+                mDm.releaseVirtualDisplay(token);
+            } catch (RemoteException ex) {
+            }
+            return null;
+        }
+        return new VirtualDisplay(this, display, token);
+    }
+
+    public void releaseVirtualDisplay(IBinder token) {
+        try {
+            mDm.releaseVirtualDisplay(token);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to release virtual display.", ex);
         }
     }
 
