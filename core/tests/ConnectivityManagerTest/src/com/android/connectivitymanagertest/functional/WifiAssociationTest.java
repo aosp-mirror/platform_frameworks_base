@@ -17,6 +17,7 @@
 package com.android.connectivitymanagertest.functional;
 
 import com.android.connectivitymanagertest.ConnectivityManagerTestActivity;
+import com.android.connectivitymanagertest.WifiAssociationTestRunner;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -27,22 +28,19 @@ import android.net.wifi.WifiConfiguration.AuthAlgorithm;
 import android.net.wifi.WifiConfiguration.GroupCipher;
 import android.net.wifi.WifiConfiguration.PairwiseCipher;
 import android.net.wifi.WifiConfiguration.Protocol;
-import android.net.wifi.WifiConfiguration.Status;
 import android.net.wifi.WifiManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.InstrumentationTestRunner;
 import android.util.Log;
 
 /**
  * Test Wi-Fi connection with different configuration
  * To run this tests:
- *     adb shell am instrument -e ssid <ssid> -e password <password>
- *         -e security-type <security-type>
- *         -w com.android.connectivitymanagertest/android.test.InstrumentationTestRunner
+ *  * adb shell am instrument -e ssid <ssid> -e password <password> \
+ * -e security-type [OPEN|WEP64|WEP128|WPA_TKIP|WPA2_AES] -e frequency-band [2.4|5.0|auto]
+ * -w com.android.connectivitymanagertest/.WifiAssociationTestRunner"
  */
 public class WifiAssociationTest
     extends ActivityInstrumentationTestCase2<ConnectivityManagerTestActivity> {
@@ -51,6 +49,8 @@ public class WifiAssociationTest
     private String mSsid = null;
     private String mPassword = null;
     private String mSecurityType = null;
+    private String mFrequencyBand = null;
+    private int mBand;
     private WifiManager mWifiManager = null;
 
     enum SECURITY_TYPE {
@@ -64,15 +64,18 @@ public class WifiAssociationTest
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        InstrumentationTestRunner mRunner = (InstrumentationTestRunner)getInstrumentation();
+        WifiAssociationTestRunner mRunner = (WifiAssociationTestRunner)getInstrumentation();
         mWifiManager = (WifiManager) mRunner.getContext().getSystemService(Context.WIFI_SERVICE);
         mAct = getActivity();
         Bundle arguments = mRunner.getArguments();
         mSecurityType = arguments.getString("security-type");
         mSsid = arguments.getString("ssid");
         mPassword = arguments.getString("password");
+        mFrequencyBand = arguments.getString("frequency-band");
+        mBand = mRunner.mBand;
         assertNotNull("Security type is empty", mSecurityType);
         assertNotNull("Ssid is empty", mSsid);
+        validateFrequencyBand();
         // enable Wifi and verify wpa_supplicant is started
         assertTrue("enable Wifi failed", mAct.enableWifi());
         sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT,
@@ -86,6 +89,14 @@ public class WifiAssociationTest
     public void tearDown() throws Exception {
         log("tearDown()");
         super.tearDown();
+    }
+
+    private void validateFrequencyBand() {
+        if (mFrequencyBand != null) {
+            int currentFreq = mWifiManager.getFrequencyBand();
+            Log.v(TAG, "read frequency band: " + currentFreq);
+            assertTrue("device frequency band is not set successfully", (mBand == currentFreq));
+         }
     }
 
     /**
