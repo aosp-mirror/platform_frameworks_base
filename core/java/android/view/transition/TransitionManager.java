@@ -15,6 +15,7 @@
  */
 package android.view.transition;
 
+import android.util.ArrayMap;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -40,6 +41,8 @@ public class TransitionManager {
     HashMap<Scene, Transition> mSceneTransitions = new HashMap<Scene, Transition>();
     HashMap<Scene, HashMap<Scene, Transition>> mScenePairTransitions =
             new HashMap<Scene, HashMap<Scene, Transition>>();
+    static ArrayMap<ViewGroup, Transition> sRunningTransitions =
+            new ArrayMap<ViewGroup, Transition>();
 
         /**
      * Sets the transition to be used for any scene change for which no
@@ -141,6 +144,11 @@ public class TransitionManager {
 
         final ViewGroup sceneRoot = scene.getSceneRoot();
 
+        Transition runningTransition = sRunningTransitions.get(sceneRoot);
+        if (runningTransition != null) {
+            runningTransition.cancelTransition();
+        }
+
         // Capture current values
         if (transition != null) {
             transition.captureValues(sceneRoot, true);
@@ -159,6 +167,14 @@ public class TransitionManager {
             observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
+                    // Add to running list, handle end to remove it
+                    sRunningTransitions.put(sceneRoot, transition);
+                    transition.addListener(new Transition.TransitionListenerAdapter() {
+                        @Override
+                        public void onTransitionEnd(Transition transition) {
+                            sRunningTransitions.remove(sceneRoot);
+                        }
+                    });
                     transition.captureValues(sceneRoot, false);
                     transition.play(sceneRoot);
                     return true;

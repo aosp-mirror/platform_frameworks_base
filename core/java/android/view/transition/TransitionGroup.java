@@ -303,6 +303,15 @@ public class TransitionGroup extends Transition {
     }
 
     @Override
+    protected void cancelTransition() {
+        super.cancelTransition();
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).cancelTransition();
+        }
+    }
+
+    @Override
     String toString(String indent) {
         String result = super.toString(indent);
         for (int i = 0; i < mTransitions.size(); ++i) {
