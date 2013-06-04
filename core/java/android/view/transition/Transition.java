@@ -798,7 +798,7 @@ public abstract class Transition {
         // TODO: how does this work with instances?
         // TODO: this doesn't actually do *anything* yet
         int numAnimators = mCurrentAnimators.size();
-        for (int i = 0; i < numAnimators; ++i) {
+        for (int i = numAnimators - 1; i >= 0; i--) {
             Animator animator = mCurrentAnimators.get(i);
             animator.cancel();
         }

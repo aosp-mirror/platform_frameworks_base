@@ -35,14 +35,13 @@ public class InterruptionTest extends Activity {
     private Scene mScene2;
     private Scene mScene3;
     private Scene mScene4;
-    Transition mAutoTransition = new AutoTransition();
+    TransitionGroup mSequencedMove = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.interruption);
 
-        View container = (View) findViewById(R.id.container);
         ViewGroup sceneRoot = (ViewGroup) findViewById(R.id.sceneRoot);
 
         mScene1 = new Scene(sceneRoot, R.layout.interruption_inner_1, this);
@@ -57,18 +56,24 @@ public class InterruptionTest extends Activity {
 
         sceneRoot.setCurrentScene(mScene1);
 
-        mAutoTransition.setDuration(1500);
+        Move move1 = new Move();
+        move1.setTargetIds(R.id.button);
+        Move move2 = new Move();
+        move2.setTargetIds(R.id.button1);
+
+        mSequencedMove.addTransitions(move1, move2);
+        mSequencedMove.setDuration(1000);
     }
 
     public void onRadioButtonClicked(View clickedButton) {
         if (clickedButton == mScene1RB) {
-            TransitionManager.go(mScene1, mAutoTransition);
+            TransitionManager.go(mScene1, mSequencedMove);
         } else if (clickedButton == mScene2RB) {
-            TransitionManager.go(mScene2, mAutoTransition);
+            TransitionManager.go(mScene2, mSequencedMove);
         } else if (clickedButton == mScene3RB) {
-            TransitionManager.go(mScene3, mAutoTransition);
+            TransitionManager.go(mScene3, mSequencedMove);
         } else {
-            TransitionManager.go(mScene4, mAutoTransition);
+            TransitionManager.go(mScene4, mSequencedMove);
         }
     }
 }
