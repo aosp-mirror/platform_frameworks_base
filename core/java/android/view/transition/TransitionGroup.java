@@ -17,13 +17,13 @@ package android.view.transition;
 
 import android.animation.Animator;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * A TransitionGroup is a parent of child transitions (including other
@@ -183,10 +183,10 @@ public class TransitionGroup extends Transition {
      */
     @Override
     protected void prePlay(ViewGroup sceneRoot,
-            HashMap<View, TransitionValues> startValues,
+            ArrayMap<View, TransitionValues> startValues,
             SparseArray<TransitionValues> startIdValues,
             LongSparseArray<TransitionValues> startItemIdValues,
-            HashMap<View, TransitionValues> endValues,
+            ArrayMap<View, TransitionValues> endValues,
             SparseArray<TransitionValues> endIdValues,
             LongSparseArray<TransitionValues> endItemIdValues) {
         for (Transition childTransition : mTransitions) {
@@ -200,10 +200,10 @@ public class TransitionGroup extends Transition {
      */
     @Override
     protected void play(ViewGroup sceneRoot,
-            final HashMap<View, TransitionValues> startValues,
+            final ArrayMap<View, TransitionValues> startValues,
             final SparseArray<TransitionValues> startIdValues,
             final LongSparseArray<TransitionValues> startItemIdValues,
-            final HashMap<View, TransitionValues> endValues,
+            final ArrayMap<View, TransitionValues> endValues,
             final SparseArray<TransitionValues> endIdValues,
             final LongSparseArray<TransitionValues> endItemIdValues) {
         setupStartEndListeners();

@@ -15,15 +15,16 @@
  */
 package android.view.transition;
 
+import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Data structure which holds cached values for the transition.
  * The view field is the target which all of the values pertain to.
- * The values field is a hashmap which holds information for fields
+ * The values field is a map which holds information for fields
  * according to names selected by the transitions. These names should
  * be unique to avoid clobbering values stored by other transitions,
  * such as the convention project:transition_name:property_name. For
@@ -48,7 +49,7 @@ public class TransitionValues {
     /**
      * The set of values tracked by transitions for this scene
      */
-    public final HashMap<String, Object> values = new HashMap<String, Object>();
+    public final Map<String, Object> values = new ArrayMap<String, Object>();
 
     @Override
     public String toString() {

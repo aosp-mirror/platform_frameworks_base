@@ -20,11 +20,12 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This transition tracks changes during scene changes to the
@@ -86,8 +87,8 @@ public class Recolor extends Transition {
         }
         ObjectAnimator anim = null;
         final View view = endValues.view;
-        HashMap<String, Object> startVals = startValues.values;
-        HashMap<String, Object> endVals = endValues.values;
+        Map<String, Object> startVals = startValues.values;
+        Map<String, Object> endVals = endValues.values;
         Drawable startBackground = (Drawable) startVals.get(PROPNAME_BACKGROUND);
         Drawable endBackground = (Drawable) endVals.get(PROPNAME_BACKGROUND);
         if (startBackground instanceof ColorDrawable && endBackground instanceof ColorDrawable) {

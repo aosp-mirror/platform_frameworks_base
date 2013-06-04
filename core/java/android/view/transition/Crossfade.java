@@ -26,13 +26,14 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This transition captures bitmap representations of target views before and
@@ -60,8 +61,8 @@ public class Crossfade extends Transition {
             return false;
         }
         final View view = startValues.view;
-        HashMap<String, Object> startVals = startValues.values;
-        HashMap<String, Object> endVals = endValues.values;
+        Map<String, Object> startVals = startValues.values;
+        Map<String, Object> endVals = endValues.values;
         Bitmap startBitmap = (Bitmap) startVals.get(PROPNAME_BITMAP);
         Bitmap endBitmap = (Bitmap) endVals.get(PROPNAME_BITMAP);
         Drawable startDrawable = (Drawable) startVals.get(PROPNAME_DRAWABLE);
@@ -85,8 +86,8 @@ public class Crossfade extends Transition {
         if (startValues == null || endValues == null) {
             return null;
         }
-        HashMap<String, Object> startVals = startValues.values;
-        HashMap<String, Object> endVals = endValues.values;
+        Map<String, Object> startVals = startValues.values;
+        Map<String, Object> endVals = endValues.values;
 
         final View view = endValues.view;
         Rect startBounds = (Rect) startVals.get(PROPNAME_BOUNDS);

@@ -19,8 +19,6 @@ import android.util.ArrayMap;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
-import java.util.HashMap;
-
 /**
  * This class manages the set of transitions that fire when there is a
  * change of {@link Scene}. To use the manager, add scenes along with
@@ -38,9 +36,9 @@ public class TransitionManager {
     private static final Transition sDefaultTransition = new AutoTransition();
     private Transition mDefaultTransition = new AutoTransition();
 
-    HashMap<Scene, Transition> mSceneTransitions = new HashMap<Scene, Transition>();
-    HashMap<Scene, HashMap<Scene, Transition>> mScenePairTransitions =
-            new HashMap<Scene, HashMap<Scene, Transition>>();
+    ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
+    ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
+            new ArrayMap<Scene, ArrayMap<Scene, Transition>>();
     static ArrayMap<ViewGroup, Transition> sRunningTransitions =
             new ArrayMap<ViewGroup, Transition>();
 
@@ -92,9 +90,9 @@ public class TransitionManager {
      * using {@link AutoTransition}.
      */
     public void setTransition(Scene fromScene, Scene toScene, Transition transition) {
-        HashMap<Scene, Transition> sceneTransitionMap = mScenePairTransitions.get(toScene);
+        ArrayMap<Scene, Transition> sceneTransitionMap = mScenePairTransitions.get(toScene);
         if (sceneTransitionMap == null) {
-            sceneTransitionMap = new HashMap<Scene, Transition>();
+            sceneTransitionMap = new ArrayMap<Scene, Transition>();
             mScenePairTransitions.put(toScene, sceneTransitionMap);
         }
         sceneTransitionMap.put(fromScene, transition);
@@ -117,7 +115,7 @@ public class TransitionManager {
             // TODO: cached in Scene instead? long-term, cache in View itself
             Scene currScene = sceneRoot.getCurrentScene();
             if (currScene != null) {
-                HashMap<Scene, Transition> sceneTransitionMap = mScenePairTransitions.get(scene);
+                ArrayMap<Scene, Transition> sceneTransitionMap = mScenePairTransitions.get(scene);
                 if (sceneTransitionMap != null) {
                     transition = sceneTransitionMap.get(currScene);
                     if (transition != null) {

@@ -206,6 +206,16 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         }
         mSize = 0;
     }
+    /**
+     * Create a new ArrayMap with the mappings from the given ArrayMap.
+     */
+    public ArrayMap(ArrayMap map) {
+        this();
+        if (map != null) {
+            putAll(map);
+        }
+    }
+
 
     /**
      * Make the array map empty.  All storage is released.

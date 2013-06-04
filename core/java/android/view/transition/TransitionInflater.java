@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -30,7 +31,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * This class inflates scenes and transitions from resource files.
@@ -40,8 +40,8 @@ public class TransitionInflater {
     // We only need one inflater for any given context. Also, this allows us to associate
     // ids with unique instances per-Context, used to avoid re-inflating
     // already-inflated resources into new/different instances
-    private static final HashMap<Context, TransitionInflater> sInflaterMap =
-            new HashMap<Context, TransitionInflater>();
+    private static final ArrayMap<Context, TransitionInflater> sInflaterMap =
+            new ArrayMap<Context, TransitionInflater>();
 
     private Context mContext;
     // TODO: do we need id maps for transitions and transitionMgrs as well?
