@@ -1024,8 +1024,10 @@ public class ValueAnimator extends Animator {
         mStarted = false;
         mStartListenersCalled = false;
         mPlayingBackwards = false;
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
-                System.identityHashCode(this));
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
+                    System.identityHashCode(this));
+        }
     }
 
     /**
@@ -1033,8 +1035,10 @@ public class ValueAnimator extends Animator {
      * called on the UI thread.
      */
     private void startAnimation(AnimationHandler handler) {
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, getNameForTrace(),
-                System.identityHashCode(this));
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, getNameForTrace(),
+                    System.identityHashCode(this));
+        }
         initAnimation();
         handler.mAnimations.add(this);
         if (mStartDelay > 0 && mListeners != null) {
