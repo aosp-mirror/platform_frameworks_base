@@ -1579,9 +1579,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < size; i++) {
             entry = uidStats.getValues(i, entry);
 
-            final Uid u = mUidStats.get(entry.uid);
-            if (u == null) continue;
-
+            final Uid u = getUidStatsLocked(entry.uid);
             u.mStartedTcpBytesReceived = entry.rxBytes;
             u.mStartedTcpBytesSent = entry.txBytes;
             u.mTcpBytesReceivedAtLastUnplug = u.mCurrentTcpBytesReceived;
