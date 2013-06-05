@@ -31,7 +31,6 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.systemui.SystemUI;
-import com.google.android.collect.Maps;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -50,7 +49,7 @@ public class RingtonePlayer extends SystemUI {
     private IAudioService mAudioService;
 
     private final NotificationPlayer mAsyncPlayer = new NotificationPlayer(TAG);
-    private final HashMap<IBinder, Client> mClients = Maps.newHashMap();
+    private final HashMap<IBinder, Client> mClients = new HashMap<IBinder, Client>();
 
     @Override
     public void start() {
