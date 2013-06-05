@@ -685,19 +685,21 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void locationCallbackFinished(ILocationListener listener) {
-        //Do not use getReceiver here as that will add the ILocationListener to
+        //Do not use getReceiverLocked here as that will add the ILocationListener to
         //the receiver list if it is not found.  If it is not found then the
         //LocationListener was removed when it had a pending broadcast and should
         //not be added back.
-        IBinder binder = listener.asBinder();
-        Receiver receiver = mReceivers.get(binder);
-        if (receiver != null) {
-            synchronized (receiver) {
-                // so wakelock calls will succeed
-                long identity = Binder.clearCallingIdentity();
-                receiver.decrementPendingBroadcastsLocked();
-                Binder.restoreCallingIdentity(identity);
-           }
+        synchronized (mLock) {
+            IBinder binder = listener.asBinder();
+            Receiver receiver = mReceivers.get(binder);
+            if (receiver != null) {
+                synchronized (receiver) {
+                    // so wakelock calls will succeed
+                    long identity = Binder.clearCallingIdentity();
+                    receiver.decrementPendingBroadcastsLocked();
+                    Binder.restoreCallingIdentity(identity);
+               }
+            }
         }
     }
 
@@ -1179,7 +1181,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private Receiver getReceiver(ILocationListener listener, int pid, int uid, String packageName) {
+    private Receiver getReceiverLocked(ILocationListener listener, int pid, int uid,
+            String packageName) {
         IBinder binder = listener.asBinder();
         Receiver receiver = mReceivers.get(binder);
         if (receiver == null) {
@@ -1196,7 +1199,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         return receiver;
     }
 
-    private Receiver getReceiver(PendingIntent intent, int pid, int uid, String packageName) {
+    private Receiver getReceiverLocked(PendingIntent intent, int pid, int uid, String packageName) {
         Receiver receiver = mReceivers.get(intent);
         if (receiver == null) {
             receiver = new Receiver(null, intent, pid, uid, packageName);
@@ -1260,7 +1263,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private Receiver checkListenerOrIntent(ILocationListener listener, PendingIntent intent,
+    private Receiver checkListenerOrIntentLocked(ILocationListener listener, PendingIntent intent,
             int pid, int uid, String packageName) {
         if (intent == null && listener == null) {
             throw new IllegalArgumentException("need either listener or intent");
@@ -1268,9 +1271,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             throw new IllegalArgumentException("cannot register both listener and intent");
         } else if (intent != null) {
             checkPendingIntent(intent);
-            return getReceiver(intent, pid, uid, packageName);
+            return getReceiverLocked(intent, pid, uid, packageName);
         } else {
-            return getReceiver(listener, pid, uid, packageName);
+            return getReceiverLocked(listener, pid, uid, packageName);
         }
     }
 
@@ -1292,9 +1295,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             // We don't check for MODE_IGNORED here; we will do that when we go to deliver
             // a location.
             checkLocationAccess(uid, packageName, allowedResolutionLevel);
-            Receiver recevier = checkListenerOrIntent(listener, intent, pid, uid, packageName);
 
             synchronized (mLock) {
+                Receiver recevier = checkListenerOrIntentLocked(listener, intent, pid, uid,
+                        packageName);
                 requestLocationUpdatesLocked(sanitizedRequest, recevier, pid, uid, packageName);
             }
         } finally {
@@ -1341,16 +1345,17 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
-        Receiver receiver = checkListenerOrIntent(listener, intent, pid, uid, packageName);
 
-        // providers may use public location API's, need to clear identity
-        long identity = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            Receiver receiver = checkListenerOrIntentLocked(listener, intent, pid, uid, packageName);
+
+            // providers may use public location API's, need to clear identity
+            long identity = Binder.clearCallingIdentity();
+            try {
                 removeUpdatesLocked(receiver);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
         }
     }
 
