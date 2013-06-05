@@ -41,7 +41,7 @@ public final class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
      * <p> [ 0,  0,  0 ]
      * </code>
      *
-     * @param rs The Renderscript context
+     * @param rs The RenderScript context
      * @param e Element type for intputs and outputs
      *
      * @return ScriptIntrinsicConvolve3x3

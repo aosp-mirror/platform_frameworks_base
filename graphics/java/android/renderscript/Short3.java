@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the native Renderscript short3 type back to the Android system.
+ * Class for exposing the native RenderScript short3 type back to the Android system.
  *
  **/
 public class Short3 {
