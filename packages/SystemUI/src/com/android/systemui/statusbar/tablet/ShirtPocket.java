@@ -28,7 +28,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -96,21 +96,21 @@ public class ShirtPocket extends ImageView {
 
         @Override
         public boolean onDragEvent(DragEvent event) {
-            if (DEBUG) Slog.d(TAG, "onDragEvent: " + event);
+            if (DEBUG) Log.d(TAG, "onDragEvent: " + event);
             switch (event.getAction()) {
                 // We want to appear whenever a potential drag takes off from anywhere in the UI.
                 case DragEvent.ACTION_DRAG_STARTED:
                     show(true);
                     break;
                 case DragEvent.ACTION_DRAG_ENTERED:
-                    if (DEBUG) Slog.d(TAG, "entered!");
+                    if (DEBUG) Log.d(TAG, "entered!");
                     // XXX: TODO
                     break;
                 case DragEvent.ACTION_DRAG_EXITED:
-                    if (DEBUG) Slog.d(TAG, "exited!");
+                    if (DEBUG) Log.d(TAG, "exited!");
                     break;
                 case DragEvent.ACTION_DROP:
-                    if (DEBUG) Slog.d(TAG, "dropped!");
+                    if (DEBUG) Log.d(TAG, "dropped!");
                     mPocket.stash(event.getClipData());
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:

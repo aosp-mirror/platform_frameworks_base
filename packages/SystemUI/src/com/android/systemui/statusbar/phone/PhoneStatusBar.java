@@ -55,7 +55,6 @@ import android.service.dreams.IDreamManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -280,7 +279,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void onAnimationEnd(Animator animation) {
             // double-check to avoid races
             if (mStatusBarContents.getAlpha() == 0) {
-                if (DEBUG) Slog.d(TAG, "makeIconsInvisible");
+                if (DEBUG) Log.d(TAG, "makeIconsInvisible");
                 mStatusBarContents.setVisibility(View.INVISIBLE);
             }
         }
@@ -296,7 +295,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.Secure.USER_SETUP_COMPLETE,
                     0 /*default */,
                     mCurrentUserId);
-            if (MULTIUSER_DEBUG) Slog.d(TAG, String.format("User setup changed: " +
+            if (MULTIUSER_DEBUG) Log.d(TAG, String.format("User setup changed: " +
                     "selfChange=%s userSetup=%s mUserSetup=%s",
                     selfChange, userSetup, mUserSetup));
             if (mSettingsButton != null && mHasFlipSettings) {
@@ -439,7 +438,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         try {
             boolean showNav = mWindowManagerService.hasNavigationBar();
-            if (DEBUG) Slog.v(TAG, "hasNavigationBar=" + showNav);
+            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
@@ -566,7 +565,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
         mShowCarrierInPanel = (mCarrierLabel != null);
-        if (DEBUG) Slog.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
+        if (DEBUG) Log.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
         if (mShowCarrierInPanel) {
             mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
 
@@ -818,7 +817,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
     private void addNavigationBar() {
-        if (DEBUG) Slog.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
+        if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
         if (mNavigationBarView == null) return;
 
         prepareNavigationBarView();
@@ -897,7 +896,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+        if (SPEW) Log.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
         StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
         view.set(icon);
@@ -906,19 +905,19 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
-        if (SPEW) Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+        if (SPEW) Log.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " old=" + old + " icon=" + icon);
         StatusBarIconView view = (StatusBarIconView)mStatusIcons.getChildAt(viewIndex);
         view.set(icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
-        if (SPEW) Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
+        if (SPEW) Log.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
         mStatusIcons.removeViewAt(viewIndex);
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Slog.d(TAG, "addNotification score=" + notification.getScore());
+        if (DEBUG) Log.d(TAG, "addNotification score=" + notification.getScore());
         StatusBarIconView iconView = addNotificationViews(key, notification);
         if (iconView == null) return;
 
@@ -926,7 +925,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         try {
             immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
             if (DEBUG) {
-                Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+                Log.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
             }
         } catch (RemoteException ex) {
         }
@@ -936,12 +935,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (ENABLE_INTRUDERS && (
                    // TODO(dsandler): Only if the screen is on
                 notification.notification.intruderView != null)) {
-            Slog.d(TAG, "Presenting high-priority notification");
+            Log.d(TAG, "Presenting high-priority notification");
             // special new transient ticker mode
             // 1. Populate mIntruderAlertView
 
             if (notification.notification.intruderView == null) {
-                Slog.e(TAG, notification.notification.toString() + " wanted to intrude but intruderView was null");
+                Log.e(TAG, notification.notification.toString() + " wanted to intrude but intruderView was null");
                 return;
             }
 
@@ -973,7 +972,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             awakenDreams();
 
             // not immersive & a full-screen alert should be shown
-            if (DEBUG) Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
+            if (DEBUG) Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
             try {
                 notification.getNotification().fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
@@ -994,7 +993,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void removeNotification(IBinder key) {
         StatusBarNotification old = removeNotificationViews(key);
-        if (SPEW) Slog.d(TAG, "removeNotification key=" + key + " old=" + old);
+        if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
         if (old != null) {
             // Cancel the ticker if it's still running
@@ -1099,7 +1098,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         int N = mNotificationData.size();
 
         if (DEBUG) {
-            Slog.d(TAG, "refreshing icons: " + N + " notifications, mNotificationIcons=" + mNotificationIcons);
+            Log.d(TAG, "refreshing icons: " + N + " notifications, mNotificationIcons=" + mNotificationIcons);
         }
 
         ArrayList<View> toShow = new ArrayList<View>();
@@ -1139,7 +1138,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         // The idea here is to only show the carrier label when there is enough room to see it, 
         // i.e. when there aren't enough notifications to fill the panel.
         if (DEBUG) {
-            Slog.d(TAG, String.format("pileh=%d scrollh=%d carrierh=%d",
+            Log.d(TAG, String.format("pileh=%d scrollh=%d carrierh=%d",
                     mPile.getHeight(), mScrollView.getHeight(), mCarrierLabelHeight));
         }
 
@@ -1152,7 +1151,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (force || mCarrierLabelVisible != makeVisible) {
             mCarrierLabelVisible = makeVisible;
             if (DEBUG) {
-                Slog.d(TAG, "making carrier label " + (makeVisible?"visible":"invisible"));
+                Log.d(TAG, "making carrier label " + (makeVisible?"visible":"invisible"));
             }
             mCarrierLabel.animate().cancel();
             if (makeVisible) {
@@ -1183,7 +1182,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         final boolean clearable = any && mNotificationData.hasClearableItems();
 
         if (DEBUG) {
-            Slog.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
+            Log.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
                     + " any=" + any + " clearable=" + clearable);
         }
 
@@ -1260,7 +1259,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mDisabled = state;
 
         if (DEBUG) {
-            Slog.d(TAG, String.format("disable: 0x%08x -> 0x%08x (diff: 0x%08x)",
+            Log.d(TAG, String.format("disable: 0x%08x -> 0x%08x (diff: 0x%08x)",
                 old, state, diff));
         }
 
@@ -1287,7 +1286,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         flagdbg.append(((state & StatusBarManager.DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
         flagdbg.append(">");
-        Slog.d(TAG, flagdbg.toString());
+        Log.d(TAG, flagdbg.toString());
 
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
             mSystemIconArea.animate().cancel();
@@ -1410,7 +1409,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     };
 
     void makeExpandedVisible(boolean revealAfterDraw) {
-        if (SPEW) Slog.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
+        if (SPEW) Log.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
         if (mExpandedVisible) {
             return;
         }
@@ -1449,7 +1448,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void animateCollapsePanels(int flags) {
         if (SPEW) {
-            Slog.d(TAG, "animateCollapse():"
+            Log.d(TAG, "animateCollapse():"
                     + " mExpandedVisible=" + mExpandedVisible
                     + " flags=" + flags);
         }
@@ -1517,7 +1516,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void animateExpandNotificationsPanel() {
-        if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
+        if (SPEW) Log.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
         }
@@ -1572,7 +1571,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void animateExpandSettingsPanel() {
-        if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
+        if (SPEW) Log.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return;
         }
@@ -1671,7 +1670,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     void makeExpandedInvisible() {
-        if (SPEW) Slog.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
+        if (SPEW) Log.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
                 + " mExpandedVisible=" + mExpandedVisible);
 
         if (!mExpandedVisible) {
@@ -1842,11 +1841,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         if (SPEW) {
-            Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
+            Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
                 + mDisabled + " mTracking=" + mTracking);
         } else if (CHATTY) {
             if (event.getAction() != MotionEvent.ACTION_MOVE) {
-                Slog.d(TAG, String.format(
+                Log.d(TAG, String.format(
                             "panel: %s at (%f, %f) mDisabled=0x%08x",
                             MotionEvent.actionToString(event.getAction()),
                             event.getRawX(), event.getRawY(), mDisabled));
@@ -1896,7 +1895,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         final int oldVal = mSystemUiVisibility;
         final int newVal = (oldVal&~mask) | (vis&mask);
         final int diff = newVal ^ oldVal;
-        if (DEBUG) Slog.d(TAG, String.format(
+        if (DEBUG) Log.d(TAG, String.format(
                 "setSystemUiVisibility vis=%s mask=%s oldVal=%s newVal=%s diff=%s",
                 Integer.toHexString(vis), Integer.toHexString(mask),
                 Integer.toHexString(oldVal), Integer.toHexString(newVal),
@@ -1959,7 +1958,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void setHideybarConfirmationVisible(boolean visible) {
-        if (DEBUG) Slog.d(TAG, "setHideybarConfirmationVisible " + visible);
+        if (DEBUG) Log.d(TAG, "setHideybarConfirmationVisible " + visible);
         if (visible && mHideybarConfirmation == null && !mHideybarConfirmationDismissed) {
             // create the confirmation toast bar with the correct message for this config
             float widthDp = mCurrentDisplaySize.x /
@@ -2016,7 +2015,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void setTransparent(View view, boolean transparent) {
         float alpha = transparent ? TRANSPARENT_ALPHA : 1;
-        if (DEBUG) Slog.d(TAG, "Setting " + (view == mStatusBarView ? "status bar" :
+        if (DEBUG) Log.d(TAG, "Setting " + (view == mStatusBarView ? "status bar" :
                 view == mNavigationBarView ? "navigation bar" : "view") +  " alpha to " + alpha);
         view.setAlpha(alpha);
     }
@@ -2084,7 +2083,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void topAppWindowChanged(boolean showMenu) {
         if (DEBUG) {
-            Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
+            Log.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
         if (mNavigationBarView != null) {
             mNavigationBarView.setMenuVisibility(showMenu);
@@ -2247,7 +2246,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mHandler.post(new Runnable() {
                         public void run() {
                             mStatusBarView.getLocationOnScreen(mAbsPos);
-                            Slog.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
+                            Log.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
                                     + ") " + mStatusBarView.getWidth() + "x"
                                     + getStatusBarHeight());
                             mStatusBarView.debug();
@@ -2319,7 +2318,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void updateExpandedViewPos(int thingy) {
-        if (DEBUG) Slog.v(TAG, "updateExpandedViewPos");
+        if (DEBUG) Log.v(TAG, "updateExpandedViewPos");
 
         // on larger devices, the notification panel is propped open a bit
         mNotificationPanel.setMinimumHeight(
@@ -2387,7 +2386,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                             @Override
                             public void run() {
                                 if (DEBUG) {
-                                    Slog.v(TAG, "running post-collapse cleanup");
+                                    Log.v(TAG, "running post-collapse cleanup");
                                 }
                                 try {
                                     mPile.setViewRemoval(true);
@@ -2465,7 +2464,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (DEBUG) Slog.v(TAG, "onReceive: " + intent);
+            if (DEBUG) Log.v(TAG, "onReceive: " + intent);
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 int flags = CommandQueue.FLAG_EXCLUDE_NONE;
@@ -2484,7 +2483,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 if (DEBUG) {
-                    Slog.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
+                    Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
                 }
                 mDisplay.getSize(mCurrentDisplaySize);
 
@@ -2521,7 +2520,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void setIntruderAlertVisibility(boolean vis) {
         if (!ENABLE_INTRUDERS) return;
         if (DEBUG) {
-            Slog.v(TAG, (vis ? "showing" : "hiding") + " intruder alert window");
+            Log.v(TAG, (vis ? "showing" : "hiding") + " intruder alert window");
         }
         mIntruderAlertView.setVisibility(vis ? View.VISIBLE : View.GONE);
     }
@@ -2572,7 +2571,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             R.dimen.status_bar_icon_padding);
 
         if (newIconHPadding != mIconHPadding || newIconSize != mIconSize) {
-//            Slog.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
+//            Log.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
             mIconHPadding = newIconHPadding;
             mIconSize = newIconSize;
             //reloadAllNotificationIcons(); // reload the tray
@@ -2617,7 +2616,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mNotificationPanelMinHeightFrac = 0f;
         }
 
-        if (false) Slog.v(TAG, "updateResources");
+        if (false) Log.v(TAG, "updateResources");
     }
 
     //
@@ -2638,7 +2637,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void run() {
             vibrate();
             SystemClock.sleep(250);
-            Slog.d(TAG, "startTracing");
+            Log.d(TAG, "startTracing");
             android.os.Debug.startMethodTracing("/data/statusbar-traces/trace");
             mHandler.postDelayed(mStopTracing, 10000);
         }
@@ -2647,7 +2646,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     Runnable mStopTracing = new Runnable() {
         public void run() {
             android.os.Debug.stopMethodTracing();
-            Slog.d(TAG, "stopTracing");
+            Log.d(TAG, "stopTracing");
             vibrate();
         }
     };

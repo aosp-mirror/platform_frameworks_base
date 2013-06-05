@@ -32,7 +32,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.EventLog;
-import android.util.Slog;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
@@ -120,7 +120,7 @@ public class SearchPanelView extends FrameLayout implements
                 mContext.startActivityAsUser(intent, opts.toBundle(),
                         new UserHandle(UserHandle.USER_CURRENT));
             } catch (ActivityNotFoundException e) {
-                Slog.w(TAG, "Activity not found for " + intent.getAction());
+                Log.w(TAG, "Activity not found for " + intent.getAction());
                 onAnimationStarted();
             }
         }
@@ -186,7 +186,7 @@ public class SearchPanelView extends FrameLayout implements
             if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
                     ASSIST_ICON_METADATA_NAME,
                     com.android.internal.R.drawable.ic_action_assist_generic)) {
-                if (DEBUG) Slog.v(TAG, "Couldn't grab icon for component " + component);
+                if (DEBUG) Log.v(TAG, "Couldn't grab icon for component " + component);
             }
         }
     }

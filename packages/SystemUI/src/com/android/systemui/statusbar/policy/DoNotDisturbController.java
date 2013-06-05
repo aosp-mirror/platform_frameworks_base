@@ -22,7 +22,7 @@ import android.content.SharedPreferences;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
-import android.util.Slog;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.widget.CompoundButton;
 
@@ -52,7 +52,7 @@ public class DoNotDisturbController implements CompoundButton.OnCheckedChangeLis
     // The checkbox is ON for notifications coming in and OFF for Do not disturb, so we
     // don't have a double negative.
     public void onCheckedChanged(CompoundButton view, boolean checked) {
-        //Slog.d(TAG, "onCheckedChanged checked=" + checked + " mDoNotDisturb=" + mDoNotDisturb);
+        //Log.d(TAG, "onCheckedChanged checked=" + checked + " mDoNotDisturb=" + mDoNotDisturb);
         final boolean value = !checked;
         if (value != mDoNotDisturb) {
             SharedPreferences.Editor editor = Prefs.edit(mContext);

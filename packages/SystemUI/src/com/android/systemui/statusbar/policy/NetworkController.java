@@ -37,7 +37,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.util.Slog;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -429,7 +429,7 @@ public class NetworkController extends BroadcastReceiver {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             if (DEBUG) {
-                Slog.d(TAG, "onSignalStrengthsChanged signalStrength=" + signalStrength +
+                Log.d(TAG, "onSignalStrengthsChanged signalStrength=" + signalStrength +
                     ((signalStrength == null) ? "" : (" level=" + signalStrength.getLevel())));
             }
             mSignalStrength = signalStrength;
@@ -440,7 +440,7 @@ public class NetworkController extends BroadcastReceiver {
         @Override
         public void onServiceStateChanged(ServiceState state) {
             if (DEBUG) {
-                Slog.d(TAG, "onServiceStateChanged state=" + state.getState());
+                Log.d(TAG, "onServiceStateChanged state=" + state.getState());
             }
             mServiceState = state;
             updateTelephonySignalStrength();
@@ -452,7 +452,7 @@ public class NetworkController extends BroadcastReceiver {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
             if (DEBUG) {
-                Slog.d(TAG, "onCallStateChanged state=" + state);
+                Log.d(TAG, "onCallStateChanged state=" + state);
             }
             // In cdma, if a voice call is made, RSSI should switch to 1x.
             if (isCdma()) {
@@ -464,7 +464,7 @@ public class NetworkController extends BroadcastReceiver {
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
             if (DEBUG) {
-                Slog.d(TAG, "onDataConnectionStateChanged: state=" + state
+                Log.d(TAG, "onDataConnectionStateChanged: state=" + state
                         + " type=" + networkType);
             }
             mDataState = state;
@@ -477,7 +477,7 @@ public class NetworkController extends BroadcastReceiver {
         @Override
         public void onDataActivity(int direction) {
             if (DEBUG) {
-                Slog.d(TAG, "onDataActivity: direction=" + direction);
+                Log.d(TAG, "onDataActivity: direction=" + direction);
             }
             mDataActivity = direction;
             updateDataIcon();
@@ -539,13 +539,13 @@ public class NetworkController extends BroadcastReceiver {
 
     private final void updateTelephonySignalStrength() {
         if (!hasService()) {
-            if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: !hasService()");
+            if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: !hasService()");
             mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
             mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
             mDataSignalIconId = R.drawable.stat_sys_signal_null;
         } else {
             if (mSignalStrength == null) {
-                if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
+                if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
                 mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
                 mDataSignalIconId = R.drawable.stat_sys_signal_null;
@@ -556,7 +556,7 @@ public class NetworkController extends BroadcastReceiver {
                 int[] iconList;
                 if (isCdma() && mAlwaysShowCdmaRssi) {
                     mLastSignalLevel = iconLevel = mSignalStrength.getCdmaLevel();
-                    if(DEBUG) Slog.d(TAG, "mAlwaysShowCdmaRssi=" + mAlwaysShowCdmaRssi
+                    if(DEBUG) Log.d(TAG, "mAlwaysShowCdmaRssi=" + mAlwaysShowCdmaRssi
                             + " set to cdmaLevel=" + mSignalStrength.getCdmaLevel()
                             + " instead of level=" + mSignalStrength.getLevel());
                 } else {
@@ -798,7 +798,7 @@ public class NetworkController extends BroadcastReceiver {
 
     void updateNetworkName(boolean showSpn, String spn, boolean showPlmn, String plmn) {
         if (false) {
-            Slog.d("CarrierLabel", "updateNetworkName showSpn=" + showSpn + " spn=" + spn
+            Log.d("CarrierLabel", "updateNetworkName showSpn=" + showSpn + " spn=" + spn
                     + " showPlmn=" + showPlmn + " plmn=" + plmn);
         }
         StringBuilder str = new StringBuilder();
@@ -832,7 +832,7 @@ public class NetworkController extends BroadcastReceiver {
                         mWifiChannel.sendMessage(Message.obtain(this,
                                 AsyncChannel.CMD_CHANNEL_FULL_CONNECTION));
                     } else {
-                        Slog.e(TAG, "Failed to connect to wifi");
+                        Log.e(TAG, "Failed to connect to wifi");
                     }
                     break;
                 case WifiManager.DATA_ACTIVITY_NOTIFICATION:
@@ -964,7 +964,7 @@ public class NetworkController extends BroadcastReceiver {
 
     private void updateConnectivity(Intent intent) {
         if (CHATTY) {
-            Slog.d(TAG, "updateConnectivity: intent=" + intent);
+            Log.d(TAG, "updateConnectivity: intent=" + intent);
         }
 
         final ConnectivityManager connManager = (ConnectivityManager) mContext
@@ -984,8 +984,8 @@ public class NetworkController extends BroadcastReceiver {
         int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
 
         if (CHATTY) {
-            Slog.d(TAG, "updateConnectivity: networkInfo=" + info);
-            Slog.d(TAG, "updateConnectivity: connectionStatus=" + connectionStatus);
+            Log.d(TAG, "updateConnectivity: networkInfo=" + info);
+            Log.d(TAG, "updateConnectivity: connectionStatus=" + connectionStatus);
         }
 
         mInetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
@@ -1173,7 +1173,7 @@ public class NetworkController extends BroadcastReceiver {
         }
 
         if (DEBUG) {
-            Slog.d(TAG, "refreshViews connected={"
+            Log.d(TAG, "refreshViews connected={"
                     + (mWifiConnected?" wifi":"")
                     + (mDataConnected?" data":"")
                     + " } level="
@@ -1312,7 +1312,7 @@ public class NetworkController extends BroadcastReceiver {
         // the data direction overlay
         if (mLastDataDirectionOverlayIconId != combinedActivityIconId) {
             if (DEBUG) {
-                Slog.d(TAG, "changing data overlay icon id to " + combinedActivityIconId);
+                Log.d(TAG, "changing data overlay icon id to " + combinedActivityIconId);
             }
             mLastDataDirectionOverlayIconId = combinedActivityIconId;
             N = mDataDirectionOverlayIconViews.size();

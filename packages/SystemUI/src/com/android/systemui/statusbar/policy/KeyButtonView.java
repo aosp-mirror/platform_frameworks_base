@@ -61,7 +61,7 @@ public class KeyButtonView extends ImageView {
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
-                // Slog.d("KeyButtonView", "longpressed: " + this);
+                // Log.d("KeyButtonView", "longpressed: " + this);
                 if (mCode != 0) {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
@@ -213,7 +213,7 @@ public class KeyButtonView extends ImageView {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                //Slog.d("KeyButtonView", "press");
+                //Log.d("KeyButtonView", "press");
                 mDownTime = SystemClock.uptimeMillis();
                 setPressed(true);
                 if (mCode != 0) {

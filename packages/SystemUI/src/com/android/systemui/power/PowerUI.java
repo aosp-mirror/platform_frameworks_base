@@ -35,7 +35,7 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.provider.Settings;
-import android.util.Slog;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -126,19 +126,19 @@ public class PowerUI extends SystemUI {
                 int bucket = findBatteryLevelBucket(mBatteryLevel);
 
                 if (DEBUG) {
-                    Slog.d(TAG, "buckets   ....." + mLowBatteryAlertCloseLevel
+                    Log.d(TAG, "buckets   ....." + mLowBatteryAlertCloseLevel
                             + " .. " + mLowBatteryReminderLevels[0]
                             + " .. " + mLowBatteryReminderLevels[1]);
-                    Slog.d(TAG, "level          " + oldBatteryLevel + " --> " + mBatteryLevel);
-                    Slog.d(TAG, "status         " + oldBatteryStatus + " --> " + mBatteryStatus);
-                    Slog.d(TAG, "plugType       " + oldPlugType + " --> " + mPlugType);
-                    Slog.d(TAG, "invalidCharger " + oldInvalidCharger + " --> " + mInvalidCharger);
-                    Slog.d(TAG, "bucket         " + oldBucket + " --> " + bucket);
-                    Slog.d(TAG, "plugged        " + oldPlugged + " --> " + plugged);
+                    Log.d(TAG, "level          " + oldBatteryLevel + " --> " + mBatteryLevel);
+                    Log.d(TAG, "status         " + oldBatteryStatus + " --> " + mBatteryStatus);
+                    Log.d(TAG, "plugType       " + oldPlugType + " --> " + mPlugType);
+                    Log.d(TAG, "invalidCharger " + oldInvalidCharger + " --> " + mInvalidCharger);
+                    Log.d(TAG, "bucket         " + oldBucket + " --> " + bucket);
+                    Log.d(TAG, "plugged        " + oldPlugged + " --> " + plugged);
                 }
 
                 if (oldInvalidCharger == 0 && mInvalidCharger != 0) {
-                    Slog.d(TAG, "showing invalid charger warning");
+                    Log.d(TAG, "showing invalid charger warning");
                     showInvalidChargerDialog();
                     return;
                 } else if (oldInvalidCharger != 0 && mInvalidCharger == 0) {
@@ -164,20 +164,20 @@ public class PowerUI extends SystemUI {
                     showLowBatteryWarning();
                 }
             } else {
-                Slog.w(TAG, "unknown intent: " + intent);
+                Log.w(TAG, "unknown intent: " + intent);
             }
         }
     };
 
     void dismissLowBatteryWarning() {
         if (mLowBatteryDialog != null) {
-            Slog.i(TAG, "closing low battery warning: level=" + mBatteryLevel);
+            Log.i(TAG, "closing low battery warning: level=" + mBatteryLevel);
             mLowBatteryDialog.dismiss();
         }
     }
 
     void showLowBatteryWarning() {
-        Slog.i(TAG,
+        Log.i(TAG,
                 ((mBatteryLevelTextView == null) ? "showing" : "updating")
                 + " low battery warning: level=" + mBatteryLevel
                 + " [" + findBatteryLevelBucket(mBatteryLevel) + "]");
@@ -234,7 +234,7 @@ public class PowerUI extends SystemUI {
 
     void playLowBatterySound() {
         if (DEBUG) {
-            Slog.i(TAG, "playing low battery sound. WOMP-WOMP!");
+            Log.i(TAG, "playing low battery sound. WOMP-WOMP!");
         }
 
         final ContentResolver cr = mContext.getContentResolver();
@@ -261,7 +261,7 @@ public class PowerUI extends SystemUI {
     }
 
     void showInvalidChargerDialog() {
-        Slog.d(TAG, "showing invalid charger dialog");
+        Log.d(TAG, "showing invalid charger dialog");
 
         dismissLowBatteryWarning();
 

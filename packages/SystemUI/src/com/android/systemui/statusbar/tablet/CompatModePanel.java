@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.RemoteException;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;

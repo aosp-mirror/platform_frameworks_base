@@ -40,7 +40,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Slog;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -427,7 +427,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
 
         if (newIconHPadding != mIconHPadding || newIconSize != mIconSize) {
-//            Slog.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
+//            Log.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
             mIconHPadding = newIconHPadding;
             mIconSize = newIconSize;
             reloadAllNotificationIcons(); // reload the tray
@@ -436,7 +436,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         final int numIcons = res.getInteger(R.integer.config_maxNotificationIcons);
         if (numIcons != mMaxNotificationIcons) {
             mMaxNotificationIcons = numIcons;
-            if (DEBUG) Slog.d(TAG, "max notification icons: " + mMaxNotificationIcons);
+            if (DEBUG) Log.d(TAG, "max notification icons: " + mMaxNotificationIcons);
             reloadAllNotificationIcons();
         }
     }
@@ -461,7 +461,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             // Sanity-check that someone hasn't set up the config wrong and asked for a navigation
             // bar on a tablet that has only the system bar
             if (mWindowManagerService.hasNavigationBar()) {
-                Slog.e(TAG, "Tablet device cannot show navigation bar and system bar");
+                Log.e(TAG, "Tablet device cannot show navigation bar and system bar");
             }
         } catch (RemoteException ex) {
         }
@@ -711,7 +711,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             super.handleMessage(m);
             switch (m.what) {
                 case MSG_OPEN_NOTIFICATION_PEEK:
-                    if (DEBUG) Slog.d(TAG, "opening notification peek window; arg=" + m.arg1);
+                    if (DEBUG) Log.d(TAG, "opening notification peek window; arg=" + m.arg1);
 
                     if (m.arg1 >= 0) {
                         final int N = mNotificationData.size();
@@ -727,7 +727,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
                         final int peekIndex = m.arg1;
                         if (peekIndex < N) {
-                            //Slog.d(TAG, "loading peek: " + peekIndex);
+                            //Log.d(TAG, "loading peek: " + peekIndex);
                             NotificationData.Entry entry =
                                 mNotificationDNDMode
                                     ? mNotificationDNDDummyEntry
@@ -769,7 +769,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     }
                     break;
                 case MSG_CLOSE_NOTIFICATION_PEEK:
-                    if (DEBUG) Slog.d(TAG, "closing notification peek window");
+                    if (DEBUG) Log.d(TAG, "closing notification peek window");
                     mNotificationPeekWindow.setVisibility(View.GONE);
                     mNotificationPeekRow.removeAllViews();
 
@@ -786,7 +786,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     mNotificationPeekKey = null;
                     break;
                 case MSG_OPEN_NOTIFICATION_PANEL:
-                    if (DEBUG) Slog.d(TAG, "opening notifications panel");
+                    if (DEBUG) Log.d(TAG, "opening notifications panel");
                     if (!mNotificationPanel.isShowing()) {
                         mNotificationPanel.show(true, true);
                         mNotificationArea.setVisibility(View.INVISIBLE);
@@ -794,37 +794,37 @@ public class TabletStatusBar extends BaseStatusBar implements
                     }
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
-                    if (DEBUG) Slog.d(TAG, "closing notifications panel");
+                    if (DEBUG) Log.d(TAG, "closing notifications panel");
                     if (mNotificationPanel.isShowing()) {
                         mNotificationPanel.show(false, true);
                         mNotificationArea.setVisibility(View.VISIBLE);
                     }
                     break;
                 case MSG_OPEN_INPUT_METHODS_PANEL:
-                    if (DEBUG) Slog.d(TAG, "opening input methods panel");
+                    if (DEBUG) Log.d(TAG, "opening input methods panel");
                     if (mInputMethodsPanel != null) mInputMethodsPanel.openPanel();
                     break;
                 case MSG_CLOSE_INPUT_METHODS_PANEL:
-                    if (DEBUG) Slog.d(TAG, "closing input methods panel");
+                    if (DEBUG) Log.d(TAG, "closing input methods panel");
                     if (mInputMethodsPanel != null) mInputMethodsPanel.closePanel(false);
                     break;
                 case MSG_OPEN_COMPAT_MODE_PANEL:
-                    if (DEBUG) Slog.d(TAG, "opening compat panel");
+                    if (DEBUG) Log.d(TAG, "opening compat panel");
                     if (mCompatModePanel != null) mCompatModePanel.openPanel();
                     break;
                 case MSG_CLOSE_COMPAT_MODE_PANEL:
-                    if (DEBUG) Slog.d(TAG, "closing compat panel");
+                    if (DEBUG) Log.d(TAG, "closing compat panel");
                     if (mCompatModePanel != null) mCompatModePanel.closePanel();
                     break;
                 case MSG_SHOW_CHROME:
-                    if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
+                    if (DEBUG) Log.d(TAG, "hiding shadows (lights on)");
                     mBarContents.setVisibility(View.VISIBLE);
                     mShadow.setVisibility(View.GONE);
                     mSystemUiVisibility &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
                     notifyUiVisibilityChanged();
                     break;
                 case MSG_HIDE_CHROME:
-                    if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
+                    if (DEBUG) Log.d(TAG, "showing shadows (lights out)");
                     animateCollapsePanels();
                     visibilityChanged(false);
                     mBarContents.setVisibility(View.GONE);
@@ -840,20 +840,20 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        if (DEBUG) Slog.d(TAG, "addIcon(" + slot + ") -> " + icon);
+        if (DEBUG) Log.d(TAG, "addIcon(" + slot + ") -> " + icon);
     }
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
-        if (DEBUG) Slog.d(TAG, "updateIcon(" + slot + ") -> " + icon);
+        if (DEBUG) Log.d(TAG, "updateIcon(" + slot + ") -> " + icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
-        if (DEBUG) Slog.d(TAG, "removeIcon(" + slot + ")");
+        if (DEBUG) Log.d(TAG, "removeIcon(" + slot + ")");
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Slog.d(TAG, "addNotification(" + key + " -> " + notification + ")");
+        if (DEBUG) Log.d(TAG, "addNotification(" + key + " -> " + notification + ")");
         addNotificationViews(key, notification);
 
         final boolean immersive = isImmersive();
@@ -861,7 +861,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             // TODO: immersive mode popups for tablet
         } else if (notification.getNotification().fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
-            Slog.w(TAG, "Notification has fullScreenIntent and activity is not immersive;"
+            Log.w(TAG, "Notification has fullScreenIntent and activity is not immersive;"
                     + " sending fullScreenIntent");
             try {
                 notification.getNotification().fullScreenIntent.send();
@@ -875,7 +875,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void removeNotification(IBinder key) {
-        if (DEBUG) Slog.d(TAG, "removeNotification(" + key + ")");
+        if (DEBUG) Log.d(TAG, "removeNotification(" + key + ")");
         removeNotificationViews(key);
         mTicker.remove(key);
         setAreThereNotifications();
@@ -900,17 +900,17 @@ public class TabletStatusBar extends BaseStatusBar implements
         // act accordingly
         if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
             boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
-            Slog.i(TAG, "DISABLE_CLOCK: " + (show ? "no" : "yes"));
+            Log.i(TAG, "DISABLE_CLOCK: " + (show ? "no" : "yes"));
             showClock(show);
         }
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
             boolean show = (state & StatusBarManager.DISABLE_SYSTEM_INFO) == 0;
-            Slog.i(TAG, "DISABLE_SYSTEM_INFO: " + (show ? "no" : "yes"));
+            Log.i(TAG, "DISABLE_SYSTEM_INFO: " + (show ? "no" : "yes"));
             mNotificationTrigger.setVisibility(show ? View.VISIBLE : View.GONE);
         }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
-                Slog.i(TAG, "DISABLE_EXPAND: yes");
+                Log.i(TAG, "DISABLE_EXPAND: yes");
                 animateCollapsePanels();
                 visibilityChanged(false);
             }
@@ -920,10 +920,10 @@ public class TabletStatusBar extends BaseStatusBar implements
                         .getBoolean(Prefs.DO_NOT_DISTURB_PREF, Prefs.DO_NOT_DISTURB_DEFAULT);
 
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: yes" + (mNotificationDNDMode?" (DND)":""));
+                Log.i(TAG, "DISABLE_NOTIFICATION_ICONS: yes" + (mNotificationDNDMode?" (DND)":""));
                 mTicker.halt();
             } else {
-                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: no" + (mNotificationDNDMode?" (DND)":""));
+                Log.i(TAG, "DISABLE_NOTIFICATION_ICONS: no" + (mNotificationDNDMode?" (DND)":""));
             }
 
             // refresh icons to show either notifications or the DND message
@@ -1089,7 +1089,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             on = true;
         }
 
-        Slog.v(TAG, "setLightsOn(" + on + ")");
+        Log.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
             setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
         } else {
@@ -1099,7 +1099,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     public void topAppWindowChanged(boolean showMenu) {
         if (DEBUG) {
-            Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
+            Log.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
         mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
 
@@ -1182,7 +1182,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     @Override
     public void setHardKeyboardStatus(boolean available, boolean enabled) {
         if (DEBUG) {
-            Slog.d(TAG, "Set hard keyboard status: available=" + available
+            Log.d(TAG, "Set hard keyboard status: available=" + available
                     + ", enabled=" + enabled);
         }
         mInputMethodSwitchButton.setHardKeyboardStatus(available);
@@ -1201,7 +1201,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     private boolean isImmersive() {
         try {
             return ActivityManagerNative.getDefault().isTopActivityImmersive();
-            //Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+            //Log.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
         } catch (RemoteException ex) {
             // the end is nigh
             return false;
@@ -1228,14 +1228,14 @@ public class TabletStatusBar extends BaseStatusBar implements
     };
 
     public void onClickRecentButton() {
-        if (DEBUG) Slog.d(TAG, "clicked recent apps; disabled=" + mDisabled);
+        if (DEBUG) Log.d(TAG, "clicked recent apps; disabled=" + mDisabled);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
             toggleRecentApps();
         }
     }
 
     public void onClickInputMethodSwitchButton() {
-        if (DEBUG) Slog.d(TAG, "clicked input methods panel; disabled=" + mDisabled);
+        if (DEBUG) Log.d(TAG, "clicked input methods panel; disabled=" + mDisabled);
         int msg = (mInputMethodsPanel.getVisibility() == View.GONE) ?
                 MSG_OPEN_INPUT_METHODS_PANEL : MSG_CLOSE_INPUT_METHODS_PANEL;
         mHandler.removeMessages(msg);
@@ -1272,7 +1272,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
 
         public boolean onTouch(View v, MotionEvent event) {
-//            Slog.d(TAG, String.format("touch: (%.1f, %.1f) initial: (%.1f, %.1f)",
+//            Log.d(TAG, String.format("touch: (%.1f, %.1f) initial: (%.1f, %.1f)",
 //                        event.getX(),
 //                        event.getY(),
 //                        mInitialTouchX,
@@ -1333,7 +1333,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     public void resetNotificationPeekFadeTimer() {
         if (DEBUG) {
-            Slog.d(TAG, "setting peek fade timer for " + NOTIFICATION_PEEK_FADE_DELAY
+            Log.d(TAG, "setting peek fade timer for " + NOTIFICATION_PEEK_FADE_DELAY
                 + "ms from now");
         }
         mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PEEK);
@@ -1393,7 +1393,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         int N = mNotificationData.size();
 
         if (DEBUG) {
-            Slog.d(TAG, "refreshing icons: " + N + " notifications, mIconLayout=" + mIconLayout);
+            Log.d(TAG, "refreshing icons: " + N + " notifications, mIconLayout=" + mIconLayout);
         }
 
         ArrayList<View> toShow = new ArrayList<View>();

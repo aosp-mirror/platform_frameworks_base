@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Slog;
 
 import com.android.systemui.statusbar.policy.Prefs;
 

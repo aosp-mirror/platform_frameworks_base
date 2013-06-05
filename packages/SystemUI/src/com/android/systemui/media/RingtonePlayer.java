@@ -28,7 +28,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.systemui.SystemUI;
 
@@ -60,7 +60,7 @@ public class RingtonePlayer extends SystemUI {
         try {
             mAudioService.setRingtonePlayer(mCallback);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Problem registering RingtonePlayer: " + e);
+            Log.e(TAG, "Problem registering RingtonePlayer: " + e);
         }
     }
 
@@ -81,7 +81,7 @@ public class RingtonePlayer extends SystemUI {
 
         @Override
         public void binderDied() {
-            if (LOGD) Slog.d(TAG, "binderDied() token=" + mToken);
+            if (LOGD) Log.d(TAG, "binderDied() token=" + mToken);
             synchronized (mClients) {
                 mClients.remove(mToken);
             }
@@ -93,7 +93,7 @@ public class RingtonePlayer extends SystemUI {
         @Override
         public void play(IBinder token, Uri uri, int streamType) throws RemoteException {
             if (LOGD) {
-                Slog.d(TAG, "play(token=" + token + ", uri=" + uri + ", uid="
+                Log.d(TAG, "play(token=" + token + ", uri=" + uri + ", uid="
                         + Binder.getCallingUid() + ")");
             }
             Client client;
@@ -111,7 +111,7 @@ public class RingtonePlayer extends SystemUI {
 
         @Override
         public void stop(IBinder token) {
-            if (LOGD) Slog.d(TAG, "stop(token=" + token + ")");
+            if (LOGD) Log.d(TAG, "stop(token=" + token + ")");
             Client client;
             synchronized (mClients) {
                 client = mClients.remove(token);
@@ -124,7 +124,7 @@ public class RingtonePlayer extends SystemUI {
 
         @Override
         public boolean isPlaying(IBinder token) {
-            if (LOGD) Slog.d(TAG, "isPlaying(token=" + token + ")");
+            if (LOGD) Log.d(TAG, "isPlaying(token=" + token + ")");
             Client client;
             synchronized (mClients) {
                 client = mClients.get(token);
@@ -138,7 +138,7 @@ public class RingtonePlayer extends SystemUI {
 
         @Override
         public void playAsync(Uri uri, UserHandle user, boolean looping, int streamType) {
-            if (LOGD) Slog.d(TAG, "playAsync(uri=" + uri + ", user=" + user + ")");
+            if (LOGD) Log.d(TAG, "playAsync(uri=" + uri + ", user=" + user + ")");
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Async playback only available from system UID.");
             }
@@ -148,7 +148,7 @@ public class RingtonePlayer extends SystemUI {
 
         @Override
         public void stopAsync() {
-            if (LOGD) Slog.d(TAG, "stopAsync()");
+            if (LOGD) Log.d(TAG, "stopAsync()");
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Async playback only available from system UID.");
             }

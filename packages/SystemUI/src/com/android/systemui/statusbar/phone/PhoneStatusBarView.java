@@ -23,7 +23,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.util.AttributeSet;
 import android.util.EventLog;
-import android.util.Slog;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -128,7 +128,7 @@ public class PhoneStatusBarView extends PanelBar {
         float region = (w * mSettingsPanelDragzoneFrac);
 
         if (DEBUG) {
-            Slog.v(TAG, String.format(
+            Log.v(TAG, String.format(
                 "w=%.1f frac=%.3f region=%.1f min=%.1f x=%.1f w-x=%.1f",
                 w, mSettingsPanelDragzoneFrac, region, mSettingsPanelDragzoneMin, x, (w-x)));
         }
@@ -152,7 +152,7 @@ public class PhoneStatusBarView extends PanelBar {
         // which is kind of tricky to determine
         mShouldFade = (mFadingPanel == null || mFadingPanel.isFullyExpanded());
         if (DEBUG) {
-            Slog.v(TAG, "start opening: " + panel + " shouldfade=" + mShouldFade);
+            Log.v(TAG, "start opening: " + panel + " shouldfade=" + mShouldFade);
         }
         mFadingPanel = panel;
     }
@@ -202,7 +202,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.panelExpansionChanged(panel, frac);
 
         if (DEBUG) {
-            Slog.v(TAG, "panelExpansionChanged: f=" + frac);
+            Log.v(TAG, "panelExpansionChanged: f=" + frac);
         }
 
         if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {

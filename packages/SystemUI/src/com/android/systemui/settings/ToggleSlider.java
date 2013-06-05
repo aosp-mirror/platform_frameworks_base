@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;

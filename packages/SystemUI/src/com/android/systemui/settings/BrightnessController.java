@@ -30,7 +30,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.util.Slog;
 import android.view.IWindowManager;
 import android.widget.CompoundButton;
 import android.widget.ImageView;

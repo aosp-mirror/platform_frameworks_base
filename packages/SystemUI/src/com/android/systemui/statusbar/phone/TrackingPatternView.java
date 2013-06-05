@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.View;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;

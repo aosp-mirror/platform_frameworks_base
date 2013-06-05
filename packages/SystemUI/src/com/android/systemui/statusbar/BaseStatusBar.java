@@ -62,7 +62,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -168,7 +167,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         @Override
         public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
             if (DEBUG) {
-                Slog.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
+                Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
@@ -259,7 +258,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (DEBUG) {
-            Slog.d(TAG, String.format(
+            Log.d(TAG, String.format(
                     "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
                    iconList.size(),
                    switches[0],
@@ -279,7 +278,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                     mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                    if (true) Slog.v(TAG, "userId " + mCurrentUserId + " is in the house");
+                    if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
                     userSwitched(mCurrentUserId);
                 }
             }}, filter);
@@ -295,7 +294,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         final int thisUserId = mCurrentUserId;
         final int notificationUserId = n.getUserId();
         if (DEBUG && MULTIUSER_DEBUG) {
-            Slog.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
+            Log.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
                     n, thisUserId, notificationUserId));
         }
         return notificationUserId == UserHandle.USER_ALL
@@ -348,7 +347,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
                 version = info.targetSdkVersion;
             } catch (NameNotFoundException ex) {
-                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
+                Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
             }
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
                 content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
@@ -643,7 +642,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     };
 
     protected void preloadRecentTasksList() {
-        if (DEBUG) Slog.d(TAG, "preloading recents");
+        if (DEBUG) Log.d(TAG, "preloading recents");
         Intent intent = new Intent(RecentsActivity.PRELOAD_INTENT);
         intent.setClassName("com.android.systemui",
                 "com.android.systemui.recent.RecentsPreloadReceiver");
@@ -653,7 +652,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void cancelPreloadingRecentTasksList() {
-        if (DEBUG) Slog.d(TAG, "cancel preloading recents");
+        if (DEBUG) Log.d(TAG, "cancel preloading recents");
         Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
         intent.setClassName("com.android.systemui",
                 "com.android.systemui.recent.RecentsPreloadReceiver");
@@ -667,11 +666,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             Intent intent;
             switch (m.what) {
              case MSG_TOGGLE_RECENTS_PANEL:
-                 if (DEBUG) Slog.d(TAG, "toggle recents panel");
+                 if (DEBUG) Log.d(TAG, "toggle recents panel");
                  toggleRecentsActivity();
                  break;
              case MSG_CLOSE_RECENTS_PANEL:
-                 if (DEBUG) Slog.d(TAG, "closing recents panel");
+                 if (DEBUG) Log.d(TAG, "closing recents panel");
                  intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
                  intent.setPackage("com.android.systemui");
                  mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
@@ -683,13 +682,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                   cancelPreloadingRecentTasksList();
                   break;
              case MSG_OPEN_SEARCH_PANEL:
-                 if (DEBUG) Slog.d(TAG, "opening search panel");
+                 if (DEBUG) Log.d(TAG, "opening search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
                      mSearchPanelView.show(true, true);
                  }
                  break;
              case MSG_CLOSE_SEARCH_PANEL:
-                 if (DEBUG) Slog.d(TAG, "closing search panel");
+                 if (DEBUG) Log.d(TAG, "closing search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isShowing()) {
                      mSearchPanelView.show(false, true);
                  }
@@ -776,7 +775,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         catch (RuntimeException e) {
             final String ident = sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId());
-            Slog.e(TAG, "couldn't inflate view for notification " + ident, e);
+            Log.e(TAG, "couldn't inflate view for notification " + ident, e);
             return false;
         }
 
@@ -855,7 +854,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mIntent.send(mContext, 0, overlay);
                 } catch (PendingIntent.CanceledException e) {
                     // the stack trace isn't very helpful here.  Just log the exception message.
-                    Slog.w(TAG, "Sending contentIntent failed: " + e);
+                    Log.w(TAG, "Sending contentIntent failed: " + e);
                 }
 
                 KeyguardManager kgm =
@@ -913,7 +912,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected StatusBarNotification removeNotificationViews(IBinder key) {
         NotificationData.Entry entry = mNotificationData.remove(key);
         if (entry == null) {
-            Slog.w(TAG, "removeNotification for unknown key: " + key);
+            Log.w(TAG, "removeNotification for unknown key: " + key);
             return null;
         }
         // Remove the expanded view.
@@ -928,7 +927,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected StatusBarIconView addNotificationViews(IBinder key,
             StatusBarNotification notification) {
         if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
+            Log.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
         }
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
@@ -957,7 +956,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Add the expanded view and icon.
         int pos = mNotificationData.add(entry);
         if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews: added at " + pos);
+            Log.d(TAG, "addNotificationViews: added at " + pos);
         }
         updateExpansionStates();
         updateNotificationIcons();
@@ -970,10 +969,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         ViewGroup.LayoutParams lp = entry.row.getLayoutParams();
         if (entry.expandable() && expand) {
-            if (DEBUG) Slog.d(TAG, "setting expanded row height to WRAP_CONTENT");
+            if (DEBUG) Log.d(TAG, "setting expanded row height to WRAP_CONTENT");
             lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         } else {
-            if (DEBUG) Slog.d(TAG, "setting collapsed row height to " + rowHeight);
+            if (DEBUG) Log.d(TAG, "setting collapsed row height to " + rowHeight);
             lp.height = rowHeight;
         }
         entry.row.setLayoutParams(lp);
@@ -986,18 +985,18 @@ public abstract class BaseStatusBar extends SystemUI implements
             NotificationData.Entry entry = mNotificationData.get(i);
             if (!entry.userLocked()) {
                 if (i == (N-1)) {
-                    if (DEBUG) Slog.d(TAG, "expanding top notification at " + i);
+                    if (DEBUG) Log.d(TAG, "expanding top notification at " + i);
                     expandView(entry, true);
                 } else {
                     if (!entry.userExpanded()) {
-                        if (DEBUG) Slog.d(TAG, "collapsing notification at " + i);
+                        if (DEBUG) Log.d(TAG, "collapsing notification at " + i);
                         expandView(entry, false);
                     } else {
-                        if (DEBUG) Slog.d(TAG, "ignoring user-modified notification at " + i);
+                        if (DEBUG) Log.d(TAG, "ignoring user-modified notification at " + i);
                     }
                 }
             } else {
-                if (DEBUG) Slog.d(TAG, "ignoring notification being held by user at " + i);
+                if (DEBUG) Log.d(TAG, "ignoring notification being held by user at " + i);
             }
         }
     }
@@ -1015,11 +1014,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
+        if (DEBUG) Log.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
 
         final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
         if (oldEntry == null) {
-            Slog.w(TAG, "updateNotification for unknown key: " + key);
+            Log.w(TAG, "updateNotification for unknown key: " + key);
             return;
         }
 
@@ -1032,13 +1031,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         final RemoteViews bigContentView = notification.getNotification().bigContentView;
 
         if (DEBUG) {
-            Slog.d(TAG, "old notification: when=" + oldNotification.getNotification().when
+            Log.d(TAG, "old notification: when=" + oldNotification.getNotification().when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " expanded=" + oldEntry.expanded
                     + " contentView=" + oldContentView
                     + " bigContentView=" + oldBigContentView
                     + " rowParent=" + oldEntry.row.getParent());
-            Slog.d(TAG, "new notification: when=" + notification.getNotification().when
+            Log.d(TAG, "new notification: when=" + notification.getNotification().when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " contentView=" + contentView
                     + " bigContentView=" + bigContentView);
@@ -1071,7 +1070,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         oldEntry.notification.getNotification().tickerText);
         boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
         if (contentsUnchanged && bigContentsUnchanged && (orderUnchanged || isTopAnyway)) {
-            if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
+            if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
                 // Reapply the RemoteViews
@@ -1102,15 +1101,15 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
-                Slog.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
+                Log.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
                 removeNotificationViews(key);
                 addNotificationViews(key, notification);
             }
         } else {
-            if (DEBUG) Slog.d(TAG, "not reusing notification for key: " + key);
-            if (DEBUG) Slog.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
-            if (DEBUG) Slog.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
-            if (DEBUG) Slog.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
+            if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
+            if (DEBUG) Log.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
+            if (DEBUG) Log.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
+            if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
             final boolean wasExpanded = oldEntry.userExpanded();
             removeNotificationViews(key);
             addNotificationViews(key, notification);
@@ -1127,7 +1126,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Is this for you?
         boolean isForCurrentUser = notificationIsForCurrentUser(notification);
-        if (DEBUG) Slog.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
+        if (DEBUG) Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
 
         // Restart the ticker if it's still running
         if (updateTicker && isForCurrentUser) {
@@ -1141,11 +1140,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // See if we need to update the intruder.
         if (ENABLE_INTRUDERS && oldNotification == mCurrentlyIntrudingNotification) {
-            if (DEBUG) Slog.d(TAG, "updating the current intruder:" + notification);
+            if (DEBUG) Log.d(TAG, "updating the current intruder:" + notification);
             // XXX: this is a hack for Alarms. The real implementation will need to *update*
             // the intruder.
             if (notification.getNotification().fullScreenIntent == null) { // TODO(dsandler): consistent logic with add()
-                if (DEBUG) Slog.d(TAG, "no longer intrudes!");
+                if (DEBUG) Log.d(TAG, "no longer intrudes!");
                 mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
             }
         }

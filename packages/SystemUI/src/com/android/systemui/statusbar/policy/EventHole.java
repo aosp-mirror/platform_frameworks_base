@@ -25,7 +25,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.InputDevice;

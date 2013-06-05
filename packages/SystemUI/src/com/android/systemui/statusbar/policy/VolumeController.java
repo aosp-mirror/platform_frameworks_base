@@ -23,7 +23,6 @@ import android.os.ServiceManager;
 import android.os.Vibrator;
 import android.media.AudioManager;
 import android.provider.Settings;
-import android.util.Slog;
 import android.view.IWindowManager;
 import android.widget.CompoundButton;
 

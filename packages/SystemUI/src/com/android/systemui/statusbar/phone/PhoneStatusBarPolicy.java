@@ -36,7 +36,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccCardConstants;
@@ -284,17 +284,17 @@ public class PhoneStatusBarPolicy {
         final String action = intent.getAction();
         final boolean enabled = intent.getBooleanExtra(TtyIntent.TTY_ENABLED, false);
 
-        if (false) Slog.v(TAG, "updateTTY: enabled: " + enabled);
+        if (false) Log.v(TAG, "updateTTY: enabled: " + enabled);
 
         if (enabled) {
             // TTY is on
-            if (false) Slog.v(TAG, "updateTTY: set TTY on");
+            if (false) Log.v(TAG, "updateTTY: set TTY on");
             mService.setIcon("tty", R.drawable.stat_sys_tty_mode, 0,
                     mContext.getString(R.string.accessibility_tty_enabled));
             mService.setIconVisibility("tty", true);
         } else {
             // TTY is off
-            if (false) Slog.v(TAG, "updateTTY: set TTY off");
+            if (false) Log.v(TAG, "updateTTY: set TTY off");
             mService.setIconVisibility("tty", false);
         }
     }

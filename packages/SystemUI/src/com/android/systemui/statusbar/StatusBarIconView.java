@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.util.Log;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
@@ -151,7 +150,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private boolean updateDrawable(boolean withClear) {
         Drawable drawable = getIcon(mIcon);
         if (drawable == null) {
-            Slog.w(TAG, "No icon for slot " + mSlot);
+            Log.w(TAG, "No icon for slot " + mSlot);
             return false;
         }
         if (withClear) {
@@ -185,7 +184,7 @@ public class StatusBarIconView extends AnimatedImageView {
                 r = context.getPackageManager()
                         .getResourcesForApplicationAsUser(icon.iconPackage, userId);
             } catch (PackageManager.NameNotFoundException ex) {
-                Slog.e(TAG, "Icon package not found: " + icon.iconPackage);
+                Log.e(TAG, "Icon package not found: " + icon.iconPackage);
                 return null;
             }
         } else {
@@ -199,7 +198,7 @@ public class StatusBarIconView extends AnimatedImageView {
         try {
             return r.getDrawable(icon.iconId);
         } catch (RuntimeException e) {
-            Slog.w(TAG, "Icon not found in "
+            Log.w(TAG, "Icon not found in "
                   + (icon.iconPackage != null ? icon.iconId : "<system>")
                   + ": " + Integer.toHexString(icon.iconId));
         }

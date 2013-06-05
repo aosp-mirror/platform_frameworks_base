@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.util.Slog;
 import android.widget.ImageView;
 import android.widget.TextView;
 

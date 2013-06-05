@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Slog;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -70,14 +70,14 @@ public class SystemUIService extends Service {
                     ? R.string.config_systemBarComponent
                     : R.string.config_statusBarComponent;
         } catch (RemoteException e) {
-            Slog.w(TAG, "Failing checking whether status bar can hide", e);
+            Log.w(TAG, "Failing checking whether status bar can hide", e);
         }
 
         final int N = SERVICES.length;
         mServices = new SystemUI[N];
         for (int i=0; i<N; i++) {
             Class cl = chooseClass(SERVICES[i]);
-            Slog.d(TAG, "loading: " + cl);
+            Log.d(TAG, "loading: " + cl);
             try {
                 mServices[i] = (SystemUI)cl.newInstance();
             } catch (IllegalAccessException ex) {
@@ -86,7 +86,7 @@ public class SystemUIService extends Service {
                 throw new RuntimeException(ex);
             }
             mServices[i].mContext = this;
-            Slog.d(TAG, "running: " + mServices[i]);
+            Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
         }
     }

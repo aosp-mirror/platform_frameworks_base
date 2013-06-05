@@ -29,7 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Slog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,7 +89,7 @@ public class TabletTicker
 
     public void add(IBinder key, StatusBarNotification notification) {
         if (false) {
-            Slog.d(TAG, "add 1 mCurrentNotification=" + mCurrentNotification
+            Log.d(TAG, "add 1 mCurrentNotification=" + mCurrentNotification
                     + " mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
         }
 
@@ -195,7 +195,7 @@ public class TabletTicker
         mCurrentKey = mKeys[0];
         mCurrentNotification = mQueue[0];
         if (false) {
-            Slog.d(TAG, "dequeue mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
+            Log.d(TAG, "dequeue mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
         }
         final int N = mQueuePos;
         for (int i=0; i<N; i++) {
@@ -276,7 +276,7 @@ public class TabletTicker
             if (expanded == null) {
                 final String ident = notification.getPackageName()
                         + "/0x" + Integer.toHexString(notification.getId());
-                Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
+                Log.e(TAG, "couldn't inflate view for notification " + ident, exception);
                 return null;
             }
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(

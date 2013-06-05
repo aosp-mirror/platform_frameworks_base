@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Slog;
+import android.util.Log;
 import android.view.MotionEvent;
 
 /**
@@ -101,7 +101,7 @@ public class GestureRecorder {
                 mDownTime = ev.getDownTime();
             } else {
                 if (mDownTime != ev.getDownTime()) {
-                    Slog.w(TAG, "Assertion failure in GestureRecorder: event downTime ("
+                    Log.w(TAG, "Assertion failure in GestureRecorder: event downTime ("
                             +ev.getDownTime()+") does not match gesture downTime ("+mDownTime+")");
                 }
             }
@@ -237,10 +237,10 @@ public class GestureRecorder {
                     mGestures.add(mCurrentGesture);
                 }
                 if (DEBUG) {
-                    Slog.v(TAG, String.format("Wrote %d complete gestures to %s", mLastSaveLen, mLogfile));
+                    Log.v(TAG, String.format("Wrote %d complete gestures to %s", mLastSaveLen, mLogfile));
                 }
             } catch (IOException e) {
-                Slog.e(TAG, String.format("Couldn't write gestures to %s", mLogfile), e);
+                Log.e(TAG, String.format("Couldn't write gestures to %s", mLogfile), e);
                 mLastSaveLen = -1;
             }
         }

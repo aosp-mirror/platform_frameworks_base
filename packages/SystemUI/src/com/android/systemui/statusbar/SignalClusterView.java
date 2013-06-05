@@ -18,7 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
@@ -64,7 +64,7 @@ public class SignalClusterView
     }
 
     public void setNetworkController(NetworkController nc) {
-        if (DEBUG) Slog.d(TAG, "NetworkController=" + nc);
+        if (DEBUG) Log.d(TAG, "NetworkController=" + nc);
         mNC = nc;
     }
 
@@ -185,7 +185,7 @@ public class SignalClusterView
             mWifiGroup.setVisibility(View.GONE);
         }
 
-        if (DEBUG) Slog.d(TAG,
+        if (DEBUG) Log.d(TAG,
                 String.format("wifi: %s sig=%d act=%d",
                     (mWifiVisible ? "VISIBLE" : "GONE"),
                     mWifiStrengthId, mWifiActivityId));
@@ -214,7 +214,7 @@ public class SignalClusterView
             mSpacer.setVisibility(View.GONE);
         }
 
-        if (DEBUG) Slog.d(TAG,
+        if (DEBUG) Log.d(TAG,
                 String.format("mobile: %s sig=%d act=%d typ=%d",
                     (mMobileVisible ? "VISIBLE" : "GONE"),
                     mMobileStrengthId, mMobileActivityId, mMobileTypeId));

@@ -29,7 +29,7 @@ import android.os.UserHandle;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.util.Slog;
+import android.util.Log;
 
 public class StorageNotification extends StorageEventListener {
     private static final String TAG = "StorageNotification";
@@ -71,7 +71,7 @@ public class StorageNotification extends StorageEventListener {
 
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         final boolean connected = mStorageManager.isUsbMassStorageConnected();
-        if (DEBUG) Slog.d(TAG, String.format( "Startup with UMS connection %s (media state %s)",
+        if (DEBUG) Log.d(TAG, String.format( "Startup with UMS connection %s (media state %s)",
                 mUmsAvailable, Environment.getExternalStorageState()));
         
         HandlerThread thr = new HandlerThread("SystemUI StorageNotification");
@@ -102,7 +102,7 @@ public class StorageNotification extends StorageEventListener {
          */
         String st = Environment.getExternalStorageState();
 
-        if (DEBUG) Slog.i(TAG, String.format("UMS connection changed to %s (media state %s)",
+        if (DEBUG) Log.i(TAG, String.format("UMS connection changed to %s (media state %s)",
                 connected, st));
 
         if (connected && (st.equals(
@@ -129,7 +129,7 @@ public class StorageNotification extends StorageEventListener {
     }
 
     private void onStorageStateChangedAsync(String path, String oldState, String newState) {
-        if (DEBUG) Slog.i(TAG, String.format(
+        if (DEBUG) Log.i(TAG, String.format(
                 "Media {%s} state changed from {%s} -> {%s}", path, oldState, newState));
         if (newState.equals(Environment.MEDIA_SHARED)) {
             /*
@@ -250,7 +250,7 @@ public class StorageNotification extends StorageEventListener {
                     true, true, null);
             updateUsbMassStorageNotification(false);
         } else {
-            Slog.w(TAG, String.format("Ignoring unknown state {%s}", newState));
+            Log.w(TAG, String.format("Ignoring unknown state {%s}", newState));
         }
     }
 

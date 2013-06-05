@@ -23,7 +23,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -224,7 +224,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
 
-        if (DEBUG) Slog.d(TAG, String.format("PANEL: onLayout: (%d, %d, %d, %d)", l, t, r, b));
+        if (DEBUG) Log.d(TAG, String.format("PANEL: onLayout: (%d, %d, %d, %d)", l, t, r, b));
     }
 
     @Override
@@ -232,7 +232,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         super.onSizeChanged(w, h, oldw, oldh);
         
         if (DEBUG) {
-            Slog.d(TAG, String.format("PANEL: onSizeChanged: (%d -> %d, %d -> %d)",
+            Log.d(TAG, String.format("PANEL: onSizeChanged: (%d -> %d, %d -> %d)",
                         oldw, w, oldh, h));
         }
     }
@@ -390,7 +390,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         }
 
         void startAnimation(boolean appearing) {
-            if (DEBUG) Slog.d(TAG, "startAnimation(appearing=" + appearing + ")");
+            if (DEBUG) Log.d(TAG, "startAnimation(appearing=" + appearing + ")");
 
             createAnimation(appearing);
             mContentAnim.start();
@@ -402,11 +402,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         }
 
         public void onAnimationCancel(Animator animation) {
-            if (DEBUG) Slog.d(TAG, "onAnimationCancel");
+            if (DEBUG) Log.d(TAG, "onAnimationCancel");
         }
 
         public void onAnimationEnd(Animator animation) {
-            if (DEBUG) Slog.d(TAG, "onAnimationEnd");
+            if (DEBUG) Log.d(TAG, "onAnimationEnd");
             if (! mVisible) {
                 setVisibility(View.GONE);
             }

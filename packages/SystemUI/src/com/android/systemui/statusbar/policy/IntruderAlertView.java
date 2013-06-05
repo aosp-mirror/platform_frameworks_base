@@ -28,7 +28,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -102,7 +101,7 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
     }
 
     public void onChildDismissed(View v) {
-        Slog.v(TAG, "User swiped intruder to dismiss");
+        Log.v(TAG, "User swiped intruder to dismiss");
         mBar.dismissIntruder();
     }
 
@@ -134,7 +133,7 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
     public void onDraw(android.graphics.Canvas c) {
         super.onDraw(c);
         if (DEBUG) {
-            //Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
+            //Log.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
             //        + getMeasuredHeight() + "px");
             c.save();
             c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
@@ -146,7 +145,7 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
 
     public void applyIntruderContent(RemoteViews intruderView, OnClickListener listener) {
         if (DEBUG) {
-            Slog.v(TAG, "applyIntruderContent: view=" + intruderView + " listener=" + listener);
+            Log.v(TAG, "applyIntruderContent: view=" + intruderView + " listener=" + listener);
         }
         mIntruderRemoteViews = intruderView;
         mOnClickListener = listener;

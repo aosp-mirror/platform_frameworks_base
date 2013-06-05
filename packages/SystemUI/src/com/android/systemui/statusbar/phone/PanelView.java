@@ -27,7 +27,7 @@ import android.animation.TimeAnimator.TimeListener;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -42,7 +42,7 @@ public class PanelView extends FrameLayout {
 
     public final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
-        Slog.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
+        Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
     public static final boolean BRAKES = false;
@@ -112,7 +112,7 @@ public class PanelView extends FrameLayout {
         }
         public void computeCurrentVelocity(long timebase) {
             if (FlingTracker.DEBUG) {
-                Slog.v("FlingTracker", "computing velocities for " + mEventBuf.size() + " events");
+                Log.v("FlingTracker", "computing velocities for " + mEventBuf.size() + " events");
             }
             mVX = mVY = 0;
             MotionEventCopy last = null;
@@ -127,7 +127,7 @@ public class PanelView extends FrameLayout {
                     final float dx = (event.x - last.x);
                     final float dy = (event.y - last.y);
                     if (FlingTracker.DEBUG) {
-                        Slog.v("FlingTracker", String.format("   [%d] dx=%.1f dy=%.1f dt=%.0f vx=%.1f vy=%.1f",
+                        Log.v("FlingTracker", String.format("   [%d] dx=%.1f dy=%.1f dt=%.0f vx=%.1f vy=%.1f",
                                 i,
                                 dx, dy, dt,
                                 (dx/dt),
@@ -147,7 +147,7 @@ public class PanelView extends FrameLayout {
                 mVY /= totalweight;
             } else {
                 if (DEBUG_NAN) {
-                    Slog.v("FlingTracker", "computeCurrentVelocity warning: totalweight=0",
+                    Log.v("FlingTracker", "computeCurrentVelocity warning: totalweight=0",
                             new Throwable());
                 }
                 // so as not to contaminate the velocities with NaN
@@ -155,13 +155,13 @@ public class PanelView extends FrameLayout {
             }
 
             if (FlingTracker.DEBUG) {
-                Slog.v("FlingTracker", "computed: vx=" + mVX + " vy=" + mVY);
+                Log.v("FlingTracker", "computed: vx=" + mVX + " vy=" + mVY);
             }
         }
         public float getXVelocity() {
             if (Float.isNaN(mVX)) {
                 if (DEBUG_NAN) {
-                    Slog.v("FlingTracker", "warning: vx=NaN");
+                    Log.v("FlingTracker", "warning: vx=NaN");
                 }
                 mVX = 0;
             }
@@ -170,7 +170,7 @@ public class PanelView extends FrameLayout {
         public float getYVelocity() {
             if (Float.isNaN(mVY)) {
                 if (DEBUG_NAN) {
-                    Slog.v("FlingTracker", "warning: vx=NaN");
+                    Log.v("FlingTracker", "warning: vx=NaN");
                 }
                 mVY = 0;
             }
@@ -307,7 +307,7 @@ public class PanelView extends FrameLayout {
                 post(mStopAnimator);
             }
         } else {
-            Slog.v(TAG, "animationTick called with dtms=" + dtms + "; nothing to do (h="
+            Log.v(TAG, "animationTick called with dtms=" + dtms + "; nothing to do (h="
                     + mExpandedHeight + " v=" + mVel + ")");
         }
     }
@@ -547,7 +547,7 @@ public class PanelView extends FrameLayout {
         if (Float.isNaN(h)) {
             // If a NaN gets in here, it will freeze the Animators.
             if (DEBUG_NAN) {
-                Slog.v(TAG, "setExpandedHeightInternal: warning: h=NaN, using 0 instead",
+                Log.v(TAG, "setExpandedHeightInternal: warning: h=NaN, using 0 instead",
                         new Throwable());
             }
             h = 0;
@@ -586,7 +586,7 @@ public class PanelView extends FrameLayout {
         if (Float.isNaN(frac)) {
             // If a NaN gets in here, it will freeze the Animators.
             if (DEBUG_NAN) {
-                Slog.v(TAG, "setExpandedFraction: frac=NaN, using 0 instead",
+                Log.v(TAG, "setExpandedFraction: frac=NaN, using 0 instead",
                         new Throwable());
             }
             frac = 0;

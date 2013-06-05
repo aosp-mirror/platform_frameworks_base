@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.View;
 import android.widget.LinearLayout;
 

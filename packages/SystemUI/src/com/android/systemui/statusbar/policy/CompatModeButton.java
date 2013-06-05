@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.RemoteException;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -55,7 +55,7 @@ public class CompatModeButton extends ImageView {
         }
         final boolean vis = (mode != ActivityManager.COMPAT_MODE_NEVER
                           && mode != ActivityManager.COMPAT_MODE_ALWAYS);
-        if (DEBUG) Slog.d(TAG, "compat mode is " + mode + "; icon will " + (vis ? "show" : "hide"));
+        if (DEBUG) Log.d(TAG, "compat mode is " + mode + "; icon will " + (vis ? "show" : "hide"));
         setVisibility(vis ? View.VISIBLE : View.GONE);
     }
 }

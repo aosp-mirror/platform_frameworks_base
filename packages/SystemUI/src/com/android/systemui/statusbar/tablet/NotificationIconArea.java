@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;

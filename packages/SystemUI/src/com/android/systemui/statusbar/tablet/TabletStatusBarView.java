@@ -23,7 +23,7 @@ import com.android.systemui.statusbar.DelegateViewHelper;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.View;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
@@ -80,7 +80,7 @@ public class TabletStatusBarView extends FrameLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             if (TabletStatusBar.DEBUG) {
-                Slog.d(TabletStatusBar.TAG, "TabletStatusBarView intercepting touch event: " + ev);
+                Log.d(TabletStatusBar.TAG, "TabletStatusBarView intercepting touch event: " + ev);
             }
             // do not close the recents panel here- the intended behavior is that recents is dismissed
             // on touch up when clicking on status bar buttons
@@ -96,7 +96,7 @@ public class TabletStatusBarView extends FrameLayout {
                 if (mPanels[i] != null && mPanels[i].getVisibility() == View.VISIBLE) {
                     if (eventInside(mIgnoreChildren[i], ev)) {
                         if (TabletStatusBar.DEBUG) {
-                            Slog.d(TabletStatusBar.TAG,
+                            Log.d(TabletStatusBar.TAG,
                                     "TabletStatusBarView eating event for view: "
                                     + mIgnoreChildren[i]);
                         }
@@ -106,7 +106,7 @@ public class TabletStatusBarView extends FrameLayout {
             }
         }
         if (TabletStatusBar.DEBUG) {
-            Slog.d(TabletStatusBar.TAG, "TabletStatusBarView not intercepting event");
+            Log.d(TabletStatusBar.TAG, "TabletStatusBarView not intercepting event");
         }
         if (mDelegateHelper != null && mDelegateHelper.onInterceptTouchEvent(ev)) {
             return true;

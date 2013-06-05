@@ -27,7 +27,6 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -87,11 +86,11 @@ public class NotificationRowLayout
             setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
                 @Override
                 public void onChildViewAdded(View parent, View child) {
-                    Slog.d(TAG, "view added: " + child + "; new count: " + getChildCount());
+                    Log.d(TAG, "view added: " + child + "; new count: " + getChildCount());
                 }
                 @Override
                 public void onChildViewRemoved(View parent, View child) {
-                    Slog.d(TAG, "view removed: " + child + "; new count: " + (getChildCount() - 1));
+                    Log.d(TAG, "view removed: " + child + "; new count: " + (getChildCount() - 1));
                 }
             });
 
@@ -167,7 +166,7 @@ public class NotificationRowLayout
     }
 
     public void onChildDismissed(View v) {
-        if (DEBUG) Slog.v(TAG, "onChildDismissed: " + v + " mRemoveViews=" + mRemoveViews);
+        if (DEBUG) Log.v(TAG, "onChildDismissed: " + v + " mRemoveViews=" + mRemoveViews);
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE && mRemoveViews) {
             veto.performClick();
@@ -231,7 +230,7 @@ public class NotificationRowLayout
      * get removed properly.
      */
     public void setViewRemoval(boolean removeViews) {
-        if (DEBUG) Slog.v(TAG, "setViewRemoval: " + removeViews);
+        if (DEBUG) Log.v(TAG, "setViewRemoval: " + removeViews);
         mRemoveViews = removeViews;
     }
 
@@ -266,7 +265,7 @@ public class NotificationRowLayout
         super.onDraw(c);
         if (DEBUG) logLayoutTransition();
         if (DEBUG) {
-            //Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
+            //Log.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
             //        + getMeasuredHeight() + "px");
             c.save();
             c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,

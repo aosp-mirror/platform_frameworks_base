@@ -29,7 +29,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.animation.AccelerateInterpolator;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -95,7 +95,7 @@ public class NavigationBarView extends LinearLayout {
                     final int vh = mCurrentView.getHeight();
 
                     if (h != vh || w != vw) {
-                        Slog.w(TAG, String.format(
+                        Log.w(TAG, String.format(
                             "*** Invalid layout in navigation bar (%s this=%dx%d cur=%dx%d)",
                             how, w, h, vw, vh));
                         if (WORKAROUND_INVALID_LAYOUT) {
@@ -318,7 +318,7 @@ public class NavigationBarView extends LinearLayout {
 
         mLowProfile = lightsOut;
 
-        if (DEBUG) Slog.d(TAG, "setting lights " + (lightsOut?"out":"on"));
+        if (DEBUG) Log.d(TAG, "setting lights " + (lightsOut?"out":"on"));
 
         final View navButtons = mCurrentView.findViewById(R.id.nav_buttons);
         final View lowLights = mCurrentView.findViewById(R.id.lights_out);
@@ -361,7 +361,7 @@ public class NavigationBarView extends LinearLayout {
         if (hide == mHidden) return;
 
         mHidden = hide;
-        Slog.d(TAG,
+        Log.d(TAG,
             (hide ? "HIDING" : "SHOWING") + " navigation bar");
 
         // bring up the lights no matter what
@@ -402,7 +402,7 @@ public class NavigationBarView extends LinearLayout {
         setMenuVisibility(mShowMenu, true /* force */);
 
         if (DEBUG) {
-            Slog.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
+            Log.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
@@ -416,13 +416,13 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        if (DEBUG) Slog.d(TAG, String.format(
+        if (DEBUG) Log.d(TAG, String.format(
                     "onSizeChanged: (%dx%d) old: (%dx%d)", w, h, oldw, oldh));
 
         final boolean newVertical = w > 0 && h > w;
         if (newVertical != mVertical) {
             mVertical = newVertical;
-            //Slog.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
+            //Log.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
             reorient();
         }
 
@@ -433,7 +433,7 @@ public class NavigationBarView extends LinearLayout {
     /*
     @Override
     protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
-        if (DEBUG) Slog.d(TAG, String.format(
+        if (DEBUG) Log.d(TAG, String.format(
                     "onLayout: %s (%d,%d,%d,%d)", 
                     changed?"changed":"notchanged", left, top, right, bottom));
         super.onLayout(changed, left, top, right, bottom);
@@ -443,7 +443,7 @@ public class NavigationBarView extends LinearLayout {
     // fails, any touch on the display will fix the layout.
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Slog.d(TAG, "onInterceptTouchEvent: " + ev.toString());
+        if (DEBUG) Log.d(TAG, "onInterceptTouchEvent: " + ev.toString());
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             postCheckForInvalidLayout("touch");
         }
