@@ -1498,8 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Mmiliki"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hitilafu"</string>
-    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Programu hii haiwezi kutumiwa na akaunti za wasifu zilizowekewa vikwazo"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Hakuna programu iliyopatikana ili kushughulikia kitendo hiki"</string>
     <string name="revoke" msgid="5404479185228271586">"Batilisha"</string>
 </resources>

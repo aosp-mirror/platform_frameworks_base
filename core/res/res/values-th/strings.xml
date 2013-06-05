@@ -1498,7 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"เจ้าของ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ข้อผิดพลาด"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"แอปนี้ไม่สนับสนุนบัญชีที่มีโปรไฟล์ที่ถูกจำกัด"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"แอปนี้ไม่สนับสนุนบัญชีที่โปรไฟล์ถูกจำกัด"</string>
     <string name="app_not_found" msgid="3429141853498927379">"ไม่พบแอปพลิเคชันสำหรับการทำงานนี้"</string>
     <string name="revoke" msgid="5404479185228271586">"เพิกถอน"</string>
 </resources>
