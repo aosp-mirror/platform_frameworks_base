@@ -7363,24 +7363,39 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // The spans that are inside or intersect the modified region no longer make sense
-        removeIntersectingSpans(start, start + before, SpellCheckSpan.class);
-        removeIntersectingSpans(start, start + before, SuggestionSpan.class);
+        removeIntersectingNonAdjacentSpans(start, start + before, SpellCheckSpan.class);
+        removeIntersectingNonAdjacentSpans(start, start + before, SuggestionSpan.class);
     }
 
     // Removes all spans that are inside or actually overlap the start..end range
-    private <T> void removeIntersectingSpans(int start, int end, Class<T> type) {
+    private <T> void removeIntersectingNonAdjacentSpans(int start, int end, Class<T> type) {
         if (!(mText instanceof Editable)) return;
         Editable text = (Editable) mText;
 
         T[] spans = text.getSpans(start, end, type);
         final int length = spans.length;
         for (int i = 0; i < length; i++) {
-            final int s = text.getSpanStart(spans[i]);
-            final int e = text.getSpanEnd(spans[i]);
-            // Spans that are adjacent to the edited region will be handled in
-            // updateSpellCheckSpans. Result depends on what will be added (space or text)
-            if (e == start || s == end) break;
+            final int spanStart = text.getSpanStart(spans[i]);
+            final int spanEnd = text.getSpanEnd(spans[i]);
+            if (spanEnd == start || spanStart == end) break;
             text.removeSpan(spans[i]);
+        }
+    }
+
+    void removeAdjacentSuggestionSpans(final int pos) {
+        if (!(mText instanceof Editable)) return;
+        final Editable text = (Editable) mText;
+
+        final SuggestionSpan[] spans = text.getSpans(pos, pos, SuggestionSpan.class);
+        final int length = spans.length;
+        for (int i = 0; i < length; i++) {
+            final int spanStart = text.getSpanStart(spans[i]);
+            final int spanEnd = text.getSpanEnd(spans[i]);
+            if (spanEnd == pos || spanStart == pos) {
+                if (SpellChecker.haveWordBoundariesChanged(text, pos, pos, spanStart, spanEnd)) {
+                    text.removeSpan(spans[i]);
+                }
+            }
         }
     }
 
