@@ -12835,8 +12835,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mRecreateDisplayList = true;
             }
             if (displayList == null) {
-                final String name = getClass().getSimpleName();
-                displayList = mAttachInfo.mHardwareRenderer.createDisplayList(name);
+                displayList = mAttachInfo.mHardwareRenderer.createDisplayList(getClass().getName());
                 // If we're creating a new display list, make sure our parent gets invalidated
                 // since they will need to recreate their display list to account for this
                 // new child display list.
