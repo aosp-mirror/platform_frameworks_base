@@ -109,7 +109,7 @@ public class AppWidgetHost {
                     break;
                 }
                 case HANDLE_PROVIDERS_CHANGED: {
-                    onProvidersChanged(msg.arg1);
+                    onProvidersChanged();
                     break;
                 }
                 case HANDLE_VIEW_DATA_CHANGED: {
@@ -396,14 +396,6 @@ public class AppWidgetHost {
      * are added, updated or removed, or widget components are enabled or disabled.)
      */
     protected void onProvidersChanged() {
-        onProvidersChanged(mContext.getUserId());
-    }
-
-    /**
-     * Private method containing a userId
-     * @hide
-     */
-    protected void onProvidersChanged(int userId) {
         // Does nothing
     }
 
