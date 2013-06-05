@@ -21,15 +21,14 @@ package android.hardware;
  * Trigger Sensors are sensors that trigger an event and are automatically
  * disabled. {@link Sensor#TYPE_SIGNIFICANT_MOTION} is one such example.
  * <p>
- * SensorManager lets you access the device's {@link android.hardware.Sensor
- * sensors}. Get an instance of this class by calling
+ * {@link SensorManager} lets you access the device's {@link android.hardware.Sensor
+ * sensors}. Get an instance of {@link SensorManager} by calling
  * {@link android.content.Context#getSystemService(java.lang.String)
  * Context.getSystemService()} with the argument
  * {@link android.content.Context#SENSOR_SERVICE}.
- * Usage details are explained in the example below.
- * </p>
+ * <p>Here's an example setup for a TriggerEventListener:
  *
- * <pre class="prettyprint">
+ * <pre>
  * class TriggerListener extends TriggerEventListener {
  *     public void onTrigger(TriggerEvent event) {
  *          // Do Work.
