@@ -897,7 +897,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
     }
 
     private static WifiDisplay createWifiDisplay(WifiP2pDevice device) {
-        return new WifiDisplay(device.deviceAddress, device.deviceName, null);
+        return new WifiDisplay(device.deviceAddress, device.deviceName, null,
+                device.wfdInfo.isSessionAvailable());
     }
 
     private final BroadcastReceiver mWifiP2pReceiver = new BroadcastReceiver() {

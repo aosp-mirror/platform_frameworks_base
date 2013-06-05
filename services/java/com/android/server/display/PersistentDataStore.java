@@ -105,7 +105,8 @@ final class PersistentDataStore {
                 alias = mRememberedWifiDisplays.get(index).getDeviceAlias();
             }
             if (!Objects.equal(display.getDeviceAlias(), alias)) {
-                return new WifiDisplay(display.getDeviceAddress(), display.getDeviceName(), alias);
+                return new WifiDisplay(display.getDeviceAddress(), display.getDeviceName(),
+                        alias, display.canConnect());
             }
         }
         return display;
