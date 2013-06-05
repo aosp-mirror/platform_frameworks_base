@@ -33,6 +33,8 @@
 namespace android {
 namespace uirenderer {
 
+class Caches;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Base shader
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,9 +79,8 @@ struct SkiaShader {
         return mType;
     }
 
-    virtual void set(TextureCache* textureCache, GradientCache* gradientCache) {
-        mTextureCache = textureCache;
-        mGradientCache = gradientCache;
+    virtual void setCaches(Caches& caches) {
+        mCaches = &caches;
     }
 
     uint32_t getGenerationId() {
@@ -103,8 +104,7 @@ struct SkiaShader {
     void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
 
 protected:
-    SkiaShader() {
-    }
+    SkiaShader();
 
     /**
      * The appropriate texture unit must have been activated prior to invoking
@@ -118,8 +118,7 @@ protected:
     SkShader::TileMode mTileY;
     bool mBlend;
 
-    TextureCache* mTextureCache;
-    GradientCache* mGradientCache;
+    Caches* mCaches;
 
     mat4 mUnitMatrix;
     mat4 mShaderMatrix;
@@ -229,7 +228,11 @@ struct SkiaComposeShader: public SkiaShader {
     ~SkiaComposeShader();
     SkiaShader* copy();
 
-    void set(TextureCache* textureCache, GradientCache* gradientCache);
+    void setCaches(Caches& caches) {
+        SkiaShader::setCaches(caches);
+        mFirst->setCaches(caches);
+        mSecond->setCaches(caches);
+    }
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,

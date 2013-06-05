@@ -69,9 +69,13 @@ void SkiaShader::copyFrom(const SkiaShader& shader) {
     mGenerationId = shader.mGenerationId;
 }
 
+SkiaShader::SkiaShader(): mCaches(NULL) {
+}
+
 SkiaShader::SkiaShader(Type type, SkShader* key, SkShader::TileMode tileX,
         SkShader::TileMode tileY, SkMatrix* matrix, bool blend):
-        mType(type), mKey(key), mTileX(tileX), mTileY(tileY), mBlend(blend) {
+        mType(type), mKey(key), mTileX(tileX), mTileY(tileY), mBlend(blend),
+        mCaches(NULL) {
     setMatrix(matrix);
     mGenerationId = 0;
 }
@@ -87,7 +91,7 @@ void SkiaShader::setupProgram(Program* program, const mat4& modelView, const Sna
 }
 
 void SkiaShader::bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT) {
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    mCaches->bindTexture(texture->id);
     texture->setWrapST(wrapS, wrapT);
 }
 
@@ -114,7 +118,7 @@ SkiaShader* SkiaBitmapShader::copy() {
 }
 
 void SkiaBitmapShader::describe(ProgramDescription& description, const Extensions& extensions) {
-    Texture* texture = mTextureCache->get(mBitmap);
+    Texture* texture = mCaches->textureCache.get(mBitmap);
     if (!texture) return;
     mTexture = texture;
 
@@ -229,7 +233,7 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
         GLuint textureSlot = (*textureUnit)++;
         Caches::getInstance().activeTexture(textureSlot);
 
-        Texture* texture = mGradientCache->get(mColors, mPositions, mCount);
+        Texture* texture = mCaches->gradientCache.get(mColors, mPositions, mCount);
 
         // Uniforms
         bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
@@ -349,7 +353,7 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
         GLuint textureSlot = (*textureUnit)++;
         Caches::getInstance().activeTexture(textureSlot);
 
-        Texture* texture = mGradientCache->get(mColors, mPositions, mCount);
+        Texture* texture = mCaches->gradientCache.get(mColors, mPositions, mCount);
 
         // Uniforms
         bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
@@ -359,7 +363,7 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
        bindUniformColor(program->getUniform("endColor"), mColors[1]);
     }
 
-    Caches::getInstance().dither.setupProgram(program, textureUnit);
+    mCaches->dither.setupProgram(program, textureUnit);
 
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
@@ -392,12 +396,6 @@ SkiaShader* SkiaComposeShader::copy() {
     copy->mMode = mMode;
     copy->cleanup();
     return copy;
-}
-
-void SkiaComposeShader::set(TextureCache* textureCache, GradientCache* gradientCache) {
-    SkiaShader::set(textureCache, gradientCache);
-    mFirst->set(textureCache, gradientCache);
-    mSecond->set(textureCache, gradientCache);
 }
 
 void SkiaComposeShader::describe(ProgramDescription& description, const Extensions& extensions) {

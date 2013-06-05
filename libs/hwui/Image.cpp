@@ -18,6 +18,7 @@
 
 #include <utils/Log.h>
 
+#include "Caches.h"
 #include "Image.h"
 
 namespace android {
@@ -38,7 +39,7 @@ Image::Image(sp<GraphicBuffer> buffer) {
     } else {
         // Create a 2D texture to sample from the EGLImage
         glGenTextures(1, &mTexture);
-        glBindTexture(GL_TEXTURE_2D, mTexture);
+        Caches::getInstance().bindTexture(mTexture);
         glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, mImage);
 
         GLenum status = GL_NO_ERROR;

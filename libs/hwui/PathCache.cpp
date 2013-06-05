@@ -139,7 +139,7 @@ static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
 
 static PathTexture* createTexture(float left, float top, float offset,
         uint32_t width, uint32_t height, uint32_t id) {
-    PathTexture* texture = new PathTexture();
+    PathTexture* texture = new PathTexture(Caches::getInstance());
     texture->left = left;
     texture->top = top;
     texture->offset = offset;
@@ -300,7 +300,7 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
 
     glGenTextures(1, &texture->id);
 
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    Caches::getInstance().bindTexture(texture->id);
     // Textures are Alpha8
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

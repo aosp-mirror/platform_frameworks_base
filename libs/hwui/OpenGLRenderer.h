@@ -888,7 +888,7 @@ private:
      * prior to calling this method.
      */
     inline void bindTexture(GLuint texture) {
-        glBindTexture(GL_TEXTURE_2D, texture);
+        mCaches.bindTexture(texture);
     }
 
     /**
@@ -896,7 +896,7 @@ private:
      * prior to calling this method.
      */
     inline void bindExternalTexture(GLuint texture) {
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
+        mCaches.bindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
     }
 
     /**

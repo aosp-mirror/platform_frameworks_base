@@ -58,7 +58,7 @@ class Caches;
  * Alpha texture used to represent a path.
  */
 struct PathTexture: public Texture {
-    PathTexture(): Texture() {
+    PathTexture(Caches& caches): Texture(caches) {
     }
 
     ~PathTexture() {

@@ -371,6 +371,7 @@ void OpenGLRenderer::resume() {
     dirtyClip();
 
     mCaches.activeTexture(0);
+    mCaches.resetBoundTextures();
 
     mCaches.blend = true;
     glEnable(GL_BLEND);
@@ -3109,7 +3110,7 @@ void OpenGLRenderer::resetShader() {
 void OpenGLRenderer::setupShader(SkiaShader* shader) {
     mDrawModifiers.mShader = shader;
     if (mDrawModifiers.mShader) {
-        mDrawModifiers.mShader->set(&mCaches.textureCache, &mCaches.gradientCache);
+        mDrawModifiers.mShader->setCaches(mCaches);
     }
 }
 

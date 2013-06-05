@@ -34,6 +34,8 @@
 namespace android {
 namespace uirenderer {
 
+class Caches;
+
 /**
  * An asset atlas holds a collection of framework bitmaps in a single OpenGL
  * texture. Each bitmap is associated with a location, defined in pixels,
@@ -157,7 +159,7 @@ public:
     Texture* getEntryTexture(SkBitmap* const bitmap) const;
 
 private:
-    void createEntries(int* map, int count);
+    void createEntries(Caches& caches, int* map, int count);
 
     Texture* mTexture;
     Image* mImage;
