@@ -595,12 +595,13 @@ public class HorizontalScrollView extends FrameLayout {
                     final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
                             (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
 
+                    // Calling overScrollBy will call onOverScrolled, which
+                    // calls onScrollChanged if applicable.
                     if (overScrollBy(deltaX, 0, mScrollX, 0, range, 0,
                             mOverscrollDistance, 0, true)) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
                     }
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
                     if (canOverscroll) {
                         final int pulledToX = oldX + deltaX;
@@ -732,9 +733,12 @@ public class HorizontalScrollView extends FrameLayout {
             boolean clampedX, boolean clampedY) {
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
+            final int oldX = mScrollX;
+            final int oldY = mScrollY;
             mScrollX = scrollX;
             mScrollY = scrollY;
             invalidateParentIfNeeded();
+            onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             if (clampedX) {
                 mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0);
             }
