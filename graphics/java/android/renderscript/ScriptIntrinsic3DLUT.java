@@ -40,7 +40,7 @@ public final class ScriptIntrinsic3DLUT extends ScriptIntrinsic {
      *
      * The defaults tables are identity.
      *
-     * @param rs The Renderscript context
+     * @param rs The RenderScript context
      * @param e Element type for intputs and outputs
      *
      * @return ScriptIntrinsic3DLUT
@@ -54,6 +54,13 @@ public final class ScriptIntrinsic3DLUT extends ScriptIntrinsic {
 
         return new ScriptIntrinsic3DLUT(id, rs, e);
     }
+
+    /**
+     * Sets the {@link android.renderscript.Allocation} to be used as the lookup table.
+     *
+     * The lookup table must use the same {@link android.renderscript.Element} as the intrinsic.
+     *
+     */
 
     public void setLUT(Allocation lut) {
         final Type t = lut.getType();

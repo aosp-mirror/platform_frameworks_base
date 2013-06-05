@@ -39,7 +39,7 @@ import android.util.TypedValue;
  * faces, and different font sizes. During creation, the Android system quieries device's screen DPI to
  * ensure proper sizing across multiple device configurations.</p>
  * <p>Fonts are rendered using screen-space positions and no state setup beyond binding a
- * font to the Renderscript is required. A note of caution on performance, though the state changes
+ * font to the RenderScript is required. A note of caution on performance, though the state changes
  * are transparent to the user, they do happen internally, and it is more efficient to
  * render large batches of text in sequence. It is also more efficient to render multiple
  * characters at once instead of one by one to improve draw call batching.</p>

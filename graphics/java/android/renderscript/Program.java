@@ -276,7 +276,7 @@ public class Program extends BaseObj {
             try {
                 mShader = new String(str, 0, strLength, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                Log.e("Renderscript shader creation", "Could not decode shader string");
+                Log.e("RenderScript shader creation", "Could not decode shader string");
             }
 
             return this;

@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the native Renderscript long3 type back to the Android system.
+ * Class for exposing the native RenderScript long3 type back to the Android system.
  **/
 public class Long3 {
     public Long3() {

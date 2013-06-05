@@ -42,7 +42,7 @@ public final class ScriptIntrinsicConvolve5x5 extends ScriptIntrinsic {
      * <p> [ 0,  0,  0,  0,  0  ]
      * </code>
      *
-     * @param rs The Renderscript context
+     * @param rs The RenderScript context
      * @param e Element type for intputs and outputs
      *
      * @return ScriptIntrinsicConvolve5x5
