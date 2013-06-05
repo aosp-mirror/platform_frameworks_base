@@ -130,10 +130,10 @@ public class TelephonyManager {
      * call. By default, the MMS app consumes this message and sends a text message to the caller. A
      * third party app can provide this functionality in lieu of MMS app by consuming this Intent
      * and sending the message using their own messaging system.  The intent contains a URI
-     * describing the recipient, and an EXTRA containg the message itself.
-     * <p>
+     * describing the recipient, and an EXTRA containing the message itself.
+     * <p class="note"><strong>Note:</strong>
      * The intent-filter which consumes this Intent needs to be in a service which requires the
-     * permission SEND_RESPOND_VIA_MESSAGE.
+     * permission {@link android.Manifest.permission#SEND_RESPOND_VIA_MESSAGE}.</p>
      *
      * <p>
      * {@link android.content.Intent#getData} is a URI describing the recipient of the message.
