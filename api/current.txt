@@ -27279,6 +27279,7 @@ package android.view.accessibility {
     method public int describeContents();
     method public static java.lang.String eventTypeToString(int);
     method public int getAction();
+    method public int getContentChangeType();
     method public long getEventTime();
     method public int getEventType();
     method public int getMovementGranularity();
@@ -27290,11 +27291,14 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityEvent obtain(android.view.accessibility.AccessibilityEvent);
     method public static android.view.accessibility.AccessibilityEvent obtain();
     method public void setAction(int);
+    method public void setContentChangeType(int);
     method public void setEventTime(long);
     method public void setEventType(int);
     method public void setMovementGranularity(int);
     method public void setPackageName(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CONTENT_CHANGE_TYPE_NODE = 1; // 0x1
+    field public static final int CONTENT_CHANGE_TYPE_SUBTREE = 0; // 0x0
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int INVALID_POSITION = -1; // 0xffffffff
     field public static final deprecated int MAX_TEXT_LENGTH = 500; // 0x1f4
@@ -27356,10 +27360,12 @@ package android.view.accessibility {
     method public int getActions();
     method public void getBoundsInParent(android.graphics.Rect);
     method public void getBoundsInScreen(android.graphics.Rect);
+    method public android.os.Bundle getBundle();
     method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
     method public int getChildCount();
     method public java.lang.CharSequence getClassName();
     method public java.lang.CharSequence getContentDescription();
+    method public int getInputType();
     method public android.view.accessibility.AccessibilityNodeInfo getLabelFor();
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getMovementGranularities();
@@ -27403,6 +27409,7 @@ package android.view.accessibility {
     method public void setEnabled(boolean);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
+    method public void setInputType(int);
     method public void setLabelFor(android.view.View);
     method public void setLabelFor(android.view.View, int);
     method public void setLabeledBy(android.view.View);

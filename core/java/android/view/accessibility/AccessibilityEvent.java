@@ -326,6 +326,7 @@ import java.util.List;
  * <em>Properties:</em></br>
  * <ul>
  *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getContentChangeType()} - The type of content change.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
@@ -661,6 +662,18 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_TOUCH_INTERACTION_END = 0x00200000;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The subtree rooted at the source node changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_SUBTREE = 0;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * Only the source node changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_NODE = 1;
+
+    /**
      * Mask for {@link AccessibilityEvent} all types.
      *
      * @see #TYPE_VIEW_CLICKED
@@ -695,6 +708,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private long mEventTime;
     int mMovementGranularity;
     int mAction;
+    int mContentChangeType;
 
     private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
 
@@ -714,6 +728,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mEventType = event.mEventType;
         mMovementGranularity = event.mMovementGranularity;
         mAction = event.mAction;
+        mContentChangeType = event.mContentChangeType;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
     }
@@ -774,6 +789,33 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public int getEventType() {
         return mEventType;
+    }
+
+    /**
+     * Gets the type of node tree change signaled by an
+     * {@link #TYPE_WINDOW_CONTENT_CHANGED} event.
+     *
+     * @see #CONTENT_CHANGE_TYPE_NODE
+     * @see #CONTENT_CHANGE_TYPE_SUBTREE
+     *
+     * @return The change type.
+     */
+    public int getContentChangeType() {
+        return mContentChangeType;
+    }
+
+    /**
+     * Sets the type of node tree change signaled by an
+     * {@link #TYPE_WINDOW_CONTENT_CHANGED} event.
+     *
+     * @see #CONTENT_CHANGE_TYPE_NODE
+     * @see #CONTENT_CHANGE_TYPE_SUBTREE
+     *
+     * @param changeType The change type.
+     */
+    public void setContentChangeType(int changeType) {
+        enforceNotSealed();
+        mContentChangeType = changeType;
     }
 
     /**
@@ -943,6 +985,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mEventType = 0;
         mMovementGranularity = 0;
         mAction = 0;
+        mContentChangeType = 0;
         mPackageName = null;
         mEventTime = 0;
         while (!mRecords.isEmpty()) {
@@ -961,6 +1004,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mEventType = parcel.readInt();
         mMovementGranularity = parcel.readInt();
         mAction = parcel.readInt();
+        mContentChangeType = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         mConnectionId = parcel.readInt();
@@ -1013,6 +1057,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(mEventType);
         parcel.writeInt(mMovementGranularity);
         parcel.writeInt(mAction);
+        parcel.writeInt(mContentChangeType);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mConnectionId);
@@ -1074,6 +1119,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");
+            builder.append("; ContentChangeType: ").append(mContentChangeType);
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
             builder.append("; mSourceNodeId: ").append(mSourceNodeId);
             for (int i = 0; i < mRecords.size(); i++) {

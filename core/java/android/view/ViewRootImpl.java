@@ -1728,10 +1728,6 @@ public final class ViewRootImpl implements ViewParent,
         if (triggerGlobalLayoutListener) {
             attachInfo.mRecomputeGlobalAttributes = false;
             attachInfo.mTreeObserver.dispatchOnGlobalLayout();
-
-            if (AccessibilityManager.getInstance(host.mContext).isEnabled()) {
-                postSendWindowContentChangedCallback(mView);
-            }
         }
 
         if (computesInternalInsets) {
@@ -5712,15 +5708,7 @@ public final class ViewRootImpl implements ViewParent,
             mSendWindowContentChangedAccessibilityEvent =
                 new SendWindowContentChangedAccessibilityEvent();
         }
-        View oldSource = mSendWindowContentChangedAccessibilityEvent.mSource;
-        if (oldSource == null) {
-            mSendWindowContentChangedAccessibilityEvent.mSource = source;
-            mHandler.postDelayed(mSendWindowContentChangedAccessibilityEvent,
-                    ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
-        } else {
-            mSendWindowContentChangedAccessibilityEvent.mSource =
-                    getCommonPredecessor(oldSource, source);
-        }
+        mSendWindowContentChangedAccessibilityEvent.runOrPost(source);
     }
 
     /**
@@ -6404,12 +6392,33 @@ public final class ViewRootImpl implements ViewParent,
 
     private class SendWindowContentChangedAccessibilityEvent implements Runnable {
         public View mSource;
+        public long mLastEventTimeMillis;
 
         public void run() {
+            mLastEventTimeMillis = SystemClock.uptimeMillis();
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                AccessibilityEvent event = AccessibilityEvent.obtain();
+                event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                event.setContentChangeType(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+                mSource.sendAccessibilityEventUnchecked(event);
+            }
+            mSource.resetSubtreeAccessibilityStateChanged();
+            mSource = null;
+        }
+
+        public void runOrPost(View source) {
             if (mSource != null) {
-                mSource.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                mSource.resetAccessibilityStateChanged();
-                mSource = null;
+                mSource = getCommonPredecessor(mSource, source);
+                return;
+            }
+            mSource = source;
+            final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
+            final long minEventIntevalMillis =
+                    ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
+            if (timeSinceLastMillis >= minEventIntevalMillis) {
+                run();
+            } else {
+                mSource.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
             }
         }
     }

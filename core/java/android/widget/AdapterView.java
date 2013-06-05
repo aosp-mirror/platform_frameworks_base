@@ -31,7 +31,6 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeProvider;
 
 /**
  * An AdapterView is a view whose children are determined by an {@link Adapter}.
@@ -1034,8 +1033,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             checkSelectionChanged();
         }
 
-        //TODO: Hmm, we do not know the old state so this is sub-optimal
-        notifyAccessibilityStateChanged();
+        childAccessibilityStateChanged(this);
     }
 
     void checkSelectionChanged() {
