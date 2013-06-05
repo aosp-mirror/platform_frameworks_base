@@ -47,7 +47,8 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Caches::Caches(): Singleton<Caches>(), mExtensions(Extensions::getInstance()), mInitialized(false) {
+Caches::Caches(): Singleton<Caches>(),
+        mExtensions(Extensions::getInstance()), mInitialized(false) {
     init();
     initFont();
     initConstraints();
@@ -99,6 +100,8 @@ bool Caches::init() {
     patchCache.init(*this);
 
     mInitialized = true;
+
+    resetBoundTextures();
 
     return true;
 }
@@ -489,6 +492,24 @@ void Caches::activeTexture(GLuint textureUnit) {
         glActiveTexture(gTextureUnits[textureUnit]);
         mTextureUnit = textureUnit;
     }
+}
+
+void Caches::bindTexture(GLuint texture) {
+    if (mBoundTextures[mTextureUnit] != texture) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        mBoundTextures[mTextureUnit] = texture;
+    }
+}
+
+void Caches::bindTexture(GLenum target, GLuint texture) {
+    if (mBoundTextures[mTextureUnit] != texture) {
+        glBindTexture(target, texture);
+        mBoundTextures[mTextureUnit] = texture;
+    }
+}
+
+void Caches::resetBoundTextures() {
+    memset(mBoundTextures, 0, REQUIRED_TEXTURE_UNITS_COUNT * sizeof(GLuint));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

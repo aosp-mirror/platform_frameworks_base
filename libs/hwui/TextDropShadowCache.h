@@ -30,6 +30,8 @@
 namespace android {
 namespace uirenderer {
 
+class Caches;
+
 struct ShadowText {
     ShadowText(): len(0), radius(0.0f), textSize(0.0f), typeface(NULL),
             flags(0), italicStyle(0.0f), scaleX(0), text(NULL), positions(NULL) {
@@ -114,7 +116,7 @@ inline hash_t hash_type(const ShadowText& entry) {
  * Alpha texture used to represent a shadow.
  */
 struct ShadowTexture: public Texture {
-    ShadowTexture(): Texture() {
+    ShadowTexture(Caches& caches): Texture(caches) {
     }
 
     float left;

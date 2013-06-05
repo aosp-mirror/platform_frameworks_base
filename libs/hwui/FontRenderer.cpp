@@ -376,7 +376,7 @@ void FontRenderer::checkTextureUpdate() {
             if (cacheTexture->getTextureId() != lastTextureId) {
                 lastTextureId = cacheTexture->getTextureId();
                 caches.activeTexture(0);
-                glBindTexture(GL_TEXTURE_2D, lastTextureId);
+                caches.bindTexture(lastTextureId);
             }
 
             if (cacheTexture->upload()) {
@@ -429,7 +429,7 @@ void FontRenderer::issueDrawCommand() {
                 first = false;
             }
 
-            glBindTexture(GL_TEXTURE_2D, texture->getTextureId());
+            caches.bindTexture(texture->getTextureId());
             texture->setLinearFiltering(mLinearFiltering, false);
 
             TextureVertex* mesh = texture->mesh();

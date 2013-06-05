@@ -55,6 +55,7 @@ namespace uirenderer {
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
 
+// GL ES 2.0 defines that at least 16 texture units must be supported
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
 
 #define REGION_MESH_QUAD_COUNT 512
@@ -79,6 +80,7 @@ static const GLsizei gVertexAAWidthOffset = 2 * sizeof(float);
 static const GLsizei gVertexAALengthOffset = 3 * sizeof(float);
 static const GLsizei gMeshCount = 4;
 
+// Must define as many texture units as specified by REQUIRED_TEXTURE_UNITS_COUNT
 static const GLenum gTextureUnits[] = {
     GL_TEXTURE0,
     GL_TEXTURE1,
@@ -223,6 +225,22 @@ public:
     void activeTexture(GLuint textureUnit);
 
     /**
+     * Binds the specified texture as a GL_TEXTURE_2D texture.
+     */
+    void bindTexture(GLuint texture);
+
+    /**
+     * Binds the specified texture..
+     */
+    void bindTexture(GLenum target, GLuint texture);
+
+    /**
+     * Signals that the cache of bound textures should be cleared.
+     * Other users of the context may have altered which textures are bound.
+     */
+    void resetBoundTextures();
+
+    /**
      * Sets the scissor for the current surface.
      */
     bool setScissor(GLint x, GLint y, GLint width, GLint height);
@@ -363,6 +381,8 @@ private:
     bool mInitialized;
 
     uint32_t mFunctorsCount;
+
+    GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
 }; // class Caches
 
 }; // namespace uirenderer

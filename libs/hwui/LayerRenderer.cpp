@@ -436,7 +436,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
         if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         caches.activeTexture(0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        caches.bindTexture(texture);
 
         glPixelStorei(GL_PACK_ALIGNMENT, bitmap->bytesPerPixel());
 

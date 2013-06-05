@@ -173,7 +173,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     GradientInfo info;
     getGradientInfo(colors, count, info);
 
-    Texture* texture = new Texture;
+    Texture* texture = new Texture();
     texture->width = info.width;
     texture->height = 2;
     texture->blend = info.hasAlpha;
@@ -286,7 +286,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
     glGenTextures(1, &texture->id);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    Caches::getInstance().bindTexture(texture->id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     if (mUseFloatTexture) {

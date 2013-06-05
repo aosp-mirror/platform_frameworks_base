@@ -30,6 +30,7 @@
 namespace android {
 namespace uirenderer {
 
+class Caches;
 class PixelBuffer;
 
 /**
@@ -178,9 +179,10 @@ private:
     TextureVertex* mMesh;
     uint32_t mCurrentQuad;
     uint32_t mMaxQuadCount;
+    Caches& mCaches;
     CacheBlock* mCacheBlocks;
-    Rect mDirtyRect;
     bool mHasES3;
+    Rect mDirtyRect;
 };
 
 }; // namespace uirenderer

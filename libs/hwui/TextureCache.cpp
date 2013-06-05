@@ -139,7 +139,7 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
             }
         }
 
-        texture = new Texture;
+        texture = new Texture();
         texture->bitmapSize = size;
         generateTexture(bitmap, texture, false);
 
@@ -162,7 +162,7 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
 }
 
 Texture* TextureCache::getTransient(SkBitmap* bitmap) {
-    Texture* texture = new Texture;
+    Texture* texture = new Texture();
     texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
     texture->cleanup = true;
 
@@ -235,7 +235,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     texture->width = bitmap->width();
     texture->height = bitmap->height();
 
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    Caches::getInstance().bindTexture(texture->id);
 
     switch (bitmap->getConfig()) {
     case SkBitmap::kA8_Config:

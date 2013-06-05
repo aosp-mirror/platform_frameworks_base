@@ -15,6 +15,7 @@
  */
 
 #include "AssetAtlas.h"
+#include "Caches.h"
 
 #include <GLES2/gl2ext.h>
 
@@ -33,12 +34,14 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int* map, int count) {
     mImage = new Image(buffer);
 
     if (mImage->getTexture()) {
-        mTexture = new Texture();
+        Caches& caches = Caches::getInstance();
+
+        mTexture = new Texture(caches);
         mTexture->id = mImage->getTexture();
         mTexture->width = buffer->getWidth();
         mTexture->height = buffer->getHeight();
 
-        createEntries(map, count);
+        createEntries(caches, map, count);
     } else {
         ALOGW("Could not create atlas image");
 
@@ -82,7 +85,7 @@ Texture* AssetAtlas::getEntryTexture(SkBitmap* const bitmap) const {
  * instead of applying the changes to the virtual textures.
  */
 struct DelegateTexture: public Texture {
-    DelegateTexture(Texture* delegate): Texture(), mDelegate(delegate) { }
+    DelegateTexture(Caches& caches, Texture* delegate): Texture(caches), mDelegate(delegate) { }
 
     virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
             bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
@@ -100,7 +103,7 @@ private:
 /**
  * TODO: This method does not take the rotation flag into account
  */
-void AssetAtlas::createEntries(int* map, int count) {
+void AssetAtlas::createEntries(Caches& caches, int* map, int count) {
     const float width = float(mTexture->width);
     const float height = float(mTexture->height);
 
@@ -117,7 +120,7 @@ void AssetAtlas::createEntries(int* map, int count) {
                 x / width, (x + bitmap->width()) / width,
                 y / height, (y + bitmap->height()) / height);
 
-        Texture* texture = new DelegateTexture(mTexture);
+        Texture* texture = new DelegateTexture(caches, mTexture);
         Entry* entry = new Entry(bitmap, x, y, rotated, texture, mapper, *this);
 
         texture->id = mTexture->id;

@@ -17,6 +17,7 @@
 #include <SkGlyph.h>
 
 #include "CacheTexture.h"
+#include "../Caches.h"
 #include "../Debug.h"
 #include "../Extensions.h"
 #include "../PixelBuffer.h"
@@ -110,7 +111,8 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove)
 CacheTexture::CacheTexture(uint16_t width, uint16_t height, uint32_t maxQuadCount) :
             mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height),
             mLinearFiltering(false), mDirty(false), mNumGlyphs(0),
-            mMesh(NULL), mCurrentQuad(0), mMaxQuadCount(maxQuadCount) {
+            mMesh(NULL), mCurrentQuad(0), mMaxQuadCount(maxQuadCount),
+            mCaches(Caches::getInstance()) {
     mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
             mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
 
@@ -166,7 +168,7 @@ void CacheTexture::setLinearFiltering(bool linearFiltering, bool bind) {
        mLinearFiltering = linearFiltering;
 
        const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
-       if (bind) glBindTexture(GL_TEXTURE_2D, getTextureId());
+       if (bind) mCaches.bindTexture(getTextureId());
        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
    }
@@ -186,7 +188,7 @@ void CacheTexture::allocateTexture() {
     if (!mTextureId) {
         glGenTextures(1, &mTextureId);
 
-        glBindTexture(GL_TEXTURE_2D, mTextureId);
+        mCaches.bindTexture(mTextureId);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Initialize texture dimensions
         glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mWidth, mHeight, 0,

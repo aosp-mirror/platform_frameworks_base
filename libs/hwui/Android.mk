@@ -41,6 +41,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		SkiaShader.cpp \
 		Snapshot.cpp \
 		Stencil.cpp \
+		Texture.cpp \
 		TextureCache.cpp \
 		TextDropShadowCache.cpp
 
