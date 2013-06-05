@@ -29,6 +29,10 @@ jfieldID gOptions_ditherFieldID;
 jfieldID gOptions_purgeableFieldID;
 jfieldID gOptions_shareableFieldID;
 jfieldID gOptions_preferQualityOverSpeedFieldID;
+jfieldID gOptions_scaledFieldID;
+jfieldID gOptions_densityFieldID;
+jfieldID gOptions_screenDensityFieldID;
+jfieldID gOptions_targetDensityFieldID;
 jfieldID gOptions_widthFieldID;
 jfieldID gOptions_heightFieldID;
 jfieldID gOptions_mimeFieldID;
@@ -152,10 +156,47 @@ static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
     return pr;
 }
 
+static SkBitmap::Config configForScaledOutput(SkBitmap::Config config) {
+    switch (config) {
+        case SkBitmap::kNo_Config:
+        case SkBitmap::kIndex8_Config:
+        case SkBitmap::kRLE_Index8_Config:
+            return SkBitmap::kARGB_8888_Config;
+        default:
+            break;
+    }
+    return config;
+}
+
+class ScaleCheckingAllocator : public SkBitmap::HeapAllocator {
+public:
+    ScaleCheckingAllocator(float scale, int size)
+            : mScale(scale), mSize(size) {
+    }
+
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+        // accounts for scale in final allocation, using eventual size and config
+        const int bytesPerPixel = SkBitmap::ComputeBytesPerPixel(
+                configForScaledOutput(bitmap->getConfig()));
+        const int requestedSize = bytesPerPixel *
+                int(bitmap->width() * mScale + 0.5f) *
+                int(bitmap->height() * mScale + 0.5f);
+        if (requestedSize > mSize) {
+            ALOGW("bitmap for alloc reuse (%d bytes) can't fit scaled bitmap (%d bytes)",
+                    mSize, requestedSize);
+            return false;
+        }
+        return SkBitmap::HeapAllocator::allocPixelRef(bitmap, ctable);
+    }
+private:
+    const float mScale;
+    const int mSize;
+};
+
 class RecyclingPixelAllocator : public SkBitmap::Allocator {
 public:
     RecyclingPixelAllocator(SkPixelRef* pixelRef, unsigned int size)
-        : mPixelRef(pixelRef), mSize(size) {
+            : mPixelRef(pixelRef), mSize(size) {
         SkSafeRef(mPixelRef);
     }
 
@@ -165,8 +206,8 @@ public:
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
         if (!bitmap->getSize64().is32() || bitmap->getSize() > mSize) {
-            ALOGW("bitmap marked for reuse (%d bytes) too small to contain new bitmap (%d bytes)",
-                    bitmap->getSize(), mSize);
+            ALOGW("bitmap marked for reuse (%d bytes) can't fit new bitmap (%d bytes)",
+                    mSize, bitmap->getSize());
             return false;
         }
         bitmap->setPixelRef(mPixelRef);
@@ -183,8 +224,7 @@ private:
 // i.e. dynamically allocated, since its lifetime may exceed the current stack
 // frame.
 static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
-        jobject options, bool allowPurgeable, bool forcePurgeable = false,
-        bool applyScale = false, float scale = 1.0f) {
+        jobject options, bool allowPurgeable, bool forcePurgeable = false) {
 
     int sampleSize = 1;
 
@@ -193,9 +233,8 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
     bool doDither = true;
     bool isMutable = false;
-    bool willScale = applyScale && scale != 1.0f;
-    bool isPurgeable = !willScale &&
-            (forcePurgeable || (allowPurgeable && optionsPurgeable(env, options)));
+    float scale = 1.0f;
+    bool isPurgeable = forcePurgeable || (allowPurgeable && optionsPurgeable(env, options));
     bool preferQualityOverSpeed = false;
 
     jobject javaBitmap = NULL;
@@ -218,12 +257,19 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         preferQualityOverSpeed = env->GetBooleanField(options,
                 gOptions_preferQualityOverSpeedFieldID);
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
+
+        if (env->GetBooleanField(options, gOptions_scaledFieldID)) {
+            const int density = env->GetIntField(options, gOptions_densityFieldID);
+            const int targetDensity = env->GetIntField(options, gOptions_targetDensityFieldID);
+            const int screenDensity = env->GetIntField(options, gOptions_screenDensityFieldID);
+            if (density != 0 && targetDensity != 0 && density != screenDensity) {
+                scale = (float) targetDensity / density;
+            }
+        }
     }
 
-    // TODO: allow scaling with reuse, ideally avoiding decode in not-enough-space condition
-    if (willScale && javaBitmap != NULL) {
-        return nullObjectReturn("Cannot pre-scale a reused bitmap");
-    }
+    const bool willScale = scale != 1.0f;
+    isPurgeable &= !willScale;
 
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     if (decoder == NULL) {
@@ -254,16 +300,6 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
     NinePatchPeeker peeker(decoder);
     decoder->setPeeker(&peeker);
-    JavaPixelAllocator javaAllocator(env);
-    RecyclingPixelAllocator recyclingAllocator(outputBitmap->pixelRef(), existingBufferSize);
-
-    // allocator to be used for final allocation associated with output
-    SkBitmap::Allocator* allocator = (javaBitmap != NULL) ?
-            (SkBitmap::Allocator*)&recyclingAllocator : (SkBitmap::Allocator*)&javaAllocator;
-
-    if (!isPurgeable && !willScale) {
-        decoder->setAllocator(allocator);
-    }
 
     AutoDecoderCancel adc(options, decoder);
 
@@ -275,6 +311,22 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     }
 
     SkImageDecoder::Mode decodeMode = isPurgeable ? SkImageDecoder::kDecodeBounds_Mode : mode;
+
+
+    JavaPixelAllocator javaAllocator(env);
+    RecyclingPixelAllocator recyclingAllocator(outputBitmap->pixelRef(), existingBufferSize);
+    ScaleCheckingAllocator scaleCheckingAllocator(scale, existingBufferSize);
+    SkBitmap::Allocator* outputAllocator = (javaBitmap != NULL) ?
+            (SkBitmap::Allocator*)&recyclingAllocator : (SkBitmap::Allocator*)&javaAllocator;
+    if (decodeMode != SkImageDecoder::kDecodeBounds_Mode) {
+        if (!willScale) {
+            decoder->setAllocator(outputAllocator);
+        } else if (javaBitmap != NULL) {
+            // check for eventual scaled bounds at allocation time, so we don't decode the bitmap
+            // only to find the scaled result too large to fit in the allocation
+            decoder->setAllocator(&scaleCheckingAllocator);
+        }
+    }
 
     SkBitmap decodingBitmap;
     if (!decoder->decode(stream, &decodingBitmap, prefConfig, decodeMode)) {
@@ -353,20 +405,11 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         const float sx = scaledWidth / float(decodingBitmap.width());
         const float sy = scaledHeight / float(decodingBitmap.height());
 
-        SkBitmap::Config config = decodingBitmap.config();
-        switch (config) {
-            case SkBitmap::kNo_Config:
-            case SkBitmap::kIndex8_Config:
-            case SkBitmap::kRLE_Index8_Config:
-                config = SkBitmap::kARGB_8888_Config;
-                break;
-            default:
-                break;
-        }
-
+        // TODO: avoid copying when scaled size equals decodingBitmap size
+        SkBitmap::Config config = configForScaledOutput(decodingBitmap.config());
         outputBitmap->setConfig(config, scaledWidth, scaledHeight);
         outputBitmap->setIsOpaque(decodingBitmap.isOpaque());
-        if (!outputBitmap->allocPixels(allocator, NULL)) {
+        if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
         outputBitmap->eraseColor(0);
@@ -422,24 +465,18 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
             isMutable, ninePatchChunk, layoutBounds, -1);
 }
 
-static jobject nativeDecodeStreamScaled(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
-        jobject padding, jobject options, jboolean applyScale, jfloat scale) {
+static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
+        jobject padding, jobject options) {
 
     jobject bitmap = NULL;
     SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage, 0);
 
     if (stream) {
         // for now we don't allow purgeable with java inputstreams
-        bitmap = doDecode(env, stream, padding, options, false, false, applyScale, scale);
+        bitmap = doDecode(env, stream, padding, options, false, false);
         stream->unref();
     }
     return bitmap;
-}
-
-static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
-        jobject padding, jobject options) {
-
-    return nativeDecodeStreamScaled(env, clazz, is, storage, padding, options, false, 1.0f);
 }
 
 static ssize_t getFDSize(int fd) {
@@ -516,8 +553,8 @@ static SkStream* copyAssetToStream(Asset* asset) {
     return stream;
 }
 
-static jobject nativeDecodeAssetScaled(JNIEnv* env, jobject clazz, jint native_asset,
-        jobject padding, jobject options, jboolean applyScale, jfloat scale) {
+static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jint native_asset,
+        jobject padding, jobject options) {
 
     SkStream* stream;
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
@@ -535,13 +572,7 @@ static jobject nativeDecodeAssetScaled(JNIEnv* env, jobject clazz, jint native_a
         stream = new AssetStreamAdaptor(asset);
     }
     SkAutoUnref aur(stream);
-    return doDecode(env, stream, padding, options, true, forcePurgeable, applyScale, scale);
-}
-
-static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jint native_asset,
-        jobject padding, jobject options) {
-
-    return nativeDecodeAssetScaled(env, clazz, native_asset, padding, options, false, 1.0f);
+    return doDecode(env, stream, padding, options, true, forcePurgeable);
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
@@ -575,10 +606,6 @@ static JNINativeMethod gMethods[] = {
         "(Ljava/io/InputStream;[BLandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeStream
     },
-    {   "nativeDecodeStream",
-        "(Ljava/io/InputStream;[BLandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;ZF)Landroid/graphics/Bitmap;",
-        (void*)nativeDecodeStreamScaled
-    },
 
     {   "nativeDecodeFileDescriptor",
         "(Ljava/io/FileDescriptor;Landroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
@@ -588,11 +615,6 @@ static JNINativeMethod gMethods[] = {
     {   "nativeDecodeAsset",
         "(ILandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeAsset
-    },
-
-    {   "nativeDecodeAsset",
-        "(ILandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;ZF)Landroid/graphics/Bitmap;",
-        (void*)nativeDecodeAssetScaled
     },
 
     {   "nativeDecodeByteArray",
@@ -637,6 +659,10 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_shareableFieldID = getFieldIDCheck(env, options_class, "inInputShareable", "Z");
     gOptions_preferQualityOverSpeedFieldID = getFieldIDCheck(env, options_class,
             "inPreferQualityOverSpeed", "Z");
+    gOptions_scaledFieldID = getFieldIDCheck(env, options_class, "inScaled", "Z");
+    gOptions_densityFieldID = getFieldIDCheck(env, options_class, "inDensity", "I");
+    gOptions_screenDensityFieldID = getFieldIDCheck(env, options_class, "inScreenDensity", "I");
+    gOptions_targetDensityFieldID = getFieldIDCheck(env, options_class, "inTargetDensity", "I");
     gOptions_widthFieldID = getFieldIDCheck(env, options_class, "outWidth", "I");
     gOptions_heightFieldID = getFieldIDCheck(env, options_class, "outHeight", "I");
     gOptions_mimeFieldID = getFieldIDCheck(env, options_class, "outMimeType", "Ljava/lang/String;");
