@@ -25565,6 +25565,7 @@ package android.view {
   }
 
   public final class MotionEvent extends android.view.InputEvent implements android.os.Parcelable {
+    method public static java.lang.String actionToString(int);
     method public final void addBatch(long, float, float, float, float, int);
     method public final void addBatch(long, android.view.MotionEvent.PointerCoords[], int);
     method public static int axisFromString(java.lang.String);
