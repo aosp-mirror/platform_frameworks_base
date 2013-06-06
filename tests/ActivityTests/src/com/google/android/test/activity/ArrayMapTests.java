@@ -247,6 +247,18 @@ public class ArrayMapTests {
         }
     }
 
+    private static void dump(ArrayMap map1, ArrayMap map2) {
+        Log.e("test", "ArrayMap of " + map1.size() + " entries:");
+        Set<Map.Entry> mapSet = map1.entrySet();
+        for (int i=0; i<map2.size(); i++) {
+            Log.e("test", "    " + map1.keyAt(i) + " -> " + map1.valueAt(i));
+        }
+        Log.e("test", "ArrayMap of " + map2.size() + " entries:");
+        for (int i=0; i<map2.size(); i++) {
+            Log.e("test", "    " + map2.keyAt(i) + " -> " + map2.valueAt(i));
+        }
+    }
+
     public static void run() {
         HashMap<ControlledHash, Integer> mHashMap = new HashMap<ControlledHash, Integer>();
         ArrayMap<ControlledHash, Integer> mArrayMap = new ArrayMap<ControlledHash, Integer>();
@@ -297,7 +309,63 @@ public class ArrayMapTests {
             dump(mHashMap, mArrayMap);
         }
 
+        if (!equalsTest()) {
+            return;
+        }
+
+        // copy constructor test
+        ArrayMap newMap = new ArrayMap<Integer, String>();
+        for (int i = 0; i < 10; ++i) {
+            newMap.put(i, String.valueOf(i));
+        }
+        ArrayMap mapCopy = new ArrayMap(newMap);
+        if (!compare(mapCopy, newMap)) {
+            Log.e("test", "ArrayMap copy constructor failure: expected " +
+                    newMap + ", got " + mapCopy);
+            dump(mHashMap, mArrayMap);
+            return;
+        }
+
         Log.e("test", "Test successful; printing final map.");
         dump(mHashMap, mArrayMap);
+    }
+
+    private static boolean equalsTest() {
+        ArrayMap<Integer, String> map1 = new ArrayMap<Integer, String>();
+        ArrayMap<Integer, String> map2 = new ArrayMap<Integer, String>();
+        HashMap<Integer, String> map3 = new HashMap<Integer, String>();
+        if (!compare(map1, map2) || !compare(map1, map3) || !compare(map3, map2)) {
+            Log.e("test", "ArrayMap equals failure for empty maps " + map1 + ", " +
+                    map2 + ", " + map3);
+            return false;
+        }
+
+        for (int i = 0; i < 10; ++i) {
+            String value = String.valueOf(i);
+            map1.put(i, value);
+            map2.put(i, value);
+            map3.put(i, value);
+        }
+        if (!compare(map1, map2) || !compare(map1, map3) || !compare(map3, map2)) {
+            Log.e("test", "ArrayMap equals failure for populated maps " + map1 + ", " +
+                    map2 + ", " + map3);
+            return false;
+        }
+
+        map1.remove(0);
+        if (compare(map1, map2) || compare(map1, map3) || compare(map3, map1)) {
+            Log.e("test", "ArrayMap equals failure for map size " + map1 + ", " +
+                    map2 + ", " + map3);
+            return false;
+        }
+
+        map1.put(0, "-1");
+        if (compare(map1, map2) || compare(map1, map3) || compare(map3, map1)) {
+            Log.e("test", "ArrayMap equals failure for map contents " + map1 + ", " +
+                    map2 + ", " + map3);
+            return false;
+        }
+
+        return true;
     }
 }
