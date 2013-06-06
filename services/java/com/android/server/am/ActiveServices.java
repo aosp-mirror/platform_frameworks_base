@@ -1840,10 +1840,10 @@ public class ActiveServices {
     /**
      * Prints a list of ServiceRecords (dumpsys activity services)
      */
-    boolean dumpServicesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+    void dumpServicesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
         boolean needSep = false;
-        boolean needSepResult = false;
+        boolean printedAnything = false;
 
         ItemMatcher matcher = new ItemMatcher();
         matcher.build(args, opti);
@@ -1866,7 +1866,7 @@ public class ActiveServices {
                         if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                             continue;
                         }
-                        needSepResult = true;
+                        printedAnything = true;
                         if (!printed) {
                             if (user != 0) {
                                 pw.println();
@@ -1893,7 +1893,7 @@ public class ActiveServices {
                             pw.println(r.connections.size());
                             if (r.connections.size() > 0) {
                                 pw.println("    Connections:");
-                                for (int conni=0; conni<=r.connections.size(); conni++) {
+                                for (int conni=0; conni<r.connections.size(); conni++) {
                                     ArrayList<ConnectionRecord> clist = r.connections.valueAt(conni);
                                     for (int i = 0; i < clist.size(); i++) {
                                         ConnectionRecord conn = clist.get(i);
@@ -1930,11 +1930,11 @@ public class ActiveServices {
                             needSep = true;
                         }
                     }
-                    needSep = printed;
+                    needSep |= printed;
                 }
             }
         } catch (Exception e) {
-            Log.w(TAG, "Exception in dumpServicesLocked: " + e);
+            Log.w(TAG, "Exception in dumpServicesLocked", e);
         }
 
         if (mPendingServices.size() > 0) {
@@ -1947,9 +1947,9 @@ public class ActiveServices {
                 if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                     continue;
                 }
-                needSepResult = true;
+                printedAnything = true;
                 if (!printed) {
-                    if (needSep) pw.println(" ");
+                    if (needSep) pw.println();
                     needSep = true;
                     pw.println("  Pending services:");
                     printed = true;
@@ -1970,9 +1970,9 @@ public class ActiveServices {
                 if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                     continue;
                 }
-                needSepResult = true;
+                printedAnything = true;
                 if (!printed) {
-                    if (needSep) pw.println(" ");
+                    if (needSep) pw.println();
                     needSep = true;
                     pw.println("  Restarting services:");
                     printed = true;
@@ -1993,9 +1993,9 @@ public class ActiveServices {
                 if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                     continue;
                 }
-                needSepResult = true;
+                printedAnything = true;
                 if (!printed) {
-                    if (needSep) pw.println(" ");
+                    if (needSep) pw.println();
                     needSep = true;
                     pw.println("  Stopping services:");
                     printed = true;
@@ -2022,9 +2022,9 @@ public class ActiveServices {
                                 || !dumpPackage.equals(cr.binding.client.info.packageName))) {
                             continue;
                         }
-                        needSepResult = true;
+                        printedAnything = true;
                         if (!printed) {
-                            if (needSep) pw.println(" ");
+                            if (needSep) pw.println();
                             needSep = true;
                             pw.println("  Connection bindings to services:");
                             printed = true;
@@ -2036,7 +2036,9 @@ public class ActiveServices {
             }
         }
 
-        return needSepResult;
+        if (!printedAnything) {
+            pw.println("  (nothing)");
+        }
     }
 
     /**

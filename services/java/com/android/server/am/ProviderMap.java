@@ -287,8 +287,7 @@ public class ProviderMap {
         boolean needSep = false;
 
         if (mSingletonByClass.size() > 0) {
-            pw.println("  Published single-user content providers (by class):");
-            needSep = dumpProvidersByClassLocked(pw, dumpAll, dumpPackage,
+            needSep |= dumpProvidersByClassLocked(pw, dumpAll, dumpPackage,
                     "  Published single-user content providers (by class):", needSep,
                     mSingletonByClass);
         }
