@@ -25,11 +25,11 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -61,9 +61,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.OnClickHandler;
 
@@ -5613,52 +5616,137 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (isTextFilterEnabled()) {
-            // XXX we need to have the text filter created, so we can get an
-            // InputConnection to proxy to.  Unfortunately this means we pretty
-            // much need to make it as soon as a list view gets focus.
-            createTextFilter(false);
             if (mPublicInputConnection == null) {
                 mDefInputConnection = new BaseInputConnection(this, false);
-                mPublicInputConnection = new InputConnectionWrapper(
-                        mTextFilter.onCreateInputConnection(outAttrs), true) {
-                    @Override
-                    public boolean reportFullscreenMode(boolean enabled) {
-                        // Use our own input connection, since it is
-                        // the "real" one the IME is talking with.
-                        return mDefInputConnection.reportFullscreenMode(enabled);
-                    }
-
-                    @Override
-                    public boolean performEditorAction(int editorAction) {
-                        // The editor is off in its own window; we need to be
-                        // the one that does this.
-                        if (editorAction == EditorInfo.IME_ACTION_DONE) {
-                            InputMethodManager imm = (InputMethodManager)
-                                    getContext().getSystemService(
-                                            Context.INPUT_METHOD_SERVICE);
-                            if (imm != null) {
-                                imm.hideSoftInputFromWindow(getWindowToken(), 0);
-                            }
-                            return true;
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public boolean sendKeyEvent(KeyEvent event) {
-                        // Use our own input connection, since the filter
-                        // text view may not be shown in a window so has
-                        // no ViewAncestor to dispatch events with.
-                        return mDefInputConnection.sendKeyEvent(event);
-                    }
-                };
+                mPublicInputConnection = new InputConnectionWrapper(outAttrs);
             }
-            outAttrs.inputType = EditorInfo.TYPE_CLASS_TEXT
-                    | EditorInfo.TYPE_TEXT_VARIATION_FILTER;
+            outAttrs.inputType = EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_FILTER;
             outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE;
             return mPublicInputConnection;
         }
         return null;
+    }
+
+    private class InputConnectionWrapper implements InputConnection {
+        private final EditorInfo mOutAttrs;
+        private InputConnection mTarget;
+
+        public InputConnectionWrapper(EditorInfo outAttrs) {
+            mOutAttrs = outAttrs;
+        }
+
+        private InputConnection getTarget() {
+            if (mTarget == null) {
+                mTarget = getTextFilterInput().onCreateInputConnection(mOutAttrs);
+            }
+            return mTarget;
+        }
+
+        @Override
+        public boolean reportFullscreenMode(boolean enabled) {
+            // Use our own input connection, since it is
+            // the "real" one the IME is talking with.
+            return mDefInputConnection.reportFullscreenMode(enabled);
+        }
+
+        @Override
+        public boolean performEditorAction(int editorAction) {
+            // The editor is off in its own window; we need to be
+            // the one that does this.
+            if (editorAction == EditorInfo.IME_ACTION_DONE) {
+                InputMethodManager imm = (InputMethodManager)
+                        getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean sendKeyEvent(KeyEvent event) {
+            // Use our own input connection, since the filter
+            // text view may not be shown in a window so has
+            // no ViewAncestor to dispatch events with.
+            return mDefInputConnection.sendKeyEvent(event);
+        }
+
+        public CharSequence getTextBeforeCursor(int n, int flags) {
+            if (mTarget == null) return "";
+            return mTarget.getTextBeforeCursor(n, flags);
+        }
+
+        public CharSequence getTextAfterCursor(int n, int flags) {
+            if (mTarget == null) return "";
+            return mTarget.getTextAfterCursor(n, flags);
+        }
+
+        public CharSequence getSelectedText(int flags) {
+            if (mTarget == null) return "";
+            return mTarget.getSelectedText(flags);
+        }
+
+        public int getCursorCapsMode(int reqModes) {
+            if (mTarget == null) return InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+            return mTarget.getCursorCapsMode(reqModes);
+        }
+
+        public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
+            return getTarget().getExtractedText(request, flags);
+        }
+
+        public boolean deleteSurroundingText(int beforeLength, int afterLength) {
+            return getTarget().deleteSurroundingText(beforeLength, afterLength);
+        }
+
+        public boolean setComposingText(CharSequence text, int newCursorPosition) {
+            return getTarget().setComposingText(text, newCursorPosition);
+        }
+
+        public boolean setComposingRegion(int start, int end) {
+            return getTarget().setComposingRegion(start, end);
+        }
+
+        public boolean finishComposingText() {
+            return mTarget == null || mTarget.finishComposingText();
+        }
+
+        public boolean commitText(CharSequence text, int newCursorPosition) {
+            return getTarget().commitText(text, newCursorPosition);
+        }
+
+        public boolean commitCompletion(CompletionInfo text) {
+            return getTarget().commitCompletion(text);
+        }
+
+        public boolean commitCorrection(CorrectionInfo correctionInfo) {
+            return getTarget().commitCorrection(correctionInfo);
+        }
+
+        public boolean setSelection(int start, int end) {
+            return getTarget().setSelection(start, end);
+        }
+
+        public boolean performContextMenuAction(int id) {
+            return getTarget().performContextMenuAction(id);
+        }
+
+        public boolean beginBatchEdit() {
+            return getTarget().beginBatchEdit();
+        }
+
+        public boolean endBatchEdit() {
+            return getTarget().endBatchEdit();
+        }
+
+        public boolean clearMetaKeyStates(int states) {
+            return getTarget().clearMetaKeyStates(states);
+        }
+
+        public boolean performPrivateCommand(String action, Bundle data) {
+            return getTarget().performPrivateCommand(action, data);
+        }
     }
 
     /**
@@ -5677,23 +5765,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private void createTextFilter(boolean animateEntrance) {
         if (mPopup == null) {
-            Context c = getContext();
-            PopupWindow p = new PopupWindow(c);
-            LayoutInflater layoutInflater = (LayoutInflater)
-                    c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mTextFilter = (EditText) layoutInflater.inflate(
-                    com.android.internal.R.layout.typing_filter, null);
-            // For some reason setting this as the "real" input type changes
-            // the text view in some way that it doesn't work, and I don't
-            // want to figure out why this is.
-            mTextFilter.setRawInputType(EditorInfo.TYPE_CLASS_TEXT
-                    | EditorInfo.TYPE_TEXT_VARIATION_FILTER);
-            mTextFilter.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
-            mTextFilter.addTextChangedListener(this);
+            PopupWindow p = new PopupWindow(getContext());
             p.setFocusable(false);
             p.setTouchable(false);
             p.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-            p.setContentView(mTextFilter);
+            p.setContentView(getTextFilterInput());
             p.setWidth(LayoutParams.WRAP_CONTENT);
             p.setHeight(LayoutParams.WRAP_CONTENT);
             p.setBackgroundDrawable(null);
@@ -5708,12 +5784,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    private EditText getTextFilterInput() {
+        if (mTextFilter == null) {
+            final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+            mTextFilter = (EditText) layoutInflater.inflate(
+                    com.android.internal.R.layout.typing_filter, null);
+            // For some reason setting this as the "real" input type changes
+            // the text view in some way that it doesn't work, and I don't
+            // want to figure out why this is.
+            mTextFilter.setRawInputType(EditorInfo.TYPE_CLASS_TEXT
+                    | EditorInfo.TYPE_TEXT_VARIATION_FILTER);
+            mTextFilter.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+            mTextFilter.addTextChangedListener(this);
+        }
+        return mTextFilter;
+    }
+
     /**
      * Clear the text filter.
      */
     public void clearTextFilter() {
         if (mFiltered) {
-            mTextFilter.setText("");
+            getTextFilterInput().setText("");
             mFiltered = false;
             if (mPopup != null && mPopup.isShowing()) {
                 dismissPopup();
@@ -5759,7 +5851,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (mPopup != null && isTextFilterEnabled()) {
+        if (isTextFilterEnabled()) {
+            createTextFilter(true);
             int length = s.length();
             boolean showing = mPopup.isShowing();
             if (!showing && length > 0) {
@@ -6331,6 +6424,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             mFirstActivePosition = firstActivePosition;
 
+            //noinspection MismatchedReadAndWriteOfArray
             final View[] activeViews = mActiveViews;
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
