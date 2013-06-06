@@ -167,7 +167,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS에서 위치 설정"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"모든 알림 지우기"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"앱 정보"</string>
-    <string name="close_universe" msgid="3736513750241754348">"닫기"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"알림 사용 안함"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"알림을 다시 사용하려면 여기를 터치하세요."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"화면이 자동으로 회전됩니다."</string>

@@ -433,9 +433,6 @@
          application -->
     <string name="status_bar_notification_inspect_item_title">App info</string>
 
-    <!-- [CHAR LIMIT=NONE] -->
-    <string name="close_universe">Close</string>
-
     <!-- Title for the pseudo-notification shown when notifications are disabled (do-not-disturb
          mode) -->
     <string name="notifications_off_title">Notifications off</string>
