@@ -33,7 +33,6 @@ import android.widget.ImageSwitcher;
 import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.CharSequences;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -192,7 +191,7 @@ public abstract class Ticker {
             if (n.getPackageName().equals(seg.notification.getPackageName())
                     && n.getNotification().icon == seg.notification.getNotification().icon
                     && n.getNotification().iconLevel == seg.notification.getNotification().iconLevel
-                    && CharSequences.equals(seg.notification.getNotification().tickerText,
+                    && charSequencesEqual(seg.notification.getNotification().tickerText,
                         n.getNotification().tickerText)) {
                 return;
             }
@@ -230,6 +229,20 @@ public abstract class Ticker {
             tickerStarting();
             scheduleAdvance();
         }
+    }
+
+    private static boolean charSequencesEqual(CharSequence a, CharSequence b) {
+        if (a.length() != b.length()) {
+            return false;
+        }
+
+        int length = a.length();
+        for (int i = 0; i < length; i++) {
+            if (a.charAt(i) != b.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void removeEntry(StatusBarNotification n) {

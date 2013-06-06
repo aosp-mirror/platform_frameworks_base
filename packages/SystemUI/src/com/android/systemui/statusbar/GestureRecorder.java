@@ -46,7 +46,7 @@ public class GestureRecorder {
             public MotionEvent event;
             public MotionEventRecord(long when, MotionEvent event) {
                 this.time = when;
-                this.event = event.copy();
+                this.event = MotionEvent.obtain(event);
             }
             String actionName(int action) {
                 switch (action) {
