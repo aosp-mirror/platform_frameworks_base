@@ -22,7 +22,6 @@ import android.content.ComponentCallbacks2;
 import android.content.res.Configuration;
 import android.opengl.ManagedEGLContext;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -306,7 +305,8 @@ public final class WindowManagerGlobal {
 
         synchronized (mLock) {
             int index = findViewLocked(view, true);
-            View curView = removeViewLocked(index, immediate);
+            View curView = mRoots[index].getView();
+            removeViewLocked(index, immediate);
             if (curView == view) {
                 return;
             }
@@ -323,7 +323,7 @@ public final class WindowManagerGlobal {
 
             int count = mViews.length;
             //Log.i("foo", "Closing all windows of " + token);
-            for (int i=0; i<count; i++) {
+            for (int i = 0; i < count; i++) {
                 //Log.i("foo", "@ " + i + " token " + mParams[i].token
                 //        + " view " + mRoots[i].getView());
                 if (token == null || mParams[i].token == token) {
@@ -335,18 +335,16 @@ public final class WindowManagerGlobal {
                                 what + " " + who + " has leaked window "
                                 + root.getView() + " that was originally added here");
                         leak.setStackTrace(root.getLocation().getStackTrace());
-                        Log.e(TAG, leak.getMessage(), leak);
+                        Log.e(TAG, "", leak);
                     }
 
                     removeViewLocked(i, false);
-                    i--;
-                    count--;
                 }
             }
         }
     }
 
-    private View removeViewLocked(int index, boolean immediate) {
+    private void removeViewLocked(int index, boolean immediate) {
         ViewRootImpl root = mRoots[index];
         View view = root.getView();
 
@@ -357,29 +355,35 @@ public final class WindowManagerGlobal {
             }
         }
         root.die(immediate);
+    }
 
-        final int count = mViews.length;
+    void doRemoveView(ViewRootImpl root) {
+        synchronized (mLock) {
+            final View view = root.getView();
+            if (view != null) {
+                view.assignParent(null);
+            }
 
-        // remove it from the list
-        View[] tmpViews = new View[count-1];
-        removeItem(tmpViews, mViews, index);
-        mViews = tmpViews;
+            final int newCount = mViews.length - 1;
+            for (int index = newCount; index >= 0; --index) {
+                if (mRoots[index] == root) {
+                    // remove it from the list
+                    View[] tmpViews = new View[newCount];
+                    removeItem(tmpViews, mViews, index);
+                    mViews = tmpViews;
 
-        ViewRootImpl[] tmpRoots = new ViewRootImpl[count-1];
-        removeItem(tmpRoots, mRoots, index);
-        mRoots = tmpRoots;
+                    ViewRootImpl[] tmpRoots = new ViewRootImpl[newCount];
+                    removeItem(tmpRoots, mRoots, index);
+                    mRoots = tmpRoots;
 
-        WindowManager.LayoutParams[] tmpParams
-                = new WindowManager.LayoutParams[count-1];
-        removeItem(tmpParams, mParams, index);
-        mParams = tmpParams;
+                    WindowManager.LayoutParams[] tmpParams = new WindowManager.LayoutParams[newCount];
+                    removeItem(tmpParams, mParams, index);
+                    mParams = tmpParams;
 
-        if (view != null) {
-            view.assignParent(null);
-            // func doesn't allow null...  does it matter if we clear them?
-            //view.setLayoutParams(null);
+                    return;
+                }
+            }
         }
-        return view;
     }
 
     private static void removeItem(Object[] dst, Object[] src, int index) {
@@ -403,7 +407,7 @@ public final class WindowManagerGlobal {
             }
         }
         if (required) {
-            throw new IllegalArgumentException("View not attached to window manager");
+            throw new IllegalArgumentException("View=" + view + " not attached to window manager");
         }
         return -1;
     }
