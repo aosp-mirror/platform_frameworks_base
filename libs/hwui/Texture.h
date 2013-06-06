@@ -52,6 +52,11 @@ public:
             bool force = false, GLenum renderTarget = GL_TEXTURE_2D);
 
     /**
+     * Convenience method to call glDeleteTextures() on this texture's id.
+     */
+    void deleteTexture() const;
+
+    /**
      * Name of the texture.
      */
     GLuint id;
@@ -113,7 +118,7 @@ public:
     AutoTexture(const Texture* texture): mTexture(texture) { }
     ~AutoTexture() {
         if (mTexture && mTexture->cleanup) {
-            glDeleteTextures(1, &mTexture->id);
+            mTexture->deleteTexture();
             delete mTexture;
         }
     }

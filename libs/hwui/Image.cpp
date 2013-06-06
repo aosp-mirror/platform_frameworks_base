@@ -54,7 +54,7 @@ Image::~Image() {
         eglDestroyImageKHR(eglGetDisplay(EGL_DEFAULT_DISPLAY), mImage);
         mImage = EGL_NO_IMAGE_KHR;
 
-        glDeleteTextures(1, &mTexture);
+        Caches::getInstance().deleteTexture(mTexture);
         mTexture = 0;
     }
 }

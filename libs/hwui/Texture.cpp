@@ -76,5 +76,9 @@ void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool for
     }
 }
 
+void Texture::deleteTexture() const {
+    mCaches.deleteTexture(id);
+}
+
 }; // namespace uirenderer
 }; // namespace android

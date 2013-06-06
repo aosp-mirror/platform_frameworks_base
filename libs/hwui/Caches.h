@@ -226,13 +226,24 @@ public:
 
     /**
      * Binds the specified texture as a GL_TEXTURE_2D texture.
+     * All texture bindings must be performed with this method or
+     * bindTexture(GLenum, GLuint).
      */
     void bindTexture(GLuint texture);
 
     /**
-     * Binds the specified texture..
+     * Binds the specified texture with the specified render target.
+     * All texture bindings must be performed with this method or
+     * bindTexture(GLuint).
      */
     void bindTexture(GLenum target, GLuint texture);
+
+    /**
+     * Deletes the specified texture and clears it from the cache
+     * of bound textures.
+     * All textures must be deleted using this method.
+     */
+    void deleteTexture(GLuint texture);
 
     /**
      * Signals that the cache of bound textures should be cleared.

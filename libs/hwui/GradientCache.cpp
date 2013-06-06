@@ -120,7 +120,7 @@ void GradientCache::operator()(GradientCacheEntry& shader, Texture*& texture) {
         const uint32_t size = texture->width * texture->height * bytesPerPixel();
         mSize -= size;
 
-        glDeleteTextures(1, &texture->id);
+        texture->deleteTexture();
         delete texture;
     }
 }

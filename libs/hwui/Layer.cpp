@@ -167,7 +167,7 @@ void Layer::generateTexture() {
 
 void Layer::deleteTexture() {
     if (texture.id) {
-        glDeleteTextures(1, &texture.id);
+        texture.deleteTexture();
         texture.id = 0;
     }
 }

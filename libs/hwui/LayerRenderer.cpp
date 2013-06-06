@@ -498,7 +498,7 @@ error:
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
         layer->setAlpha(alpha, mode);
         layer->setFbo(previousLayerFbo);
-        glDeleteTextures(1, &texture);
+        caches.deleteTexture(texture);
         caches.fboCache.put(fbo);
         glViewport(previousViewport[0], previousViewport[1],
                 previousViewport[2], previousViewport[3]);

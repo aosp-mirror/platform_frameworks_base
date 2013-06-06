@@ -223,7 +223,7 @@ void PathCache::removeTexture(PathTexture* texture) {
         }
 
         if (texture->id) {
-            glDeleteTextures(1, &texture->id);
+            Caches::getInstance().deleteTexture(texture->id);
         }
         delete texture;
     }

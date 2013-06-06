@@ -156,7 +156,7 @@ void CacheTexture::releaseTexture() {
         mTexture = NULL;
     }
     if (mTextureId) {
-        glDeleteTextures(1, &mTextureId);
+        mCaches.deleteTexture(mTextureId);
         mTextureId = 0;
     }
     mDirty = false;
