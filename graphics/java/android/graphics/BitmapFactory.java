@@ -552,6 +552,7 @@ public class BitmapFactory {
         return finish ? finishDecode(bm, outPadding, opts) : bm;
     }
 
+    // TODO: remove this path, implement any needed functionality in native decode
     private static Bitmap finishDecode(Bitmap bm, Rect outPadding, Options opts) {
         if (bm == null || opts == null) {
             return bm;

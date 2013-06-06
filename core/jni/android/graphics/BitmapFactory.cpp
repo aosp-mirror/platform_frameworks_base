@@ -152,6 +152,33 @@ static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
     return pr;
 }
 
+class RecyclingPixelAllocator : public SkBitmap::Allocator {
+public:
+    RecyclingPixelAllocator(SkPixelRef* pixelRef, unsigned int size)
+        : mPixelRef(pixelRef), mSize(size) {
+        SkSafeRef(mPixelRef);
+    }
+
+    ~RecyclingPixelAllocator() {
+        SkSafeUnref(mPixelRef);
+    }
+
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+        if (!bitmap->getSize64().is32() || bitmap->getSize() > mSize) {
+            ALOGW("bitmap marked for reuse (%d bytes) too small to contain new bitmap (%d bytes)",
+                    bitmap->getSize(), mSize);
+            return false;
+        }
+        bitmap->setPixelRef(mPixelRef);
+        bitmap->lockPixels();
+        return true;
+    }
+
+private:
+    SkPixelRef* const mPixelRef;
+    const unsigned int mSize;
+};
+
 // since we "may" create a purgeable imageref, we require the stream be ref'able
 // i.e. dynamically allocated, since its lifetime may exceed the current stack
 // frame.
@@ -193,6 +220,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
     }
 
+    // TODO: allow scaling with reuse, ideally avoiding decode in not-enough-space condition
     if (willScale && javaBitmap != NULL) {
         return nullObjectReturn("Cannot pre-scale a reused bitmap");
     }
@@ -206,34 +234,35 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     decoder->setDitherImage(doDither);
     decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
 
-    NinePatchPeeker peeker(decoder);
-    JavaPixelAllocator javaAllocator(env);
-
-    SkBitmap* bitmap;
-    bool useExistingBitmap = false;
+    SkBitmap* outputBitmap = NULL;
     unsigned int existingBufferSize = 0;
-    if (javaBitmap == NULL) {
-        bitmap = new SkBitmap;
-    } else {
-        bitmap = (SkBitmap*) env->GetIntField(javaBitmap, gBitmap_nativeBitmapFieldID);
-        // only reuse the provided bitmap if it is mutable
-        if (!bitmap->isImmutable()) {
-            useExistingBitmap = true;
-            // config of supplied bitmap overrules config set in options
-            prefConfig = bitmap->getConfig();
-            existingBufferSize = GraphicsJNI::getBitmapAllocationByteCount(env, javaBitmap);
-        } else {
+    if (javaBitmap != NULL) {
+        outputBitmap = (SkBitmap*) env->GetIntField(javaBitmap, gBitmap_nativeBitmapFieldID);
+        if (outputBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
-            bitmap = new SkBitmap;
+            javaBitmap = NULL;
+            outputBitmap = NULL;
+        } else {
+            existingBufferSize = GraphicsJNI::getBitmapAllocationByteCount(env, javaBitmap);
         }
     }
 
-    SkAutoTDelete<SkImageDecoder> add(decoder);
-    SkAutoTDelete<SkBitmap> adb(!useExistingBitmap ? bitmap : NULL);
+    SkAutoTDelete<SkBitmap> adb(outputBitmap == NULL ? new SkBitmap : NULL);
+    if (outputBitmap == NULL) outputBitmap = adb.get();
 
+    SkAutoTDelete<SkImageDecoder> add(decoder);
+
+    NinePatchPeeker peeker(decoder);
     decoder->setPeeker(&peeker);
-    if (!isPurgeable) {
-        decoder->setAllocator(&javaAllocator);
+    JavaPixelAllocator javaAllocator(env);
+    RecyclingPixelAllocator recyclingAllocator(outputBitmap->pixelRef(), existingBufferSize);
+
+    // allocator to be used for final allocation associated with output
+    SkBitmap::Allocator* allocator = (javaBitmap != NULL) ?
+            (SkBitmap::Allocator*)&recyclingAllocator : (SkBitmap::Allocator*)&javaAllocator;
+
+    if (!isPurgeable && !willScale) {
+        decoder->setAllocator(allocator);
     }
 
     AutoDecoderCancel adc(options, decoder);
@@ -245,45 +274,15 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         return nullObjectReturn("gOptions_mCancelID");
     }
 
-    SkImageDecoder::Mode decodeMode = mode;
-    if (isPurgeable) {
-        decodeMode = SkImageDecoder::kDecodeBounds_Mode;
-    }
+    SkImageDecoder::Mode decodeMode = isPurgeable ? SkImageDecoder::kDecodeBounds_Mode : mode;
 
-    if (javaBitmap != NULL) {
-        // If we're reusing the pixelref from an existing bitmap, decode the bounds and
-        // reinitialize the native object for the new content, keeping the pixelRef
-        SkPixelRef* pixelRef = bitmap->pixelRef();
-        SkSafeRef(pixelRef);
-
-        SkBitmap boundsBitmap;
-        decoder->decode(stream, &boundsBitmap, prefConfig, SkImageDecoder::kDecodeBounds_Mode);
-        stream->rewind();
-
-        if (boundsBitmap.getSize() > existingBufferSize) {
-            return nullObjectReturn("bitmap marked for reuse too small to contain decoded data");
-        }
-
-        bitmap->setConfig(boundsBitmap.config(), boundsBitmap.width(), boundsBitmap.height(), 0);
-        bitmap->setPixelRef(pixelRef);
-        SkSafeUnref(pixelRef);
-        GraphicsJNI::reinitBitmap(env, javaBitmap);
-    }
-
-    SkBitmap* decoded;
-    if (willScale) {
-        decoded = new SkBitmap;
-    } else {
-        decoded = bitmap;
-    }
-    SkAutoTDelete<SkBitmap> adb2(willScale ? decoded : NULL);
-
-    if (!decoder->decode(stream, decoded, prefConfig, decodeMode, javaBitmap != NULL)) {
+    SkBitmap decodingBitmap;
+    if (!decoder->decode(stream, &decodingBitmap, prefConfig, decodeMode)) {
         return nullObjectReturn("decoder->decode returned false");
     }
 
-    int scaledWidth = decoded->width();
-    int scaledHeight = decoded->height();
+    int scaledWidth = decodingBitmap.width();
+    int scaledHeight = decodingBitmap.height();
 
     if (willScale && mode != SkImageDecoder::kDecodeBounds_Mode) {
         scaledWidth = int(scaledWidth * scale + 0.5f);
@@ -351,10 +350,10 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         // Dalvik code has always behaved. We simply recreate the behavior here.
         // The result is slightly different from simply using scale because of
         // the 0.5f rounding bias applied when computing the target image size
-        const float sx = scaledWidth / float(decoded->width());
-        const float sy = scaledHeight / float(decoded->height());
+        const float sx = scaledWidth / float(decodingBitmap.width());
+        const float sy = scaledHeight / float(decodingBitmap.height());
 
-        SkBitmap::Config config = decoded->config();
+        SkBitmap::Config config = decodingBitmap.config();
         switch (config) {
             case SkBitmap::kNo_Config:
             case SkBitmap::kIndex8_Config:
@@ -365,19 +364,21 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
                 break;
         }
 
-        bitmap->setConfig(config, scaledWidth, scaledHeight);
-        bitmap->setIsOpaque(decoded->isOpaque());
-        if (!bitmap->allocPixels(&javaAllocator, NULL)) {
+        outputBitmap->setConfig(config, scaledWidth, scaledHeight);
+        outputBitmap->setIsOpaque(decodingBitmap.isOpaque());
+        if (!outputBitmap->allocPixels(allocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
-        bitmap->eraseColor(0);
+        outputBitmap->eraseColor(0);
 
         SkPaint paint;
         paint.setFilterBitmap(true);
 
-        SkCanvas canvas(*bitmap);
+        SkCanvas canvas(*outputBitmap);
         canvas.scale(sx, sy);
-        canvas.drawBitmap(*decoded, 0.0f, 0.0f, &paint);
+        canvas.drawBitmap(decodingBitmap, 0.0f, 0.0f, &paint);
+    } else {
+        outputBitmap->swap(decodingBitmap);
     }
 
     if (padding) {
@@ -392,17 +393,17 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
     SkPixelRef* pr;
     if (isPurgeable) {
-        pr = installPixelRef(bitmap, stream, sampleSize, doDither);
+        pr = installPixelRef(outputBitmap, stream, sampleSize, doDither);
     } else {
         // if we get here, we're in kDecodePixels_Mode and will therefore
         // already have a pixelref installed.
-        pr = bitmap->pixelRef();
+        pr = outputBitmap->pixelRef();
     }
     if (pr == NULL) {
         return nullObjectReturn("Got null SkPixelRef");
     }
 
-    if (!isMutable && !useExistingBitmap) {
+    if (!isMutable && javaBitmap == NULL) {
         // promise we will never change our pixels (great for sharing and pictures)
         pr->setImmutable();
     }
@@ -410,12 +411,14 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     // detach bitmap from its autodeleter, since we want to own it now
     adb.detach();
 
-    if (useExistingBitmap) {
+    if (javaBitmap != NULL) {
+        GraphicsJNI::reinitBitmap(env, javaBitmap);
+        outputBitmap->notifyPixelsChanged();
         // If a java bitmap was passed in for reuse, pass it back
         return javaBitmap;
     }
     // now create the java bitmap
-    return GraphicsJNI::createBitmap(env, bitmap, javaAllocator.getStorageObj(),
+    return GraphicsJNI::createBitmap(env, outputBitmap, javaAllocator.getStorageObj(),
             isMutable, ninePatchChunk, layoutBounds, -1);
 }
 
