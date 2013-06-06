@@ -222,7 +222,7 @@ public class TaskStack {
         }
     }
 
-    void setBounds(Rect bounds) {
+    void setBounds(Rect bounds, boolean underStatusBar) {
         mDimLayer.setBounds(bounds);
         mAnimationBackgroundSurface.setBounds(bounds);
 
@@ -236,6 +236,7 @@ public class TaskStack {
                     if (!resizingWindows.contains(win)) {
                         resizingWindows.add(win);
                     }
+                    win.mUnderStatusBar = underStatusBar;
                 }
             }
         }
