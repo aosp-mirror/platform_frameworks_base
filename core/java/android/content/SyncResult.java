@@ -56,7 +56,7 @@ public final class SyncResult implements Parcelable {
 
     /**
      * Used to indicate that the SyncAdapter experienced a hard error due to an error it
-     * received from interacting with the storage later. The SyncManager will record that
+     * received from interacting with the storage layer. The SyncManager will record that
      * the sync request failed and it will not reschedule the request.
      */
     public boolean databaseError;
