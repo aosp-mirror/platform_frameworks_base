@@ -3470,7 +3470,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             }
                         }});
                     } else {
-                        if (DEBUG_LAYOUT) Slog.v(TAG, "Policy preventing status bar from hiding");
+                        if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar already hiding");
                     }
                 } else {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "** SHOWING status bar: top is not fullscreen");

@@ -3487,9 +3487,9 @@ public class WindowManagerService extends IWindowManager.Stub
             final int firstToken = tokens.size() - 1;
             for (int tokenNdx = firstToken; tokenNdx >= 0; --tokenNdx) {
                 final AppWindowToken atoken = tokens.get(tokenNdx);
-    
+
                 if (DEBUG_APP_ORIENTATION) Slog.v(TAG, "Checking app orientation: " + atoken);
-    
+
                 // if we're about to tear down this window and not seek for
                 // the behind activity, don't use it for orientation
                 if (!findingBehind
@@ -3498,7 +3498,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " -- going to hide");
                     continue;
                 }
-    
+
                 if (tokenNdx == firstToken) {
                     // If we have hit a new Task, and the bottom
                     // of the previous group didn't explicitly say to use
@@ -3512,19 +3512,19 @@ public class WindowManagerService extends IWindowManager.Stub
                         return lastOrientation;
                     }
                 }
-    
+
                 // We ignore any hidden applications on the top.
                 if (atoken.hiddenRequested || atoken.willBeHidden) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
                             + " -- hidden on top");
                     continue;
                 }
-    
+
                 if (tokenNdx == 0) {
                     // Last token in this task.
                     lastOrientation = atoken.requestedOrientation;
                 }
-    
+
                 int or = atoken.requestedOrientation;
                 // If this application is fullscreen, and didn't explicitly say
                 // to use the orientation behind it, then just take whatever
@@ -8605,7 +8605,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     || winAnimator.mSurfaceResized
                     || configChanged) {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
-                    Slog.v(TAG, "Resize reasons: "
+                    Slog.v(TAG, "Resize reasons for w=" + w + ": "
                             + " contentInsetsChanged=" + w.mContentInsetsChanged
                             + " " + w.mContentInsets.toShortString()
                             + " visibleInsetsChanged=" + w.mVisibleInsetsChanged
@@ -9346,7 +9346,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         setFocusedStackFrame();
-        
+
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
         enableScreenIfNeededLocked();
