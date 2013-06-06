@@ -388,15 +388,19 @@
 
 
 
-      <li class="nav-section">
+<li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/connectivity/index.html">
                <span class="en">Connectivity</span>
              </a></div>
         <ul>
-          <li><a href="<?cs var:toroot?>guide/topics/connectivity/bluetooth.html">
-              <span class="en">Bluetooth</span>
-            </a>
-          </li>
+          <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot?>guide/topics/connectivity/bluetooth.html">
+          <span class="en">Bluetooth</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/connectivity/bluetooth-le.html">Bluetooth Low Energy</a></li>
+        </ul>
+      </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot?>guide/topics/connectivity/nfc/index.html">
           <span class="en">NFC</span></a>
@@ -425,6 +429,7 @@
 
     </ul>
   </li><!-- end of connectivity -->
+
 
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/text/index.html">

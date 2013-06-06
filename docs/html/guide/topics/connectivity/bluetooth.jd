@@ -2,19 +2,13 @@ page.title=Bluetooth
 page.tags="wireless","bluetoothadapter","bluetoothdevice"
 @jd:body
 
-<div id="qv-wrapper"> 
-<div id="qv"> 
+<div id="qv-wrapper">
+<div id="qv">
  
-  <h2>Quickview</h2> 
-  <ul> 
-    <li>Android's bluetooth APIs allow your application to perform wireless data transactions with
-other devices</li> 
-  </ul> 
- 
-  <h2>In this document</h2> 
+  <h2>In this document</h2>
   <ol> 
-    <li><a href="#TheBasics">The Basics</a></li> 
-    <li><a href="#Permissions">Bluetooth Permissions</a></li> 
+    <li><a href="#TheBasics">The Basics</a></li>
+    <li><a href="#Permissions">Bluetooth Permissions</a></li>
     <li><a href="#SettingUp">Setting Up Bluetooth</a></li> 
     <li><a href="#FindingDevices">Finding Devices</a> 
       <ol> 
@@ -70,6 +64,11 @@ following:</p>
   <li>Manage multiple connections</li>
 </ul>
 
+<p>This document describes how to use <em>Classic Bluetooth</em>. Classic
+Bluetooth is the right choice for more battery-intensive operations such as streaming
+and communicating between Android devices. For Bluetooth devices with low power requirements,
+Android 4.3 (API Level 18) introduces API support for Bluetooth Low Energy. To learn more,
+see <a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">Bluetooth Low Energy</a>.</p>
 
 <h2 id="TheBasics">The Basics</h2>
 
@@ -164,22 +163,18 @@ is, the internal service that runs a particular profile). </dd>
  
 <h2 id="Permissions">Bluetooth Permissions</h2> 
  
-<p>In order to use Bluetooth features in your application, you need to declare
-at least one of two Bluetooth permissions: {@link
-android.Manifest.permission#BLUETOOTH} and {@link
-android.Manifest.permission#BLUETOOTH_ADMIN}.</p> 
- 
-<p>You must request the {@link android.Manifest.permission#BLUETOOTH} permission
-in order to perform any Bluetooth communication, such as requesting a
-connection, accepting a connection, and transferring data.</p> 
- 
-<p>You must request the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-permission in order to initiate device discovery or manipulate Bluetooth
-settings. Most applications need this permission solely for the
+<p>In order to use Bluetooth features in your application, you must declare
+the Bluetooth permission {@link android.Manifest.permission#BLUETOOTH}.
+You need this permission to perform any Bluetooth communication,
+such as requesting a connection, accepting a connection, and transferring data.</p>
+
+<p>If you want your app to initiate device discovery or manipulate Bluetooth
+settings, you must also declare the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+permission. Most applications need this permission solely for the
 ability to discover local Bluetooth devices. The other abilities granted by this
 permission should not be used, unless the application is a "power manager" that
 will modify Bluetooth settings upon user request. <strong>Note:</strong> If you
-use {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission, then must
+use {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission, then you must
 also have the {@link android.Manifest.permission#BLUETOOTH} permission.</p> 
  
 <p>Declare the Bluetooth permission(s) in your application manifest file. For
