@@ -50,29 +50,30 @@ public class BitmapFactory {
          * reuse this bitmap when loading content. If the decode operation cannot
          * use this bitmap, the decode method will return <code>null</code> and
          * will throw an IllegalArgumentException. The current implementation
-         * necessitates that the reused bitmap be mutable and of a size that is
-         * equal to or larger than the source content. The source content must be
-         * in jpeg or png format (whether as a resource or as a stream). The
-         * {@link android.graphics.Bitmap.Config configuration} of the reused
-         * bitmap will override the setting of {@link #inPreferredConfig}, if set.
-         * The reused bitmap will continue to remain mutable even when decoding a
+         * necessitates that the reused bitmap be mutable, and the resulting
+         * reused bitmap will continue to remain mutable even when decoding a
          * resource which would normally result in an immutable bitmap.
          *
-         * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, the reused
-         * bitmap can be used to decode any other bitmaps as long as the resulting
+         * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, any mutable
+         * bitmap can be reused to decode any other bitmaps as long as the resulting
          * {@link Bitmap#getByteCount() byte count} of the decoded bitmap is less
          * than or equal to the {@link Bitmap#getAllocationByteCount() allocated byte count}
          * of the reused bitmap. This can be because the intrinsic size is smaller,
-         * or the sampled size is smaller. Prior to
-         * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, only equal sized
-         * bitmaps are supported, with {@link #inSampleSize} set to 1.
+         * or the size after density / sampled size scaling is smaller.
+         *
+         * <p>Prior to {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} additional
+         * constraints apply: The image being decoded (whether as a resource or
+         * as a stream) must be in jpeg or png format. Only equal sized bitmaps
+         * are supported, with {@link #inSampleSize} set to 1. Additionally, the
+         * {@link android.graphics.Bitmap.Config configuration} of the reused
+         * bitmap will override the setting of {@link #inPreferredConfig}, if set.
          *
          * <p>You should still always use the returned Bitmap of the decode
          * method and not assume that reusing the bitmap worked, due to the
          * constraints outlined above and failure situations that can occur.
          * Checking whether the return value matches the value of the inBitmap
-         * set in the Options structure is a way to see if the bitmap was reused,
-         * but in all cases you should use the returned Bitmap to make sure
+         * set in the Options structure will indicate if the bitmap was reused,
+         * but in all cases you should use the Bitmap returned by the decoding function to ensure
          * that you are using the bitmap that was used as the decode destination.</p>
          */
         public Bitmap inBitmap;
@@ -440,6 +441,7 @@ public class BitmapFactory {
         if (bm == null && opts != null && opts.inBitmap != null) {
             throw new IllegalArgumentException("Problem decoding into existing bitmap");
         }
+        setDensityFromOptions(bm, opts);
         return bm;
     }
 
@@ -454,6 +456,31 @@ public class BitmapFactory {
      */
     public static Bitmap decodeByteArray(byte[] data, int offset, int length) {
         return decodeByteArray(data, offset, length, null);
+    }
+
+    /**
+     * Set the newly decoded bitmap's density based on the Options.
+     */
+    private static void setDensityFromOptions(Bitmap outputBitmap, Options opts) {
+        if (outputBitmap == null || opts == null) return;
+
+        final int density = opts.inDensity;
+        if (density != 0) {
+            outputBitmap.setDensity(density);
+            final int targetDensity = opts.inTargetDensity;
+            if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
+                return;
+            }
+
+            byte[] np = outputBitmap.getNinePatchChunk();
+            final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
+            if (opts.inScaled || isNinePatch) {
+                outputBitmap.setDensity(targetDensity);
+            }
+        } else if (opts.inBitmap != null) {
+            // bitmap was reused, ensure density is reset
+            outputBitmap.setDensity(Bitmap.getDefaultDensity());
+        }
     }
 
     /**
@@ -497,25 +524,7 @@ public class BitmapFactory {
 
         if (is instanceof AssetManager.AssetInputStream) {
             final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
-
-            if (opts == null || (opts.inScaled && opts.inBitmap == null)) {
-                float scale = 1.0f;
-                int targetDensity = 0;
-                if (opts != null) {
-                    final int density = opts.inDensity;
-                    targetDensity = opts.inTargetDensity;
-                    if (density != 0 && targetDensity != 0) {
-                        scale = targetDensity / (float) density;
-                    }
-                }
-
-                bm = nativeDecodeAsset(asset, outPadding, opts, true, scale);
-                if (bm != null && targetDensity != 0) bm.setDensity(targetDensity);
-
-                finish = false;
-            } else {
-                bm = nativeDecodeAsset(asset, outPadding, opts);
-            }
+            bm = nativeDecodeAsset(asset, outPadding, opts);
         } else {
             // pass some temp storage down to the native code. 1024 is made up,
             // but should be large enough to avoid too many small calls back
@@ -523,82 +532,18 @@ public class BitmapFactory {
             // to mark(...) above.
             byte [] tempStorage = null;
             if (opts != null) tempStorage = opts.inTempStorage;
-            if (tempStorage == null) tempStorage = new byte[16 * 1024];
-
-            if (opts == null || (opts.inScaled && opts.inBitmap == null)) {
-                float scale = 1.0f;
-                int targetDensity = 0;
-                if (opts != null) {
-                    final int density = opts.inDensity;
-                    targetDensity = opts.inTargetDensity;
-                    if (density != 0 && targetDensity != 0) {
-                        scale = targetDensity / (float) density;
-                    }
-                }
-
-                bm = nativeDecodeStream(is, tempStorage, outPadding, opts, true, scale);
-                if (bm != null && targetDensity != 0) bm.setDensity(targetDensity);
-
-                finish = false;
-            } else {
-                bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
-            }
+            if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
+            bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
         }
 
         if (bm == null && opts != null && opts.inBitmap != null) {
             throw new IllegalArgumentException("Problem decoding into existing bitmap");
         }
 
-        return finish ? finishDecode(bm, outPadding, opts) : bm;
-    }
-
-    // TODO: remove this path, implement any needed functionality in native decode
-    private static Bitmap finishDecode(Bitmap bm, Rect outPadding, Options opts) {
-        if (bm == null || opts == null) {
-            return bm;
-        }
-        
-        final int density = opts.inDensity;
-        if (density == 0) {
-            return bm;
-        }
-        
-        bm.setDensity(density);
-        final int targetDensity = opts.inTargetDensity;
-        if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
-            return bm;
-        }
-        byte[] np = bm.getNinePatchChunk();
-        int[] lb = bm.getLayoutBounds();
-        final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
-        if (opts.inScaled || isNinePatch) {
-            float scale = targetDensity / (float) density;
-            if (scale != 1.0f) {
-                final Bitmap oldBitmap = bm;
-                bm = Bitmap.createScaledBitmap(oldBitmap,
-                        Math.max(1, (int) (bm.getWidth() * scale + 0.5f)),
-                        Math.max(1, (int) (bm.getHeight() * scale + 0.5f)), true);
-                if (bm != oldBitmap) oldBitmap.recycle();
-
-                if (isNinePatch) {
-                    np = nativeScaleNinePatch(np, scale, outPadding);
-                    bm.setNinePatchChunk(np);
-                }
-                if (lb != null) {
-                    int[] newLb = new int[lb.length];
-                    for (int i=0; i<lb.length; i++) {
-                        newLb[i] = (int)((lb[i]*scale)+.5f);
-                    }
-                    bm.setLayoutBounds(newLb);
-                }
-            }
-
-            bm.setDensity(targetDensity);
-        }
-
+        setDensityFromOptions(bm, opts);
         return bm;
     }
-    
+
     /**
      * Decode an input stream into a bitmap. If the input stream is null, or
      * cannot be used to decode a bitmap, the function returns null.
@@ -633,7 +578,7 @@ public class BitmapFactory {
             if (bm == null && opts != null && opts.inBitmap != null) {
                 throw new IllegalArgumentException("Problem decoding into existing bitmap");
             }
-            return finishDecode(bm, outPadding, opts);
+            return bm;
         } else {
             FileInputStream fis = new FileInputStream(fd);
             try {
@@ -660,8 +605,6 @@ public class BitmapFactory {
 
     private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts);
-    private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
-            Rect padding, Options opts, boolean applyScale, float scale);
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts);
     private static native Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts);
