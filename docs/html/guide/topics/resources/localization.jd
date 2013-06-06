@@ -480,4 +480,4 @@ the new locale. </p>
 
 <h2 id="checklist">Localization Checklist</h2>
 
-<p>For an overview of the process of localizing an Android application, see the <a href="{@docRoot}distribute/googleplay/publish/localization.html">Localization Checklist</a>.</p>
+<p>For an overview of the process of localizing an Android application, see the <a href="{@docRoot}distribute/googleplay/publish/localizing.html">Localization Checklist</a>.</p>
