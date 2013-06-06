@@ -3334,13 +3334,17 @@ final class ActivityStack {
     }
 
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
-            boolean dumpClient, String dumpPackage, boolean needSep) {
+            boolean dumpClient, String dumpPackage, boolean needSep, String header) {
         boolean printed = false;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             printed |= ActivityStackSupervisor.dumpHistoryList(fd, pw,
                     mTaskHistory.get(taskNdx).mActivities, "    ", "Hist", true, !dumpAll,
-                    dumpClient, dumpPackage, needSep, "    Task " + taskNdx + ": id #" + task.taskId);
+                    dumpClient, dumpPackage, needSep, header,
+                    "    Task " + taskNdx + ": id #" + task.taskId);
+            if (printed) {
+                header = null;
+            }
         }
         return printed;
     }
