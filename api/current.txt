@@ -28200,7 +28200,15 @@ package android.view.transition {
   public class Crossfade extends android.view.transition.Transition {
     ctor public Crossfade();
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
+    method public int getFadeBehavior();
+    method public int getResizeBehavior();
     method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
+    method public void setFadeBehavior(int);
+    method public void setResizeBehavior(int);
+    field public static final int FADE_BEHAVIOR_CROSSFADE = 0; // 0x0
+    field public static final int FADE_BEHAVIOR_REVEAL = 1; // 0x1
+    field public static final int RESIZE_BEHAVIOR_NONE = 0; // 0x0
+    field public static final int RESIZE_BEHAVIOR_SCALE = 1; // 0x1
   }
 
   public class Fade extends android.view.transition.Visibility {
