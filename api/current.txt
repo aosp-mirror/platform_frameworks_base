@@ -31794,7 +31794,7 @@ package java.lang {
     method protected final void setSigners(java.lang.Class<?>, java.lang.Object[]);
   }
 
-  public class ClassNotFoundException extends java.lang.Exception {
+  public class ClassNotFoundException extends java.lang.ReflectiveOperationException {
     ctor public ClassNotFoundException();
     ctor public ClassNotFoundException(java.lang.String);
     ctor public ClassNotFoundException(java.lang.String, java.lang.Throwable);
@@ -31936,7 +31936,7 @@ package java.lang {
     ctor public IllegalAccessError(java.lang.String);
   }
 
-  public class IllegalAccessException extends java.lang.Exception {
+  public class IllegalAccessException extends java.lang.ReflectiveOperationException {
     ctor public IllegalAccessException();
     ctor public IllegalAccessException(java.lang.String);
   }
@@ -31985,7 +31985,7 @@ package java.lang {
     ctor public InstantiationError(java.lang.String);
   }
 
-  public class InstantiationException extends java.lang.Exception {
+  public class InstantiationException extends java.lang.ReflectiveOperationException {
     ctor public InstantiationException();
     ctor public InstantiationException(java.lang.String);
   }
@@ -32162,7 +32162,7 @@ package java.lang {
     ctor public NoSuchFieldError(java.lang.String);
   }
 
-  public class NoSuchFieldException extends java.lang.Exception {
+  public class NoSuchFieldException extends java.lang.ReflectiveOperationException {
     ctor public NoSuchFieldException();
     ctor public NoSuchFieldException(java.lang.String);
   }
@@ -32172,7 +32172,7 @@ package java.lang {
     ctor public NoSuchMethodError(java.lang.String);
   }
 
-  public class NoSuchMethodException extends java.lang.Exception {
+  public class NoSuchMethodException extends java.lang.ReflectiveOperationException {
     ctor public NoSuchMethodException();
     ctor public NoSuchMethodException(java.lang.String);
   }
@@ -32265,6 +32265,13 @@ package java.lang {
 
   public abstract interface Readable {
     method public abstract int read(java.nio.CharBuffer) throws java.io.IOException;
+  }
+
+  public class ReflectiveOperationException extends java.lang.Exception {
+    ctor public ReflectiveOperationException();
+    ctor public ReflectiveOperationException(java.lang.String);
+    ctor public ReflectiveOperationException(java.lang.Throwable);
+    ctor public ReflectiveOperationException(java.lang.String, java.lang.Throwable);
   }
 
   public abstract interface Runnable {
@@ -33033,7 +33040,7 @@ package java.lang.reflect {
     method public abstract java.lang.Object invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[]) throws java.lang.Throwable;
   }
 
-  public class InvocationTargetException extends java.lang.Exception {
+  public class InvocationTargetException extends java.lang.ReflectiveOperationException {
     ctor protected InvocationTargetException();
     ctor public InvocationTargetException(java.lang.Throwable);
     ctor public InvocationTargetException(java.lang.Throwable, java.lang.String);
