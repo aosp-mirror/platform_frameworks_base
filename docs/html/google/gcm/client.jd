@@ -1,0 +1,24 @@
+page.title=GCM Client
+page.tags="cloud","push","messaging"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>See Also</h2>
+
+<ol class="toc">
+<li><a href="gs.html">Getting Started</a></li>
+<li><a href="server.html">GCM Server</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>A GCM client is a GCM-enabled app that runs on an Android device. To write your client code, we recommend that you use the new <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs. The client helper library that was offered in previous versions of GCM still works, but it has been superseded by the more efficient <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs.</p>
+
+<p>A full GCM implementation requires both a client implementation and a server-side implementation. For a step-by-step guide to creating a complete sample implementation that includes both client and server, see <a href="gs.html">Getting Started</a>. </p>
+
+<p>
+
+
