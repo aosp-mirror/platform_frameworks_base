@@ -79,6 +79,9 @@ public class StackBox {
     /** Dirty flag. Something inside this or some descendant of this has changed. */
     boolean layoutNeeded;
 
+    /** True if this StackBox sits below the Status Bar. */
+    boolean mUnderStatusBar;
+
     /** Used to keep from reallocating a temporary Rect for propagating bounds to child boxes */
     Rect mTmpRect = new Rect();
 
@@ -286,14 +289,19 @@ public class StackBox {
 
     /** If this is a terminal StackBox (contains a TaskStack) set the bounds.
      * @param bounds The rectangle to set the bounds to.
+     * @param underStatusBar True if the StackBox is directly below the Status Bar.
      * @return True if the bounds changed, false otherwise. */
-    boolean setStackBoxSizes(Rect bounds) {
-        boolean change;
+    boolean setStackBoxSizes(Rect bounds, boolean underStatusBar) {
+        boolean change = false;
+        if (mUnderStatusBar != underStatusBar) {
+            change = true;
+            mUnderStatusBar = underStatusBar;
+        }
         if (mStack != null) {
-            change = !mBounds.equals(bounds);
+            change |= !mBounds.equals(bounds);
             if (change) {
                 mBounds.set(bounds);
-                mStack.setBounds(bounds);
+                mStack.setBounds(bounds, underStatusBar);
             }
         } else {
             mTmpRect.set(bounds);
@@ -301,18 +309,18 @@ public class StackBox {
                 final int height = bounds.height();
                 int firstHeight = (int)(height * mWeight);
                 mTmpRect.bottom = bounds.top + firstHeight;
-                change = mFirst.setStackBoxSizes(mTmpRect);
+                change |= mFirst.setStackBoxSizes(mTmpRect, underStatusBar);
                 mTmpRect.top = mTmpRect.bottom;
                 mTmpRect.bottom = bounds.top + height;
-                change |= mSecond.setStackBoxSizes(mTmpRect);
+                change |= mSecond.setStackBoxSizes(mTmpRect, false);
             } else {
                 final int width = bounds.width();
                 int firstWidth = (int)(width * mWeight);
                 mTmpRect.right = bounds.left + firstWidth;
-                change = mFirst.setStackBoxSizes(mTmpRect);
+                change |= mFirst.setStackBoxSizes(mTmpRect, underStatusBar);
                 mTmpRect.left = mTmpRect.right;
                 mTmpRect.right = bounds.left + width;
-                change |= mSecond.setStackBoxSizes(mTmpRect);
+                change |= mSecond.setStackBoxSizes(mTmpRect, underStatusBar);
             }
         }
         return change;

@@ -340,7 +340,7 @@ class DisplayContent {
     boolean setStackBoxSize(Rect contentRect) {
         boolean change = false;
         for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            change |= mStackBoxes.get(stackBoxNdx).setStackBoxSizes(contentRect);
+            change |= mStackBoxes.get(stackBoxNdx).setStackBoxSizes(contentRect, true);
         }
         return change;
     }
