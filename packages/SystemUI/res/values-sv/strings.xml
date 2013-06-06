@@ -167,7 +167,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Platsen har identifierats av GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Ta bort alla meddelanden."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Info om appen"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Stäng"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Meddelanden inaktiverade"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"Knacka lätt här om du vill aktivera meddelanden igen."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skärmen roteras automatiskt."</string>

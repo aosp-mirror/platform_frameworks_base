@@ -167,7 +167,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija nastavljena z GPS-om"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Izbriši vsa obvestila."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Podatki o aplikaciji"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Zapri"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Obvestila so izklopljena"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"Dotaknite se tukaj, da ponovno vklopite obvestila."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Zaslon se bo samodejno zasukal."</string>
