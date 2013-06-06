@@ -39,6 +39,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.google.android.collect.Lists;
 
 /**
  * StorageManager is the interface to the systems storage service. The storage
@@ -644,5 +645,17 @@ public class StorageManager {
     public long getStorageFullBytes(File path) {
         return Settings.Global.getLong(mResolver, Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                 DEFAULT_FULL_THRESHOLD_BYTES);
+    }
+
+    /** {@hide} */
+    public static ArrayList<StorageVolume> getPhysicalExternalVolume(StorageVolume[] volumesphy) {
+        int count = volumesphy.length;
+        ArrayList<StorageVolume> volumes = Lists.newArrayList();
+        for (int i=0; i < count ; i++) {
+            if (!volumesphy[i].isEmulated()) {
+                volumes.add(volumesphy[i]);
+            }
+        }
+        return volumes;
     }
 }

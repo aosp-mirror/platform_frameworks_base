@@ -20,6 +20,14 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Takes care of unmounting and formatting external storage.
@@ -117,15 +125,29 @@ public class ExternalStorageFormatter extends Service
     public IBinder onBind(Intent intent) {
         return null;
     }
-
     @Override
     public void onCancel(DialogInterface dialog) {
+
         IMountService mountService = getMountService();
-        String extStoragePath = mStorageVolume == null ?
-                Environment.getLegacyExternalStorageDirectory().toString() :
-                mStorageVolume.getPath();
         try {
-            mountService.mountVolume(extStoragePath);
+            final StorageVolume[] volumes = mountService.getVolumeList();
+            final ArrayList<StorageVolume> physicalVols = StorageManager.getPhysicalExternalVolume(volumes);
+            String extStoragePath = null;
+            // find external storage path if storage volume not specified
+            if (mStorageVolume == null) {
+                if (physicalVols.size() == 0) {
+                        updateProgressDialog(R.string.progress_nomediapresent);
+                } else {
+                        final StorageVolume physicalVol = physicalVols.get(0);
+                        extStoragePath = physicalVol.toString();
+                        mountService.mountVolume(extStoragePath);
+                }
+            }
+            //else use the specified storage volume
+            else {
+                extStoragePath = mStorageVolume.getPath();
+                mountService.mountVolume(extStoragePath);
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed talking with mount service", e);
         }
@@ -140,37 +162,93 @@ public class ExternalStorageFormatter extends Service
         stopSelf();
     }
 
+
+
     void updateProgressState() {
-        String status = mStorageVolume == null ?
-                Environment.getExternalStorageState() :
-                mStorageManager.getVolumeState(mStorageVolume.getPath());
+        String status = null;
+        String extStoragePath = null;
+        StorageVolume physicalVol;
+        try {
+            final IMountService mountService = getMountService();
+            final StorageVolume[] volumes = mountService.getVolumeList();
+            final ArrayList<StorageVolume> physicalVols = StorageManager.getPhysicalExternalVolume(volumes);
+            // find external storage path if storage volume not specified
+            if (mStorageVolume == null) {
+                if (physicalVols.size() == 0) {
+                    updateProgressDialog(R.string.progress_nomediapresent);
+                    return;
+                    } else {
+                        physicalVol = physicalVols.get(0);
+                        status = mStorageManager.getVolumeState(physicalVol.getPath()) ;
+                    }
+                }
+                //else use the specified storage volume
+                else {
+                        status = mStorageManager.getVolumeState(mStorageVolume.getPath());
+                }
+        }
+        catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with mount service", e);
+        }
         if (Environment.MEDIA_MOUNTED.equals(status)
                 || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status)) {
             updateProgressDialog(R.string.progress_unmounting);
-            IMountService mountService = getMountService();
-            final String extStoragePath = mStorageVolume == null ?
-                    Environment.getLegacyExternalStorageDirectory().toString() :
-                    mStorageVolume.getPath();
             try {
-                // Remove encryption mapping if this is an unmount for a factory reset.
-                mountService.unmountVolume(extStoragePath, true, mFactoryReset);
-            } catch (RemoteException e) {
+                final IMountService mountService = getMountService();
+                final StorageVolume[] volumes = mountService.getVolumeList();
+                final ArrayList<StorageVolume> physicalVols = StorageManager.getPhysicalExternalVolume(volumes);
+                // find external storage path if storage volume not specified
+                if (mStorageVolume == null) {
+                    if (physicalVols.size() == 0) {
+                        updateProgressDialog(R.string.progress_nomediapresent);
+                        return;
+                    } else {
+                        physicalVol = physicalVols.get(0);
+                        extStoragePath = physicalVol.getPath();
+                        Log.e(TAG, "physicalVol : " + physicalVol.toString());
+                        mountService.unmountVolume(extStoragePath, true, mFactoryReset);
+                    }
+                }
+                //else use the specified storage volume
+                else {
+                        extStoragePath = mStorageVolume.getPath();
+                        mountService.unmountVolume(extStoragePath, true, mFactoryReset);
+                }
+            }
+            catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with mount service", e);
             }
-        } else if (Environment.MEDIA_NOFS.equals(status)
+        }
+        else if (Environment.MEDIA_NOFS.equals(status)
                 || Environment.MEDIA_UNMOUNTED.equals(status)
                 || Environment.MEDIA_UNMOUNTABLE.equals(status)) {
             updateProgressDialog(R.string.progress_erasing);
             final IMountService mountService = getMountService();
-            final String extStoragePath = mStorageVolume == null ?
-                    Environment.getLegacyExternalStorageDirectory().toString() :
-                    mStorageVolume.getPath();
             if (mountService != null) {
                 new Thread() {
                     @Override
                     public void run() {
                         boolean success = false;
+                        StorageVolume physicalVol = null;
+                        ArrayList<StorageVolume> physicalVols = null;
+                        String extStoragePath = null;
                         try {
+                            final StorageVolume[] volumes = mountService.getVolumeList();
+                            physicalVols = StorageManager.getPhysicalExternalVolume(volumes);
+                            // find external storage path if storage volume not specified
+                            if (mStorageVolume == null) {
+                                if (physicalVols.size() == 0) {
+                                    updateProgressDialog(R.string.progress_nomediapresent);
+                                    return;
+                                } else {
+                                    physicalVol = physicalVols.get(0);
+                                    extStoragePath = physicalVol.getPath();
+                                }
+                            }
+                            //else use the specified storage volume
+                            else {
+                                extStoragePath = mStorageVolume.getPath();
+                            }
                             mountService.formatVolume(extStoragePath);
                             success = true;
                         } catch (Exception e) {
@@ -191,7 +269,15 @@ public class ExternalStorageFormatter extends Service
                             sendBroadcast(new Intent("android.intent.action.MASTER_CLEAR"));
                         } else {
                             try {
-                                mountService.mountVolume(extStoragePath);
+                                if(physicalVols.size() == 0) {
+                                    updateProgressDialog(R.string.progress_nomediapresent);
+                                    return;
+                                } else {
+                                    physicalVol = physicalVols.get(0);
+                                    extStoragePath = mStorageVolume == null ?
+                                        physicalVol.getPath() : mStorageVolume.getPath();
+                                    mountService.mountVolume(extStoragePath);
+                                }
                             } catch (RemoteException e) {
                                 Log.w(TAG, "Failed talking with mount service", e);
                             }
