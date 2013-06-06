@@ -1,0 +1,160 @@
+page.title=GCM Server
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Quickview</h2>
+
+<ul>
+<li>Understand how to set up the server side of a GCM app.</li>
+<li>Become familiar with the <a href="{@docRoot}reference/com/google/android/gcm/server/package-summary.html">GCM server helper library</a>.</li>
+</ul>
+
+
+<h2>In this document</h2>
+
+<ol>
+  <li><a href="#requirements">Requirements</a> </li>
+  <li><a href="#gcm-setup">Setting Up GCM</a></li>
+  <li><a href="#server-setup">Setting Up an HTTP Server</a>
+    <ol>
+      <li><a href="#webserver-setup">Using a standard web server</a></li>
+      <li><a href="#appengine-setup">Using App Engine for Java</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>See Also</h2>
+
+<ol class="toc">
+<li><a href="gs.html">Getting Started</a></li>
+<li><a href="client.html">GCM Client</a></li>
+<li><a href="ccs.html">Cloud Connection Server</a></li>
+
+
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>This document gives examples of GCM server-side code for HTTP. For an example of an XMPP server (<a href="ccs.html">Cloud Connection Server</a>), see <a href="gs.html#server">Getting Started</a>. Note that a full GCM implementation requires a client-side implementation, in addition to the server. For a complete working example that includes client and server-side code, see <a href="gs.html">Getting Started</a>.</a>
+
+<h2 id="requirements">Requirements</h2>
+<p>For the web server:</p>
+<ul>
+  <li> <a href="http://ant.apache.org/">Ant 1.8</a> (it might work with earlier versions, but it's not guaranteed).</li>
+  <li>One of the following:
+    <ul>
+      <li>A running web server compatible with Servlets API version 2.5, such as <a href="http://tomcat.apache.org/">Tomcat 6</a> or <a href="http://jetty.codehaus.org/">Jetty</a>, or</li>
+      <li><a href="http://code.google.com/appengine/">Java App Engine SDK</a> version 1.6 or later.</li>
+    </ul>
+  </li>
+  <li>A Google account registered to use GCM.</li>
+  <li>The API  key for that account.</li>
+</ul>
+<p>For the Android application:</p>
+<ul>
+  <li>Emulator (or device) running Android 2.2 with Google APIs.</li>
+  <li>The Google API project number of the account registered to use GCM.</li>
+</ul>
+<h2 id="gcm-setup">Setting Up GCM</h2>
+<p>Before proceeding with the server and client setup, it's necessary to register a Google account with the Google API Console, enable Google Cloud Messaging in GCM, and obtain an API key from the <a href="https://code.google.com/apis/console">Google API Console</a>.</p>
+<p>For instructions on how to set up GCM, see <a href="gs.html">Getting Started</a>.</p>
+
+
+<h2 id="server-setup">Setting Up an HTTP Server</h2>
+<p>This section describes the different options for setting up an HTTP server.</p>
+<h3 id="webserver-setup">Using a standard web server</h3>
+<p>To set up the server using a standard, servlet-compliant web server:</p>
+<ol>
+  <li>From the <a href="http://code.google.com/p/gcm">open source site</a>, download the following directories: <code>gcm-server</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
+
+
+  <li>In a text editor, edit the <code>samples/gcm-demo-server/WebContent/WEB-INF/classes/api.key</code> and replace the existing text with the API key obtained above.</li>
+  <li>In a shell window, go to the <code>samples/gcm-demo-server</code> directory.</li>
+  <li>Generate the server's WAR file by running <code>ant war</code>:</li>
+  
+  <pre class="prettyprint">$ ant war
+
+Buildfile:build.xml
+
+init:
+   [mkdir] Created dir: build/classes
+   [mkdir] Created dir: dist
+
+compile:
+   [javac] Compiling 6 source files to build/classes
+
+war:
+     [war] Building war: <strong>dist/gcm-demo.war</strong>
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+</pre>
+  
+  <li>Deploy the <code>dist/gcm-demo.war</code> to your running server. For instance, if you're using Jetty, copy <code>gcm-demo.war</code> to the <code>webapps</code> directory of the Jetty installation.</li>
+  <li>Open the server's main page in a browser. The URL depends on the server you're using and your machine's IP address, but it will be something like <code>http://192.168.1.10:8080/gcm-demo/home</code>, where <code>gcm-demo</code> is the application context and <code>/home</code> is the path of the main servlet.
+    
+  </li>
+</ol>
+<p class="note"><strong>Note:</strong> You can get the IP by running <code>ifconfig</code> on Linux or MacOS, or <code>ipconfig</code> on Windows. </p>
+
+<p> You server is now ready.</p>
+
+<h3 id="appengine-setup">Using App Engine for Java</h3>
+
+<p>To set up the server using a standard App Engine for Java:</p>
+<ol>
+  <li>Get the files from the <a href="http://code.google.com/p/gcm">open source site</a>, as described above.</p>
+  </li>
+  <li>In a text editor, edit <code>samples/gcm-demo-appengine/src/com/google/android/gcm/demo/server/ApiKeyInitializer.java</code> and replace the existing text with the API key obtained above.
+
+  <p class="note"><strong>Note:</strong> The API key value set in that class will be used just once to create a persistent entity on App Engine. If you deploy the application, you can use App Engine's <code>Datastore Viewer</code> to change it later.</p>
+  
+  </li>
+  <li>In a shell window, go to the <code>samples/gcm-demo-appengine</code> directory.</li>
+  <li>Start the development App Engine server by <code>ant runserver</code>, using the <code>-Dsdk.dir</code> to indicate the location of the App Engine SDK and <code>-Dserver.host</code> to set your server's hostname or IP address:</li>
+
+<pre class="prettyprint">
+$ ant -Dsdk.dir=/opt/google/appengine-java-sdk runserver -Dserver.host=192.168.1.10
+Buildfile: gcm-demo-appengine/build.xml
+
+init:
+    [mkdir] Created dir: gcm-demo-appengine/dist
+
+copyjars:
+
+compile:
+
+datanucleusenhance:
+  [enhance] DataNucleus Enhancer (version 1.1.4) : Enhancement of classes
+  [enhance] DataNucleus Enhancer completed with success for 0 classes. Timings : input=28 ms, enhance=0 ms, total=28 ms. Consult the log for full details
+  [enhance] DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+
+runserver:
+     [java] Jun 15, 2012 8:46:06 PM com.google.apphosting.utils.jetty.JettyLogger info
+     [java] INFO: Logging to JettyLogger(null) via com.google.apphosting.utils.jetty.JettyLogger
+     [java] Jun 15, 2012 8:46:06 PM com.google.apphosting.utils.config.AppEngineWebXmlReader readAppEngineWebXml
+     [java] INFO: Successfully processed gcm-demo-appengine/WebContent/WEB-INF/appengine-web.xml
+     [java] Jun 15, 2012 8:46:06 PM com.google.apphosting.utils.config.AbstractConfigXmlReader readConfigXml
+     [java] INFO: Successfully processed gcm-demo-appengine/WebContent/WEB-INF/web.xml
+     [java] Jun 15, 2012 8:46:09 PM com.google.android.gcm.demo.server.ApiKeyInitializer contextInitialized
+     [java] SEVERE: Created fake key. Please go to App Engine admin console, change its value to your API Key (the entity type is 'Settings' and its field to be changed is 'ApiKey'), then restart the server!
+     [java] Jun 15, 2012 8:46:09 PM com.google.appengine.tools.development.DevAppServerImpl start
+     [java] INFO: The server is running at http://192.168.1.10:8080/
+     [java] Jun 15, 2012 8:46:09 PM com.google.appengine.tools.development.DevAppServerImpl start
+     [java] INFO: The admin console is running at http://192.168.1.10:8080/_ah/admin
+</pre>
+
+  <li>Open the server's main page in a browser. The URL depends on the server you're using and your machine's IP address, but it will be something like <code>http://192.168.1.10:8080/home</code>, where <code>/home</code> is the path of the main servlet.</li>
+  
+  <p class="note"><strong>Note:</strong> You can get the IP by running <code>ifconfig</code> on Linux or MacOS, or <code>ipconfig</code> on Windows.</p>
+  
+</ol>
+<p> You server is now ready.</p>
+
+
