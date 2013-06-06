@@ -268,6 +268,23 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_SET_SELECTION = 0x00020000;
 
     /**
+     * Action to expand an expandable node.
+     */
+    public static final int ACTION_EXPAND = 0x00040000;
+
+    /**
+     * Action to collapse an expandable node.
+     */
+    public static final int ACTION_COLLAPSE = 0x00080000;
+
+    /**
+     * Action to dismiss a dismissable node.
+     */
+    public static final int ACTION_DISMISS = 0x00100000;
+
+    // Action arguments
+
+    /**
      * Argument for which movement granularity to be used when traversing the node text.
      * <p>
      * <strong>Type:</strong> int<br>
@@ -334,6 +351,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_SELECTION_END_INT =
             "ACTION_ARGUMENT_SELECTION_END_INT";
 
+    // Focus types
+
     /**
      * The input focus.
      */
@@ -398,6 +417,20 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final int BOOLEAN_PROPERTY_VISIBLE_TO_USER = 0x00000800;
 
     private static final int BOOLEAN_PROPERTY_EDITABLE = 0x00001000;
+
+    private static final int BOOLEAN_PROPERTY_LIVE_REGION = 0x00002000;
+
+    private static final int BOOLEAN_PROPERTY_OPENS_POPUP = 0x00004000;
+
+    private static final int BOOLEAN_PROPERTY_EXPANDABLE = 0x00008000;
+
+    private static final int BOOLEAN_PROPERTY_EXPANDED = 0x00010000;
+
+    private static final int BOOLEAN_PROPERTY_DISMISSABLE = 0x00020000;
+
+    private static final int BOOLEAN_PROPERTY_MULTI_LINE = 0x00040000;
+
+    private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00080000;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -488,6 +521,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     private Bundle mBundle;
 
     private int mConnectionId = UNDEFINED;
+
+    private RangeInfo mRangeInfo;
+    private CollectionInfo mCollectionInfo;
+    private CollectionItemInfo mCollectionItemInfo;
 
     /**
      * Hide constructor from clients.
@@ -1334,6 +1371,255 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Gets the collection info if the node is a collection. A collection
+     * child is always a collection item.
+     *
+     * @return The collection info.
+     */
+    public CollectionInfo getCollectionInfo() {
+        return mCollectionInfo;
+    }
+
+    /**
+     * Sets the collection info if the node is a collection. A collection
+     * child is always a collection item.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param collectionInfo The collection info.
+     */
+    public void setCollectionInfo(CollectionInfo collectionInfo) {
+        enforceNotSealed();
+        mCollectionInfo = collectionInfo;
+    }
+
+    /**
+     * Gets the collection item info if the node is a collection item. A collection
+     * item is always a child of a collection.
+     *
+     * @return The collection item info.
+     */
+    public CollectionItemInfo getCollectionItemInfo() {
+        return mCollectionItemInfo;
+    }
+
+    /**
+     * Sets the collection item info if the node is a collection item. A collection
+     * item is always a child of a collection.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @return collectionItem True if the node is an item.
+     */
+    public void setCollectionItemInfo(CollectionItemInfo collectionItemInfo) {
+        enforceNotSealed();
+        mCollectionItemInfo = collectionItemInfo;
+    }
+
+    /**
+     * Gets the range info if this node is a range.
+     *
+     * @return The range.
+     */
+    public RangeInfo getRangeInfo() {
+        return mRangeInfo;
+    }
+
+    /**
+     * Sets the range info if this node is a range.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param rangeInfo The range info.
+     */
+    public void setRangeInfo(RangeInfo rangeInfo) {
+        enforceNotSealed();
+        mRangeInfo = rangeInfo;
+    }
+
+    /**
+     * Gets if the content of this node is invalid. For example,
+     * a date is not well-formed.
+     *
+     * @return If the node content is invalid.
+     */
+    public boolean isContentInvalid() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_CONTENT_INVALID);
+    }
+
+    /**
+     * Sets if the content of this node is invalid. For example,
+     * a date is not well-formed.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param contentInvalid If the node content is invalid.
+     */
+    public void setContentInvalid(boolean contentInvalid) {
+        setBooleanProperty(BOOLEAN_PROPERTY_CONTENT_INVALID, contentInvalid);
+    }
+
+    /**
+     * Gets if the node is a live region for whose changes the user
+     * should be notified. It is the responsibility of the accessibility
+     * service to monitor this region and notify the user if it changes.
+     *
+     * @return If the node is a live region.
+     */
+    public boolean isLiveRegion() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_LIVE_REGION);
+    }
+
+    /**
+     * Sets if the node is a live region for whose changes the user
+     * should be notified. It is the responsibility of the accessibility
+     * service to monitor this region and notify the user if it changes.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param liveRegion If the node is a live region.
+     */
+    public void setLiveRegion(boolean liveRegion) {
+        enforceNotSealed();
+        setBooleanProperty(BOOLEAN_PROPERTY_LIVE_REGION, liveRegion);
+    }
+
+    /**
+     * Gets if the node is a multi line editable text.
+     *
+     * @return True if the node is multi line.
+     */
+    public boolean isMultiLine() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_MULTI_LINE);
+    }
+
+    /**
+     * Sets if the node is a multi line editable text.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param multiLine True if the node is multi line.
+     */
+    public void setMultiLine(boolean multiLine) {
+        enforceNotSealed();
+        setBooleanProperty(BOOLEAN_PROPERTY_MULTI_LINE, multiLine);
+    }
+
+    /**
+     * Gets if this node opens a popup or a dialog.
+     *
+     * @return If the the node opens a popup.
+     */
+    public boolean getOpensPopup() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP);
+    }
+
+    /**
+     * Sets if this node opens a popup or a dialog.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param opensPopup If the the node opens a popup.
+     */
+    public void setOpensPopup(boolean opensPopup) {
+        enforceNotSealed();
+        setBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP, opensPopup);
+    }
+
+    /**
+     * Gets if the node can be expanded.
+     *
+     * @return If the node can be expanded.
+     */
+    public boolean isExpandable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_EXPANDABLE);
+    }
+
+    /**
+     * Sets if the node can be expanded.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param expandable If the node can be expanded.
+     */
+    public void setExpandable(boolean expandable) {
+        enforceNotSealed();
+        setBooleanProperty(BOOLEAN_PROPERTY_EXPANDABLE, expandable);
+    }
+
+    /**
+     * Gets if the node is expanded.
+     *
+     * @return If the node is expanded.
+     */
+    public boolean isExpanded() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_EXPANDED);
+    }
+
+    /**
+     * Sets if the node is expanded.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param expanded If the node is expanded.
+     */
+    public void setExpanded(boolean expanded) {
+        enforceNotSealed();
+        setBooleanProperty(BOOLEAN_PROPERTY_EXPANDED, expanded);
+    }
+
+    /**
+     * Gets if the node can be dismissed.
+     *
+     * @return If the node can be dismissed.
+     */
+    public boolean isDismissable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE);
+    }
+
+    /**
+     * Sets if the node can be dismissed.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param dismissable If the node can be dismissed.
+     */
+    public void setDismissable(boolean dismissable) {
+        enforceNotSealed();
+        setBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE, dismissable);
+    }
+
+    /**
      * Gets the package this node comes from.
      *
      * @return The package name.
@@ -1921,6 +2207,36 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeInt(0);
         }
 
+        if (mRangeInfo != null) {
+            parcel.writeInt(1);
+            parcel.writeInt(mRangeInfo.getType());
+            parcel.writeFloat(mRangeInfo.getMin());
+            parcel.writeFloat(mRangeInfo.getMax());
+            parcel.writeFloat(mRangeInfo.getCurrent());
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (mCollectionInfo != null) {
+            parcel.writeInt(1);
+            parcel.writeInt(mCollectionInfo.getHorizontalSize());
+            parcel.writeInt(mCollectionInfo.getVerticalSize());
+            parcel.writeInt(mCollectionInfo.isHierarchical() ? 1 : 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (mCollectionItemInfo != null) {
+            parcel.writeInt(1);
+            parcel.writeInt(mCollectionItemInfo.getHorizontalPosition());
+            parcel.writeInt(mCollectionItemInfo.getHorizontalSpan());
+            parcel.writeInt(mCollectionItemInfo.getVerticalPosition());
+            parcel.writeInt(mCollectionItemInfo.getVerticalSpan());
+            parcel.writeInt(mCollectionItemInfo.isHeading() ? 1 : 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
         // Since instances of this class are fetched via synchronous i.e. blocking
         // calls in IPCs we always recycle as soon as the instance is marshaled.
         recycle();
@@ -1951,7 +2267,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mMovementGranularities = other.mMovementGranularities;
         final int otherChildIdCount = other.mChildNodeIds.size();
         for (int i = 0; i < otherChildIdCount; i++) {
-            mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));    
+            mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));
         }
         mTextSelectionStart = other.mTextSelectionStart;
         mTextSelectionEnd = other.mTextSelectionEnd;
@@ -1959,6 +2275,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (other.mBundle != null && !other.mBundle.isEmpty()) {
             getBundle().putAll(other.mBundle);
         }
+        mRangeInfo = other.mRangeInfo;
+        mCollectionInfo = other.mCollectionInfo;
+        mCollectionItemInfo = other.mCollectionItemInfo;
     }
 
     /**
@@ -2006,10 +2325,35 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mTextSelectionStart = parcel.readInt();
         mTextSelectionEnd = parcel.readInt();
+
         mInputType = parcel.readInt();
 
         if (parcel.readInt() == 1) {
             getBundle().putAll(parcel.readBundle());
+        }
+
+        if (parcel.readInt() == 1) {
+            mRangeInfo = RangeInfo.obtain(
+                    parcel.readInt(),
+                    parcel.readFloat(),
+                    parcel.readFloat(),
+                    parcel.readFloat());
+        }
+
+        if (parcel.readInt() == 1) {
+            mCollectionInfo = CollectionInfo.obtain(
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt() == 1);
+        }
+
+        if (parcel.readInt() == 1) {
+            mCollectionItemInfo = CollectionItemInfo.obtain(
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt() == 1);
         }
     }
 
@@ -2040,6 +2384,18 @@ public class AccessibilityNodeInfo implements Parcelable {
         mInputType = InputType.TYPE_NULL;
         if (mBundle != null) {
             mBundle.clear();
+        }
+        if (mRangeInfo != null) {
+            mRangeInfo.recycle();
+            mRangeInfo = null;
+        }
+        if (mCollectionInfo != null) {
+            mCollectionInfo.recycle();
+            mCollectionInfo = null;
+        }
+        if (mCollectionItemInfo != null) {
+            mCollectionItemInfo.recycle();
+            mCollectionItemInfo = null;
         }
     }
 
@@ -2217,6 +2573,311 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("]");
 
         return builder.toString();
+    }
+
+    /**
+     * Class with information if a node is a range. Use
+     * {@link #obtain(int, float, float, float)} to get an instance.
+     */
+    public static final class RangeInfo {
+        private static final int MAX_POOL_SIZE = 10;
+
+        /** Range type: integer. */
+        public static final int RANGE_TYPE_INT = 0;
+        /** Range type: float. */
+        public static final int RANGE_TYPE_FLOAT = 1;
+        /** Range type: percent with values from zero to one.*/
+        public static final int RANGE_TYPE_PERCENT = 2;
+
+        private static final SynchronizedPool<RangeInfo> sPool =
+                new SynchronizedPool<AccessibilityNodeInfo.RangeInfo>(MAX_POOL_SIZE);
+
+        private int mType;
+        private float mMin;
+        private float mMax;
+        private float mCurrent;
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param type The type of the range.
+         * @param min The min value.
+         * @param max The max value.
+         * @param current The current value.
+         */
+        public static RangeInfo obtain(int type, float min, float max, float current) {
+            RangeInfo info = sPool.acquire();
+            return (info != null) ? info : new RangeInfo(type, min, max, current);
+        }
+
+        /**
+         * Creates a new range.
+         *
+         * @param type The type of the range.
+         * @param min The min value.
+         * @param max The max value.
+         * @param current The current value.
+         */
+        private RangeInfo(int type, float min, float max, float current) {
+            mType = type;
+            mMin = min;
+            mMax = max;
+            mCurrent = current;
+        }
+
+        /**
+         * Gets the range type.
+         *
+         * @return The range type.
+         *
+         * @see #RANGE_TYPE_INT
+         * @see #RANGE_TYPE_FLOAT
+         * @see #RANGE_TYPE_PERCENT
+         */
+        public int getType() {
+            return mType;
+        }
+
+        /**
+         * Gets the min value.
+         *
+         * @return The min value.
+         */
+        public float getMin() {
+            return mMin;
+        }
+
+        /**
+         * Gets the max value.
+         *
+         * @return The max value.
+         */
+        public float getMax() {
+            return mMax;
+        }
+
+        /**
+         * Gets the current value.
+         *
+         * @return The current value.
+         */
+        public float getCurrent() {
+            return mCurrent;
+        }
+
+        /**
+         * Recycles this instance.
+         */
+        void recycle() {
+            clear();
+            sPool.release(this);
+        }
+
+        private void clear() {
+            mType = 0;
+            mMin = 0;
+            mMax = 0;
+            mCurrent = 0;
+        }
+    }
+
+    /**
+     * Class with information if a node is a collection. Use
+     * {@link #obtain(int, float, float, float)} to an instance.
+     */
+    public static final class CollectionInfo {
+        private static final int MAX_POOL_SIZE = 20;
+
+        private static final SynchronizedPool<CollectionInfo> sPool =
+                new SynchronizedPool<CollectionInfo>(MAX_POOL_SIZE);
+
+        private int mHorizontalSize;
+        private int mVerticalSize;
+        private boolean mHierarchical;
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param horizontalSize The horizontal size.
+         * @param verticalSize The vertical size.
+         * @param hierarchical Whether the collection is hierarchical.
+         */
+        public static CollectionInfo obtain(int horizontalSize, int verticalSize,
+                boolean hierarchical) {
+            CollectionInfo info = sPool.acquire();
+            return (info != null) ? info : new CollectionInfo(horizontalSize,
+                    verticalSize, hierarchical);
+        }
+
+        /**
+         * Creates a new instance.
+         *
+         * @param horizontalSize The horizontal size.
+         * @param verticalSize The vertical size.
+         * @param hierarchical Whether the collection is hierarchical.
+         */
+        private CollectionInfo(int horizontalSize, int verticalSize,
+                boolean hierarchical) {
+            mHorizontalSize = horizontalSize;
+            mVerticalSize = verticalSize;
+            mHierarchical = hierarchical;
+        }
+
+        /**
+         * Gets the horizontal size in terms of item positions.
+         *
+         * @return The size.
+         */
+        public int getHorizontalSize() {
+            return mHorizontalSize;
+        }
+
+        /**
+         * Gets the vertical size in terms of item positions.
+         *
+         * @return The size.
+         */
+        public int getVerticalSize() {
+            return mVerticalSize;
+        }
+
+        /**
+         * Gets if the collection is a hierarchically ordered.
+         *
+         * @return Whether the collection is hierarchical.
+         */
+        public boolean isHierarchical() {
+            return mHierarchical;
+        }
+
+        /**
+         * Recycles this instance.
+         */
+        void recycle() {
+            clear();
+            sPool.release(this);
+        }
+
+        private void clear() {
+            mHorizontalSize = 0;
+            mVerticalSize = 0;
+            mHierarchical = false;
+        }
+    }
+
+    /**
+     * Class with information if a node is a collection item. Use
+     * {@link #obtain(int, int, boolean)} to get an instance.
+     */
+    public static final class CollectionItemInfo {
+        private static final int MAX_POOL_SIZE = 20;
+
+        private static final SynchronizedPool<CollectionItemInfo> sPool =
+                new SynchronizedPool<CollectionItemInfo>(MAX_POOL_SIZE);
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param horizontalPosition The horizontal item position.
+         * @param horizontalSpan The horizontal item span.
+         * @param verticalPosition The vertical item position.
+         * @param verticalSpan The vertical item span.
+         * @param heading Whether the item is a heading.
+         */
+        public static CollectionItemInfo obtain(int horizontalPosition, int horizontalSpan,
+                int verticalPosition, int verticalSpan, boolean heading) {
+            CollectionItemInfo info = sPool.acquire();
+            return (info != null) ? info : new CollectionItemInfo(horizontalPosition,
+                    horizontalSpan, verticalPosition, verticalSpan, heading);
+        }
+
+        private boolean mHeading;
+        private int mHorizontalPosition;
+        private int mVerticalPosition;
+        private int mHorizontalSpan;
+        private int mVerticalSpan;
+
+        /**
+         * Creates a new instance.
+         *
+         * @param horizontalPosition The horizontal item position.
+         * @param horizontalSpan The horizontal item span.
+         * @param verticalPosition The vertical item position.
+         * @param verticalSpan The vertical item span.
+         * @param heading Whether the item is a heading.
+         */
+        private CollectionItemInfo(int horizontalPosition, int horizontalSpan,
+                int verticalPosition, int verticalSpan, boolean heading) {
+            mHorizontalPosition = horizontalPosition;
+            mHorizontalSpan = horizontalSpan;
+            mVerticalPosition = verticalPosition;
+            mVerticalSpan = verticalSpan;
+            mHeading = heading;
+        }
+
+        /**
+         * Gets the horizontal item position in the parent collection.
+         *
+         * @return The position.
+         */
+        public int getHorizontalPosition() {
+            return mHorizontalPosition;
+        }
+
+        /**
+         * Gets the vertical item position in the parent collection.
+         *
+         * @return The position.
+         */
+        public int getVerticalPosition() {
+            return mVerticalPosition;
+        }
+
+        /**
+         * Gets the horizontal span in terms of item positions
+         * of the parent collection.
+         *
+         * @return The span.
+         */
+        public int getHorizontalSpan() {
+            return mHorizontalSpan;
+        }
+
+        /**
+         * Gets the vertical span in terms of item positions
+         * of the parent collection.
+         *
+         * @return The span.
+         */
+        public int getVerticalSpan() {
+            return mVerticalSpan;
+        }
+
+        /**
+         * Gets if the collection item is a heading. For example, section
+         * heading, table header, etc.
+         *
+         * @return If the item is a heading.
+         */
+        public boolean isHeading() {
+            return mHeading;
+        }
+
+        /**
+         * Recycles this instance.
+         */
+        void recycle() {
+            clear();
+            sPool.release(this);
+        }
+
+        private void clear() {
+            mHorizontalPosition = 0;
+            mHorizontalSpan = 0;
+            mVerticalPosition = 0;
+            mVerticalSpan = 0;
+            mHeading = false;
+        }
     }
 
     /**

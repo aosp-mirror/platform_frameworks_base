@@ -2685,7 +2685,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             | AccessibilityNodeInfo.ACTION_COPY
             | AccessibilityNodeInfo.ACTION_PASTE
             | AccessibilityNodeInfo.ACTION_CUT
-            | AccessibilityNodeInfo.ACTION_SET_SELECTION;
+            | AccessibilityNodeInfo.ACTION_SET_SELECTION
+            | AccessibilityNodeInfo.ACTION_EXPAND
+            | AccessibilityNodeInfo.ACTION_COLLAPSE
+            | AccessibilityNodeInfo.ACTION_DISMISS;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED
