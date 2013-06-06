@@ -250,18 +250,21 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return mCurrDrawable != null ? mCurrDrawable.getMinimumHeight() : 0;
     }
 
+    @Override
     public void invalidateDrawable(Drawable who) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().invalidateDrawable(this);
         }
     }
 
+    @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().scheduleDrawable(this, what, when);
         }
     }
 
+    @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().unscheduleDrawable(this, what);
@@ -415,11 +418,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            final int N = mDrawableContainerState.getChildCount();
-            final Drawable[] drawables = mDrawableContainerState.getChildren();
-            for (int i = 0; i < N; i++) {
-                if (drawables[i] != null) drawables[i].mutate();
-            }
+            mDrawableContainerState.mutate();
             mMutated = true;
         }
         return this;
@@ -544,12 +543,31 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return pos;
         }
 
+        final int getCapacity() {
+            return mDrawables.length;
+        }
+
         public final int getChildCount() {
             return mNumChildren;
         }
 
+        /*
+         * @deprecated Use {@link #getChild} instead.
+         */
         public final Drawable[] getChildren() {
             return mDrawables;
+        }
+
+        public final Drawable getChild(int index) {
+            return mDrawables[index];
+        }
+
+        final void mutate() {
+            final int N = getChildCount();
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                if (drawables[i] != null) drawables[i].mutate();
+            }
         }
 
         /** A boolean value indicating whether to use the maximum padding value of 

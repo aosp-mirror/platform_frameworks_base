@@ -228,7 +228,7 @@ public class StateListDrawable extends DrawableContainer {
      * @see #getStateSet(int)
      */
     public Drawable getStateDrawable(int index) {
-        return mStateListState.getChildren()[index];
+        return mStateListState.getChild(index);
     }
     
     /**
@@ -278,9 +278,9 @@ public class StateListDrawable extends DrawableContainer {
             super(orig, owner, res);
 
             if (orig != null) {
-                mStateSets = orig.mStateSets;
+                mStateSets = Arrays.copyOf(orig.mStateSets, orig.mStateSets.length);
             } else {
-                mStateSets = new int[getChildren().length][];
+                mStateSets = new int[getCapacity()][];
             }
         }
 
