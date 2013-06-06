@@ -52,6 +52,9 @@ page.title=User Notifications
 
 <p>The way this works is that during registration, the 3rd-party server requests a {@code notification_key}. The {@code notification_key} maps a particular user to all of the user's associated registration IDs (a regID represents a particular Android application running on a particular device). Then instead of sending one message to one regID at a time, the 3rd-party server can send a message to to the {@code notification_key}, which then sends the message to all of the user's regIDs.</p>
 
+<p class="note"><strong>Note:</strong> A notification dismissal message is like any other upstream message, meaning that it will be delivered to the other devices that belong to the specified {@code notification_key}. You should design your app to handle cases where the app receives a dismissal message, but has not yet displayed the notification that is being dismissed. You can solve this by caching the dismissal and then reconciling it with the corresponding notification.
+</p>
+
 <p>You can use this feature with either the new <a href="ccs.html">GCM Cloud Connection Server</a> (CCS), or the older <a href="gcm.html">GCM HTTP server</a>.</p>
 
 

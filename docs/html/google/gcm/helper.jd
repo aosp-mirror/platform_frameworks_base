@@ -2,6 +2,23 @@ page.title=Using the GCM Helper Libraries
 page.tags="cloud","push","messaging"
 @jd:body
 
+<div id="deprecatedSticker">
+  <a href="#" 
+     onclick="$('#naMessage').show();$('#deprecatedSticker').hide();return false">
+    <strong>This doc is deprecated</strong></a>
+</div>
+
+
+<div id="naMessage" style="display:block">
+<div><p><strong>The information in this document has been superseded by <a href="server.html">GCM Server</a> and <a href="client.html">GCM Client</a></strong>. Please use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> API instead of the GCM client helper library. The GCM server helper library is still valid.</p>
+
+ <input style="margin-top:1em;padding:5px" type="button"
+        value="That's nice, but I still want to read this document"
+onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
+</div>
+</div>
+
+
 <div id="qv-wrapper">
 <div id="qv">
 
