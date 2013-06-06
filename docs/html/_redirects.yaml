@@ -219,6 +219,21 @@ redirects:
 - from: /guide/tutorials/...
   to: /resources/tutorials/...
 
+# move ui docs to design
+
+- from: /guide/practices/ui_guidelines/index.html
+  to: /design/index.html
+
+- from: /guide/practices/ui_guidelines/icon_design.*
+  to: /design/style/iconography.html
+
+- from: /guide/practices/ui_guidelines/activity_task_design.html
+  to: /design/patterns/app-structure.html
+
+- from: /guide/practices/ui_guidelines/menu_design.html
+  to: /design/patterns/actionbar.html
+
+
 # ------------------- RESOURCES -------------------
 
 - from: /resources/dashboard/...
