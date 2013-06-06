@@ -298,6 +298,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     /** When true this window can be displayed on screens owther than mOwnerUid's */
     private boolean mShowToOwnerOnly;
 
+    /** When true this window is at the top of the screen and should be layed out to extend under
+     * the status bar */
+    boolean mUnderStatusBar = true;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
@@ -434,6 +438,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         if (mAppToken != null) {
             mContainingFrame.set(getStackBounds());
+            if (mUnderStatusBar) {
+                mContainingFrame.top = pf.top;
+            }
         } else {
             mContainingFrame.set(pf);
         }
