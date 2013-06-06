@@ -23,7 +23,7 @@ page.title=GCM Cloud Connection Server
       <li><a href="#msg_examples">Message Examples</a></li>
     </ol>
   </li>
-  <li><a href="#flow">Control Flow</a> </li>
+  <li><a href="#flow">Flow Control</a> </li>
 </ol>
 
 <h2>See Also</h2>
@@ -47,6 +47,8 @@ page.title=GCM Cloud Connection Server
 </ul>
 
 <p>The upstream messaging (device-to-cloud) feature of CCS is part of the Google Play services platform. Upstream messaging is available through the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs. To use upstream messaging and the new streamlined registration process, you must <a href="{@docRoot}google/play-services/setup.html">set up</a> the Google Play services SDK.</p>
+
+<p class="note"><strong>Note:</strong> For an example of an XMPP server, see <a href="server.html#xmpp">GCM Server</a>.
 
 <h2 id="gcm">CCS vs. GCM HTTP</h2>
 
@@ -229,69 +231,13 @@ gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, ttl, data);
   &lt;/gcm&gt;
 &lt;/message&gt;</pre>
 
-<h4 id="python">Python Example</h4>
-<p>This example illustrates how to connect,
-send, and receive GCM messages using XMPP. It shouldn't be used as-is
-on a production deployment.</p>
 
-<pre>
-import sys, json, xmpp
-SERVER = ('gcm.googleapis.com', 5235)
-#USERNAME = '&lt;your_numeric_project_id&gt;'
-#PASSWORD = '&lt;your_gcm_api_key&gt;'
+<h2 id="flow">Flow Control</h2>
 
-# Unique message id for downstream messages
-sent_message_id = 0
+<p>Every message sent to CCS receives either an ACK or a NACK response. Messages that haven't received one of these responses are considered pending. If the pending message count reaches 1000, the 3rd-party server should stop sending new messages and wait for CCS to acknowledge some of the existing pending messages.</p>
 
-def message_callback(session, message):
-  global sent_message_id
-  gcm = message.getTags('gcm')
+<p>Conversely, to avoid overloading the 3rd-party server, CCS will stop sending if there are too many unacknowledged messages. Therefore, the 3rd-party server should "ACK" received messages as soon as possible to maintain a constant flow of incoming messages. The aforementioned pending message limit doesn't apply to these ACKs. Even if the pending message count reaches 1000, the 3rd-party server should continue sending ACKs to avoid blocking delivery of new messages.</p>
 
-  if gcm:
-    gcm_json = gcm[0].getData()
-    msg = json.loads(gcm_json)
-    msg_id = msg['message_id']
-    device_reg_id = msg['from']
-
-    # Ignore non-standard messages (e.g. acks/nacks).
-    if not msg.has_key('message_type'):
-      # Acknowledge the incoming message.
-      send({'to': device_reg_id,
-            'message_type': 'ack',
-            'message_id': msg_id})
-
-      # Send a response back to the server.
-      send({'to': device_reg_id,
-            'message_id' : str(sent_message_id),
-            'data': {'pong': 1}})
-      sent_message_id = sent_message_id + 1
-
-def send(json_dict):
-  template = (&quot;&lt;message from='{0}' to='gcm@google.com'&gt;&quot;
-              &quot;&lt;gcm xmlns='google:mobile:data'&gt;{1}&lt;/gcm&gt;&lt;/message&gt;&quot;)
-  client.send(xmpp.protocol.Message(
-      node=template.format(client.Bind.bound[0],
-                           json.dumps(json_dict))))
-
-client = xmpp.Client(SERVER[0], debug=['socket'])
-client.connect(server=SERVER, secure=1, use_srv=False)
-auth = client.auth(USERNAME, PASSWORD, 'test')
-if not auth:
-  print 'Authentication failed!'
-  sys.exit(1)
-
-client.RegisterHandler('message', message_callback)
-
-while True:
-  client.Process(1)</pre>
-
-<h2 id="flow">Control Flow</h2>
-
-<p>Every message sent by a 3rd-party server to CCS receives either an ACK or a NACK response. A single connection can have at most 1000 messages that were sent without having yet received a response.</p>
-
-<p>To enforce this policy, the app can maintain a counter of sent messages that increments on each send and decrements on each ACK or NACK. If the counter exceeds 1000, the app should stop sending messages until an ACK or NACK is received.</p>
-
-<p>Conversely, when CCS sends messages to a 3rd-party server, it expects ACKs for each message it sends, and it will not send more than 1000 unacknowledged messages.</p>
-
-<p>The ACKs and messages must match on each connection. You can only send an ACK for a message on the connection on which it was received.</p>
+<p>ACKs are only valid within the context of one connection. If the connection is closed before a message can be ACKed, the 3rd-party server should wait for CCS to resend the message before ACKing it again.
+</p>
 
