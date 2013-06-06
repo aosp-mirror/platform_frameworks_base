@@ -4575,11 +4575,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     boolean rootViewRequestFocus() {
-        View root = getRootView();
-        if (root != null) {
-            return root.requestFocus();
-        }
-        return false;
+        final View root = getRootView();
+        return root != null && root.requestFocus();
     }
 
     /**
@@ -13482,7 +13479,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onAnimationStart();
         }
 
-        boolean more = a.getTransformation(drawingTime, parent.mChildTransformation, 1f);
+        final Transformation t = parent.getChildTransformation();
+        boolean more = a.getTransformation(drawingTime, t, 1f);
         if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
             if (parent.mInvalidationTransformation == null) {
                 parent.mInvalidationTransformation = new Transformation();
@@ -13490,7 +13488,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidationTransform = parent.mInvalidationTransformation;
             a.getTransformation(drawingTime, invalidationTransform, 1f);
         } else {
-            invalidationTransform = parent.mChildTransformation;
+            invalidationTransform = t;
         }
 
         if (more) {
@@ -13543,17 +13541,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
                     ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
                 ViewGroup parentVG = (ViewGroup) mParent;
-                final boolean hasTransform =
-                        parentVG.getChildStaticTransformation(this, parentVG.mChildTransformation);
-                if (hasTransform) {
-                    Transformation transform = parentVG.mChildTransformation;
-                    final int transformType = parentVG.mChildTransformation.getTransformationType();
+                final Transformation t = parentVG.getChildTransformation();
+                if (parentVG.getChildStaticTransformation(this, t)) {
+                    final int transformType = t.getTransformationType();
                     if (transformType != Transformation.TYPE_IDENTITY) {
                         if ((transformType & Transformation.TYPE_ALPHA) != 0) {
-                            alpha = transform.getAlpha();
+                            alpha = t.getAlpha();
                         }
                         if ((transformType & Transformation.TYPE_MATRIX) != 0) {
-                            displayList.setMatrix(transform.getMatrix());
+                            displayList.setMatrix(t.getMatrix());
                         }
                     }
                 }
@@ -13598,7 +13594,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int flags = parent.mGroupFlags;
 
         if ((flags & ViewGroup.FLAG_CLEAR_TRANSFORMATION) == ViewGroup.FLAG_CLEAR_TRANSFORMATION) {
-            parent.mChildTransformation.clear();
+            parent.getChildTransformation().clear();
             parent.mGroupFlags &= ~ViewGroup.FLAG_CLEAR_TRANSFORMATION;
         }
 
@@ -13626,7 +13622,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (concatMatrix) {
                 mPrivateFlags3 |= PFLAG3_VIEW_IS_ANIMATING_TRANSFORM;
             }
-            transformToApply = parent.mChildTransformation;
+            transformToApply = parent.getChildTransformation();
         } else {
             if ((mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_TRANSFORM) ==
                     PFLAG3_VIEW_IS_ANIMATING_TRANSFORM && mDisplayList != null) {
@@ -13636,12 +13632,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             if (!useDisplayListProperties &&
                     (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
-                final boolean hasTransform =
-                        parent.getChildStaticTransformation(this, parent.mChildTransformation);
+                final Transformation t = parent.getChildTransformation();
+                final boolean hasTransform = parent.getChildStaticTransformation(this, t);
                 if (hasTransform) {
-                    final int transformType = parent.mChildTransformation.getTransformationType();
-                    transformToApply = transformType != Transformation.TYPE_IDENTITY ?
-                            parent.mChildTransformation : null;
+                    final int transformType = t.getTransformationType();
+                    transformToApply = transformType != Transformation.TYPE_IDENTITY ? t : null;
                     concatMatrix = (transformType & Transformation.TYPE_MATRIX) != 0;
                 }
             }

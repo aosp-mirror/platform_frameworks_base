@@ -128,7 +128,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * A Transformation used when drawing children, to
      * apply on the child being drawn.
      */
-    final Transformation mChildTransformation = new Transformation();
+    private Transformation mChildTransformation;
 
     /**
      * Used to track the current invalidation region.
@@ -3209,6 +3209,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected boolean getChildStaticTransformation(View child, Transformation t) {
         return false;
+    }
+
+    Transformation getChildTransformation() {
+        if (mChildTransformation == null) {
+            mChildTransformation = new Transformation();
+        }
+        return mChildTransformation;
     }
 
     /**
