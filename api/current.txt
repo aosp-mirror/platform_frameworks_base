@@ -3845,6 +3845,23 @@ package android.app {
     field public static final int DEFAULT_LIGHTS = 4; // 0x4
     field public static final int DEFAULT_SOUND = 1; // 0x1
     field public static final int DEFAULT_VIBRATE = 2; // 0x2
+    field public static final java.lang.String EXTRA_INFO_TEXT = "android.infoText";
+    field public static final java.lang.String EXTRA_LARGE_ICON = "android.largeIcon";
+    field public static final java.lang.String EXTRA_LARGE_ICON_BIG = "android.largeIcon.big";
+    field public static final java.lang.String EXTRA_PEOPLE = "android.people";
+    field public static final java.lang.String EXTRA_PICTURE = "android.picture";
+    field public static final java.lang.String EXTRA_PROGRESS = "android.progress";
+    field public static final java.lang.String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
+    field public static final java.lang.String EXTRA_PROGRESS_MAX = "android.progressMax";
+    field public static final java.lang.String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
+    field public static final java.lang.String EXTRA_SHOW_WHEN = "android.showWhen";
+    field public static final java.lang.String EXTRA_SMALL_ICON = "android.icon";
+    field public static final java.lang.String EXTRA_SUB_TEXT = "android.subText";
+    field public static final java.lang.String EXTRA_SUMMARY_TEXT = "android.summaryText";
+    field public static final java.lang.String EXTRA_TEXT = "android.text";
+    field public static final java.lang.String EXTRA_TEXT_LINES = "android.textLines";
+    field public static final java.lang.String EXTRA_TITLE = "android.title";
+    field public static final java.lang.String EXTRA_TITLE_BIG = "android.title.big";
     field public static final int FLAG_AUTO_CANCEL = 16; // 0x10
     field public static final int FLAG_FOREGROUND_SERVICE = 64; // 0x40
     field public static final deprecated int FLAG_HIGH_PRIORITY = 128; // 0x80
@@ -3859,12 +3876,14 @@ package android.app {
     field public static final int PRIORITY_MAX = 2; // 0x2
     field public static final int PRIORITY_MIN = -2; // 0xfffffffe
     field public static final int STREAM_DEFAULT = -1; // 0xffffffff
+    field public android.app.Notification.Action[] actions;
     field public int audioStreamType;
     field public android.widget.RemoteViews bigContentView;
     field public android.app.PendingIntent contentIntent;
     field public android.widget.RemoteViews contentView;
     field public int defaults;
     field public android.app.PendingIntent deleteIntent;
+    field public android.os.Bundle extras;
     field public int flags;
     field public android.app.PendingIntent fullScreenIntent;
     field public int icon;
@@ -3880,6 +3899,18 @@ package android.app {
     field public android.widget.RemoteViews tickerView;
     field public long[] vibrate;
     field public long when;
+  }
+
+  public static class Notification.Action implements android.os.Parcelable {
+    ctor public Notification.Action();
+    ctor public Notification.Action(int, java.lang.CharSequence, android.app.PendingIntent);
+    method public android.app.Notification.Action clone();
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public android.app.PendingIntent actionIntent;
+    field public int icon;
+    field public java.lang.CharSequence title;
   }
 
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {
@@ -3914,6 +3945,7 @@ package android.app {
     method public android.app.Notification.Builder setContentTitle(java.lang.CharSequence);
     method public android.app.Notification.Builder setDefaults(int);
     method public android.app.Notification.Builder setDeleteIntent(android.app.PendingIntent);
+    method public android.app.Notification.Builder setExtras(android.os.Bundle);
     method public android.app.Notification.Builder setFullScreenIntent(android.app.PendingIntent, boolean);
     method public android.app.Notification.Builder setLargeIcon(android.graphics.Bitmap);
     method public android.app.Notification.Builder setLights(int, int, int);
