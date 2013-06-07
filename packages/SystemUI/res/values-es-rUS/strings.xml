@@ -206,5 +206,5 @@
     <string name="status_bar_help_text" msgid="7874607155052076323">"Desliza el dedo hacia abajo para acceder al contenido."\n"Vuelve a deslizar el dedo hacia abajo para acceder a los controles del sistema."</string>
     <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Desliza el dedo hacia arriba desde la parte inferior de la pantalla para mostrar la barra del sistema."</string>
     <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Desliza el dedo desde la parte inferior de la pantalla para mostrar la barra."</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Desliza el dedo desde la parte derecha de la pantalla para mostrar la barra del sistema."</string>
+    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Desliza el dedo desde la derecha de la pantalla para mostrar la barra del sistema."</string>
 </resources>
