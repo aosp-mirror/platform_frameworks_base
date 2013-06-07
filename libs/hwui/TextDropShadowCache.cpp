@@ -155,7 +155,7 @@ void TextDropShadowCache::operator()(ShadowText& text, ShadowTexture*& texture) 
             ALOGD("Shadow texture deleted, size = %d", texture->bitmapSize);
         }
 
-        glDeleteTextures(1, &texture->id);
+        texture->deleteTexture();
         delete texture;
     }
 }

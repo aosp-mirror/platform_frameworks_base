@@ -112,7 +112,7 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
         if (mDebugEnabled) {
             ALOGD("Texture deleted, size = %d", texture->bitmapSize);
         }
-        glDeleteTextures(1, &texture->id);
+        texture->deleteTexture();
         delete texture;
     }
 }

@@ -508,6 +508,28 @@ void Caches::bindTexture(GLenum target, GLuint texture) {
     }
 }
 
+void Caches::deleteTexture(GLuint texture) {
+    // When glDeleteTextures() is called on a currently bound texture,
+    // OpenGL ES specifies that the texture is then considered unbound
+    // Consider the following series of calls:
+    //
+    // glGenTextures -> creates texture name 2
+    // glBindTexture(2)
+    // glDeleteTextures(2) -> 2 is now unbound
+    // glGenTextures -> can return 2 again
+    //
+    // If we don't call glBindTexture(2) after the second glGenTextures
+    // call, any texture operation will be performed on the default
+    // texture (name=0)
+
+    for (int i = 0; i < REQUIRED_TEXTURE_UNITS_COUNT; i++) {
+        if (mBoundTextures[i] == texture) {
+            mBoundTextures[i] = 0;
+        }
+    }
+    glDeleteTextures(1, &texture);
+}
+
 void Caches::resetBoundTextures() {
     memset(mBoundTextures, 0, REQUIRED_TEXTURE_UNITS_COUNT * sizeof(GLuint));
 }
