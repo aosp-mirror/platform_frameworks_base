@@ -64,6 +64,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.NativeDaemonConnector.Command;
+import com.android.server.NativeDaemonConnector.SensitiveArg;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
@@ -1642,8 +1643,8 @@ class MountService extends IMountService.Stub
 
         int rc = StorageResultCode.OperationSucceeded;
         try {
-            mConnector.execute("asec", "create", id, sizeMb, fstype, key, ownerUid,
-                    external ? "1" : "0");
+            mConnector.execute("asec", "create", id, sizeMb, fstype, new SensitiveArg(key),
+                    ownerUid, external ? "1" : "0");
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
@@ -1743,7 +1744,7 @@ class MountService extends IMountService.Stub
 
         int rc = StorageResultCode.OperationSucceeded;
         try {
-            mConnector.execute("asec", "mount", id, key, ownerUid);
+            mConnector.execute("asec", "mount", id, new SensitiveArg(key), ownerUid);
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code != VoldResponseCode.OpFailedStorageBusy) {
@@ -2019,7 +2020,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "checkpw", password);
+            event = mConnector.execute("cryptfs", "checkpw", new SensitiveArg(password));
 
             final int code = Integer.parseInt(event.getMessage());
             if (code == 0) {
@@ -2058,7 +2059,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            mConnector.execute("cryptfs", "enablecrypto", "inplace", password);
+            mConnector.execute("cryptfs", "enablecrypto", "inplace", new SensitiveArg(password));
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
@@ -2083,7 +2084,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "changepw", password);
+            event = mConnector.execute("cryptfs", "changepw", new SensitiveArg(password));
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
@@ -2116,7 +2117,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "verifypw", password);
+            event = mConnector.execute("cryptfs", "verifypw", new SensitiveArg(password));
             Slog.i(TAG, "cryptfs verifypw => " + event.getMessage());
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
@@ -2482,8 +2483,8 @@ class MountService extends IMountService.Stub
 
             int rc = StorageResultCode.OperationSucceeded;
             try {
-                mConnector.execute(
-                        "obb", "mount", mObbState.voldPath, hashedKey, mObbState.ownerGid);
+                mConnector.execute("obb", "mount", mObbState.voldPath, new SensitiveArg(hashedKey),
+                        mObbState.ownerGid);
             } catch (NativeDaemonConnectorException e) {
                 int code = e.getCode();
                 if (code != VoldResponseCode.OpFailedStorageBusy) {
