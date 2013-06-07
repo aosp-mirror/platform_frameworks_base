@@ -400,8 +400,16 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public void putAll(ArrayMap<? extends K, ? extends V> array) {
         final int N = array.mSize;
         ensureCapacity(mSize + N);
-        for (int i=0; i<N; i++) {
-            put(array.keyAt(i), array.valueAt(i));
+        if (mSize == 0) {
+            if (N > 0) {
+                System.arraycopy(array.mHashes, 0, mHashes, 0, N);
+                System.arraycopy(array.mArray, 0, mArray, 0, N<<1);
+                mSize = N;
+            }
+        } else {
+            for (int i=0; i<N; i++) {
+                put(array.keyAt(i), array.valueAt(i));
+            }
         }
     }
 
@@ -605,7 +613,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * Return a {@link java.util.Set} for iterating over and interacting with all keys
      * in the array map.
      *
-     * <p><b>Note:</b> this is a fair inefficient way to access the array contents, it
+     * <p><b>Note:</b> this is a fairly inefficient way to access the array contents, it
      * requires generating a number of temporary objects.</p>
      */
     @Override
@@ -617,11 +625,71 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * Return a {@link java.util.Collection} for iterating over and interacting with all values
      * in the array map.
      *
-     * <p><b>Note:</b> this is a fair inefficient way to access the array contents, it
+     * <p><b>Note:</b> this is a fairly inefficient way to access the array contents, it
      * requires generating a number of temporary objects.</p>
      */
     @Override
     public Collection<V> values() {
         return getCollection().getValues();
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation returns false if the object is not a map, or
+     * if the maps have different sizes. Otherwise, for each key in this map,
+     * values of both maps are compared. If the values for any key are not
+     * equal, the method returns false, otherwise it returns true.
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) object;
+            if (size() != map.size()) {
+                return false;
+            }
+
+            try {
+                for (int i=0; i<mSize; i++) {
+                    K key = keyAt(i);
+                    V mine = valueAt(i);
+                    Object theirs = map.get(key);
+                    if (mine == null) {
+                        if (theirs != null || !map.containsKey(key)) {
+                            return false;
+                        }
+                    } else if (!mine.equals(theirs)) {
+                        return false;
+                    }
+                }
+            } catch (NullPointerException ignored) {
+                return false;
+            } catch (ClassCastException ignored) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation sums a hashcode using all keys and values.
+     */
+    @Override
+    public int hashCode() {
+        int result = 0;
+        for (int i=0; i<mSize; i++) {
+            K key = keyAt(i);
+            V value = valueAt(i);
+            result += (key == null ? 0 : key.hashCode())
+                    ^ (value == null ? 0 : value.hashCode());
+        }
+        return result;
+    }
+
 }
