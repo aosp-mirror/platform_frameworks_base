@@ -9134,6 +9134,7 @@ package android.graphics {
   }
 
   public class NinePatch {
+    ctor public NinePatch(android.graphics.Bitmap, byte[]);
     ctor public NinePatch(android.graphics.Bitmap, byte[], java.lang.String);
     method public void draw(android.graphics.Canvas, android.graphics.RectF);
     method public void draw(android.graphics.Canvas, android.graphics.Rect);
