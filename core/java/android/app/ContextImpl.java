@@ -513,12 +513,16 @@ class ContextImpl extends Context {
                 }});
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
+                Display mDefaultDisplay;
                 public Object getService(ContextImpl ctx) {
                     Display display = ctx.mDisplay;
                     if (display == null) {
-                        DisplayManager dm = (DisplayManager)ctx.getOuterContext().getSystemService(
-                                Context.DISPLAY_SERVICE);
-                        display = dm.getDisplay(Display.DEFAULT_DISPLAY);
+                        if (mDefaultDisplay == null) {
+                            DisplayManager dm = (DisplayManager)ctx.getOuterContext().
+                                    getSystemService(Context.DISPLAY_SERVICE);
+                            mDefaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
+                        }
+                        display = mDefaultDisplay;
                     }
                     return new WindowManagerImpl(display);
                 }});
