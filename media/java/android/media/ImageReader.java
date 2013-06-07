@@ -16,8 +16,15 @@
 
 package android.media;
 
+import android.graphics.ImageFormat;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.Surface;
-import java.lang.AutoCloseable;
+
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * <p>The ImageReader class allows direct application access to image data
@@ -39,7 +46,7 @@ import java.lang.AutoCloseable;
  * ImageReader does not obtain and release Images at a rate equal to the
  * production rate.</p>
  */
-public final class ImageReader {
+public final class ImageReader implements AutoCloseable {
 
     /**
      * <p>Create a new reader for images of the desired size and format.</p>
@@ -62,7 +69,7 @@ public final class ImageReader {
      * access simultaneously. This should be as small as possible to limit
      * memory use. Once maxImages Images are obtained by the user, one of them
      * has to be released before a new Image will become available for access
-     * through getImage(). Must be greater than 0.
+     * through getNextImage(). Must be greater than 0.
      *
      * @see Image
      */
@@ -80,6 +87,12 @@ public final class ImageReader {
             throw new IllegalArgumentException(
                 "Maximum outstanding image count must be at least 1");
         }
+
+        mNumPlanes = getNumPlanesFromFormat();
+
+        nativeInit(new WeakReference<ImageReader>(this), width, height, format, maxImages);
+
+        mSurface = nativeGetSurface();
     }
 
     public int getWidth() {
@@ -111,7 +124,7 @@ public final class ImageReader {
      * @return A Surface to use for a drawing target for various APIs.
      */
     public Surface getSurface() {
-        return null;
+        return mSurface;
     }
 
     /**
@@ -122,6 +135,13 @@ public final class ImageReader {
      * available.
      */
     public Image getNextImage() {
+        SurfaceImage si = new SurfaceImage();
+        if (nativeImageSetup(si)) {
+            // create SurfacePlane objects
+            si.createSurfacePlanes();
+            si.setImageValid(true);
+            return si;
+        }
         return null;
     }
 
@@ -138,34 +158,307 @@ public final class ImageReader {
             throw new IllegalArgumentException(
                 "This image was not produced by this ImageReader");
         }
+
+        si.clearSurfacePlanes();
+        nativeReleaseImage(i);
+        si.setImageValid(false);
     }
 
-    public void setOnImageAvailableListener(OnImageAvailableListener l) {
-        mImageListener = l;
+    /**
+     * Register a listener to be invoked when a new image becomes available
+     * from the ImageReader.
+     * @param listener the listener that will be run
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
+     */
+   public void setImageAvailableListener(OnImageAvailableListener listener, Handler handler) {
+        mImageListener = listener;
+
+        Looper looper;
+        mHandler = handler;
+        if (mHandler == null) {
+            if ((looper = Looper.myLooper()) != null) {
+                mHandler = new Handler();
+            } else {
+                throw new IllegalArgumentException(
+                        "Looper doesn't exist in the calling thread");
+            }
+        }
     }
 
+    /**
+     * Callback interface for being notified that a new image is available.
+     * The onImageAvailable is called per image basis, that is, callback fires for every new frame
+     * available from ImageReader.
+     */
     public interface OnImageAvailableListener {
+        /**
+         * Callback that is called when a new image is available from ImageReader.
+         * @param reader the ImageReader the callback is associated with.
+         * @see ImageReader
+         * @see Image
+         */
         void onImageAvailable(ImageReader reader);
+    }
+
+    /**
+     * Free up all the resources associated with this ImageReader. After
+     * Calling this method, this ImageReader can not be used. calling
+     * any methods on this ImageReader and Images previously provided by {@link #getNextImage}
+     * will result in an IllegalStateException, and attempting to read from
+     * ByteBuffers returned by an earlier {@code Plane#getBuffer} call will
+     * have undefined behavior.
+     */
+    @Override
+    public void close() {
+        nativeClose();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            close();
+        } finally {
+            super.finalize();
+        }
+    }
+
+    private int getNumPlanesFromFormat() {
+        switch (mFormat) {
+            case ImageFormat.YV12:
+            case ImageFormat.YUV_420_888:
+            case ImageFormat.NV21:
+                return 3;
+            case ImageFormat.NV16:
+                return 2;
+            case ImageFormat.RGB_565:
+            case ImageFormat.JPEG:
+            case ImageFormat.YUY2:
+            case ImageFormat.Y8:
+            case ImageFormat.Y16:
+            case ImageFormat.RAW_SENSOR:
+                return 1;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Invalid format specified %d", mFormat));
+        }
+    }
+
+    /**
+     * Called from Native code when an Event happens.
+     */
+    private static void postEventFromNative(Object selfRef) {
+        WeakReference weakSelf = (WeakReference)selfRef;
+        final ImageReader ir = (ImageReader)weakSelf.get();
+        if (ir == null) {
+            return;
+        }
+
+        if (ir.mHandler != null) {
+            ir.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    ir.mImageListener.onImageAvailable(ir);
+                }
+              });
+        }
     }
 
     private final int mWidth;
     private final int mHeight;
     private final int mFormat;
     private final int mMaxImages;
+    private final int mNumPlanes;
+    private final Surface mSurface;
 
+    private Handler mHandler;
     private OnImageAvailableListener mImageListener;
 
-    private class SurfaceImage extends android.media.Image {
+    /**
+     * This field is used by native code, do not access or modify.
+     */
+    private long mNativeContext;
+
+    private class SurfaceImage implements android.media.Image {
         public SurfaceImage() {
+            mIsImageValid = false;
         }
 
         @Override
         public void close() {
-            ImageReader.this.releaseImage(this);
+            if (mIsImageValid) {
+                ImageReader.this.releaseImage(this);
+            }
         }
 
         public ImageReader getReader() {
             return ImageReader.this;
         }
+
+        @Override
+        public int getFormat() {
+            if (mIsImageValid) {
+                return ImageReader.this.mFormat;
+            } else {
+                throw new IllegalStateException("Image is already released");
+            }
+        }
+
+        @Override
+        public int getWidth() {
+            if (mIsImageValid) {
+                return ImageReader.this.mWidth;
+            } else {
+                throw new IllegalStateException("Image is already released");
+            }
+        }
+
+        @Override
+        public int getHeight() {
+            if (mIsImageValid) {
+                return ImageReader.this.mHeight;
+            } else {
+                throw new IllegalStateException("Image is already released");
+            }
+        }
+
+        @Override
+        public long getTimestamp() {
+            if (mIsImageValid) {
+                return mTimestamp;
+            } else {
+                throw new IllegalStateException("Image is already released");
+            }
+        }
+
+        @Override
+        public Plane[] getPlanes() {
+            if (mIsImageValid) {
+                // Shallow copy is fine.
+                return mPlanes.clone();
+            } else {
+                throw new IllegalStateException("Image is already released");
+            }
+        }
+
+        @Override
+        protected final void finalize() throws Throwable {
+            try {
+                close();
+            } finally {
+                super.finalize();
+            }
+        }
+
+        private void setImageValid(boolean isValid) {
+            mIsImageValid = isValid;
+        }
+
+        private boolean isImageValid() {
+            return mIsImageValid;
+        }
+
+        private void clearSurfacePlanes() {
+            if (mIsImageValid) {
+                for (int i = 0; i < mPlanes.length; i++) {
+                    if (mPlanes[i] != null) {
+                        mPlanes[i].clearBuffer();
+                        mPlanes[i] = null;
+                    }
+                }
+            }
+        }
+
+        private void createSurfacePlanes() {
+            mPlanes = new SurfacePlane[ImageReader.this.mNumPlanes];
+            for (int i = 0; i < ImageReader.this.mNumPlanes; i++) {
+                mPlanes[i] = nativeCreatePlane(i);
+            }
+        }
+        private class SurfacePlane implements android.media.Image.Plane {
+            // SurfacePlane instance is created by native code when a new SurfaceImage is created
+            private SurfacePlane(int index, int rowStride, int pixelStride) {
+                mIndex = index;
+                mRowStride = rowStride;
+                mPixelStride = pixelStride;
+            }
+
+            @Override
+            public ByteBuffer getBuffer() {
+                if (SurfaceImage.this.isImageValid() == false) {
+                    throw new IllegalStateException("Image is already released");
+                }
+                if (mBuffer != null) {
+                    return mBuffer;
+                } else {
+                    mBuffer = SurfaceImage.this.nativeImageGetBuffer(mIndex);
+                    // Set the byteBuffer order according to host endianness (native order),
+                    // otherwise, the byteBuffer order defaults to ByteOrder.BIG_ENDIAN.
+                    return mBuffer.order(ByteOrder.nativeOrder());
+                }
+            }
+
+            @Override
+            public int getPixelStride() {
+                if (SurfaceImage.this.isImageValid()) {
+                    return mPixelStride;
+                } else {
+                    throw new IllegalStateException("Image is already released");
+                }
+            }
+
+            @Override
+            public int getRowStride() {
+                if (SurfaceImage.this.isImageValid()) {
+                    return mRowStride;
+                } else {
+                    throw new IllegalStateException("Image is already released");
+                }
+            }
+
+            private void clearBuffer() {
+                mBuffer = null;
+            }
+
+            final private int mIndex;
+            final private int mPixelStride;
+            final private int mRowStride;
+
+            private ByteBuffer mBuffer;
+        }
+
+        /**
+         * This field is used to keep track of native object and used by native code only.
+         * Don't modify.
+         */
+        private long mLockedBuffer;
+
+        /**
+         * This field is set by native code during nativeImageSetup().
+         */
+        private long mTimestamp;
+
+        private SurfacePlane[] mPlanes;
+        private boolean mIsImageValid;
+
+        private synchronized native ByteBuffer nativeImageGetBuffer(int idx);
+        private synchronized native SurfacePlane nativeCreatePlane(int idx);
+    }
+
+    private synchronized native void nativeInit(Object weakSelf, int w, int h,
+                                                    int fmt, int maxImgs);
+    private synchronized native void nativeClose();
+    private synchronized native void nativeReleaseImage(Image i);
+    private synchronized native Surface nativeGetSurface();
+    private synchronized native boolean nativeImageSetup(Image i);
+
+    /*
+     * We use a class initializer to allow the native code to cache some
+     * field offsets.
+     */
+    private static native void nativeClassInit();
+    static {
+        System.loadLibrary("media_jni");
+        nativeClassInit();
     }
 }
