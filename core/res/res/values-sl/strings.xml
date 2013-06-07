@@ -607,7 +607,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"preskus dostopa do zaščitene shrambe"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Aplikaciji omogoča preskušanje dovoljenja za shrambo USB, ki bo na voljo v prihodnjih napravah."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Aplikaciji omogoča preskušanje dovoljenja za kartico SD, ki bo na voljo v prihodnjih napravah."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"spr. ali bris. vseb. pomn. USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"spreminjanje ali brisanje vsebine shrambe USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"spreminjanje ali brisanje vsebine kartice SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Programu omogoča zapisovanje v pomnilnik USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Programu omogoča pisanje na kartico SD."</string>
@@ -1498,8 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Trenutni uporabnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Lastnik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Napaka"</string>
-    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Ta aplikacija ne podpira računov za profile z omejitvami"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Najdena ni bila nobena aplikacija za izvedbo tega dejanja"</string>
     <string name="revoke" msgid="5404479185228271586">"Prekliči"</string>
 </resources>

@@ -602,7 +602,7 @@
     <string name="permlab_readDictionary" msgid="4107101525746035718">"Begriffe lesen, die Sie zum Wörterbuch hinzugefügt haben"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Ermöglicht der App, alle Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Wörter zu meinem Wörterbuch hinzufügen"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ermöglicht der App, dem Nutzerwörterbuch neue Einträge hinzuzufügen"</string>
+    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ermöglicht der App, neue Einträge zum Nutzerwörterbuch hinzuzufügen"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"Zugriff auf geschützten Speicher testen"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"Zugriff auf geschützten Speicher testen"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Ermöglicht der App, eine Berechtigung für USB-Speicher zu testen, die künftig auf neuen Geräten verfügbar sein wird"</string>
@@ -1498,8 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigentümer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fehler"</string>
-    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Diese App unterstützt keine Konten für eingeschränkte Profile."</string>
     <string name="app_not_found" msgid="3429141853498927379">"Für diese Aktion wurde keine App gefunden."</string>
     <string name="revoke" msgid="5404479185228271586">"Aufheben"</string>
 </resources>

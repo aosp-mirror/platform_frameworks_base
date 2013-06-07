@@ -1498,8 +1498,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Bieżący użytkownik: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Właściciel"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Błąd"</string>
-    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
-    <skip />
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Ta aplikacja nie obsługuje kont w profilach z ograniczeniami"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nie znaleziono aplikacji do obsługi tej akcji"</string>
     <string name="revoke" msgid="5404479185228271586">"Cofnij"</string>
 </resources>
