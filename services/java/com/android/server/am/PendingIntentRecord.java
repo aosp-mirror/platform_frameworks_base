@@ -31,7 +31,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
-class PendingIntentRecord extends IIntentSender.Stub {
+final class PendingIntentRecord extends IIntentSender.Stub {
     final ActivityManagerService owner;
     final Key key;
     final int uid;

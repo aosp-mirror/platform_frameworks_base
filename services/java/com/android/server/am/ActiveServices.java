@@ -57,7 +57,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
-public class ActiveServices {
+public final class ActiveServices {
     static final boolean DEBUG_SERVICE = ActivityManagerService.DEBUG_SERVICE;
     static final boolean DEBUG_SERVICE_EXECUTING = ActivityManagerService.DEBUG_SERVICE_EXECUTING;
     static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;

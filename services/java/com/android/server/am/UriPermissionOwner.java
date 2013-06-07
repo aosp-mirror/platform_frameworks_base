@@ -24,7 +24,7 @@ import android.os.IBinder;
 import java.util.HashSet;
 import java.util.Iterator;
 
-class UriPermissionOwner {
+final class UriPermissionOwner {
     final ActivityManagerService service;
     final Object owner;
 

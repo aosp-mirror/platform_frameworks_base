@@ -47,7 +47,7 @@ import java.util.List;
 /**
  * A running application service.
  */
-class ServiceRecord extends Binder {
+final class ServiceRecord extends Binder {
     // Maximum number of delivery attempts before giving up.
     static final int MAX_DELIVERY_COUNT = 3;
 

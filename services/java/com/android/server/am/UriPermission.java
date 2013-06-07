@@ -35,7 +35,7 @@ import java.util.HashSet;
  * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert/
  *      src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
  */
-class UriPermission {
+final class UriPermission {
     private static final String TAG = "UriPermission";
 
     final int userHandle;

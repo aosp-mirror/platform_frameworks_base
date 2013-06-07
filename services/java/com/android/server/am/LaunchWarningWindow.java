@@ -26,7 +26,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class LaunchWarningWindow extends Dialog {
+public final class LaunchWarningWindow extends Dialog {
     public LaunchWarningWindow(Context context, ActivityRecord cur, ActivityRecord next) {
         super(context, R.style.Theme_Toast);
 

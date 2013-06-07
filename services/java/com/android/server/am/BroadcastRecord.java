@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * An active intent broadcast.
  */
-class BroadcastRecord extends Binder {
+final class BroadcastRecord extends Binder {
     final Intent intent;    // the original intent that generated us
     final ComponentName targetComp; // original component name set on the intent
     final ProcessRecord callerApp; // process that sent this

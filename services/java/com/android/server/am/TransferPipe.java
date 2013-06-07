@@ -32,7 +32,7 @@ import android.util.Slog;
 /**
  * Helper for transferring data through a pipe from a client app.
  */
-class TransferPipe implements Runnable {
+final class TransferPipe implements Runnable {
     static final String TAG = "TransferPipe";
     static final boolean DEBUG = false;
 

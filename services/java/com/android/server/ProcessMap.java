@@ -16,13 +16,12 @@
 
 package com.android.server;
 
+import android.util.ArrayMap;
 import android.util.SparseArray;
 
-import java.util.HashMap;
-
 public class ProcessMap<E> {
-    final HashMap<String, SparseArray<E>> mMap
-            = new HashMap<String, SparseArray<E>>();
+    final ArrayMap<String, SparseArray<E>> mMap
+            = new ArrayMap<String, SparseArray<E>>();
     
     public E get(String name, int uid) {
         SparseArray<E> uids = mMap.get(name);
@@ -50,7 +49,7 @@ public class ProcessMap<E> {
         }
     }
     
-    public HashMap<String, SparseArray<E>> getMap() {
+    public ArrayMap<String, SparseArray<E>> getMap() {
         return mMap;
     }
 }

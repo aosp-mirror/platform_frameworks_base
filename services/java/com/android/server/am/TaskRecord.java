@@ -33,7 +33,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-class TaskRecord extends ThumbnailHolder {
+final class TaskRecord extends ThumbnailHolder {
     final int taskId;       // Unique identifier for this task.
     final String affinity;  // The affinity name for this task, or null.
     Intent intent;          // The original intent that started the task.

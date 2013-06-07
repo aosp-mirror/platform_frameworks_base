@@ -25,7 +25,7 @@ import java.io.PrintWriter;
 /**
  * Description of a single binding to a service.
  */
-class ConnectionRecord {
+final class ConnectionRecord {
     final AppBindRecord binding;    // The application/service binding.
     final ActivityRecord activity;   // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.

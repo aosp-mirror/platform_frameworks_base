@@ -44,13 +44,14 @@ import java.util.HashSet;
  * Full information about a particular process that
  * is currently running.
  */
-class ProcessRecord {
+final class ProcessRecord {
     final BatteryStatsImpl.Uid.Proc batteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final boolean isolated;     // true if this is a special isolated process
     final int uid;              // uid of process; may be different from 'info' if isolated
     final int userId;           // user of process.
     final String processName;   // name of the process
+    final ProcessTracker.ProcessState tracker; // tracking execution of process
     // List of packages running in the process
     final HashSet<String> pkgList = new HashSet<String>();
     IApplicationThread thread;  // the actual proc...  may be null only if
@@ -61,8 +62,8 @@ class ProcessRecord {
     long lastActivityTime;      // For managing the LRU list
     long lruWeight;             // Weight for ordering in LRU list
     int maxAdj;                 // Maximum OOM adjustment for this process
-    int hiddenAdj;              // If hidden, this is the adjustment to use
-    int clientHiddenAdj;        // If empty but hidden client, this is the adjustment to use
+    int cachedAdj;              // If cached, this is the adjustment to use
+    int clientCachedAdj;        // If empty but cached client, this is the adjustment to use
     int emptyAdj;               // If empty, this is the adjustment to use
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
@@ -108,7 +109,7 @@ class ProcessRecord {
     long lastLowMemory;         // When we last told the app that memory is low
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     boolean empty;              // Is this an empty background process?
-    boolean hidden;             // Is this a hidden process?
+    boolean cached;             // Is this a cached process?
     int lastPss;                // Last pss size reported by app.
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
@@ -201,11 +202,11 @@ class ProcessRecord {
                 pw.print(" lruWeight="); pw.print(lruWeight);
                 pw.print(" serviceb="); pw.print(serviceb);
                 pw.print(" keeping="); pw.print(keeping);
-                pw.print(" hidden="); pw.print(hidden);
+                pw.print(" cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
-                pw.print(" hidden="); pw.print(hiddenAdj);
-                pw.print(" client="); pw.print(clientHiddenAdj);
+                pw.print(" cached="); pw.print(cachedAdj);
+                pw.print(" client="); pw.print(clientCachedAdj);
                 pw.print(" empty="); pw.print(emptyAdj);
                 pw.print(" curRaw="); pw.print(curRawAdj);
                 pw.print(" setRaw="); pw.print(setRawAdj);
@@ -325,17 +326,19 @@ class ProcessRecord {
     }
     
     ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, IApplicationThread _thread,
-            ApplicationInfo _info, String _processName, int _uid) {
+            ApplicationInfo _info, String _processName, int _uid,
+            ProcessTracker.ProcessState _tracker) {
         batteryStats = _batteryStats;
         info = _info;
         isolated = _info.uid != _uid;
         uid = _uid;
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
+        tracker = _tracker;
         pkgList.add(_info.packageName);
         thread = _thread;
-        maxAdj = ProcessList.HIDDEN_APP_MAX_ADJ;
-        hiddenAdj = clientHiddenAdj = emptyAdj = ProcessList.HIDDEN_APP_MIN_ADJ;
+        maxAdj = ProcessList.CACHED_APP_MAX_ADJ;
+        cachedAdj = clientCachedAdj = emptyAdj = ProcessList.CACHED_APP_MIN_ADJ;
         curRawAdj = setRawAdj = -100;
         curAdj = setAdj = -100;
         persistent = false;

@@ -29,7 +29,7 @@ import android.view.Display;
 /**
  * Activity manager code dealing with processes.
  */
-class ProcessList {
+final class ProcessList {
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
     static final int MIN_CRASH_INTERVAL = 60*1000;
@@ -38,8 +38,8 @@ class ProcessList {
 
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
-    static final int HIDDEN_APP_MAX_ADJ = 15;
-    static int HIDDEN_APP_MIN_ADJ = 9;
+    static final int CACHED_APP_MAX_ADJ = 15;
+    static int CACHED_APP_MIN_ADJ = 9;
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
@@ -94,37 +94,37 @@ class ProcessList {
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4*1024;
 
-    // The minimum number of hidden apps we want to be able to keep around,
+    // The minimum number of cached apps we want to be able to keep around,
     // without empty apps being able to push them out of memory.
-    static final int MIN_HIDDEN_APPS = 2;
+    static final int MIN_CACHED_APPS = 2;
 
-    // The maximum number of hidden processes we will keep around before
+    // The maximum number of cached processes we will keep around before
     // killing them; this is just a control to not let us go too crazy with
     // keeping around processes on devices with large amounts of RAM.
-    static final int MAX_HIDDEN_APPS = 24;
+    static final int MAX_CACHED_APPS = 24;
 
     // We allow empty processes to stick around for at most 30 minutes.
     static final long MAX_EMPTY_TIME = 30*60*1000;
 
-    // The number of hidden at which we don't consider it necessary to do
+    // The number of cached at which we don't consider it necessary to do
     // memory trimming.
-    static final int TRIM_HIDDEN_APPS = 3;
+    static final int TRIM_CACHED_APPS = 3;
 
     // The number of empty apps at which we don't consider it necessary to do
     // memory trimming.
     static final int TRIM_EMPTY_APPS = 3;
 
-    // Threshold of number of hidden+empty where we consider memory critical.
+    // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_CRITICAL_THRESHOLD = 3;
 
-    // Threshold of number of hidden+empty where we consider memory critical.
+    // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_LOW_THRESHOLD = 5;
 
-    // We put empty content processes after any hidden processes that have
+    // We put empty content processes after any cached processes that have
     // been idle for less than 15 seconds.
     static final long CONTENT_APP_IDLE_OFFSET = 15*1000;
 
-    // We put empty content processes after any hidden processes that have
+    // We put empty content processes after any cached processes that have
     // been idle for less than 120 seconds.
     static final long EMPTY_APP_IDLE_OFFSET = 120*1000;
 
@@ -133,7 +133,7 @@ class ProcessList {
     // can't give it a different value for every possible kind of process.
     private final int[] mOomAdj = new int[] {
             FOREGROUND_APP_ADJ, VISIBLE_APP_ADJ, PERCEPTIBLE_APP_ADJ,
-            BACKUP_APP_ADJ, HIDDEN_APP_MIN_ADJ, HIDDEN_APP_MAX_ADJ
+            BACKUP_APP_ADJ, CACHED_APP_MIN_ADJ, CACHED_APP_MAX_ADJ
     };
     // These are the low-end OOM level limits.  This is appropriate for an
     // HVGA or smaller phone with less than 512MB.  Values are in KB.
@@ -154,11 +154,34 @@ class ProcessList {
 
     private boolean mHaveDisplaySize;
 
+    private final int[] mAdjToTrackedState = new int[CACHED_APP_MAX_ADJ+1];
+
     ProcessList() {
         MemInfoReader minfo = new MemInfoReader();
         minfo.readMemInfo();
         mTotalMemMb = minfo.getTotalSize()/(1024*1024);
         updateOomLevels(0, 0, false);
+        for (int i=0; i<=CACHED_APP_MAX_ADJ; i++) {
+            if (i <= FOREGROUND_APP_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_FOREGROUND;
+            } else if (i <= VISIBLE_APP_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_VISIBLE;
+            } else if (i <= PERCEPTIBLE_APP_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_PERCEPTIBLE;
+            } else if (i <= BACKUP_APP_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_BACKUP;
+            } else if (i <= SERVICE_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_SERVICE;
+            } else if (i <= HOME_APP_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_HOME;
+            } else if (i <= PREVIOUS_APP_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_PREVIOUS;
+            } else if (i <= SERVICE_B_ADJ) {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_SERVICE;
+            } else {
+                mAdjToTrackedState[i] = ProcessTracker.STATE_CACHED;
+            }
+        }
     }
 
     void applyDisplaySize(WindowManagerService wm) {
@@ -218,6 +241,10 @@ class ProcessList {
             }
         }
         return mOomMinFree[mOomAdj.length-1] * 1024;
+    }
+
+    int adjToTrackedState(int adj) {
+        return mAdjToTrackedState[adj];
     }
 
     private void writeFile(String path, String data) {

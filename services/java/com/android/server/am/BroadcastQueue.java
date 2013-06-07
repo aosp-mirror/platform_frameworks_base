@@ -47,7 +47,7 @@ import android.util.Slog;
  * We keep two broadcast queues and associated bookkeeping, one for those at
  * foreground priority, and one for normal (background-priority) broadcasts.
  */
-public class BroadcastQueue {
+public final class BroadcastQueue {
     static final String TAG = "BroadcastQueue";
     static final String TAG_MU = ActivityManagerService.TAG_MU;
     static final boolean DEBUG_BROADCAST = ActivityManagerService.DEBUG_BROADCAST;

@@ -27,7 +27,7 @@ import java.util.Iterator;
 /**
  * A particular Intent that has been bound to a Service.
  */
-class IntentBindRecord {
+final class IntentBindRecord {
     /** The running service. */
     final ServiceRecord service;
     /** The intent that is bound.*/

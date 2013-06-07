@@ -21,7 +21,7 @@ import com.android.internal.os.BatteryStatsImpl;
 import android.content.pm.ApplicationInfo;
 
 /** @hide */
-class BackupRecord {
+final class BackupRecord {
     // backup/restore modes
     public static final int BACKUP_NORMAL = 0;
     public static final int BACKUP_FULL = 1;

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-class ContentProviderRecord {
+final class ContentProviderRecord {
     final ActivityManagerService service;
     public final ProviderInfo info;
     final int uid;

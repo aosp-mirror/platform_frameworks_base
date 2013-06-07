@@ -25,7 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Slog;
 
-class StrictModeViolationDialog extends BaseErrorDialog {
+final class StrictModeViolationDialog extends BaseErrorDialog {
     private final static String TAG = "StrictModeViolationDialog";
 
     private final ActivityManagerService mService;

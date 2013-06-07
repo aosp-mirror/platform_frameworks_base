@@ -80,7 +80,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityStackSupervisor {
+public final class ActivityStackSupervisor {
     static final boolean DEBUG = ActivityManagerService.DEBUG || false;
     static final boolean DEBUG_ADD_REMOVE = DEBUG || false;
     static final boolean DEBUG_APP = DEBUG || false;

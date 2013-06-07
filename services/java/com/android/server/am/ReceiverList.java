@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * A receiver object that has registered for one or more broadcasts.
  * The ArrayList holds BroadcastFilter objects.
  */
-class ReceiverList extends ArrayList<BroadcastFilter>
+final class ReceiverList extends ArrayList<BroadcastFilter>
         implements IBinder.DeathRecipient {
     final ActivityManagerService owner;
     public final IIntentReceiver receiver;

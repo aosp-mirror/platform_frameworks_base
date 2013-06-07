@@ -25,7 +25,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
-public class CompatModePackages {
+public final class CompatModePackages {
     private final String TAG = ActivityManagerService.TAG;
     private final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
 

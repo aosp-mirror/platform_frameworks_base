@@ -28,7 +28,7 @@ import android.os.Message;
 import android.util.Slog;
 import android.view.WindowManager;
 
-class AppNotRespondingDialog extends BaseErrorDialog {
+final class AppNotRespondingDialog extends BaseErrorDialog {
     private static final String TAG = "AppNotRespondingDialog";
 
     // Event 'what' codes

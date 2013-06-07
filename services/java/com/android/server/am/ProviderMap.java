@@ -35,7 +35,7 @@ import java.util.Map;
  * Keeps track of content providers by authority (name) and class. It separates the mapping by
  * user and ones that are not user-specific (system providers).
  */
-public class ProviderMap {
+public final class ProviderMap {
 
     private static final String TAG = "ProviderMap";
 

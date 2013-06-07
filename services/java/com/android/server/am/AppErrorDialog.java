@@ -25,7 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.WindowManager;
 
-class AppErrorDialog extends BaseErrorDialog {
+final class AppErrorDialog extends BaseErrorDialog {
     private final ActivityManagerService mService;
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;

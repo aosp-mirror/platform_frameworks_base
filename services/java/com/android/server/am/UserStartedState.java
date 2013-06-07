@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import android.app.IStopUserCallback;
 import android.os.UserHandle;
 
-public class UserStartedState {
+public final class UserStartedState {
     // User is first coming up.
     public final static int STATE_BOOTING = 0;
     // User is in the normal running state.
