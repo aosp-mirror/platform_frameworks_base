@@ -42,8 +42,18 @@ public class NinePatch {
     public final byte[] mChunk;
     private Paint mPaint;
     private String mSrcName;  // Useful for debugging
-    private final RectF mRect = new RectF();
-    
+
+    /**
+     * Create a drawable projection from a bitmap to nine patches.
+     *
+     * @param bitmap    The bitmap describing the patches.
+     * @param chunk     The 9-patch data chunk describing how the underlying
+     *                  bitmap is split apart and drawn.
+     */
+    public NinePatch(Bitmap bitmap, byte[] chunk) {
+        this(bitmap, chunk, null);
+    }
+
     /** 
      * Create a drawable projection from a bitmap to nine patches.
      *
@@ -90,13 +100,13 @@ public class NinePatch {
      * @param location  Where to draw the bitmap.
      */
     public void draw(Canvas canvas, RectF location) {
-        if (!canvas.isHardwareAccelerated()) {
+        if (canvas.isHardwareAccelerated()) {
+            canvas.drawPatch(this, location, mPaint);
+        } else {
             nativeDraw(canvas.mNativeCanvas, location,
                        mBitmap.ni(), mChunk,
                        mPaint != null ? mPaint.mNativePaint : 0,
                        canvas.mDensity, mBitmap.mDensity);
-        } else {
-            canvas.drawPatch(this, location, mPaint);
         }
     }
     
@@ -107,14 +117,13 @@ public class NinePatch {
      * @param location  Where to draw the bitmap.
      */
     public void draw(Canvas canvas, Rect location) {
-        if (!canvas.isHardwareAccelerated()) {
+        if (canvas.isHardwareAccelerated()) {
+            canvas.drawPatch(this, location, mPaint);
+        } else {
             nativeDraw(canvas.mNativeCanvas, location,
                         mBitmap.ni(), mChunk,
                         mPaint != null ? mPaint.mNativePaint : 0,
                         canvas.mDensity, mBitmap.mDensity);
-        } else {
-            mRect.set(location);
-            canvas.drawPatch(this, mRect, mPaint);
         }
     }
 
@@ -126,13 +135,12 @@ public class NinePatch {
      * @param paint     The Paint to draw through.
      */
     public void draw(Canvas canvas, Rect location, Paint paint) {
-        if (!canvas.isHardwareAccelerated()) {
+        if (canvas.isHardwareAccelerated()) {
+            canvas.drawPatch(this, location, paint);
+        } else {
             nativeDraw(canvas.mNativeCanvas, location,
                     mBitmap.ni(), mChunk, paint != null ? paint.mNativePaint : 0,
                     canvas.mDensity, mBitmap.mDensity);
-        } else {
-            mRect.set(location);
-            canvas.drawPatch(this, mRect, paint);
         }
     }
 
@@ -170,6 +178,5 @@ public class NinePatch {
     private static native void nativeDraw(int canvas_instance, Rect loc, int bitmap_instance,
                                           byte[] c, int paint_instance_or_null,
                                           int destDensity, int srcDensity);
-    private static native int nativeGetTransparentRegion(
-            int bitmap, byte[] chunk, Rect location);
+    private static native int nativeGetTransparentRegion(int bitmap, byte[] chunk, Rect location);
 }

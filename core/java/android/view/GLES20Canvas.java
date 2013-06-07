@@ -736,6 +736,21 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
+    public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
+        Bitmap bitmap = patch.getBitmap();
+        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        // Shaders are ignored when drawing patches
+        int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
+        try {
+            final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+            nDrawPatch(mRenderer, bitmap.mNativeBitmap, patch.mChunk,
+                    dst.left, dst.top, dst.right, dst.bottom, nativePaint);
+        } finally {
+            if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
+        }
+    }
+
+    @Override
     public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
         Bitmap bitmap = patch.getBitmap();
         if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");

@@ -1070,9 +1070,23 @@ public class Canvas {
      * 
      * @hide
      */
+    public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
+    }
+
+    /**
+     * Draws the specified bitmap as an N-patch (most often, a 9-patches.)
+     *
+     * Note: Only supported by hardware accelerated canvas at the moment.
+     *
+     * @param patch The ninepatch object to render
+     * @param dst The destination rectangle.
+     * @param paint The paint to draw the bitmap with. may be null
+     *
+     * @hide
+     */
     public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
-    }    
-    
+    }
+
     /**
      * Draw the specified bitmap, with its top/left corner at (x,y), using
      * the specified paint, transformed by the current matrix.
