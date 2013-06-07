@@ -499,6 +499,10 @@ public class Editor {
      * Create new SpellCheckSpans on the modified region.
      */
     private void updateSpellCheckSpans(int start, int end, boolean createSpellChecker) {
+        // Remove spans whose adjacent characters are text not punctuation
+        mTextView.removeAdjacentSuggestionSpans(start);
+        mTextView.removeAdjacentSuggestionSpans(end);
+
         if (mTextView.isTextEditable() && mTextView.isSuggestionsEnabled() &&
                 !(mTextView instanceof ExtractEditText)) {
             if (mSpellChecker == null && createSpellChecker) {
