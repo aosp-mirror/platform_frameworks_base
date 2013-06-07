@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Looper;
 import android.view.DisplayInfo;
@@ -52,49 +51,54 @@ public class StackTapDetector extends InputEventReceiver {
 
     @Override
     public void onInputEvent(InputEvent event) {
-        if (!(event instanceof MotionEvent)
-                || !event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-            return;
-        }
-        final MotionEvent motionEvent = (MotionEvent)event;
-        final int action = motionEvent.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-                mPointerId = motionEvent.getPointerId(0);
-                mDownX = motionEvent.getX();
-                mDownY = motionEvent.getY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (mPointerId >= 0) {
-                    int index = motionEvent.findPointerIndex(mPointerId);
-                    if ((motionEvent.getEventTime() - motionEvent.getDownTime()) > TAP_TIMEOUT_MSEC
-                            || (motionEvent.getX(index) - mDownX) > mMotionSlop
-                            || (motionEvent.getY(index) - mDownY) > mMotionSlop) {
-                        mPointerId = -1;
-                    }
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_POINTER_UP: {
-                int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-                // Extract the index of the pointer that left the touch sensor
-                if (mPointerId == motionEvent.getPointerId(index)) {
-                    final int x = (int)motionEvent.getX(index);
-                    final int y = (int)motionEvent.getY(index);
-                    synchronized (this) {
+        try {
+            if (!(event instanceof MotionEvent)
+                    || !event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+                return;
+            }
+            final MotionEvent motionEvent = (MotionEvent)event;
+            final int action = motionEvent.getAction();
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    mPointerId = motionEvent.getPointerId(0);
+                    mDownX = motionEvent.getX();
+                    mDownY = motionEvent.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mPointerId >= 0) {
+                        int index = motionEvent.findPointerIndex(mPointerId);
                         if ((motionEvent.getEventTime() - motionEvent.getDownTime())
-                                < TAP_TIMEOUT_MSEC
-                                && (x - mDownX) < mMotionSlop && (y - mDownY) < mMotionSlop
-                                && !mTouchExcludeRegion.contains(x, y)) {
-                            mService.mH.obtainMessage(H.TAP_OUTSIDE_STACK, x, y, mDisplayContent)
-                                    .sendToTarget();
+                                > TAP_TIMEOUT_MSEC
+                                || (motionEvent.getX(index) - mDownX) > mMotionSlop
+                                || (motionEvent.getY(index) - mDownY) > mMotionSlop) {
+                            mPointerId = -1;
                         }
                     }
-                    mPointerId = -1;
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_POINTER_UP: {
+                    int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                            >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+                    // Extract the index of the pointer that left the touch sensor
+                    if (mPointerId == motionEvent.getPointerId(index)) {
+                        final int x = (int)motionEvent.getX(index);
+                        final int y = (int)motionEvent.getY(index);
+                        synchronized (this) {
+                            if ((motionEvent.getEventTime() - motionEvent.getDownTime())
+                                    < TAP_TIMEOUT_MSEC
+                                    && (x - mDownX) < mMotionSlop && (y - mDownY) < mMotionSlop
+                                    && !mTouchExcludeRegion.contains(x, y)) {
+                                mService.mH.obtainMessage(H.TAP_OUTSIDE_STACK, x, y,
+                                        mDisplayContent).sendToTarget();
+                            }
+                        }
+                        mPointerId = -1;
+                    }
+                    break;
                 }
-                break;
             }
+        } finally {
+            finishInputEvent(event, false /*ignored for monitors*/);
         }
     }
 }
