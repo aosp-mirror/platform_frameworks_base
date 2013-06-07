@@ -52,7 +52,7 @@ import java.io.InputStream;
  */
 public class NinePatchDrawable extends Drawable {
     // dithering helps a lot, and is pretty cheap, so default is true
-    private static final boolean DEFAULT_DITHER = true;
+    private static final boolean DEFAULT_DITHER = false;
     private NinePatchState mNinePatchState;
     private NinePatch mNinePatch;
     private Rect mPadding;
@@ -197,10 +197,8 @@ public class NinePatchDrawable extends Drawable {
             mBitmapHeight = mNinePatch.getHeight();
             mOpticalInsets = mNinePatchState.mOpticalInsets;
         } else {
-            mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(),
-                    sdensity, tdensity);
-            mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(),
-                    sdensity, tdensity);
+            mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(), sdensity, tdensity);
+            mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(), sdensity, tdensity);
             if (mNinePatchState.mPadding != null && mPadding != null) {
                 Rect dest = mPadding;
                 Rect src = mNinePatchState.mPadding;
@@ -271,6 +269,7 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public void setDither(boolean dither) {
+        //noinspection PointlessBooleanExpression
         if (mPaint == null && dither == DEFAULT_DITHER) {
             // Fast common case -- leave at default dither.
             return;
@@ -299,8 +298,7 @@ public class NinePatchDrawable extends Drawable {
         }
 
         final boolean dither = a.getBoolean(
-                com.android.internal.R.styleable.NinePatchDrawable_dither,
-                DEFAULT_DITHER);
+                com.android.internal.R.styleable.NinePatchDrawable_dither, DEFAULT_DITHER);
         final BitmapFactory.Options options = new BitmapFactory.Options();
         if (dither) {
             options.inDither = false;
@@ -330,8 +328,7 @@ public class NinePatchDrawable extends Drawable {
                     ": <nine-patch> requires a valid 9-patch source image");
         }
 
-        setNinePatchState(new NinePatchState(
-                new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"),
+        setNinePatchState(new NinePatchState(new NinePatch(bitmap, bitmap.getNinePatchChunk()),
                 padding, opticalInsets, dither), r);
         mNinePatchState.mTargetDensity = mTargetDensity;
 
@@ -429,7 +426,8 @@ public class NinePatchDrawable extends Drawable {
         // Copy constructor
 
         NinePatchState(NinePatchState state) {
-            mNinePatch = new NinePatch(state.mNinePatch);
+            // Note we don't copy the nine patch because it is immutable.
+            mNinePatch = state.mNinePatch;
             // Note we don't copy the padding because it is immutable.
             mPadding = state.mPadding;
             mOpticalInsets = state.mOpticalInsets;
