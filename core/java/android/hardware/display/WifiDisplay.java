@@ -33,6 +33,7 @@ public final class WifiDisplay implements Parcelable {
     private final String mDeviceAddress;
     private final String mDeviceName;
     private final String mDeviceAlias;
+    private final boolean mCanConnect;
 
     public static final WifiDisplay[] EMPTY_ARRAY = new WifiDisplay[0];
 
@@ -41,7 +42,9 @@ public final class WifiDisplay implements Parcelable {
             String deviceAddress = in.readString();
             String deviceName = in.readString();
             String deviceAlias = in.readString();
-            return new WifiDisplay(deviceAddress, deviceName, deviceAlias);
+            boolean canConnect = (in.readInt() != 0);
+            return new WifiDisplay(deviceAddress, deviceName,
+                    deviceAlias, canConnect);
         }
 
         public WifiDisplay[] newArray(int size) {
@@ -50,6 +53,11 @@ public final class WifiDisplay implements Parcelable {
     };
 
     public WifiDisplay(String deviceAddress, String deviceName, String deviceAlias) {
+        this(deviceAddress, deviceName, deviceAlias, false);
+    }
+
+    public WifiDisplay(String deviceAddress, String deviceName,
+                       String deviceAlias, boolean canConnect) {
         if (deviceAddress == null) {
             throw new IllegalArgumentException("deviceAddress must not be null");
         }
@@ -60,6 +68,7 @@ public final class WifiDisplay implements Parcelable {
         mDeviceAddress = deviceAddress;
         mDeviceName = deviceName;
         mDeviceAlias = deviceAlias;
+        mCanConnect = canConnect;
     }
 
     /**
@@ -88,6 +97,13 @@ public final class WifiDisplay implements Parcelable {
     }
 
     /**
+     * Gets the availability of the Wifi display device.
+     */
+    public boolean canConnect() {
+        return mCanConnect;
+    }
+
+    /**
      * Gets the name to show in the UI.
      * Uses the device alias if available, otherwise uses the device name.
      */
@@ -104,7 +120,8 @@ public final class WifiDisplay implements Parcelable {
         return other != null
                 && mDeviceAddress.equals(other.mDeviceAddress)
                 && mDeviceName.equals(other.mDeviceName)
-                && Objects.equal(mDeviceAlias, other.mDeviceAlias);
+                && Objects.equal(mDeviceAlias, other.mDeviceAlias)
+                && (mCanConnect == other.mCanConnect);
     }
 
     /**
@@ -127,6 +144,7 @@ public final class WifiDisplay implements Parcelable {
         dest.writeString(mDeviceAddress);
         dest.writeString(mDeviceName);
         dest.writeString(mDeviceAlias);
+        dest.writeInt(mCanConnect ? 1 : 0);
     }
 
     @Override
@@ -141,6 +159,7 @@ public final class WifiDisplay implements Parcelable {
         if (mDeviceAlias != null) {
             result += ", alias " + mDeviceAlias;
         }
+        result += ", canConnect " + mCanConnect;
         return result;
     }
 }
