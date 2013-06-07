@@ -1721,7 +1721,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setText(mText);
 
         if (hasPasswordTransformationMethod()) {
-            notifyAccessibilityStateChanged();
+            notifyViewAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -7318,7 +7318,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
-        notifyAccessibilityStateChanged();
     }
 
     /**
@@ -8131,6 +8130,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             info.setEditable(true);
         }
 
+        if (mEditor != null) {
+            info.setInputType(mEditor.mInputType);
+        }
+
         if (!TextUtils.isEmpty(mText)) {
             info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
             info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
@@ -8163,7 +8166,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case AccessibilityNodeInfo.ACTION_COPY: {
                 if (isFocused() && canCopy()) {
                     if (onTextContextMenuItem(ID_COPY)) {
-                        notifyAccessibilityStateChanged();
                         return true;
                     }
                 }
@@ -8171,7 +8173,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case AccessibilityNodeInfo.ACTION_PASTE: {
                 if (isFocused() && canPaste()) {
                     if (onTextContextMenuItem(ID_PASTE)) {
-                        notifyAccessibilityStateChanged();
                         return true;
                     }
                 }
@@ -8179,7 +8180,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case AccessibilityNodeInfo.ACTION_CUT: {
                 if (isFocused() && canCut()) {
                     if (onTextContextMenuItem(ID_CUT)) {
-                        notifyAccessibilityStateChanged();
                         return true;
                     }
                 }
@@ -8198,7 +8198,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         // No arguments clears the selection.
                         if (start == end && end == -1) {
                             Selection.removeSelection((Spannable) text);
-                            notifyAccessibilityStateChanged();
                             return true;
                         }
                         if (start >= 0 && start <= end && end <= text.length()) {
@@ -8207,7 +8206,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             if (mEditor != null) {
                                 mEditor.startSelectionActionMode();
                             }
-                            notifyAccessibilityStateChanged();
                             return true;
                         }
                     }

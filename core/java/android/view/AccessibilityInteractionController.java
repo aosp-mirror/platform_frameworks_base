@@ -406,6 +406,10 @@ final class AccessibilityInteractionController {
                         if (host == null || !ViewRootImpl.isViewDescendantOf(host, root)) {
                             break;
                         }
+                        // The focused view not shown, we failed.
+                        if (!isShown(host)) {
+                            break;
+                        }
                         // If the host has a provider ask this provider to search for the
                         // focus instead fetching all provider nodes to do the search here.
                         AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();

@@ -1698,16 +1698,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * @hide
-     */
-    @Override
-    public void childAccessibilityStateChanged(View child) {
-        if (mParent != null) {
-            mParent.childAccessibilityStateChanged(child);
-        }
-    }
-
-    /**
      * Implement this method to intercept hover events before they are handled
      * by child views.
      * <p>
@@ -2534,13 +2524,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
-    public void resetAccessibilityStateChanged() {
-        super.resetAccessibilityStateChanged();
+    public void childAccessibilityStateChanged(View root) {
+        if (mParent != null) {
+            mParent.childAccessibilityStateChanged(root);
+        }
+    }
+
+    @Override
+    void resetSubtreeAccessibilityStateChanged() {
+        super.resetSubtreeAccessibilityStateChanged();
         View[] children = mChildren;
         final int childCount = mChildrenCount;
         for (int i = 0; i < childCount; i++) {
-            View child = children[i];
-            child.resetAccessibilityStateChanged();
+            children[i].resetSubtreeAccessibilityStateChanged();
         }
     }
 
@@ -3466,7 +3462,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void clearCachedLayoutMode() {
-        if (!getBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET)) {
+        if (!hasBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET)) {
            mLayoutMode = LAYOUT_MODE_UNDEFINED;
         }
     }
@@ -3596,6 +3592,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (child.hasTransientState()) {
             childHasTransientStateChanged(child, true);
+        }
+
+        if (child.isImportantForAccessibility() && child.getVisibility() != View.GONE) {
+            childAccessibilityStateChanged(child);
         }
     }
 
@@ -3836,6 +3836,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         onViewRemoved(view);
+
+        if (view.isImportantForAccessibility() && view.getVisibility() != View.GONE) {
+            childAccessibilityStateChanged(view);
+        }
     }
 
     /**
@@ -4786,7 +4790,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         setBooleanFlag(FLAG_USE_CHILD_DRAWING_ORDER, enabled);
     }
 
-    private boolean getBooleanFlag(int flag) {
+    private boolean hasBooleanFlag(int flag) {
         return (mGroupFlags & flag) == flag;
     }
 
@@ -4854,7 +4858,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     void invalidateInheritedLayoutMode(int layoutModeOfRoot) {
         if (mLayoutMode == LAYOUT_MODE_UNDEFINED ||
             mLayoutMode == layoutModeOfRoot ||
-            getBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET)) {
+            hasBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET)) {
             return;
         }
         setLayoutMode(LAYOUT_MODE_UNDEFINED, false);

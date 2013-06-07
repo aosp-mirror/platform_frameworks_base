@@ -114,7 +114,7 @@ public abstract class CompoundButton extends Button implements Checkable {
         if (mChecked != checked) {
             mChecked = checked;
             refreshDrawableState();
-            notifyAccessibilityStateChanged();
+            notifyViewAccessibilityStateChangedIfNeeded();
 
             // Avoid infinite recursions if setChecked() is called from a listener
             if (mBroadcasting) {

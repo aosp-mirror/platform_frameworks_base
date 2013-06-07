@@ -292,13 +292,14 @@ public interface ViewParent {
     public ViewParent getParentForAccessibility();
 
     /**
-     * A child notifies its parent that its state for accessibility has changed.
-     * That is some of the child properties reported to accessibility services has
-     * changed, hence the interested services have to be notified for the new state.
+     * A child notifies its parent that the accessibility state of a subtree rooted
+     * at a given node changed. That is the structure of the subtree is different.
+     *
+     * @param The root of the changed subtree.
      *
      * @hide
      */
-    public void childAccessibilityStateChanged(View child);
+    public void childAccessibilityStateChanged(View root);
 
     /**
      * Tells if this view parent can resolve the layout direction.

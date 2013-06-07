@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.InputType;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseLongArray;
 import android.view.View;
@@ -482,6 +483,9 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private int mTextSelectionStart = UNDEFINED;
     private int mTextSelectionEnd = UNDEFINED;
+    private int mInputType = InputType.TYPE_NULL;
+
+    private Bundle mBundle;
 
     private int mConnectionId = UNDEFINED;
 
@@ -594,22 +598,39 @@ public class AccessibilityNodeInfo implements Parcelable {
      * since it represents a view that is no longer in the view tree and should
      * be recycled.
      * </p>
+     *
+     * @param bypassCache Whether to bypass the cache.
      * @return Whether the refresh succeeded.
+     *
+     * @hide
      */
-    public boolean refresh() {
+    public boolean refresh(boolean bypassCache) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         AccessibilityNodeInfo refreshedInfo = client.findAccessibilityNodeInfoByAccessibilityId(
-                mConnectionId, mWindowId, mSourceNodeId, 0);
+                mConnectionId, mWindowId, mSourceNodeId, bypassCache, 0);
         if (refreshedInfo == null) {
             return false;
         }
         init(refreshedInfo);
         refreshedInfo.recycle();
         return true;
+    }
+
+    /**
+     * Refreshes this info with the latest state of the view it represents.
+     * <p>
+     * <strong>Note:</strong> If this method returns false this info is obsolete
+     * since it represents a view that is no longer in the view tree and should
+     * be recycled.
+     * </p>
+     * @return Whether the refresh succeeded.
+     */
+    public boolean refresh() {
+        return refresh(false);
     }
 
     /**
@@ -652,7 +673,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         final long childId = mChildNodeIds.get(index);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId,
-                childId, FLAG_PREFETCH_DESCENDANTS);
+                childId, false, FLAG_PREFETCH_DESCENDANTS);
     }
 
     /**
@@ -878,7 +899,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mParentNodeId, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mParentNodeId, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1470,7 +1491,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabelForId, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mLabelForId, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1527,7 +1548,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabeledById, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mLabeledById, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1597,6 +1618,52 @@ public class AccessibilityNodeInfo implements Parcelable {
         enforceNotSealed();
         mTextSelectionStart = start;
         mTextSelectionEnd = end;
+    }
+
+    /**
+     * Gets the input type of the source as defined by {@link InputType}.
+     *
+     * @return The input type.
+     */
+    public int getInputType() {
+        return mInputType;
+    }
+
+    /**
+     * Sets the input type of the source as defined by {@link InputType}.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an
+     *   AccessibilityService.
+     * </p>
+     *
+     * @param inputType The input type.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setInputType(int inputType) {
+        mInputType = inputType;
+    }
+
+    /**
+     * Gets an optional bundle with additional data. The bundle
+     * is lazily created and never <code>null</code>.
+     * <p>
+     * <strong>Note:</strong> It is recommended to use the package
+     * name of your application as a prefix for the keys to avoid
+     * collisions which may confuse an accessibility service if the
+     * same key has different meaning when emitted from different
+     * applications.
+     * </p>
+     *
+     * @return The bundle.
+     */
+    public Bundle getBundle() {
+        if (mBundle == null) {
+            mBundle = new Bundle();
+        }
+        return mBundle;
     }
 
     /**
@@ -1845,6 +1912,14 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         parcel.writeInt(mTextSelectionStart);
         parcel.writeInt(mTextSelectionEnd);
+        parcel.writeInt(mInputType);
+
+        if (mBundle != null) {
+            parcel.writeInt(1);
+            parcel.writeBundle(mBundle);
+        } else {
+            parcel.writeInt(0);
+        }
 
         // Since instances of this class are fetched via synchronous i.e. blocking
         // calls in IPCs we always recycle as soon as the instance is marshaled.
@@ -1880,6 +1955,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         mTextSelectionStart = other.mTextSelectionStart;
         mTextSelectionEnd = other.mTextSelectionEnd;
+        mInputType = other.mInputType;
+        if (other.mBundle != null && !other.mBundle.isEmpty()) {
+            getBundle().putAll(other.mBundle);
+        }
     }
 
     /**
@@ -1927,6 +2006,11 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mTextSelectionStart = parcel.readInt();
         mTextSelectionEnd = parcel.readInt();
+        mInputType = parcel.readInt();
+
+        if (parcel.readInt() == 1) {
+            getBundle().putAll(parcel.readBundle());
+        }
     }
 
     /**
@@ -1953,6 +2037,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         mActions = 0;
         mTextSelectionStart = UNDEFINED;
         mTextSelectionEnd = UNDEFINED;
+        mInputType = InputType.TYPE_NULL;
+        if (mBundle != null) {
+            mBundle.clear();
+        }
     }
 
     /**

@@ -163,7 +163,7 @@ public final class AccessibilityInteractionClient
     public AccessibilityNodeInfo getRootInActiveWindow(int connectionId) {
         return findAccessibilityNodeInfoByAccessibilityId(connectionId,
                 AccessibilityNodeInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
-                AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
+                false, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
     }
 
     /**
@@ -177,18 +177,22 @@ public final class AccessibilityInteractionClient
      *     where to start the search. Use
      *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
      *     to start from the root.
+     * @param bypassCache Whether to bypass the cache while looking for the node.
      * @param prefetchFlags flags to guide prefetching.
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(int connectionId,
-            int accessibilityWindowId, long accessibilityNodeId, int prefetchFlags) {
+            int accessibilityWindowId, long accessibilityNodeId, boolean bypassCache,
+            int prefetchFlags) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                AccessibilityNodeInfo cachedInfo = sAccessibilityNodeInfoCache.get(
-                        accessibilityNodeId);
-                if (cachedInfo != null) {
-                    return cachedInfo;
+                if (!bypassCache) {
+                    AccessibilityNodeInfo cachedInfo = sAccessibilityNodeInfoCache.get(
+                            accessibilityNodeId);
+                    if (cachedInfo != null) {
+                        return cachedInfo;
+                    }
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final boolean success = connection.findAccessibilityNodeInfoByAccessibilityId(
@@ -350,7 +354,7 @@ public final class AccessibilityInteractionClient
             }
         } catch (RemoteException re) {
             if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote findAccessibilityFocus", re);
+                Log.w(LOG_TAG, "Error while calling remote findFocus", re);
             }
         }
         return null;
