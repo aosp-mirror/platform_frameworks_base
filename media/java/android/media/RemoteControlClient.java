@@ -180,6 +180,12 @@ public class RemoteControlClient
     public final static long PLAYBACK_POSITION_INVALID = -1;
     /**
      * @hide
+     * An invalid playback position value associated with the use of {@link #setPlaybackState(int)}
+     * used to indicate that playback position will remain unknown.
+     */
+    public final static long PLAYBACK_POSITION_ALWAYS_UNKNOWN = 0x8019771980198300L;
+    /**
+     * @hide
      * The default playback speed, 1x.
      */
     public final static float PLAYBACK_SPEED_1X = 1.0f;
@@ -602,7 +608,8 @@ public class RemoteControlClient
      *       {@link #PLAYSTATE_ERROR}.
      */
     public void setPlaybackState(int state) {
-        setPlaybackState(state, PLAYBACK_POSITION_INVALID, PLAYBACK_SPEED_1X);
+        setPlaybackStateInt(state, PLAYBACK_POSITION_ALWAYS_UNKNOWN, PLAYBACK_SPEED_1X,
+                false /* legacy API, converting to method with position and speed */);
     }
 
     /**
@@ -629,12 +636,28 @@ public class RemoteControlClient
      *    playing (e.g. when state is {@link #PLAYSTATE_ERROR}).
      */
     public void setPlaybackState(int state, long timeInMs, float playbackSpeed) {
+        setPlaybackStateInt(state, timeInMs, playbackSpeed, true);
+    }
+
+    private void setPlaybackStateInt(int state, long timeInMs, float playbackSpeed,
+            boolean hasPosition) {
         synchronized(mCacheLock) {
             if ((mPlaybackState != state) || (mPlaybackPositionMs != timeInMs)
                     || (mPlaybackSpeed != playbackSpeed)) {
                 // store locally
                 mPlaybackState = state;
-                mPlaybackPositionMs = timeInMs;
+                // distinguish between an application not knowing the current playback position
+                // at the moment and an application using the API where only the playback state
+                // is passed, not the playback position.
+                if (hasPosition) {
+                    if (timeInMs < 0) {
+                        mPlaybackPositionMs = PLAYBACK_POSITION_INVALID;
+                    } else {
+                        mPlaybackPositionMs = timeInMs;
+                    }
+                } else {
+                    mPlaybackPositionMs = PLAYBACK_POSITION_ALWAYS_UNKNOWN;
+                }
                 mPlaybackSpeed = playbackSpeed;
                 // keep track of when the state change occurred
                 mPlaybackStateChangeTimeMs = SystemClock.elapsedRealtime();
