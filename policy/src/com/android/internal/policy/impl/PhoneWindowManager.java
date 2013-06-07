@@ -296,35 +296,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
 
-    private static final class PointerLocationInputEventReceiver extends InputEventReceiver {
-        private final PointerLocationView mView;
-
-        public PointerLocationInputEventReceiver(InputChannel inputChannel, Looper looper,
-                PointerLocationView view) {
-            super(inputChannel, looper);
-            mView = view;
-        }
-
+    private final class PointerLocationPointerEventListener implements PointerEventListener {
         @Override
-        public void onInputEvent(InputEvent event) {
-            boolean handled = false;
-            try {
-                if (event instanceof MotionEvent
-                        && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                    final MotionEvent motionEvent = (MotionEvent)event;
-                    mView.addPointerEvent(motionEvent);
-                    handled = true;
-                }
-            } finally {
-                finishInputEvent(event, handled);
+        public void onPointerEvent(MotionEvent motionEvent) {
+            if (mPointerLocationView != null) {
+                mPointerLocationView.addPointerEvent(motionEvent);
             }
         }
     }
 
     // Pointer location view state, only modified on the mHandler Looper.
-    PointerLocationInputEventReceiver mPointerLocationInputEventReceiver;
+    PointerLocationPointerEventListener mPointerLocationPointerEventListener;
     PointerLocationView mPointerLocationView;
-    InputChannel mPointerLocationInputChannel;
 
     // The current size of the screen; really; extends into the overscan area of
     // the screen and doesn't account for any system elements like the status bar.
@@ -568,8 +551,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mStatusHideybar;
     private int mNavigationHideybar;
 
-    private InputChannel mSystemGestureInputChannel;
-    private SystemGestures mSystemGestures;
+    private SystemGesturesPointerEventListener mSystemGestures;
 
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
@@ -925,10 +907,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         context.registerReceiver(mMultiuserReceiver, filter);
 
         // monitor for system gestures
-        mSystemGestureInputChannel = mWindowManagerFuncs.monitorInput("SystemGestures");
-        mSystemGestures = new SystemGestures(mSystemGestureInputChannel,
-                mHandler.getLooper(), context,
-                new SystemGestures.Callbacks() {
+        mSystemGestures = new SystemGesturesPointerEventListener(context,
+                new SystemGesturesPointerEventListener.Callbacks() {
                     @Override
                     public void onSwipeFromTop() {
                         if (mStatusBar != null) {
@@ -954,6 +934,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 });
+        mWindowManagerFuncs.registerPointerEventListener(mSystemGestures);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
@@ -1212,23 +1193,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
             wm.addView(mPointerLocationView, lp);
 
-            mPointerLocationInputChannel =
-                    mWindowManagerFuncs.monitorInput("PointerLocationView");
-            mPointerLocationInputEventReceiver =
-                    new PointerLocationInputEventReceiver(mPointerLocationInputChannel,
-                            Looper.myLooper(), mPointerLocationView);
+            mPointerLocationPointerEventListener = new PointerLocationPointerEventListener();
+            mWindowManagerFuncs.registerPointerEventListener(mPointerLocationPointerEventListener);
         }
     }
 
     private void disablePointerLocation() {
-        if (mPointerLocationInputEventReceiver != null) {
-            mPointerLocationInputEventReceiver.dispose();
-            mPointerLocationInputEventReceiver = null;
-        }
-
-        if (mPointerLocationInputChannel != null) {
-            mPointerLocationInputChannel.dispose();
-            mPointerLocationInputChannel = null;
+        if (mPointerLocationPointerEventListener != null) {
+            mWindowManagerFuncs.unregisterPointerEventListener(
+                    mPointerLocationPointerEventListener);
+            mPointerLocationPointerEventListener = null;
         }
 
         if (mPointerLocationView != null) {

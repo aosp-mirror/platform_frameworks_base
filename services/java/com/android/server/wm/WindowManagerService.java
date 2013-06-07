@@ -124,6 +124,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.FakeWindow;
+import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
@@ -280,8 +281,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
-
-    private static final String TAP_INPUT_CHANNEL_NAME = "StackTapDetector";
 
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
@@ -594,6 +593,8 @@ public class WindowManagerService extends IWindowManager.Stub
     SparseArray<Task> mTaskIdToTask = new SparseArray<Task>();
     SparseArray<TaskStack> mStackIdToStack = new SparseArray<TaskStack>();
 
+    private final PointerEventDispatcher mPointerEventDispatcher;
+
     final class DragInputEventReceiver extends InputEventReceiver {
         public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
@@ -727,6 +728,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mHeadless = displayManager.isHeadless();
         mDisplaySettings = new DisplaySettings(context);
         mDisplaySettings.readSettingsLocked();
+
+        mPointerEventDispatcher = new PointerEventDispatcher(mInputManager.monitorInput(TAG));
 
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mDisplayManager.registerDisplayListener(this, null);
@@ -5098,6 +5101,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 mAnimatorDurationScale };
     }
 
+    @Override
+    public void registerPointerEventListener(PointerEventListener listener) {
+        mPointerEventDispatcher.registerInputEventListener(listener);
+    }
+
+    @Override
+    public void unregisterPointerEventListener(PointerEventListener listener) {
+        mPointerEventDispatcher.unregisterInputEventListener(listener);
+    }
+
     // Called by window manager policy. Not exposed externally.
     @Override
     public int getLidState() {
@@ -5113,12 +5126,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // Switch state: AKEY_STATE_UNKNOWN.
             return LID_ABSENT;
         }
-    }
-
-    // Called by window manager policy.  Not exposed externally.
-    @Override
-    public InputChannel monitorInput(String inputChannelName) {
-        return mInputManager.monitorInput(inputChannelName);
     }
 
     // Called by window manager policy.  Not exposed externally.
@@ -10652,10 +10659,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // TODO: Create an input channel for each display with touch capability.
         if (displayId == Display.DEFAULT_DISPLAY) {
-            InputChannel inputChannel = monitorInput(TAP_INPUT_CHANNEL_NAME);
-            displayContent.mTapInputChannel = inputChannel;
-            displayContent.mTapDetector =
-                    new StackTapDetector(this, displayContent, inputChannel, Looper.myLooper());
+            displayContent.mTapDetector = new StackTapPointerEventListener(this, displayContent);
+            registerPointerEventListener(displayContent.mTapDetector);
         }
 
         return displayContent;
@@ -10838,10 +10843,9 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayContent != null) {
             mDisplayContents.delete(displayId);
 
-            if (displayContent.mTapInputChannel != null) {
-                displayContent.mTapInputChannel.dispose();
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                unregisterPointerEventListener(displayContent.mTapDetector);
             }
-
             WindowList windows = displayContent.getWindowList();
             while (!windows.isEmpty()) {
                 final WindowState win = windows.get(windows.size() - 1);
