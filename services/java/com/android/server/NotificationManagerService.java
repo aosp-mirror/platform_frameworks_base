@@ -1390,7 +1390,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             return ;
         }
 
-        final boolean isSystemToast = ("android".equals(pkg));
+        final boolean isSystemToast = isCallerSystem() || ("android".equals(pkg));
 
         if (ENABLE_BLOCKED_TOASTS && !noteNotificationOp(pkg, Binder.getCallingUid())) {
             if (!isSystemToast) {
@@ -1606,7 +1606,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id + " notification=" + notification);
         }
         checkCallerIsSystemOrSameApp(pkg);
-        final boolean isSystemNotification = ("android".equals(pkg));
+        final boolean isSystemNotification = isCallerSystem() || ("android".equals(pkg));
 
         userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, userId, true, false, "enqueueNotification", pkg);
@@ -2082,19 +2082,26 @@ public class NotificationManagerService extends INotificationManager.Stub
         cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId);
     }
 
+    // Return true if the caller is a system or phone UID and therefore should not have
+    // any notifications or toasts blocked.
+    boolean isCallerSystem() {
+        final int uid = Binder.getCallingUid();
+        final int appid = UserHandle.getAppId(uid);
+        return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
+    }
+
     void checkCallerIsSystem() {
-        int uid = Binder.getCallingUid();
-        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {
+        if (isCallerSystem()) {
             return;
         }
-        throw new SecurityException("Disallowed call for uid " + uid);
+        throw new SecurityException("Disallowed call for uid " + Binder.getCallingUid());
     }
 
     void checkCallerIsSystemOrSameApp(String pkg) {
-        int uid = Binder.getCallingUid();
-        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {
+        if (isCallerSystem()) {
             return;
         }
+        final int uid = Binder.getCallingUid();
         try {
             ApplicationInfo ai = AppGlobals.getPackageManager().getApplicationInfo(
                     pkg, 0, UserHandle.getCallingUserId());
