@@ -607,7 +607,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"δοκιμή πρόσβασης σε προστατευμένο χώρο αποθήκευσης"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Επιτρέπει USB για άλλες συσκ."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Επιτρέπει στην εφαρμογή τη δοκιμή μια άδειας για την κάρτα SD που θα διατίθεται σε μελλοντικές συσκευές."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"τροπ. ή διαγρ. περιεχ. αποθ. χώρ. USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"τροπ. ή διαγρ. του USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"τροποποίηση ή διαγραφή των περιεχομένων της κάρτας SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Επιτρέπει στην εφαρμογή την εγγραφή στον αποθηκευτικό χώρο USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
