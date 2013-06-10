@@ -18757,8 +18757,13 @@ package android.provider {
     field public static final int MISSED_TYPE = 3; // 0x3
     field public static final java.lang.String NEW = "new";
     field public static final java.lang.String NUMBER = "number";
+    field public static final java.lang.String NUMBER_PRESENTATION = "presentation";
     field public static final java.lang.String OFFSET_PARAM_KEY = "offset";
     field public static final int OUTGOING_TYPE = 2; // 0x2
+    field public static final int PRESENTATION_ALLOWED = 1; // 0x1
+    field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
+    field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
+    field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final java.lang.String TYPE = "type";
   }
 

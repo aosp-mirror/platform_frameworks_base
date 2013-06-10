@@ -49,10 +49,6 @@ public class CallerInfo {
     private static final String TAG = "CallerInfo";
     private static final boolean VDBG = Rlog.isLoggable(TAG, Log.VERBOSE);
 
-    public static final String UNKNOWN_NUMBER = "-1";
-    public static final String PRIVATE_NUMBER = "-2";
-    public static final String PAYPHONE_NUMBER = "-3";
-
     /**
      * Please note that, any one of these member variables can be null,
      * and any accesses to them should be prepared to handle such a case.
