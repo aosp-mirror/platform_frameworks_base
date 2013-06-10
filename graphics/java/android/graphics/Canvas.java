@@ -37,12 +37,14 @@ import javax.microedition.khronos.opengles.GL;
  * Canvas and Drawables</a> developer guide.</p></div>
  */
 public class Canvas {
+
     // assigned in constructors or setBitmap, freed in finalizer
-    int mNativeCanvas;
-    
+    /** @hide */
+    public int mNativeCanvas;
+
     // may be null
     private Bitmap mBitmap;
-    
+
     // optional field set by the caller
     private DrawFilter mDrawFilter;
 
@@ -59,7 +61,6 @@ public class Canvas {
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
     
     // Used by native code
-    @SuppressWarnings({"UnusedDeclaration"})
     private int mSurfaceFormat;
 
     /**
@@ -79,10 +80,9 @@ public class Canvas {
     private static final int MAXMIMUM_BITMAP_SIZE = 32766;
 
     // This field is used to finalize the native Canvas properly
-    @SuppressWarnings({"UnusedDeclaration"})
     private final CanvasFinalizer mFinalizer;
 
-    private static class CanvasFinalizer {
+    private static final class CanvasFinalizer {
         private int mNativeCanvas;
 
         public CanvasFinalizer(int nativeCanvas) {
@@ -92,11 +92,16 @@ public class Canvas {
         @Override
         protected void finalize() throws Throwable {
             try {
-                if (mNativeCanvas != 0) {
-                    finalizer(mNativeCanvas);
-                }
+                dispose();
             } finally {
                 super.finalize();
+            }
+        }
+
+        public void dispose() {
+            if (mNativeCanvas != 0) {
+                finalizer(mNativeCanvas);
+                mNativeCanvas = 0;
             }
         }
     }
@@ -132,13 +137,14 @@ public class Canvas {
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
     }
-    
-    Canvas(int nativeCanvas) {
+
+    /** @hide */
+    public Canvas(int nativeCanvas) {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
         }
         mNativeCanvas = nativeCanvas;
-        mFinalizer = new CanvasFinalizer(nativeCanvas);
+        mFinalizer = new CanvasFinalizer(mNativeCanvas);
         mDensity = Bitmap.getDefaultDensity();
     }
 
@@ -155,7 +161,18 @@ public class Canvas {
         }
         finalizer(oldCanvas);
     }
-    
+
+    /**
+     * Gets the native canvas pointer.
+     *
+     * @return The native pointer.
+     *
+     * @hide
+     */
+    public int getNativeCanvas() {
+        return mNativeCanvas;
+    }
+
     /**
      * Returns null.
      * 
@@ -1657,6 +1674,15 @@ public class Canvas {
         }
         drawPicture(picture);
         restore();
+    }
+
+    /**
+     * Releases the resources associated with this canvas.
+     *
+     * @hide
+     */
+    public void release() {
+        mFinalizer.dispose();
     }
 
     /**

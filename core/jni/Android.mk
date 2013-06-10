@@ -140,6 +140,7 @@ LOCAL_SRC_FILES:= \
 	android_util_FileObserver.cpp \
 	android/opengl/poly_clip.cpp.arm \
 	android/opengl/util.cpp.arm \
+	android/print/android_print_pdf_PdfDocument.cpp \
 	android_server_NetworkManagementSocketTagger.cpp \
 	android_server_Watchdog.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
@@ -164,6 +165,7 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(TOP)/frameworks/av/include \
 	external/skia/src/core \
+	external/skia/src/pdf \
 	external/skia/src/images \
 	external/skia/include/utils \
 	external/sqlite/dist \
