@@ -57,7 +57,7 @@ final class TaskRecord extends ThumbnailHolder {
     /** Current stack */
     ActivityStack stack;
 
-    private boolean mApplicationTask;
+    private boolean mApplicationTask = true;
 
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent, ActivityStack _stack) {
         taskId = _taskId;
@@ -164,7 +164,10 @@ final class TaskRecord extends ThumbnailHolder {
             // Was not previously in list.
             numFullscreen++;
         }
-        mApplicationTask = r.isApplicationActivity();
+        // Only set this to be an application task if it has not already been set as home task.
+        if (mApplicationTask) {
+            mApplicationTask = r.isApplicationActivity();
+        }
         mActivities.add(index, r);
     }
 
