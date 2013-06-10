@@ -3595,7 +3595,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (child.isImportantForAccessibility() && child.getVisibility() != View.GONE) {
-            childAccessibilityStateChanged(child);
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 
@@ -3838,7 +3838,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         onViewRemoved(view);
 
         if (view.isImportantForAccessibility() && view.getVisibility() != View.GONE) {
-            childAccessibilityStateChanged(view);
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
     }
 

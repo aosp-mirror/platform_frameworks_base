@@ -6397,12 +6397,10 @@ public final class ViewRootImpl implements ViewParent,
 
         public void run() {
             mLastEventTimeMillis = SystemClock.uptimeMillis();
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                AccessibilityEvent event = AccessibilityEvent.obtain();
-                event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                event.setContentChangeType(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
-                mSource.sendAccessibilityEventUnchecked(event);
-            }
+            AccessibilityEvent event = AccessibilityEvent.obtain();
+            event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+            event.setContentChangeType(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+            mSource.sendAccessibilityEventUnchecked(event);
             mSource.resetSubtreeAccessibilityStateChanged();
             mSource = null;
         }
@@ -6417,6 +6415,7 @@ public final class ViewRootImpl implements ViewParent,
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
             if (timeSinceLastMillis >= minEventIntevalMillis) {
+                mSource.removeCallbacks(this);
                 run();
             } else {
                 mSource.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
